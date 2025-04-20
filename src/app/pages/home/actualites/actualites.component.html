@@ -1,0 +1,46 @@
+<section id="news" class="news-section">
+    <div class="container">
+      <h2>Actualités</h2>
+      <div id="featured-news" class="featured-news">
+        <!-- Contenu vedette -->
+        <div class="news-image">
+          <img src="https://via.placeholder.com/600x300" alt="Actualité vedette">
+          <div class="image-title">Titre de l'actualité vedette</div>
+        </div>
+        <div class="featured-content">
+          <h3>Actualité vedette</h3>
+          <p>
+            Ceci est une description de l'actualité vedette. Elle met en avant un événement ou une annonce importante.
+          </p>
+          <a href="#" class="read-more">Lire plus</a>
+        </div>
+      </div>
+  
+      <div id="news-grid" class="news-grid">
+        <!-- Affichage dynamique des actualités -->
+        <div class="news-card" *ngFor="let actualite of filteredNews">
+          <div class="news-image">
+            <img src="https://via.placeholder.com/400x200" alt="{{ actualite.title }}">
+          </div>
+          <div class="news-content">
+            <h4>{{ actualite.title }}</h4>
+            <p>{{ actualite.content }}</p>
+            <a href="#" class="read-more">Lire plus</a>
+          </div>
+          <div class="image-title">{{ actualite.category }}</div> <!-- Catégorie de l'événement -->
+        </div>
+      </div>
+  
+      <div id="news-buttons" class="news-buttons">
+        <button id="load-more" class="load-more-btn" (click)="loadMore()">Charger plus</button>
+        <button id="load-less" class="load-less-btn" (click)="loadLess()">Charger moins</button>
+      </div>
+  
+      <div class="news-filter">
+        <button class="filter-btn" data-category="all" (click)="filterNews('all')">Tous</button>
+        <button class="filter-btn" data-category="evenement" (click)="filterNews('evenement')">Événements</button>
+        <button class="filter-btn" data-category="competition" (click)="filterNews('competition')">Compétitions</button>
+        <button class="filter-btn" data-category="annonce" (click)="filterNews('annonce')">Annonces</button>
+      </div>
+    </div>
+  </section>

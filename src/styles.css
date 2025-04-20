@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+    --primary-color: #e16f8a; /* Rose */
+    --secondary-color: #1d84ac; /* Bleu */
+    --text-color: #34495e;
+    --background-color: #ffffff;
+    --hover-color: #f15f8b; /* Couleur de survol pour les boutons */
+}
+
+/* Réinitialisation globale */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}

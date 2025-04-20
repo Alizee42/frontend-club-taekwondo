@@ -1,0 +1,158 @@
+header {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 10px 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    text-align: right;
+}
+
+nav {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+nav.open {
+    display: flex;
+}
+
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+}
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-menu li {
+    position: relative;
+}
+
+.nav-menu > div {
+    padding: 5px 0;
+    transition: background-color 0.3s ease;
+    background-color: var(--secondary-color);
+}
+
+.nav-menu > div:hover {
+    background-color: var(--hover-color);
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    display: block;
+    padding: 10px 20px;
+}
+
+.nav-menu a:hover {
+    color: white;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--primary-color);
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px); /* Décalage vertical initial */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Animation fluide */
+}
+
+.dropdown-menu > div {
+    padding: 5px 0;
+    background-color: var(--primary-color);
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu > div:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-menu .dropdown:hover .dropdown-menu {
+    display: block;
+}
+.nav-menu .dropdown {
+    position: relative;
+    transition: background-color 0.3s ease; /* Transition fluide pour le fond */
+}
+.nav-menu .dropdown:hover {
+    background-color: var(--hover-color); /* Fond rose au survol */
+}
+.nav-menu .dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+    transform: translateY(0); /* Supprime le décalage vertical */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Animation fluide */
+}
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+    }
+
+    nav {
+        display: none;
+        flex-direction: column;
+        background-color: var(--secondary-color);
+        position: absolute;
+        top: 50px;
+        left: 0;
+        width: 100%;
+        padding: 10px 0;
+        z-index: 1000;
+        border: 2px solid rgb(186, 186, 186);
+        box-shadow: -4px 8px 15px 2px rgb(186, 186, 186);
+    }
+
+    nav.open {
+        display: flex;
+    }
+
+    .nav-menu {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .dropdown-menu {
+        position: static;
+        box-shadow: none;
+    }
+
+    .nav-menu li.dropdown:hover .dropdown-menu {
+        display: none;
+    }
+
+    .dropdown-menu {
+        display: none;
+    }
+
+    .nav-menu li.dropdown.open .dropdown-menu {
+        display: block;
+    }
+}

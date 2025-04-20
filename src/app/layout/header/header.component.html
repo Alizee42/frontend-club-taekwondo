@@ -1,0 +1,42 @@
+<header>
+    <div class="header-content">
+        <div class="logo">
+            <h1>Olympique Taekwondo Villeurbannais</h1>
+        </div>
+        <button class="hamburger" aria-label="Menu" (click)="toggleMenu()">
+            ☰
+        </button>
+        <nav [class.open]="menuOpen">
+            <ul class="nav-menu">
+                <div>
+                    <li><a href="/accueil">Accueil</a></li>
+                </div>
+                <div>
+                    <li><a href="/#section-accueil">Section Accueil</a></li>
+                </div>
+                <div class="dropdown" [class.open]="dropdownOpen" (click)="toggleDropdown($event)">
+                    <li>
+                        <a href="#">Infos Pratiques</a>
+                        <ul class="dropdown-menu">
+                            <div>
+                                <li><a href="/inscription">Inscription</a></li>
+                            </div>
+                            <div>
+                                <li><a href="/tarif">Tarif</a></li>
+                            </div>
+                        </ul>
+                    </li>
+                </div>
+                <div>
+                    <li><a href="/galerie">Galerie</a></li>
+                </div>
+                <div>
+                    <li><a href="/contact">Contact</a></li>
+                </div>
+                <div>
+                    <li><a href="/connexion">Connexion</a></li>
+                </div>
+            </ul>
+        </nav>
+    </div>
+</header>
