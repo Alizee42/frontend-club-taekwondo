@@ -1,42 +1,43 @@
-<header>
-    <div class="header-content">
-        <div class="logo">
-            <h1>Olympique Taekwondo Villeurbannais</h1>
-        </div>
-        <button class="hamburger" aria-label="Menu" (click)="toggleMenu()">
-            ☰
-        </button>
-        <nav [class.open]="menuOpen">
-            <ul class="nav-menu">
-                <div>
-                    <li><a href="/accueil">Accueil</a></li>
-                </div>
-                <div>
-                    <li><a href="/#section-accueil">Section Accueil</a></li>
-                </div>
-                <div class="dropdown" [class.open]="dropdownOpen" (click)="toggleDropdown($event)">
-                    <li>
-                        <a href="#">Infos Pratiques</a>
-                        <ul class="dropdown-menu">
-                            <div>
-                                <li><a href="/inscription">Inscription</a></li>
-                            </div>
-                            <div>
-                                <li><a href="/tarif">Tarif</a></li>
-                            </div>
-                        </ul>
-                    </li>
-                </div>
-                <div>
-                    <li><a href="/galerie">Galerie</a></li>
-                </div>
-                <div>
-                    <li><a href="/contact">Contact</a></li>
-                </div>
-                <div>
-                    <li><a href="/connexion">Connexion</a></li>
-                </div>
+<header class="main-header">
+    <div class="header-container">
+      <div class="logo">
+        <a routerLink="/">Taekwondo Club</a>
+      </div>
+  
+      <div class="burger" (click)="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+  
+      <nav class="main-nav" [ngClass]="{ 'open': menuOpen }">
+        <ul>
+          <li><a routerLink="/">Accueil</a></li>
+  
+          <li class="dropdown">
+            <a href="#" (click)="false">Le club ▾</a>
+            <ul class="dropdown-menu dropdown-large">
+              <li><a routerLink="/#a-propos">À propos</a></li>
+              <li><a routerLink="/#horaires">Horaires</a></li>
+              <li><a routerLink="/#professeur">Professeur</a></li>
+              <li><a routerLink="/#avis">Avis</a></li>
+              <li><a routerLink="/#actualites">Actualités</a></li>
             </ul>
-        </nav>
+          </li>
+          
+          <li class="dropdown">
+            <a href="#" (click)="false">Infos pratiques ▾</a>
+            <ul class="dropdown-menu dropdown-small">
+              <li><a routerLink="/inscription">Inscription</a></li>
+              <li><a routerLink="/tarifs">Tarifs</a></li>
+            </ul>
+          </li>          
+  
+          <li><a routerLink="/galerie">Galerie</a></li>
+          <li><a routerLink="/contact">Contact</a></li>
+          <li><a routerLink="/connexion">Connexion</a></li>
+        </ul>
+      </nav>
     </div>
-</header>
+  </header>
+  

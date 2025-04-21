@@ -1,46 +1,62 @@
-<section id="testimonials" class="testimonials-section">
-    <div class="container">
-      <h2>Témoignages</h2>
-      <button class="carousel-button left" (click)="scrollCarousel('left')">&#10094;</button>
-      <div class="testimonial-carousel" #testimonialCarousel>
-        <div class="testimonial-item" *ngFor="let avis of avisList">
-          <img [src]="avis.photo" [alt]="avis.nom + ' ' + avis.prenom">
-          <blockquote>"{{ avis.contenu }}"</blockquote>
-          <p>{{ avis.nom }} {{ avis.prenom }}</p>
+<section id="avis" class="avis-section">
+  <div class="container">
+    <h2 class="section-title">Ils parlent de nous</h2>
+
+    <div class="swiper avis-swiper">
+      <div class="swiper-wrapper">
+        
+        <!-- Avis 1 -->
+        <div class="swiper-slide">
+          <div class="avis-card">
+            <p class="avis-text">“Super club ! Mon fils s’épanouit depuis qu’il pratique le Taekwondo ici.”</p>
+            <div class="avis-author">
+              <img src="assets/images/avatar1.jpg" alt="Parent 1" />
+              <div>
+                <strong>Julie M.</strong><br>
+                Maman d’un élève
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <button class="carousel-button right" (click)="scrollCarousel('right')">&#10095;</button>
-  
-      <div class="testimonial-form-trigger">
-        <p>Vous avez une expérience à partager ?</p>
-        <button (click)="ouvrirModal()" class="btn-leave-review">Laisser mon avis</button>
-      </div>
-      
-      <!-- Modal Structure -->
-      <div class="modal" [class.show]="modalOuvert">
-        <div class="modal-content">
-          <span class="close-button" (click)="fermerModal()">&times;</span>
-          <h3>Partagez votre expérience avec nous</h3>
-          <form (ngSubmit)="soumettreAvis()">
-            <div class="form-group">
-              <label for="userName">Votre nom :</label>
-              <input type="text" id="userName" [(ngModel)]="nouvelAvis.nom" name="nom" required>
+
+        <!-- Avis 2 -->
+        <div class="swiper-slide">
+          <div class="avis-card">
+            <p class="avis-text">“Les professeurs sont très pédagogues. L’ambiance est au top !”</p>
+            <div class="avis-author">
+              <img src="assets/images/avatar2.jpg" alt="Adolescent 1" />
+              <div>
+                <strong>Sami B.</strong><br>
+                Élève, 15 ans
+              </div>
             </div>
-            <div class="form-group">
-              <label for="userPrenom">Votre prénom :</label>
-              <input type="text" id="userPrenom" [(ngModel)]="nouvelAvis.prenom" name="prenom" required>
-            </div>
-            <div class="form-group">
-              <label for="userPhoto">Votre photo (URL) :</label>
-              <input type="url" id="userPhoto" [(ngModel)]="nouvelAvis.photo" name="photo">
-            </div>
-            <div class="form-group">
-              <label for="userTestimonial">Votre témoignage :</label>
-              <textarea id="userTestimonial" [(ngModel)]="nouvelAvis.contenu" name="contenu" required></textarea>
-            </div>
-            <button type="submit" class="btn-submit-review">Envoyer votre témoignage</button>
-          </form>
+          </div>
         </div>
+
+        <!-- Avis 3 -->
+        <div class="swiper-slide">
+          <div class="avis-card">
+            <p class="avis-text">“J’ai retrouvé confiance en moi grâce aux cours adultes. Merci !”</p>
+            <div class="avis-author">
+              <img src="assets/images/avatar3.jpg" alt="Adulte 1" />
+              <div>
+                <strong>Karim D.</strong><br>
+                Élève adulte
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ajoute autant d'avis que tu veux ici -->
+
       </div>
+
+      <!-- Pagination -->
+      <div class="swiper-pagination"></div>
+
+      <!-- Flèches -->
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
     </div>
-  </section>
+  </div>
+</section>
