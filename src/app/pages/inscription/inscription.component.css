@@ -1,0 +1,275 @@
+.inscription-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Titre principal */
+.page-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Section intro */
+.intro {
+  margin-bottom: 30px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #555;
+  text-align: center;
+}
+
+.intro p {
+  margin: 10px 0;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.form-group label {
+  width: 85px;
+  margin-right: 10px;
+  font-weight: 500;
+  font-weight: bold;
+}
+
+.form-group input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Formulaire d'inscription */
+.inscription-container {
+  flex: 1;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  border: 2px solid var(--blue-main); /* Bordure avec la couleur principale */
+  box-shadow: var(--shadow); /* Ombre pour un effet de profondeur */
+}
+
+/* Champs du formulaire */
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--blue-dark); /* Couleur secondaire pour les labels */
+  font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="email"]{
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--blue-main); /* Bordure avec la couleur principale */
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border 0.3s;
+}
+form input[type="file"],
+form input[type="radio"] {
+  width: auto;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--blue-main); /* Bordure avec la couleur principale */
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border 0.3s;
+}
+
+form input:focus {
+  border-color: var(--blue-dark); /* Couleur secondaire au focus */
+  outline: none;
+}
+.form-document {
+  display: flex;
+  align-items: center; /* Centre le label par rapport à l'input en hauteur */
+  margin-bottom: 10px; /* Un peu plus d'espace entre les éléments */
+}
+
+.form-document label {
+  width: 160px;
+  margin-right: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center; /* Assure que le texte est centré verticalement */
+}
+
+.form-document input {
+  padding: 6px 10px; /* Réduction du padding de l'input */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  flex: 1;
+}
+
+/* Section de paiement */
+.form-paiement {
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* Options de paiement */
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Espacement entre chaque option de paiement */
+  padding-left: 20px; /* Petit décalage pour les options */
+}
+
+/* Style pour chaque option de paiement */
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Espacement entre le radio button et le texte */
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.payment-option input[type="radio"] {
+  margin-right: 2%;
+  transform: scale(1.3); /* Agrandir légèrement les boutons radio */
+  cursor: pointer;
+}
+
+.payment-option label {
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+
+/* Confirmation details */
+.confirmation-details {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.confirmation-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem; /* Espacement entre les lignes */
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.confirmation-label {
+  font-weight: bold;
+  color: var(--blue-dark); /* Couleur secondaire pour les labels */
+}
+
+.confirmation-value {
+  color: var(--text-main); /* Couleur principale pour les valeurs */
+}
+
+/* Boutons de confirmation */
+.confirmation-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem; /* Espacement entre les boutons */
+  margin-top: 1.5rem;
+}
+
+.confirmation-buttons button {
+  flex: 1; /* Les boutons prennent la même largeur */
+  padding: 0.8rem 1.5rem;
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.confirmation-buttons button:hover {
+  background-color: var(--blue-dark);
+}
+
+/* Boutons */
+button {
+  padding: 0.8rem 1.5rem;
+  background-color: var(--blue-main); /* Couleur principale */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+  float: right;
+}
+
+button:hover {
+  background-color: var(--blue-dark); /* Couleur secondaire au survol */
+}
+
+/* Liste de confirmation */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+ul li {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: var(--text-main); /* Couleur principale du texte */
+}
+
+ul li strong {
+  color: var(--blue-dark); /* Couleur secondaire pour les titres */
+}
+
+.step-title {
+  font-size: 18px;
+  color: var(--red-main);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+/* Boutons des étapes */
+.step-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  gap: 1rem; /* Espacement entre les boutons */
+}
+
+.step-buttons button {
+  flex: 1;
+  padding: 0.8rem 1.5rem;
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.step-buttons button:hover {
+  background-color: var(--blue-dark);
+}
+
+/* Responsive pour mobile */
+@media (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .intro,
+  .inscription-container {
+    width: 100%;
+  }
+}

@@ -1,43 +1,39 @@
 <header class="main-header">
-    <div class="header-container">
-      <div class="logo">
-        <a routerLink="/">Taekwondo Club</a>
-      </div>
-  
-      <div class="burger" (click)="toggleMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-  
-      <nav class="main-nav" [ngClass]="{ 'open': menuOpen }">
-        <ul>
-          <li><a routerLink="/">Accueil</a></li>
-  
-          <li class="dropdown">
-            <a href="#" (click)="false">Le club ▾</a>
-            <ul class="dropdown-menu dropdown-large">
-              <li><a routerLink="/#a-propos">À propos</a></li>
-              <li><a routerLink="/#horaires">Horaires</a></li>
-              <li><a routerLink="/#professeur">Professeur</a></li>
-              <li><a routerLink="/#avis">Avis</a></li>
-              <li><a routerLink="/#actualites">Actualités</a></li>
-            </ul>
-          </li>
-          
-          <li class="dropdown">
-            <a href="#" (click)="false">Infos pratiques ▾</a>
-            <ul class="dropdown-menu dropdown-small">
-              <li><a routerLink="/inscription">Inscription</a></li>
-              <li><a routerLink="/tarifs">Tarifs</a></li>
-            </ul>
-          </li>          
-  
-          <li><a routerLink="/galerie">Galerie</a></li>
-          <li><a routerLink="/contact">Contact</a></li>
-          <li><a routerLink="/connexion">Connexion</a></li>
-        </ul>
-      </nav>
+  <div class="header-container">
+    <div class="logo">
+      <a routerLink="/">Taekwondo Club</a>
     </div>
-  </header>
-  
+
+    <div class="burger" (click)="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <nav class="main-nav" [class.open]="menuOpen">
+      <ul>
+        <li><a (click)="goHome()">Accueil</a></li>
+
+        <li class="dropdown" [class.active]="dropdownOpenClub">
+          <a (click)="toggleDropdown('club')">Le club ▾</a>
+          <ul class="dropdown-menu" *ngIf="dropdownOpenClub">
+            <li><a class="dropdown-link" (click)="scrollToSection('about')">À propos</a></li>
+            <li><a class="dropdown-link" (click)="scrollToSection('hschedule-info')">Horaires</a></li>
+            <li><a class="dropdown-link" (click)="scrollToSection('enseignants')">Professeur</a></li>
+            <li><a class="dropdown-link" (click)="scrollToSection('avis')">Avis</a></li>
+            <li><a class="dropdown-link" (click)="scrollToSection('actualites')">Actualités</a></li>
+          </ul>
+        </li>
+
+        <li><a routerLink="/galerie">Galerie</a></li>
+        
+        <!-- Ajout de la page Inscription avec la méthode goToInscription() -->
+        <li><a (click)="goToInscription()">Inscription</a></li>
+
+        <li><a routerLink="/contact">Contact</a></li>
+        <li><a routerLink="/connexion">Connexion</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+

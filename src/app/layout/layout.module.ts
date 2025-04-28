@@ -4,8 +4,8 @@ import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
-  declarations: [HeaderComponent, FooterComponent],
-  imports: [CommonModule],
+  declarations: [],
+  imports: [CommonModule, HeaderComponent, FooterComponent],
   exports: [HeaderComponent, FooterComponent] // ✅ très important !
 })
 export class LayoutModule {}

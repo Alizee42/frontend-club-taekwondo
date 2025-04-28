@@ -1,235 +1,155 @@
-/* ====== Structure générale ====== */
 .main-header {
-    background-color:var(--blue-dark);
-    color: #F1FAEE;
-    padding: 15px 0;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-  }
-  
-  .header-container {
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;  /* Aligner les éléments aux extrémités */
-    align-items: center;  /* Centrer verticalement le contenu */
-  }
-  
-  .logo a {
-    color: #F1FAEE;
-    font-size: 1.8rem; /* Vérifie si la taille du logo est trop grande */
-    font-weight: bold;
-    text-decoration: none;
-  }
-  
-  
-  /* ====== Menu principal ====== */
-  .main-nav {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-    margin-left: auto;  /* Assurer que le menu est à droite */
-  }
-  .main-nav ul {
-    list-style: none;
-    display: flex;
-    gap: 25px;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .main-nav a {
-    color: #F1FAEE;
-    text-decoration: none;
-    padding: 8px 12px;
-    transition: all 0.3s ease;
-    position: relative;
-  }
-  
-  /* Surlignement au hover */
-  .main-nav a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 4px;
-    width: 0;
-    height: 2px;
-    background-color: #A8DADC;
-    transition: width 0.3s ease;
-  }
-  
-  .main-nav a:hover::after {
-    width: 100%;
-  }
-  
-  .main-nav a:hover {
-    background-color: transparent;
-    color: #A8DADC;
-  }
-  
-  /* ====== Dropdown ====== */
-  .dropdown {
-    position: relative;
-  }
-  
-  .dropdown-menu {
-    position: absolute;
-    top: calc(100% + 10px); /* ajusté pour espacer les sous-menus */
-    left: 0;
-    background-color: #1B263B;
-    padding: 10px 0;
-    border-radius: 6px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-    display: flex;
-    flex-direction: column;
-    min-width: 150px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    z-index: 999;
-  }
-  
-  .dropdown:hover .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-  
-  .dropdown-menu a {
-    text-align: left;
-    padding: 12px 20px;
-    color: #F1FAEE;
-    text-decoration: none;
-    position: relative;
-    transition: color 0.3s ease;
-  }
-  
-  .dropdown-menu a::after {
-    content: "";
-    position: absolute;
-    left: 20px;
-    bottom: 5px;
-    width: 0;
-    height: 2px;
-    background-color: #A8DADC;
-    transition: width 0.3s ease;
-  }
-  
-  .dropdown-menu a:hover::after {
-    width: 80%;
-  }
-  
-  .dropdown-menu a:hover {
-    color: #A8DADC;
-  }
-  .dropdown-menu.dropdown-small {
-    min-height: 100px;
-  }
-  
-  .dropdown-menu.dropdown-large {
-    min-height: 200px;
-  }
-  
-  /* ====== Burger menu (mobile) ====== */
+  background-color: var(--blue-dark); /* Couleur du fond du menu */
+  border-bottom: 2px solid #eee;
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+  z-index: 1000;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+.logo a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff; /* Texte du logo en blanc pour contraster avec le bleu */
+  text-decoration: none;
+}
+
+.main-nav ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.main-nav a {
+  position: relative;
+  text-decoration: none;
+  color: #fff;
+  padding: 5px 0; /* Un peu de padding pour ne pas coller le texte au bas */
+  display: inline-block; /* Important pour que le surlignage suive la largeur du texte */
+  transition: color 0.3s;
+}
+
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0%; /* Initialement, la largeur est 0% */
+  height: 2px;
+  background-color: #e63946; /* Couleur du surlignage */
+  transition: width 0.3s ease;
+}
+
+.main-nav a:hover::after {
+  width: 100%;
+}
+
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.burger span {
+  width: 25px;
+  height: 3px;
+  background-color: #fff; /* Icônes du burger en blanc */
+}
+/* Dropdown menu - vertical */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%; /* Décalage de la position du dropdown */
+  left: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0.5rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  max-height: 300px; /* Hauteur maximale pour éviter que le dropdown ne déborde */
+  overflow-y: auto; /* Permet à la liste de défiler si le contenu dépasse */
+  z-index: 999;
+  display: flex;
+  flex-direction: column; /* Faire apparaître les éléments du dropdown en colonne */
+  margin-top: 10px; /* Décalage du dropdown vers le bas */
+}
+
+.dropdown-menu li {
+  padding: 4px 0; /* Réduction de l'espacement entre les éléments */
+}
+.dropdown-menu a {
+  position: relative;
+  display: inline-block; /* S'assurer que le surlignage ne dépasse pas la largeur du texte */
+  color: #333;
+  text-decoration: none;
+  padding: 4px 9px; /* Ajustement du padding pour rendre les liens plus compacts */
+  font-size: 14px; /* Taille de texte plus petite pour éviter l'encombrement */
+}
+
+.dropdown-menu a:hover {
+  color: #e63946;
+}
+.dropdown-menu a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0%; /* Initialement, la largeur est 0% */
+  height: 2px;
+  background-color: #e63946; /* Couleur du surlignage */
+  transition: width 0.3s ease;
+}
+.dropdown-menu a:hover::after {
+  width: 100%; /* Lors du survol, le surlignage s'étend sur la largeur du texte uniquement */
+}
+.dropdown-menu .dropdown-link {
+  padding: 1px 9px; /* Réduit l'espacement interne des liens */
+  font-size: 14px; /* Taille de texte plus petite */
+  color: #333; /* Couleur du texte */
+  text-decoration: none;
+  position: relative;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
   .burger {
+    display: flex;
+  }
+
+  .main-nav {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
     flex-direction: column;
-    gap: 5px;
-    cursor: pointer;
+    width: 100%;
+    background-color: #fff;
+    padding: 1rem;
   }
-  
-  .burger span {
-    height: 3px;
-    width: 25px;
-    background-color: #F1FAEE;
-    display: block;
-    border-radius: 2px;
+
+  .main-nav.open {
+    display: flex;
   }
-  
-  /* ====== Responsive ====== */
-  @media (max-width: 768px) {
-    .main-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background-color: #1B263B;
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 80px 20px 20px; /* Ajusté pour ne pas couper avec le burger */
-      display: none;
-      transform: translateX(-100%);
-      transition: transform 0.4s ease;
-      z-index: 998;
-    }
-  
-    .main-nav.open {
-      display: flex;
-      transform: translateX(0);
-    }
-  
-    .main-nav ul {
-      flex-direction: column;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-    }
-  
-    .dropdown-menu {
-      position: relative;
-      opacity: 1 !important;
-      visibility: visible !important;
-      transform: none !important;
-      box-shadow: none;
-      background-color: transparent;
-      padding-left: 10px;
-    }
-  
-    .dropdown-menu a {
-      padding: 12px 20px;
-      text-align: left;
-    }
-  
-    .burger {
-      display: flex;
-    }
-    
-    /* Ajuster l'espacement entre les liens dans le burger */
-    .main-nav ul li {
-      padding: 10px 0;
-      text-align: left;
-      width: 100%;
-    }
+
+  .main-nav ul {
+    flex-direction: column;
+    gap: 1rem;
   }
-  
-  /* ====== Fixes supplémentaires ====== */
-  @media (max-width: 480px) {
-    .header-container {
-      padding: 0 10px; /* Réduction du padding pour les très petits écrans */
-    }
-  
-    .logo a {
-      font-size: 1.5rem; /* Réduction de la taille de la police pour les petits écrans */
-    }
-  
-    .main-nav a {
-      padding: 10px 15px; /* Réduction des paddings sur les liens pour le mobile */
-    }
-  
-    .main-nav ul {
-      gap: 20px; /* Réduction de l'écart entre les éléments du menu */
-    }
-  
-    .dropdown-menu a {
-      font-size: 14px; /* Réduction de la taille des textes dans le sous-menu */
-    }
-  
-    .burger span {
-      width: 30px; /* Agrandir légèrement le burger menu sur les petits écrans */
-    }
+
+  .dropdown-menu {
+    position: static;
+    box-shadow: none;
+    border: none;
   }
-  
+}
