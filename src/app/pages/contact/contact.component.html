@@ -1,0 +1,39 @@
+<div class="contact-container">
+  <div class="contact-content">
+    
+    <!-- Bloc de gauche -->
+    <div class="contact-left card">
+      <h1>Une question ?</h1>
+      <p>Remplissez le formulaire pour nous contacter. Nous sommes là pour répondre à toutes vos questions concernant nos services et votre expérience avec notre club.</p>
+      <p>Vous pouvez également nous joindre directement par téléphone ou par email aux coordonnées suivantes :</p>
+      <ul>
+        <li><strong>Téléphone :</strong> 06.63.97.89.26 / 07.65.82.67.72</li>
+        <li><strong>Email :</strong> <a href="mailto:taekwondovilleurbannais&#64;gmail.com">taekwondovilleurbannais&#64;gmail.com</a></li>
+        <li><strong>Adresse :</strong> 4 Rue De Bat Yam, 69100 Villeurbanne</li>
+      </ul>
+    </div>
+
+    <!-- Bloc de droite -->
+    <div class="contact-right card">
+      <form class="contact-form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="name">Nom</label>
+          <input type="text" id="name" placeholder="Votre nom" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Votre email" required />
+        </div>
+
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" placeholder="Votre message" rows="6" required></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Envoyer</button>
+      </form>
+    </div>
+
+  </div>
+</div>

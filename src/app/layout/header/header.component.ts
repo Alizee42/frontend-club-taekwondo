@@ -47,7 +47,14 @@ export class HeaderComponent {
     this.router.navigate(['/']);
     this.closeMenu();
   }
-
+  goToGalerie() {
+    this.router.navigate(['/galerie']);
+    this.closeMenu();
+  }
+  goToContact() {
+    this.router.navigate(['/contact']);
+    this.closeMenu();
+  }
   closeMenu() {
     this.menuOpen = false;
     this.dropdownOpenInfos = false;

@@ -19,10 +19,11 @@ export class InscriptionComponent {
       prenom: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', Validators.required],
+      adresse: ['', Validators.required], 
       paymentType: ['none', Validators.required],
       medicalCert: [null],
       photoId: [null]
-    });
+    });    
   }
 
   nextStep() {

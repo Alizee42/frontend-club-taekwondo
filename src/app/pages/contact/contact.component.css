@@ -1,0 +1,110 @@
+.contact-container {
+    background-color: var(--background-light);
+    padding: 60px 20px;
+  }
+  
+  .contact-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: stretch; /* <- la clé : étire tous les enfants à même hauteur */
+    justify-content: center;
+  }
+  
+  .card {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .contact-left h1 {
+    color: var(--blue-main);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .contact-left p {
+    margin-bottom: 15px;
+    color: var(--text-main);
+    line-height: 1.6;
+    
+  }
+  
+  .contact-left ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .contact-left ul li {
+    margin-bottom: 10px;
+    color: var(--blue-dark);
+  }
+  
+  .contact-left a {
+    color: var(--red-main);
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .contact-left a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+  }
+  
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  
+  .contact-form .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .contact-form .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--blue-dark);
+    font-weight: bold;
+  }
+  
+  .contact-form .form-group input,
+  .contact-form .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  
+  .submit-btn {
+    background-color: var(--blue-main);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-btn:hover {
+    background-color: var(--blue-hover);
+  }
+  
+  /* Responsive pour mobile */
+  @media (max-width: 768px) {
+    .contact-content {
+      flex-direction: column;
+    }
+  }
+  

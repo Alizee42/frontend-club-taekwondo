@@ -25,12 +25,12 @@
           </ul>
         </li>
 
-        <li><a routerLink="/galerie">Galerie</a></li>
+        <li><a (click)="goToGalerie()">Galerie</a></li>
         
         <!-- Ajout de la page Inscription avec la méthode goToInscription() -->
         <li><a (click)="goToInscription()">Inscription</a></li>
 
-        <li><a routerLink="/contact">Contact</a></li>
+        <li><a (click)="goToContact()">Contact</a></li>
         <li><a routerLink="/connexion">Connexion</a></li>
       </ul>
     </nav>
