@@ -1,0 +1,26 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>Connexion</h1>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" [(ngModel)]="email" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" [(ngModel)]="password" required />
+      </div>
+    
+      <button type="submit" class="submit-btn">Se connecter</button>
+    </form>
+    
+    
+
+    <!-- Liens supplémentaires -->
+    <div class="links-container">
+      <a href="/mot-de-passe-oublie" class="forgot-password">Mot de passe oublié ?</a>
+      <a href="/inscription" class="sign-up">Créer un compte</a>
+    </div>
+  </div>
+</div>

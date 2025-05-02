@@ -1,0 +1,105 @@
+
+  /* Container général */
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--background-light);
+    padding: 2rem;
+  }
+  
+  /* Carte de connexion */
+  .login-card {
+    background: var(--card-bg);
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+  }
+  
+  /* Titre */
+  .login-card h1 {
+    margin-bottom: 2rem;
+    color: var(--blue-dark);
+    font-size: 2rem;
+  }
+  
+  /* Formulaire */
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Groupes de champs */
+  .form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Labels */
+  label {
+    display: inline-block;
+    margin-right: 1rem;
+    color: var(--text-main);
+    font-weight: 600;
+    width: 30%; /* Proportions pour aligner avec les inputs */
+  }
+  
+  /* Inputs */
+  input {
+    width: 65%;
+    padding: 0.8rem;
+    border: 1px solid var(--blue-main);
+    border-radius: 8px;
+    background-color: white;
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  
+  input:focus {
+    border-color: var(--red-main);
+    outline: none;
+  }
+  
+  /* Bouton de connexion */
+  .submit-btn {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: var(--blue-main);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .submit-btn:hover {
+    background: var(--blue-hover);
+  }
+  
+  .links-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  /* Liens "Mot de passe oublié" et "Inscription" */
+  .forgot-password, .sign-up {
+    color: var(--blue-main);
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  
+  .forgot-password:hover, .sign-up:hover {
+    color: var(--red-main);
+  }

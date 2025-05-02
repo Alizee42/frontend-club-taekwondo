@@ -1,0 +1,10 @@
+.admin-footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    border-top: 1px solid #ccc;
+    margin-top: 2rem;
+  }
+  

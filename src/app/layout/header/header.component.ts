@@ -55,6 +55,10 @@ export class HeaderComponent {
     this.router.navigate(['/contact']);
     this.closeMenu();
   }
+  goToConnexion() {
+    this.router.navigate(['/connexion']);
+    this.closeMenu();
+  }
   closeMenu() {
     this.menuOpen = false;
     this.dropdownOpenInfos = false;

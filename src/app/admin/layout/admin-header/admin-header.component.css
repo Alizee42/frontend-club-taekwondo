@@ -1,0 +1,46 @@
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--blue-dark);
+    color: white;
+    box-shadow: var(--shadow);
+  }
+  
+  .logo {
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  
+  .admin-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .admin-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+  }
+  
+  .admin-nav a:hover {
+    color: var(--accent-hover);
+  }
+  
+  .admin-nav button {
+    background-color: var(--red-main);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .admin-nav button:hover {
+    background-color: var(--accent-dark);
+  }
+  
