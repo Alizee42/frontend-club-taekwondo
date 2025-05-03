@@ -8,7 +8,7 @@
 
 .header-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Répartit les éléments horizontalement */
   align-items: center;
   padding: 1rem 2rem;
 }
@@ -19,7 +19,11 @@
   color: #fff; /* Texte du logo en blanc pour contraster avec le bleu */
   text-decoration: none;
 }
-
+.main-nav {
+  display: flex;
+  align-items: center; /* Aligne le menu avec le cercle */
+  gap: 1.5rem; /* Ajuste l'espacement entre les liens */
+}
 .main-nav ul {
   display: flex;
   gap: 1.5rem;
@@ -120,7 +124,72 @@
   text-decoration: none;
   position: relative;
 }
+.profile-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 
+.profile-circle {
+  width: 40px;
+  height: 40px;
+  background-color: var(--accent-hover);
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.profile-circle:hover {
+  background-color: var(--accent-dark);
+}
+/* ====== Menu déroulant ====== */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background-color: var(--blue-dark);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  list-style: none;
+  padding: 0.5rem 0;
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+  min-width: 180px;
+  max-width: 284px;
+}
+
+.profile-dropdown.open {
+  display: flex;
+}
+
+.profile-dropdown li {
+  padding: 0.5rem 1rem;
+}
+.profile-dropdown li a,
+.profile-dropdown li button {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: color 0.3s ease;
+  font-size: 15px;
+}
+
+.profile-dropdown li a:hover,
+.profile-dropdown li button:hover {
+  color: var(--accent-hover);
+}
 /* Responsive */
 @media (max-width: 768px) {
   .burger {

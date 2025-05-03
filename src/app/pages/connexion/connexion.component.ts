@@ -18,7 +18,8 @@ export class ConnexionComponent {
   constructor(private router: Router, private http: HttpClient) {}
 
   onSubmit() {
-    console.log('submit tenté');
+    console.log('Email fourni :', this.email);
+    console.log('Mot de passe fourni :', this.password);
 
     if (this.email && this.password) {
       const formData = {
@@ -39,7 +40,6 @@ export class ConnexionComponent {
             localStorage.setItem('role', role);
           }
 
-          // Convertir le rôle en minuscule
           const roleLower = role?.toLowerCase();
 
           if (roleLower === 'admin') {

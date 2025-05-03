@@ -1,0 +1,140 @@
+.profile-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f4f9;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .profile-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    width: 600px;
+    padding: 30px;
+    text-align: center;
+  }
+  
+  .profile-header {
+    margin-bottom: 30px;
+  }
+  
+  .profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    border: 4px solid #007bff;
+  }
+  
+  .profile-header h2 {
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+  }
+  
+  .profile-role {
+    font-size: 16px;
+    color: #777;
+    margin-top: 10px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+  }
+  
+  label {
+    font-weight: bold;
+    color: #555;
+    flex: 0 0 120px; /* Taille fixe pour les labels */
+    text-align: left; /* Aligne le texte des labels à gauche */
+    margin-right: 10px; /* Espacement entre le label et le contenu */
+  }
+  
+  .form-field {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: space-between;
+  }
+  
+  span,
+  input {
+    flex: 1;
+  }
+  
+  span {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  .btn-edit {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #007bff;
+    margin-left: 10px; /* Espacement entre le champ et le bouton stylo */
+    transition: color 0.3s ease;
+  }
+  
+  .btn-edit:hover {
+    color: #0056b3;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 20px; /* Ajoute un espacement entre les boutons */
+  }
+  
+  .btn-save {
+    padding: 12px 25px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-save:hover {
+    background-color: #0056b3;
+  }
+  
+  .btn-password {
+    padding: 12px 25px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-password:hover {
+    background-color: #218838;
+  }

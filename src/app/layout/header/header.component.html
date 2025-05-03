@@ -1,15 +1,18 @@
 <header class="main-header">
   <div class="header-container">
+    <!-- Logo -->
     <div class="logo">
       <a routerLink="/">Taekwondo Club</a>
     </div>
 
+    <!-- Burger menu (mobile) -->
     <div class="burger" (click)="toggleMenu()">
       <span></span>
       <span></span>
       <span></span>
     </div>
 
+    <!-- Navigation principale -->
     <nav class="main-nav" [class.open]="menuOpen">
       <ul>
         <li><a (click)="goHome()">Accueil</a></li>
@@ -26,14 +29,24 @@
         </li>
 
         <li><a (click)="goToGalerie()">Galerie</a></li>
-        
-        <!-- Ajout de la page Inscription avec la méthode goToInscription() -->
         <li><a (click)="goToInscription()">Inscription</a></li>
-
         <li><a (click)="goToContact()">Contact</a></li>
-        <li><a (click)="goToConnexion()">Connexion</a></li>
+
+        <!-- Lien Connexion (affiché uniquement si l'utilisateur n'est pas connecté) -->
+        <li *ngIf="!isLoggedIn"><a (click)="goToConnexion()">Connexion</a></li>
       </ul>
     </nav>
+
+    <!-- Cercle avec initiales (uniquement si connecté) -->
+    <div *ngIf="isLoggedIn" class="profile-menu">
+      <div class="profile-circle" (click)="toggleProfileMenu()">
+        {{ getInitials() }}
+      </div>
+      <ul class="profile-dropdown" [class.open]="profileMenuOpen">
+        <li><a (click)="goToDashboard()">Tableau de bord</a></li>
+        <li><a (click)="goToProfil()">Modifier mon profil</a></li>
+        <li><button (click)="logout()">Se déconnecter</button></li>
+      </ul>
+    </div>
   </div>
 </header>
-

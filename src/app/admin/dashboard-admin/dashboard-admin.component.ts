@@ -30,4 +30,7 @@ export class DashboardAdminComponent {
   manageGallery() {
     this.router.navigate(['/admin/gallery']); // Redirige vers la gestion de la galerie
   }
+  manageNews() {
+    this.router.navigate(['/admin/actualites']); // Redirige vers la gestion des actualités
+  }
 }

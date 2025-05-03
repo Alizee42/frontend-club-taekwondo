@@ -1,8 +1,11 @@
 <header class="admin-header">
-    <div class="logo">Olympique Villeurbanne Taekwondo - Admin</div>
+  <div class="header-content">
+    <div class="logo">Olympique Villeurbanne Taekwondo</div>
     <nav class="admin-nav">
-      <a routerLink="/">🏠 Accueil</a>
+      <a routerLink="/admin/dashboard">Dashboard</a>
+      <a routerLink="/" (click)="goToHome()">Accueil site</a>
+      <a (click)="goToProfil()">Profil</a> <!-- Lien vers le profil -->
       <button (click)="logout()">Se déconnecter</button>
     </nav>
-  </header>
-  
+  </div>
+</header>

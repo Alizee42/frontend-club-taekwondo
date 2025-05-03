@@ -8,6 +8,7 @@ import { DashboardAdminComponent } from './admin/dashboard-admin/dashboard-admin
 import { DashboardMembreComponent } from './membre/dashboard-membre/dashboard-membre.component';
 import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.component';
 import { MembreLayoutComponent } from './membre/layout/membre-layout/membre-layout.component';
+import { ProfilComponent } from './pages/profil/profil.component'; // Importer le composant Profil
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -17,6 +18,9 @@ export const routes: Routes = [
   { path: 'galerie', component: GalerieComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'connexion', component: ConnexionComponent },
+
+  // Route pour la page "Profil" (protégée par AuthGuard)
+  { path: 'profil', component: ProfilComponent, canActivate: [AuthGuard] },
 
   // Routes protégées pour l'admin
   {
