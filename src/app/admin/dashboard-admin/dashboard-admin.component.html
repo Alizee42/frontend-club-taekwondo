@@ -3,7 +3,7 @@
     <p class="intro">Bienvenue sur l’espace de gestion du site Olympique Villeurbanne Taekwondo.</p>
   
     <div class="dashboard-grid">
-      <a routerLink="/admin/horaires" class="dashboard-card">
+      <a (click)="navigateToHoraires()" class="dashboard-card">
         <div class="icon-container">
           <i class="fas fa-clock"></i>
         </div>
@@ -11,7 +11,7 @@
         <p>Gérer les créneaux, cours et disponibilités</p>
       </a>
   
-      <a routerLink="/admin/professeurs" class="dashboard-card">
+      <a (click)="navigateToprofesseurs()" class="dashboard-card">
         <div class="icon-container">
           <i class="fas fa-chalkboard-teacher"></i>
         </div>

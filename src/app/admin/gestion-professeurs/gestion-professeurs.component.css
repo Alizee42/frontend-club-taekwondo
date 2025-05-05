@@ -1,0 +1,172 @@
+.gestion-professeurs-container {
+  padding: 20px;
+  background-color: var(--gray-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  color: var(--blue-main);
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.btn-add {
+  display: block;
+  margin: 0 auto 20px auto;
+  padding: 10px 20px;
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-add:hover {
+  background-color: var(--blue-dark);
+}
+
+.professeurs-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.professeur-card {
+  background-color: white;
+  border: 1px solid var(--gray-dark);
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.professeur-card p {
+  font-size: 0.95rem;
+  color: var(--gray-dark);
+  margin: 5px 0;
+  overflow: hidden; /* Empêche le texte de dépasser */
+  text-overflow: ellipsis; /* Ajoute des points de suspension si le texte est trop long */
+  max-height: 50px; /* Limite la hauteur de la description */
+}
+.professeur-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.professeur-card h2 {
+  color: var(--blue-main);
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.professeur-card p {
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+  margin: 5px 0;
+}
+
+.btn-delete {
+  display: block;
+  margin-top: 15px;
+  padding: 8px 15px;
+  background-color: var(--red-main);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.btn-delete:hover {
+  background-color: var(--red-dark);
+}
+
+/* Styles pour la modale */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal h2 {
+  margin-top: 0;
+  color: var(--blue-main);
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--gray-dark);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.btn-modal {
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  flex: 1;
+  text-align: center;
+}
+
+.btn-modal:hover {
+  background-color: var(--blue-dark);
+}
+
+.btn-modal:first-child {
+  background-color: var(--red-main);
+}
+
+.btn-modal:first-child:hover {
+  background-color: var(--red-dark);
+}
+.form-group input[type="file"] {
+  padding: 5px;
+  font-size: 0.9rem;
+  border: 1px solid var(--gray-dark);
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}

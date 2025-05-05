@@ -1,5 +1,5 @@
-<app-header *ngIf="!isAdminOrMembreRoute"></app-header> <!-- Header principal -->
+<app-header *ngIf="!isAdminOrMembreRoute && !isProfilRoute"></app-header> <!-- Header principal -->
 
 <router-outlet></router-outlet> <!-- Contenu des routes -->
 
-<app-footer *ngIf="!isAdminOrMembreRoute"></app-footer> <!-- Footer principal -->
+<app-footer *ngIf="!isAdminOrMembreRoute && !isProfilRoute"></app-footer> <!-- Footer principal -->

@@ -1,0 +1,49 @@
+<div class="gestion-horaires-container">
+    <h1>Gestion des Horaires</h1>
+    <button class="btn-add" (click)="openModal()">Ajouter un horaire</button>
+  
+    <div class="horaire-list">
+      <div *ngFor="let horaire of horaires; let i = index" class="horaire-card">
+        <h2>{{ horaire.jour }}</h2>
+        <p><strong>Heures :</strong> {{ horaire.heures[0]?.time }}</p>
+        <p><strong>Groupe :</strong> {{ horaire.heures[0]?.groupe }}</p>
+        <p><strong>Adresse :</strong> {{ horaire.adresse }}</p>
+        <button class="btn-delete" (click)="deleteHoraire(i)">Supprimer</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modale personnalisée -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal">
+      <h2>Ajouter un horaire</h2>
+      <form>
+        <div class="form-group">
+          <label for="jour">Jour</label>
+          <select id="jour" [(ngModel)]="newHoraire.jour" name="jour">
+            <option value="" disabled selected>Choisir un jour</option>
+            <option *ngFor="let jour of joursSemaine" [value]="jour">{{ jour }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="heures">Tranche horaire</label>
+          <select id="heures" [(ngModel)]="newHoraire.heures" name="heures">
+            <option value="" disabled selected>Choisir une tranche horaire</option>
+            <option *ngFor="let tranche of tranchesHoraires" [value]="tranche">{{ tranche }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="groupe">Groupe</label>
+          <input type="text" id="groupe" [(ngModel)]="newHoraire.groupe" name="groupe" placeholder="Ex : Enfants, Adultes">
+        </div>
+        <div class="form-group">
+          <label for="adresse">Adresse</label>
+          <input type="text" id="adresse" [(ngModel)]="newHoraire.adresse" name="adresse" placeholder="Ex : 16 Rue du Progrès">
+        </div>
+      </form>
+      <div class="modal-actions">
+        <button class="btn-modal" (click)="closeModal()">Annuler</button>
+        <button class="btn-modal" (click)="addHoraire()">Ajouter</button>
+      </div>
+    </div>
+  </div>

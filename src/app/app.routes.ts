@@ -10,6 +10,8 @@ import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.c
 import { MembreLayoutComponent } from './membre/layout/membre-layout/membre-layout.component';
 import { ProfilComponent } from './pages/profil/profil.component'; // Importer le composant Profil
 import { AuthGuard } from './guards/auth.guard';
+import { GestionHorairesComponent } from './admin/gestion-horaires/gestion-horaires.component';
+import { GestionProfesseursComponent } from './admin/gestion-professeurs/gestion-professeurs.component';
 
 export const routes: Routes = [
   // Routes publiques
@@ -28,7 +30,9 @@ export const routes: Routes = [
     component: AdminLayoutComponent, // Utilise AdminLayout comme conteneur
     canActivate: [AuthGuard],
     children: [
-      { path: 'dashboard-admin', component: DashboardAdminComponent }
+      { path: 'dashboard-admin', component: DashboardAdminComponent },
+      { path: 'horaires', component: GestionHorairesComponent },// Route pour la gestion des horaires
+      { path: 'professeurs', component: GestionProfesseursComponent } // Route pour la gestion des professeurs
     ]
   },
 

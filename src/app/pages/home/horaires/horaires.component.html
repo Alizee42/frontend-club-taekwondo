@@ -2,31 +2,19 @@
   <div class="container">
     <h2 class="section-title">Horaires des Cours</h2>
     <div class="schedule-info-container">
-      <div class="schedule-card">
-        <i class="fas fa-clock"></i>
-        <h3>Le mardi</h3>
+      <div *ngFor="let horaire of horaires" class="schedule-card">
+        <h3>{{ horaire.jour }}</h3>
         <div class="schedule-details">
           <h4>Heures</h4>
-          <p><span class="time">18h à 19h</span> : BABYS et enfants</p>
-          <p><span class="time">19h à 20h</span> : Adolescents et adultes</p>
+          <ul>
+            <li *ngFor="let heure of horaire.heures">
+              <span class="time">{{ heure.time }}</span> : {{ heure.groupe }}
+            </li>
+          </ul>
         </div>
         <div class="schedule-details">
           <h4>Adresse</h4>
-          <p>16 Rue du Progrès, 69100 Villeurbanne</p>
-        </div>
-      </div>
-
-      <div class="schedule-card">
-        <i class="fas fa-calendar-alt"></i>
-        <h3>Le mercredi</h3>
-        <div class="schedule-details">
-          <h4>Heures</h4>
-          <p><span class="time">18h à 19h</span> : BABYS et enfants</p>
-          <p><span class="time">19h à 20h</span> : Adolescents et adultes</p>
-        </div>
-        <div class="schedule-details">
-          <h4>Adresse</h4>
-          <p>6 Rue Berthelot, 69100 Villeurbanne</p>
+          <p>{{ horaire.adresse }}</p>
         </div>
       </div>
     </div>

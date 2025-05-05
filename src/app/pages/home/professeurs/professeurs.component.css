@@ -21,7 +21,11 @@
 .teacher-card {
   perspective: 1000px;
   width: 300px;
-  height: 400px;
+  height: 400px; /* Fixe une hauteur pour la carte */
+  overflow: hidden; /* Empêche tout débordement */
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  position: relative; /* Nécessaire pour contenir les éléments internes */
 }
 
 .card-inner {
@@ -76,9 +80,36 @@
   transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start; /* Aligne le contenu en haut */
+  padding: 20px;
+  gap: 10px; /* Ajoute un espacement entre les éléments */
 }
 
+.teacher-back h3 {
+  margin: 0 0 10px; /* Réduit l'espacement en bas du titre */
+  text-align: center;
+  font-size: 1.5em;
+  color: var(--red-main); /* Rouge principal */
+}
+
+.teacher-back p {
+  font-size: 1em;
+  color: var(--text-dark);
+  text-align: justify; /* Justifie le texte pour un rendu propre */
+  margin: 0; /* Supprime les marges par défaut */
+  overflow-wrap: break-word; /* Coupe les mots trop longs pour éviter les débordements */
+  word-wrap: break-word; /* Compatibilité avec d'anciens navigateurs */
+  white-space: normal; /* Permet le retour à la ligne */
+  overflow: hidden; /* Empêche le contenu de dépasser */
+  max-height: 100%; /* S'assure que le texte reste dans la carte */
+}
+.teacher-front img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid var(--blue-main);
+}
 .social-links {
   display: flex;
   gap: 10px;
@@ -97,7 +128,7 @@
 }
 
 @media (max-width: 768px) {
-  .teachers-grid {
+  .teachers-grid { 
     flex-direction: column;
     align-items: center;
   }

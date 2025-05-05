@@ -1,0 +1,46 @@
+<div class="gestion-professeurs-container">
+  <h1>Gestion des Professeurs</h1>
+  <button class="btn-add" (click)="openModal()">Ajouter un professeur</button>
+
+  <div class="professeurs-list">
+    <div *ngFor="let professeur of professeurs" class="professeur-card">
+      <h2>{{ professeur.nom }} {{ professeur.prenom }}</h2>
+      <p><strong>Spécialité :</strong> {{ professeur.specialite }}</p>
+      <p><strong>Description :</strong> {{ professeur.description }}</p>
+      <button class="btn-delete" (click)="deleteProfesseur(professeur.id)">Supprimer</button>
+    </div>
+  </div>
+
+  <!-- Modale pour ajouter un professeur -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal">
+      <h2>Ajouter un professeur</h2>
+      <form>
+        <div class="form-group">
+          <label for="photo">Photo</label>
+          <input type="file" id="photo" name="photo" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label for="nom">Nom</label>
+          <input type="text" id="nom" [(ngModel)]="newProfesseur.nom" name="nom" required>
+        </div>
+        <div class="form-group">
+          <label for="prenom">Prénom</label>
+          <input type="text" id="prenom" [(ngModel)]="newProfesseur.prenom" name="prenom" required>
+        </div>
+        <div class="form-group">
+          <label for="specialite">Spécialité</label>
+          <input type="text" id="specialite" [(ngModel)]="newProfesseur.specialite" name="specialite">
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" [(ngModel)]="newProfesseur.description" name="description"></textarea>
+        </div>
+      </form>
+      <div class="modal-actions">
+        <button class="btn-modal" (click)="closeModal()">Annuler</button>
+        <button class="btn-modal" (click)="addProfesseur()">Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>

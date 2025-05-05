@@ -15,6 +15,9 @@ export class AdminHeaderComponent {
   goToProfil() {
     this.router.navigate(['/profil']); // Redirige vers la page "Modifier mon profil"
   }
+  goToDashboard() {
+    this.router.navigate(['/admin/dashboard-admin']); // Redirige vers le tableau de bord admin
+  }
   logout() {
     localStorage.removeItem('token'); // Supprime le token pour déconnexion
     this.router.navigate(['/connexion']); // Redirige vers la page de connexion

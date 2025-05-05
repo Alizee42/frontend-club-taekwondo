@@ -18,6 +18,7 @@ import { Router, NavigationEnd } from '@angular/router';
   ]
 })
 export class AppComponent {
+  isProfilRoute: boolean = false;
   title(title: any) {
     throw new Error('Method not implemented.');
   }
@@ -37,6 +38,7 @@ export class AppComponent {
       if (event instanceof NavigationEnd) {
         // Vérifie si la route actuelle est une route admin ou membre
         this.isAdminOrMembreRoute = event.url.startsWith('/admin') || event.url.startsWith('/membre');
+        this.isProfilRoute = event.url.startsWith('/profil');
       }
     });
   }
