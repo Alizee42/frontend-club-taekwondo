@@ -15,4 +15,7 @@ export class DashboardAdminComponent {
   navigateToprofesseurs(): void {
     this.router.navigate(['/admin/professeurs']); // Redirige vers la page Gestion des Horaires
   }
+  navigateToavis(): void {
+    this.router.navigate(['/admin/avis']); // Redirige vers la page Gestion des Horaires
+  }
 }

@@ -12,6 +12,7 @@ import { ProfilComponent } from './pages/profil/profil.component'; // Importer l
 import { AuthGuard } from './guards/auth.guard';
 import { GestionHorairesComponent } from './admin/gestion-horaires/gestion-horaires.component';
 import { GestionProfesseursComponent } from './admin/gestion-professeurs/gestion-professeurs.component';
+import { GestionAvisComponent } from './admin/gestion-avis/gestion-avis.component';
 
 export const routes: Routes = [
   // Routes publiques
@@ -32,7 +33,8 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard-admin', component: DashboardAdminComponent },
       { path: 'horaires', component: GestionHorairesComponent },// Route pour la gestion des horaires
-      { path: 'professeurs', component: GestionProfesseursComponent } // Route pour la gestion des professeurs
+      { path: 'professeurs', component: GestionProfesseursComponent }, // Route pour la gestion des professeurs
+      { path: 'avis', component: GestionAvisComponent }
     ]
   },
 

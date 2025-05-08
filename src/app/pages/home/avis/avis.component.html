@@ -2,61 +2,78 @@
   <div class="container">
     <h2 class="section-title">Ils parlent de nous</h2>
 
+    <!-- Message de confirmation -->
+    <div *ngIf="messageConfirmation" class="alert alert-success">
+      {{ messageConfirmation }}
+    </div>
+
+    <!-- Carrousel des avis -->
     <div class="swiper avis-swiper">
       <div class="swiper-wrapper">
-        
-        <!-- Avis 1 -->
-        <div class="swiper-slide">
+        <div *ngFor="let avis of avisApprouves" class="swiper-slide">
           <div class="avis-card">
-            <p class="avis-text">“Super club ! Mon fils s’épanouit depuis qu’il pratique le Taekwondo ici.”</p>
+            <p class="avis-text">“{{ avis.contenu }}”</p>
             <div class="avis-author">
-              <img src="assets/images/avatar1.jpg" alt="Parent 1" />
+              <img
+                [src]="avis.photo || 'assets/images/default-avatar.jpg'"
+                alt="Photo de {{ avis.pseudoVisiteur }}"
+                class="avis-photo"
+              />
               <div>
-                <strong>Julie M.</strong><br>
-                Maman d’un élève
+                <strong>{{ avis.pseudoVisiteur || 'Anonyme' }}</strong><br />
+                <span>{{ avis.typeAvis || 'Avis général' }}</span>
               </div>
+            </div>
+            <div class="note-stars">
+              <i
+                *ngFor="let star of [1, 2, 3, 4, 5]"
+                class="fa"
+                [class.fa-star]="star <= avis.note"
+                [class.fa-star-o]="star > avis.note"
+                aria-hidden="true"
+              ></i>
             </div>
           </div>
         </div>
-
-        <!-- Avis 2 -->
-        <div class="swiper-slide">
-          <div class="avis-card">
-            <p class="avis-text">“Les professeurs sont très pédagogues. L’ambiance est au top !”</p>
-            <div class="avis-author">
-              <img src="assets/images/avatar2.jpg" alt="Adolescent 1" />
-              <div>
-                <strong>Sami B.</strong><br>
-                Élève, 15 ans
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Avis 3 -->
-        <div class="swiper-slide">
-          <div class="avis-card">
-            <p class="avis-text">“J’ai retrouvé confiance en moi grâce aux cours adultes. Merci !”</p>
-            <div class="avis-author">
-              <img src="assets/images/avatar3.jpg" alt="Adulte 1" />
-              <div>
-                <strong>Karim D.</strong><br>
-                Élève adulte
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ajoute autant d'avis que tu veux ici -->
-
       </div>
-
+    
       <!-- Pagination -->
       <div class="swiper-pagination"></div>
-
+    
       <!-- Flèches -->
       <div class="swiper-button-prev"></div>
       <div class="swiper-button-next"></div>
+    </div>
+
+    <!-- Bouton pour laisser un avis -->
+    <button class="btn-leave-review" (click)="ouvrirModale()">Laisser un avis</button>
+  </div>
+
+  <!-- Modale pour laisser un avis -->
+  <div class="modale" [class.active]="modaleOuverte">
+    <div class="modale-content">
+      <!-- Bouton pour fermer la modale (croix) -->
+      <button class="modale-close" (click)="fermerModale()">×</button>
+
+      <h3>Laisser un avis</h3>
+      <form (ngSubmit)="envoyerAvis()">
+        <div class="form-group">
+          <label for="pseudo">Pseudo</label>
+          <input type="text" id="pseudo" [(ngModel)]="nouvelAvis.pseudoVisiteur" name="pseudo" required />
+        </div>
+        <div class="form-group">
+          <label for="contenu">Votre avis</label>
+          <textarea id="contenu" [(ngModel)]="nouvelAvis.contenu" name="contenu" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="note">Note</label>
+          <select id="note" [(ngModel)]="nouvelAvis.note" name="note" required>
+            <option *ngFor="let star of [1, 2, 3, 4, 5]" [value]="star">{{ star }} étoile(s)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-submit">Envoyer</button>
+        <button type="button" class="btn-close" (click)="fermerModale()">Annuler</button>
+      </form>
     </div>
   </div>
 </section>

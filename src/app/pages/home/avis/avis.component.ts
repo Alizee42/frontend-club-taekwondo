@@ -1,36 +1,102 @@
-import { Component, AfterViewInit } from '@angular/core';
-import Swiper from 'swiper/bundle';
-import 'swiper/css/bundle';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common'; // Pour *ngFor et *ngIf
+import { FormsModule } from '@angular/forms'; // Pour [(ngModel)]
+import { HttpClientModule } from '@angular/common/http'; // Pour les requêtes HTTP
+import { AvisService, Avis } from '../../../services/avis.service';
+import Swiper from 'swiper/bundle'; // Import Swiper bundle
+import 'swiper/css/bundle'; // Import des styles Swiper
 
 @Component({
   selector: 'app-avis',
+  standalone: true, // Composant autonome
+  imports: [CommonModule, FormsModule, HttpClientModule], // Import des modules nécessaires
   templateUrl: './avis.component.html',
-  styleUrls: ['./avis.component.css']
+  styleUrls: ['./avis.component.css'],
 })
-export class AvisComponent implements AfterViewInit {
-  swiper: Swiper | undefined;
+export class AvisComponent implements OnInit, AfterViewInit {
+  avisApprouves: Avis[] = []; // Liste des avis approuvés
+  modaleOuverte = false; // État de la modale
+  nouvelAvis: Partial<Avis> = { contenu: '', pseudoVisiteur: '', note: 5 }; // Avis par défaut
+  messageConfirmation: string | null = null; // Message de confirmation
+  swiper: Swiper | null = null; // Instance de Swiper
 
+  constructor(private avisService: AvisService) {}
+
+  ngOnInit(): void {
+    this.chargerAvis(); // Charger les avis au démarrage
+  }
+
+  /**
+   * Initialise Swiper après que la vue a été rendue.
+   */
   ngAfterViewInit(): void {
     this.swiper = new Swiper('.avis-swiper', {
-      loop: true,
-      spaceBetween: 30,
-      slidesPerView: 1,
+      loop: true, // Boucle infinie
+      spaceBetween: 30, // Espacement entre les slides
+      slidesPerView: 1, // Nombre de slides visibles
       autoplay: {
-        delay: 5000,
+        delay: 5000, // Délai entre les slides
       },
       pagination: {
-        el: '.swiper-pagination',
-        clickable: true
+        el: '.swiper-pagination', // Pagination
+        clickable: true, // Pagination cliquable
       },
       navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev'
+        nextEl: '.swiper-button-next', // Bouton suivant
+        prevEl: '.swiper-button-prev', // Bouton précédent
       },
       breakpoints: {
         768: {
-          slidesPerView: 2
-        }
-      }
+          slidesPerView: 2, // 2 slides visibles sur les écrans moyens
+        },
+      },
     });
+  }
+
+  /**
+   * Charge les avis approuvés depuis le service.
+   */
+  chargerAvis(): void {
+    this.avisService.getAvis().subscribe((avis) => {
+      this.avisApprouves = avis.filter((a) => a.approuve); // Filtrer les avis approuvés
+    });
+  }
+
+  /**
+   * Ouvre la modale pour laisser un avis.
+   */
+  ouvrirModale(): void {
+    this.modaleOuverte = true;
+  }
+
+  /**
+   * Ferme la modale.
+   */
+  fermerModale(): void {
+    this.modaleOuverte = false;
+  }
+
+  /**
+   * Envoie un nouvel avis au service.
+   */
+  envoyerAvis(): void {
+    if (this.nouvelAvis.contenu && this.nouvelAvis.pseudoVisiteur) {
+      const avisAEnvoyer = { ...this.nouvelAvis, approuve: false }; // Avis en attente de validation
+      this.avisService.ajouterAvis(avisAEnvoyer as Avis).subscribe(() => {
+        this.fermerModale(); // Fermer la modale après l'envoi
+        this.nouvelAvis = { contenu: '', pseudoVisiteur: '', note: 5 }; // Réinitialiser le formulaire
+        this.messageConfirmation = 'Votre avis a été envoyé et est en attente de validation.';
+        this.masquerMessageApresDelai(); // Masquer le message après un délai
+      });
+    }
+  }
+
+  /**
+   * Masque le message de confirmation après un délai.
+   */
+  masquerMessageApresDelai(): void {
+    setTimeout(() => {
+      this.messageConfirmation = null;
+    }, 5000); // Masquer après 5 secondes
   }
 }

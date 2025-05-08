@@ -1,0 +1,67 @@
+<div class="gestion-avis-container">
+  <h1>Gestion des Avis</h1>
+
+  <!-- Avis en attente -->
+  <section class="section-liste">
+    <h2>En attente d'approbation</h2>
+    <div *ngIf="avisEnAttente.length === 0" class="empty-message">Aucun avis en attente.</div>
+    <div *ngFor="let avis of avisEnAttente" class="avis-card">
+      <div class="avis-infos">
+        <p>
+          <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> – {{ avis.typeAvis }} – {{ avis.datePub | date }}
+        </p>
+        <p>{{ avis.contenu }}</p>
+        <div class="note-stars" aria-label="Note">
+          <span *ngFor="let star of [1, 2, 3, 4, 5]">
+            <i
+              class="fa"
+              [class.fa-star]="star <= (avis.note || 0)"
+              [class.fa-star-o]="star > (avis.note || 0)"
+              aria-hidden="true"
+            ></i>
+          </span>
+        </div>
+      </div>
+      <div class="avis-actions">
+        <button
+          class="btn-approve"
+          (click)="approuverAvis(avis.id)"
+          aria-label="Approuver l'avis"
+        >
+          ✔
+        </button>
+        <button
+          class="btn-delete"
+          (click)="supprimerAvis(avis.id)"
+          aria-label="Supprimer l'avis"
+        >
+          ✖
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Avis approuvés -->
+  <section class="section-liste">
+    <h2>Avis approuvés</h2>
+    <div *ngIf="avisApprouves.length === 0" class="empty-message">Aucun avis approuvé.</div>
+    <div *ngFor="let avis of avisApprouves" class="avis-card">
+      <div class="avis-infos">
+        <p>
+          <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> – {{ avis.typeAvis }} – {{ avis.datePub | date }}
+        </p>
+        <p>{{ avis.contenu }}</p>
+        <div class="note-stars" aria-label="Note">
+          <span *ngFor="let star of [1, 2, 3, 4, 5]">
+            <i
+              class="fa"
+              [class.fa-star]="star <= (avis.note || 0)"
+              [class.fa-star-o]="star > (avis.note || 0)"
+              aria-hidden="true"
+            ></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

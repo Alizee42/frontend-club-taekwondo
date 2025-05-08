@@ -1,0 +1,120 @@
+.gestion-avis-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  font-family: 'Poppins', sans-serif;
+}
+
+h1, h2 {
+  text-align: center;
+  color: var(--blue-main);
+  margin-bottom: 20px;
+}
+
+.section-ajout,
+.section-liste {
+  margin-bottom: 40px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+textarea,
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+.btn-ajouter {
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-ajouter:hover {
+  background-color: #0056b3;
+}
+
+.avis-card {
+  background: #f9f9f9;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  flex-wrap: wrap;
+}
+
+.avis-infos {
+  max-width: 85%;
+}
+
+.note-stars {
+  color: #ffb400;
+  margin-top: 5px;
+}
+
+.avis-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-approve, .btn-delete {
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-approve {
+  background-color: #28a745; /* Vert pour indiquer une action positive */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-approve:hover {
+  background-color: #218838; /* Vert plus foncé au survol */
+  transform: scale(1.05); /* Légère mise en avant au survol */
+}
+
+.btn-approve:active {
+  background-color: #1e7e34; /* Vert encore plus foncé lors du clic */
+  transform: scale(0.95); /* Légère réduction lors du clic */
+}
+
+.btn-delete {
+  background-color: var(--red-main);
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+.empty-message {
+  text-align: center;
+  font-style: italic;
+  color: #888;
+  margin-top: 15px;
+}
