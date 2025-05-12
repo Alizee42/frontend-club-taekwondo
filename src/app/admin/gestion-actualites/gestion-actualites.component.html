@@ -1,0 +1,59 @@
+<div class="gestion-actualites-container">
+  <h1>Gestion des Actualités</h1>
+
+  <form (ngSubmit)="onSubmit()" #actualiteForm="ngForm">
+    <div class="form-group">
+      <label for="titre">Titre</label>
+      <input type="text" id="titre" [(ngModel)]="actualite.titre" name="titre" required />
+    </div>
+
+    <div class="form-group">
+      <label for="contenu">Contenu</label>
+      <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="typeActu">Type</label>
+      <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
+        <option value="evenement">Événement</option>
+        <option value="competition">Compétition</option>
+        <option value="annonce">Annonce</option>
+      </select>
+    </div>
+
+    <div class="form-group checkbox-group">
+      <label>
+        <input type="checkbox" [(ngModel)]="actualite.isFeatured" name="isFeatured" />
+        Mettre cette actualité à la une
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label for="image">Ajouter une image</label>
+      <input type="file" id="image" (change)="onImageSelected($event)" />
+      <div class="image-preview" *ngIf="imageUrl">
+        <img [src]="imageUrl" alt="Prévisualisation de l'image" />
+      </div>
+    </div>
+  
+    <button type="submit" class="btn-submit">Enregistrer</button>
+  </form>
+
+  <div class="actualites-list">
+    <h2>Liste des Actualités</h2>
+    <div *ngFor="let actu of actualites" class="actualite-card">
+      <div class="header">
+        <h3>{{ actu.titre }}</h3>
+        <span *ngIf="actu.isFeatured" class="badge-une">À la une</span>
+      </div>
+      <div *ngIf="actu.imageUrl" class="image-thumb">
+        <img [src]="actu.imageUrl" alt="Image actualité">
+      </div>
+      <p>{{ actu.contenu }}</p>
+      <p><strong>Date de publication :</strong> {{ actu.datePublication | date:'dd/MM/yyyy' }}</p>
+      <p><strong>Type :</strong> {{ actu.typeActu }}</p>
+      <button (click)="editActualite(actu)">Modifier</button>
+      <button *ngIf="actu.id" (click)="deleteActualite(actu.id)">Supprimer</button>
+    </div>
+  </div>
+</div>

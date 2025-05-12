@@ -12,6 +12,7 @@ interface Avis {
   pseudoVisiteur?: string; // Ajout de pseudoVisiteur
   typeAvis?: string; // Ajout de typeAvis
   datePub?: Date; // Ajout de datePub
+  photo?: string;
 }
 
 @Component({
@@ -49,7 +50,10 @@ export class GestionAvisComponent implements OnInit {
   }
   supprimerAvis(id: number): void {
     this.http.delete(`http://localhost:8080/api/avis/${id}`).subscribe(() => {
+      console.log(`Avis ${id} supprimé.`);
       this.chargerAvis(); // Recharge les avis après suppression
+    }, (error) => {
+      console.error(`Erreur lors de la suppression de l'avis ${id}:`, error);
     });
   }
 
@@ -60,5 +64,11 @@ export class GestionAvisComponent implements OnInit {
         this.chargerAvis();
       });
     }
+  }
+  getInitials(name: string): string {
+    if (!name) return '';
+    const parts = name.split(' ');
+    const initials = parts.map(part => part[0]).join('');
+    return initials.toUpperCase();
   }
 }

@@ -18,4 +18,7 @@ export class DashboardAdminComponent {
   navigateToavis(): void {
     this.router.navigate(['/admin/avis']); // Redirige vers la page Gestion des Horaires
   }
+  navigateToActualites(): void {
+    this.router.navigate(['/admin/actualites']); // Redirige vers la page Gestion des Actualités
+  }
 }

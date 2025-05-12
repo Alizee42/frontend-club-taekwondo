@@ -1,42 +1,79 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Importation de CommonModule
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router'; // <-- Ajoute ça
+import { ActualiteService } from '../../../services/actualite.service';
 
 @Component({
   selector: 'app-actualites',
-  standalone: true, // Indique que le composant est autonome
-  imports: [CommonModule], // Ajout de CommonModule ici
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule
+  ],
   templateUrl: './actualites.component.html',
   styleUrls: ['./actualites.component.css']
 })
-export class ActualitesComponent {
-  // Liste complète des actualités
-  news = [
-    { id: 1, title: 'Événement 1', category: 'evenement', content: 'Description de l\'événement 1' },
-    { id: 2, title: 'Compétition 1', category: 'competition', content: 'Description de la compétition 1' },
-    { id: 3, title: 'Annonce 1', category: 'annonce', content: 'Description de l\'annonce 1' },
-    { id: 4, title: 'Événement 2', category: 'evenement', content: 'Description de l\'événement 2' },
-    { id: 5, title: 'Compétition 2', category: 'competition', content: 'Description de la compétition 2' },
-  ];
+export class ActualitesComponent implements OnInit {
+  news: any[] = [];
+  filteredNews: any[] = [];
+  currentPage: number = 1;  // Page courante pour la pagination
+  pageSize: number = 3;     // Nombre d'actualités par page
 
-  // Liste des actualités affichées
-  filteredNews = this.news.slice(0, 3); // Par défaut, afficher les 3 premières actualités
+  constructor(private actualiteService: ActualiteService) {}
 
-  // Charger toutes les actualités
-  loadMore() {
-    this.filteredNews = this.news;
+  ngOnInit(): void {
+    this.loadActualites();
   }
 
-  // Réduire à 3 actualités
-  loadLess() {
-    this.filteredNews = this.news.slice(0, 3);
+  // Charger les actualités
+  loadActualites(): void {
+    this.actualiteService.getAll().subscribe({
+      next: (data) => {
+        this.news = data;
+        this.updateFilteredNews();
+      },
+      error: (err) => {
+        console.error('Erreur de chargement des actualités :', err);
+      }
+    });
+  }
+
+  // Met à jour les actualités filtrées pour la page courante
+  updateFilteredNews(): void {
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.filteredNews = this.news.slice(start, end);
+  }
+
+  // Charger plus d'actualités
+  loadMore(): void {
+    this.currentPage++;
+    this.updateFilteredNews();
+  }
+
+  // Revenir aux 3 premières actualités
+  loadLess(): void {
+    this.currentPage = 1;
+    this.updateFilteredNews();
   }
 
   // Filtrer les actualités par catégorie
-  filterNews(category: string) {
+  filterNews(category: string): void {
     if (category === 'all') {
       this.filteredNews = this.news;
     } else {
-      this.filteredNews = this.news.filter(item => item.category === category);
+      this.filteredNews = this.news.filter(item => item.typeActu === category);
     }
+  }
+
+  // Tracer par ID
+  trackById(index: number, item: any): any {
+    return item.id;
+  }
+
+  // Gestion des erreurs d'image
+  onImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    target.src = 'assets/images/default.jpg'; // Remplacer par une image par défaut
   }
 }

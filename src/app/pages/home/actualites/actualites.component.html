@@ -2,26 +2,40 @@
   <div class="container">
     <h2>Actualités</h2>
 
-    <div class="featured-actualite">
-      <img src="assets/images/actu1.jpg" alt="Actu à la une">
+    <!-- Actualité à la une -->
+    <div *ngIf="filteredNews.length > 0" class="featured-actualite card">
+      <div class="image-wrapper">
+        <img [src]="filteredNews[0].imageUrl || 'assets/images/default.jpg'" 
+             alt="{{ filteredNews[0].titre }} - Image à la une" 
+             (error)="onImageError($event)">
+        <div class="category-badge">{{ filteredNews[0].typeActu }}</div>
+      </div>
       <div class="featured-content">
-        <h3>Stage de perfectionnement - Avril 2025</h3>
-        <p>Rejoignez notre stage intensif de Taekwondo pour tous les niveaux. Une semaine d'entraînement intense encadrée par des experts.</p>
-        <a href="#" class="btn-actualite">En savoir plus</a>
+        <h3>{{ filteredNews[0].titre }}</h3>
+        <p class="excerpt">{{ filteredNews[0].contenu | slice:0:250 }}...</p>
+        <a [routerLink]="['/actualite', filteredNews[0].id]" class="btn-actualite">En savoir plus</a>
       </div>
     </div>
 
+    <!-- Autres actualités -->
     <div class="other-actualites">
-      <div class="actu-card">
-        <img src="assets/images/actu2.jpg" alt="Actu 2">
-        <h4>Compétition régionale</h4>
-        <p>Nos jeunes ont brillé lors du championnat régional. Bravo à tous !</p>
+      <div *ngFor="let actu of filteredNews.slice(1); trackBy: trackById" class="actu-card card">
+        <div class="image-wrapper">
+          <img [src]="actu.imageUrl || 'assets/images/default.jpg'" alt="Image actualité" (error)="onImageError($event)">
+          <div class="category-badge">{{ actu.typeActu }}</div>
+        </div>
+        <div class="card-body">
+          <h4>{{ actu.titre }}</h4>
+          <p class="excerpt">{{ actu.contenu | slice:0:150 }}...</p>
+          <a [routerLink]="['/actualite', actu.id]" class="btn-actualite">En savoir plus</a>
+        </div>
       </div>
-      <div class="actu-card">
-        <img src="assets/images/actu3.jpg" alt="Actu 3">
-        <h4>Nouvelle saison 2025</h4>
-        <p>Les inscriptions sont ouvertes ! Venez nombreux dès septembre.</p>
-      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-buttons">
+      <button (click)="loadLess()" *ngIf="currentPage > 1">Voir moins</button>
+      <button (click)="loadMore()">Charger plus</button>
     </div>
   </div>
 </section>

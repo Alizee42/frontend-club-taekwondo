@@ -52,24 +52,55 @@
   <!-- Modale pour laisser un avis -->
   <div class="modale" [class.active]="modaleOuverte">
     <div class="modale-content">
-      <!-- Bouton pour fermer la modale (croix) -->
       <button class="modale-close" (click)="fermerModale()">×</button>
-
+  
       <h3>Laisser un avis</h3>
       <form (ngSubmit)="envoyerAvis()">
         <div class="form-group">
-          <label for="pseudo">Pseudo</label>
-          <input type="text" id="pseudo" [(ngModel)]="nouvelAvis.pseudoVisiteur" name="pseudo" required />
+          <label for="pseudo">Votre nom :</label>
+          <input
+            type="text"
+            id="pseudo"
+            [(ngModel)]="nouvelAvis.pseudoVisiteur"
+            name="pseudo"
+            placeholder="Entrez votre nom"
+            required
+          />
         </div>
         <div class="form-group">
-          <label for="contenu">Votre avis</label>
-          <textarea id="contenu" [(ngModel)]="nouvelAvis.contenu" name="contenu" required></textarea>
+          <label for="contenu">Votre témoignage :</label>
+          <textarea
+            id="contenu"
+            [(ngModel)]="nouvelAvis.contenu"
+            name="contenu"
+            placeholder="Partagez votre expérience"
+            required
+          ></textarea>
         </div>
         <div class="form-group">
-          <label for="note">Note</label>
-          <select id="note" [(ngModel)]="nouvelAvis.note" name="note" required>
-            <option *ngFor="let star of [1, 2, 3, 4, 5]" [value]="star">{{ star }} étoile(s)</option>
+          <label for="note">Votre note :</label>
+          <select
+            id="note"
+            [(ngModel)]="nouvelAvis.note"
+            name="note"
+            required
+          >
+            <option *ngFor="let star of [1, 2, 3, 4, 5]" [value]="star">
+              {{ star }} étoile{{ star > 1 ? 's' : '' }}
+            </option>
           </select>
+        </div>
+        <div class="form-group">
+          <label for="photo">Votre photo (optionnelle) :</label>
+          <input
+            type="file"
+            id="photo"
+            (change)="onPhotoSelected($event)"
+            accept="image/*"
+          />
+          <div *ngIf="photoPreview" class="photo-preview">
+            <img [src]="photoPreview" alt="Aperçu de la photo" />
+          </div>
         </div>
         <button type="submit" class="btn-submit">Envoyer</button>
         <button type="button" class="btn-close" (click)="fermerModale()">Annuler</button>

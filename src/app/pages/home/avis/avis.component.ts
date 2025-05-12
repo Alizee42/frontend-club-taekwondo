@@ -79,16 +79,32 @@ export class AvisComponent implements OnInit, AfterViewInit {
   /**
    * Envoie un nouvel avis au service.
    */
-  envoyerAvis(): void {
-    if (this.nouvelAvis.contenu && this.nouvelAvis.pseudoVisiteur) {
-      const avisAEnvoyer = { ...this.nouvelAvis, approuve: false }; // Avis en attente de validation
-      this.avisService.ajouterAvis(avisAEnvoyer as Avis).subscribe(() => {
-        this.fermerModale(); // Fermer la modale après l'envoi
-        this.nouvelAvis = { contenu: '', pseudoVisiteur: '', note: 5 }; // Réinitialiser le formulaire
-        this.messageConfirmation = 'Votre avis a été envoyé et est en attente de validation.';
-        this.masquerMessageApresDelai(); // Masquer le message après un délai
-      });
-    }
+  photoPreview: string | null = null; // Aperçu de la photo
+
+onPhotoSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.photoPreview = e.target?.result as string;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+envoyerAvis(): void {
+  if (this.nouvelAvis.contenu && this.nouvelAvis.pseudoVisiteur) {
+    const avisAEnvoyer = {
+      ...this.nouvelAvis,
+      approuve: false,
+      photo: this.photoPreview || null, // Ajouter la photo si elle existe
+    };
+    this.avisService.ajouterAvis(avisAEnvoyer as Avis).subscribe(() => {
+      this.fermerModale(); // Fermer la modale après l'envoi
+      this.nouvelAvis = { contenu: '', pseudoVisiteur: '', note: 5 }; // Réinitialiser le formulaire
+      this.photoPreview = null; // Réinitialiser l'aperçu de la photo
+    });
+  }
   }
 
   /**
@@ -99,4 +115,5 @@ export class AvisComponent implements OnInit, AfterViewInit {
       this.messageConfirmation = null;
     }, 5000); // Masquer après 5 secondes
   }
+  
 }

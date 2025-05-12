@@ -40,13 +40,23 @@
       </div>
     </div>
   </section>
-
   <!-- Avis approuvés -->
   <section class="section-liste">
     <h2>Avis approuvés</h2>
     <div *ngIf="avisApprouves.length === 0" class="empty-message">Aucun avis approuvé.</div>
     <div *ngFor="let avis of avisApprouves" class="avis-card">
       <div class="avis-infos">
+        <div class="photo-container">
+          <img
+            *ngIf="avis.photo"
+            [src]="avis.photo"
+            alt="Photo de {{ avis.pseudoVisiteur }}"
+            class="photo"
+          />
+          <div *ngIf="!avis.photo" class="initials">
+            {{ getInitials(avis.pseudoVisiteur || avis.auteur) }}
+          </div>
+        </div>
         <p>
           <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> – {{ avis.typeAvis }} – {{ avis.datePub | date }}
         </p>
@@ -61,6 +71,15 @@
             ></i>
           </span>
         </div>
+      </div>
+      <div class="avis-actions">
+        <button
+          class="btn-delete"
+          (click)="supprimerAvis(avis.id)"
+          aria-label="Supprimer l'avis"
+        >
+          ✖
+        </button>
       </div>
     </div>
   </section>

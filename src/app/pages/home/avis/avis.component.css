@@ -180,3 +180,39 @@
 .btn-close:hover {
   background-color: #c82333;
 }
+.form-group {
+  margin-bottom: 20px;
+}
+
+input[type="text"],
+textarea,
+input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+input[type="file"] {
+  padding: 5px;
+}
+
+.photo-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.photo-preview img {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--blue-main);
+}

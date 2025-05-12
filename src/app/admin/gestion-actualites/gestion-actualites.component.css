@@ -1,0 +1,162 @@
+.gestion-actualites-container {
+  background-color: var(--background-light);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+h1 {
+  color: var(--blue-main);
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;  /* Espacement amélioré */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;  /* Espacement augmenté */
+}
+
+label {
+  font-weight: bold;
+  color: var(--text-main);
+}
+
+input, select, textarea {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
+  border-color: var(--blue-main);
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-group input {
+  width: auto;
+}
+
+.btn-submit {
+  background-color: var(--blue-main);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: var(--blue-hover);
+  transform: translateY(-2px);  /* Effet de léger survol */
+}
+
+.btn-submit:focus {
+  box-shadow: 0 0 5px var(--blue-main);  /* Effet de focus pour le bouton */
+}
+
+.image-preview {
+  margin-top: 10px;
+  max-width: 200px;
+  transition: transform 0.3s ease;
+}
+
+.image-preview:hover {
+  transform: scale(1.05);  /* Effet de zoom léger sur l'image */
+}
+
+.image-preview img {
+  width: 100%;
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+}
+
+.actualites-list {
+  margin-top: 40px;
+}
+
+.actualite-card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espacement interne pour plus de clarté */
+}
+
+.actualite-card .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actualite-card h3 {
+  color: var(--blue-dark);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.badge-une {
+  background-color: var(--red-main);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.image-thumb img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.actualite-card p {
+  color: var(--text-main);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+button {
+  background-color: var(--accent-dark);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px); /* Effet de léger survol */
+}
+
+button + button {
+  background-color: var(--red-main);
+}
+
+button + button:hover {
+  background-color: var(--accent-dark);
+}
