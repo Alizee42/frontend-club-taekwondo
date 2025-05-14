@@ -1,0 +1,66 @@
+.actualite-detail {
+    padding: 40px 20px;
+    font-family: 'Poppins', sans-serif;
+    max-width: 900px;
+    margin: 0 auto; /* Centrer le contenu */
+    color: var(--text-main); /* Utiliser la couleur principale du texte */
+  }
+  
+  .actualite-detail h1 {
+    font-size: 28px;
+    color: var(--blue-main); /* Utiliser la couleur principale bleue */
+    margin-bottom: 20px;
+    text-align: center; /* Centrer le titre */
+    text-transform: uppercase; /* Mettre le titre en majuscules */
+    letter-spacing: 1px; /* Espacement des lettres pour un effet moderne */
+  }
+  
+  .actualite-detail .type-actu {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--red-main); /* Utiliser la couleur rouge principale */
+    margin-bottom: 20px;
+    text-align: center; /* Centrer le type d'actualité */
+    text-transform: uppercase; /* Mettre en majuscules */
+  }
+  
+  .actualite-detail img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border-radius: 10px; /* Coins arrondis pour un meilleur visuel */
+    box-shadow: var(--shadow); /* Utiliser l'ombre définie dans :root */
+    transition: transform 0.3s ease; /* Ajouter un effet au survol */
+  }
+  
+  .actualite-detail img:hover {
+    transform: scale(1.05); /* Zoom léger au survol */
+  }
+  
+  .actualite-detail .contenu {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-main); /* Utiliser la couleur principale du texte */
+    margin-bottom: 20px;
+    text-align: justify; /* Justifier le texte pour un rendu plus propre */
+  }
+  
+  .actualite-detail .date {
+    font-size: 14px;
+    color: var(--blue-dark); /* Utiliser une couleur sombre pour la date */
+    text-align: right; /* Aligner la date à droite */
+    margin-top: 10px;
+  }
+  
+  .container {
+    background: var(--card-bg); /* Utiliser la couleur de fond des cartes */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: var(--shadow); /* Utiliser l'ombre définie dans :root */
+  }
+  
+  .container:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); /* Ombre plus marquée au survol */
+  }
+  

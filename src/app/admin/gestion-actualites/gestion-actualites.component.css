@@ -13,7 +13,6 @@ h1, h2 {
   margin-bottom: 30px;
   text-align: center;
 }
-
 /* ----------- FORMULAIRE ----------- */
 
 .actualite-form {
@@ -31,19 +30,95 @@ h1, h2 {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  align-items: flex-end;
 }
 
 .form-group {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 250px;
+  min-width: 120px;
 }
 
 label {
   font-weight: 600;
   margin-bottom: 8px;
   color: #333;
+}
+
+input,
+select,
+textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-featured {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 150px; /* Largeur fixe pour le champ "À la une" */
+}
+
+
+.form-featured-control {
+  display: flex;
+  align-items: center; /* Aligner verticalement la case à cocher et le texte */
+  gap: 10px; /* Espacement entre la case à cocher et le texte */
+  padding: 0; /* Supprimer le padding pour réduire la hauteur */
+  border: none; /* Supprimer la bordure */
+  background-color: transparent; /* Supprimer le fond */
+  font-size: 14px;
+  height: auto; /* Ajuster automatiquement la hauteur */
+}
+
+.form-featured-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #007bff; /* Couleur de la case à cocher */
+  cursor: pointer;
+}
+
+.form-featured-text {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  line-height: 1; /* Assurer un alignement vertical parfait */
+}
+
+.btn-submit {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  align-self: flex-start;
+}
+
+.btn-submit:hover {
+  background-color: #0056b3;
+}
+
+/* ----------- IMAGE ----------- */
+
+.image-preview img {
+  max-width: 200px;
+  border-radius: 6px;
+  margin-top: 10px;
 }
 
 /* Harmonisation du select */

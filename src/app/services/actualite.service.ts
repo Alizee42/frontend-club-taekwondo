@@ -31,10 +31,12 @@ export class ActualiteService {
       this.actualitesSubject.next(data); // Met à jour la liste des actualités dans le Subject
     });
   }
-// Notifier les composants des changements
-notifyChanges(): void {
-  this.reloadActualites(); // Recharge les actualités depuis l'API
-}
+
+  // Notifier les composants des changements
+  notifyChanges(): void {
+    this.reloadActualites(); // Recharge les actualités depuis l'API
+  }
+
   // Ajouter un mécanisme pour recharger les actualités manuellement
   reloadActualites(): void {
     this.loadActualites(); // Recharge les actualités
@@ -73,6 +75,16 @@ notifyChanges(): void {
         // Optionnel : filtrer l'actualité supprimée du cache local
         const currentActualites = this.actualitesSubject.getValue();
         this.actualitesSubject.next(currentActualites.filter(actualite => actualite.id !== id));
+      })
+    );
+  }
+
+  // Récupérer une actualité par ID
+  getById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      catchError((error) => {
+        console.error('Erreur lors de la récupération de l\'actualité :', error);
+        throw error;
       })
     );
   }

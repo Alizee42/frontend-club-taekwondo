@@ -14,6 +14,8 @@ import { GestionHorairesComponent } from './admin/gestion-horaires/gestion-horai
 import { GestionProfesseursComponent } from './admin/gestion-professeurs/gestion-professeurs.component';
 import { GestionAvisComponent } from './admin/gestion-avis/gestion-avis.component';
 import { GestionActualitesComponent } from './admin/gestion-actualites/gestion-actualites.component';
+import { ActualiteDetailComponent } from './pages/home/actualites/actualite-detail/actualite-detail.component';
+import { GestionGalerieComponent } from './admin/gestion-galerie/gestion-galerie.component';
 
 export const routes: Routes = [
   // Routes publiques
@@ -22,6 +24,8 @@ export const routes: Routes = [
   { path: 'galerie', component: GalerieComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'connexion', component: ConnexionComponent },
+
+  { path: 'actualite/:id', component: ActualiteDetailComponent },
 
   // Route pour la page "Profil" (protégée par AuthGuard)
   { path: 'profil', component: ProfilComponent, canActivate: [AuthGuard] },
@@ -36,7 +40,8 @@ export const routes: Routes = [
       { path: 'horaires', component: GestionHorairesComponent },// Route pour la gestion des horaires
       { path: 'professeurs', component: GestionProfesseursComponent }, // Route pour la gestion des professeurs
       { path: 'avis', component: GestionAvisComponent },
-      { path: 'actualites', component: GestionActualitesComponent }
+      { path: 'actualites', component: GestionActualitesComponent },
+      { path: 'galerie', component: GestionGalerieComponent }
     ]
   },
 

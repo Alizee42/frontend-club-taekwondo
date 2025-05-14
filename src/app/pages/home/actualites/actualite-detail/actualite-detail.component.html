@@ -1,0 +1,9 @@
+<section class="actualite-detail">
+    <div class="container">
+      <h1>{{ actualite?.titre }}</h1>
+      <p class="type-actu">{{ actualite?.typeActu }}</p>
+      <img [src]="actualite?.imageUrl || 'assets/images/default.jpg'" alt="{{ actualite?.titre }}" />
+      <p class="contenu">{{ actualite?.contenu }}</p>
+      <p class="date">Publié le : {{ actualite?.datePublication | date:'dd/MM/yyyy' }}</p>
+    </div>
+  </section>

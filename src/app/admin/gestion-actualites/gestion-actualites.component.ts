@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Pour le pipe 'date'
-import { FormsModule } from '@angular/forms'; // Pour 'ngModel'
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActualiteService } from '../../services/actualite.service';
 
 interface Actualite {
@@ -22,10 +22,9 @@ interface Actualite {
 })
 export class GestionActualitesComponent implements OnInit {
   actualites: Actualite[] = [];
-  imageUrl: string | ArrayBuffer | null = null;  // Variable pour gérer l'aperçu de l'image
-  imageError: string = '';  // Message d'erreur pour l'image
+  imageUrl: string | ArrayBuffer | null = null;
+  imageError: string = '';
 
-  // Objet actualité par défaut
   actualite: Actualite = {
     titre: '',
     contenu: '',
@@ -49,7 +48,7 @@ export class GestionActualitesComponent implements OnInit {
 
   onSubmit(): void {
     this.actualite.datePublication = new Date().toISOString();
-  
+
     if (this.actualite.id) {
       this.actualiteService.update(this.actualite.id, this.actualite).subscribe(() => {
         this.loadActualites();
@@ -122,7 +121,6 @@ export class GestionActualitesComponent implements OnInit {
     selectedActu.isFeatured = true;
     this.actualiteService.update(selectedActu.id!, selectedActu).subscribe(() => {
       this.loadActualites();
-      this.actualiteService.notifyChanges();
     });
   }
 }

@@ -1,50 +1,76 @@
 <div class="gestion-actualites-container">
   <h1>Gestion des Actualités</h1>
 
+  <!-- Formulaire pour ajouter ou modifier une actualité -->
   <form (ngSubmit)="onSubmit()" #actualiteForm="ngForm" class="actualite-form">
     <div class="form-row">
       <div class="form-group">
         <label for="titre">Titre</label>
-        <input type="text" id="titre" [(ngModel)]="actualite.titre" name="titre" required />
+        <input
+          type="text"
+          id="titre"
+          [(ngModel)]="actualite.titre"
+          name="titre"
+          placeholder="Entrez le titre de l'actualité"
+          required
+        />
       </div>
 
       <div class="form-group">
         <label for="typeActu">Type</label>
-        <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
+        <select
+          id="typeActu"
+          [(ngModel)]="actualite.typeActu"
+          name="typeActu"
+          required
+        >
           <option value="evenement">Événement</option>
           <option value="competition">Compétition</option>
           <option value="annonce">Annonce</option>
         </select>
       </div>
+
+      <!-- Mettre à la une -->
+      <div class="form-group form-featured">
+        <label for="isFeatured" class="form-featured-label">Mettre à la une</label>
+        <div class="form-featured-control">
+          <input
+            type="checkbox"
+            id="isFeatured"
+            [(ngModel)]="actualite.isFeatured"
+            name="isFeatured"
+            class="form-featured-checkbox"
+          />
+          <span class="form-featured-text">À la une</span>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
       <label for="contenu">Contenu</label>
-      <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
+      <textarea
+        id="contenu"
+        [(ngModel)]="actualite.contenu"
+        name="contenu"
+        placeholder="Entrez le contenu de l'actualité"
+        required
+      ></textarea>
     </div>
 
     <div class="form-group">
       <label for="image">Image</label>
       <input type="file" id="image" (change)="onImageSelected($event)" />
       <div class="image-preview" *ngIf="imageUrl">
-        <img [src]="imageUrl" alt="Image prévisualisation" />
+        <img [src]="imageUrl" alt="Prévisualisation de l'image" />
       </div>
     </div>
-    <div class="form-group form-featured">
-      <label for="isFeatured" class="form-featured-label">Mettre en avant cette actualité :</label>
-      <div class="form-featured-control">
-        <input
-        type="checkbox"
-        id="isFeatured"
-        [(ngModel)]="actualite.isFeatured"
-        name="isFeatured"
-      />        
-      <span class="form-featured-text">À la une</span>
-      </div>
-    </div>       
-        <button type="submit" class="btn-submit">Enregistrer</button>
+
+    <button type="submit" class="btn-submit">
+      {{ actualite.id ? 'Mettre à jour' : 'Ajouter' }}
+    </button>
   </form>
 
+  <!-- Liste des actualités -->
   <h2>Liste des Actualités</h2>
   <div class="table-wrapper">
     <table class="actualites-table">
@@ -59,24 +85,44 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let actu of actualites" [class.featured-row]="actu.isFeatured">
+        <tr
+          *ngFor="let actu of actualites"
+          [class.featured-row]="actu.isFeatured"
+        >
           <td>{{ actu.titre }}</td>
           <td>{{ actu.typeActu }}</td>
-          <td>{{ actu.datePublication | date:'dd/MM/yyyy' }}</td>
+          <td>{{ actu.datePublication | date: 'dd/MM/yyyy' }}</td>
           <td>
             <ng-container *ngIf="actu.isFeatured; else notFeatured">
               <span class="badge-une">✔ À la une</span>
             </ng-container>
             <ng-template #notFeatured>
-              <button (click)="setFeatured(actu)" class="btn-feature">Mettre à la une</button>
+              <button
+                (click)="setFeatured(actu)"
+                class="btn-feature"
+                [disabled]="actu.isFeatured"
+              >
+                Mettre à la une
+              </button>
             </ng-template>
-          </td>                
-          <td>
-            <img *ngIf="actu.imageUrl" [src]="actu.imageUrl" class="thumbnail" />
           </td>
           <td>
-            <button (click)="editActualite(actu)">Modifier</button>
-            <button *ngIf="actu.id" (click)="deleteActualite(actu.id)" class="btn-delete">Supprimer</button>
+            <img
+              *ngIf="actu.imageUrl"
+              [src]="actu.imageUrl"
+              class="thumbnail"
+              alt="Image de l'actualité"
+            />
+          </td>
+          <td>
+            <button (click)="editActualite(actu)" class="btn-edit">Modifier</button>
+            <button
+              *ngIf="actu.id"
+              (click)="deleteActualite(actu.id)"
+              class="btn-delete"
+            >
+              Supprimer
+            </button>
           </td>
         </tr>
       </tbody>

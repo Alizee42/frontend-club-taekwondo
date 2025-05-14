@@ -1,22 +1,62 @@
 .grid-gallery {
   display: grid;
   grid-template-columns: repeat(4, 1fr); /* 4 images par ligne sur grands écrans */
-  gap: 16px;
-  padding: 16px;
+  gap: 24px; /* Espacement entre les éléments */
+  padding: 24px;
+}
+
+.grid-item {
+  width: 100%; /* La card occupe toute la largeur disponible */
+  height: auto; /* Ajuste automatiquement la hauteur en fonction du contenu */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: var(--card-bg); /* Couleur de fond des cartes */
+  border-radius: 12px; /* Coins arrondis pour la card */
+  box-shadow: var(--shadow); /* Ombre pour un effet de carte */
+  overflow: hidden; /* Cache les débordements */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 16px; /* Ajoute un peu d'espace autour du contenu */
+}
+
+.grid-item:hover {
+  transform: translateY(-8px); /* Légère élévation au survol */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Accentue l'ombre au survol */
 }
 
 .grid-item img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+  width: 100%; /* Remplit toute la largeur du conteneur */
+  max-height: 250px; /* Augmente la hauteur maximale de l'image */
+  background-color: #f4f4f4; /* Ajoute un fond gris clair pour les espaces vides */
+  border-radius: 8px 8px 0 0; /* Coins arrondis uniquement en haut */
+  margin-bottom: 12px; /* Ajoute un espacement entre l'image et le titre */
 }
 
-.grid-item img:hover {
-  transform: scale(1.05);
+.grid-item h3 {
+  font-size: 1rem; /* Réduit la taille du titre */
+  font-weight: bold;
+  margin: 8px 0; /* Réduit l'espacement autour du titre */
+  color: var(--blue-main); /* Couleur principale pour le titre */
+  text-align: center;
 }
 
+.grid-item p {
+  font-size: 0.8rem; /* Réduit la taille de la description */
+  color: var(--text-main); /* Couleur principale pour le texte */
+  margin: 0 16px 8px; /* Réduit l'espacement autour de la description */
+  line-height: 1.4;
+  text-align: center;
+}
+.gallery-title {
+  font-size: 2rem; /* Taille du titre */
+  font-weight: bold;
+  text-align: center; /* Centre le titre */
+  color: var(--blue-main); /* Utilise la couleur principale */
+  margin-bottom: 24px; /* Ajoute un espacement sous le titre */
+  text-transform: uppercase; /* Met le texte en majuscules */
+  margin-top: 2%;
+}
 /* Responsive */
 @media (max-width: 992px) {
   .grid-gallery {

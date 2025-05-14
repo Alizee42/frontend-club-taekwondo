@@ -1,137 +1,47 @@
 <div class="inscription-wrapper">
-  <!-- Titre principal -->
-  <h1 class="page-title">Bienvenue sur la page d'inscription</h1>
-
-  <!-- Section Intro (centrée ou bandeau) -->
-  <section class="intro">
-    <p>
-      Pour vous inscrire, veuillez remplir les informations demandées dans le formulaire ci-dessous. 
-      Vous pourrez finaliser le paiement et télécharger les documents nécessaires plus tard, directement depuis votre tableau de bord.
-    </p>
-    <p>
-      Lors de votre inscription, vous avez la possibilité de choisir le mode de paiement : en une seule fois ou en plusieurs fois. 
-      Vous pouvez également soumettre vos documents (certificat médical, photo d'identité, etc.) à tout moment après l'inscription.
-    </p>
-  </section>
-
-  <!-- Conteneur du formulaire -->
-  <div class="inscription-container">
-    <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
-      <!-- Étape 1 : Infos personnelles -->
-      <div *ngIf="step === 1" class="form-step">
-        <h2 class="step-title">Étape 1 : Informations Personnelles</h2>
-        <div class="form-group">
-          <label for="nom">Nom :</label>
-          <input id="nom" formControlName="nom" type="text" required>
-        </div>
-        <div class="form-group">
-          <label for="prenom">Prénom :</label>
-          <input id="prenom" formControlName="prenom" type="text" required>
-        </div>
-        <div class="form-group">
-          <label for="adresse">Adresse :</label>
-          <input id="adresse" formControlName="adresse" type="text" required>
-        </div>
-        <div class="form-group">
-          <label for="email">E-mail :</label>
-          <input id="email" formControlName="email" type="email" required>
-        </div>
-        <div class="form-group">
-          <label for="phone">Téléphone :</label>
-          <input id="phone" formControlName="phone" type="text" required>
-        </div>
-        <div class="step-buttons">
-          <button type="button" (click)="nextStep()">Suivant</button>
-        </div>
+  <h1 class="page-title">Créer un compte</h1>
+  <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="nom">Nom :</label>
+      <input id="nom" formControlName="nom" type="text" required>
+      <div *ngIf="inscriptionForm.get('nom')?.invalid && inscriptionForm.get('nom')?.touched">
+        <small class="error">Le nom est requis.</small>
       </div>
-
-      <!-- Étape 2 : Choix du Paiement -->
-<div *ngIf="step === 2" class="form-step">
-  <h2 class="step-title">Étape 2 : Choix du Paiement (Optionnel)</h2>
-  <div class="form-paiement">
-    <div class="payment-options">
-      <label class="payment-option">
-        <input type="radio" formControlName="paymentType" value="single"> Paiement en une fois
-      </label>
-      <label class="payment-option">
-        <input type="radio" formControlName="paymentType" value="monthly"> Paiement mensuel
-      </label>
-      <label class="payment-option">
-        <input type="radio" formControlName="paymentType" value="none"> Paiement ultérieur
-      </label>
     </div>
-  </div>
-  <div class="step-buttons">
-    <button type="button" (click)="step = 1">Retour</button>
-    <button type="button" (click)="nextStep()">Suivant</button>
-  </div>
-</div>
-
-<!-- Étape 3 : Dépôt des Documents -->
-<div *ngIf="step === 3" class="form-step">
-  <h2 class="step-title">Étape 3 : Dépôt des Documents (Optionnel)</h2>
-
-  <!-- Certificat médical -->
-  <div class="form-document">
-    <label for="medicalCert">Certificat médical :</label>
-    <input id="medicalCert" type="file" (change)="onFileChange($event, 'medicalCert')">
-  </div>
-
-  <!-- Photo d'identité -->
-  <div class="form-document">
-    <label for="photoId">Photo d'identité :</label>
-    <input id="photoId" type="file" (change)="onFileChange($event, 'photoId')">
-  </div>
-
-  <!-- Document d'identité -->
-  <div class="form-document">
-    <label for="identityDoc">Document d'identité :</label>
-    <input id="identityDoc" type="file" (change)="onFileChange($event, 'identityDoc')">
-  </div>
-
-  <!-- Boutons de navigation -->
-  <div class="step-buttons">
-    <button type="button" (click)="step = 2">Retour</button>
-    <button type="button" (click)="nextStep()">Suivant</button>
-  </div>
-</div>
-
-
-      <!-- Étape 4 : Confirmation -->
-      <div *ngIf="step === 4" class="form-step">
-        <h2 class="step-title">Étape 4 : Confirmation</h2>
-        <p>Veuillez vérifier vos informations avant de confirmer l'inscription :</p>
-        <div class="confirmation-details">
-          <div class="confirmation-item">
-            <span class="confirmation-label">Nom :</span>
-            <span class="confirmation-value">{{ inscriptionForm.value.nom }}</span>
-          </div>
-          <div class="confirmation-item">
-            <span class="confirmation-label">Prénom :</span>
-            <span class="confirmation-value">{{ inscriptionForm.value.prenom }}</span>
-          </div>
-          <div class="confirmation-item">
-            <span class="confirmation-label">Adresse :</span>
-            <span class="confirmation-value">{{ inscriptionForm.value.adresse }}</span>
-          </div>
-          <div class="confirmation-item">
-            <span class="confirmation-label">Email :</span>
-            <span class="confirmation-value">{{ inscriptionForm.value.email }}</span>
-          </div>
-          <div class="confirmation-item">
-            <span class="confirmation-label">Téléphone :</span>
-            <span class="confirmation-value">{{ inscriptionForm.value.phone }}</span>
-          </div>
-          <div class="confirmation-item">
-            <span class="confirmation-label">Mode de paiement :</span>
-            <span class="confirmation-value">{{ inscriptionForm.value.paymentType }}</span>
-          </div>
-        </div>
-        <div class="step-buttons">
-          <button type="button" (click)="step = 3">Retour</button>
-          <button type="submit">Confirmer l'inscription</button>
-        </div>
+    
+    <div class="form-group">
+      <label for="prenom">Prénom :</label>
+      <input id="prenom" formControlName="prenom" type="text" required>
+      <div *ngIf="inscriptionForm.get('prenom')?.invalid && inscriptionForm.get('prenom')?.touched">
+        <small class="error">Le prénom est requis.</small>
       </div>
-    </form>
-  </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="email">Email :</label>
+      <input id="email" formControlName="email" type="email" required>
+      <div *ngIf="inscriptionForm.get('email')?.invalid && inscriptionForm.get('email')?.touched">
+        <small class="error">Un email valide est requis.</small>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="telephone">Téléphone :</label>
+      <input id="telephone" formControlName="telephone" type="tel" required>
+      <div *ngIf="inscriptionForm.get('telephone')?.invalid && inscriptionForm.get('telephone')?.touched">
+        <small class="error">Un numéro de téléphone valide est requis.</small>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="password">Mot de passe :</label>
+      <input id="password" formControlName="password" type="password" required>
+      <div *ngIf="inscriptionForm.get('password')?.invalid && inscriptionForm.get('password')?.touched">
+        <small class="error">
+          Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.
+        </small>
+      </div>
+    </div>
+    <button type="submit" class="btn">S'inscrire</button>
+  </form>
 </div>

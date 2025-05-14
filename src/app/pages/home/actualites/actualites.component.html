@@ -8,7 +8,7 @@
         <img [src]="featuredNews.imageUrl || 'assets/images/default.jpg'"
              alt="{{ featuredNews.titre }} - Image à la une"
              (error)="onImageError($event)">
-        <span class="badge {{ featuredNews.typeActu }}">{{ featuredNews.typeActu }}</span>
+        <span class="badge {{ featuredNews.typeActu | lowercase }}">{{ featuredNews.typeActu }}</span>
       </div>
       <div class="actu-content">
         <h3>{{ featuredNews.titre }}</h3>
@@ -22,7 +22,7 @@
       <div *ngFor="let actu of filteredNews; trackBy: trackById" class="actu-card">
         <div class="image-wrapper">
           <img [src]="actu.imageUrl || 'assets/images/default.jpg'" alt="Image actualité" (error)="onImageError($event)">
-          <span class="badge {{ actu.typeActu }}">{{ actu.typeActu }}</span>
+          <span class="badge {{ actu.typeActu | lowercase }}">{{ actu.typeActu }}</span>
         </div>
         <div class="actu-content">
           <h4>{{ actu.titre }}</h4>

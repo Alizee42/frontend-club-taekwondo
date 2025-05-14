@@ -1,6 +1,10 @@
-<div class="grid-gallery">
+<div class="gallery-container">
+  <h1 class="gallery-title">Galerie</h1>
+  <div class="grid-gallery">
     <div class="grid-item" *ngFor="let image of images">
-      <img [src]="image.url" [alt]="image.alt">
+      <img [src]="image.imageUrl" [alt]="image.titre" />
+      <h3>{{ image.titre }}</h3>
+      <p>{{ image.description | slice: 0:100 }}...</p> <!-- Limite à 100 caractères -->
     </div>
   </div>
-  
+</div>
