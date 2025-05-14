@@ -48,9 +48,8 @@ export class GestionActualitesComponent implements OnInit {
   }
 
   onSubmit(): void {
-    // S'assurer que la date est bien au format ISO
     this.actualite.datePublication = new Date().toISOString();
-
+  
     if (this.actualite.id) {
       this.actualiteService.update(this.actualite.id, this.actualite).subscribe(() => {
         this.loadActualites();
@@ -66,9 +65,8 @@ export class GestionActualitesComponent implements OnInit {
     }
   }
 
-  // Fonction pour sélectionner une image depuis l'ordinateur et prévisualiser
   onImageSelected(event: any): void {
-    const file = event.target.files[0]; // Récupère le fichier sélectionné
+    const file = event.target.files[0];
     if (file) {
       const fileType = file.type.split('/')[0];
       if (fileType !== 'image') {
@@ -79,19 +77,18 @@ export class GestionActualitesComponent implements OnInit {
 
       const reader = new FileReader();
       reader.onload = () => {
-        this.imageUrl = reader.result; // Stocke l'URL de l'image pour l'aperçu
-        this.actualite.imageUrl = this.imageUrl as string;  // Met à jour l'objet actualité avec l'URL de l'image
-        this.imageError = '';  // Réinitialiser le message d'erreur
+        this.imageUrl = reader.result;
+        this.actualite.imageUrl = this.imageUrl as string;
+        this.imageError = '';
       };
-      reader.readAsDataURL(file); // Convertit le fichier en URL pour l'aperçu
+      reader.readAsDataURL(file);
     }
   }
 
   editActualite(actu: Actualite): void {
     this.actualite = { ...actu };
-    // Si une image est présente, elle sera affichée
     this.imageUrl = actu.imageUrl || null;
-    this.imageError = '';  // Réinitialiser l'erreur d'image
+    this.imageError = '';
   }
 
   deleteActualite(id: string): void {
@@ -110,7 +107,22 @@ export class GestionActualitesComponent implements OnInit {
       isFeatured: false,
       imageUrl: ''
     };
-    this.imageUrl = null;  // Réinitialiser l'aperçu de l'image
-    this.imageError = '';  // Réinitialiser l'erreur d'image
+    this.imageUrl = null;
+    this.imageError = '';
+  }
+
+  setFeatured(selectedActu: Actualite): void {
+    this.actualites.forEach(actu => {
+      if (actu.id !== selectedActu.id) {
+        actu.isFeatured = false;
+        this.actualiteService.update(actu.id!, actu).subscribe();
+      }
+    });
+
+    selectedActu.isFeatured = true;
+    this.actualiteService.update(selectedActu.id!, selectedActu).subscribe(() => {
+      this.loadActualites();
+      this.actualiteService.notifyChanges();
+    });
   }
 }

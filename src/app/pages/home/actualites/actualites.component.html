@@ -1,39 +1,39 @@
-<section id="actualites" class="actualites-section">
+<section id="actualites" class="section-actualites">
   <div class="container">
-    <h2>Actualités</h2>
+    <h2 class="section-title">Actualités</h2>
 
     <!-- Actualité à la une -->
-    <div *ngIf="filteredNews.length > 0" class="featured-actualite card">
+    <div *ngIf="featuredNews" class="actu-featured">
       <div class="image-wrapper">
-        <img [src]="filteredNews[0].imageUrl || 'assets/images/default.jpg'" 
-             alt="{{ filteredNews[0].titre }} - Image à la une" 
+        <img [src]="featuredNews.imageUrl || 'assets/images/default.jpg'"
+             alt="{{ featuredNews.titre }} - Image à la une"
              (error)="onImageError($event)">
-        <div class="category-badge">{{ filteredNews[0].typeActu }}</div>
+        <span class="badge {{ featuredNews.typeActu }}">{{ featuredNews.typeActu }}</span>
       </div>
-      <div class="featured-content">
-        <h3>{{ filteredNews[0].titre }}</h3>
-        <p class="excerpt">{{ filteredNews[0].contenu | slice:0:250 }}...</p>
-        <a [routerLink]="['/actualite', filteredNews[0].id]" class="btn-actualite">En savoir plus</a>
+      <div class="actu-content">
+        <h3>{{ featuredNews.titre }}</h3>
+        <p>{{ featuredNews.contenu | slice:0:200 }}...</p>
+        <a [routerLink]="['/actualite', featuredNews.id]" class="btn-link">En savoir plus</a>
       </div>
     </div>
 
     <!-- Autres actualités -->
-    <div class="other-actualites">
-      <div *ngFor="let actu of filteredNews.slice(1); trackBy: trackById" class="actu-card card">
+    <div class="actu-grid">
+      <div *ngFor="let actu of filteredNews; trackBy: trackById" class="actu-card">
         <div class="image-wrapper">
           <img [src]="actu.imageUrl || 'assets/images/default.jpg'" alt="Image actualité" (error)="onImageError($event)">
-          <div class="category-badge">{{ actu.typeActu }}</div>
+          <span class="badge {{ actu.typeActu }}">{{ actu.typeActu }}</span>
         </div>
-        <div class="card-body">
+        <div class="actu-content">
           <h4>{{ actu.titre }}</h4>
-          <p class="excerpt">{{ actu.contenu | slice:0:150 }}...</p>
-          <a [routerLink]="['/actualite', actu.id]" class="btn-actualite">En savoir plus</a>
+          <p>{{ actu.contenu | slice:0:100 }}...</p>
+          <a [routerLink]="['/actualite', actu.id]" class="btn-link small">Lire</a>
         </div>
       </div>
     </div>
 
     <!-- Pagination -->
-    <div class="pagination-buttons">
+    <div class="pagination-controls">
       <button (click)="loadLess()" *ngIf="currentPage > 1">Voir moins</button>
       <button (click)="loadMore()">Charger plus</button>
     </div>

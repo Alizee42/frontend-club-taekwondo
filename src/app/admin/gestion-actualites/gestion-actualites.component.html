@@ -1,10 +1,21 @@
 <div class="gestion-actualites-container">
   <h1>Gestion des Actualités</h1>
 
-  <form (ngSubmit)="onSubmit()" #actualiteForm="ngForm">
-    <div class="form-group">
-      <label for="titre">Titre</label>
-      <input type="text" id="titre" [(ngModel)]="actualite.titre" name="titre" required />
+  <form (ngSubmit)="onSubmit()" #actualiteForm="ngForm" class="actualite-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="titre">Titre</label>
+        <input type="text" id="titre" [(ngModel)]="actualite.titre" name="titre" required />
+      </div>
+
+      <div class="form-group">
+        <label for="typeActu">Type</label>
+        <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
+          <option value="evenement">Événement</option>
+          <option value="competition">Compétition</option>
+          <option value="annonce">Annonce</option>
+        </select>
+      </div>
     </div>
 
     <div class="form-group">
@@ -13,47 +24,62 @@
     </div>
 
     <div class="form-group">
-      <label for="typeActu">Type</label>
-      <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
-        <option value="evenement">Événement</option>
-        <option value="competition">Compétition</option>
-        <option value="annonce">Annonce</option>
-      </select>
-    </div>
-
-    <div class="form-group checkbox-group">
-      <label>
-        <input type="checkbox" [(ngModel)]="actualite.isFeatured" name="isFeatured" />
-        Mettre cette actualité à la une
-      </label>
-    </div>
-
-    <div class="form-group">
-      <label for="image">Ajouter une image</label>
+      <label for="image">Image</label>
       <input type="file" id="image" (change)="onImageSelected($event)" />
       <div class="image-preview" *ngIf="imageUrl">
-        <img [src]="imageUrl" alt="Prévisualisation de l'image" />
+        <img [src]="imageUrl" alt="Image prévisualisation" />
       </div>
     </div>
-  
-    <button type="submit" class="btn-submit">Enregistrer</button>
+    <div class="form-group form-featured">
+      <label for="isFeatured" class="form-featured-label">Mettre en avant cette actualité :</label>
+      <div class="form-featured-control">
+        <input
+        type="checkbox"
+        id="isFeatured"
+        [(ngModel)]="actualite.isFeatured"
+        name="isFeatured"
+      />        
+      <span class="form-featured-text">À la une</span>
+      </div>
+    </div>       
+        <button type="submit" class="btn-submit">Enregistrer</button>
   </form>
 
-  <div class="actualites-list">
-    <h2>Liste des Actualités</h2>
-    <div *ngFor="let actu of actualites" class="actualite-card">
-      <div class="header">
-        <h3>{{ actu.titre }}</h3>
-        <span *ngIf="actu.isFeatured" class="badge-une">À la une</span>
-      </div>
-      <div *ngIf="actu.imageUrl" class="image-thumb">
-        <img [src]="actu.imageUrl" alt="Image actualité">
-      </div>
-      <p>{{ actu.contenu }}</p>
-      <p><strong>Date de publication :</strong> {{ actu.datePublication | date:'dd/MM/yyyy' }}</p>
-      <p><strong>Type :</strong> {{ actu.typeActu }}</p>
-      <button (click)="editActualite(actu)">Modifier</button>
-      <button *ngIf="actu.id" (click)="deleteActualite(actu.id)">Supprimer</button>
-    </div>
+  <h2>Liste des Actualités</h2>
+  <div class="table-wrapper">
+    <table class="actualites-table">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Type</th>
+          <th>Date</th>
+          <th>À la une</th>
+          <th>Image</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let actu of actualites" [class.featured-row]="actu.isFeatured">
+          <td>{{ actu.titre }}</td>
+          <td>{{ actu.typeActu }}</td>
+          <td>{{ actu.datePublication | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <ng-container *ngIf="actu.isFeatured; else notFeatured">
+              <span class="badge-une">✔ À la une</span>
+            </ng-container>
+            <ng-template #notFeatured>
+              <button (click)="setFeatured(actu)" class="btn-feature">Mettre à la une</button>
+            </ng-template>
+          </td>                
+          <td>
+            <img *ngIf="actu.imageUrl" [src]="actu.imageUrl" class="thumbnail" />
+          </td>
+          <td>
+            <button (click)="editActualite(actu)">Modifier</button>
+            <button *ngIf="actu.id" (click)="deleteActualite(actu.id)" class="btn-delete">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

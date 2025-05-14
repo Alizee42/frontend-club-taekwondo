@@ -31,7 +31,10 @@ export class ActualiteService {
       this.actualitesSubject.next(data); // Met à jour la liste des actualités dans le Subject
     });
   }
-
+// Notifier les composants des changements
+notifyChanges(): void {
+  this.reloadActualites(); // Recharge les actualités depuis l'API
+}
   // Ajouter un mécanisme pour recharger les actualités manuellement
   reloadActualites(): void {
     this.loadActualites(); // Recharge les actualités
