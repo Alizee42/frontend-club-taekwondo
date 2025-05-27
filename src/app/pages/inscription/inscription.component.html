@@ -32,7 +32,36 @@
         <small class="error">Un numéro de téléphone valide est requis.</small>
       </div>
     </div>
+    <div class="form-group">
+      <label for="numeroLicence">Numéro de Licence :</label>
+      <input id="numeroLicence" formControlName="numeroLicence" type="text" required>
+      <div *ngIf="inscriptionForm.get('numeroLicence')?.invalid && inscriptionForm.get('numeroLicence')?.touched">
+        <small class="error">Le numéro de licence est requis.</small>
+      </div>
+    </div>
     
+    <div class="form-group">
+      <label for="adresse">Adresse :</label>
+      <input id="adresse" formControlName="adresse" type="text" required>
+      <div *ngIf="inscriptionForm.get('adresse')?.invalid && inscriptionForm.get('adresse')?.touched">
+        <small class="error">L'adresse est requise.</small>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="ceinture">Ceinture :</label>
+      <input id="ceinture" formControlName="ceinture" type="text">
+    </div>
+    
+    <div class="form-group">
+      <label for="statutSante">Statut Santé :</label>
+      <input id="statutSante" formControlName="statutSante" type="text">
+    </div>
+    
+    <div class="form-group">
+      <label for="dateNaissance">Date de Naissance :</label>
+      <input id="dateNaissance" formControlName="dateNaissance" type="date">
+    </div>
     <div class="form-group">
       <label for="password">Mot de passe :</label>
       <input id="password" formControlName="password" type="password" required>

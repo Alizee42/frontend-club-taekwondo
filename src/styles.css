@@ -3,6 +3,7 @@
     --blue-hover: #283a5a;
     --blue-dark: #1B263B;
     --red-main: #E63946;
+    --red-hover: #b22e39;
     --accent-dark: #9e1b1b;
     --accent-hover: #e4b343;
     --text-main: #1e1e1e;
@@ -24,3 +25,32 @@ html, body {
   padding: 0;
   height: 100%;
 }
+
+
+/* Styles pour les statuts */
+.status-validé,
+.status-en-attente,
+.status-refusé {
+  display: inline-flex; /* Permet d'aligner l'icône et le texte */
+  align-items: center; /* Centre verticalement l'icône et le texte */
+  font-weight: bold;
+  font-size: 0.9rem; /* Ajuste la taille du texte */
+}
+
+.status-validé {
+  color: green; /* Couleur pour "validé" */
+}
+
+.status-en-attente {
+  color: orange; /* Couleur pour "en attente" */
+}
+
+.status-refusé {
+  color: red; /* Couleur pour "refusé" */
+}
+
+.status-icon {
+  margin-right: 0.5rem; /* Ajoute un espace entre l'icône et le texte */
+  font-size: 1.2rem; /* Ajuste la taille de l'icône */
+}
+

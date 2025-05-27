@@ -1,0 +1,27 @@
+<div class="paiements-container">
+  <h2>Gestion des paiements</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Membre</th>
+        <th>Montant</th>
+        <th>Date</th>
+        <th>Statut</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let paiement of paiements">
+        <td>{{ paiement.membre.nom }} {{ paiement.membre.prenom }}</td>
+        <td>{{ paiement.montant }} €</td>
+        <td>{{ paiement.datePaiement }}</td>
+        <td>{{ paiement.statut }}</td>
+        <td>
+          <button *ngIf="paiement.statut === 'en attente'" (click)="validerPaiement(paiement.id)">
+            Valider
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

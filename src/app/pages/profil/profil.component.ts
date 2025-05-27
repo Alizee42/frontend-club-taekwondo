@@ -3,13 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AdminHeaderComponent } from "../../admin/layout/admin-header/admin-header.component";
+import { MembreHeaderComponent } from "../../membre/layout/membre-header/membre-header.component";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-profil',
   templateUrl: './profil.component.html',
   styleUrls: ['./profil.component.css'],
   standalone: true,
-  imports: [FormsModule, CommonModule, AdminHeaderComponent]
+  imports: [FormsModule, CommonModule, AdminHeaderComponent, MembreHeaderComponent] // Supprimez Router des imports
 })
 export class ProfilComponent implements OnInit {
   user: any = {};
@@ -18,17 +20,35 @@ export class ProfilComponent implements OnInit {
   showPasswordModal = false; // Contrôle l'affichage de la modale
   passwordData = { newPassword: '', confirmPassword: '' }; // Données pour le mot de passe
   passwordError = ''; // Message d'erreur pour le mot de passe
+  role: string | null = null; // Stocke le rôle de l'utilisateur
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {} // Injectez Router ici
 
   ngOnInit(): void {
     const storedUser = localStorage.getItem('user');
+    this.role = localStorage.getItem('role'); // Récupère le rôle de l'utilisateur depuis le localStorage
+  
+    if (!this.role) {
+      console.error('Rôle non défini. Redirection vers la page de connexion.');
+      this.logout(); // Déconnecte l'utilisateur si le rôle est absent
+      return;
+    }
+  
     if (storedUser) {
       this.user = JSON.parse(storedUser); // Recharge les informations utilisateur depuis le localStorage
     } else {
       this.loadUserData(); // Charge les données depuis le backend si elles ne sont pas dans le localStorage
     }
   }
+
+  logout(): void {
+    localStorage.removeItem('token'); // Supprime le token
+    localStorage.removeItem('user'); // Supprime les informations utilisateur
+    localStorage.removeItem('role'); // Supprime le rôle
+    this.role = null; // Réinitialise le rôle
+    this.router.navigate(['/connexion']); // Redirige vers la page de connexion
+  }
+
   loadUserData(): void {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -119,6 +139,7 @@ export class ProfilComponent implements OnInit {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
   }
+
   toggleEdit(field: string): void {
     this.editMode[field] = !this.editMode[field];
   }

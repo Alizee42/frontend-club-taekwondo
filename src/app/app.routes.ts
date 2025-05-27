@@ -16,6 +16,10 @@ import { GestionAvisComponent } from './admin/gestion-avis/gestion-avis.componen
 import { GestionActualitesComponent } from './admin/gestion-actualites/gestion-actualites.component';
 import { ActualiteDetailComponent } from './pages/home/actualites/actualite-detail/actualite-detail.component';
 import { GestionGalerieComponent } from './admin/gestion-galerie/gestion-galerie.component';
+import { DocumentsComponent } from './membre/documents/documents.component';
+import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-documents.component';
+import { PaiementsComponent } from './membre/paiements/paiements.component'; // Importer le composant Paiement
+import { GestionPaiementsComponent } from './admin/gestion-paiements/gestion-paiements.component'; // Importer le composant Paiement
 
 export const routes: Routes = [
   // Routes publiques
@@ -41,7 +45,9 @@ export const routes: Routes = [
       { path: 'professeurs', component: GestionProfesseursComponent }, // Route pour la gestion des professeurs
       { path: 'avis', component: GestionAvisComponent },
       { path: 'actualites', component: GestionActualitesComponent },
-      { path: 'galerie', component: GestionGalerieComponent }
+      { path: 'galerie', component: GestionGalerieComponent },
+      { path: 'documents', component: GestionDocumentsComponent }, // Route pour la gestion des documents
+      { path: 'paiements', component: GestionPaiementsComponent }
     ]
   },
 
@@ -51,7 +57,9 @@ export const routes: Routes = [
     component: MembreLayoutComponent, // Utilise MembreLayout comme conteneur
     canActivate: [AuthGuard],
     children: [
-      { path: 'dashboard-membre', component: DashboardMembreComponent }
+      { path: 'dashboard-membre', component: DashboardMembreComponent },
+      { path: 'documents', component: DocumentsComponent }, // Route pour les documents
+      { path: 'paiements', component: PaiementsComponent }, // Nouvelle route pour les paiements
     ]
   },
 

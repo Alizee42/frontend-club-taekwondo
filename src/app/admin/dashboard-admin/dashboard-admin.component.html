@@ -1,5 +1,10 @@
 <div class="dashboard-container">
-  <h1>Tableau de bord - Administrateur</h1>
+  <div class="dashboard-header">
+    <h1>Tableau de bord</h1>
+    <p class="welcome-message" *ngIf="administrateurConnecte">
+      Bienvenue, <span class="highlight">{{ administrateurConnecte.prenom }} {{ administrateurConnecte.nom }}</span> !
+    </p>
+  </div>
   <p class="intro">Bienvenue sur l’espace de gestion du site Olympique Villeurbanne Taekwondo.</p>
 
   <div class="dashboard-grid">
@@ -35,7 +40,6 @@
       <p>Suivre les demandes et candidatures</p>
     </a>
 
-    <!-- Lien vers la gestion de la galerie -->
     <a (click)="navigateToGalerie()" class="dashboard-card">
       <div class="icon-container">
         <i class="fas fa-images"></i>
@@ -44,13 +48,28 @@
       <p>Ajouter photos et vidéos</p>
     </a>
 
-    <!-- Lien vers la gestion des actualités -->
     <a (click)="navigateToActualites()" class="dashboard-card">
       <div class="icon-container">
         <i class="fas fa-newspaper"></i>
       </div>
       <h3>Actualités</h3>
       <p>Gérer les articles et annonces</p>
+    </a>
+
+    <a (click)="navigateToDocument()" class="dashboard-card">
+      <div class="icon-container">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <h3>Documents</h3>
+      <p>Gérer les documents soumis par les membres</p>
+    </a>
+    
+    <a (click)="navigateToPaiement()" class="dashboard-card">
+      <div class="icon-container">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <h3>Paiement</h3>
+      <p>Gérer les paiments effuctuer par les membre pour les cotisation et le</p>
     </a>
   </div>
 </div>

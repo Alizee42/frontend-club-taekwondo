@@ -1,0 +1,56 @@
+<div class="paiement-page">
+  <header class="paiement-header">
+    <h1>Effectuez votre paiement</h1>
+    <p>Choisissez votre mode de paiement et suivez les étapes pour finaliser votre cotisation.</p>
+  </header>
+
+  <section class="paiement-options">
+    <h2>Options de paiement</h2>
+    <form class="paiement-form">
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="modePaiement" value="unique" [(ngModel)]="modePaiement" checked>
+          Paiement en une fois
+        </label>
+        <label>
+          <input type="radio" name="modePaiement" value="echeances" [(ngModel)]="modePaiement">
+          Paiement en plusieurs fois
+        </label>
+      </div>
+    </form>
+
+    <div *ngIf="modePaiement === 'echeances'" class="echeances-details">
+      <p>Le montant sera divisé en <strong>3 échéances</strong> de <strong>{{ (montant / 3).toFixed(2) }} €</strong>.</p>
+    </div>
+  </section>
+
+  <section class="paiement-stripe">
+    <h2>Informations de paiement</h2>
+    <div id="card-element" class="card-element"></div>
+    <button class="btn-payer" (click)="initierPaiement()">Payer maintenant</button>
+  </section>
+
+  <section class="historique-paiements">
+    <h2>Historique des paiements</h2>
+    <table class="paiements-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Montant</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let paiement of paiements">
+          <td>{{ paiement.datePaiement }}</td>
+          <td>{{ paiement.montant }} €</td>
+          <td>
+            <span [class]="'status-' + paiement.statut.toLowerCase()">
+              {{ paiement.statut }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>

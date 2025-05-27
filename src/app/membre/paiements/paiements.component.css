@@ -1,0 +1,200 @@
+.paiement-page {
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-main);
+  background-color: var(--background-light);
+  padding: 2rem;
+}
+
+.paiement-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.paiement-header h1 {
+  color: var(--blue-main);
+  font-size: 2.5rem;
+}
+
+.paiement-header p {
+  color: var(--blue-dark);
+  font-size: 1.2rem;
+}
+
+.paiement-options {
+  margin-bottom: 2rem;
+}
+
+.paiement-options h2 {
+  color: var(--blue-main);
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.radio-group {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.radio-group label {
+  font-size: 1.2rem;
+  color: var(--blue-dark);
+  cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+  margin-right: 0.5rem;
+}
+
+.echeances-details {
+  text-align: center;
+  color: var(--blue-hover);
+  font-size: 1.1rem;
+  margin-top: 1rem;
+}
+
+.paiement-stripe {
+  margin-bottom: 2rem;
+}
+
+.paiement-stripe h2 {
+  color: var(--blue-main);
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.card-element {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--blue-main);
+  border-radius: 8px;
+  background-color: var(--card-bg);
+  transition: border-color 0.3s ease;
+}
+
+.card-element:focus-within {
+  border-color: var(--blue-hover);
+}
+
+.btn-payer {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-payer:hover {
+  background-color: var(--blue-hover);
+  transform: translateY(-2px);
+}
+
+.historique-paiements {
+  margin-top: 2rem;
+}
+
+.historique-paiements h2 {
+  color: var(--blue-main);
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.paiements-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.paiements-table th,
+.paiements-table td {
+  border: 1px solid var(--blue-dark);
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.paiements-table th {
+  background-color: var(--blue-main);
+  color: white;
+}
+
+.paiements-table tr:nth-child(even) {
+  background-color: var(--card-bg);
+}
+
+.paiements-table tr:hover {
+  background-color: var(--accent-hover);
+}
+.paiement-card {
+  border: 1px solid var(--blue-main);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem;
+  text-align: center;
+  background-color: var(--background-light);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.paiement-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-option {
+  background-color: var(--blue-main);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-option:hover {
+  background-color: var(--blue-hover);
+}
+
+/* Amélioration des options de paiement */
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border: 1px solid var(--blue-main);
+  border-radius: 8px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.radio-group label:hover {
+  background-color: var(--blue-light);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.radio-group input[type="radio"] {
+  accent-color: var(--blue-main);
+}
+
+/* Bouton de paiement */
+.btn-payer {
+  background: linear-gradient(90deg, var(--blue-main), var(--blue-hover));
+  font-size: 1.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-payer:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}

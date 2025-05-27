@@ -1,1 +1,47 @@
-<p>dashboard-membre works!</p>
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Tableau de bord</h1>
+    <p class="welcome-message" *ngIf="utilisateurConnecte">
+      Bienvenue, <span class="highlight">{{ utilisateurConnecte.prenom }} {{ utilisateurConnecte.nom }}</span> !
+    </p>
+  </div>
+  <p class="intro">Accédez rapidement à vos sections principales ci-dessous.</p>
+
+  <div class="dashboard-grid">
+    <!-- Section Documents -->
+    <a (click)="navigateToDocuments()" class="dashboard-card">
+      <div class="icon-container">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <h3>Documents</h3>
+      <p>Ajouter ou consulter vos documents (certificat médical, etc.).</p>
+    </a>
+
+    <!-- Section Paiements -->
+    <a (click)="navigateToPaiements()" class="dashboard-card">
+      <div class="icon-container">
+        <i class="fas fa-credit-card"></i>
+      </div>
+      <h3>Paiements</h3>
+      <p>Gérer vos paiements et consulter l'historique.</p>
+    </a>
+
+    <!-- Section Store -->
+    <a (click)="navigateToStore()" class="dashboard-card">
+      <div class="icon-container">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <h3>Boutique</h3>
+      <p>Acheter des tenues et accessoires.</p>
+    </a>
+
+    <!-- Section Suivi personnel -->
+    <a (click)="navigateToSuivi()" class="dashboard-card">
+      <div class="icon-container">
+        <i class="fas fa-user"></i>
+      </div>
+      <h3>Suivi personnel</h3>
+      <p>Consulter vos informations personnelles et votre suivi.</p>
+    </a>
+  </div>
+</div>

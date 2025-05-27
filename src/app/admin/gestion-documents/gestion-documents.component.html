@@ -1,0 +1,66 @@
+<div class="gestion-documents-container">
+  <h1>Gestion des Documents</h1>
+  <p class="intro">Validez ou refusez les documents soumis par les membres.</p>
+
+  <div class="accordion">
+    <div class="accordion-item" *ngFor="let utilisateur of utilisateurs">
+      <!-- En-tête de l'utilisateur -->
+      <div class="accordion-header" (click)="toggleAccordion(utilisateur)">
+        <h3>{{ utilisateur.nom }} {{ utilisateur.prenom }}</h3>
+        <p>Email : {{ utilisateur.email }}</p>
+        <p>Téléphone : {{ utilisateur.telephone }}</p>
+        <button class="accordion-toggle">
+          {{ utilisateur.isOpen ? 'Réduire' : 'Afficher les documents' }}
+        </button>
+      </div>
+
+      <!-- Corps de l'accordion : Liste des documents -->
+      <div class="accordion-body" *ngIf="utilisateur.isOpen">
+        <table>
+          <thead>
+            <tr>
+              <th>Type de document</th>
+              <th>Nom du fichier</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let document of utilisateur.documents">
+              <td>{{ document.typeDocument }}</td>
+              <td>
+                <a [href]="document.cheminFichier" target="_blank">{{ document.nomDocument }}</a>
+              </td>
+              <td>{{ document.dateDepot | date }}</td>
+              <td>
+                <span [ngClass]="getStatusClass(document.status)">
+                  <i class="status-icon" [ngClass]="getStatusIcon(document.status)"></i>
+                  {{ getStatusText(document.status) }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-buttons">
+                  <button
+                    class="btn-validate"
+                    (click)="validerDocument(document)"
+                    [disabled]="document.status === 'validé' || document.status === 'refusé'"
+                  >
+                    Valider
+                  </button>
+                  <button
+                    class="btn-refuse"
+                    (click)="refuserDocument(document)"
+                    [disabled]="document.status === 'validé' || document.status === 'refusé'"
+                  >
+                    Refuser
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

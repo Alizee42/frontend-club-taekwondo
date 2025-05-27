@@ -72,7 +72,16 @@ export class HeaderComponent implements OnInit {
   }
 
   goToDashboard() {
-    this.router.navigate(['/admin/dashboard-admin']); // Redirige vers le tableau de bord admin
+    const role = localStorage.getItem('role')?.toLowerCase(); // Récupère le rôle et le convertit en minuscules
+    if (role === 'admin') {
+      this.router.navigate(['/admin/dashboard-admin']); // Redirige vers le tableau de bord admin
+    } else if (role === 'membre') {
+      this.router.navigate(['/membre/dashboard-membre']); // Redirige vers le tableau de bord membre
+    } else {
+      console.error('Rôle inconnu ou non défini.');
+      alert('Votre rôle est inconnu. Veuillez contacter l’administrateur.');
+      this.router.navigate(['/']); // Redirige vers la page d'accueil
+    }
   }
 
   logout() {
@@ -91,10 +100,15 @@ export class HeaderComponent implements OnInit {
     }
     return 'U';
   }
-
   checkLoginStatus() {
     const token = localStorage.getItem('token'); // Vérifie si un token est présent
     this.isLoggedIn = !!token; // Si un token existe, l'utilisateur est connecté
+    const role = localStorage.getItem('role'); // Récupère le rôle de l'utilisateur
+    if (role) {
+      console.log(`Utilisateur connecté avec le rôle : ${role}`);
+    } else {
+      console.warn('Rôle non défini pour l’utilisateur connecté.');
+    }
   }
 
   closeMenu() {
