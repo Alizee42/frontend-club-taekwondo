@@ -1,25 +1,114 @@
-<div class="paiements-container">
-  <h2>Gestion des paiements</h2>
-  <table>
+<div class="admin-paiements-container">
+  <h1 class="page-title">Gestion des paiements</h1>
+  <p class="description">
+    Retrouvez ici tous les paiements effectués par les membres. Cliquez sur un utilisateur pour voir les détails de ses paiements.
+  </p>
+
+  <!-- Tableau principal -->
+  <table class="paiements-table">
     <thead>
       <tr>
         <th>Membre</th>
-        <th>Montant</th>
-        <th>Date</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let utilisateur of utilisateursRegroupes; let i = index">
+        <!-- Ligne utilisateur -->
+        <tr (click)="toggleDetails(i)" class="utilisateur-row">
+          <td><strong>{{ utilisateur.nom }}</strong></td>
+          <td>{{ utilisateur.email }}</td>
+          <td>{{ utilisateur.telephone }}</td>
+          <td>
+            <button class="btn-toggle-details">
+              <i class="fas fa-chevron-down"></i>
+              {{ utilisateur.showDetails ? 'Masquer' : 'Afficher' }} les paiements
+            </button>
+          </td>
+        </tr>
+        <!-- Détails des paiements sous forme de cartes en grille -->
+        <tr *ngIf="utilisateur.showDetails" class="details-row">
+          <td colspan="4">
+            <div class="details-container">
+              <h3>Détails des paiements</h3>
+              <div class="paiements-grid">
+                <div class="paiement-card" *ngFor="let paiement of utilisateur.paiements">
+                  <p><strong>Montant :</strong> {{ paiement.montant }} €</p>
+                  <p><strong>Date :</strong> {{ paiement.datePaiement }}</p>
+                  <p><strong>Statut :</strong> 
+                    <span [class]="'status-' + paiement.statut.toLowerCase()">
+                      {{ paiement.statut }}
+                    </span>
+                  </p>
+                  <p><strong>Mode :</strong> {{ paiement.modePaiement }}</p>
+                  <div class="actions">
+                    <button *ngIf="paiement.statut === 'en attente'" class="btn-valider" (click)="validerPaiement(paiement.id)">
+                      <i class="fas fa-check"></i> Valider
+                    </button>
+                    <button *ngIf="paiement.statut !== 'annulé'" class="btn-annuler" (click)="annulerPaiement(paiement.id)">
+                      <i class="fas fa-times"></i> Annuler
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>
+
+
+
+<div class="admin-dashboard">
+  <h1>Tableau de bord des paiements</h1>
+  <div class="filters">
+    <label for="statut">Statut :</label>
+    <select id="statut" [(ngModel)]="filtreStatut">
+      <option value="">Tous</option>
+      <option value="payé">Payé</option>
+      <option value="en attente">En attente</option>
+      <option value="annulé">Annulé</option>
+    </select>
+
+    <label for="utilisateur">Utilisateur :</label>
+    <input id="utilisateur" type="text" [(ngModel)]="filtreUtilisateur" placeholder="Nom du membre">
+
+    <label for="modePaiement">Mode de paiement :</label>
+    <select id="modePaiement" [(ngModel)]="filtreModePaiement">
+      <option value="">Tous</option>
+      <option value="Carte">Carte</option>
+      <option value="Espèces">Espèces</option>
+      <option value="Virement">Virement</option>
+    </select>
+
+    <button (click)="appliquerFiltres()">Appliquer</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Montant Total</th>
+        <th>Montant Restant</th>
         <th>Statut</th>
-        <th>Action</th>
+        <th>Mode Paiement</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let paiement of paiements">
-        <td>{{ paiement.membre.nom }} {{ paiement.membre.prenom }}</td>
-        <td>{{ paiement.montant }} €</td>
-        <td>{{ paiement.datePaiement }}</td>
+        <td>{{ paiement.utilisateur.nom }}</td>
+        <td>{{ paiement.montantTotal }} €</td>
+        <td>{{ paiement.montantRestant }} €</td>
         <td>{{ paiement.statut }}</td>
+        <td>{{ paiement.modePaiement }}</td>
         <td>
-          <button *ngIf="paiement.statut === 'en attente'" (click)="validerPaiement(paiement.id)">
-            Valider
-          </button>
+          <button *ngIf="paiement.statut === 'en attente'" (click)="validerPaiement(paiement.id)">Valider</button>
+          <button *ngIf="paiement.statut !== 'annulé'" (click)="annulerPaiement(paiement.id)">Annuler</button>
         </td>
       </tr>
     </tbody>

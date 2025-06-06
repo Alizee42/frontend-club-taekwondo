@@ -1,200 +1,360 @@
+/* Reset léger */
+* {
+  box-sizing: border-box;
+}
+
 .paiement-page {
-  font-family: 'Roboto', sans-serif;
-  color: var(--text-main);
-  background-color: var(--background-light);
-  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  color: #0d1a4a; /* bleu foncé */
+  padding: 30px;
+  background: #f9fbff;
+  min-height: 100vh;
 }
 
-.paiement-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
+/* Header de la page */
 .paiement-header h1 {
-  color: var(--blue-main);
-  font-size: 2.5rem;
+  font-weight: 700;
+  font-size: 2.2rem;
+  margin-bottom: 5px;
 }
 
 .paiement-header p {
-  color: var(--blue-dark);
-  font-size: 1.2rem;
+  font-weight: 400;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 30px;
 }
 
-.paiement-options {
-  margin-bottom: 2rem;
-}
-
-.paiement-options h2 {
-  color: var(--blue-main);
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-}
-
-.radio-group {
+/* Conteneur principal */
+.paiement-container {
   display: flex;
-  justify-content: center;
-  gap: 2rem;
+  gap: 40px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Wizard + formulaire */
+.paiement-wizard {
+  flex: 1;
+  background: white;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(13, 26, 74, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Barre de progression */
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.progress-bar div {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  color: #0d1a4a99;
+  border-bottom: 3px solid #0d1a4a33;
+  transition: all 0.3s ease;
+}
+
+.progress-bar div.active {
+  color: #0d1a4a;
+  border-bottom: 3px solid #d63333; /* rouge */
+  font-weight: 700;
+}
+
+/* Étapes */
+.step h2 {
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #0d1a4a;
+}
+
+/* Formulaire de paiement */
+.paiement-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .radio-group label {
-  font-size: 1.2rem;
-  color: var(--blue-dark);
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
   cursor: pointer;
+  color: #0d1a4add;
 }
 
 .radio-group input[type="radio"] {
-  margin-right: 0.5rem;
+  margin-right: 10px;
+  cursor: pointer;
 }
 
-.echeances-details {
-  text-align: center;
-  color: var(--blue-hover);
-  font-size: 1.1rem;
-  margin-top: 1rem;
+.echeances-details p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #0d1a4acc;
 }
 
-.paiement-stripe {
-  margin-bottom: 2rem;
-}
-
-.paiement-stripe h2 {
-  color: var(--blue-main);
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-}
-
+/* Card Element Stripe */
 .card-element {
-  margin: 1rem 0;
-  padding: 1rem;
-  border: 1px solid var(--blue-main);
+  padding: 14px 12px;
+  border: 1.8px solid #0d1a4a66;
   border-radius: 8px;
-  background-color: var(--card-bg);
+  background: #fefefe;
+  box-shadow: inset 0 1px 3px rgba(13, 26, 74, 0.1);
+  margin-bottom: 25px;
+  min-height: 44px;
   transition: border-color 0.3s ease;
 }
 
-.card-element:focus-within {
-  border-color: var(--blue-hover);
+.card-element.StripeElement--focus {
+  border-color: #d63333; /* rouge accent */
+  box-shadow: 0 0 8px #d6333355;
+}
+
+.card-element.StripeElement--invalid {
+  border-color: #e55353;
+  box-shadow: 0 0 6px #e5535355;
+}
+
+/* Boutons */
+.btn-next,
+.btn-prev,
+.btn-payer,
+.btn-new-payment {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  padding: 12px 22px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.btn-next {
+  background-color: #0d1a4a;
+  color: white;
+  align-self: flex-start;
+}
+
+.btn-next:hover {
+  background-color: #142e8d;
+}
+
+.btn-prev,
+.btn-payer {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  padding: 12px 22px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-prev:hover {
+  background-color: #b02a2a;
 }
 
 .btn-payer {
-  display: block;
-  width: 100%;
-  padding: 0.75rem;
-  background-color: var(--blue-main);
+  background-color: #0d1a4a;
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  text-align: center;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .btn-payer:hover {
-  background-color: var(--blue-hover);
-  transform: translateY(-2px);
+  background-color: #142e8d;
 }
-
-.historique-paiements {
-  margin-top: 2rem;
-}
-
-.historique-paiements h2 {
-  color: var(--blue-main);
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-}
-
-.paiements-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  font-size: 1rem;
-}
-
-.paiements-table th,
-.paiements-table td {
-  border: 1px solid var(--blue-dark);
-  padding: 0.75rem;
-  text-align: center;
-}
-
-.paiements-table th {
-  background-color: var(--blue-main);
+.btn-prev {
+  background-color: #d63333;
   color: white;
 }
-
-.paiements-table tr:nth-child(even) {
-  background-color: var(--card-bg);
+.btn-prev:hover {
+  background-color: #b02a2a;
+}
+.btn-payer:hover {
+  background-color: #142e8d;
 }
 
-.paiements-table tr:hover {
-  background-color: var(--accent-hover);
+.btn-new-payment {
+  background-color: #28a745;
+  color: white;
+  margin-top: 20px;
 }
+
+.btn-new-payment:hover {
+  background-color: #218838;
+}
+
+/* Historique paiements en bas */
+.historique-paiements {
+  margin-top: 40px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(13, 26, 74, 0.15);
+}
+
+.historique-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0d1a4a;
+  margin-bottom: 20px;
+}
+
+.historique-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.paiements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
 .paiement-card {
-  border: 1px solid var(--blue-main);
+  background-color: #f9fbff;
   border-radius: 8px;
-  padding: 1.5rem;
-  margin: 1rem;
-  text-align: center;
-  background-color: var(--background-light);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(13, 26, 74, 0.15);
+  padding: 1rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .paiement-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(13, 26, 74, 0.2);
 }
 
-.btn-option {
-  background-color: var(--blue-main);
+.paiement-card p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.btn-payer-echeance {
+  background-color: var(--blue-main); /* Couleur principale du site */
   color: white;
-  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
   transition: background-color 0.3s ease;
 }
-
-.btn-option:hover {
-  background-color: var(--blue-hover);
+.actions {
+  display: flex;
+  justify-content: center; /* Centre le bouton horizontalement */
+  margin-top: 1rem;
+}
+.actions-right {
+  display: flex;
+  justify-content: flex-end; /* Aligne les boutons à droite */
+  gap: 1rem; /* Ajoute un espace entre les boutons */
+}
+.btn-payer-echeance:hover {
+  background-color: #0b5ed7;
+}
+/* Styles pour la modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* S'assurer que la modal est au-dessus de tout */
 }
 
-/* Amélioration des options de paiement */
-.radio-group label {
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 600px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: left; /* Alignement à gauche pour une meilleure lisibilité */
+}
+
+.modal-content h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.modal-content p {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+.modal-content label {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.modal-content select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.status-payé {
+  color: #28a745; /* Vert */
+}
+
+.status-en-attente {
+  color: #ffc107; /* Jaune */
+}
+
+.status-annulé {
+  color: #dc3545; /* Rouge */
+}
+/* Icônes et visuel clair */
+.progress-bar div {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border: 1px solid var(--blue-main);
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Box radio améliorée */
+.option-box {
+  border: 1px solid #ccc;
   border-radius: 8px;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #f7f9fd;
+  transition: border 0.3s ease;
+}
+.option-box.selected {
+  border: 2px solid #0d1a4a;
+  background: #eef2fb;
+}
+.option-box:hover {
+  border-color: #d63333;
 }
 
-.radio-group label:hover {
-  background-color: var(--blue-light);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Label sécurisé */
+.securite-msg {
+  font-size: 0.9rem;
+  color: #198754;
+  margin: 10px 0;
 }
 
-.radio-group input[type="radio"] {
-  accent-color: var(--blue-main);
-}
-
-/* Bouton de paiement */
-.btn-payer {
-  background: linear-gradient(90deg, var(--blue-main), var(--blue-hover));
-  font-size: 1.5rem;
-  padding: 1rem;
-  border-radius: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn-payer:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+/* Logo */
+.logo {
+  max-height: 60px;
+  margin-bottom: 20px;
 }

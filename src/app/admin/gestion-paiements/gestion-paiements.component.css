@@ -1,32 +1,170 @@
-.paiements-container {
-    padding: 2rem;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-  }
-  
-  table th, table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  table th {
-    background-color: #f4f4f4;
-  }
-  
-  button {
-    padding: 0.5rem 1rem;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #45a049;
-  }
+/* Conteneur principal */
+.admin-paiements-container {
+  padding: 2rem;
+  font-family: 'Arial', sans-serif;
+  background-color: var(--background-light);
+}
+
+/* Titre de la page */
+.page-title {
+  font-size: 2rem;
+  color: var(--blue-main);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Description */
+.description {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: var(--text-main);
+  text-align: center;
+}
+
+/* Tableau principal */
+.paiements-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.paiements-table th, .paiements-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.paiements-table th {
+  background-color: var(--blue-dark);
+  color: white;
+}
+
+/* Ligne utilisateur */
+.utilisateur-row {
+  cursor: pointer;
+  background-color: var(--card-bg);
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.utilisateur-row:hover {
+  background-color: var(--blue-hover);
+  color: white;
+}
+
+/* Ligne des détails */
+.details-row {
+  background-color: var(--background-light);
+}
+
+/* Conteneur des détails */
+.details-container {
+  padding: 1rem;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.paiements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.paiement-card {
+  background-color: var(--background-light);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.paiement-card:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-hover);
+}
+
+.paiement-card p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.status-payé {
+  color: var(--green-main);
+}
+
+.status-en-attente {
+  color: var(--orange-main);
+}
+
+.status-annulé {
+  color: var(--red-main);
+}
+
+/* Actions des paiements */
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.actions .btn-valider {
+  background-color: var(--blue-main);
+  color: white;
+}
+
+.actions .btn-valider:hover {
+  background-color: var(--blue-hover);
+}
+
+.actions .btn-annuler {
+  background-color: var(--red-main);
+  color: white;
+}
+
+.actions .btn-annuler:hover {
+  background-color: var(--red-hover);
+}
+
+/* Bouton pour afficher/masquer les détails */
+.btn-toggle-details {
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-toggle-details:hover {
+  background-color: var(--blue-hover);
+}
+
+/* Statuts des paiements */
+.status-payé {
+  color: var(--green-main);
+}
+
+.status-en-attente {
+  color: var(--orange-main);
+}
+
+.status-annulé {
+  color: var(--red-main);
+}
