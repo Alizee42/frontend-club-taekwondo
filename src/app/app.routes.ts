@@ -18,7 +18,7 @@ import { ActualiteDetailComponent } from './pages/home/actualites/actualite-deta
 import { GestionGalerieComponent } from './admin/gestion-galerie/gestion-galerie.component';
 import { DocumentsComponent } from './membre/documents/documents.component';
 import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-documents.component';
-import { PaiementsComponent } from './membre/paiements/paiements.component'; // Importer le composant Paiement
+import { PaiementComponent } from './membre/paiement/paiement.component'; 
 import { GestionPaiementsComponent } from './admin/gestion-paiements/gestion-paiements.component'; // Importer le composant Paiement
 
 export const routes: Routes = [
@@ -59,7 +59,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard-membre', component: DashboardMembreComponent },
       { path: 'documents', component: DocumentsComponent }, // Route pour les documents
-      { path: 'paiements', component: PaiementsComponent }, // Nouvelle route pour les paiements
+      { path: 'paiements', component: PaiementComponent }, // Nouvelle route pour les paiements
     ]
   },
 

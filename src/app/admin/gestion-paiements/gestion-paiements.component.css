@@ -1,170 +1,196 @@
-/* Conteneur principal */
-.admin-paiements-container {
-  padding: 2rem;
-  font-family: 'Arial', sans-serif;
-  background-color: var(--background-light);
+
+
+/* Structure principale */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--background);
+  font-family: 'Poppins', sans-serif;
 }
 
-/* Titre de la page */
-.page-title {
-  font-size: 2rem;
-  color: var(--blue-main);
-  margin-bottom: 1rem;
-  text-align: center;
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background-color: var(--blue-dark); /* Utilisation de la variable globale */
+  color: var(--background-light); /* Texte blanc */
+  padding: 2rem 1rem;
+  box-shadow: var(--shadow); /* Ombre */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Description */
-.description {
-  font-size: 1.2rem;
+.sidebar h2 {
+  font-size: 1.6rem;
   margin-bottom: 2rem;
-  color: var(--text-main);
-  text-align: center;
+  color: var(--white);
 }
 
-/* Tableau principal */
-.paiements-table {
+.sidebar h3 {
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 0.25rem;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.menu li {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu li:hover,
+.menu li.active {
+  background-color: var(--secondary-blue);
+}
+
+.sidebar input,
+.sidebar select,
+.sidebar button {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.6rem;
+  border-radius: var(--radius);
+  border: none;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.sidebar input,
+.sidebar select {
+  background-color: var(--white);
+  color: var(--text-dark);
+}
+
+.sidebar button {
+  background-color: var(--secondary-blue);
+  color: var(--white);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sidebar button:hover {
+  background-color: var(--main-blue);
+}
+
+/* Contenu principal */
+.content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* KPI section */
+.kpi {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: var(--white);
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--text-dark);
+}
+
+.kpi-card h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-light);
+}
+
+.kpi-card p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0.25rem 0 0;
+}
+
+/* Tableau section */
+.table-section {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.table-section h2 {
+  margin-bottom: 1rem;
+}
+
+table {
   width: 100%;
   border-collapse: collapse;
-  background-color: var(--card-bg);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
+  background-color: var(--white);
 }
 
-.paiements-table th, .paiements-table td {
-  border: 1px solid #ddd;
-  padding: 12px;
+thead {
+  background-color: var(--main-blue);
+  color: var(--white);
+}
+
+th,
+td {
+  padding: 0.75rem;
   text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 0.95rem;
 }
 
-.paiements-table th {
-  background-color: var(--blue-dark);
-  color: white;
+tbody tr:nth-child(even) {
+  background-color: var(--background);
 }
 
-/* Ligne utilisateur */
-.utilisateur-row {
-  cursor: pointer;
-  background-color: var(--card-bg);
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+tbody tr:hover {
+  background-color: var(--secondary-blue);
+  color: var(--white);
 }
 
-.utilisateur-row:hover {
-  background-color: var(--blue-hover);
-  color: white;
-}
-
-/* Ligne des détails */
-.details-row {
-  background-color: var(--background-light);
-}
-
-/* Conteneur des détails */
-.details-container {
-  padding: 1rem;
-  background-color: var(--card-bg);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-}
-
-.paiements-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.paiement-card {
-  background-color: var(--background-light);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.paiement-card:hover {
-  transform: scale(1.02);
-  box-shadow: var(--shadow-hover);
-}
-
-.paiement-card p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-.status-payé {
-  color: var(--green-main);
+/* Statuts */
+.status-validé {
+  color: var(--accent-green);
 }
 
 .status-en-attente {
-  color: var(--orange-main);
+  color: var(--accent-orange);
 }
 
 .status-annulé {
-  color: var(--red-main);
+  color: var(--accent-red);
 }
 
-/* Actions des paiements */
-.actions {
-  margin-top: 1rem;
-  display: flex;
-  gap: 1rem;
+.status-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
 }
 
-.actions button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background-color 0.3s ease;
-}
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-container {
+    flex-direction: column;
+  }
 
-.actions .btn-valider {
-  background-color: var(--blue-main);
-  color: white;
-}
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 1rem;
+  }
 
-.actions .btn-valider:hover {
-  background-color: var(--blue-hover);
-}
-
-.actions .btn-annuler {
-  background-color: var(--red-main);
-  color: white;
-}
-
-.actions .btn-annuler:hover {
-  background-color: var(--red-hover);
-}
-
-/* Bouton pour afficher/masquer les détails */
-.btn-toggle-details {
-  background-color: var(--blue-main);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-toggle-details:hover {
-  background-color: var(--blue-hover);
-}
-
-/* Statuts des paiements */
-.status-payé {
-  color: var(--green-main);
-}
-
-.status-en-attente {
-  color: var(--orange-main);
-}
-
-.status-annulé {
-  color: var(--red-main);
+  .content {
+    padding: 1rem;
+  }
 }

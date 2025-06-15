@@ -1,116 +1,113 @@
-<div class="admin-paiements-container">
-  <h1 class="page-title">Gestion des paiements</h1>
-  <p class="description">
-    Retrouvez ici tous les paiements effectués par les membres. Cliquez sur un utilisateur pour voir les détails de ses paiements.
-  </p>
+<div class="admin-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2>Menu Paiements</h2>
 
-  <!-- Tableau principal -->
-  <table class="paiements-table">
-    <thead>
-      <tr>
-        <th>Membre</th>
-        <th>Email</th>
-        <th>Téléphone</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <ng-container *ngFor="let utilisateur of utilisateursRegroupes; let i = index">
-        <!-- Ligne utilisateur -->
-        <tr (click)="toggleDetails(i)" class="utilisateur-row">
-          <td><strong>{{ utilisateur.nom }}</strong></td>
-          <td>{{ utilisateur.email }}</td>
-          <td>{{ utilisateur.telephone }}</td>
-          <td>
-            <button class="btn-toggle-details">
-              <i class="fas fa-chevron-down"></i>
-              {{ utilisateur.showDetails ? 'Masquer' : 'Afficher' }} les paiements
-            </button>
-          </td>
-        </tr>
-        <!-- Détails des paiements sous forme de cartes en grille -->
-        <tr *ngIf="utilisateur.showDetails" class="details-row">
-          <td colspan="4">
-            <div class="details-container">
-              <h3>Détails des paiements</h3>
-              <div class="paiements-grid">
-                <div class="paiement-card" *ngFor="let paiement of utilisateur.paiements">
-                  <p><strong>Montant :</strong> {{ paiement.montant }} €</p>
-                  <p><strong>Date :</strong> {{ paiement.datePaiement }}</p>
-                  <p><strong>Statut :</strong> 
-                    <span [class]="'status-' + paiement.statut.toLowerCase()">
-                      {{ paiement.statut }}
-                    </span>
-                  </p>
-                  <p><strong>Mode :</strong> {{ paiement.modePaiement }}</p>
-                  <div class="actions">
-                    <button *ngIf="paiement.statut === 'en attente'" class="btn-valider" (click)="validerPaiement(paiement.id)">
-                      <i class="fas fa-check"></i> Valider
-                    </button>
-                    <button *ngIf="paiement.statut !== 'annulé'" class="btn-annuler" (click)="annulerPaiement(paiement.id)">
-                      <i class="fas fa-times"></i> Annuler
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-      </ng-container>
-    </tbody>
-  </table>
-</div>
+    <nav>
+      <!-- Vues disponibles -->
+      <h3>Vues</h3>
+      <ul class="menu">
+        <li (click)="changerVue('tableau')" [class.active]="vueActive === 'tableau'">📋 Tableau des utilisateurs</li>
+        <li (click)="changerVue('kpi')" [class.active]="vueActive === 'kpi'">📊 Statistiques</li>
+        <li (click)="changerVue('echeances')" [class.active]="vueActive === 'echeances'">📅 Échéances</li>
+      </ul>
 
+      <!-- Filtres -->
+      <h3>Filtres</h3>
+      <div class="filters">
+        <input type="text" placeholder="🔍 Rechercher nom/email" [(ngModel)]="filtreRecherche">
+        <select [(ngModel)]="filtreStatut">
+          <option value="">Tous les statuts</option>
+          <option value="payé">Payé</option>
+          <option value="en attente">En attente</option>
+          <option value="annulé">Annulé</option>
+        </select>
+        <select [(ngModel)]="filtreMoyen">
+          <option value="">Tous moyens</option>
+          <option value="site">Site</option>
+          <option value="virement">Virement</option>
+          <option value="manuel">Manuel</option>
+          <option value="espèces">Espèces</option>
+        </select>
+        <button (click)="appliquerFiltres()">✅ Appliquer</button>
+      </div>
 
+      <!-- Actions -->
+      <h3>Actions</h3>
+      <div class="actions">
+        <button (click)="ouvrirModalPaiement()">➕ Ajouter un paiement</button>
+        <button (click)="exporterCSV()">📤 Exporter</button>
+        <button (click)="envoyerRappels()">🔔 Rappels</button>
+      </div>
+    </nav>
+  </aside>
 
-<div class="admin-dashboard">
-  <h1>Tableau de bord des paiements</h1>
-  <div class="filters">
-    <label for="statut">Statut :</label>
-    <select id="statut" [(ngModel)]="filtreStatut">
-      <option value="">Tous</option>
-      <option value="payé">Payé</option>
-      <option value="en attente">En attente</option>
-      <option value="annulé">Annulé</option>
-    </select>
+  <!-- Contenu principal -->
+  <main class="content">
 
-    <label for="utilisateur">Utilisateur :</label>
-    <input id="utilisateur" type="text" [(ngModel)]="filtreUtilisateur" placeholder="Nom du membre">
+    <!-- Vue KPI -->
+    <section *ngIf="vueActive === 'kpi'" class="kpi-section">
+      <h2>Statistiques générales</h2>
+      <div class="kpi">
+        <div class="kpi-card" *ngFor="let k of kpiList">
+          <h4>{{ k.label }}</h4>
+          <p>{{ k.value }}</p>
+        </div>
+      </div>
+      <canvas id="paiementsChart" style="width:100%; max-width:800px;"></canvas>
+    </section>
 
-    <label for="modePaiement">Mode de paiement :</label>
-    <select id="modePaiement" [(ngModel)]="filtreModePaiement">
-      <option value="">Tous</option>
-      <option value="Carte">Carte</option>
-      <option value="Espèces">Espèces</option>
-      <option value="Virement">Virement</option>
-    </select>
+    <!-- Vue tableau utilisateurs -->
+    <section *ngIf="vueActive === 'tableau'" class="table-section">
+      <h2>Tableau des paiements par utilisateur</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Montant payé</th>
+            <th>Restant</th>
+            <th>Statut</th>
+            <th>Moyen</th>
+            <th>Dernier paiement</th>
+            <th>Échéances</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of utilisateursFiltres; else aucunUtilisateur">
+            <td>{{ u.nom }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.montantPaye }}€</td>
+            <td>{{ u.montantRestant }}€</td>
+            <td>{{ u.statut }}</td>
+            <td>{{ u.moyenPaiement }}</td>
+            <td>{{ u.dernierPaiement }}</td>
+            <td>{{ u.echeancesText }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #aucunUtilisateur>
+        <p>Aucun utilisateur trouvé.</p>
+      </ng-template>
+    </section>
 
-    <button (click)="appliquerFiltres()">Appliquer</button>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Nom</th>
-        <th>Montant Total</th>
-        <th>Montant Restant</th>
-        <th>Statut</th>
-        <th>Mode Paiement</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let paiement of paiements">
-        <td>{{ paiement.utilisateur.nom }}</td>
-        <td>{{ paiement.montantTotal }} €</td>
-        <td>{{ paiement.montantRestant }} €</td>
-        <td>{{ paiement.statut }}</td>
-        <td>{{ paiement.modePaiement }}</td>
-        <td>
-          <button *ngIf="paiement.statut === 'en attente'" (click)="validerPaiement(paiement.id)">Valider</button>
-          <button *ngIf="paiement.statut !== 'annulé'" (click)="annulerPaiement(paiement.id)">Annuler</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- Vue échéances -->
+    <section *ngIf="vueActive === 'echeances'" class="echeances-section">
+      <h2>Échéances par utilisateur</h2>
+      <ul>
+        <li *ngFor="let paiement of paiements; else aucuneEcheance">
+          <strong>{{ paiement.nom }}</strong> :
+          <ul *ngIf="paiement.echeances?.length; else aucune">
+            <li *ngFor="let echeance of paiement.echeances">
+              {{ echeance.dateEcheance | date: 'dd/MM/yyyy' }} - {{ echeance.statut }}
+            </li>
+          </ul>
+          <ng-template #aucune><em>Aucune échéance</em></ng-template>
+        </li>
+      </ul>
+      <ng-template #aucuneEcheance>
+        <p>Aucune échéance trouvée.</p>
+      </ng-template>
+    </section>
+  </main>
 </div>

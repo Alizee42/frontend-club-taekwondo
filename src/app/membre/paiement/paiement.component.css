@@ -1,0 +1,462 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: var(--background-light);
+  color: var(--text-main);
+}
+
+.paiement-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.paiement-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--blue-dark);
+  margin-bottom: 10px;
+}
+.paiement-header p {
+  font-size: 1rem;
+  color: #555;
+}
+.paiement-container {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 25px;
+  margin-bottom: 30px;
+}
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.progress-bar div {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  color: #0d1a4a99;
+  border-bottom: 3px solid #0d1a4a33;
+  font-weight: 600;
+}
+.progress-bar div.active {
+  color: var(--blue-main);
+  border-bottom: 3px solid var(--red-main);
+  font-weight: 700;
+}
+.step h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: var(--blue-dark);
+}
+.choix-cartes {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.carte-option {
+  flex: 1 1 45%;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  background: #f7f9fd;
+  cursor: pointer;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+.carte-option.active {
+  border-color: var(--blue-main);
+  box-shadow: var(--shadow);
+}
+.carte-option h3 {
+  margin: 0 0 5px;
+  color: var(--blue-dark);
+}
+.carte-option p {
+  font-size: 0.9rem;
+  color: #555;
+}
+.echeance-select {
+  margin-top: 15px; /* Ajoute un espacement au-dessus de la section */
+  padding: 10px; /* Ajoute un espace interne autour des éléments */
+  background-color: #ffffff; /* Couleur de fond pour mieux délimiter */
+  border-radius: 8px; /* Arrondit les coins */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Ajoute une ombre légère */
+}
+
+.echeance-select label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 10px; /* Augmente l'espace sous le label */
+}
+
+.echeance-select select {
+  width: 100%; /* Prend toute la largeur disponible */
+  padding: 12px; /* Augmente l'espace interne */
+  border-radius: 6px; /* Arrondit les coins */
+  border: 1px solid #ccc; /* Bordure légère */
+  font-size: 1rem; /* Augmente la taille du texte */
+  background-color: #f7f9fd; /* Couleur de fond */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ajoute une ombre légère */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 15px; /* Ajoute un espace sous le champ select */
+}
+
+.echeance-select select:focus {
+  border-color: var(--blue-main); /* Change la couleur de la bordure au focus */
+  box-shadow: 0 0 6px rgba(30, 96, 145, 0.5); /* Ajoute une ombre au focus */
+}
+
+.echeance-select p {
+  margin-top: 10px; /* Ajoute un espace au-dessus du texte */
+  font-size: 0.9rem;
+  color: #444;
+}
+
+/* Supprime les bordures par défaut */
+button {
+  border: none; /* Supprime la bordure */
+  outline: none; /* Supprime le contour au focus */
+}
+
+
+.btn-next,
+.btn-new-payment,
+.btn-payer-echeance {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  padding: 10px 20px;
+  transition: background 0.3s;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.btn-next {
+  background: var(--blue-main);
+  margin-left: auto; 
+  display: block; 
+  margin-top: 2%;
+}
+.btn-next:hover {
+  background: var(--blue-hover);
+}
+
+.btn-group {
+  display: flex; 
+  justify-content: flex-end;
+  gap: 20px; 
+  margin-top: 30px; 
+}
+
+.btn-payer {
+  background: var(--blue-main); 
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-payer:hover {
+  background: var(--blue-hover); 
+}
+
+.btn-prev {
+  background: var(--red-main); 
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-prev:hover {
+  background: var(--red-hover); /* Rouge plus foncé au survol */
+}
+.btn-payer-echeance {
+  background-color: var(--blue-main); /* Couleur principale */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-payer-echeance:hover {
+  background-color: var(--blue-hover);
+  transform: translateY(-2px);
+}
+
+.btn-payer-echeance:disabled {
+  background-color: #ccc; /* Couleur grise pour les boutons désactivés */
+  cursor: not-allowed;
+}
+.btn-new-payment {
+  background: #28a745;
+}
+.btn-new-payment:hover {
+  background: #218838;
+}
+.table-toggle {
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--blue-main);
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px; /* Espace entre le texte et l'icône */
+  margin-bottom: 10px;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+  margin-bottom: 2%;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.table-toggle:hover {
+  color: var(--blue-hover);
+}
+
+.table-toggle span {
+  font-size: 1rem;
+}
+.card-element {
+  padding: 12px;
+  border: 1.5px solid #0d1a4a66;
+  border-radius: 8px;
+  background: #fefefe;
+  box-shadow: inset 0 1px 3px rgba(13,26,74,0.1);
+  margin-bottom: 20px;
+  min-height: 44px;
+}
+.historique-section {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.historique-section h2 {
+  color: var(--blue-dark);
+  margin-bottom: 15px;
+}
+.historique-bloc h3 {
+  color: var(--blue-main);
+  margin-bottom: 10px;
+}
+.historique-table, .echeancier-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(13, 26, 74, 0.1);
+}
+
+.historique-table th, .echeancier-table th {
+  background-color: #0d1a4a;
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px;
+}
+
+.historique-table td, .echeancier-table td {
+  padding: 12px;
+  text-align: left;
+  color: #555;
+}
+
+.historique-table tr:nth-child(even), .echeancier-table tr:nth-child(even) {
+  background-color: #f9fbff;
+}
+
+.historique-table tr:hover, .echeancier-table tr:hover {
+  background-color: #e6f0ff;
+}
+
+.historique-table th:first-child, .echeancier-table th:first-child,
+.historique-table td:first-child, .echeancier-table td:first-child {
+  border-left: 4px solid #0d1a4a;
+}
+
+.historique-table th:last-child, .echeancier-table th:last-child,
+.historique-table td:last-child, .echeancier-table td:last-child {
+  border-right: 4px solid #0d1a4a;
+}
+.paiement-details-grid {
+  display: grid;
+  grid-template-columns: 1fr auto; /* Deux colonnes : montants à gauche, statut à droite */
+  gap: 20px; /* Espacement entre les colonnes */
+  align-items: center; /* Aligne les éléments verticalement */
+  margin-bottom: 2%;
+}
+
+.montants p {
+  margin: 0; /* Supprime les marges par défaut */
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.statut p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.statut span {
+  font-weight: bold;
+}
+.paiement-card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.paiement-card {
+  flex: 1 1 calc(50% - 20px); /* Deux cartes par ligne */
+  background: #f7f9fd;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.paiement-card p {
+  margin: 5px 0;
+}
+.paiement-card h4 {
+  color: var(--blue-dark);
+  margin: 8px 0;
+}
+.paiement-card .status-payé {
+  color: #28a745;
+  font-weight: 600;
+}
+.paiement-card .status-en-attente {
+  color: #ffc107;
+  font-weight: 600;
+}
+.paiement-card .status-annulé {
+  color: #dc3545;
+  font-weight: 600;
+}
+.status-payé {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-en-attente {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.status-annulé {
+  color: #dc3545;
+  font-weight: bold;
+}
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+}
+
+.badge-payé {
+  background-color: #28a745; /* Vert pour "payé" */
+}
+
+.badge-en-attente {
+  background-color: #ffc107; /* Jaune pour "en attente" */
+  color: #fff; /* Texte noir pour contraste */
+}
+
+.badge-annulé {
+  background-color: #dc3545; /* Rouge pour "annulé" */
+}
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--card-bg); /* Couleur de fond de la modale */
+  border-radius: 12px; /* Arrondit les coins */
+  padding: 40px; /* Augmente l'espace interne */
+  box-shadow: var(--shadow); /* Ajoute une ombre légère */
+  text-align: center; /* Centre le texte */
+  width: 600px; /* Augmente la largeur fixe de la modale */
+  max-width: 95%; /* S'adapte aux petits écrans */
+  max-height: 90%; /* Limite la hauteur pour éviter le débordement */
+  overflow-y: auto; /* Ajoute un défilement si le contenu dépasse */
+}
+
+.modal-content h3 {
+  color: var(--blue-main); /* Couleur du titre */
+  margin-bottom: 20px; /* Augmente l'espacement sous le titre */
+  font-size: 1.8rem; /* Augmente la taille du titre */
+}
+
+.modal-content p {
+  font-size: 1.2rem; /* Augmente la taille du texte */
+  margin-bottom: 25px; /* Augmente l'espacement sous le texte */
+}
+
+.modal-content .btn-group {
+  display: flex; /* Aligne les boutons horizontalement */
+  justify-content: space-between; /* Espacement entre les boutons */
+  gap: 15px; /* Ajoute un espace entre les boutons */
+}
+
+.modal-content button {
+  padding: 12px 24px; /* Augmente la taille des boutons */
+  border-radius: 8px; /* Arrondit les coins */
+  font-size: 1.1rem; /* Augmente la taille du texte des boutons */
+  cursor: pointer; /* Change le curseur au survol */
+  font-weight: 600; /* Texte en gras */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); /* Ajoute une ombre plus prononcée */
+  transition: background-color 0.3s ease; /* Transition fluide */
+}
+
+.modal-content .btn-blue {
+  background: var(--blue-main); /* Couleur principale */
+  color: white;
+}
+
+.modal-content .btn-blue:hover {
+  background: var(--blue-hover); /* Couleur au survol */
+}
+
+.modal-content .btn-red {
+  background: var(--red-main); /* Couleur principale */
+  color: white;
+}
+
+.modal-content .btn-red:hover {
+  background: var(--red-hover); /* Couleur au survol */
+}
