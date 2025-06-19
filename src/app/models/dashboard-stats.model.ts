@@ -1,18 +1,12 @@
-export interface DaySum {
-  day: string;
-  total: number;
-}
+import { DaySum } from "./day-sum";
+import { MembreRetard } from "./membre-retard";
 
-export interface MembreRetard {
-  nom: string;
-  montantRestant: number;
-}
 
 export interface DashboardStats {
   totalPayes: number;
-  totalAttente: number;
   totalAnnules: number;
+  totalAttente: number;
   pourcentagePayesMois: number;
-  courbe30J: DaySum[];
-  topRetards: MembreRetard[];
+  courbe: DaySum[]; // ✅ nécessaire pour le graphique
+  membresEnRetard: MembreRetard[]; // ✅ nécessaire pour la liste
 }

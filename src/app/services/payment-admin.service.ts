@@ -7,11 +7,11 @@ import { DashboardStats } from '../models/dashboard-stats.model';
   providedIn: 'root'
 })
 export class PaymentAdminService {
-  private url = 'http://localhost:8080/api/paiements'; // URL en dur
+  private apiUrl = '/api/paiements';
 
   constructor(private http: HttpClient) {}
 
-  getStats(): Observable<DashboardStats> {
-    return this.http.get<DashboardStats>(`${this.url}/stats`);
+  getDashboardStats(): Observable<DashboardStats> {
+    return this.http.get<DashboardStats>(`${this.apiUrl}/dashboard`);
   }
 }

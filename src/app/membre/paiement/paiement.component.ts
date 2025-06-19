@@ -31,6 +31,10 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   montantTotalAPayer: number = 0;
 
   enCoursDePaiement: boolean = false;
+  paiementReussi: boolean = false;
+  paiementErreur: boolean = false;
+  erreurMessage: string = '';
+
   step: number = 1;
   maxStep: number = 3;
 
@@ -82,6 +86,8 @@ export class PaiementComponent implements OnInit, AfterViewInit {
 
   loadPaiements(): void {
     const token = localStorage.getItem('token');
+    if (!token) return;
+
     this.http.get<any[]>('http://localhost:8080/api/paiements', {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
@@ -89,11 +95,12 @@ export class PaiementComponent implements OnInit, AfterViewInit {
         this.paiements = data.map(p => ({
           ...p,
           modePaiement: p.modePaiement === 'carte' ? 'unique' : p.modePaiement,
-          montantRestant: p.montant_restant ?? 0,
-          montantTotal: p.montant_total ?? 0,
           echeances: p.echeances || []
         }));
         this.mettreAJourFiltresPaiements();
+      },
+      error: (err) => {
+        console.error("❌ Erreur lors du chargement des paiements :", err);
       }
     });
   }
@@ -124,6 +131,12 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     const token = localStorage.getItem('token');
     const utilisateurId = Number(localStorage.getItem('utilisateurId'));
 
+    if (!token) {
+      this.erreurMessage = 'Utilisateur non authentifié';
+      this.paiementErreur = true;
+      return;
+    }
+
     const data = {
       amount: montant,
       currency: 'eur',
@@ -134,20 +147,29 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     };
 
     this.enCoursDePaiement = true;
+    this.paiementErreur = false;
+    this.paiementReussi = false;
 
     this.http.post('http://localhost:8080/api/paiements/create-payment-intent', data, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (res: any) => {
         const clientSecret = res?.clientSecret;
-        if (!clientSecret) return alert("Erreur : clientSecret non reçu.");
+        if (!clientSecret) {
+          this.erreurMessage = 'Erreur : clientSecret non reçu.';
+          this.paiementErreur = true;
+          this.enCoursDePaiement = false;
+          return;
+        }
         this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
           this.loadPaiements();
+          this.paiementReussi = true;
           this.enCoursDePaiement = false;
         });
       },
       error: () => {
-        alert('Erreur lors de la création du paiement.');
+        this.erreurMessage = 'Erreur lors de la création du paiement.';
+        this.paiementErreur = true;
         this.enCoursDePaiement = false;
       }
     });
@@ -159,7 +181,8 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     }).then((result: any) => {
       this.enCoursDePaiement = false;
       if (result.error) {
-        alert('Erreur : ' + result.error.message);
+        this.erreurMessage = result.error.message;
+        this.paiementErreur = true;
       } else {
         callback();
         this.step = 3;
@@ -204,6 +227,12 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     }
 
     const token = localStorage.getItem('token');
+    if (!token) {
+      this.erreurMessage = 'Authentification requise.';
+      this.paiementErreur = true;
+      return;
+    }
+
     this.enCoursDePaiement = true;
 
     this.http.post(`http://localhost:8080/api/echeances/${this.echeanceEnCours.id}/payer`, {}, {
@@ -213,29 +242,36 @@ export class PaiementComponent implements OnInit, AfterViewInit {
       next: () => {
         this.loadPaiements();
         this.fermerModalPaiement();
+        this.paiementReussi = true;
         this.enCoursDePaiement = false;
-        alert('Paiement reçu ! ✅');
       },
       error: () => {
-        alert('Erreur lors du paiement.');
+        this.erreurMessage = 'Erreur lors du paiement de l’échéance.';
+        this.paiementErreur = true;
         this.enCoursDePaiement = false;
       }
     });
   }
 
+   // ...existing code...
   genererEcheancier(paiement: any): { numero: number; date: Date; montant: number; statut: string; id: number }[] {
     if (!paiement?.echeances?.length) return [];
-  
     return paiement.echeances
       .map((e: any) => ({
-        numero: e.numero, // Utiliser le numéro existant renvoyé par le backend
+        numero: e.numero,
         date: new Date(e.dateEcheance),
         montant: e.montant,
         statut: e.statut,
         id: e.id
       }))
-      .sort((a: { date: Date }, b: { date: Date }) => a.date.getTime() - b.date.getTime());
+      .sort(
+        (
+          a: { numero: number; date: Date; montant: number; statut: string; id: number },
+          b: { numero: number; date: Date; montant: number; statut: string; id: number }
+        ) => a.date.getTime() - b.date.getTime()
+      );
   }
+  // ...existing code...
 
   toggleSection(section: string): void {
     this.sectionOuverte[section] = !this.sectionOuverte[section];
@@ -249,5 +285,11 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     return this.modePaiement === 'echeances' && this.nombreEcheances > 0
       ? this.montantInitial / this.nombreEcheances
       : 0;
+  }
+
+  fermerModale(): void {
+    this.paiementReussi = false;
+    this.paiementErreur = false;
+    this.erreurMessage = '';
   }
 }

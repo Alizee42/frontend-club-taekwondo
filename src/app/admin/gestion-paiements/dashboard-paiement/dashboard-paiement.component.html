@@ -1,0 +1,37 @@
+<h2>📊 Tableau de bord</h2>
+
+<section *ngIf="stats">
+  <div class="kpi-cards">
+    <div class="kpi">
+      <h4>Total encaissé</h4>
+      <span>{{ stats.totalPayes | currency:'EUR' }}</span>
+    </div>
+    <div class="kpi">
+      <h4>En attente</h4>
+      <span>{{ stats.totalAttente | currency:'EUR' }}</span>
+    </div>
+    <div class="kpi">
+      <h4>Annulés</h4>
+      <span>{{ stats.totalAnnules | currency:'EUR' }}</span>
+    </div>
+    <div class="kpi">
+      <h4>% payés</h4>
+      <span>{{ stats.pourcentagePayesMois | number:'1.0-2' }}%</span>
+    </div>
+  </div>
+
+  <!-- 📈 Courbe des paiements -->
+  <div class="chart-container" *ngIf="stats.courbe?.length">
+    <canvas id="paiementsChart" height="100"></canvas>
+  </div>
+
+  <!-- ⏳ Membres en retard -->
+  <div class="alertes" *ngIf="stats.membresEnRetard?.length">
+    <p>⚠️ {{ stats.membresEnRetard.length }} membre{{ stats.membresEnRetard.length > 1 ? 's' : '' }} en retard de paiement</p>
+    <ul>
+      <li *ngFor="let membre of stats.membresEnRetard">
+        {{ membre.nom }} - {{ membre.totalRestant | currency:'EUR' }}
+      </li>
+    </ul>
+  </div>
+</section>

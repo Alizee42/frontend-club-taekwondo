@@ -43,7 +43,29 @@
       <section *ngIf="step === 2" class="step">
         <h2>Informations de paiement</h2>
         <p><strong>Montant à payer :</strong> {{ montantTotalAPayer.toFixed(2) }} €</p>
+        <div class="recapitulatif recap-bien-dispose">
+          <h3>🧾 Résumé du paiement</h3>
+          <ul class="recap-list">
+            <li><strong>Montant total :</strong> {{ montantInitial.toFixed(2) }} €</li>
+            <li><strong>Mode de paiement :</strong>
+              {{ modePaiement === 'unique' ? 'Paiement en une fois' : nombreEcheances + ' échéances' }}
+            </li>
+            <li *ngIf="modePaiement === 'echeances'">
+              <strong>Montant par échéance :</strong> {{ getMontantParEcheance().toFixed(2) }} €
+            </li>
+            <li *ngIf="modePaiement === 'echeances' && paiementsEcheances.length > 0">
+              <strong>Prochaine échéance :</strong> {{ genererEcheancier(paiementsEcheances[0])[0].date | date: 'dd/MM/yyyy'
+              }}
+            </li>
+          </ul>
+        </div>
+      
         <div id="card-element" class="card-element"></div>
+        <div class="securite-zone">
+          <p class="securite">🔒 Ce paiement est sécurisé par Stripe</p>
+          <p class="rgpd">📄 Vos données ne sont jamais stockées sur notre site</p>
+        </div>
+      
         <div class="btn-group">
           <button class="btn-payer" (click)="initierPaiement()">Payer maintenant</button>
           <button class="btn-prev" (click)="previousStep()">Retour</button>
@@ -53,10 +75,35 @@
       <!-- Étape 3 -->
       <section *ngIf="step === 3" class="step confirmation">
         <div class="confirmation-icon">&#10004;</div>
-        <h2>Paiement réussi !</h2>
-        <p>Merci pour votre paiement.</p>
-        <button class="btn-new-payment" (click)="step = 1">Nouveau paiement</button>
+        <h2>Paiement effectué avec succès</h2>
+        <p>Nous vous remercions pour votre règlement.✅ Un reçu vous a été envoyé par email.</p>
+        <p>Vous pouvez retrouver vos paiements dans la section <strong>“Mes paiements”</strong> ci-dessous.</p>
+        <button class="btn-new-payment" (click)="step = 1">Effectuer un autre paiement</button>
       </section>
+
+    </div>
+  </div>
+  <!-- 🔄 Chargement -->
+  <div class="modal-overlay" *ngIf="enCoursDePaiement">
+    <div class="modal-content">
+      <p>Paiement en cours...</p>
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <!-- ✅ Succès -->
+  <div class="modal-overlay" *ngIf="paiementReussi">
+    <div class="modal-content success">
+      <p>✅ Paiement confirmé !</p>
+      <button (click)="fermerModale()">Fermer</button>
+    </div>
+  </div>
+
+  <!-- ❌ Erreur -->
+  <div class="modal-overlay" *ngIf="paiementErreur">
+    <div class="modal-content error">
+      <p>❌ Une erreur est survenue : {{ erreurMessage }}</p>
+      <button (click)="fermerModale()">Fermer</button>
     </div>
   </div>
 
@@ -67,7 +114,8 @@
     <!-- Paiements uniques -->
     <div class="historique-bloc">
       <button class="table-toggle" (click)="toggleSection('unique')">
-        Paiements uniques <span *ngIf="sectionOuverte['unique']">▼</span><span *ngIf="!sectionOuverte['unique']">▲</span>
+        Paiements uniques <span *ngIf="sectionOuverte['unique']">▼</span><span
+          *ngIf="!sectionOuverte['unique']">▲</span>
       </button>
       <table class="historique-table" *ngIf="sectionOuverte['unique']">
         <thead>
@@ -83,11 +131,15 @@
             <td>{{ paiement.montant }} €</td>
             <td>
               <span class="badge" [ngClass]="{
-                'badge-payé': paiement.statut === 'payé',
-                'badge-en-attente': paiement.statut === 'en attente',
-                'badge-annulé': paiement.statut === 'annulé'
-              }">{{ paiement.statut }}</span>
+    'badge-payé': paiement.statut === 'payé',
+    'badge-en-attente': paiement.statut === 'en attente',
+    'badge-annulé': paiement.statut === 'annulé'
+  }">
+                {{ paiement.statut === 'payé' ? '✔' : (paiement.statut === 'en attente' ? '⏳' : '❌') }}
+                {{ paiement.statut }}
+              </span>
             </td>
+
           </tr>
           <tr *ngIf="paiementsUniques.length === 0">
             <td colspan="3">Aucun paiement unique trouvé.</td>
@@ -99,7 +151,8 @@
     <!-- Paiements échelonnés -->
     <div class="historique-bloc">
       <button class="table-toggle" (click)="toggleSection('echeances')">
-        Paiements échelonnés <span *ngIf="sectionOuverte['echeances']">▼</span><span *ngIf="!sectionOuverte['echeances']">▲</span>
+        Paiements échelonnés <span *ngIf="sectionOuverte['echeances']">▼</span><span
+          *ngIf="!sectionOuverte['echeances']">▲</span>
       </button>
       <div *ngIf="sectionOuverte['echeances']">
         <div class="paiement-card-container">
@@ -107,8 +160,8 @@
             <div class="paiement-card" *ngFor="let paiement of paiementsEcheances">
               <div class="paiement-details-grid">
                 <div class="montants">
-                  <p><strong>Montant total :</strong> {{ paiement.montantTotal?.toFixed(2) }} €</p>
-                  <p><strong>Montant restant :</strong> {{ paiement.montantRestant?.toFixed(2) || 'Non disponible' }} €</p>
+                  <p>Montant total : {{ paiement.montantTotal | currency:'EUR' }}</p>
+                  <p>Montant restant : {{ paiement.montantRestant | currency:'EUR' }}</p>
                 </div>
                 <div class="statut">
                   <span class="badge" [ngClass]="{
@@ -142,11 +195,11 @@
                       </span>
                     </td>
                     <td>
-                      <button *ngIf="paiement.echeancesRestantes > 0 && echeance.statut !== 'payé'"
-                              class="btn-payer-echeance"
-                              (click)="ouvrirModalPaiement(paiement, echeance)">
+                      <button *ngIf="echeance.statut !== 'payé'" class="btn-payer-echeance"
+                        (click)="ouvrirModalPaiement(paiement, echeance)">
                         Payer
                       </button>
+
                     </td>
                   </tr>
                 </tbody>
@@ -167,8 +220,11 @@
       <h3>Payer une échéance</h3>
       <p>Montant : {{ montantTotalAPayer.toFixed(2) }} €</p>
       <div id="card-element-modal" class="card-element"></div>
-      <button class="btn-blue" (click)="payerEcheances()">Valider</button>
-      <button class="btn-red" (click)="fermerModalPaiement()">Annuler</button>
+      <div class="btn-group">
+        <button class="btn-blue" (click)="payerEcheances()">Valider</button>
+        <button class="btn-red" (click)="fermerModalPaiement()">Annuler</button>
+      </div>
+
     </div>
   </div>
 </div>
