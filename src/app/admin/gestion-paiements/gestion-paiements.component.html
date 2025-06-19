@@ -2,12 +2,11 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <h2>Menu Paiements</h2>
-
     <nav>
-      <!-- Vues disponibles -->
+      <!-- Vues -->
       <h3>Vues</h3>
       <ul class="menu">
-        <li (click)="changerVue('tableau')" [class.active]="vueActive === 'tableau'">📋 Tableau des utilisateurs</li>
+        <li (click)="changerVue('tableau')" [class.active]="vueActive === 'tableau'">📋 Tableau</li>
         <li (click)="changerVue('kpi')" [class.active]="vueActive === 'kpi'">📊 Statistiques</li>
         <li (click)="changerVue('echeances')" [class.active]="vueActive === 'echeances'">📅 Échéances</li>
       </ul>
@@ -15,9 +14,9 @@
       <!-- Filtres -->
       <h3>Filtres</h3>
       <div class="filters">
-        <input type="text" placeholder="🔍 Rechercher nom/email" [(ngModel)]="filtreRecherche">
+        <input type="text" placeholder="🔍 Nom ou email" [(ngModel)]="filtreRecherche">
         <select [(ngModel)]="filtreStatut">
-          <option value="">Tous les statuts</option>
+          <option value="">Tous statuts</option>
           <option value="payé">Payé</option>
           <option value="en attente">En attente</option>
           <option value="annulé">Annulé</option>
@@ -29,85 +28,157 @@
           <option value="manuel">Manuel</option>
           <option value="espèces">Espèces</option>
         </select>
-        <button (click)="appliquerFiltres()">✅ Appliquer</button>
+        <label>
+          <input type="checkbox" [(ngModel)]="filtrerRetards">
+          🔴 Retards uniquement
+        </label>
+        <button (click)="appliquerFiltres()">🔎 Filtrer</button>
       </div>
 
       <!-- Actions -->
       <h3>Actions</h3>
       <div class="actions">
-        <button (click)="ouvrirModalPaiement()">➕ Ajouter un paiement</button>
-        <button (click)="exporterCSV()">📤 Exporter</button>
+        <button (click)="ouvrirModalPaiement()">➕ Nouveau paiement</button>
+        <button (click)="exporterCSV()">📤 Export CSV</button>
         <button (click)="envoyerRappels()">🔔 Rappels</button>
+      </div>
+
+      <!-- Alertes -->
+      <div class="alertes">
+        <h3>🔔 Alertes</h3>
+        <ul>
+          <li *ngFor="let alert of alertes">{{ alert }}</li>
+        </ul>
       </div>
     </nav>
   </aside>
 
   <!-- Contenu principal -->
   <main class="content">
+    <!-- Header résumé -->
+    <section class="header-admin">
+      <div class="header-title">
+      </div>
+      <div class="header-kpi-summary">
+        <div class="summary-item">
+          <span>Total encaissé</span>
+          <strong>{{ stats.totalPayes | currency:'EUR' }}</strong>
+        </div>
+        <div class="summary-item">
+          <span>En attente</span>
+          <strong>{{ stats.totalAttente | currency:'EUR' }}</strong>
+        </div>
+        <div class="summary-item">
+          <span>Annulés</span>
+          <strong>{{ stats.totalAnnules | currency:'EUR' }}</strong>
+        </div>
+        <div class="summary-item">
+          <span>% payé</span>
+          <strong>{{ stats.pourcentagePayesMois | number:'1.0-2' }}%</strong>
+        </div>
+        <button class="btn-export" (click)="exporterResume()">📤 Export mois</button>
+      </div>
+    </section>
 
-    <!-- Vue KPI -->
+    <!-- 📊 Vue KPI -->
     <section *ngIf="vueActive === 'kpi'" class="kpi-section">
       <h2>Statistiques générales</h2>
       <div class="kpi">
         <div class="kpi-card" *ngFor="let k of kpiList">
+          <div class="icon">
+            <!-- Ajoutez une icône spécifique pour chaque KPI -->
+            <ng-container [ngSwitch]="k.label">
+              <span *ngSwitchCase="'💰 Total encaissé (€)'">💰</span>
+              <span *ngSwitchCase="'🧾 Paiements en attente (€)'">🧾</span>
+              <span *ngSwitchCase="'✅ Membres à jour (%)'">✅</span>
+              <span *ngSwitchCase="'🔁 Paiements récurrents'">🔁</span>
+              <span *ngSwitchCase="'⏱️ Échéances à venir'">⏱️</span>
+              <span *ngSwitchDefault>📊</span>
+            </ng-container>
+          </div>
           <h4>{{ k.label }}</h4>
           <p>{{ k.value }}</p>
         </div>
       </div>
-      <canvas id="paiementsChart" style="width:100%; max-width:800px;"></canvas>
+            <canvas id="paiementsChart" style="width:100%; max-width:800px;"></canvas>
     </section>
 
-    <!-- Vue tableau utilisateurs -->
+       <!-- 📋 Vue tableau -->
     <section *ngIf="vueActive === 'tableau'" class="table-section">
-      <h2>Tableau des paiements par utilisateur</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Montant payé</th>
-            <th>Restant</th>
-            <th>Statut</th>
-            <th>Moyen</th>
-            <th>Dernier paiement</th>
-            <th>Échéances</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let u of utilisateursFiltres; else aucunUtilisateur">
-            <td>{{ u.nom }}</td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.montantPaye }}€</td>
-            <td>{{ u.montantRestant }}€</td>
-            <td>{{ u.statut }}</td>
-            <td>{{ u.moyenPaiement }}</td>
-            <td>{{ u.dernierPaiement }}</td>
-            <td>{{ u.echeancesText }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #aucunUtilisateur>
-        <p>Aucun utilisateur trouvé.</p>
-      </ng-template>
+      <h2>Paiements par utilisateur</h2>
+      <div class="user-table">
+        <div class="user-row" *ngFor="let u of utilisateursFiltres">
+          <!-- Résumé utilisateur -->
+          <div class="user-summary" (click)="u.expand = !u.expand">
+            <span class="user-name">{{ u.nom }} {{ u.prenom }}</span>
+            <span class="user-paid">{{ u.montantPaye }} €</span>
+            <span class="user-rest">{{ u.montantRestant }} € restants</span>
+            <span class="user-status" [ngClass]="{
+              'status-validé': u.statut === 'payé',
+              'status-en-attente': u.statut === 'en attente',
+              'status-annulé': u.statut === 'annulé'
+            }">{{ u.statut }}</span>
+            <span class="expand-indicator">{{ u.expand ? '▲' : '▼' }}</span>
+          </div>
+    
+          <!-- Détails utilisateur -->
+          <div class="user-details" *ngIf="u.expand">
+            <p><strong>Email :</strong> {{ u.email }}</p>
+            <p><strong>Dernier paiement :</strong> {{ u.dernierPaiement }}</p>
+            <p><strong>Moyen :</strong> {{ u.moyenPaiement }}</p>
+            <p><strong>Échéances :</strong></p>
+            <ul class="echeances-list">
+              <li *ngFor="let echeance of u.echeances">
+                <span class="echeance-date">{{ echeance.dateEcheance | date:'dd/MM/yyyy' }}</span>
+                <span class="echeance-statut" [ngClass]="{
+                  'badge-payé': echeance.statut === 'payé',
+                  'badge-en-attente': echeance.statut === 'en attente',
+                  'badge-retard': echeance.statut === 'retard'
+                }">{{ echeance.statut }}</span>
+                <span class="echeance-montant">{{ echeance.montant | currency:'EUR' }}</span>
+              </li>
+            </ul>
+            <div class="btn-group">
+              <button class="btn-primary" (click)="ouvrirPaiementUtilisateur(u)">💸 Ajouter paiement</button>
+              <button class="btn-secondary" (click)="envoyerRappelIndividuel(u)">🔔 Rappel</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- Vue échéances -->
+    <!-- 📅 Vue échéances -->
     <section *ngIf="vueActive === 'echeances'" class="echeances-section">
-      <h2>Échéances par utilisateur</h2>
-      <ul>
-        <li *ngFor="let paiement of paiements; else aucuneEcheance">
-          <strong>{{ paiement.nom }}</strong> :
-          <ul *ngIf="paiement.echeances?.length; else aucune">
-            <li *ngFor="let echeance of paiement.echeances">
-              {{ echeance.dateEcheance | date: 'dd/MM/yyyy' }} - {{ echeance.statut }}
-            </li>
-          </ul>
-          <ng-template #aucune><em>Aucune échéance</em></ng-template>
+      <h2>Échéances à venir</h2>
+      <label>
+        📆 Mois :
+        <select [(ngModel)]="moisSelectionne" (change)="chargerEcheances()">
+          <option *ngFor="let mois of moisDispo" [value]="mois">{{ mois }}</option>
+        </select>
+      </label>
+            <ul class="timeline">
+        <li *ngFor="let paiement of paiements">
+          <div class="timeline-user" *ngIf="paiement.echeances && paiement.echeances.length > 0">
+            <div class="timeline-header">
+              <strong class="timeline-user-name">{{ paiement.nom }} {{ paiement.prenom }}</strong>
+            </div>
+            <ul class="timeline-echeances">
+              <li *ngFor="let echeance of paiement.echeances" class="timeline-echeance">
+                <div class="echeance-info">
+                  <span class="timeline-date">{{ echeance.dateEcheance | date:'dd/MM/yyyy' }}</span>
+                  <span class="timeline-statut" [ngClass]="{
+                    'badge-payé': echeance.statut === 'payé',
+                    'badge-en-attente': echeance.statut === 'en attente',
+                    'badge-retard': echeance.statut === 'retard'
+                  }">{{ echeance.statut }}</span>
+                  <span class="echeance-montant">{{ echeance.montant | currency:'EUR' }}</span>
+                </div>
+                <button *ngIf="echeance.statut !== 'payé'" class="btn-reminder" (click)="relancerEcheance(echeance)">🔔 Rappeler</button>
+              </li>
+            </ul>
+          </div>
         </li>
       </ul>
-      <ng-template #aucuneEcheance>
-        <p>Aucune échéance trouvée.</p>
-      </ng-template>
     </section>
   </main>
 </div>

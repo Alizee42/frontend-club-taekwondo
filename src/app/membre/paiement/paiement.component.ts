@@ -12,7 +12,6 @@ import { StripeService } from '../../services/stripe.service';
   styleUrls: ['./paiement.component.css']
 })
 export class PaiementComponent implements OnInit, AfterViewInit {
-
   paiements: any[] = [];
   paiementsUniques: any[] = [];
   paiementsEcheances: any[] = [];
@@ -40,7 +39,6 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   constructor(private http: HttpClient, private stripeService: StripeService) {}
 
   ngOnInit(): void {
-    console.log('Montant initial:', this.montantInitial);
     this.loadPaiements(); 
   }
 
@@ -57,7 +55,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
           const elements = stripe.elements();
           this.cardElement = elements.create('card');
           this.cardElement.mount('#card-element');
-        }).catch(err => console.error("Erreur lors de l'initialisation de Stripe :", err));
+        });
       } else {
         this.cardElement.mount('#card-element');
       }
@@ -66,22 +64,15 @@ export class PaiementComponent implements OnInit, AfterViewInit {
 
   initStripeElementModal(): void {
     const container = document.querySelector('#card-element-modal');
-    if (!container) {
-      console.error("Élément HTML pour Stripe introuvable.");
-      return;
-    }
+    if (!container) return;
 
     if (!this.stripe) {
       this.stripeService.getStripeInstance().then((stripe: any) => {
-        if (!stripe) {
-          console.error("Erreur : Impossible de charger Stripe.");
-          return;
-        }
         this.stripe = stripe;
         const elements = stripe.elements();
         this.cardElementModal = elements.create('card');
         this.cardElementModal.mount('#card-element-modal');
-      }).catch(err => console.error("Erreur lors de l'initialisation de Stripe :", err));
+      });
     } else {
       const elements = this.stripe.elements();
       this.cardElementModal = elements.create('card');
@@ -95,23 +86,17 @@ export class PaiementComponent implements OnInit, AfterViewInit {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (data) => {
-        console.log('📦 Données reçues du backend:', data);  // 🔍 Vérifie ce qui est reçu
-        this.paiements = data.map(paiement => ({
-          ...paiement,
-          modePaiement: paiement.modePaiement === 'carte' ? 'unique' : paiement.modePaiement,
-          montantRestant: paiement.montant_restant ?? 0,
-          montantTotal: paiement.montant_total ?? 0,
-          echeances: paiement.echeances || []
+        this.paiements = data.map(p => ({
+          ...p,
+          modePaiement: p.modePaiement === 'carte' ? 'unique' : p.modePaiement,
+          montantRestant: p.montant_restant ?? 0,
+          montantTotal: p.montant_total ?? 0,
+          echeances: p.echeances || []
         }));
-        
-        this.mettreAJourFiltresPaiements(); // met à jour paiementsUniques et paiementsEcheances
-      },
-      error: (err) => {
-        console.error('❌ Erreur lors du chargement des paiements:', err);
+        this.mettreAJourFiltresPaiements();
       }
     });
   }
-  
 
   mettreAJourFiltresPaiements(): void {
     this.paiementsUniques = this.paiements.filter(p => p.modePaiement === 'unique');
@@ -121,9 +106,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   nextStep(): void {
     if (this.step < this.maxStep) {
       this.step++;
-      if (this.step === 2) {
-        setTimeout(() => this.initStripeElement(), 200);
-      }
+      if (this.step === 2) setTimeout(() => this.initStripeElement(), 200);
     }
   }
 
@@ -135,9 +118,8 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     if (this.enCoursDePaiement) return;
 
     const montant = this.modePaiement === 'unique' ? this.montantInitial : this.getMontantParEcheance();
-    if (montant <= 0 || !this.cardElement) {
-      return alert("Erreur : montant invalide ou Stripe non chargé.");
-    }
+    if (montant <= 0 || !this.cardElement) return alert("Erreur : montant invalide ou Stripe non chargé.");
+    this.montantTotalAPayer = montant;
 
     const token = localStorage.getItem('token');
     const utilisateurId = Number(localStorage.getItem('utilisateurId'));
@@ -158,16 +140,13 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     }).subscribe({
       next: (res: any) => {
         const clientSecret = res?.clientSecret;
-        if (!clientSecret) {
-          return alert("Erreur : clientSecret non reçu.");
-        }
+        if (!clientSecret) return alert("Erreur : clientSecret non reçu.");
         this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
           this.loadPaiements();
           this.enCoursDePaiement = false;
         });
       },
-      error: (err) => {
-        console.error('Erreur lors de la création du paiement:', err);
+      error: () => {
         alert('Erreur lors de la création du paiement.');
         this.enCoursDePaiement = false;
       }
@@ -195,7 +174,10 @@ export class PaiementComponent implements OnInit, AfterViewInit {
 
     this.paiementActuel = paiement;
     this.echeanceEnCours = echeance;
-    this.montantTotalAPayer = parseFloat(echeance.montant);
+
+    const montant = Number(echeance.montant);
+    this.montantTotalAPayer = isNaN(montant) ? 0 : montant;
+
     this.modalOuverte = true;
 
     if (this.cardElementModal) {
@@ -232,9 +214,9 @@ export class PaiementComponent implements OnInit, AfterViewInit {
         this.loadPaiements();
         this.fermerModalPaiement();
         this.enCoursDePaiement = false;
+        alert('Paiement reçu ! ✅');
       },
-      error: (err) => {
-        console.error('Erreur lors du paiement:', err);
+      error: () => {
         alert('Erreur lors du paiement.');
         this.enCoursDePaiement = false;
       }
@@ -242,19 +224,17 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   }
 
   genererEcheancier(paiement: any): { numero: number; date: Date; montant: number; statut: string; id: number }[] {
-    if (!paiement?.echeances?.length) {
-      console.log('Aucune échéance trouvée pour le paiement :', paiement);
-      return [];
-    }
-
-    return paiement.echeances.map((e: any, i: number) => ({
-      numero: i + 1,
-      date: new Date(e.dateEcheance),
-      montant: e.montant,
-      statut: e.statut,
-      id: e.id
-    })).sort((a: { date: Date }, b: { date: Date }) => a.date.getTime() - b.date.getTime());
-
+    if (!paiement?.echeances?.length) return [];
+  
+    return paiement.echeances
+      .map((e: any) => ({
+        numero: e.numero, // Utiliser le numéro existant renvoyé par le backend
+        date: new Date(e.dateEcheance),
+        montant: e.montant,
+        statut: e.statut,
+        id: e.id
+      }))
+      .sort((a: { date: Date }, b: { date: Date }) => a.date.getTime() - b.date.getTime());
   }
 
   toggleSection(section: string): void {

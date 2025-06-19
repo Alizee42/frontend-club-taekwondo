@@ -20,11 +20,11 @@
         <h2>Choisissez votre mode de paiement</h2>
         <div class="choix-cartes">
           <div class="carte-option" [class.active]="modePaiement === 'unique'" (click)="modePaiement = 'unique'">
-            <h3>Paiement en une fois</h3>
+            <h3>💳 Paiement en une fois</h3>
             <p>Un seul règlement de <strong>{{ montantInitial }} €</strong>.</p>
           </div>
           <div class="carte-option" [class.active]="modePaiement === 'echeances'" (click)="modePaiement = 'echeances'">
-            <h3>Paiement en plusieurs fois</h3>
+            <h3>📆 Paiement en plusieurs fois</h3>
             <p *ngIf="modePaiement !== 'echeances'">Sélectionnez cette option pour diviser votre paiement.</p>
             <div class="echeance-select" *ngIf="modePaiement === 'echeances'">
               <label>Nombre d’échéances :</label>
@@ -42,6 +42,7 @@
       <!-- Étape 2 -->
       <section *ngIf="step === 2" class="step">
         <h2>Informations de paiement</h2>
+        <p><strong>Montant à payer :</strong> {{ montantTotalAPayer.toFixed(2) }} €</p>
         <div id="card-element" class="card-element"></div>
         <div class="btn-group">
           <button class="btn-payer" (click)="initierPaiement()">Payer maintenant</button>
@@ -63,7 +64,7 @@
   <div class="historique-section">
     <h2>Mes paiements</h2>
 
-    <!-- ✅ Paiements uniques -->
+    <!-- Paiements uniques -->
     <div class="historique-bloc">
       <button class="table-toggle" (click)="toggleSection('unique')">
         Paiements uniques <span *ngIf="sectionOuverte['unique']">▼</span><span *ngIf="!sectionOuverte['unique']">▲</span>
@@ -80,7 +81,13 @@
           <tr *ngFor="let paiement of paiementsUniques">
             <td>{{ paiement.datePaiement | date: 'dd/MM/yyyy' }}</td>
             <td>{{ paiement.montant }} €</td>
-            <td>{{ paiement.statut }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-payé': paiement.statut === 'payé',
+                'badge-en-attente': paiement.statut === 'en attente',
+                'badge-annulé': paiement.statut === 'annulé'
+              }">{{ paiement.statut }}</span>
+            </td>
           </tr>
           <tr *ngIf="paiementsUniques.length === 0">
             <td colspan="3">Aucun paiement unique trouvé.</td>
@@ -89,7 +96,7 @@
       </table>
     </div>
 
-    <!-- ✅ Paiements échelonnés -->
+    <!-- Paiements échelonnés -->
     <div class="historique-bloc">
       <button class="table-toggle" (click)="toggleSection('echeances')">
         Paiements échelonnés <span *ngIf="sectionOuverte['echeances']">▼</span><span *ngIf="!sectionOuverte['echeances']">▲</span>
@@ -100,8 +107,8 @@
             <div class="paiement-card" *ngFor="let paiement of paiementsEcheances">
               <div class="paiement-details-grid">
                 <div class="montants">
-                  <p><strong>Montant total :</strong> {{ montantInitial.toFixed(2) }} €</p>
-                  <p><strong>Montant restant :</strong> {{ paiement.montantRestant ? paiement.montantRestant.toFixed(2) : 'Non disponible' }} €</p>
+                  <p><strong>Montant total :</strong> {{ paiement.montantTotal?.toFixed(2) }} €</p>
+                  <p><strong>Montant restant :</strong> {{ paiement.montantRestant?.toFixed(2) || 'Non disponible' }} €</p>
                 </div>
                 <div class="statut">
                   <span class="badge" [ngClass]="{
@@ -127,13 +134,15 @@
                     <td>{{ echeance.date | date: 'dd/MM/yyyy' }}</td>
                     <td>{{ echeance.montant }} €</td>
                     <td>
-                      <span [ngClass]="{
-                        'status-payé': echeance.statut === 'payé',
-                        'status-en-attente': echeance.statut === 'en attente'
-                      }">{{ echeance.statut }}</span>
+                      <span class="badge" [ngClass]="{
+                        'badge-payé': echeance.statut === 'payé',
+                        'badge-en-attente': echeance.statut === 'en attente'
+                      }">
+                        {{ echeance.statut === 'payé' ? '✔' : '⏳' }} {{ echeance.statut }}
+                      </span>
                     </td>
                     <td>
-                      <button *ngIf="paiement.echeancesRestantes > 0"
+                      <button *ngIf="paiement.echeancesRestantes > 0 && echeance.statut !== 'payé'"
                               class="btn-payer-echeance"
                               (click)="ouvrirModalPaiement(paiement, echeance)">
                         Payer
@@ -152,7 +161,7 @@
     </div>
   </div>
 
-  <!-- 🔷 Modal de paiement d’échéance -->
+  <!-- Modal -->
   <div class="modal" *ngIf="modalOuverte">
     <div class="modal-content">
       <h3>Payer une échéance</h3>
