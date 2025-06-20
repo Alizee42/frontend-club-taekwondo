@@ -1,37 +1,169 @@
-h2 {
-  margin-bottom: 1rem;
+/* 🔹 Titre principal */
+.dashboard-title {
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
   color: #1E6091;
+  text-align: center;
+}
+
+/* 🔹 Section globale */
+.dashboard-section {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .kpi-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.2rem;
 }
 
-.kpi {
-  background: white;
-  padding: 1rem;
-  border-left: 5px solid #1E6091;
+.kpi-card {
+  padding: 1.2rem;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  transition: 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
 }
-.kpi:hover {
-  transform: translateY(-3px);
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+}
+
+.kpi-card h4 {
+  font-size: 1rem;
+  margin: 0.3rem 0;
+  color: #344e41;
+}
+
+.kpi-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: auto;
+}
+
+/* 🔹 Icône */
+.kpi-icon {
+  font-size: 1.8rem;
+  color: #1e6091;
+  margin-bottom: 0.4rem;
+}
+
+/* 🔹 Styles par type */
+.kpi-card.success {
+  background: #e6f4ea;
+  border-left: 5px solid #2d6a4f;
+}
+.kpi-card.warning {
+  background: #fff3cd;
+  border-left: 5px solid #e67700;
+}
+.kpi-card.danger {
+  background: #f8d7da;
+  border-left: 5px solid #d00000;
+}
+.kpi-card.neutral {
+  background: #e0f7f1;
+  border-left: 5px solid #1b4332;
+}
+
+/* 🔹 Graphique */
+.chart-section h3 {
+  font-size: 1.3rem;
+  color: #1E6091;
+  margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .chart-container {
-  margin-bottom: 2rem;
-  background: white;
-  padding: 1rem;
+  background: #ffffff;
+  padding: 1rem 1.5rem;
   border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-.alertes {
+canvas#doughnutChart {
+  width: 100% !important;
+  max-width: 400px;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+}
+
+
+/* 🔹 Alertes de retard */
+.alert-section {
   background: #fff3cd;
   color: #856404;
-  padding: 1rem;
-  border-radius: 5px;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border-left: 5px solid #ffc107;
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 1rem;
 }
+
+.alert-section h3 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.alert-text {
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.retard-list {
+  list-style: none;
+  padding-left: 1rem;
+  margin-bottom: 0;
+}
+
+.retard-list li {
+  margin-bottom: 1rem;
+  position: relative;
+  padding-left: 1rem;
+  font-size: 1.1rem;
+}
+
+.retard-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #f08c00;
+}
+
+/* Improved structure for member details */
+.retard-item {
+  display: flex;
+  flex-direction: column;
+  padding-left: 20px;
+}
+
+.retard-details {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #344e41;
+}
+
+.total-restant {
+  font-weight: 700;
+}
+
+.echeance-retard {
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: #e67700;
+}
+

@@ -121,60 +121,59 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     if (this.step > 1) this.step--;
   }
 
-  initierPaiement(): void {
-    if (this.enCoursDePaiement) return;
+ initierPaiement(): void {
+  if (this.enCoursDePaiement) return;
 
-    const montant = this.modePaiement === 'unique' ? this.montantInitial : this.getMontantParEcheance();
-    if (montant <= 0 || !this.cardElement) return alert("Erreur : montant invalide ou Stripe non chargé.");
-    this.montantTotalAPayer = montant;
+  const montant = this.montantInitial;  // ✅ Correction ici
+  if (montant <= 0 || !this.cardElement) return alert("Erreur : montant invalide ou Stripe non chargé.");
+  this.montantTotalAPayer = montant;
 
-    const token = localStorage.getItem('token');
-    const utilisateurId = Number(localStorage.getItem('utilisateurId'));
+  const token = localStorage.getItem('token');
+  const utilisateurId = Number(localStorage.getItem('utilisateurId'));
 
-    if (!token) {
-      this.erreurMessage = 'Utilisateur non authentifié';
-      this.paiementErreur = true;
-      return;
-    }
-
-    const data = {
-      amount: montant,
-      currency: 'eur',
-      modePaiement: this.modePaiement,
-      typePaiement: this.modePaiement === 'unique' ? 'unique' : 'echeances',
-      nombreEcheances: this.modePaiement === 'echeances' ? this.nombreEcheances : 1,
-      utilisateurId
-    };
-
-    this.enCoursDePaiement = true;
-    this.paiementErreur = false;
-    this.paiementReussi = false;
-
-    this.http.post('http://localhost:8080/api/paiements/create-payment-intent', data, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: (res: any) => {
-        const clientSecret = res?.clientSecret;
-        if (!clientSecret) {
-          this.erreurMessage = 'Erreur : clientSecret non reçu.';
-          this.paiementErreur = true;
-          this.enCoursDePaiement = false;
-          return;
-        }
-        this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
-          this.loadPaiements();
-          this.paiementReussi = true;
-          this.enCoursDePaiement = false;
-        });
-      },
-      error: () => {
-        this.erreurMessage = 'Erreur lors de la création du paiement.';
-        this.paiementErreur = true;
-        this.enCoursDePaiement = false;
-      }
-    });
+  if (!token) {
+    this.erreurMessage = 'Utilisateur non authentifié';
+    this.paiementErreur = true;
+    return;
   }
 
+  const data = {
+    amount: montant,  // ✅ On envoie le montant total
+    currency: 'eur',
+    modePaiement: this.modePaiement,
+    typePaiement: this.modePaiement === 'unique' ? 'unique' : 'echeances',
+    nombreEcheances: this.modePaiement === 'echeances' ? this.nombreEcheances : 1,
+    utilisateurId
+  };
+
+  this.enCoursDePaiement = true;
+  this.paiementErreur = false;
+  this.paiementReussi = false;
+
+  this.http.post('http://localhost:8080/api/stripe/create-payment-intent', data, {
+    headers: { Authorization: `Bearer ${token}` }
+  }).subscribe({
+    next: (res: any) => {
+      const clientSecret = res?.clientSecret;
+      if (!clientSecret) {
+        this.erreurMessage = 'Erreur : clientSecret non reçu.';
+        this.paiementErreur = true;
+        this.enCoursDePaiement = false;
+        return;
+      }
+      this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
+        this.loadPaiements();
+        this.paiementReussi = true;
+        this.enCoursDePaiement = false;
+      });
+    },
+    error: () => {
+      this.erreurMessage = 'Erreur lors de la création du paiement.';
+      this.paiementErreur = true;
+      this.enCoursDePaiement = false;
+    }
+  });
+}
   confirmerPaiementStripe(clientSecret: string, element: any, callback: () => void): void {
     this.stripe.confirmCardPayment(clientSecret, {
       payment_method: { card: element, billing_details: { name: 'Nom du client' } }

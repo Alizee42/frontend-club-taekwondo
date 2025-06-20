@@ -8,5 +8,5 @@ export interface DashboardStats {
   totalAttente: number;
   pourcentagePayesMois: number;
   courbe: DaySum[]; // ✅ nécessaire pour le graphique
-  membresEnRetard: MembreRetard[]; // ✅ nécessaire pour la liste
+    membresEnRetard: MembreRetard[];
 }

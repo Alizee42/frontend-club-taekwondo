@@ -1,37 +1,60 @@
-<h2>📊 Tableau de bord</h2>
+<h2 class="dashboard-title">📊 Tableau de bord des paiements</h2>
 
-<section *ngIf="stats">
-  <div class="kpi-cards">
-    <div class="kpi">
-      <h4>Total encaissé</h4>
-      <span>{{ stats.totalPayes | currency:'EUR' }}</span>
-    </div>
-    <div class="kpi">
-      <h4>En attente</h4>
-      <span>{{ stats.totalAttente | currency:'EUR' }}</span>
-    </div>
-    <div class="kpi">
-      <h4>Annulés</h4>
-      <span>{{ stats.totalAnnules | currency:'EUR' }}</span>
-    </div>
-    <div class="kpi">
-      <h4>% payés</h4>
-      <span>{{ stats.pourcentagePayesMois | number:'1.0-2' }}%</span>
-    </div>
+<section *ngIf="stats" class="dashboard-section">
+  <!-- 🔹 KPI Cards -->
+ <div class="kpi-cards">
+  <div class="kpi-card success">
+    <i class="ri-wallet-3-line kpi-icon"></i>
+    <h4>Total encaissé</h4>
+    <p class="kpi-value">{{ stats.totalPayes | currency:'EUR' }}</p>
   </div>
+  <div class="kpi-card warning">
+    <i class="ri-time-line kpi-icon"></i>
+    <h4>En attente</h4>
+    <p class="kpi-value">{{ stats.totalAttente | currency:'EUR' }}</p>
+  </div>
+  <div class="kpi-card danger">
+    <i class="ri-close-circle-line kpi-icon"></i>
+    <h4>Annulés</h4>
+    <p class="kpi-value">{{ stats.totalAnnules | currency:'EUR' }}</p>
+  </div>
+  <div class="kpi-card neutral">
+    <i class="ri-bar-chart-2-line kpi-icon"></i>
+    <h4>% payés</h4>
+    <p class="kpi-value">{{ stats.pourcentagePayesMois | number:'1.0-2' }}%</p>
+  </div>
+</div>
 
-  <!-- 📈 Courbe des paiements -->
-  <div class="chart-container" *ngIf="stats.courbe?.length">
-    <canvas id="paiementsChart" height="100"></canvas>
+  <!-- 🔹 Courbe des paiements -->
+<!-- 🔹 Répartition des paiements -->
+<div class="chart-section">
+  <h3>Répartition des paiements</h3>
+  <div class="chart-container">
+    <canvas id="doughnutChart"></canvas>
   </div>
+</div>
+<!-- 🔹 Membres en retard -->
+<div class="alert-section" *ngIf="stats.membresEnRetard?.length">
+  <h3>⏳ Membres en retard</h3>
+  <p class="alert-text">
+    ⚠️ {{ stats.membresEnRetard.length }} membre{{ stats.membresEnRetard.length > 1 ? 's' : '' }} en retard de paiement
+  </p>
+  <ul class="retard-list">
+    <li *ngFor="let membre of stats.membresEnRetard">
+      <div class="retard-item">
+        <strong>{{ membre.nom }}</strong>
+        <div class="retard-details">
+          <span class="total-restant">
+            Montant restant à payer : <strong>{{ membre.totalRestant | currency:'EUR' }}</strong>
+          </span>
+          <span class="echeance-retard">
+            <br> Echéance en retard : <strong>{{ membre.echeanceDate | date:'dd/MM/yyyy' }}</strong>
+            – {{ membre.echeanceMontant | currency:'EUR' }}
+          </span>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
 
-  <!-- ⏳ Membres en retard -->
-  <div class="alertes" *ngIf="stats.membresEnRetard?.length">
-    <p>⚠️ {{ stats.membresEnRetard.length }} membre{{ stats.membresEnRetard.length > 1 ? 's' : '' }} en retard de paiement</p>
-    <ul>
-      <li *ngFor="let membre of stats.membresEnRetard">
-        {{ membre.nom }} - {{ membre.totalRestant | currency:'EUR' }}
-      </li>
-    </ul>
-  </div>
 </section>
