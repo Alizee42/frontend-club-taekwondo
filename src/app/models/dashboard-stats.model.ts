@@ -7,6 +7,6 @@ export interface DashboardStats {
   totalAnnules: number;
   totalAttente: number;
   pourcentagePayesMois: number;
-  courbe: DaySum[]; // ✅ nécessaire pour le graphique
-    membresEnRetard: MembreRetard[];
+  courbe: DaySum[]; 
+  membresEnRetard: MembreRetard[];
 }

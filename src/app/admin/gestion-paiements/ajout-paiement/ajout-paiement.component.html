@@ -1,1 +1,98 @@
-<p>ajout-paiement works!</p>
+<div class="ajout-paiement-container">
+    <h2>Ajout avancé d’un paiement</h2>
+
+    <!-- Accordéon Utilisateur -->
+    <div class="accordion-section">
+        <div class="accordion-header" (click)="toggleSection('utilisateur')" [class.active]="sections.utilisateur">
+            <span>👤 Utilisateur</span>
+            <i class="ri-arrow-right-s-line"></i>
+        </div>
+        <div class="accordion-content" [class.active]="sections.utilisateur">
+            <label>Nom :
+                <input type="text" [(ngModel)]="paiement.utilisateurNom" placeholder="Nom de l’utilisateur" />
+            </label>
+            <label>Prénom :
+                <input type="text" [(ngModel)]="paiement.utilisateurPrenom" placeholder="Prénom" />
+            </label>
+            <label>Email :
+                <input type="email" [(ngModel)]="paiement.utilisateurEmail" placeholder="Email (facultatif)" />
+            </label>
+        </div>
+    </div>
+
+    <!-- Accordéon Détails paiement -->
+    <div class="accordion-section">
+        <div class="accordion-header" (click)="toggleSection('details')" [class.active]="sections.details">
+            <span>💳 Détails du paiement</span>
+            <i class="ri-arrow-right-s-line"></i>
+        </div>
+        <div class="accordion-content" [class.active]="sections.details">
+            <label>Type :
+                <select [(ngModel)]="paiement.type">
+                    <option value="Cotisation">Cotisation</option>
+                    <option value="Licence">Licence</option>
+                    <option value="Événement">Événement</option>
+                </select>
+            </label>
+            <label>Montant total :
+                <input type="number" [(ngModel)]="paiement.montantTotal" min="0" step="0.01" />
+            </label>
+            <label>Mode de paiement :
+                <select [(ngModel)]="paiement.modePaiement" (change)="onModePaiementChange()">
+                    <option value="espèces">Espèces</option>
+                    <option value="virement">Virement</option>
+                    <option value="chèque">Chèque</option>
+                    <option value="échéances">Échéances</option>
+                </select>
+            </label>
+            <label>Date de paiement :
+                <input type="date" [(ngModel)]="paiement.datePaiement" />
+            </label>
+        </div>
+    </div>
+
+    <!-- Accordéon Échéances -->
+    <div class="accordion-section" *ngIf="paiement.modePaiement === 'échéances'">
+        <div class="accordion-header" (click)="toggleSection('echeances')" [class.active]="sections.echeances">
+            <span>📆 Échéances</span>
+            <i class="ri-arrow-right-s-line"></i>
+        </div>
+        <div class="accordion-content" [class.active]="sections.echeances">
+            <button type="button" (click)="ajouterEcheance()">+ Ajouter une échéance</button>
+            <div class="echeance-row" *ngFor="let echeance of paiement.echeances; let i = index">
+                <label>Date :
+                    <input type="date" [(ngModel)]="echeance.dateEcheance" />
+                </label>
+                <label>Montant :
+                    <input type="number" [(ngModel)]="echeance.montant" min="0" step="0.01" />
+                </label>
+                <label>Statut :
+                    <select [(ngModel)]="echeance.statut">
+                        <option value="payé">Payé</option>
+                        <option value="en attente">En attente</option>
+                    </select>
+                </label>
+                <button type="button" (click)="supprimerEcheance(i)">❌</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accordéon Justificatif -->
+    <div class="accordion-section">
+        <div class="accordion-header" (click)="toggleSection('justificatif')" [class.active]="sections.justificatif">
+            <span>📁 Justificatif</span>
+            <i class="ri-arrow-right-s-line"></i>
+        </div>
+        <div class="accordion-content" [class.active]="sections.justificatif">
+            <input type="file" (change)="onFileSelected($event)" />
+            <div *ngIf="nomFichier" class="nom-fichier">
+                Fichier sélectionné : {{ nomFichier }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton Valider -->
+    <div class="form-section">
+        <button class="bouton-validation" (click)="validerPaiement()">✅ Valider le paiement</button>
+    </div>
+</div>

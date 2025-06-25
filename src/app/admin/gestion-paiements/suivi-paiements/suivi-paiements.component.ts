@@ -1,11 +1,232 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
+import { CommonModule, CurrencyPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-suivi-paiements',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './suivi-paiements.component.html',
-  styleUrl: './suivi-paiements.component.css'
+  styleUrls: ['./suivi-paiements.component.css'],
+  providers: [CurrencyPipe]
 })
-export class SuiviPaiementsComponent {
+export class SuiviPaiementsComponent implements OnInit {
+  @Output() changementVue = new EventEmitter<string>();
 
+  paiements: any[] = [];
+  paiementsFiltres: any[] = [];
+
+  filter = {
+    type: '',
+    statut: '',
+    utilisateur: ''
+  };
+
+  modalStatutVisible = false;
+  modalOuverte = false;
+  paiementActuel: any = null;
+  nouveauStatut: string = 'payé';
+
+  paiementManuel: any = {
+    utilisateurNom: '',
+    utilisateurPrenom: '',
+    utilisateurEmail: '',
+    type: 'Cotisation',
+    montantAttendu: 0,
+    modePaiement: 'espèces',
+    datePaiement: '',
+    echeances: []
+  };
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.chargerPaiements();
+  }
+
+  redirigerVersAjoutPaiement(): void {
+    this.changementVue.emit('ajouter-paiement');
+  }
+
+  chargerPaiements(): void {
+    this.http.get<any[]>('/api/paiements').subscribe(data => {
+      this.paiements = data;
+      this.filtrerPaiements();
+    });
+  }
+
+  filtrerPaiements(): void {
+    this.paiementsFiltres = this.paiements.filter(p => {
+      const typeOK = this.filter.type ? p.type === this.filter.type : true;
+      const statutOK = this.filter.statut ? p.statut === this.filter.statut : true;
+      const utilisateurOK = this.filter.utilisateur
+        ? (p.utilisateurNom?.toLowerCase().includes(this.filter.utilisateur.toLowerCase()) ||
+           p.utilisateurPrenom?.toLowerCase().includes(this.filter.utilisateur.toLowerCase()))
+        : true;
+      return typeOK && statutOK && utilisateurOK;
+    });
+  }
+
+  calculPourcentage(paiement: any): number {
+    const total = paiement.modePaiement === 'échéances' ? paiement.montantAttendu : paiement.montantTotal || 0;
+    let payé = 0;
+
+    if (paiement.modePaiement === 'échéances') {
+      payé = paiement.echeances?.reduce((sum: number, e: any) => e.statut === 'payé' ? sum + e.montant : sum, 0) || 0;
+    } else {
+      payé = total - (paiement.montantRestant || 0);
+    }
+
+    return total > 0 ? Math.round((payé / total) * 100) : 0;
+  }
+
+  ouvrirModalStatut(paiement: any): void {
+    this.paiementActuel = paiement;
+    this.nouveauStatut = paiement.statut;
+    this.modalStatutVisible = true;
+  }
+
+  fermerModalStatut(): void {
+    this.modalStatutVisible = false;
+    this.paiementActuel = null;
+  }
+
+  confirmerChangementStatut(): void {
+    if (!this.paiementActuel) return;
+
+    const id = this.paiementActuel.id;
+    let endpoint = '';
+
+    if (this.nouveauStatut === 'payé') endpoint = 'valider';
+    else if (this.nouveauStatut === 'annulé') endpoint = 'annuler';
+    else {
+      this.paiementActuel.statut = this.nouveauStatut;
+      this.modalStatutVisible = false;
+      this.filtrerPaiements();
+      return;
+    }
+
+    this.http.post(`/api/paiements/${id}/${endpoint}`, {}).subscribe(() => {
+      this.paiementActuel.statut = this.nouveauStatut;
+      if (this.nouveauStatut === 'payé') {
+        this.paiementActuel.montantRestant = 0;
+      }
+      this.modalStatutVisible = false;
+      this.filtrerPaiements();
+    });
+  }
+
+  supprimerPaiement(paiement: any): void {
+    const id = paiement.id;
+    if (confirm(`Confirmer la suppression du paiement pour ${paiement.utilisateurNom} ${paiement.utilisateurPrenom} ?`)) {
+      this.http.delete(`/api/paiements/${id}`).subscribe({
+        next: () => {
+          this.paiements = this.paiements.filter(p => p.id !== id);
+          this.filtrerPaiements();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression du paiement :', err);
+          alert("La suppression du paiement a échoué. Veuillez réessayer.");
+        }
+      });
+    }
+  }
+
+  ouvrirModalEcheances(paiement: any): void {
+    alert(`Échéances pour ${paiement.utilisateurNom} ${paiement.utilisateurPrenom} :\n` +
+      paiement.echeances.map((e: any) => `Date: ${e.dateEcheance}, Montant: ${e.montant}, Statut: ${e.statut}`).join('\n'));
+  }
+
+  ouvrirFormulairePaiement(): void {
+    this.modalOuverte = true;
+  }
+
+  fermerFormulairePaiement(): void {
+    this.modalOuverte = false;
+    this.paiementManuel = {
+      utilisateurNom: '',
+      utilisateurPrenom: '',
+      utilisateurEmail: '',
+      type: 'Cotisation',
+      montantAttendu: 0,
+      modePaiement: 'espèces',
+      datePaiement: '',
+      echeances: []
+    };
+  }
+
+  onModePaiementChange(): void {
+    if (this.paiementManuel.modePaiement === 'échéances') {
+      if (this.paiementManuel.echeances.length === 0) {
+        this.ajouterEcheance();
+      }
+    } else {
+      this.paiementManuel.echeances = [];
+    }
+  }
+
+  ajouterEcheance(): void {
+    const montantRestant = this.paiementManuel.montantAttendu || 0;
+    this.paiementManuel.echeances.push({
+      dateEcheance: '',
+      montant: montantRestant,
+      statut: 'en attente'
+    });
+  }
+
+  supprimerEcheance(index: number): void {
+    this.paiementManuel.echeances.splice(index, 1);
+  }
+
+  recalculerMontantRestant(): void {
+    const montantPayé = this.paiementManuel.echeances.reduce((sum: number, e: any) =>
+      e.statut === 'payé' ? sum + e.montant : sum, 0
+    );
+    this.paiementManuel.montantRestant = Math.max(0, this.paiementManuel.montantAttendu - montantPayé);
+  }
+
+  enregistrerPaiementManuel(): void {
+    if (this.paiementManuel.modePaiement === 'échéances') {
+      if (this.paiementManuel.montantAttendu <= 0) {
+        alert("Le montant total attendu doit être supérieur à 0.");
+        return;
+      }
+
+      const totalEcheances = this.paiementManuel.echeances.reduce((sum: number, e: any) => sum + (e.montant || 0), 0);
+      const montantPayé = this.paiementManuel.echeances.reduce((sum: number, e: any) => e.statut === 'payé' ? sum + e.montant : sum, 0);
+
+      if (totalEcheances !== this.paiementManuel.montantAttendu) {
+        alert("La somme des échéances doit être égale au montant total attendu.");
+        return;
+      }
+
+      if (montantPayé > this.paiementManuel.montantAttendu) {
+        alert("Le montant payé dépasse le montant attendu.");
+        return;
+      }
+    }
+
+    const dto = {
+      utilisateurNom: this.paiementManuel.utilisateurNom,
+      utilisateurPrenom: this.paiementManuel.utilisateurPrenom,
+      utilisateurEmail: this.paiementManuel.utilisateurEmail || null,
+      type: this.paiementManuel.type,
+      montantTotal: this.paiementManuel.montantAttendu,
+      modePaiement: this.paiementManuel.modePaiement,
+      datePaiement: this.paiementManuel.datePaiement,
+      echeances: this.paiementManuel.echeances
+    };
+
+    this.http.post('/api/paiements/ajouter-manuel', dto).subscribe({
+      next: () => {
+        this.chargerPaiements();
+        this.fermerFormulairePaiement();
+      },
+      error: (err) => {
+        console.error('Erreur lors de l’ajout manuel', err);
+        alert("Erreur lors de l'ajout manuel : " + (err.error?.message || err.message));
+      }
+    });
+  }
 }

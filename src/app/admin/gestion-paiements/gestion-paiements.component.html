@@ -16,14 +16,37 @@
   <!-- Contenu -->
   <main class="content">
     <ng-container [ngSwitch]="vueActive">
-      <section *ngSwitchCase="'dashboard'"><app-dashboard-paiement></app-dashboard-paiement></section>
-      <section *ngSwitchCase="'utilisateurs'"><app-utilisateurs-paiement></app-utilisateurs-paiement></section>
-      <section *ngSwitchCase="'paiements'"><app-suivi-paiements></app-suivi-paiements></section>
-      <section *ngSwitchCase="'echeances'"><app-echeances></app-echeances></section>
-      <section *ngSwitchCase="'ajouter-paiement'"><app-ajout-paiement></app-ajout-paiement></section>
-      <section *ngSwitchCase="'historique'"><app-historique-paiements></app-historique-paiements></section>
-      <section *ngSwitchCase="'parametres'"><app-parametres-paiement></app-parametres-paiement></section>
-      <section *ngSwitchDefault><p>Choisissez une vue dans le menu.</p></section>
+      <section *ngSwitchCase="'dashboard'">
+        <app-dashboard-paiement></app-dashboard-paiement>
+      </section>
+
+      <section *ngSwitchCase="'utilisateurs'">
+        <app-utilisateurs-paiement></app-utilisateurs-paiement>
+      </section>
+
+      <section *ngSwitchCase="'paiements'">
+        <app-suivi-paiements (changementVue)="changerVue($event)"></app-suivi-paiements>
+      </section>
+
+      <section *ngSwitchCase="'echeances'">
+        <app-echeances></app-echeances>
+      </section>
+
+      <section *ngSwitchCase="'ajouter-paiement'">
+        <app-ajout-paiement></app-ajout-paiement>
+      </section>
+
+      <section *ngSwitchCase="'historique'">
+        <app-historique-paiements></app-historique-paiements>
+      </section>
+
+      <section *ngSwitchCase="'parametres'">
+        <app-parametres-paiement></app-parametres-paiement>
+      </section>
+
+      <section *ngSwitchDefault>
+        <p>Choisissez une vue dans le menu.</p>
+      </section>
     </ng-container>
   </main>
 </div>
