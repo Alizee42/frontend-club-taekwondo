@@ -51,31 +51,40 @@
         </div>
     </div>
 
-    <!-- Accordéon Échéances -->
-    <div class="accordion-section" *ngIf="paiement.modePaiement === 'échéances'">
-        <div class="accordion-header" (click)="toggleSection('echeances')" [class.active]="sections.echeances">
-            <span>📆 Échéances</span>
-            <i class="ri-arrow-right-s-line"></i>
-        </div>
-        <div class="accordion-content" [class.active]="sections.echeances">
-            <button type="button" (click)="ajouterEcheance()">+ Ajouter une échéance</button>
-            <div class="echeance-row" *ngFor="let echeance of paiement.echeances; let i = index">
-                <label>Date :
-                    <input type="date" [(ngModel)]="echeance.dateEcheance" />
-                </label>
-                <label>Montant :
-                    <input type="number" [(ngModel)]="echeance.montant" min="0" step="0.01" />
-                </label>
-                <label>Statut :
-                    <select [(ngModel)]="echeance.statut">
-                        <option value="payé">Payé</option>
-                        <option value="en attente">En attente</option>
-                    </select>
-                </label>
-                <button type="button" (click)="supprimerEcheance(i)">❌</button>
-            </div>
+   <!-- Accordéon Échéances -->
+<div class="accordion-section" *ngIf="paiement.modePaiement === 'échéances'">
+    <div class="accordion-header" (click)="toggleSection('echeances')" [class.active]="sections.echeances">
+        <span>📆 Échéances</span>
+        <i class="ri-arrow-right-s-line"></i>
+    </div>
+    <div class="accordion-content" [class.active]="sections.echeances">
+        <!-- Nombre d’échéances -->
+        <label>Nombre d’échéances :
+            <input type="number" [(ngModel)]="nombreEcheances" min="1" (change)="genererEcheances()" />
+        </label>
+
+        <!-- Bouton pour régénérer manuellement -->
+        <button type="button" (click)="genererEcheances()">🔄 Générer automatiquement</button>
+
+        <!-- Liste des échéances -->
+        <div class="echeance-row" *ngFor="let echeance of paiement.echeances; let i = index">
+            <label>Date :
+                <input type="date" [(ngModel)]="echeance.dateEcheance" />
+            </label>
+            <label>Montant :
+                <input type="number" [(ngModel)]="echeance.montant" min="0" step="0.01" />
+            </label>
+            <label>Statut :
+                <select [(ngModel)]="echeance.statut">
+                    <option value="payé">Payé</option>
+                    <option value="en attente">En attente</option>
+                </select>
+            </label>
+            <button type="button" (click)="supprimerEcheance(i)">❌</button>
         </div>
     </div>
+</div>
+
 
     <!-- Accordéon Justificatif -->
     <div class="accordion-section">

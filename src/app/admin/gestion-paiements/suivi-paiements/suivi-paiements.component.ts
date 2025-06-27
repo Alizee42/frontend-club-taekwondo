@@ -28,38 +28,40 @@ export class SuiviPaiementsComponent implements OnInit {
   paiementActuel: any = null;
   nouveauStatut: string = 'payé';
 
-paiementManuel: any = {
-  utilisateurNom: '',
-  utilisateurPrenom: '',
-  utilisateurEmail: '',
-  type: 'Cotisation',
-  montantTotal: 0, // 🔁 était "montantAttendu"
-  modePaiement: 'espèces',
-  datePaiement: '',
-  echeances: []
-};
-
+  paiementManuel: any = {
+    utilisateurNom: '',
+    utilisateurPrenom: '',
+    utilisateurEmail: '',
+    type: 'Cotisation',
+    montantTotal: 0,
+    modePaiement: 'espèces',
+    datePaiement: '',
+    echeances: []
+  };
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
+    console.log('📥 Initialisation du composant suivi-paiements...');
     this.chargerPaiements();
   }
 
   redirigerVersAjoutPaiement(): void {
+    console.log('➡️ Redirection vers ajout-paiement');
     this.changementVue.emit('ajouter-paiement');
   }
 
   chargerPaiements(): void {
+    console.log('🔄 Chargement des paiements...');
     this.http.get<any[]>('/api/paiements').subscribe(data => {
-      console.log('📦 Données chargées depuis l’API /api/paiements :', data);
+      console.log('✅ Paiements reçus :', data);
       this.paiements = data;
       this.filtrerPaiements();
     });
   }
-  
 
   filtrerPaiements(): void {
+    console.log('🔍 Filtrage des paiements...');
     this.paiementsFiltres = this.paiements.filter(p => {
       const typeOK = this.filter.type ? p.type === this.filter.type : true;
       const statutOK = this.filter.statut ? p.statut === this.filter.statut : true;
@@ -69,38 +71,42 @@ paiementManuel: any = {
         : true;
       return typeOK && statutOK && utilisateurOK;
     });
+    console.log('📊 Paiements filtrés :', this.paiementsFiltres);
   }
 
   calculPourcentage(paiement: any): number {
-    if (!paiement || !paiement.montantTotal || paiement.montantTotal === 0) {
-      console.warn('⚠️ Paiement invalide ou montant total = 0', paiement);
+    if (!paiement || typeof paiement.montantTotal !== 'number' || paiement.montantTotal <= 0) {
+      console.warn('❗ Paiement invalide ou montantTotal manquant:', paiement);
       return 0;
     }
-  
+
     let montantPaye = 0;
-  
+
     if (paiement.modePaiement === 'échéances' && Array.isArray(paiement.echeances)) {
       montantPaye = paiement.echeances
         .filter((e: any) => e.statut === 'payé')
         .reduce((sum: number, e: any) => sum + e.montant, 0);
-      console.log(`📊 Paiement en échéances (id: ${paiement.id}) - Montant payé :`, montantPaye);
+      console.log(`📆 Paiement #${paiement.id} en échéances - montant payé:`, montantPaye);
     } else {
-      montantPaye = paiement.montantTotal - paiement.montantRestant;
-      console.log(`📊 Paiement classique (id: ${paiement.id}) - Montant payé :`, montantPaye);
+      const restant = typeof paiement.montantRestant === 'number' ? paiement.montantRestant : paiement.montantTotal;
+      montantPaye = paiement.montantTotal - restant;
+      console.log(`💸 Paiement #${paiement.id} unique - montant payé:`, montantPaye);
     }
-  
+
     const pourcentage = (montantPaye / paiement.montantTotal) * 100;
-    console.log(`✅ Pourcentage payé pour paiement ${paiement.id} : ${Math.round(pourcentage)}%`);
+    console.log(`📈 Paiement #${paiement.id} - Pourcentage payé: ${Math.round(pourcentage)}%`);
     return Math.round(pourcentage);
   }
-  
+
   ouvrirModalStatut(paiement: any): void {
+    console.log('📝 Ouverture de la modale de statut pour :', paiement);
     this.paiementActuel = paiement;
     this.nouveauStatut = paiement.statut;
     this.modalStatutVisible = true;
   }
 
   fermerModalStatut(): void {
+    console.log('❌ Fermeture de la modale de statut');
     this.modalStatutVisible = false;
     this.paiementActuel = null;
   }
@@ -120,6 +126,8 @@ paiementManuel: any = {
       return;
     }
 
+    console.log(`🚀 Envoi du changement de statut vers /api/paiements/${id}/${endpoint}`);
+
     this.http.post(`/api/paiements/${id}/${endpoint}`, {}).subscribe(() => {
       this.paiementActuel.statut = this.nouveauStatut;
       if (this.nouveauStatut === 'payé') {
@@ -127,19 +135,22 @@ paiementManuel: any = {
       }
       this.modalStatutVisible = false;
       this.filtrerPaiements();
+      console.log('✅ Statut mis à jour avec succès.');
     });
   }
 
   supprimerPaiement(paiement: any): void {
     const id = paiement.id;
     if (confirm(`Confirmer la suppression du paiement pour ${paiement.utilisateurNom} ${paiement.utilisateurPrenom} ?`)) {
+      console.log('🗑 Suppression du paiement ID', id);
       this.http.delete(`/api/paiements/${id}`).subscribe({
         next: () => {
           this.paiements = this.paiements.filter(p => p.id !== id);
           this.filtrerPaiements();
+          console.log('✅ Paiement supprimé');
         },
         error: (err) => {
-          console.error('Erreur lors de la suppression du paiement :', err);
+          console.error('❌ Erreur lors de la suppression :', err);
           alert("La suppression du paiement a échoué. Veuillez réessayer.");
         }
       });
@@ -147,22 +158,25 @@ paiementManuel: any = {
   }
 
   ouvrirModalEcheances(paiement: any): void {
+    console.log('🔍 Consultation des échéances pour :', paiement);
     alert(`Échéances pour ${paiement.utilisateurNom} ${paiement.utilisateurPrenom} :\n` +
       paiement.echeances.map((e: any) => `Date: ${e.dateEcheance}, Montant: ${e.montant}, Statut: ${e.statut}`).join('\n'));
   }
 
   ouvrirFormulairePaiement(): void {
+    console.log('🧾 Ouverture du formulaire de paiement manuel');
     this.modalOuverte = true;
   }
 
   fermerFormulairePaiement(): void {
+    console.log('❌ Fermeture du formulaire de paiement');
     this.modalOuverte = false;
     this.paiementManuel = {
       utilisateurNom: '',
       utilisateurPrenom: '',
       utilisateurEmail: '',
       type: 'Cotisation',
-      montantAttendu: 0,
+      montantTotal: 0,
       modePaiement: 'espèces',
       datePaiement: '',
       echeances: []
@@ -170,6 +184,7 @@ paiementManuel: any = {
   }
 
   onModePaiementChange(): void {
+    console.log('🔁 Changement de mode de paiement:', this.paiementManuel.modePaiement);
     if (this.paiementManuel.modePaiement === 'échéances') {
       if (this.paiementManuel.echeances.length === 0) {
         this.ajouterEcheance();
@@ -180,6 +195,7 @@ paiementManuel: any = {
   }
 
   ajouterEcheance(): void {
+    console.log('➕ Ajout d’une échéance');
     const montantRestant = this.paiementManuel.montantTotal || 0;
     this.paiementManuel.echeances.push({
       dateEcheance: '',
@@ -189,100 +205,58 @@ paiementManuel: any = {
   }
 
   supprimerEcheance(index: number): void {
+    console.log(`➖ Suppression de l’échéance #${index}`);
     this.paiementManuel.echeances.splice(index, 1);
   }
 
   recalculerMontantRestant(): void {
     const montantPayé = this.paiementManuel.echeances.reduce((sum: number, e: any) =>
-      e.statut === 'payé' ? sum + e.montant : sum, 0
-    );
+      e.statut === 'payé' ? sum + e.montant : sum, 0);
     this.paiementManuel.montantRestant = Math.max(0, this.paiementManuel.montantTotal - montantPayé);
+    console.log('🔄 Recalcul du montant restant :', this.paiementManuel.montantRestant);
   }
 
   enregistrerPaiementManuel(): void {
+    console.log('💾 Enregistrement d’un paiement manuel');
     const paiement = this.paiementManuel;
-    console.log("📥 Paiement manuel saisi :", paiement);
-  
+
     if (!paiement.utilisateurNom || !paiement.utilisateurPrenom || !paiement.datePaiement) {
       alert("Veuillez remplir tous les champs obligatoires.");
-      console.warn("❗ Champs obligatoires manquants :", paiement);
       return;
     }
-  
-    const montantTotal = paiement.montantAttendu;
-    console.log("💶 Montant total saisi :", montantTotal);
-  
-    if (montantTotal <= 0) {
-      alert("Le montant total attendu doit être supérieur à 0.");
-      console.warn("❗ Montant invalide :", montantTotal);
-      return;
-    }
-  
-    let totalEcheances = 0;
-    let montantPayé = 0;
-  
-    if (paiement.modePaiement === 'échéances') {
-      console.log("📆 Paiement en échéances détecté.");
-  
-      if (!paiement.echeances || paiement.echeances.length === 0) {
-        alert("Veuillez saisir au moins une échéance.");
-        console.warn("❗ Aucune échéance saisie.");
-        return;
-      }
-  
-      totalEcheances = paiement.echeances.reduce((sum: number, e: any) => sum + (e.montant || 0), 0);
-      montantPayé = paiement.echeances.reduce((sum: number, e: any) =>
-        e.statut === 'payé' ? sum + e.montant : sum, 0);
-  
-      console.log("💳 Total échéances :", totalEcheances);
-      console.log("✅ Montant payé par échéances :", montantPayé);
-  
-      if (totalEcheances !== montantTotal) {
-        alert("La somme des échéances doit être égale au montant total attendu.");
-        console.warn("❗ Somme des échéances ≠ montant total");
-        return;
-      }
-  
-      if (montantPayé > montantTotal) {
-        alert("Le montant payé dépasse le montant attendu.");
-        console.warn("❗ Montant payé > montant total");
-        return;
-      }
-    }
-  
-    // 🔁 Si paiement rapide → statut = payé, montantRestant = 0
-    if (['espèces', 'virement', 'chèque'].includes(paiement.modePaiement)) {
-      paiement.montantRestant = 0;
-      paiement.statut = 'payé';
-      console.log("⚡ Paiement rapide détecté → marquage comme payé");
-    }
-  
+
     const dto: any = {
       utilisateurNom: paiement.utilisateurNom,
       utilisateurPrenom: paiement.utilisateurPrenom,
       utilisateurEmail: paiement.utilisateurEmail || null,
       type: paiement.type,
-      montantTotal: montantTotal,
-      montantRestant: paiement.montantRestant,
+      montantTotal: paiement.montantTotal,
       modePaiement: paiement.modePaiement,
       datePaiement: paiement.datePaiement,
-      statut: paiement.statut,
+      statut: paiement.modePaiement === 'échéances' ? 'en attente' : 'payé',
       echeances: paiement.modePaiement === 'échéances' ? paiement.echeances : []
     };
-  
+
+    if (paiement.modePaiement === 'échéances') {
+      const totalEcheances = dto.echeances.reduce((s: number, e: any) => s + (e.montant || 0), 0);
+      if (totalEcheances !== dto.montantTotal) {
+        alert("La somme des échéances doit être égale au montant total.");
+        return;
+      }
+    }
+
     const endpoint = paiement.modePaiement === 'échéances'
       ? '/api/paiements/ajouter-complet'
       : '/api/paiements/ajouter-manuel';
-  
-    console.log("📤 Données envoyées au backend :", dto);
-    console.log("🔗 Endpoint ciblé :", endpoint);
-  
+
+    console.log('📤 Envoi des données vers :', endpoint, dto);
+
     this.http.post(endpoint, dto).subscribe({
       next: () => {
+        console.log('✅ Paiement manuel enregistré');
         this.chargerPaiements();
         this.fermerFormulairePaiement();
         alert("Paiement enregistré avec succès !");
-        console.log("✅ Paiement enregistré avec succès.");
       },
       error: (err) => {
         console.error('❌ Erreur lors de l’ajout manuel :', err);
@@ -290,5 +264,4 @@ paiementManuel: any = {
       }
     });
   }
-  
-}  
+}

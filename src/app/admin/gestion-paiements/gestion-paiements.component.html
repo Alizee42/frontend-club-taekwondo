@@ -32,9 +32,10 @@
         <app-echeances></app-echeances>
       </section>
 
-      <section *ngSwitchCase="'ajouter-paiement'">
-        <app-ajout-paiement></app-ajout-paiement>
-      </section>
+<section *ngSwitchCase="'ajouter-paiement'">
+  <app-ajout-paiement (changementVue)="changerVue($event)"></app-ajout-paiement>
+</section>
+
 
       <section *ngSwitchCase="'historique'">
         <app-historique-paiements></app-historique-paiements>

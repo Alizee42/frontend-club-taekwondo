@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -11,6 +11,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
   styleUrls: ['./ajout-paiement.component.css']
 })
 export class AjoutPaiementComponent implements OnInit {
+  @Output() changementVue = new EventEmitter<string>(); // 🔁 redirection vers vue paiements
+
   paiement: any = {
     utilisateurNom: '',
     utilisateurPrenom: '',
@@ -24,6 +26,7 @@ export class AjoutPaiementComponent implements OnInit {
   };
 
   nomFichier: string | null = null;
+  nombreEcheances: number = 1;
 
   sections = {
     utilisateur: true,
@@ -41,10 +44,29 @@ export class AjoutPaiementComponent implements OnInit {
   }
 
   onModePaiementChange(): void {
-    if (this.paiement.modePaiement !== 'échéances') {
+    if (this.paiement.modePaiement === 'échéances') {
+      this.nombreEcheances = 1;
+      this.genererEcheances();
+    } else {
       this.paiement.echeances = [];
-    } else if (this.paiement.echeances.length === 0) {
-      this.ajouterEcheance();
+    }
+  }
+
+  genererEcheances(): void {
+    const montant = Number(this.paiement.montantTotal);
+    const nombre = Number(this.nombreEcheances);
+    if (!montant || !nombre || nombre <= 0) return;
+
+    const montantParEcheance = +(montant / nombre).toFixed(2);
+    this.paiement.echeances = [];
+
+    for (let i = 0; i < nombre; i++) {
+      this.paiement.echeances.push({
+        dateEcheance: '',
+        montant: montantParEcheance,
+        statut: 'en attente',
+        numero: i + 1
+      });
     }
   }
 
@@ -80,13 +102,12 @@ export class AjoutPaiementComponent implements OnInit {
   validerPaiement(): void {
     const p = this.paiement;
 
-    // 🧪 Vérifications basiques
+    // Vérification
     if (!p.utilisateurNom || !p.utilisateurPrenom || !p.type || !p.datePaiement || p.montantTotal <= 0) {
       alert("Merci de remplir tous les champs obligatoires avec des valeurs valides.");
       return;
     }
 
-    // 💰 Si mode échéances, vérification des montants
     if (p.modePaiement === 'échéances') {
       if (p.echeances.length === 0) {
         alert("Veuillez ajouter au moins une échéance.");
@@ -99,39 +120,47 @@ export class AjoutPaiementComponent implements OnInit {
       }
     }
 
-    // 📦 Création du FormData
+    // Montants
+    const montantPaye = p.modePaiement === 'échéances'
+      ? p.echeances.filter((e: any) => e.statut === 'payé').reduce((s: number, e: any) => s + Number(e.montant), 0)
+      : p.montantTotal;
+
+    const montantRestant = p.montantTotal - montantPaye;
+
+    // Création du FormData
     const formData = new FormData();
     formData.append('utilisateurNom', p.utilisateurNom);
     formData.append('utilisateurPrenom', p.utilisateurPrenom);
     formData.append('utilisateurEmail', p.utilisateurEmail || '');
     formData.append('type', p.type);
     formData.append('montantTotal', String(p.montantTotal));
+    formData.append('montantPaye', String(montantPaye));
+    formData.append('montantRestant', String(montantRestant));
     formData.append('modePaiement', p.modePaiement);
     formData.append('datePaiement', p.datePaiement);
     formData.append('statut', p.modePaiement === 'échéances' ? 'en attente' : 'payé');
 
-    // 🔁 Ajouter les échéances si besoin
     if (p.modePaiement === 'échéances') {
       formData.append('echeances', JSON.stringify(
         p.echeances.map((e: any, i: number) => ({
           dateEcheance: e.dateEcheance,
           montant: e.montant,
-          statut: 'en attente',
+          statut: e.statut,
           numero: i + 1
         }))
       ));
     }
 
-    // 📎 Ajouter le fichier justificatif
     if (p.justificatif) {
       formData.append('justificatif', p.justificatif);
     }
 
-    // 📤 Envoi vers le backend
+    // Envoi
     this.http.post('/api/paiements/ajouter-complet', formData).subscribe({
       next: () => {
         alert("✅ Paiement enregistré avec succès !");
         this.resetFormulaire();
+        this.changementVue.emit("paiements"); // 👉 redirection vers vue paiements
       },
       error: err => {
         console.error(err);
@@ -153,5 +182,6 @@ export class AjoutPaiementComponent implements OnInit {
       justificatif: null
     };
     this.nomFichier = null;
+    this.nombreEcheances = 1;
   }
 }
