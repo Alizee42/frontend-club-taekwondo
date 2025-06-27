@@ -43,6 +43,8 @@ export class AjoutPaiementComponent implements OnInit {
   onModePaiementChange(): void {
     if (this.paiement.modePaiement !== 'échéances') {
       this.paiement.echeances = [];
+    } else if (this.paiement.echeances.length === 0) {
+      this.ajouterEcheance();
     }
   }
 
@@ -66,45 +68,74 @@ export class AjoutPaiementComponent implements OnInit {
     }
   }
 
+  calculMontantRestant(): number {
+    if (this.paiement.modePaiement === 'échéances') {
+      const payé = this.paiement.echeances.reduce((sum: number, e: any) =>
+        e.statut === 'payé' ? sum + Number(e.montant) : sum, 0);
+      return Math.max(0, this.paiement.montantTotal - payé);
+    }
+    return 0;
+  }
+
   validerPaiement(): void {
-    if (!this.paiement.utilisateurNom || !this.paiement.utilisateurPrenom || !this.paiement.type || !this.paiement.datePaiement) {
-      alert("Merci de remplir tous les champs obligatoires.");
+    const p = this.paiement;
+
+    // 🧪 Vérifications basiques
+    if (!p.utilisateurNom || !p.utilisateurPrenom || !p.type || !p.datePaiement || p.montantTotal <= 0) {
+      alert("Merci de remplir tous les champs obligatoires avec des valeurs valides.");
       return;
     }
 
-    if (this.paiement.modePaiement === 'échéances') {
-      const somme = this.paiement.echeances.reduce((s: number, e: any) => s + Number(e.montant), 0);
-      if (somme !== Number(this.paiement.montantTotal)) {
+    // 💰 Si mode échéances, vérification des montants
+    if (p.modePaiement === 'échéances') {
+      if (p.echeances.length === 0) {
+        alert("Veuillez ajouter au moins une échéance.");
+        return;
+      }
+      const somme = p.echeances.reduce((s: number, e: any) => s + Number(e.montant), 0);
+      if (somme !== Number(p.montantTotal)) {
         alert("La somme des échéances ne correspond pas au montant total.");
         return;
       }
     }
 
+    // 📦 Création du FormData
     const formData = new FormData();
-    formData.append('utilisateurNom', this.paiement.utilisateurNom);
-    formData.append('utilisateurPrenom', this.paiement.utilisateurPrenom);
-    formData.append('utilisateurEmail', this.paiement.utilisateurEmail || '');
-    formData.append('type', this.paiement.type);
-    formData.append('montantTotal', String(this.paiement.montantTotal));
-    formData.append('modePaiement', this.paiement.modePaiement);
-    formData.append('datePaiement', this.paiement.datePaiement);
+    formData.append('utilisateurNom', p.utilisateurNom);
+    formData.append('utilisateurPrenom', p.utilisateurPrenom);
+    formData.append('utilisateurEmail', p.utilisateurEmail || '');
+    formData.append('type', p.type);
+    formData.append('montantTotal', String(p.montantTotal));
+    formData.append('modePaiement', p.modePaiement);
+    formData.append('datePaiement', p.datePaiement);
+    formData.append('statut', p.modePaiement === 'échéances' ? 'en attente' : 'payé');
 
-    if (this.paiement.modePaiement === 'échéances') {
-      formData.append('echeances', JSON.stringify(this.paiement.echeances));
+    // 🔁 Ajouter les échéances si besoin
+    if (p.modePaiement === 'échéances') {
+      formData.append('echeances', JSON.stringify(
+        p.echeances.map((e: any, i: number) => ({
+          dateEcheance: e.dateEcheance,
+          montant: e.montant,
+          statut: 'en attente',
+          numero: i + 1
+        }))
+      ));
     }
 
-    if (this.paiement.justificatif) {
-      formData.append('justificatif', this.paiement.justificatif);
+    // 📎 Ajouter le fichier justificatif
+    if (p.justificatif) {
+      formData.append('justificatif', p.justificatif);
     }
 
+    // 📤 Envoi vers le backend
     this.http.post('/api/paiements/ajouter-complet', formData).subscribe({
       next: () => {
-        alert("Paiement enregistré avec succès !");
+        alert("✅ Paiement enregistré avec succès !");
         this.resetFormulaire();
       },
       error: err => {
         console.error(err);
-        alert("Erreur lors de l'enregistrement du paiement.");
+        alert("❌ Erreur lors de l'enregistrement du paiement.");
       }
     });
   }

@@ -49,10 +49,8 @@
         <td>{{ paiement.type }}</td>
         <td>{{ paiement.montantTotal | currency:'EUR' }}</td>
         <td>
-          <div class="progress-bar-container">
-            <div class="progress-bar" [style.width.%]="calculPourcentage(paiement)">
-              {{ calculPourcentage(paiement) }}%
-            </div>
+          <div class="progress-bar" [style.width.%]="calculPourcentage(paiement)">
+            {{ calculPourcentage(paiement) }}%
           </div>
           <small>
             {{ paiement.montantTotal - paiement.montantRestant | currency:'EUR' }}
@@ -129,7 +127,7 @@
 
         <div class="form-group">
           <label>Montant :</label>
-          <input type="number" [(ngModel)]="paiementManuel.montantTotal" name="montantTotal" required />
+<input type="number" [(ngModel)]="paiementManuel.montantAttendu" name="montantAttendu" required />
         </div>
 
         <div class="form-group">

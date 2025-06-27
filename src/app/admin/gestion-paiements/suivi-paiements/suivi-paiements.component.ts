@@ -28,16 +28,17 @@ export class SuiviPaiementsComponent implements OnInit {
   paiementActuel: any = null;
   nouveauStatut: string = 'payé';
 
-  paiementManuel: any = {
-    utilisateurNom: '',
-    utilisateurPrenom: '',
-    utilisateurEmail: '',
-    type: 'Cotisation',
-    montantAttendu: 0,
-    modePaiement: 'espèces',
-    datePaiement: '',
-    echeances: []
-  };
+paiementManuel: any = {
+  utilisateurNom: '',
+  utilisateurPrenom: '',
+  utilisateurEmail: '',
+  type: 'Cotisation',
+  montantTotal: 0, // 🔁 était "montantAttendu"
+  modePaiement: 'espèces',
+  datePaiement: '',
+  echeances: []
+};
+
 
   constructor(private http: HttpClient) {}
 
@@ -51,10 +52,12 @@ export class SuiviPaiementsComponent implements OnInit {
 
   chargerPaiements(): void {
     this.http.get<any[]>('/api/paiements').subscribe(data => {
+      console.log('📦 Données chargées depuis l’API /api/paiements :', data);
       this.paiements = data;
       this.filtrerPaiements();
     });
   }
+  
 
   filtrerPaiements(): void {
     this.paiementsFiltres = this.paiements.filter(p => {
@@ -69,18 +72,28 @@ export class SuiviPaiementsComponent implements OnInit {
   }
 
   calculPourcentage(paiement: any): number {
-    const total = paiement.modePaiement === 'échéances' ? paiement.montantAttendu : paiement.montantTotal || 0;
-    let payé = 0;
-
-    if (paiement.modePaiement === 'échéances') {
-      payé = paiement.echeances?.reduce((sum: number, e: any) => e.statut === 'payé' ? sum + e.montant : sum, 0) || 0;
-    } else {
-      payé = total - (paiement.montantRestant || 0);
+    if (!paiement || !paiement.montantTotal || paiement.montantTotal === 0) {
+      console.warn('⚠️ Paiement invalide ou montant total = 0', paiement);
+      return 0;
     }
-
-    return total > 0 ? Math.round((payé / total) * 100) : 0;
+  
+    let montantPaye = 0;
+  
+    if (paiement.modePaiement === 'échéances' && Array.isArray(paiement.echeances)) {
+      montantPaye = paiement.echeances
+        .filter((e: any) => e.statut === 'payé')
+        .reduce((sum: number, e: any) => sum + e.montant, 0);
+      console.log(`📊 Paiement en échéances (id: ${paiement.id}) - Montant payé :`, montantPaye);
+    } else {
+      montantPaye = paiement.montantTotal - paiement.montantRestant;
+      console.log(`📊 Paiement classique (id: ${paiement.id}) - Montant payé :`, montantPaye);
+    }
+  
+    const pourcentage = (montantPaye / paiement.montantTotal) * 100;
+    console.log(`✅ Pourcentage payé pour paiement ${paiement.id} : ${Math.round(pourcentage)}%`);
+    return Math.round(pourcentage);
   }
-
+  
   ouvrirModalStatut(paiement: any): void {
     this.paiementActuel = paiement;
     this.nouveauStatut = paiement.statut;
@@ -167,7 +180,7 @@ export class SuiviPaiementsComponent implements OnInit {
   }
 
   ajouterEcheance(): void {
-    const montantRestant = this.paiementManuel.montantAttendu || 0;
+    const montantRestant = this.paiementManuel.montantTotal || 0;
     this.paiementManuel.echeances.push({
       dateEcheance: '',
       montant: montantRestant,
@@ -183,50 +196,99 @@ export class SuiviPaiementsComponent implements OnInit {
     const montantPayé = this.paiementManuel.echeances.reduce((sum: number, e: any) =>
       e.statut === 'payé' ? sum + e.montant : sum, 0
     );
-    this.paiementManuel.montantRestant = Math.max(0, this.paiementManuel.montantAttendu - montantPayé);
+    this.paiementManuel.montantRestant = Math.max(0, this.paiementManuel.montantTotal - montantPayé);
   }
 
   enregistrerPaiementManuel(): void {
-    if (this.paiementManuel.modePaiement === 'échéances') {
-      if (this.paiementManuel.montantAttendu <= 0) {
-        alert("Le montant total attendu doit être supérieur à 0.");
+    const paiement = this.paiementManuel;
+    console.log("📥 Paiement manuel saisi :", paiement);
+  
+    if (!paiement.utilisateurNom || !paiement.utilisateurPrenom || !paiement.datePaiement) {
+      alert("Veuillez remplir tous les champs obligatoires.");
+      console.warn("❗ Champs obligatoires manquants :", paiement);
+      return;
+    }
+  
+    const montantTotal = paiement.montantAttendu;
+    console.log("💶 Montant total saisi :", montantTotal);
+  
+    if (montantTotal <= 0) {
+      alert("Le montant total attendu doit être supérieur à 0.");
+      console.warn("❗ Montant invalide :", montantTotal);
+      return;
+    }
+  
+    let totalEcheances = 0;
+    let montantPayé = 0;
+  
+    if (paiement.modePaiement === 'échéances') {
+      console.log("📆 Paiement en échéances détecté.");
+  
+      if (!paiement.echeances || paiement.echeances.length === 0) {
+        alert("Veuillez saisir au moins une échéance.");
+        console.warn("❗ Aucune échéance saisie.");
         return;
       }
-
-      const totalEcheances = this.paiementManuel.echeances.reduce((sum: number, e: any) => sum + (e.montant || 0), 0);
-      const montantPayé = this.paiementManuel.echeances.reduce((sum: number, e: any) => e.statut === 'payé' ? sum + e.montant : sum, 0);
-
-      if (totalEcheances !== this.paiementManuel.montantAttendu) {
+  
+      totalEcheances = paiement.echeances.reduce((sum: number, e: any) => sum + (e.montant || 0), 0);
+      montantPayé = paiement.echeances.reduce((sum: number, e: any) =>
+        e.statut === 'payé' ? sum + e.montant : sum, 0);
+  
+      console.log("💳 Total échéances :", totalEcheances);
+      console.log("✅ Montant payé par échéances :", montantPayé);
+  
+      if (totalEcheances !== montantTotal) {
         alert("La somme des échéances doit être égale au montant total attendu.");
+        console.warn("❗ Somme des échéances ≠ montant total");
         return;
       }
-
-      if (montantPayé > this.paiementManuel.montantAttendu) {
+  
+      if (montantPayé > montantTotal) {
         alert("Le montant payé dépasse le montant attendu.");
+        console.warn("❗ Montant payé > montant total");
         return;
       }
     }
-
-    const dto = {
-      utilisateurNom: this.paiementManuel.utilisateurNom,
-      utilisateurPrenom: this.paiementManuel.utilisateurPrenom,
-      utilisateurEmail: this.paiementManuel.utilisateurEmail || null,
-      type: this.paiementManuel.type,
-      montantTotal: this.paiementManuel.montantAttendu,
-      modePaiement: this.paiementManuel.modePaiement,
-      datePaiement: this.paiementManuel.datePaiement,
-      echeances: this.paiementManuel.echeances
+  
+    // 🔁 Si paiement rapide → statut = payé, montantRestant = 0
+    if (['espèces', 'virement', 'chèque'].includes(paiement.modePaiement)) {
+      paiement.montantRestant = 0;
+      paiement.statut = 'payé';
+      console.log("⚡ Paiement rapide détecté → marquage comme payé");
+    }
+  
+    const dto: any = {
+      utilisateurNom: paiement.utilisateurNom,
+      utilisateurPrenom: paiement.utilisateurPrenom,
+      utilisateurEmail: paiement.utilisateurEmail || null,
+      type: paiement.type,
+      montantTotal: montantTotal,
+      montantRestant: paiement.montantRestant,
+      modePaiement: paiement.modePaiement,
+      datePaiement: paiement.datePaiement,
+      statut: paiement.statut,
+      echeances: paiement.modePaiement === 'échéances' ? paiement.echeances : []
     };
-
-    this.http.post('/api/paiements/ajouter-manuel', dto).subscribe({
+  
+    const endpoint = paiement.modePaiement === 'échéances'
+      ? '/api/paiements/ajouter-complet'
+      : '/api/paiements/ajouter-manuel';
+  
+    console.log("📤 Données envoyées au backend :", dto);
+    console.log("🔗 Endpoint ciblé :", endpoint);
+  
+    this.http.post(endpoint, dto).subscribe({
       next: () => {
         this.chargerPaiements();
         this.fermerFormulairePaiement();
+        alert("Paiement enregistré avec succès !");
+        console.log("✅ Paiement enregistré avec succès.");
       },
       error: (err) => {
-        console.error('Erreur lors de l’ajout manuel', err);
-        alert("Erreur lors de l'ajout manuel : " + (err.error?.message || err.message));
+        console.error('❌ Erreur lors de l’ajout manuel :', err);
+        alert("Erreur lors de l'ajout : " + (err.error?.message || err.message));
       }
     });
   }
-}
+  
+}  
