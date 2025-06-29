@@ -99,6 +99,10 @@
     background-color: #6c757d; /* gris foncé */
     color: white;
   }
+  .badge-dark {
+    background-color: #bb2a2a;
+    color: white;
+  }
   
   
   /* 🔹 Modale */
@@ -181,4 +185,40 @@
     cursor: pointer;
     color: var(--blue-dark);
   }
+    /* === Boutons d'action === */
+  .btn-icon {
+    background-color: var(--blue-main);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 16px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
   
+  .btn-icon:hover {
+    background-color: var(--blue-hover);
+    transform: scale(1.1); /* Ajout d'un effet de zoom au survol */
+  }
+  
+  /* Boutons spécifiques */
+  .btn-stats {
+    background-color: var(--blue-main);
+  }
+  
+  .btn-stats:hover {
+    background-color: var(--blue-hover);
+  }
+  
+  .btn-echeances {
+    background-color: var(--accent-hover); /* Doré clair */
+  }
+  
+  .btn-echeances:hover {
+    background-color: #d4a436; /* Variante hover */
+  }

@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router'; // Pour router-outlet
 import { HeaderComponent } from './layout/header/header.component'; // Importer le header
 import { FooterComponent } from './layout/footer/footer.component'; // Importer le footer
 import { Router, NavigationEnd } from '@angular/router';
+import { ParametresPaiementService } from './services/parametres-paiement.service'; // adapte le chemin si besoin
+
 
 @Component({
   selector: 'app-root',
@@ -26,22 +28,29 @@ export class AppComponent {
   userRole: string | null = ''; // Rôle de l'utilisateur, "admin" ou "membre"
   isAdminOrMembreRoute: boolean = false; // Indique si la route actuelle est admin ou membre
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private parametresService: ParametresPaiementService // ✅ injection du service
+  ) {}
+  
 
   ngOnInit(): void {
-    // Vérifie la présence du token dans le localStorage pour déterminer si l'utilisateur est connecté
+    // 🔐 Vérifie connexion
     this.isLoggedIn = !!localStorage.getItem('token');
     this.userRole = localStorage.getItem('role');
-
-    // Écoute les changements de route
+  
+    // 📦 Charge les paramètres de paiement une seule fois
+    this.parametresService.chargerParametres();
+  
+    // 🔄 Surveille les routes
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        // Vérifie si la route actuelle est une route admin ou membre
         this.isAdminOrMembreRoute = event.url.startsWith('/admin') || event.url.startsWith('/membre');
         this.isProfilRoute = event.url.startsWith('/profil');
       }
     });
   }
+  
 
   // Méthode pour se déconnecter
   logout() {

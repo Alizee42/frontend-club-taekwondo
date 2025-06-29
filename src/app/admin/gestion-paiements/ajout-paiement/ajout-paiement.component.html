@@ -1,107 +1,111 @@
+<h2 class="page-title"><i class="ri-money-euro-circle-line"></i> Ajout d’un Paiement</h2>
+
 <div class="ajout-paiement-container">
-    <h2>Ajout avancé d’un paiement</h2>
+  <!-- Barre d'étapes -->
+  <div class="stepper">
+    <div *ngFor="let step of steps; let i = index" [class.active]="currentStep === i">
+      {{ step.label }}
+    </div>
+  </div>
 
-    <!-- Accordéon Utilisateur -->
-    <div class="accordion-section">
-        <div class="accordion-header" (click)="toggleSection('utilisateur')" [class.active]="sections.utilisateur">
-            <span>👤 Utilisateur</span>
-            <i class="ri-arrow-right-s-line"></i>
-        </div>
-        <div class="accordion-content" [class.active]="sections.utilisateur">
-            <label>Nom :
-                <input type="text" [(ngModel)]="paiement.utilisateurNom" placeholder="Nom de l’utilisateur" />
-            </label>
-            <label>Prénom :
-                <input type="text" [(ngModel)]="paiement.utilisateurPrenom" placeholder="Prénom" />
-            </label>
-            <label>Email :
-                <input type="email" [(ngModel)]="paiement.utilisateurEmail" placeholder="Email (facultatif)" />
-            </label>
-        </div>
+  <!-- Étape 1 : Utilisateur -->
+  <div *ngIf="currentStep === 0" class="form-step">
+    <h3>👤 Informations utilisateur</h3>
+    <label>Nom :
+      <input type="text" [(ngModel)]="paiement.utilisateurNom" placeholder="Nom de l’utilisateur" />
+    </label>
+    <label>Prénom :
+      <input type="text" [(ngModel)]="paiement.utilisateurPrenom" placeholder="Prénom" />
+    </label>
+    <label>Email :
+      <input type="email" [(ngModel)]="paiement.utilisateurEmail" placeholder="Email (facultatif)" />
+    </label>
+  </div>
+
+  <!-- Étape 2 : Détails paiement -->
+  <div *ngIf="currentStep === 1" class="form-step">
+    <h3>💳 Détails du paiement</h3>
+    <label>Type :
+      <select [(ngModel)]="paiement.type">
+        <option value="Cotisation">Cotisation</option>
+        <option value="Licence">Licence</option>
+        <option value="Événement">Événement</option>
+      </select>
+    </label>
+
+    <label>Montant total :
+      <input type="number" [(ngModel)]="paiement.montantTotal" min="0" step="0.01"
+             [readonly]="paiement.type === 'Cotisation' && parametresGlobaux" />
+    </label>
+
+    <label>Mode de paiement :
+      <select [(ngModel)]="paiement.modePaiement" (change)="onModePaiementChange()">
+        <option *ngFor="let mode of modesDisponibles" [value]="mode">
+          {{ mode | titlecase }}
+        </option>
+      </select>
+    </label>
+
+    <label>Date de paiement :
+      <input type="date" [(ngModel)]="paiement.datePaiement" />
+    </label>
+  </div>
+
+  <!-- Étape 3 : Échéances -->
+  <div *ngIf="currentStep === 2 && paiement.modePaiement === 'échéances'" class="form-step">
+    <h3>📆 Échéances</h3>
+    <label>Nombre d’échéances :
+      <input type="number" [(ngModel)]="nombreEcheances" (change)="genererEcheances()" min="1" max="10" />
+    </label>
+
+    <button type="button" (click)="genererEcheances()">🔄 Générer automatiquement</button>
+
+    <div class="echeance-row" *ngFor="let echeance of paiement.echeances; let i = index">
+      <label>Date :
+        <input type="date" [(ngModel)]="echeance.dateEcheance" />
+      </label>
+      <label>Montant :
+        <input type="number" [(ngModel)]="echeance.montant" min="0" step="0.01" />
+      </label>
+      <label>Statut :
+        <select [(ngModel)]="echeance.statut">
+          <option value="payé">Payé</option>
+          <option value="en attente">En attente</option>
+        </select>
+      </label>
+      <button type="button" (click)="supprimerEcheance(i)">❌</button>
+    </div>
+  </div>
+
+  <!-- Étape 4 : Justificatif & Résumé -->
+  <div *ngIf="(currentStep === 2 && paiement.modePaiement !== 'échéances') || currentStep === 3" class="form-step">
+    <h3>📁 Justificatif & Résumé</h3>
+    <label>Fichier justificatif :
+      <input type="file" (change)="onFileSelected($event)" />
+    </label>
+    <div *ngIf="nomFichier" class="nom-fichier">
+      Fichier sélectionné : {{ nomFichier }}
     </div>
 
-    <!-- Accordéon Détails paiement -->
-    <div class="accordion-section">
-        <div class="accordion-header" (click)="toggleSection('details')" [class.active]="sections.details">
-            <span>💳 Détails du paiement</span>
-            <i class="ri-arrow-right-s-line"></i>
-        </div>
-        <div class="accordion-content" [class.active]="sections.details">
-            <label>Type :
-                <select [(ngModel)]="paiement.type">
-                    <option value="Cotisation">Cotisation</option>
-                    <option value="Licence">Licence</option>
-                    <option value="Événement">Événement</option>
-                </select>
-            </label>
-            <label>Montant total :
-                <input type="number" [(ngModel)]="paiement.montantTotal" min="0" step="0.01" />
-            </label>
-            <label>Mode de paiement :
-                <select [(ngModel)]="paiement.modePaiement" (change)="onModePaiementChange()">
-                    <option value="espèces">Espèces</option>
-                    <option value="virement">Virement</option>
-                    <option value="chèque">Chèque</option>
-                    <option value="échéances">Échéances</option>
-                </select>
-            </label>
-            <label>Date de paiement :
-                <input type="date" [(ngModel)]="paiement.datePaiement" />
-            </label>
-        </div>
+    <div class="resume-paiement">
+      <h4>🧾 Résumé</h4>
+      <ul>
+        <li>👤 {{ paiement.utilisateurNom }} {{ paiement.utilisateurPrenom }}</li>
+        <li>📧 {{ paiement.utilisateurEmail }}</li>
+        <li>💳 {{ paiement.type }} - {{ paiement.montantTotal | currency:'EUR' }}</li>
+        <li>📅 {{ paiement.datePaiement | date:'dd/MM/yyyy' }}</li>
+        <li>💼 Mode : {{ paiement.modePaiement }}</li>
+        <li *ngIf="paiement.modePaiement === 'échéances'">
+          {{ paiement.echeances.length }} échéance(s)
+        </li>
+      </ul>
     </div>
+  </div>
 
-   <!-- Accordéon Échéances -->
-<div class="accordion-section" *ngIf="paiement.modePaiement === 'échéances'">
-    <div class="accordion-header" (click)="toggleSection('echeances')" [class.active]="sections.echeances">
-        <span>📆 Échéances</span>
-        <i class="ri-arrow-right-s-line"></i>
-    </div>
-    <div class="accordion-content" [class.active]="sections.echeances">
-        <!-- Nombre d’échéances -->
-        <label>Nombre d’échéances :
-            <input type="number" [(ngModel)]="nombreEcheances" min="1" (change)="genererEcheances()" />
-        </label>
-
-        <!-- Bouton pour régénérer manuellement -->
-        <button type="button" (click)="genererEcheances()">🔄 Générer automatiquement</button>
-
-        <!-- Liste des échéances -->
-        <div class="echeance-row" *ngFor="let echeance of paiement.echeances; let i = index">
-            <label>Date :
-                <input type="date" [(ngModel)]="echeance.dateEcheance" />
-            </label>
-            <label>Montant :
-                <input type="number" [(ngModel)]="echeance.montant" min="0" step="0.01" />
-            </label>
-            <label>Statut :
-                <select [(ngModel)]="echeance.statut">
-                    <option value="payé">Payé</option>
-                    <option value="en attente">En attente</option>
-                </select>
-            </label>
-            <button type="button" (click)="supprimerEcheance(i)">❌</button>
-        </div>
-    </div>
-</div>
-
-
-    <!-- Accordéon Justificatif -->
-    <div class="accordion-section">
-        <div class="accordion-header" (click)="toggleSection('justificatif')" [class.active]="sections.justificatif">
-            <span>📁 Justificatif</span>
-            <i class="ri-arrow-right-s-line"></i>
-        </div>
-        <div class="accordion-content" [class.active]="sections.justificatif">
-            <input type="file" (change)="onFileSelected($event)" />
-            <div *ngIf="nomFichier" class="nom-fichier">
-                Fichier sélectionné : {{ nomFichier }}
-            </div>
-        </div>
-    </div>
-
-    <!-- Bouton Valider -->
-    <div class="form-section">
-        <button class="bouton-validation" (click)="validerPaiement()">✅ Valider le paiement</button>
-    </div>
+  <!-- Navigation -->
+  <div class="step-buttons">
+    <button type="button" (click)="prevStep()" [disabled]="currentStep === 0">⬅️ Précédent</button>
+    <button type="button" *ngIf="!isLastStep()" (click)="nextStep()">➡️ Suivant</button>
+    <button type="button" *ngIf="isLastStep()" class="bouton-validation" (click)="validerPaiement()">✅ Valider le paiement</button>
+  </div>
 </div>

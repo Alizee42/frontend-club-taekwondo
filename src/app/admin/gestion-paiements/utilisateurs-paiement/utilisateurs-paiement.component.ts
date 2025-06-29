@@ -64,16 +64,34 @@ export class UtilisateursPaiementComponent implements OnInit {
   }
 
   getStatutPaiement(utilisateur: any): string {
-    const paiements = utilisateur.paiements || [];
+    if (!utilisateur.paiements || utilisateur.paiements.length === 0) {
+      return 'inconnu';
+    }
   
-    if (paiements.length === 0) return 'aucun paiement';
+    let hasEnRetard = false;
+    let hasEnAttente = false;
+    let hasAnnule = false;
   
-    if (paiements.every((p: any) => p.statut === 'payé')) return 'à jour';
-    if (paiements.some((p: any) => p.statut === 'en retard')) return 'en retard';
-    if (paiements.some((p: any) => p.statut === 'en attente')) return 'en attente';
+    for (const p of utilisateur.paiements) {
+      const statut = p.statut?.toLowerCase();
+      if (statut === 'en retard') {
+        hasEnRetard = true;
+      } else if (statut === 'en attente') {
+        hasEnAttente = true;
+      } else if (statut === 'annulé') {
+        hasAnnule = true;
+      } else if (statut === 'payé') {
+        // continue
+      }
+    }
   
-    return 'inconnu';
+    if (hasEnRetard) return 'en retard';
+    if (hasEnAttente) return 'en attente';
+    if (hasAnnule) return 'annulé'; // ✅ Ajouté
+  
+    return 'à jour';
   }
+  
   
 
   voirStats(utilisateur: any): void {

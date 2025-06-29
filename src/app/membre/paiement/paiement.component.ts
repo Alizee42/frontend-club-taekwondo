@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StripeService } from '../../services/stripe.service';
+import { ParametresPaiementService } from '../../services/parametres-paiement.service';
 
 @Component({
   selector: 'app-paiements',
@@ -16,10 +17,10 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   paiementsUniques: any[] = [];
   paiementsEcheances: any[] = [];
 
-  montantInitial: number = 300;
+  montantInitial: number = 0; // Montant récupéré depuis les paramètres globaux
   modePaiement: string = 'unique';
   nombreEcheances: number = 1;
-  echeancesOptions: number[] = [2, 3, 4];
+  echeancesOptions: number[] = [];
 
   stripe: any;
   cardElement: any;
@@ -40,10 +41,20 @@ export class PaiementComponent implements OnInit, AfterViewInit {
 
   sectionOuverte: { [key: string]: boolean } = { unique: true, echeances: true };
 
-  constructor(private http: HttpClient, private stripeService: StripeService) {}
+  constructor(
+    private http: HttpClient,
+    private stripeService: StripeService,
+    private parametresService: ParametresPaiementService
+  ) {}
 
   ngOnInit(): void {
-    this.loadPaiements(); 
+    this.parametresService.parametres$.subscribe((parametres) => {
+      if (parametres) {
+        this.montantInitial = parametres.montantCotisation;
+        this.echeancesOptions = Array.from({ length: parametres.echeancesAutorisees }, (_, i) => i + 1);
+      }
+    });
+    this.loadPaiements();
   }
 
   ngAfterViewInit(): void {}
@@ -121,59 +132,60 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     if (this.step > 1) this.step--;
   }
 
- initierPaiement(): void {
-  if (this.enCoursDePaiement) return;
+  initierPaiement(): void {
+    if (this.enCoursDePaiement) return;
 
-  const montant = this.montantInitial;  // ✅ Correction ici
-  if (montant <= 0 || !this.cardElement) return alert("Erreur : montant invalide ou Stripe non chargé.");
-  this.montantTotalAPayer = montant;
+    const montant = this.montantInitial;
+    if (montant <= 0 || !this.cardElement) return alert("Erreur : montant invalide ou Stripe non chargé.");
+    this.montantTotalAPayer = montant;
 
-  const token = localStorage.getItem('token');
-  const utilisateurId = Number(localStorage.getItem('utilisateurId'));
+    const token = localStorage.getItem('token');
+    const utilisateurId = Number(localStorage.getItem('utilisateurId'));
 
-  if (!token) {
-    this.erreurMessage = 'Utilisateur non authentifié';
-    this.paiementErreur = true;
-    return;
-  }
+    if (!token) {
+      this.erreurMessage = 'Utilisateur non authentifié';
+      this.paiementErreur = true;
+      return;
+    }
 
-  const data = {
-    amount: montant,  // ✅ On envoie le montant total
-    currency: 'eur',
-    modePaiement: this.modePaiement,
-    typePaiement: this.modePaiement === 'unique' ? 'unique' : 'echeances',
-    nombreEcheances: this.modePaiement === 'echeances' ? this.nombreEcheances : 1,
-    utilisateurId
-  };
+    const data = {
+      amount: montant,
+      currency: 'eur',
+      modePaiement: this.modePaiement,
+      typePaiement: this.modePaiement === 'unique' ? 'unique' : 'echeances',
+      nombreEcheances: this.modePaiement === 'echeances' ? this.nombreEcheances : 1,
+      utilisateurId
+    };
 
-  this.enCoursDePaiement = true;
-  this.paiementErreur = false;
-  this.paiementReussi = false;
+    this.enCoursDePaiement = true;
+    this.paiementErreur = false;
+    this.paiementReussi = false;
 
-  this.http.post('http://localhost:8080/api/stripe/create-payment-intent', data, {
-    headers: { Authorization: `Bearer ${token}` }
-  }).subscribe({
-    next: (res: any) => {
-      const clientSecret = res?.clientSecret;
-      if (!clientSecret) {
-        this.erreurMessage = 'Erreur : clientSecret non reçu.';
+    this.http.post('http://localhost:8080/api/stripe/create-payment-intent', data, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (res: any) => {
+        const clientSecret = res?.clientSecret;
+        if (!clientSecret) {
+          this.erreurMessage = 'Erreur : clientSecret non reçu.';
+          this.paiementErreur = true;
+          this.enCoursDePaiement = false;
+          return;
+        }
+        this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
+          this.loadPaiements();
+          this.paiementReussi = true;
+          this.enCoursDePaiement = false;
+        });
+      },
+      error: () => {
+        this.erreurMessage = 'Erreur lors de la création du paiement.';
         this.paiementErreur = true;
         this.enCoursDePaiement = false;
-        return;
       }
-      this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
-        this.loadPaiements();
-        this.paiementReussi = true;
-        this.enCoursDePaiement = false;
-      });
-    },
-    error: () => {
-      this.erreurMessage = 'Erreur lors de la création du paiement.';
-      this.paiementErreur = true;
-      this.enCoursDePaiement = false;
-    }
-  });
-}
+    });
+  }
+
   confirmerPaiementStripe(clientSecret: string, element: any, callback: () => void): void {
     this.stripe.confirmCardPayment(clientSecret, {
       payment_method: { card: element, billing_details: { name: 'Nom du client' } }
@@ -251,26 +263,6 @@ export class PaiementComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
-   // ...existing code...
-  genererEcheancier(paiement: any): { numero: number; date: Date; montant: number; statut: string; id: number }[] {
-    if (!paiement?.echeances?.length) return [];
-    return paiement.echeances
-      .map((e: any) => ({
-        numero: e.numero,
-        date: new Date(e.dateEcheance),
-        montant: e.montant,
-        statut: e.statut,
-        id: e.id
-      }))
-      .sort(
-        (
-          a: { numero: number; date: Date; montant: number; statut: string; id: number },
-          b: { numero: number; date: Date; montant: number; statut: string; id: number }
-        ) => a.date.getTime() - b.date.getTime()
-      );
-  }
-  // ...existing code...
 
   toggleSection(section: string): void {
     this.sectionOuverte[section] = !this.sectionOuverte[section];

@@ -1,0 +1,200 @@
+/* === Global Styles === */
+.echeance-container {
+    background-color: var(--background-light);
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .titre {
+    color: var(--blue-dark);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+  
+  /* === Barre de recherche === */
+  .barre-recherche {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .filtre-echeance {
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: white;
+    transition: border 0.3s ease;
+  }
+  
+  .filtre-echeance:focus {
+    border-color: var(--blue-main);
+    outline: none;
+  }
+  
+  /* === Accordéon Membres === */
+  .accordeon-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .membre-bloc {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+  
+  .membre-header {
+    padding: 1rem;
+    background-color: var(--blue-main);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+  
+  .membre-header:hover {
+    background-color: var(--blue-hover);
+  }
+  
+  .membre-nom {
+    font-size: 1rem;
+  }
+  
+  .echeance-count {
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+  
+  /* === Flèche rotation === */
+  .fleche {
+    transition: transform 0.3s ease;
+    font-size: 1.4rem;
+  }
+  .fleche.ouvert {
+    transform: rotate(180deg);
+  }
+  
+  /* === Liste des échéances === */
+  .liste-echeances {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #f9f9f9;
+    border-top: 1px solid #e2e2e2;
+  }
+  
+  .echeance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e2e2e2;
+    font-size: 0.9rem;
+  }
+  
+  .echeance-item:last-child {
+    border-bottom: none;
+  }
+  .echeance-details {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+  }
+  .echeance-details .date,
+  .echeance-details .montant {
+    min-width: 100px;
+    font-weight: 500;
+    color: #333;
+  }  
+  .echeance-info {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  /* === Badges === */
+  .badge {
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    min-width: 90px;
+    text-align: center;
+  }
+  
+  .badge-paye {
+    background-color: #28a745;
+    color: white;
+  }
+  .badge-attente {
+    background-color: #ffc107;
+    color: black;
+  }
+  .badge-retard {
+    background-color: #dc3545;
+    color: white;
+  }
+  .badge-annule {
+    background-color: #bb2a2a;
+    color: white;
+  }
+  
+  /* === Actions === */
+  .echeance-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .btn-icon {
+    background-color: var(--blue-main);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-icon:hover {
+    transform: scale(1.1);
+  }
+  
+  .btn-paye {
+    background-color: #28a745;
+  }
+  .btn-paye:hover {
+    background-color: #218838;
+  }
+  
+  .btn-supprimer {
+    background-color: var(--red-main);
+  }
+  .btn-supprimer:hover {
+    background-color: var(--red-hover);
+  }
+  
+  .btn-relancer {
+    background-color: var(--accent-hover);
+  }
+  .btn-relancer:hover {
+    background-color: #d4a436;
+  }
+  
+  .btn-icon i {
+    font-size: 1.2rem;
+  }
+  

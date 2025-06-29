@@ -1,1 +1,75 @@
-<p>parametres-paiement works!</p>
+<div class="suivi-paiements">
+  <h2 class="page-title">
+    <i class="ri-settings-3-line"></i> Paramètres de Paiement
+  </h2>
+
+  <form (ngSubmit)="enregistrerParametres()" class="form-parametres">
+    <!-- Cotisation annuelle -->
+    <div class="form-section">
+      <h3>💰 Cotisation annuelle</h3>
+      <label for="cotisation">Montant (€) :</label>
+      <input
+        id="cotisation"
+        type="number"
+        [(ngModel)]="parametres.montantCotisation"
+        name="montantCotisation"
+        min="0"
+      />
+    </div>
+
+    <!-- Modes de paiement -->
+    <div class="form-section">
+      <h3>💳 Modes de paiement disponibles</h3>
+
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="parametres.virement" name="virement" />
+          Virement
+        </label>
+        <label>
+          <input type="checkbox" [(ngModel)]="parametres.especes" name="especes" />
+          Espèces
+        </label>
+        <label>
+          <input type="checkbox" [(ngModel)]="parametres.stripe" name="stripe" />
+          Stripe
+        </label>
+      </div>
+
+      <label for="modeDefaut">Mode par défaut :</label>
+      <select id="modeDefaut" [(ngModel)]="parametres.modePaiementParDefaut" name="modePaiementParDefaut">
+        <option value="virement">Virement</option>
+        <option value="espèces">Espèces</option>
+        <option value="stripe">Stripe</option>
+      </select>
+    </div>
+
+    <!-- Paiement échelonné -->
+    <div class="form-section">
+      <h3>📆 Paiement en plusieurs fois</h3>
+
+      <label for="nbEcheances">Nombre d’échéances autorisé :</label>
+      <select id="nbEcheances" [(ngModel)]="parametres.echeancesAutorisees" name="echeancesAutorisees">
+        <option *ngFor="let n of [2, 3, 4]" [value]="n">{{ n }} fois</option>
+      </select>
+
+      <label for="intervalle">Intervalle entre échéances :</label>
+      <select id="intervalle" [(ngModel)]="parametres.intervalleEcheance" name="intervalleEcheance">
+        <option value="3semaines">Toutes les 3 semaines</option>
+        <option value="1mois">Tous les mois</option>
+        <option value="2mois">Tous les 2 mois</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button type="submit" class="btn btn-submit">✅ Enregistrer</button>
+    </div>
+  </form>
+</div>
+
+<div class="modal-backdrop" *ngIf="showModal">
+  <div class="modal-box">
+    <p>{{ messageModal }}</p>
+    <button class="btn-close" (click)="fermerModal()">Fermer</button>
+  </div>
+</div>

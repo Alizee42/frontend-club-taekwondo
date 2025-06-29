@@ -1,1 +1,56 @@
-<p>echeances works!</p>
+<div class="echeance-container">
+  <h1 class="titre"><i class="ri-calendar-event-line"></i> Suivi des Échéances</h1>
+
+  <!-- Barre de recherche -->
+  <div class="barre-recherche">
+    <input type="text" [(ngModel)]="filtreTexte" class="filtre-echeance" placeholder="🔍 Rechercher un membre..." />
+  </div>
+
+  <!-- Accordéon Membres + Échéances -->
+  <div class="accordeon-container">
+    <div class="membre-bloc" *ngFor="let membre of membresFiltres">
+      <!-- En-tête du membre -->
+      <div class="membre-header" (click)="membre.expanded = !membre.expanded" [attr.aria-expanded]="membre.expanded"
+        role="button" tabindex="0">
+        <span class="membre-nom">{{ membre.prenom }} {{ membre.nom }}</span>
+        <span class="echeance-count">{{ membre.echeances.length }} échéance(s)</span>
+        <i class="ri-arrow-down-s-line fleche" [class.ouvert]="membre.expanded"></i>
+      </div>
+
+      <!-- Liste des échéances -->
+      <ul class="liste-echeances" *ngIf="membre.expanded">
+        <li *ngFor="let echeance of membre.echeances" class="echeance-item">
+          <div class="echeance-details">
+            <span class="badge" [ngClass]="{
+                    'badge-paye': echeance.statut === 'payé',
+                    'badge-attente': echeance.statut === 'en attente',
+                    'badge-retard': echeance.statut === 'en retard',
+                    'badge-annule': echeance.statut === 'annulé'
+                  }">
+              {{ echeance.statut }}
+            </span>
+
+
+            <span class="date">{{ echeance.dateEcheance | date:'dd/MM/yyyy' }}</span>
+            <span class="montant">{{ echeance.montant | currency:'EUR' }}</span>
+          </div>
+
+          <div class="echeance-actions">
+            <button *ngIf="echeance.statut !== 'payé' && echeance.statut !== 'annulé'" class="btn-icon btn-paye"
+              (click)="marquerCommePayee(echeance)">
+              <i class="ri-check-line"></i>
+            </button>
+
+            <button class="btn-icon btn-supprimer" (click)="supprimerEcheance(echeance)">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+            <button class="btn-icon btn-relancer" (click)="relancerEcheance(echeance)">
+              <i class="ri-mail-send-line"></i>
+            </button>
+          </div>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+</div>

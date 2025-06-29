@@ -1,36 +1,19 @@
 <div class="suivi-paiements">
-  <h2>Suivi des Paiements</h2>
+  <h2 class="page-title"><i class="ri-list-check-2"></i> Suivi des Paiements</h2>
 
-  <div class="filters">
-    <label>Type :
-      <select [(ngModel)]="filter.type">
-        <option value="">Tous</option>
-        <option value="cotisation">Cotisation</option>
-        <option value="licence">Licence</option>
-        <option value="événement">Événement</option>
-      </select>
-    </label>
-
-    <label>Statut :
-      <select [(ngModel)]="filter.statut">
-        <option value="">Tous</option>
-        <option value="payé">Payé</option>
-        <option value="en attente">En attente</option>
-        <option value="annulé">Annulé</option>
-      </select>
-    </label>
-
-    <label>Utilisateur :
-      <input type="text" [(ngModel)]="filter.utilisateur" placeholder="Nom ou Prénom">
-    </label>
+  <div class="top-bar">
+    <input type="text" class="search-input" [(ngModel)]="filter.utilisateur" (input)="filtrerPaiements()" placeholder="🔍 Rechercher un utilisateur...">
+  
+    <div class="btn-group">
+      <button class="icon-btn" (click)="ouvrirModalFiltres()" title="Filtres avancés">
+        <i class="ri-filter-3-line"></i>
+      </button>
+      <button class="action-btn" (click)="ouvrirFormulairePaiement()">+ Paiement rapide</button>
+      <button class="action-btn" (click)="redirigerVersAjoutPaiement()">Ajout avancé</button>
+    </div>
   </div>
-
-  <div class="btnGroup">
-    <button class="ajout-manuel-btn" (click)="ouvrirFormulairePaiement()">+ Paiement rapide</button>
-    <button class="ajout-manuel-btn" (click)="redirigerVersAjoutPaiement()">Ajout avancé</button>
-  </div>
-
   <table>
+
     <thead>
       <tr>
         <th>Utilisateur</th>
@@ -53,10 +36,10 @@
             {{ calculPourcentage(paiement) }}%
           </div>
           <small>
-            {{ paiement.montantTotal - paiement.montantRestant | currency:'EUR' }}
+            {{ getMontantPaye(paiement) | currency:'EUR' }}
             / {{ paiement.montantTotal | currency:'EUR' }}
           </small>
-        </td>
+        </td>        
         <td>{{ paiement.datePaiement | date:'dd/MM/yyyy' }}</td>
         <td>{{ paiement.modePaiement }}</td>
         <td>
@@ -68,17 +51,16 @@
           </span>
         </td>
         <td class="actions">
-          <button *ngIf="paiement.modePaiement !== 'échéances'" class="btn-icon"
-                  (click)="ouvrirModalStatut(paiement)" title="Changer le statut">
-            <i class="ri-edit-box-line"></i>
-          </button>
-          <button class="btn-icon" (click)="supprimerPaiement(paiement)" title="Supprimer le paiement">
+          <button class="btn-icon btn-supprimer" (click)="supprimerPaiement(paiement)" title="Supprimer le paiement">
             <i class="ri-delete-bin-line"></i>
           </button>
-          <button class="btn-icon" (click)="ouvrirModalEcheances(paiement)" title="Voir les échéances">
+          <button class="btn-icon btn-annuler" (click)="ouvrirModalAnnulation(paiement)" title="Annuler le paiement">
+            <i class="ri-close-circle-line"></i>
+          </button>
+          <button class="btn-icon btn-echeance" (click)="ouvrirModalEcheances(paiement)" title="Voir les échéances">
             <i class="ri-calendar-event-line"></i>
           </button>
-        </td>
+        </td>        
       </tr>
     </tbody>
   </table>
@@ -86,27 +68,33 @@
   <!-- ✅ MODAL AJOUT RAPIDE -->
   <div class="modal" *ngIf="modalOuverte">
     <div class="modal-content">
-      <h2>Ajout rapide d’un paiement</h2>
+      <div class="modal-header">
+        <h2>Ajout rapide d’un paiement</h2>
+        <button class="close-btn" (click)="fermerFormulairePaiement()" aria-label="Fermer">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+  
       <p class="info-message">
         Ce formulaire permet d’ajouter rapidement un paiement (sans échéances ni justificatif). Pour plus d’options, utilisez l’ajout avancé.
       </p>
-
+  
       <form (ngSubmit)="enregistrerPaiementManuel()" #paiementForm="ngForm">
         <div class="form-group">
           <label>Nom :</label>
           <input type="text" [(ngModel)]="paiementManuel.utilisateurNom" name="utilisateurNom" required />
         </div>
-
+  
         <div class="form-group">
           <label>Prénom :</label>
           <input type="text" [(ngModel)]="paiementManuel.utilisateurPrenom" name="utilisateurPrenom" required />
         </div>
-
+  
         <div class="form-group">
           <label>Email :</label>
           <input type="email" [(ngModel)]="paiementManuel.utilisateurEmail" name="utilisateurEmail" />
         </div>
-
+  
         <div class="form-group">
           <label>Type de paiement :</label>
           <select [(ngModel)]="paiementManuel.type" name="type" required>
@@ -115,7 +103,7 @@
             <option value="événement">Événement</option>
           </select>
         </div>
-
+  
         <div class="form-group">
           <label>Mode de paiement :</label>
           <select [(ngModel)]="paiementManuel.modePaiement" name="modePaiement" required>
@@ -124,22 +112,103 @@
             <option value="chèque">Chèque</option>
           </select>
         </div>
-
+  
         <div class="form-group">
           <label>Montant :</label>
-<input type="number" [(ngModel)]="paiementManuel.montantAttendu" name="montantAttendu" required />
+          <input type="number" [(ngModel)]="paiementManuel.montantAttendu" name="montantAttendu" required />
         </div>
-
+  
         <div class="form-group">
           <label>Date de paiement :</label>
           <input type="date" [(ngModel)]="paiementManuel.datePaiement" name="datePaiement" required />
         </div>
-
+  
         <div class="modal-actions">
-          <button type="submit">Ajouter</button>
-          <button type="button" (click)="fermerFormulairePaiement()">Annuler</button>
+          <button type="submit" class="btn btn-submit">Ajouter</button>
+          <button type="button" class="btn btn-cancel" (click)="fermerFormulairePaiement()">Annuler</button>
         </div>
       </form>
     </div>
   </div>
+  
+  <!-- ✅ MODAL ANNULATION -->
+<div class="modal" *ngIf="modalAnnulationVisible">
+  <div class="modal-content">
+    <h2>🛑 Annuler le paiement</h2>
+    <p>Veuillez indiquer le <strong>motif</strong> de l’annulation :</p>
+
+    <form (ngSubmit)="confirmerAnnulationPaiement()">
+      <div class="form-group">
+        <label>Motif d'annulation :</label>
+        <textarea [(ngModel)]="motifAnnulation" name="motifAnnulation" rows="3" required></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit">✅ Confirmer l’annulation</button>
+        <button type="button" (click)="fermerModalAnnulation()">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="modal" *ngIf="modalFiltresVisible">
+  <div class="modal-content">
+    <h2>Filtres avancés</h2>
+
+    <div class="form-group">
+      <label>Type :</label>
+      <select [(ngModel)]="filter.type">
+        <option value="">Tous</option>
+        <option value="cotisation">Cotisation</option>
+        <option value="licence">Licence</option>
+        <option value="événement">Événement</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Statut :</label>
+      <select [(ngModel)]="filter.statut">
+        <option value="">Tous</option>
+        <option value="payé">Payé</option>
+        <option value="en attente">En attente</option>
+        <option value="annulé">Annulé</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="action-btn" (click)="filtrerPaiements(); fermerModalFiltres()">✅ Appliquer</button>
+      <button class="cancel-btn" (click)="fermerModalFiltres()">Annuler</button>
+    </div>
+  </div>
+</div>
+<!-- ✅ MODAL ÉCHÉANCES -->
+<div class="modal" *ngIf="modalEcheancesVisible">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Échéances du paiement</h2>
+      <button class="close-btn" (click)="fermerModalEcheances()" aria-label="Fermer">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <div *ngIf="paiementActuel?.echeances?.length > 0; else aucuneEcheance">
+      <ul class="echeance-list">
+        <li *ngFor="let e of paiementActuel.echeances">
+          <span>📅 {{ e.dateEcheance | date:'dd/MM/yyyy' }}</span>
+          <span>💶 {{ e.montant | currency:'EUR' }}</span>
+          <span class="badge"
+                [class.paye]="e.statut === 'payé'"
+                [class.attente]="e.statut === 'en attente'"
+                [class.annule]="e.statut === 'annulé'">
+            {{ e.statut }}
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <ng-template #aucuneEcheance>
+      <p>Aucune échéance pour ce paiement.</p>
+    </ng-template>
+  </div>
+</div>
+
 </div>

@@ -30,6 +30,7 @@ body {
   margin-bottom: 30px;
 }
 .progress-bar {
+  background: #f0f4f8;
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;

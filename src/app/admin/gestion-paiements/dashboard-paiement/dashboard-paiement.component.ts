@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardStats } from '../../../models/dashboard-stats.model';
 import { PaymentAdminService } from '../../../services/payment-admin.service';
@@ -7,12 +7,12 @@ import {
   ArcElement,
   Tooltip,
   Legend,
-  DoughnutController // ✅ Correction ici
+  DoughnutController
 } from 'chart.js';
 import { DaySum } from '../../../models/day-sum';
 import { MembreRetard } from '../../../models/membre-retard';
+import { Subscription } from 'rxjs';
 
-// ✅ Enregistrement du bon contrôleur
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
 @Component({
@@ -22,48 +22,59 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
   templateUrl: './dashboard-paiement.component.html',
   styleUrls: ['./dashboard-paiement.component.css']
 })
-export class DashboardPaiementComponent implements OnInit {
+export class DashboardPaiementComponent implements OnInit, OnDestroy {
   stats!: DashboardStats & {
     courbe: DaySum[];
     membresEnRetard: MembreRetard[];
   };
 
   chart: Chart | null = null;
+  private statsSubscription!: Subscription;
 
   constructor(private paymentService: PaymentAdminService) {}
 
- ngOnInit(): void {
-  console.log('[🔄 INIT] Chargement du tableau de bord...');
-  this.paymentService.getDashboardStats().subscribe({
-    next: (data: any) => {
-      console.log('[✅ DATA REÇUE]', data);
+  ngOnInit(): void {
+    console.log('[🔄 INIT] Écoute des données dashboard...');
+
+    // 👂 On s'abonne au flux observable
+    this.statsSubscription = this.paymentService.dashboardStats$.subscribe(data => {
+      if (!data) return;
+      console.log('[✅ STATS RÉACTIVES REÇUES]', data);
 
       this.stats = {
         totalPayes: data.totalPayes,
         totalAnnules: data.totalAnnules,
         totalAttente: data.totalAttente,
         pourcentagePayesMois: data.pourcentagePayesMois,
-        courbe: data.courbe30J || [],
-        membresEnRetard: data.membresEnRetard || [] // 🔄 Remplace topRetards par membresEnRetard
+        courbe: data.courbe || [],
+        membresEnRetard: data.membresEnRetard || []
       };
 
-      console.log('[👀 Membres en retard]', this.stats.membresEnRetard);
-
       this.buildDoughnutChart();
-    },
-    error: err => {
-      console.error('[⛔ ERREUR API]', err);
-    }
-  });
-}
+    });
 
+    this.refreshStats();
+  }
+
+  /**
+   * Recharge les données depuis le backend
+   */
+  refreshStats(): void {
+    console.log('[🔁] Rechargement des données Dashboard...');
+    this.paymentService.refreshDashboardStats().subscribe({
+      next: () => console.log('[✔️] Dashboard actualisé'),
+      error: err => console.error('[❌] Erreur lors du refresh', err)
+    });
+  }
+
+  /**
+   * Affiche le donut avec les 3 totaux
+   */
   buildDoughnutChart(): void {
-    console.log('[🍩 BUILD DOUGHNUT CHART]');
-
     setTimeout(() => {
       const canvas = document.getElementById('doughnutChart') as HTMLCanvasElement;
       if (!canvas) {
-        console.warn('[⚠️] Canvas #doughnutChart introuvable dans le DOM'); // ✅ correction ici
+        console.warn('[⚠️] Canvas #doughnutChart introuvable');
         return;
       }
 
@@ -108,6 +119,15 @@ export class DashboardPaiementComponent implements OnInit {
           }
         }
       });
-    }, 100); // délai pour s’assurer que le DOM est prêt
+    }, 100);
+  }
+
+  /**
+   * Nettoyage à la destruction
+   */
+  ngOnDestroy(): void {
+    if (this.statsSubscription) {
+      this.statsSubscription.unsubscribe();
+    }
   }
 }

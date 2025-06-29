@@ -55,3 +55,25 @@ html, body {
   font-size: 1.2rem; /* Ajuste la taille de l'icône */
 }
 
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+select {
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: inherit;
+  height: 40px;
+  box-sizing: border-box;
+  background-color: #fff;
+  color: #333;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #3b82f6; /* couleur bleue focus */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}

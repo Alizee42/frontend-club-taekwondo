@@ -7,7 +7,6 @@ import { UtilisateursPaiementComponent } from './utilisateurs-paiement/utilisate
 import { SuiviPaiementsComponent } from './suivi-paiements/suivi-paiements.component';
 import { EcheancesComponent } from './echeances/echeances.component';
 import { AjoutPaiementComponent } from './ajout-paiement/ajout-paiement.component';
-import { HistoriquePaiementsComponent } from './historique-paiements/historique-paiements.component';
 import { ParametresPaiementComponent } from './parametres-paiement/parametres-paiement.component';
 
 @Component({
@@ -20,7 +19,6 @@ import { ParametresPaiementComponent } from './parametres-paiement/parametres-pa
     SuiviPaiementsComponent,
     EcheancesComponent,
     AjoutPaiementComponent,
-    HistoriquePaiementsComponent,
     ParametresPaiementComponent
   ],
   templateUrl: './gestion-paiements.component.html',

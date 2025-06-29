@@ -1,6 +1,6 @@
 <div class="header-section">
-    <h2>👥 Liste des membres</h2>
-    <input
+  <h2 class="page-title"><i class="ri-user-3-line"></i> Liste des Membres</h2>
+  <input
       type="text"
       placeholder="Rechercher un membre..."
       [(ngModel)]="searchTerm"
@@ -27,20 +27,24 @@
               'badge-success': getStatutPaiement(utilisateur) === 'à jour',
               'badge-warning': getStatutPaiement(utilisateur) === 'en attente',
               'badge-danger': getStatutPaiement(utilisateur) === 'en retard',
-              'badge-secondary': getStatutPaiement(utilisateur) === 'inconnu'
-            }"
-          >
+              'badge-secondary': getStatutPaiement(utilisateur) === 'inconnu',
+              'badge-dark': getStatutPaiement(utilisateur) === 'annulé'
+            }">
             {{ getStatutPaiement(utilisateur) }}
           </span>
         </td>
-        <td>
-          <button (click)="voirStats(utilisateur)" title="Voir les statistiques">📊</button>
-          <button (click)="voirEcheances(utilisateur)" title="Voir les échéances">📅</button>
+               <td>
+          <button class="btn-icon btn-stats" (click)="voirStats(utilisateur)" title="Voir les statistiques">
+            <i class="ri-bar-chart-line"></i>
+          </button>
+          <button class="btn-icon btn-echeances" (click)="voirEcheances(utilisateur)" title="Voir les échéances">
+            <i class="ri-calendar-event-line"></i>
+          </button>
         </td>
       </tr>
     </tbody>
   </table>
-  
+    
   <!-- 🔸 Modale Statistiques -->
   <div class="modal" *ngIf="modalStatsVisible">
     <div class="modal-content">

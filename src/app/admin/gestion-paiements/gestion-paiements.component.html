@@ -8,7 +8,6 @@
       <li (click)="changerVue('paiements')" [class.active]="vueActive === 'paiements'">💰 Paiements</li>
       <li (click)="changerVue('echeances')" [class.active]="vueActive === 'echeances'">📅 Échéances</li>
       <li (click)="changerVue('ajouter-paiement')" [class.active]="vueActive === 'ajouter-paiement'">➕ Ajouter</li>
-      <li (click)="changerVue('historique')" [class.active]="vueActive === 'historique'">📜 Historique</li>
       <li (click)="changerVue('parametres')" [class.active]="vueActive === 'parametres'">⚙️ Paramètres</li>
     </ul>
   </aside>
@@ -37,9 +36,7 @@
 </section>
 
 
-      <section *ngSwitchCase="'historique'">
-        <app-historique-paiements></app-historique-paiements>
-      </section>
+    
 
       <section *ngSwitchCase="'parametres'">
         <app-parametres-paiement></app-parametres-paiement>
