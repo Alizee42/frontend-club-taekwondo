@@ -14,11 +14,21 @@
           <div class="avis-card">
             <p class="avis-text">“{{ avis.contenu }}”</p>
             <div class="avis-author">
-              <img
-                [src]="avis.photo || 'assets/images/default-avatar.jpg'"
-                alt="Photo de {{ avis.pseudoVisiteur }}"
-                class="avis-photo"
-              />
+              <div class="photo-container">
+                <img
+                  *ngIf="avis.photo"
+                  [src]="getPhotoUrl(avis.photo)"
+                  alt="Photo de {{ avis.pseudoVisiteur }}"
+                  class="avis-photo"
+                />
+                <div
+                  *ngIf="!avis.photo"
+                  class="initials"
+                  [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || 'Anonyme')"
+                >
+                  {{ getInitials(avis.pseudoVisiteur || 'Anonyme') }}
+                </div>
+              </div>
               <div>
                 <strong>{{ avis.pseudoVisiteur || 'Anonyme' }}</strong><br />
                 <span>{{ avis.typeAvis || 'Avis général' }}</span>
@@ -36,6 +46,7 @@
           </div>
         </div>
       </div>
+
     
       <!-- Pagination -->
       <div class="swiper-pagination"></div>

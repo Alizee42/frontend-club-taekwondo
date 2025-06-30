@@ -20,6 +20,7 @@ import { DocumentsComponent } from './membre/documents/documents.component';
 import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-documents.component';
 import { PaiementComponent } from './membre/paiement/paiement.component'; 
 import { GestionPaiementsComponent } from './admin/gestion-paiements/gestion-paiements.component'; // Importer le composant Paiement
+import { BoutiqueComponent } from './pages/boutique/boutique.component';
 
 export const routes: Routes = [
   // Routes publiques
@@ -33,6 +34,8 @@ export const routes: Routes = [
 
   // Route pour la page "Profil" (protégée par AuthGuard)
   { path: 'profil', component: ProfilComponent, canActivate: [AuthGuard] },
+  { path: 'boutique', component: BoutiqueComponent },
+
 
   // Routes protégées pour l'admin
   {

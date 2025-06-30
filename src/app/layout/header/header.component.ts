@@ -13,12 +13,27 @@ export class HeaderComponent implements OnInit {
   menuOpen = false;
   dropdownOpenClub = false;
   profileMenuOpen = false;
-  isLoggedIn = false; // État de connexion de l'utilisateur
+  panierOpen = false;
+
+  isLoggedIn = false;
+  user: any = null;
+  panier: any[] = [];
+  cartCount = 0;
 
   constructor(private router: Router) {}
 
   ngOnInit() {
     this.checkLoginStatus();
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      this.user = JSON.parse(storedUser);
+    }
+
+    const storedPanier = localStorage.getItem('panier');
+    if (storedPanier) {
+      this.panier = JSON.parse(storedPanier);
+      this.cartCount = this.panier.length;
+    }
   }
 
   toggleMenu() {
@@ -35,12 +50,8 @@ export class HeaderComponent implements OnInit {
     this.profileMenuOpen = !this.profileMenuOpen;
   }
 
-  scrollToSection(sectionId: string) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      this.closeMenu();
-    }
+  togglePanier() {
+    this.panierOpen = !this.panierOpen;
   }
 
   goToInscription() {
@@ -67,60 +78,75 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/connexion']);
     this.closeMenu();
   }
+
   goToProfil() {
-    this.router.navigate(['/profil']); // Redirige vers la page "Modifier mon profil"
+    this.router.navigate(['/profil']);
   }
 
   goToDashboard() {
-    const role = localStorage.getItem('role')?.toLowerCase(); // Récupère le rôle et le convertit en minuscules
+    const role = localStorage.getItem('role')?.toLowerCase();
     if (role === 'admin') {
-      this.router.navigate(['/admin/dashboard-admin']); // Redirige vers le tableau de bord admin
+      this.router.navigate(['/admin/dashboard-admin']);
     } else if (role === 'membre') {
-      this.router.navigate(['/membre/dashboard-membre']); // Redirige vers le tableau de bord membre
+      this.router.navigate(['/membre/dashboard-membre']);
     } else {
       console.error('Rôle inconnu ou non défini.');
       alert('Votre rôle est inconnu. Veuillez contacter l’administrateur.');
-      this.router.navigate(['/']); // Redirige vers la page d'accueil
+      this.router.navigate(['/']);
     }
+  }
+
+  goToBoutique() {
+    this.router.navigate(['/boutique']);
+    this.closeMenu();
+  }
+
+  goToPanier() {
+    this.panierOpen = !this.panierOpen;
   }
 
   logout() {
-    localStorage.removeItem('token'); // Supprime le token
-    localStorage.removeItem('user'); // Supprime les informations utilisateur
-    this.isLoggedIn = false; // Met à jour l'état de connexion
-    this.router.navigate(['/connexion']); // Redirige vers la page de connexion
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('panier');
+    this.isLoggedIn = false;
+    this.router.navigate(['/connexion']);
   }
 
   getInitials(): string {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user && user.name) {
-      const names = user.name.split(' ');
-      const initials = names.map((n: string) => n[0]).join('');
-      return initials.toUpperCase();
-    }
-    return 'U';
+    if (!this.user || !this.user.nom || !this.user.prenom) return '?';
+    return (this.user.prenom.charAt(0) + this.user.nom.charAt(0)).toUpperCase();
   }
+
   checkLoginStatus() {
-    const token = localStorage.getItem('token'); // Vérifie si un token est présent
-    this.isLoggedIn = !!token; // Si un token existe, l'utilisateur est connecté
-    const role = localStorage.getItem('role'); // Récupère le rôle de l'utilisateur
-    if (role) {
-      console.log(`Utilisateur connecté avec le rôle : ${role}`);
-    } else {
-      console.warn('Rôle non défini pour l’utilisateur connecté.');
-    }
+    const token = localStorage.getItem('token');
+    this.isLoggedIn = !!token;
   }
 
   closeMenu() {
     this.menuOpen = false;
     this.dropdownOpenClub = false;
     this.profileMenuOpen = false;
+    this.panierOpen = false;
   }
-
+  scrollToSection(sectionId: string) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      this.closeMenu(); // facultatif : referme le menu mobile après clic
+    }
+  }
+  
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.main-nav') && !target.closest('.burger') && !target.closest('.profile-menu')) {
+    if (
+      !target.closest('.main-nav') &&
+      !target.closest('.burger') &&
+      !target.closest('.profile-menu') &&
+      !target.closest('.cart-icon') &&
+      !target.closest('.cart-preview')
+    ) {
       this.closeMenu();
     }
   }

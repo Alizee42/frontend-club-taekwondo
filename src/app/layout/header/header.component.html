@@ -5,18 +5,10 @@
       <a routerLink="/">Taekwondo Club</a>
     </div>
 
-    <!-- Burger menu (mobile) -->
-    <div class="burger" (click)="toggleMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-
-    <!-- Navigation principale -->
+    <!-- Navigation -->
     <nav class="main-nav" [class.open]="menuOpen">
       <ul>
         <li><a (click)="goHome()">Accueil</a></li>
-
         <li class="dropdown" [class.active]="dropdownOpenClub">
           <a (click)="toggleDropdown('club')">Le club ▾</a>
           <ul class="dropdown-menu" *ngIf="dropdownOpenClub">
@@ -27,26 +19,50 @@
             <li><a class="dropdown-link" (click)="scrollToSection('actualites')">Actualités</a></li>
           </ul>
         </li>
-
         <li><a (click)="goToGalerie()">Galerie</a></li>
         <li><a (click)="goToInscription()">Inscription</a></li>
+        <li><a (click)="goToBoutique()">Boutique</a></li>
         <li><a (click)="goToContact()">Contact</a></li>
-
-        <!-- Lien Connexion (affiché uniquement si l'utilisateur n'est pas connecté) -->
         <li *ngIf="!isLoggedIn"><a (click)="goToConnexion()">Connexion</a></li>
       </ul>
     </nav>
 
-    <!-- Cercle avec initiales (uniquement si connecté) -->
-    <div *ngIf="isLoggedIn" class="profile-menu">
-      <div class="profile-circle" (click)="toggleProfileMenu()">
-        {{ getInitials() }}
+    <!-- Burger menu -->
+    <div class="burger" (click)="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+
+    <!-- Zone connectée -->
+    <div *ngIf="isLoggedIn" class="user-actions">
+      <!-- Panier -->
+      <div class="cart-icon" (click)="goToPanier()">
+        <i class="ri-shopping-cart-line"></i>
+        <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
       </div>
-      <ul class="profile-dropdown" [class.open]="profileMenuOpen">
-        <li><a (click)="goToDashboard()">Tableau de bord</a></li>
-        <li><a (click)="goToProfil()">Modifier mon profil</a></li>
-        <li><button (click)="logout()">Se déconnecter</button></li>
-      </ul>
+      
+
+      <!-- Initiales profil -->
+      <div class="profile-menu">
+        <div class="profile-circle" (click)="toggleProfileMenu()">
+          {{ getInitials() }}
+        </div>
+        <ul class="profile-dropdown" [class.open]="profileMenuOpen">
+          <li><a (click)="goToDashboard()">Tableau de bord</a></li>
+          <li><a (click)="goToProfil()">Modifier mon profil</a></li>
+          <li><button (click)="logout()">Se déconnecter</button></li>
+        </ul>
+      </div>
+
+      <!-- Mini panier -->
+      <div class="cart-preview" *ngIf="panierOpen">
+        <div *ngIf="panier.length === 0">Panier vide</div>
+        <ul *ngIf="panier.length > 0">
+          <li *ngFor="let item of panier">
+            {{ item.nom }} ({{ item.taille }}, {{ item.couleur }}) <span *ngIf="item.flocage">+ Flocage</span>
+          </li>
+        </ul>
+        <button (click)="goToBoutique()">Voir le panier</button>
+      </div>
     </div>
   </div>
 </header>

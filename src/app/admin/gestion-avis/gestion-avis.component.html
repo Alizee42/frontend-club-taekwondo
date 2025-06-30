@@ -4,13 +4,31 @@
   <!-- Avis en attente -->
   <section class="section-liste">
     <h2>En attente d'approbation</h2>
-    <div *ngIf="avisEnAttente.length === 0" class="empty-message">Aucun avis en attente.</div>
+    <div *ngIf="avisEnAttente.length === 0" class="empty-message">
+      Aucun avis en attente.
+    </div>
+
     <div *ngFor="let avis of avisEnAttente" class="avis-card">
       <div class="avis-infos">
+        <div class="photo-container">
+          <img
+          *ngIf="avis.photo"
+          [src]="getPhotoUrl(avis.photo)"
+          alt="Photo de {{ avis.pseudoVisiteur }}"
+          class="photo"
+        />
+        
+          <div *ngIf="!avis.photo" class="initials" [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || avis.auteur)">
+            {{ getInitials(avis.pseudoVisiteur || avis.auteur) }}
+          </div>
+        </div>
+
         <p>
-          <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> – {{ avis.typeAvis }} – {{ avis.datePub | date }}
+          <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> –
+          {{ avis.typeAvis }} – {{ avis.datePub | date }}
         </p>
         <p>{{ avis.contenu }}</p>
+
         <div class="note-stars" aria-label="Note">
           <span *ngFor="let star of [1, 2, 3, 4, 5]">
             <i
@@ -22,6 +40,7 @@
           </span>
         </div>
       </div>
+
       <div class="avis-actions">
         <button
           class="btn-approve"
@@ -40,27 +59,35 @@
       </div>
     </div>
   </section>
+
   <!-- Avis approuvés -->
   <section class="section-liste">
     <h2>Avis approuvés</h2>
-    <div *ngIf="avisApprouves.length === 0" class="empty-message">Aucun avis approuvé.</div>
+    <div *ngIf="avisApprouves.length === 0" class="empty-message">
+      Aucun avis approuvé.
+    </div>
+
     <div *ngFor="let avis of avisApprouves" class="avis-card">
       <div class="avis-infos">
         <div class="photo-container">
           <img
-            *ngIf="avis.photo"
-            [src]="avis.photo"
-            alt="Photo de {{ avis.pseudoVisiteur }}"
-            class="photo"
-          />
-          <div *ngIf="!avis.photo" class="initials">
+  *ngIf="avis.photo"
+  [src]="getPhotoUrl(avis.photo)"
+  alt="Photo de {{ avis.pseudoVisiteur }}"
+  class="photo"
+/>
+
+          <div *ngIf="!avis.photo" class="initials" [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || avis.auteur)">
             {{ getInitials(avis.pseudoVisiteur || avis.auteur) }}
           </div>
         </div>
+
         <p>
-          <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> – {{ avis.typeAvis }} – {{ avis.datePub | date }}
+          <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> –
+          {{ avis.typeAvis }} – {{ avis.datePub | date }}
         </p>
         <p>{{ avis.contenu }}</p>
+
         <div class="note-stars" aria-label="Note">
           <span *ngFor="let star of [1, 2, 3, 4, 5]">
             <i
@@ -72,6 +99,7 @@
           </span>
         </div>
       </div>
+
       <div class="avis-actions">
         <button
           class="btn-delete"

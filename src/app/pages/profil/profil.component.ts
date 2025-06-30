@@ -143,4 +143,10 @@ export class ProfilComponent implements OnInit {
   toggleEdit(field: string): void {
     this.editMode[field] = !this.editMode[field];
   }
+  getInitiales(nom: string, prenom: string): string {
+    const initialeNom = nom ? nom.charAt(0) : '';
+    const initialePrenom = prenom ? prenom.charAt(0) : '';
+    return (initialeNom + initialePrenom).toUpperCase();
+  }
+  
 }

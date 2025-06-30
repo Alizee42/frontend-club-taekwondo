@@ -8,10 +8,10 @@ interface Avis {
   contenu: string;
   auteur: string;
   approuve: boolean;
-  note?: number; // Note ajoutée
-  pseudoVisiteur?: string; // Ajout de pseudoVisiteur
-  typeAvis?: string; // Ajout de typeAvis
-  datePub?: Date; // Ajout de datePub
+  note?: number;
+  pseudoVisiteur?: string;
+  typeAvis?: string;
+  datePub?: Date;
   photo?: string;
 }
 
@@ -25,7 +25,7 @@ interface Avis {
 export class GestionAvisComponent implements OnInit {
   avisEnAttente: Avis[] = [];
   avisApprouves: Avis[] = [];
-  nouvelAvis: Partial<Avis> = { contenu: '', auteur: '', note: 5 }; // Note par défaut
+  nouvelAvis: Partial<Avis> = { contenu: '', auteur: '', note: 5 };
 
   constructor(private http: HttpClient) {}
 
@@ -42,18 +42,13 @@ export class GestionAvisComponent implements OnInit {
 
   approuverAvis(id: number): void {
     this.http.put(`http://localhost:8080/api/avis/${id}/approuver`, {}).subscribe(() => {
-      console.log(`Avis ${id} approuvé.`);
-      this.chargerAvis(); // Recharge les avis après approbation
-    }, (error) => {
-      console.error(`Erreur lors de l'approbation de l'avis ${id}:`, error);
+      this.chargerAvis();
     });
   }
+
   supprimerAvis(id: number): void {
     this.http.delete(`http://localhost:8080/api/avis/${id}`).subscribe(() => {
-      console.log(`Avis ${id} supprimé.`);
-      this.chargerAvis(); // Recharge les avis après suppression
-    }, (error) => {
-      console.error(`Erreur lors de la suppression de l'avis ${id}:`, error);
+      this.chargerAvis();
     });
   }
 
@@ -65,10 +60,16 @@ export class GestionAvisComponent implements OnInit {
       });
     }
   }
-  getInitials(name: string): string {
-    if (!name) return '';
-    const parts = name.split(' ');
-    const initials = parts.map(part => part[0]).join('');
-    return initials.toUpperCase();
+
+  getInitials(nom: string): string {
+    if (!nom) return '';
+    const parts = nom.trim().split(' ');
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
   }
+
+  getPhotoUrl(photo: string): string {
+    return `http://localhost:8080/uploads/avis/${photo}`;
+  }
+  
 }

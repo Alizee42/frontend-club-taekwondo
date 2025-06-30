@@ -203,66 +203,75 @@ export class PaiementComponent implements OnInit, AfterViewInit {
 
   ouvrirModalPaiement(paiement: any, echeance: any): void {
     if (!paiement || !echeance || echeance.statut === 'payé') {
-      return alert("Cette échéance ne peut pas être payée.");
-    }
-
-    this.paiementActuel = paiement;
-    this.echeanceEnCours = echeance;
-
-    const montant = Number(echeance.montant);
-    this.montantTotalAPayer = isNaN(montant) ? 0 : montant;
-
-    this.modalOuverte = true;
-
-    if (this.cardElementModal) {
-      this.cardElementModal.unmount();
-      this.cardElementModal = null;
-    }
-
-    setTimeout(() => this.initStripeElementModal(), 300);
-  }
-
-  fermerModalPaiement(): void {
-    this.modalOuverte = false;
-    this.paiementActuel = null;
-    this.echeanceEnCours = null;
-    if (this.cardElementModal) {
-      this.cardElementModal.unmount();
-      this.cardElementModal = null;
-    }
-  }
-
-  payerEcheances(): void {
-    if (!this.echeanceEnCours || !this.cardElementModal) {
-      return alert("Erreur : informations manquantes.");
-    }
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.erreurMessage = 'Authentification requise.';
-      this.paiementErreur = true;
+      console.error("Erreur : cette échéance ne peut pas être payée.");
       return;
     }
-
-    this.enCoursDePaiement = true;
-
-    this.http.post(`http://localhost:8080/api/echeances/${this.echeanceEnCours.id}/payer`, {}, {
-      headers: { Authorization: `Bearer ${token}` },
-      responseType: 'text'
-    }).subscribe({
-      next: () => {
-        this.loadPaiements();
-        this.fermerModalPaiement();
-        this.paiementReussi = true;
-        this.enCoursDePaiement = false;
-      },
-      error: () => {
-        this.erreurMessage = 'Erreur lors du paiement de l’échéance.';
-        this.paiementErreur = true;
-        this.enCoursDePaiement = false;
-      }
-    });
+  
+    console.log("Ouverture de la modale pour l'échéance :", echeance);
+  
+    this.paiementActuel = paiement;
+    this.echeanceEnCours = echeance;
+  
+    const montant = Number(echeance.montant);
+    this.montantTotalAPayer = isNaN(montant) ? 0 : montant;
+  
+    this.modalOuverte = true; // Ouvre la modale
+  
+    if (this.cardElementModal) {
+      this.cardElementModal.unmount();
+      this.cardElementModal = null;
+    }
+  
+    setTimeout(() => this.initStripeElementModal(), 300); // Initialise Stripe après un délai
   }
+
+    fermerModalPaiement(): void {
+    this.modalOuverte = false; // Ferme la modale
+    this.paiementActuel = null;
+    this.echeanceEnCours = null;
+  
+    if (this.cardElementModal) {
+      this.cardElementModal.unmount();
+      this.cardElementModal = null;
+    }
+  }
+  
+payerEcheances(): void {
+  if (!this.echeanceEnCours || !this.cardElementModal) {
+    alert("Erreur : informations manquantes.");
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    this.erreurMessage = 'Authentification requise.';
+    this.paiementErreur = true;
+    return;
+  }
+
+  const data = {
+    id: this.echeanceEnCours.id,
+    montant: this.echeanceEnCours.montant
+  };
+
+  this.enCoursDePaiement = true;
+
+  this.http.post(`http://localhost:8080/api/paiements/${this.paiementActuel.id}/payer-echeance`, [data], {
+    headers: { Authorization: `Bearer ${token}` }
+  }).subscribe({
+    next: () => {
+      this.loadPaiements();
+      this.fermerModalPaiement();
+      this.paiementReussi = true;
+      this.enCoursDePaiement = false;
+    },
+    error: () => {
+      this.erreurMessage = 'Erreur lors du paiement de l’échéance.';
+      this.paiementErreur = true;
+      this.enCoursDePaiement = false;
+    }
+  });
+}
 
   toggleSection(section: string): void {
     this.sectionOuverte[section] = !this.sectionOuverte[section];
@@ -282,5 +291,18 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     this.paiementReussi = false;
     this.paiementErreur = false;
     this.erreurMessage = '';
+  }
+  genererEcheancier(paiement: any): any[] {
+    // Simule la génération d'un échéancier pour un paiement
+    return paiement.echeances || [];
+  }
+  calculerMontantRestant(paiement: any): number {
+    if (!paiement.echeances || paiement.echeances.length === 0) return paiement.montantTotal;
+  
+    const montantPayé = paiement.echeances
+      .filter((echeance: any) => echeance.statut === 'payé') // Ajout du type explicite `any` pour `echeance`
+      .reduce((total: number, echeance: any) => total + echeance.montant, 0); // Ajout des types explicites `number` et `any`
+  
+    return paiement.montantTotal - montantPayé;
   }
 }

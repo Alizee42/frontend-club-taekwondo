@@ -1,5 +1,5 @@
 .main-header {
-  background-color: var(--blue-dark); /* Couleur du fond du menu */
+  background-color: var(--blue-dark);
   border-bottom: 2px solid #eee;
   font-family: 'Poppins', sans-serif;
   position: relative;
@@ -8,128 +8,86 @@
 
 .header-container {
   display: flex;
-  justify-content: space-between; /* Répartit les éléments horizontalement */
   align-items: center;
+  justify-content: space-between;
   padding: 1rem 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
+
+/* Logo à gauche */
+.logo {
+  flex: 0 0 auto;
+}
 .logo a {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #fff; /* Texte du logo en blanc pour contraster avec le bleu */
+  color: #fff;
   text-decoration: none;
 }
-.main-nav {
+
+/* NAVIGATION CENTRÉE */
+.nav-wrapper {
+  flex: 1;
   display: flex;
-  align-items: center; /* Aligne le menu avec le cercle */
-  gap: 1.5rem; /* Ajuste l'espacement entre les liens */
+  justify-content: center;
 }
 .main-nav ul {
   display: flex;
+  align-items: center;
   gap: 1.5rem;
   list-style: none;
   padding: 0;
+  margin: 0;
 }
-
 .main-nav a {
-  position: relative;
   text-decoration: none;
   color: #fff;
-  padding: 5px 0; /* Un peu de padding pour ne pas coller le texte au bas */
-  display: inline-block; /* Important pour que le surlignage suive la largeur du texte */
+  position: relative;
+  padding: 5px 0;
+  display: inline-block;
   transition: color 0.3s;
 }
-
 .main-nav a::after {
   content: "";
   position: absolute;
   left: 0;
   bottom: -4px;
-  width: 0%; /* Initialement, la largeur est 0% */
+  width: 0%;
   height: 2px;
-  background-color: #e63946; /* Couleur du surlignage */
+  background-color: #e63946;
   transition: width 0.3s ease;
 }
-
 .main-nav a:hover::after {
   width: 100%;
 }
 
+/* BURGER MENU */
 .burger {
   display: none;
   flex-direction: column;
   gap: 4px;
   cursor: pointer;
 }
-
 .burger span {
   width: 25px;
   height: 3px;
-  background-color: #fff; /* Icônes du burger en blanc */
-}
-/* Dropdown menu - vertical */
-.dropdown {
-  position: relative;
+  background-color: #fff;
 }
 
-.dropdown-menu {
-  position: absolute;
-  top: 100%; /* Décalage de la position du dropdown */
-  left: 0;
-  background: #fff;
-  border: 1px solid #ddd;
-  padding: 0.5rem 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  min-width: 180px;
-  max-height: 300px; /* Hauteur maximale pour éviter que le dropdown ne déborde */
-  overflow-y: auto; /* Permet à la liste de défiler si le contenu dépasse */
-  z-index: 999;
-  display: flex;
-  flex-direction: column; /* Faire apparaître les éléments du dropdown en colonne */
-  margin-top: 10px; /* Décalage du dropdown vers le bas */
-}
-
-.dropdown-menu li {
-  padding: 4px 0; /* Réduction de l'espacement entre les éléments */
-}
-.dropdown-menu a {
-  position: relative;
-  display: inline-block; /* S'assurer que le surlignage ne dépasse pas la largeur du texte */
-  color: #333;
-  text-decoration: none;
-  padding: 4px 9px; /* Ajustement du padding pour rendre les liens plus compacts */
-  font-size: 14px; /* Taille de texte plus petite pour éviter l'encombrement */
-}
-
-.dropdown-menu a:hover {
-  color: #e63946;
-}
-.dropdown-menu a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -4px;
-  width: 0%; /* Initialement, la largeur est 0% */
-  height: 2px;
-  background-color: #e63946; /* Couleur du surlignage */
-  transition: width 0.3s ease;
-}
-.dropdown-menu a:hover::after {
-  width: 100%; /* Lors du survol, le surlignage s'étend sur la largeur du texte uniquement */
-}
-.dropdown-menu .dropdown-link {
-  padding: 1px 9px; /* Réduit l'espacement interne des liens */
-  font-size: 14px; /* Taille de texte plus petite */
-  color: #333; /* Couleur du texte */
-  text-decoration: none;
-  position: relative;
-}
+/* PROFIL À DROITE */
 .profile-menu {
-  position: relative;
   display: flex;
   align-items: center;
+  position: relative;
+  flex: 0 0 auto;
 }
-
 .profile-circle {
   width: 40px;
   height: 40px;
@@ -144,11 +102,11 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .profile-circle:hover {
   background-color: var(--accent-dark);
 }
-/* ====== Menu déroulant ====== */
+
+/* MENU PROFIL */
 .profile-dropdown {
   position: absolute;
   top: calc(100% + 10px);
@@ -162,13 +120,10 @@
   flex-direction: column;
   z-index: 1000;
   min-width: 180px;
-  max-width: 284px;
 }
-
 .profile-dropdown.open {
   display: flex;
 }
-
 .profile-dropdown li {
   padding: 0.5rem 1rem;
 }
@@ -182,21 +137,73 @@
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transition: color 0.3s ease;
   font-size: 15px;
+  transition: color 0.3s ease;
 }
-
 .profile-dropdown li a:hover,
 .profile-dropdown li button:hover {
   color: var(--accent-hover);
 }
-/* Responsive */
+/* Panier */
+.cart-icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--accent-hover);
+  color: white;
+  font-size: 1.4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  margin-left: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.cart-icon:hover {
+  background-color: var(--accent-dark);
+}
+
+.cart-icon .ri-shopping-cart-line {
+  font-size: 22px;
+}
+
+.cart-icon .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: red;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+
+
+/* Mini-panier */
+.cart-preview {
+  position: absolute;
+  top: 60px;
+  right: 80px;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 0.8rem;
+  border-radius: 8px;
+  z-index: 1000;
+  min-width: 220px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .burger {
     display: flex;
   }
 
-  .main-nav {
+  .nav-wrapper {
     display: none;
     position: absolute;
     top: 100%;
@@ -205,15 +212,20 @@
     width: 100%;
     background-color: #fff;
     padding: 1rem;
+    z-index: 999;
   }
 
-  .main-nav.open {
+  .nav-wrapper.open {
     display: flex;
   }
 
   .main-nav ul {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .profile-menu {
+    margin-left: auto;
   }
 
   .dropdown-menu {

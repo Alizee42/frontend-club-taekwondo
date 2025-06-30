@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-// Interface pour représenter un utilisateur
 interface Utilisateur {
   id: number;
   nom: string;
@@ -11,7 +10,6 @@ interface Utilisateur {
   email: string;
 }
 
-// Interface pour représenter un document
 interface Document {
   id: number;
   typeDocument: string;
@@ -27,202 +25,181 @@ interface Document {
   styleUrls: ['./documents.component.css'],
   imports: [CommonModule, FormsModule]
 })
-export class DocumentsComponent {
-  utilisateurConnecte: Utilisateur | null = null; // Remplace membreConnecte
-  documentType: string = 'certificat'; // Type de document sélectionné
-  selectedFile: File | null = null; // Fichier sélectionné
-  documents: Document[] = []; // Liste des documents
+export class DocumentsComponent implements OnInit {
+  utilisateurConnecte: Utilisateur | null = null;
+  documentType: string = 'certificat';
+  selectedFile: File | null = null;
+  documents: Document[] = [];
+
   requiredDocuments = [
     { type: 'certificat', label: 'Certificat médical', uploaded: false },
     { type: 'photo', label: 'Photo d’identité', uploaded: false },
     { type: 'identite', label: 'Document d’identité', uploaded: false }
-  ]; // Liste des documents obligatoires
+  ];
 
   constructor(private http: HttpClient) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadUtilisateurConnecte();
   }
 
-  // Charger l'utilisateur connecté
-  loadUtilisateurConnecte() {
+  loadUtilisateurConnecte(): void {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('Utilisateur non connecté.');
       return;
     }
 
-    this.http.get<Utilisateur>('http://localhost:8080/api/utilisateurs/me', {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    this.http.get<Utilisateur>('http://localhost:8080/api/utilisateurs/me', { headers }).subscribe({
       next: (utilisateur) => {
         this.utilisateurConnecte = utilisateur;
         localStorage.setItem('utilisateurId', utilisateur.id.toString());
         this.loadDocuments();
       },
       error: (err) => {
-        console.error('Erreur lors de la récupération de l\'utilisateur connecté :', err);
+        console.error('Erreur utilisateur :', err);
         alert('Impossible de récupérer les informations de l\'utilisateur connecté.');
       }
     });
   }
 
-  // Charger les documents de l'utilisateur
-  loadDocuments() {
+  loadDocuments(): void {
     const utilisateurId = localStorage.getItem('utilisateurId');
     if (!utilisateurId) {
-      alert('Impossible de charger les documents : utilisateur non connecté.');
+      alert('Utilisateur non connecté.');
       return;
     }
 
     this.http.get<Document[]>(`http://localhost:8080/api/documents/utilisateur/${utilisateurId}`).subscribe({
-      next: (response) => {
-        this.documents = response || [];
+      next: (documents) => {
+        this.documents = documents || [];
         this.updateRequiredDocumentsStatus();
       },
       error: (err) => {
-        console.error('Erreur lors du chargement des documents :', err);
-        alert('Une erreur est survenue lors du chargement des documents.');
+        console.error('Erreur chargement documents :', err);
+        alert('Erreur lors du chargement des documents.');
       }
     });
   }
 
- // Mettre à jour le statut des documents obligatoires
- updateRequiredDocumentsStatus() {
-  this.requiredDocuments.forEach((doc) => {
-    const document = this.documents.find((d) => d.typeDocument === doc.type);
-    doc.uploaded = !!(document && document.status === 'validé'); // Convertit en boolean avec !!
-  });
-}
+  updateRequiredDocumentsStatus(): void {
+    this.requiredDocuments.forEach(doc => {
+      const found = this.documents.find(d => d.typeDocument === doc.type);
+      doc.uploaded = !!(found && found.status === 'validé');
+    });
+  }
 
-  // Vérifier si un document est refusé
   isDocumentRefused(type: string): boolean {
-    const document = this.documents.find((doc) => doc.typeDocument === type);
-    return document?.status === 'refusé';
+    const doc = this.documents.find(d => d.typeDocument === type);
+    return doc?.status === 'refusé';
   }
 
-  // Valider un fichier
   isValidFile(file: File): boolean {
-    const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
-    const maxSize = 5 * 1024 * 1024; // 5 Mo
-    return allowedTypes.includes(file.type) && file.size <= maxSize;
+    const allowed = ['image/png', 'image/jpeg', 'application/pdf'];
+    const max = 5 * 1024 * 1024; // 5 Mo
+    return allowed.includes(file.type) && file.size <= max;
   }
 
-  // Téléverser un document
-  onUploadDocument() {
+  onUploadDocument(): void {
     if (!this.selectedFile) {
       alert('Veuillez sélectionner un fichier.');
       return;
     }
 
     if (!this.isValidFile(this.selectedFile)) {
-      alert('Type ou taille de fichier invalide. Veuillez téléverser un fichier PNG, JPEG ou PDF de moins de 5 Mo.');
+      alert('Fichier invalide (format ou taille).');
       return;
     }
 
     const utilisateurId = localStorage.getItem('utilisateurId');
     if (!utilisateurId) {
-      alert('Impossible de téléverser le document : utilisateur non connecté.');
+      alert('Utilisateur non connecté.');
       return;
     }
 
     const formData = new FormData();
-    formData.append('typeDocument', this.documentType);
     formData.append('file', this.selectedFile);
+    formData.append('typeDocument', this.documentType);
     formData.append('utilisateurId', utilisateurId);
 
     this.http.post('http://localhost:8080/api/documents', formData).subscribe({
       next: () => {
         alert('Document téléversé avec succès.');
         this.loadDocuments();
+        this.selectedFile = null;
       },
       error: (err) => {
-        console.error('Erreur lors du téléversement du document :', err);
-        alert('Une erreur est survenue lors du téléversement.');
+        console.error('Erreur téléversement :', err);
+        alert('Erreur lors du téléversement du document.');
       }
     });
   }
 
-  // Gérer la sélection d'un fichier
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
   }
 
-  // Modifier un document
-  onEditDocument(document: any) {
+  onEditDocument(document: Document): void {
     if (document.status === 'validé') {
-      alert('Ce document est validé et ne peut plus être modifié.');
+      alert('Document validé, non modifiable.');
       return;
     }
-  
-    // Réactiver le document dans le menu déroulant pour permettre la modification
-    const docToReactivate = this.requiredDocuments.find((doc) => doc.type === document.typeDocument);
-    if (docToReactivate) {
-      docToReactivate.uploaded = false; // Réactiver le document dans le menu déroulant
+
+    const doc = this.requiredDocuments.find(d => d.type === document.typeDocument);
+    if (doc) doc.uploaded = false;
+
+    alert(`Vous pouvez modifier ou remplacer le document : ${document.nomDocument}`);
+  }
+
+  onDeleteDocument(document: Document): void {
+    if (document.status === 'validé') {
+      alert('Document validé, non supprimable.');
+      return;
     }
-  
-    alert(`Vous pouvez maintenant modifier ou téléverser à nouveau le document : ${document.nomDocument}`);
+
+    if (confirm(`Supprimer le document : ${document.nomDocument} ?`)) {
+      this.http.delete(`http://localhost:8080/api/documents/${document.id}`).subscribe({
+        next: () => {
+          alert('Document supprimé.');
+          this.loadDocuments();
+        },
+        error: (err) => {
+          console.error('Erreur suppression :', err);
+          alert('Erreur lors de la suppression du document.');
+        }
+      });
+    }
   }
 
-// Supprimer un document
-onDeleteDocument(document: Document) {
-  if (document.status === 'validé') {
-    alert('Ce document est validé et ne peut plus être supprimé.');
-    return;
-  }
-  if (confirm(`Êtes-vous sûr de vouloir supprimer le document : ${document.nomDocument} ?`)) {
-    this.http.delete(`http://localhost:8080/api/documents/${document.id}`).subscribe({
-      next: () => {
-        alert('Document supprimé avec succès.');
-        this.loadDocuments();
-      },
-      error: (err) => {
-        console.error('Erreur lors de la suppression du document :', err);
-        alert('Une erreur est survenue lors de la suppression du document.');
-      }
-    });
-  }
-}
-
-  // Obtenir la classe CSS en fonction du statut
   getStatusClass(status: string): string {
     switch (status) {
-      case 'validé':
-        return 'status-validé';
-      case 'en attente':
-        return 'status-en-attente';
-      case 'refusé':
-        return 'status-refusé';
-      default:
-        return '';
+      case 'validé': return 'status-validé';
+      case 'en attente': return 'status-en-attente';
+      case 'refusé': return 'status-refusé';
+      default: return '';
     }
   }
 
-  // Obtenir l'icône en fonction du statut
   getStatusIcon(status: string): string {
     switch (status) {
-      case 'validé':
-        return 'fas fa-check-circle'; // Icône pour "validé"
-      case 'en attente':
-        return 'fas fa-clock'; // Icône pour "en attente"
-      case 'refusé':
-        return 'fas fa-times-circle'; // Icône pour "refusé"
-      default:
-        return '';
+      case 'validé': return 'fas fa-check-circle';
+      case 'en attente': return 'fas fa-clock';
+      case 'refusé': return 'fas fa-times-circle';
+      default: return '';
     }
   }
 
-  // Obtenir le texte du statut
   getStatusText(status: string): string {
     switch (status) {
-      case 'validé':
-        return 'Validé';
-      case 'en attente':
-        return 'En attente de validation';
-      case 'refusé':
-        return 'Refusé';
-      default:
-        return 'Statut inconnu';
+      case 'validé': return 'Validé';
+      case 'en attente': return 'En attente de validation';
+      case 'refusé': return 'Refusé';
+      default: return 'Statut inconnu';
     }
   }
 }

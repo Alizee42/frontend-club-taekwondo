@@ -1,0 +1,41 @@
+<div class="boutique-container">
+    <h1>🛍️ Boutique du Club</h1>
+  
+    <div class="produits">
+      <div class="produit-card" *ngFor="let produit of produits">
+        <img [src]="produit.imageUrl" alt="{{ produit.nom }}" class="produit-image" />
+        <h2>{{ produit.nom }}</h2>
+        <p>{{ produit.description }}</p>
+        <p class="prix">{{ produit.prix }} €</p>
+  
+        <div class="options">
+          <label>Taille :
+            <select [(ngModel)]="produit.taille">
+              <option *ngFor="let taille of tailles" [value]="taille">{{ taille }}</option>
+            </select>
+          </label>
+          <label>Couleur :
+            <select [(ngModel)]="produit.couleur">
+              <option *ngFor="let couleur of couleurs" [value]="couleur">{{ couleur }}</option>
+            </select>
+          </label>
+          <label>Flocage :
+            <input type="text" [(ngModel)]="produit.flocage" placeholder="Nom ou texte" />
+          </label>
+        </div>
+  
+        <button (click)="ajouterAuPanier(produit)">Ajouter au panier</button>
+      </div>
+    </div>
+  
+    <div class="panier" *ngIf="panier.length > 0">
+      <h2>🛒 Panier</h2>
+      <div class="panier-item" *ngFor="let item of panier; let i = index">
+        <p>{{ item.nom }} - {{ item.taille }}, {{ item.couleur }} ({{ item.flocage }}) : {{ item.prix }} €</p>
+        <button (click)="supprimerDuPanier(i)">❌ Supprimer</button>
+      </div>
+      <p class="total">Total : {{ getTotal() }} €</p>
+      <button class="payer-btn" (click)="payer()">Payer</button>
+    </div>
+  </div>
+  

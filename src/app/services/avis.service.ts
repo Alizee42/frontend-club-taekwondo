@@ -26,8 +26,9 @@ export class AvisService {
     return this.http.get<Avis[]>(this.apiUrl).pipe(catchError(this.handleError));
   }
 
-  ajouterAvis(avis: Avis): Observable<Avis> {
-    return this.http.post<Avis>(this.apiUrl, avis).pipe(catchError(this.handleError));
+  // 🔁 Accepte FormData maintenant
+  ajouterAvis(formData: FormData): Observable<Avis> {
+    return this.http.post<Avis>(this.apiUrl, formData).pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse) {
