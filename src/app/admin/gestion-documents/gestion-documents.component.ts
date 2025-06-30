@@ -1,24 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, NgClass, NgFor, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-gestion-documents',
   templateUrl: './gestion-documents.component.html',
   styleUrls: ['./gestion-documents.component.css'],
   standalone: true,
-  imports: [CommonModule, NgClass, NgFor, DatePipe]
+  imports: [CommonModule, NgClass, NgFor, DatePipe, FormsModule],
 })
 export class GestionDocumentsComponent implements OnInit {
-  utilisateurs: any[] = []; // Liste des utilisateurs avec leurs documents
+  utilisateurs: any[] = [];
+  utilisateursFiltres: any[] = [];
+  searchTerm: string = '';
+  filtreStatut: string = '';
+  documentEnApercu: any = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private sanitizer: DomSanitizer
+  ) {}
 
   ngOnInit() {
-    this.loadDocuments(); // Charger les documents au chargement
+    this.loadDocuments();
   }
 
-  // Charger les documents et les regrouper par utilisateur
   loadDocuments() {
     this.http.get<any[]>('http://localhost:8080/api/documents').subscribe({
       next: (documents) => {
@@ -34,8 +42,8 @@ export class GestionDocumentsComponent implements OnInit {
                 prenom: document.utilisateur.prenom,
                 email: document.utilisateur.email,
                 telephone: document.utilisateur.telephone,
-                isOpen: false, // État de l'accordion
-                documents: []
+                isOpen: false,
+                documents: [],
               });
             }
 
@@ -46,84 +54,165 @@ export class GestionDocumentsComponent implements OnInit {
         });
 
         this.utilisateurs = Array.from(utilisateursMap.values());
+        this.utilisateursFiltres = this.utilisateurs;
       },
       error: (err) => {
         console.error('Erreur lors du chargement des documents :', err);
-      }
+      },
     });
   }
 
-  // Basculer l'état de l'accordion
   toggleAccordion(utilisateur: any) {
     utilisateur.isOpen = !utilisateur.isOpen;
   }
 
-  // Valider un document
   validerDocument(document: any) {
-    this.http.put(`http://localhost:8080/api/documents/${document.id}/valider`, {}).subscribe({
-      next: () => {
-        alert('Document validé avec succès.');
-        this.loadDocuments();
-      },
-      error: (err) => {
-        console.error('Erreur lors de la validation du document :', err);
-        alert('Une erreur est survenue lors de la validation.');
-      }
-    });
+    this.http
+      .put(`http://localhost:8080/api/documents/${document.id}/valider`, {})
+      .subscribe({
+        next: () => {
+          this.loadDocuments();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la validation :', err);
+        },
+      });
   }
 
-  // Refuser un document
   refuserDocument(document: any) {
-    this.http.put(`http://localhost:8080/api/documents/${document.id}/refuser`, {}).subscribe({
-      next: () => {
-        alert('Document refusé avec succès.');
-        this.loadDocuments();
-      },
-      error: (err) => {
-        console.error('Erreur lors du refus du document :', err);
-        alert('Une erreur est survenue lors du refus.');
-      }
-    });
+    this.http
+      .put(`http://localhost:8080/api/documents/${document.id}/refuser`, {})
+      .subscribe({
+        next: () => {
+          this.loadDocuments();
+        },
+        error: (err) => {
+          console.error('Erreur lors du refus :', err);
+        },
+      });
   }
 
-  // Obtenir la classe CSS en fonction du statut
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'validé':
-        return 'status-validé';
-      case 'en attente':
-        return 'status-en-attente';
-      case 'refusé':
-        return 'status-refusé';
-      default:
-        return '';
-    }
+  validerTous(utilisateur: any) {
+    const docsAAvalider = utilisateur.documents.filter(
+      (d: any) => d.status === 'en_attente'
+    );
+    docsAAvalider.forEach((d: any) => this.validerDocument(d));
   }
 
-  // Obtenir le texte du statut
-  getStatusText(status: string): string {
+  refuserTous(utilisateur: any) {
+    const docsARefuser = utilisateur.documents.filter(
+      (d: any) => d.status === 'en_attente'
+    );
+    docsARefuser.forEach((d: any) => this.refuserDocument(d));
+  }
+
+getStatusText(status: string): string {
+  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
+
+  switch (normalised) {
+    case 'validé':
+      return 'Validé';
+    case 'refusé':
+      return 'Refusé';
+    case 'en_attente':
+      return 'En attente de validation';
+    default:
+      return status;
+  }
+}
+
+
+  getGlobalStatusText(documents: any[]): string {
+    const status = this.getGlobalStatus(documents);
     switch (status) {
-      case 'en attente':
-        return 'En attente de validation';
       case 'validé':
         return 'Validé';
       case 'refusé':
         return 'Refusé';
+      case 'en_attente':
+        return 'En attente';
       default:
         return status;
     }
   }
-  // Obtenir l'icône CSS en fonction du statut
-getStatusIcon(status: string): string {
-  switch (status) {
+
+getStatusClass(status: string): string {
+  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
+
+  switch (normalised) {
     case 'validé':
-      return 'fa fa-check-circle'; // Icône pour "validé"
+      return 'status-validé';
     case 'refusé':
-      return 'fa fa-times-circle'; // Icône pour "refusé"
-    case 'en attente':
-      return 'fa fa-clock'; // Icône pour "en attente"
+      return 'status-refusé';
+    case 'en_attente':
+      return 'status-en-attente';
     default:
       return '';
   }
 }
+
+
+getStatusIcon(status: string): string {
+  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
+
+  switch (normalised) {
+    case 'validé':
+      return 'ri-check-line';
+    case 'refusé':
+      return 'ri-close-line';
+    case 'en_attente':
+      return 'ri-time-line';
+    default:
+      return '';
+  }
+}
+
+
+  getGlobalStatus(documents: any[]): string {
+    if (documents.every((d) => d.status === 'validé')) return 'validé';
+    if (documents.some((d) => d.status === 'refusé')) return 'refusé';
+    return 'en_attente';
+  }
+
+  getGlobalStatusClass(documents: any[]): string {
+    return 'badge ' + this.getGlobalStatus(documents);
+  }
+
+  estFinalise(document: any): boolean {
+    return document.status === 'validé' || document.status === 'refusé';
+  }
+
+  filtrerUtilisateurs() {
+    this.utilisateursFiltres = this.utilisateurs.filter((u) => {
+      const matchNom = u.nom
+        .toLowerCase()
+        .includes(this.searchTerm.toLowerCase());
+      const matchEmail = u.email
+        .toLowerCase()
+        .includes(this.searchTerm.toLowerCase());
+      const matchStatut = this.filtreStatut
+        ? u.documents.some((d: any) => d.status === this.filtreStatut)
+        : true;
+
+      return (matchNom || matchEmail) && matchStatut;
+    });
+  }
+
+  ouvrirApercu(document: any) {
+    this.documentEnApercu = document;
+  }
+
+  fermerApercu() {
+    this.documentEnApercu = null;
+  }
+
+  getSafeUrl(chemin: string): SafeResourceUrl {
+    chemin = chemin.replace(/^documents\//, '');
+    const fullUrl = `http://localhost:8080/uploads/documents/${encodeURIComponent(chemin)}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(fullUrl);
+  }
+
+  estImage(nom: string): boolean {
+    return /\.(png|jpe?g|gif|bmp|webp)$/i.test(nom);
+  }
 }

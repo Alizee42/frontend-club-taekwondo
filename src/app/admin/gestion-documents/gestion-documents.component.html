@@ -2,24 +2,43 @@
   <h1>Gestion des Documents</h1>
   <p class="intro">Validez ou refusez les documents soumis par les membres.</p>
 
+  <!-- 🔍 Recherche & filtre -->
+  <div class="filter-bar">
+    <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un membre..." (input)="filtrerUtilisateurs()" />
+    <select [(ngModel)]="filtreStatut" (change)="filtrerUtilisateurs()">
+      <option value="">Tous les statuts</option>
+      <option value="validé">Validé</option>
+      <option value="refusé">Refusé</option>
+      <option value="en_attente">En attente</option>
+    </select>
+  </div>
+
   <div class="accordion">
-    <div class="accordion-item" *ngFor="let utilisateur of utilisateurs">
-      <!-- En-tête de l'utilisateur -->
+    <div class="accordion-item" *ngFor="let utilisateur of utilisateursFiltres">
       <div class="accordion-header" (click)="toggleAccordion(utilisateur)">
-        <h3>{{ utilisateur.nom }} {{ utilisateur.prenom }}</h3>
-        <p>Email : {{ utilisateur.email }}</p>
-        <p>Téléphone : {{ utilisateur.telephone }}</p>
-        <button class="accordion-toggle">
-          {{ utilisateur.isOpen ? 'Réduire' : 'Afficher les documents' }}
-        </button>
+        <div>
+          <h3>{{ utilisateur.nom }} {{ utilisateur.prenom }}</h3>
+          <p>{{ utilisateur.email }} — {{ utilisateur.telephone }}</p>
+        </div>
+
+        <!-- 🟢 Badge statut -->
+        <span class="badge" [ngClass]="getGlobalStatusClass(utilisateur.documents)">
+          {{ getGlobalStatusText(utilisateur.documents) }}
+        </span>
+
+        <button class="accordion-toggle">{{ utilisateur.isOpen ? 'Réduire' : 'Afficher' }}</button>
       </div>
 
-      <!-- Corps de l'accordion : Liste des documents -->
       <div class="accordion-body" *ngIf="utilisateur.isOpen">
+        <div class="bulk-actions">
+          <button (click)="validerTous(utilisateur)">Tout valider</button>
+          <button (click)="refuserTous(utilisateur)">Tout refuser</button>
+        </div>
+
         <table>
           <thead>
             <tr>
-              <th>Type de document</th>
+              <th>Type</th>
               <th>Nom du fichier</th>
               <th>Date</th>
               <th>Statut</th>
@@ -27,12 +46,17 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let document of utilisateur.documents">
+            <tr *ngFor="let document of utilisateur.documents" [ngClass]="document.status">
               <td>{{ document.typeDocument }}</td>
               <td>
-                <a [href]="document.cheminFichier" target="_blank">{{ document.nomDocument }}</a>
+                <button class="btn-apercu" (click)="ouvrirApercu(document)">
+                  <i class="ri-search-line" style="margin-right: 6px;"></i>
+                  {{ document.nomDocument }}
+                </button>
               </td>
-              <td>{{ document.dateDepot | date }}</td>
+
+
+              <td>{{ document.dateDepot | date:'dd/MM/yyyy' }}</td>
               <td>
                 <span [ngClass]="getStatusClass(document.status)">
                   <i class="status-icon" [ngClass]="getStatusIcon(document.status)"></i>
@@ -41,26 +65,34 @@
               </td>
               <td>
                 <div class="actions-buttons">
-                  <button
-                    class="btn-validate"
-                    (click)="validerDocument(document)"
-                    [disabled]="document.status === 'validé' || document.status === 'refusé'"
-                  >
-                    Valider
-                  </button>
-                  <button
-                    class="btn-refuse"
-                    (click)="refuserDocument(document)"
-                    [disabled]="document.status === 'validé' || document.status === 'refusé'"
-                  >
-                    Refuser
-                  </button>
+                  <button class="btn-validate" (click)="validerDocument(document)"
+                    [disabled]="estFinalise(document)">Valider</button>
+                  <button class="btn-refuse" (click)="refuserDocument(document)"
+                    [disabled]="estFinalise(document)">Refuser</button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- 📄 MODALE APERCU -->
+  <div class="modal-overlay" *ngIf="documentEnApercu">
+    <div class="modal-content">
+      <button class="close-button" (click)="fermerApercu()">×</button>
+      <h2>Aperçu du document</h2>
+
+      <!-- Option intelligente : image ou PDF -->
+      <ng-container *ngIf="estImage(documentEnApercu.nomDocument); else pdfBlock">
+        <img [src]="getSafeUrl(documentEnApercu.cheminFichier)" width="100%"
+          style="max-height: 500px; object-fit: contain;" />
+      </ng-container>
+      <ng-template #pdfBlock>
+        <iframe [src]="getSafeUrl(documentEnApercu.cheminFichier)" width="100%" height="500px"></iframe>
+      </ng-template>
+
     </div>
   </div>
 </div>

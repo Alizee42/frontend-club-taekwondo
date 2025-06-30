@@ -17,22 +17,22 @@
 
   <div class="documents-grid">
     <!-- 📄 Documents obligatoires -->
-    <div class="required-documents">
-      <h2>Documents obligatoires</h2>
-      <p class="description">Ces documents sont nécessaires pour valider votre inscription :</p>
-      <ul>
-        <li *ngFor="let doc of requiredDocuments">
-          <span>{{ doc.label }}</span>
-          <span *ngIf="!isDocumentRefused(doc.type)" [ngClass]="{ 'uploaded': doc.uploaded, 'not-uploaded': !doc.uploaded }">
-            {{ doc.uploaded ? 'Téléversé' : 'Non téléversé' }}
-          </span>
-          <span *ngIf="isDocumentRefused(doc.type)" class="refused">
-            Refusé
-            <i class="tooltip-icon" title="Document refusé. Veuillez téléverser un nouveau document.">i</i>
-          </span>
-        </li>
-      </ul>
-    </div>
+ <div class="required-documents">
+  <h2>Documents obligatoires</h2>
+  <p class="description">Ces documents sont nécessaires pour valider votre inscription :</p>
+  <ul>
+    <li *ngFor="let doc of requiredDocuments">
+      <span>{{ doc.label }}</span>
+      <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
+        <span [ngClass]="statusInfo.class">
+          {{ statusInfo.text }}
+          <i *ngIf="statusInfo.tooltip" class="tooltip-icon" [title]="statusInfo.tooltip">i</i>
+        </span>
+      </ng-container>
+    </li>
+  </ul>
+</div>
+
 
     <!-- ⬆️ Formulaire d'upload -->
     <div class="upload-section">

@@ -17,117 +17,35 @@ h1 {
   font-size: 1.1rem;
 }
 
-.documents-list table {
+/* 🔍 Barre de filtre */
+.filter-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-bar input,
+.filter-bar select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  background-color: var(--card-bg);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 300px;
 }
 
-.documents-list th,
-.documents-list td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.documents-list th {
-  background-color: var(--blue-main);
-  color: #fff;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.documents-list tr:hover {
-  background-color: var(--background-hover);
-}
-
-.documents-list td {
-  color: var(--text-main);
-}
-
-.btn-validate {
-  background-color: var(--green-main);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-validate:hover {
-  background-color: var(--green-hover);
-}
-
-.btn-refuse {
-  background-color: var(--red-main);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-refuse:hover {
-  background-color: var(--red-hover);
-}
-
-.status-validé {
-  color: green;
-  font-weight: bold;
-}
-
-.status-en-attente {
-  color: orange;
-  font-weight: bold;
-}
-
-.status-refusé {
-  color: red;
-  font-weight: bold;
-}
-.btn-validate {
-  background-color: #28a745; /* Vert */
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.btn-validate:hover {
-  background-color: #218838; /* Vert foncé */
-}
-
-.btn-refuse {
-  background-color: #dc3545; /* Rouge */
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.btn-refuse:hover {
-  background-color: #c82333; /* Rouge foncé */
-}
+/* 📦 Accordéon */
 .accordion {
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .accordion-item {
   border: 1px solid #ddd;
   border-radius: 8px;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .accordion-header {
@@ -138,6 +56,8 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .accordion-header h3 {
@@ -157,6 +77,27 @@ h1 {
   cursor: pointer;
 }
 
+/* 🟢 Badge */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: capitalize;
+  color: white;
+}
+.badge.validé {
+  background-color: #28a745;
+}
+.badge.refusé {
+  background-color: #dc3545;
+}
+.badge.en_attente {
+  background-color: #ffc107;
+  color: #333;
+}
+
+/* 📃 Table de documents */
 .accordion-body {
   background-color: #f9f9f9;
   padding: 1rem;
@@ -185,96 +126,165 @@ h1 {
   background-color: var(--background-hover);
 }
 
-.accordion-body td {
-  color: var(--text-main);
+/* 🎯 Lignes colorées */
+.validé {
+  background-color: #e6ffee;
+}
+
+.refusé {
+  background-color: #ffe6e6;
+}
+
+.en_attente {
+  background-color: #fffbe6;
+}
+
+/* 🎯 Statut */
+.status-validé,
+.status-refusé,
+.status-en-attente {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.status-validé {
+  color: green;
+}
+
+.status-refusé {
+  color: red;
+}
+
+.status-en-attente {
+  color: orange;
+}
+
+.status-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+/* 📦 Actions groupées */
+.bulk-actions {
+ margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  float: right;
+
+}
+
+.bulk-actions button {
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: var(--blue-main);
+  color: white;
+  transition: background-color 0.2s ease;
+}
+.bulk-actions button:hover {
+  background-color: #0056b3;
+}
+
+/* ✅ Boutons d'action */
+.actions-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-validate,
+.btn-refuse {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .btn-validate {
-  background-color: #28a745; /* Vert */
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+  background-color: #28a745;
 }
-
 .btn-validate:hover {
-  background-color: #218838; /* Vert foncé */
+  background-color: #218838;
 }
 
 .btn-refuse {
-  background-color: #dc3545; /* Rouge */
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+  background-color: #dc3545;
 }
-
 .btn-refuse:hover {
-  background-color: #c82333; /* Rouge foncé */
+  background-color: #c82333;
 }
 
-/* Icônes de statut */
-.status-icon {
-  margin-right: 0.5rem; /* Espace entre l'icône et le texte */
-  font-size: 1.2rem; /* Taille de l'icône */
-}
-
-.status-validé .status-icon {
-  color: green; /* Couleur verte pour "validé" */
-}
-
-.status-refusé .status-icon {
-  color: red; /* Couleur rouge pour "refusé" */
-}
-
-.status-en-attente .status-icon {
-  color: orange; /* Couleur orange pour "en attente" */
-}
-
-/* Boutons désactivés */
+/* Désactivé */
 button:disabled {
-  background-color: #ccc; /* Gris clair */
-  color: #666; /* Texte gris */
-  cursor: not-allowed; /* Curseur non autorisé */
-  opacity: 0.6; /* Transparence */
-}
-/* Statut : Validé */
-.status-validé {
-  color: green; /* Couleur verte pour "validé" */
-  font-weight: bold; /* Texte en gras */
-  display: flex; /* Aligner l'icône et le texte */
-  align-items: center; /* Centrer verticalement l'icône et le texte */
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
-/* Statut : Refusé */
-.status-refusé {
-  color: red; /* Couleur rouge pour "refusé" */
-  font-weight: bold; /* Texte en gras */
-  display: flex; /* Aligner l'icône et le texte */
-  align-items: center; /* Centrer verticalement l'icône et le texte */
+/* 📄 Modale d’aperçu */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
 
-/* Statut : En attente */
-.status-en-attente {
-  color: orange; /* Couleur orange pour "en attente" */
-  font-weight: bold; /* Texte en gras */
-  display: flex; /* Aligner l'icône et le texte */
-  align-items: center; /* Centrer verticalement l'icône et le texte */
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  width: 80%;
+  max-width: 800px;
+  border-radius: 10px;
+  position: relative;
 }
 
-/* Icônes de statut */
-.status-icon {
-  margin-right: 0.5rem; /* Espace entre l'icône et le texte */
-  font-size: 1.2rem; /* Taille de l'icône */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
 }
-/* Espacement entre les boutons */
-.actions-buttons {
-  display: flex; /* Aligner les boutons horizontalement */
-  gap: 1rem; /* Espacement entre les boutons */
+.btn-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  font: inherit;
+}
+.btn-link:hover {
+  color: #0056b3;
+}
+.btn-apercu {
+  background: none;
+  border: none;
+  color: var(--blue-def);
+  cursor: pointer;
+  text-align: left;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  font-size: 14px;
+}
+
+.btn-apercu:hover {
+  text-decoration: underline;
 }

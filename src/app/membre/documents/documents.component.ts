@@ -31,11 +31,11 @@ export class DocumentsComponent implements OnInit {
   selectedFile: File | null = null;
   documents: Document[] = [];
 
-  requiredDocuments = [
-    { type: 'certificat', label: 'Certificat médical', uploaded: false },
-    { type: 'photo', label: 'Photo d’identité', uploaded: false },
-    { type: 'identite', label: 'Document d’identité', uploaded: false }
-  ];
+ requiredDocuments = [
+  { type: 'certificat', label: 'Certificat médical', uploaded: false, etat: 'non_envoyé' },
+  { type: 'photo', label: 'Photo d’identité', uploaded: false, etat: 'non_envoyé' },
+  { type: 'identite', label: 'Document d’identité', uploaded: false, etat: 'non_envoyé' }
+];
 
   constructor(private http: HttpClient) {}
 
@@ -84,11 +84,22 @@ export class DocumentsComponent implements OnInit {
     });
   }
 
-  updateRequiredDocumentsStatus(): void {
-    this.requiredDocuments.forEach(doc => {
-      const found = this.documents.find(d => d.typeDocument === doc.type);
-      doc.uploaded = !!(found && found.status === 'validé');
-    });
+ updateRequiredDocumentsStatus(): void {
+  this.requiredDocuments.forEach(doc => {
+    const match = this.documents.find(d => d.typeDocument === doc.type);
+    if (match) {
+      doc.uploaded = match.status !== 'refusé';
+      doc['etat'] = match.status; // validé, en_attente, refusé
+    } else {
+      doc.uploaded = false;
+      doc['etat'] = 'non_envoyé';
+    }
+  });
+}
+
+
+  isUploaded(type: string): boolean {
+    return this.documents.some(d => d.typeDocument === type && d.status !== 'refusé');
   }
 
   isDocumentRefused(type: string): boolean {
@@ -127,8 +138,8 @@ export class DocumentsComponent implements OnInit {
     this.http.post('http://localhost:8080/api/documents', formData).subscribe({
       next: () => {
         alert('Document téléversé avec succès.');
-        this.loadDocuments();
         this.selectedFile = null;
+        this.loadDocuments(); // ✅ recharge la liste
       },
       error: (err) => {
         console.error('Erreur téléversement :', err);
@@ -176,30 +187,68 @@ export class DocumentsComponent implements OnInit {
     }
   }
 
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'validé': return 'status-validé';
-      case 'en attente': return 'status-en-attente';
-      case 'refusé': return 'status-refusé';
-      default: return '';
-    }
+ getStatusText(status: string): string {
+  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
+  switch (normalised) {
+    case 'validé':
+      return 'Validé';
+    case 'refusé':
+      return 'Refusé';
+    case 'en_attente':
+      return 'En attente de validation';
+    default:
+      return 'Inconnu';
+  }
+}
+
+getStatusClass(status: string): string {
+  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
+  switch (normalised) {
+    case 'validé':
+      return 'status-validé';
+    case 'refusé':
+      return 'status-refusé';
+    case 'en_attente':
+      return 'status-en-attente';
+    default:
+      return '';
+  }
+}
+
+getStatusIcon(status: string): string {
+  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
+  switch (normalised) {
+    case 'validé':
+      return 'ri-check-line';
+    case 'refusé':
+      return 'ri-close-line';
+    case 'en_attente':
+      return 'ri-time-line';
+    default:
+      return '';
+  }
+}
+getDocumentStatusInfo(type: string): { text: string; class: string; tooltip?: string } {
+  const doc = this.documents.find(d => d.typeDocument === type);
+  if (!doc || !doc.status) {
+    return { text: 'Non téléversé', class: 'not-uploaded' };
   }
 
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case 'validé': return 'fas fa-check-circle';
-      case 'en attente': return 'fas fa-clock';
-      case 'refusé': return 'fas fa-times-circle';
-      default: return '';
-    }
+  const raw = doc.status.trim().toLowerCase();
+  const status = raw.replace(/\s+/g, '_');
+
+  if (status === 'validé') {
+    return { text: 'Validé', class: 'uploaded' };
+  } else if (status === 'refusé') {
+    return {
+      text: 'Refusé',
+      class: 'refused',
+      tooltip: 'Document refusé. Veuillez téléverser un nouveau fichier.'
+    };
+  } else if (status === 'en_attente') {
+    return { text: 'Téléversé', class: 'uploaded' };
   }
 
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'validé': return 'Validé';
-      case 'en attente': return 'En attente de validation';
-      case 'refusé': return 'Refusé';
-      default: return 'Statut inconnu';
-    }
-  }
+  return { text: 'Téléversé', class: 'uploaded' };
+}
 }
