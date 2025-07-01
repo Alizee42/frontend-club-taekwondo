@@ -17,26 +17,33 @@ export class ConnexionComponent {
 
   constructor(private router: Router, private http: HttpClient) {}
 
-    onSubmit() {
+  onSubmit() {
     console.log('Email fourni :', this.email);
     console.log('Mot de passe fourni :', this.password);
   
     if (this.email && this.password) {
+      const loginData = {
+        email: this.email,
+        password: this.password
+      };
+  
       this.http.post<any>(
-        'http://localhost:8080/api/utilisateurs/login?email=' + this.email + '&password=' + this.password,
-        null, // Le corps de la requête est vide ici
-        { responseType: 'json' } // Indique que la réponse doit être interprétée comme JSON
+        'http://localhost:8080/api/utilisateurs/login',
+        loginData // ✅ envoyer le corps JSON ici
       ).subscribe({
         next: (response) => {
           console.log('Réponse reçue :', response);
   
-          const role = response.role || response.user?.role;
+          const role = response.role || response.utilisateur?.role;
   
           if (response.token) {
             localStorage.setItem('token', response.token);
           }
           if (role) {
             localStorage.setItem('role', role);
+          }
+          if (response.utilisateur) {
+            localStorage.setItem('utilisateur', JSON.stringify(response.utilisateur));
           }
   
           const roleLower = role?.toLowerCase();
@@ -58,4 +65,5 @@ export class ConnexionComponent {
       alert('Veuillez remplir correctement tous les champs.');
     }
   }
+  
 }

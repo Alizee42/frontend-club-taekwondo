@@ -1,41 +1,37 @@
 <div class="boutique-container">
-    <h1>🛍️ Boutique du Club</h1>
-  
-    <div class="produits">
-      <div class="produit-card" *ngFor="let produit of produits">
-        <img [src]="produit.imageUrl" alt="{{ produit.nom }}" class="produit-image" />
-        <h2>{{ produit.nom }}</h2>
-        <p>{{ produit.description }}</p>
-        <p class="prix">{{ produit.prix }} €</p>
-  
-        <div class="options">
-          <label>Taille :
-            <select [(ngModel)]="produit.taille">
-              <option *ngFor="let taille of tailles" [value]="taille">{{ taille }}</option>
-            </select>
-          </label>
-          <label>Couleur :
-            <select [(ngModel)]="produit.couleur">
-              <option *ngFor="let couleur of couleurs" [value]="couleur">{{ couleur }}</option>
-            </select>
-          </label>
-          <label>Flocage :
-            <input type="text" [(ngModel)]="produit.flocage" placeholder="Nom ou texte" />
-          </label>
-        </div>
-  
-        <button (click)="ajouterAuPanier(produit)">Ajouter au panier</button>
+  <h2>Boutique - Dobok Taekwondo</h2>
+
+  <div class="produit">
+    <img src="assets/images/dobok.jpg" alt="Dobok Taekwondo" class="produit-image">
+
+    <div class="produit-info">
+      <h3>Dobok Taekwondo</h3>
+      <p>Tenue officielle blanche en coton pour la pratique du Taekwondo.</p>
+      <p class="prix-base">Prix : 30 €</p>
+
+      <label for="taille">Choisir une taille (en cm) :</label>
+      <select id="taille" (change)="updatePrixTotal()">
+        <option value="">-- Sélectionnez --</option>
+        <option value="120">120 cm</option>
+        <option value="130">130 cm</option>
+        <option value="140">140 cm</option>
+        <option value="150">150 cm</option>
+        <option value="160">160 cm</option>
+        <option value="170">170 cm</option>
+        <option value="180">180 cm</option>
+        <option value="190">190 cm</option>
+        <option value="200">200 cm</option>
+        <option value="210">210 cm</option>
+      </select>
+
+      <div class="flocage-option">
+        <input type="checkbox" id="flocage" (change)="updatePrixTotal()" />
+        <label for="flocage">Ajouter un flocage (+10 €) — Texte : <strong>tkdVilleurbannais</strong></label>
       </div>
-    </div>
-  
-    <div class="panier" *ngIf="panier.length > 0">
-      <h2>🛒 Panier</h2>
-      <div class="panier-item" *ngFor="let item of panier; let i = index">
-        <p>{{ item.nom }} - {{ item.taille }}, {{ item.couleur }} ({{ item.flocage }}) : {{ item.prix }} €</p>
-        <button (click)="supprimerDuPanier(i)">❌ Supprimer</button>
-      </div>
-      <p class="total">Total : {{ getTotal() }} €</p>
-      <button class="payer-btn" (click)="payer()">Payer</button>
+
+      <p class="prix-total">Prix total : <span id="prix-total">30</span> €</p>
+
+      <button class="btn-commander" (click)="ajouterAuPanier(produits[0]); commander()">Commander</button>
     </div>
   </div>
-  
+</div>
