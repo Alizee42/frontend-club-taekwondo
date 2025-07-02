@@ -14,4 +14,10 @@ export class CommandeService {
   creerCommandeAvecLignes(commandeDTO: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/with-lignes`, commandeDTO);
   }
+
+  // 🔹 Méthode pour créer une commande avec statut "EN_ATTENTE"
+  creerCommandeEnAttente(commandeDTO: any): Observable<any> {
+    commandeDTO.statut = 'EN_ATTENTE'; // Ajout du statut "EN_ATTENTE"
+    return this.http.post(`${this.apiUrl}/with-lignes`, commandeDTO);
+  }
 }

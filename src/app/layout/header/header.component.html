@@ -29,18 +29,19 @@
 
     <!-- Burger menu -->
     <div class="burger" (click)="toggleMenu()">
-      <span></span><span></span><span></span>
+      <span></span>
+      <span></span>
+      <span></span>
     </div>
 
     <!-- Zone connectée -->
     <div *ngIf="isLoggedIn" class="user-actions">
       <!-- Panier -->
-      <div class="cart-icon" (click)="goToPanier()">
+      <div class="cart-icon" (click)="togglePanier()">
         <i class="ri-shopping-cart-line"></i>
         <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
       </div>
-      
-
+    
       <!-- Initiales profil -->
       <div class="profile-menu">
         <div class="profile-circle" (click)="toggleProfileMenu()">
@@ -52,16 +53,28 @@
           <li><button (click)="logout()">Se déconnecter</button></li>
         </ul>
       </div>
-
-      <!-- Mini panier -->
+    
+      <!-- Dropdown du panier -->
       <div class="cart-preview" *ngIf="panierOpen">
-        <div *ngIf="panier.length === 0">Panier vide</div>
+        <div *ngIf="panier.length === 0">Votre panier est vide.</div>
         <ul *ngIf="panier.length > 0">
-          <li *ngFor="let item of panier">
-            {{ item.nom }} ({{ item.taille }}, {{ item.couleur }}) <span *ngIf="item.flocage">+ Flocage</span>
+          <li *ngFor="let item of panier; let i = index" class="cart-item">
+            <img [src]="item.imageUrl" alt="{{ item.nom }}" class="cart-item-image" />
+            <div class="cart-item-info">
+              <p><strong>{{ item.nom }}</strong></p>
+              <p>Taille : {{ item.taille }}</p>
+              <p>Quantité : {{ item.quantite }}</p>
+              <p>Prix total : {{ item.prix }} €</p>
+            </div>
+            <button class="btn-delete" (click)="supprimerDuPanier(i)">
+              <i class="ri-delete-bin-line"></i>
+            </button>
           </li>
         </ul>
-        <button (click)="goToBoutique()">Voir le panier</button>
+        <div class="payment-buttons">
+          <button class="btn-pay" (click)="payerParCB()">Payer par CB</button>
+          <button class="btn-pay" (click)="payerAuClub()">Payer au club</button>
+        </div>
       </div>
     </div>
   </div>

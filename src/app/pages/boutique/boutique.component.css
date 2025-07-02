@@ -1,126 +1,163 @@
+/* Conteneur principal de la boutique */
 .boutique-container {
-  max-width: 1000px;
-  margin: 40px auto;
+  max-width: 900px;
+  margin: 30px auto;
   padding: 20px;
   font-family: 'Poppins', sans-serif;
-  background-color: #f8f8f8;
+  background-color: #f9f9f9;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Titre principal */
 .boutique-container h2 {
   text-align: center;
-  font-size: 28px;
+  font-size: 30px;
   color: #2c3e50;
   margin-bottom: 30px;
+  font-weight: bold;
 }
 
+/* Conteneur du produit */
 .produit {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px;
+  gap: 20px;
   background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
   align-items: flex-start;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* Image du produit */
 .produit-image {
-  width: 280px;
+  width: 250px;
   max-width: 100%;
   border-radius: 10px;
   object-fit: cover;
-  border: 1px solid #ddd;
+  height: 300px;
+  margin-right: 20px;
+  margin-top: 30%;
 }
 
+/* Informations sur le produit */
 .produit-info {
   flex: 1;
   min-width: 250px;
 }
 
+/* Titre du produit */
 .produit-info h3 {
   margin-top: 0;
   font-size: 24px;
   color: #333;
+  font-weight: bold;
 }
 
+/* Description du produit */
 .produit-info p {
   font-size: 16px;
-  margin: 10px 0;
-  color: #444;
+  margin: 15px 0;
+  color: #555;
 }
 
+/* Prix du produit */
 .prix-base {
   font-weight: bold;
-  font-size: 18px;
+  font-size: 20px;
   color: #007bff;
 }
 
+/* Conteneur des options */
+.options {
+  margin-top: 15px;
+  display: grid;
+  gap: 15px;
+}
+
+/* Style des options (taille, quantité, flocage) */
+.option {
+  margin-bottom: 15px;
+}
+
+/* Labels des options */
 label {
   display: block;
-  margin-top: 15px;
   margin-bottom: 5px;
-  font-weight: 500;
+  font-weight: 600;
   color: #333;
 }
 
-select {
+/* Sélecteurs et champs de saisie */
+select,
+input[type="number"] {
   padding: 8px;
-  font-size: 15px;
-  border-radius: 6px;
+  font-size: 14px;
+  border-radius: 8px;
   border: 1px solid #ccc;
   width: 100%;
   max-width: 250px;
 }
 
+/* Option de flocage */
 .flocage-option {
-  margin-top: 15px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.flocage-option input {
-  transform: scale(1.2);
-}
-
+/* Prix total */
 .prix-total {
-  margin-top: 20px;
+  margin-top: 15px;
   font-size: 20px;
   font-weight: bold;
   color: #2c3e50;
 }
 
-.btn-commander {
-  margin-top: 25px;
+/* Bouton pour ajouter au panier */
+.btn-ajouter-panier {
+  margin-top: 20px;
   padding: 12px 25px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
-  background-color: #28a745;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.btn-commander:hover {
-  background-color: #218838;
+.btn-ajouter-panier:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
 }
 
-/* Responsive */
+/* Responsive design */
 @media (max-width: 768px) {
   .produit {
     flex-direction: column;
     align-items: center;
+    padding: 15px;
+  }
+
+  .produit-image {
+    width: 100%;
+    height: auto;
   }
 
   .produit-info {
     width: 100%;
   }
 
-  select {
+  select,
+  input[type="number"] {
     width: 100%;
+  }
+
+  .btn-ajouter-panier {
+    width: 100%;
+    text-align: center;
   }
 }

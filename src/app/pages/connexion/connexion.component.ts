@@ -17,7 +17,7 @@ export class ConnexionComponent {
 
   constructor(private router: Router, private http: HttpClient) {}
 
-  onSubmit() {
+    onSubmit() {
     console.log('Email fourni :', this.email);
     console.log('Mot de passe fourni :', this.password);
   
@@ -29,7 +29,7 @@ export class ConnexionComponent {
   
       this.http.post<any>(
         'http://localhost:8080/api/utilisateurs/login',
-        loginData // ✅ envoyer le corps JSON ici
+        loginData
       ).subscribe({
         next: (response) => {
           console.log('Réponse reçue :', response);
@@ -43,7 +43,7 @@ export class ConnexionComponent {
             localStorage.setItem('role', role);
           }
           if (response.utilisateur) {
-            localStorage.setItem('utilisateur', JSON.stringify(response.utilisateur));
+            localStorage.setItem('user', JSON.stringify(response.utilisateur));
           }
   
           const roleLower = role?.toLowerCase();
@@ -65,5 +65,4 @@ export class ConnexionComponent {
       alert('Veuillez remplir correctement tous les champs.');
     }
   }
-  
 }
