@@ -307,6 +307,22 @@
 .btn-pay:hover {
   background-color: #0056b3;
 }
+/* Modale Stripe */
+.modal-backdrop {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.5); z-index: 1000;
+}
+.modal-content {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: #fff; padding: 2rem; border-radius: 8px; z-index: 1001;
+  min-width: 320px; max-width: 90vw;
+}
+.confirmation {
+  margin-top: 1rem; color: green; font-weight: bold;
+}
+.paiement-securite {
+  margin-top: 1rem; font-size: 0.95em; color: #333;
+}
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .burger {

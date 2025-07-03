@@ -71,10 +71,24 @@
             </button>
           </li>
         </ul>
+        <!-- Ajoute ce bloc dans header.component.html, dans la div .cart-preview -->
+        <div id="card-element" style="margin: 16px 0;"></div>
         <div class="payment-buttons">
           <button class="btn-pay" (click)="payerParCB()">Payer par CB</button>
           <button class="btn-pay" (click)="payerAuClub()">Payer au club</button>
         </div>
+      </div>
+    </div>
+        <!-- Modale de paiement Stripe -->
+    <div class="modal-backdrop" *ngIf="showPaiementModal" (click)="fermerPaiementModal()"></div>
+    <div class="modal-content" *ngIf="showPaiementModal">
+      <h2>Paiement sécurisé</h2>
+      <div id="modal-card-element" style="margin: 16px 0;"></div>
+      <button (click)="validerPaiement()">Valider le paiement</button>
+      <button (click)="fermerPaiementModal()">Annuler</button>
+      <div *ngIf="confirmationMessage" class="confirmation">{{ confirmationMessage }}</div>
+      <div class="paiement-securite">
+        <p>🔒 Paiement sécurisé via Stripe. Ne partagez jamais vos informations bancaires.</p>
       </div>
     </div>
   </div>
