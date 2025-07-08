@@ -1,0 +1,21 @@
+<div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>📦 Commandes</h2>
+      <ul class="menu">
+        <li (click)="changerVue('cb')" [class.active]="vueActive === 'cb'">💳 Commandes CB</li>
+        <li (click)="changerVue('club')" [class.active]="vueActive === 'club'">🏠 Paiement au club</li>
+        <li (click)="changerVue('disponibilite')" [class.active]="vueActive === 'disponibilite'">📦 Disponibilité retrait</li>
+        <li (click)="changerVue('historique')" [class.active]="vueActive === 'historique'">📚 Historique</li>
+      </ul>
+    </aside>
+  
+    <!-- Contenu dynamique -->
+    <section class="content">
+      <app-liste-cb *ngIf="vueActive === 'cb'"></app-liste-cb>
+      <app-liste-club *ngIf="vueActive === 'club'"></app-liste-club>
+      <app-disponibilite *ngIf="vueActive === 'disponibilite'"></app-disponibilite>
+      <app-historique-commandes *ngIf="vueActive === 'historique'"></app-historique-commandes>
+    </section>
+  </div>
+  

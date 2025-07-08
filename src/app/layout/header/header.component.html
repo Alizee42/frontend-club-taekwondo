@@ -41,7 +41,7 @@
         <i class="ri-shopping-cart-line"></i>
         <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
       </div>
-    
+
       <!-- Initiales profil -->
       <div class="profile-menu">
         <div class="profile-circle" (click)="toggleProfileMenu()">
@@ -53,10 +53,13 @@
           <li><button (click)="logout()">Se déconnecter</button></li>
         </ul>
       </div>
-    
+
       <!-- Dropdown du panier -->
       <div class="cart-preview" *ngIf="panierOpen">
-        <div *ngIf="panier.length === 0">Votre panier est vide.</div>
+        <div *ngIf="panier.length === 0">
+          <p>Votre panier est vide.</p>
+          <button class="btn-return" (click)="goToBoutique()">Retourner à la boutique</button>
+        </div>
         <ul *ngIf="panier.length > 0">
           <li *ngFor="let item of panier; let i = index" class="cart-item">
             <img [src]="item.imageUrl" alt="{{ item.nom }}" class="cart-item-image" />
@@ -71,25 +74,38 @@
             </button>
           </li>
         </ul>
-        <!-- Ajoute ce bloc dans header.component.html, dans la div .cart-preview -->
-        <div id="card-element" style="margin: 16px 0;"></div>
-        <div class="payment-buttons">
+        <div class="payment-buttons" *ngIf="panier.length > 0 && isLoggedIn">
           <button class="btn-pay" (click)="payerParCB()">Payer par CB</button>
           <button class="btn-pay" (click)="payerAuClub()">Payer au club</button>
         </div>
       </div>
     </div>
-        <!-- Modale de paiement Stripe -->
-    <div class="modal-backdrop" *ngIf="showPaiementModal" (click)="fermerPaiementModal()"></div>
-    <div class="modal-content" *ngIf="showPaiementModal">
+  </div>
+</header>
+
+<!-- Modale générique -->
+<div *ngIf="confirmationMessage || showPaiementModal" class="modal-overlay">
+  <div class="modal-content">
+    <button class="modal-close" (click)="closeAllModals()">×</button>
+
+    <!-- Message de confirmation -->
+    <ng-container *ngIf="confirmationMessage">
+      <h2>Confirmation</h2>
+      <p class="confirmation">{{ confirmationMessage }}</p>
+      <p *ngIf="showConfirmationModal">Merci pour votre commande. Veuillez effectuer le paiement au club.</p>
+      <p *ngIf="!showConfirmationModal">Un e-mail de confirmation vous a été envoyé.</p>
+      <button class="btn-return" (click)="goToBoutique()">Retourner à la boutique</button>
+    </ng-container>
+
+    <!-- Paiement sécurisé -->
+    <ng-container *ngIf="showPaiementModal">
       <h2>Paiement sécurisé</h2>
       <div id="modal-card-element" style="margin: 16px 0;"></div>
       <button (click)="validerPaiement()">Valider le paiement</button>
       <button (click)="fermerPaiementModal()">Annuler</button>
-      <div *ngIf="confirmationMessage" class="confirmation">{{ confirmationMessage }}</div>
       <div class="paiement-securite">
         <p>🔒 Paiement sécurisé via Stripe. Ne partagez jamais vos informations bancaires.</p>
       </div>
-    </div>
+    </ng-container>
   </div>
-</header>
+</div>

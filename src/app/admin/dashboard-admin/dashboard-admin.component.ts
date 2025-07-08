@@ -69,4 +69,7 @@ export class DashboardAdminComponent implements OnInit {
   navigateToPaiement(): void {
     this.router.navigate(['/admin/paiements']); // Redirige vers la page Gestion des Documents
   }
+    navigateToGestionCommande(): void {
+    this.router.navigate(['/admin/gestion-commande']); // Redirige vers la page Gestion des Commandes
+  }
 }

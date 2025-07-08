@@ -1,0 +1,114 @@
+<div class="disponibilite-container">
+  <h2>📦 Gestion des disponibilités au club</h2>
+
+  <!-- Message de chargement -->
+  <div *ngIf="isLoading" class="loading-message" aria-live="polite">
+    Chargement des commandes...
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="error-message" aria-live="assertive">
+    {{ errorMessage }}
+  </div>
+
+  <!-- 📦 Commandes à traiter -->
+  <div *ngIf="!isLoading">
+    <h3>📦 À préparer / disponibles</h3>
+    <div *ngIf="commandesEnCours.length === 0" class="no-commande-message">
+      Aucune commande à préparer.
+    </div>
+
+    <table *ngIf="commandesEnCours.length > 0" class="table-commandes">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Produits</th>
+          <th>Montant</th>
+          <th>Date</th>
+          <th>Statut</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let commande of commandesEnCours">
+          <td>{{ commande.utilisateur?.prenom }} {{ commande.utilisateur?.nom }}</td>
+          <td>
+            <ul>
+              <li *ngFor="let ligne of commande.lignesCommande">
+                {{ ligne.produitNom }} ({{ ligne.quantite }}x)
+                <hr />
+                <span class="details">Taille: {{ ligne.taille }}, Couleur: {{ ligne.couleur }}</span>
+                <span *ngIf="ligne.flocage">, Flocage: {{ ligne.flocage }}</span>
+              </li>
+            </ul>
+          </td>
+          <td>{{ commande.montantTotal }} €</td>
+          <td>{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="badge"
+              [ngClass]="{
+                'badge-attente': commande.statut === 'EN_COURS' || commande.statut === 'PAYEE',
+                'badge-dispo': commande.statut === 'DISPONIBLE'
+              }">
+              {{
+                commande.statut === 'EN_COURS' || commande.statut === 'PAYEE' ? 'À préparer' :
+                commande.statut === 'DISPONIBLE' ? 'Disponible au club' : ''
+              }}
+            </span>
+          </td>
+          <td>
+            <button *ngIf="commande.statut === 'EN_COURS' || commande.statut === 'PAYEE'"
+                    class="btn-action"
+                    (click)="marquerCommeDisponible(commande.id)">
+              📦 Marquer comme disponible
+            </button>
+
+            <button *ngIf="commande.statut === 'DISPONIBLE'"
+                    class="btn-action"
+                    (click)="marquerCommeRetiree(commande.id)">
+              ✅ Marquer comme retirée
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ✅ Commandes retirées -->
+  <div *ngIf="!isLoading">
+    <h3 style="margin-top: 32px;">✅ Commandes retirées</h3>
+    <div *ngIf="commandesRetirees.length === 0" class="no-commande-message">
+      Aucune commande retirée récemment.
+    </div>
+
+    <table *ngIf="commandesRetirees.length > 0" class="table-commandes">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Produits</th>
+          <th>Montant</th>
+          <th>Date</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let commande of commandesRetirees">
+          <td>{{ commande.utilisateur?.prenom }} {{ commande.utilisateur?.nom }}</td>
+          <td>
+            <ul>
+              <li *ngFor="let ligne of commande.lignesCommande">
+                {{ ligne.produitNom }} ({{ ligne.quantite }}x)
+                <hr />
+                <span class="details">Taille: {{ ligne.taille }}, Couleur: {{ ligne.couleur }}</span>
+                <span *ngIf="ligne.flocage">, Flocage: {{ ligne.flocage }}</span>
+              </li>
+            </ul>
+          </td>
+          <td>{{ commande.montantTotal }} €</td>
+          <td>{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
+          <td><span class="badge badge-retire">Retirée</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

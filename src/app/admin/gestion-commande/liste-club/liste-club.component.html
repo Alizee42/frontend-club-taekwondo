@@ -1,0 +1,87 @@
+<div class="liste-club-container">
+  <h2>💶 Paiements au club (espèces / virement)</h2>
+
+  <!-- Message de chargement -->
+  <div *ngIf="isLoading" class="loading-message" aria-live="polite">
+    Chargement des commandes...
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="error-message" aria-live="assertive">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Message si aucune commande -->
+  <div *ngIf="!isLoading && commandes.length === 0" class="no-commande-message">
+    Aucune commande en attente de paiement au club.
+  </div>
+
+  <!-- Tableau des commandes -->
+  <table *ngIf="!isLoading && commandes.length > 0" class="table-commandes">
+    <thead>
+      <tr>
+        <th scope="col">Client</th>
+        <th scope="col">Produits</th>
+        <th scope="col">Montant</th>
+        <th scope="col">Date</th>
+        <th scope="col">Mode</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let commande of commandes">
+        <td>{{ commande.utilisateur?.prenom }} {{ commande.utilisateur?.nom }}</td>
+
+        <td>
+          <ul>
+            <li *ngFor="let ligne of commande.lignesCommande">
+              {{ ligne.produitNom }} ({{ ligne.quantite }}x)
+              <span class="details">Taille: {{ ligne.taille }}, Couleur: {{ ligne.couleur }}</span>
+              <span *ngIf="ligne.flocage">, Flocage: {{ ligne.flocage }}</span>
+            </li>
+          </ul>
+        </td>
+
+        <td>{{ commande.montantTotal }} €</td>
+        <td>{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
+        <td><strong>{{ commande.modePaiement }}</strong></td>
+
+        <td>
+          <button class="btn-action" (click)="ouvrirModalPaiement(commande)">
+            💶 Paiement effectué
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ✅ Modale de saisie du paiement -->
+  <div class="modal" *ngIf="modalVisible">
+    <div class="modal-content">
+      <h3>Enregistrer le paiement de {{ commandeActuelle?.utilisateur?.prenom }} {{ commandeActuelle?.utilisateur?.nom }}</h3>
+
+      <form (ngSubmit)="validerPaiement()">
+        <label for="modePaiement">Mode de paiement :</label>
+        <select id="modePaiement" [(ngModel)]="paiementForm.mode" name="modePaiement" required>
+          <option value="">-- Sélectionner --</option>
+          <option value="especes">Espèces</option>
+          <option value="virement">Virement</option>
+          <option value="autre">Autre</option>
+        </select>
+
+        <label for="datePaiement">Date de paiement :</label>
+        <input id="datePaiement" type="date" [(ngModel)]="paiementForm.date" name="datePaiement" required />
+
+        <label for="justificatif">Justificatif (facultatif) :</label>
+        <input id="justificatif" type="file" (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png" />
+
+        <p class="montant">💰 Montant : {{ commandeActuelle?.montantTotal }} €</p>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-confirm">✅ Valider</button>
+          <button type="button" class="btn btn-cancel" (click)="fermerModal()">❌ Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

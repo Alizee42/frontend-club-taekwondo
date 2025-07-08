@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { PanierService } from '../../services/panier.service';
 
 interface Produit {
-  id: number; // 🔥 Ajout de l'ID
+  id: number;
   nom: string;
   description: string;
   prixBase: number;
@@ -15,7 +15,7 @@ interface Produit {
   couleur?: string;
   floquageActif?: boolean;
   flocage?: string;
-  quantite?: number; // Ajout de la propriété quantite
+  quantite?: number;
 }
 
 @Component({
@@ -41,7 +41,7 @@ export class BoutiqueComponent implements OnInit {
 
     this.produits = [
       {
-        id: 1, // 🔥 Correspond à l'ID réel en base
+        id: 1,
         nom: 'Dobok Taekwondo',
         description: 'Tenue blanche officielle',
         prixBase: 30,
@@ -63,38 +63,49 @@ export class BoutiqueComponent implements OnInit {
     return total;
   }
 
-    ajouterAuPanier(produit: Produit): void {
-    const tailleSelect = document.getElementById('taille') as HTMLSelectElement;
-    const flocageCheckbox = document.getElementById('flocage') as HTMLInputElement;
-    const quantiteInput = document.getElementById('quantite') as HTMLInputElement;
-  
-    if (!tailleSelect.value) {
+  ajouterAuPanier(produit: Produit): void {
+    const tailleSelect = document.getElementById('taille') as HTMLSelectElement | null;
+    const flocageCheckbox = document.getElementById('flocage') as HTMLInputElement | null;
+    const quantiteInput = document.getElementById('quantite') as HTMLInputElement | null;
+
+    if (!tailleSelect?.value) {
       alert('Veuillez sélectionner une taille.');
       return;
     }
-  
-    const copie = { ...produit };
+
+    if (!flocageCheckbox || !quantiteInput) {
+      alert('Une erreur est survenue. Veuillez réessayer.');
+      return;
+    }
+
+    const copie: Produit = { ...produit };
     copie.taille = tailleSelect.value;
     copie.floquageActif = flocageCheckbox.checked;
     copie.quantite = parseInt(quantiteInput.value, 10) || 1; // Quantité par défaut : 1
     copie.prix = this.calculerPrix(copie) * copie.quantite;
-  
-    this.panierService.ajouterAuPanier(copie); // Utilisation du service
+
+    this.panierService.ajouterAuPanier(copie);
     alert('Produit ajouté au panier !');
   }
 
   updatePrixTotal(): void {
-    const tailleSelect = document.getElementById('taille') as HTMLSelectElement;
-    const flocageCheckbox = document.getElementById('flocage') as HTMLInputElement;
-  
+    const tailleSelect = document.getElementById('taille') as HTMLSelectElement | null;
+    const flocageCheckbox = document.getElementById('flocage') as HTMLInputElement | null;
+
+    if (!tailleSelect || !flocageCheckbox) {
+      console.error('Impossible de mettre à jour le prix total. Les éléments DOM sont introuvables.');
+      return;
+    }
+
     const produit = this.produits[0];
     produit.taille = tailleSelect.value;
     produit.floquageActif = flocageCheckbox.checked;
-  
-    console.log('Taille sélectionnée :', produit.taille); // Vérifiez la taille
-    console.log('Flocage actif :', produit.floquageActif); // Vérifiez le flocage
-  
-    const prixTotalElement = document.getElementById('prix-total') as HTMLElement;
-    prixTotalElement.textContent = this.calculerPrix(produit).toString();
+
+    const prixTotalElement = document.getElementById('prix-total') as HTMLElement | null;
+    if (prixTotalElement) {
+      prixTotalElement.textContent = this.calculerPrix(produit).toFixed(2);
+    } else {
+      console.error('Élément pour afficher le prix total introuvable.');
+    }
   }
 }

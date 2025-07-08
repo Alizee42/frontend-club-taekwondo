@@ -1,3 +1,4 @@
+/* HEADER PRINCIPAL */
 .main-header {
   background-color: var(--blue-dark);
   border-bottom: 2px solid #eee;
@@ -14,17 +15,18 @@
   gap: 1rem;
   flex-wrap: wrap;
 }
+
 .user-actions {
   display: flex;
   align-items: center;
   gap: 0.8rem;
 }
 
-
-/* Logo à gauche */
+/* LOGO */
 .logo {
   flex: 0 0 auto;
 }
+
 .logo a {
   font-size: 1.5rem;
   font-weight: bold;
@@ -32,12 +34,13 @@
   text-decoration: none;
 }
 
-/* NAVIGATION CENTRÉE */
+/* NAVIGATION */
 .nav-wrapper {
   flex: 1;
   display: flex;
   justify-content: center;
 }
+
 .main-nav ul {
   display: flex;
   align-items: center;
@@ -46,6 +49,7 @@
   padding: 0;
   margin: 0;
 }
+
 .main-nav a {
   text-decoration: none;
   color: #fff;
@@ -54,6 +58,7 @@
   display: inline-block;
   transition: color 0.3s;
 }
+
 .main-nav a::after {
   content: "";
   position: absolute;
@@ -64,6 +69,7 @@
   background-color: #e63946;
   transition: width 0.3s ease;
 }
+
 .main-nav a:hover::after {
   width: 100%;
 }
@@ -75,19 +81,21 @@
   gap: 4px;
   cursor: pointer;
 }
+
 .burger span {
   width: 25px;
   height: 3px;
   background-color: #fff;
 }
 
-/* PROFIL À DROITE */
+/* PROFIL */
 .profile-menu {
   display: flex;
   align-items: center;
   position: relative;
   flex: 0 0 auto;
 }
+
 .profile-circle {
   width: 40px;
   height: 40px;
@@ -102,6 +110,7 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
 .profile-circle:hover {
   background-color: var(--accent-dark);
 }
@@ -121,12 +130,15 @@
   z-index: 1000;
   min-width: 180px;
 }
+
 .profile-dropdown.open {
   display: flex;
 }
+
 .profile-dropdown li {
   padding: 0.5rem 1rem;
 }
+
 .profile-dropdown li a,
 .profile-dropdown li button {
   color: white;
@@ -140,11 +152,13 @@
   font-size: 15px;
   transition: color 0.3s ease;
 }
+
 .profile-dropdown li a:hover,
 .profile-dropdown li button:hover {
   color: var(--accent-hover);
 }
-/* Panier */
+
+/* PANIER */
 .cart-icon {
   width: 40px;
   height: 40px;
@@ -181,7 +195,6 @@
   font-weight: bold;
 }
 
-
 .cart-preview {
   position: absolute;
   top: 60px;
@@ -206,22 +219,25 @@
   margin: 5px 0;
   color: #333;
 }
-
-.cart-preview button {
+/* Bouton Retourner à la boutique */
+.cart-preview .btn-return {
   margin-top: 10px;
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 10px 20px;
+  font-size: 16px;
   font-weight: bold;
-  background-color: #007bff;
+  background-color: #007bff; /* Bleu principal */
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: block;
+  text-align: center;
 }
 
-.cart-preview button:hover {
-  background-color: #0056b3;
+.cart-preview .btn-return:hover {
+  background-color: #0056b3; /* Bleu plus foncé au survol */
+  transform: scale(1.05); /* Légère mise en avant au survol */
 }
 .cart-item {
   display: flex;
@@ -248,7 +264,95 @@
   color: #333;
 }
 
-.cart-preview button {
+/* BOUTONS */
+/* Bouton Supprimer dans le panier */
+.btn-delete {
+  padding: 6px 10px;
+  font-size: 14px;
+  background-color: #dc3545; /* Rouge principal */
+  color: white;
+  border: none;
+  border-radius: 50%; /* Bouton rond */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+}
+
+.btn-delete:hover {
+  background-color: #c82333; 
+  transform: scale(1.1);  
+}
+
+.btn-delete i {
+  font-size: 16px; 
+}
+.payment-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-pay {
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-pay:hover {
+  background-color: #0056b3;
+}
+
+/* MODALE */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* Superposition sombre */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  position: relative;
+  background: #f9f9f9; /* Fond légèrement gris */
+  padding: 2rem;
+  border-radius: 10px;
+  border: 2px solid var(--blue-main); /* Bordure bleue pour démarquer */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Ombre pour effet de profondeur */
+  z-index: 2001;
+  min-width: 320px;
+  max-width: 90vw;
+  animation: fadeIn 0.3s ease-out; /* Animation d'apparition */
+}
+.modal-content h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+.modal-content button {
   margin-top: 10px;
   padding: 10px 15px;
   font-size: 16px;
@@ -261,38 +365,65 @@
   transition: background-color 0.3s ease;
 }
 
-.cart-preview button:hover {
-  background-color: #218838;
+.modal-content button:hover {
+  background-color: var(--blue-hover);
 }
-/* Bouton pour supprimer un produit avec une icône */
-.btn-delete {
-  padding: 5px;
+
+.modal-content button:last-child {
+  background-color: #dc3545; /* Couleur rouge pour le bouton Annuler */
+}
+
+.modal-content button:last-child:hover {
+  background-color: #c82333;
+}
+.paiement-securite p {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 1rem;
+  text-align: center;
+}
+/* Bouton Retourner à la boutique aligné à droite */
+.modal-content .btn-return {
+  margin-top: 15px;
+  padding: 10px 20px;
   font-size: 16px;
-  background-color: transparent;
-  color: #dc3545;
+  font-weight: bold;
+  background-color: #007bff; /* Bleu principal */
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: background-color 0.3s ease;
+  float: right; /* Aligne le bouton à droite */
 }
 
-.btn-delete:hover {
-  color: #c82333;
+.modal-content .btn-return:hover {
+  background-color: #0056b3; /* Bleu plus foncé au survol */
 }
-
-.btn-delete i {
-  font-size: 20px;
-}
-
-/* Conteneur des boutons de paiement */
-.payment-buttons {
-  display: flex;
-  gap: 15px; /* Ajoute un espace entre les boutons */
+/* CONFIRMATION */
+.confirmation-container {
+  text-align: center;
   margin-top: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
-/* Boutons de paiement */
-.btn-pay {
+.confirmation-container .confirmation {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: green;
+  margin-bottom: 10px;
+}
+
+.confirmation-container p {
+  font-size: 1rem;
+  color: #333;
+}
+
+.confirmation-container .btn-return {
+  margin-top: 10px;
   padding: 10px 15px;
   font-size: 16px;
   font-weight: bold;
@@ -304,24 +435,106 @@
   transition: background-color 0.3s ease;
 }
 
-.btn-pay:hover {
+.confirmation-container .btn-return:hover {
   background-color: #0056b3;
 }
-/* Modale Stripe */
-.modal-backdrop {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.5); z-index: 1000;
+/* CROIX DE FERMETURE DES MODALES */
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
-.modal-content {
-  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  background: #fff; padding: 2rem; border-radius: 8px; z-index: 1001;
-  min-width: 320px; max-width: 90vw;
+
+.modal-close:hover {
+  color: #dc3545; /* Rouge au survol */
 }
-.confirmation {
-  margin-top: 1rem; color: green; font-weight: bold;
+/* MODALE DE CONFIRMATION */
+.global-confirmation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Superposition sombre */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
-.paiement-securite {
-  margin-top: 1rem; font-size: 0.95em; color: #333;
+
+.confirmation-box {
+  background-color: #e6ffe6; /* Vert clair pour indiquer le succès */
+  padding: 25px 35px;
+  border-radius: 10px;
+  border: 2px solid #28a745; /* Bordure verte pour indiquer le succès */
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Ombre pour effet de profondeur */
+  max-width: 450px;
+  width: 90%; /* S'adapte aux petits écrans */
+  animation: fadeIn 0.3s ease-out; /* Animation d'apparition */
+}
+
+.confirmation-box .confirmation {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #28a745; /* Vert pour indiquer le succès */
+  margin-bottom: 15px;
+}
+
+.confirmation-box p {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.confirmation-box .btn-return {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.confirmation-box .btn-return:hover {
+  background-color: #0056b3;
+}
+/* STYLE POUR LE CHAMP STRIPE */
+#modal-card-element {
+  background-color: #fff; /* Fond blanc pour contraste */
+  border: 2px solid var(--blue-main); /* Bordure bleue pour démarquer */
+  border-radius: 8px; /* Coins arrondis */
+  padding: 10px; /* Espacement interne */
+  font-size: 16px; /* Taille de police lisible */
+  color: #333; /* Couleur du texte */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombre pour effet de profondeur */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#modal-card-element:focus {
+  border-color: var(--blue-main); /* Bordure bleue foncée au focus */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Ombre plus prononcée au focus */
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 /* RESPONSIVE */
 @media (max-width: 768px) {

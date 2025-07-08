@@ -1,0 +1,193 @@
+.liste-commandes-container {
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.table-commandes {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.table-commandes th,
+.table-commandes td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table-commandes th {
+    background: var(--blue-main);
+  color: white;
+  font-weight: 600;
+}
+
+.table-commandes td ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.details {
+  display: block; 
+  margin-top: 4px; 
+  color: #666; 
+  font-size: 0.85em; 
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.9em;
+  display: inline-block;
+}
+
+.badge-attente {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-validee {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-annulee {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.info-action {
+  font-size: 0.9em;
+  color: #007bff;
+}
+
+.info-action.done {
+  color: #28a745;
+}
+
+.btn-action {
+  padding: 6px 12px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-action:hover {
+  background: #218838;
+}
+/* ✅ MODALE DE VALIDATION CENTRÉE */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* fond sombre */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* ✅ Contenu de la modale */
+.modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: slideIn 0.3s ease-in-out;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.modal-content select {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.btn-confirm,
+.btn-cancel {
+  flex: 1;
+  padding: 0.6rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-confirm {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+}
+
+.btn-cancel {
+  background-color: #f44336;
+  color: white;
+  border: none;
+}
+
+.btn-confirm:hover {
+  background-color: #45a049;
+}
+
+.btn-cancel:hover {
+  background-color: #e53935;
+}
+
+/* ✅ Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}

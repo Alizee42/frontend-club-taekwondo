@@ -21,6 +21,7 @@ import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-doc
 import { PaiementComponent } from './membre/paiement/paiement.component'; 
 import { GestionPaiementsComponent } from './admin/gestion-paiements/gestion-paiements.component'; // Importer le composant Paiement
 import { BoutiqueComponent } from './pages/boutique/boutique.component';
+import { GestionCommandeComponent } from './admin/gestion-commande/gestion-commande.component';
 
 export const routes: Routes = [
   // Routes publiques
@@ -50,7 +51,9 @@ export const routes: Routes = [
       { path: 'actualites', component: GestionActualitesComponent },
       { path: 'galerie', component: GestionGalerieComponent },
       { path: 'documents', component: GestionDocumentsComponent }, // Route pour la gestion des documents
-      { path: 'paiements', component: GestionPaiementsComponent }
+      { path: 'paiements', component: GestionPaiementsComponent },
+      { path: 'gestion-commande', component: GestionCommandeComponent } // Nouvelle route
+
     ]
   },
 

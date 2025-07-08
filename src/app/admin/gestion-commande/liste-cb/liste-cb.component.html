@@ -1,0 +1,50 @@
+<div class="liste-commandes-container">
+  <h2>💳 Commandes payées par CB</h2>
+
+  <!-- Indicateur de chargement -->
+  <div *ngIf="isLoading" class="loading-indicator">
+    Chargement des commandes CB...
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Message si aucune commande n'est disponible -->
+  <div *ngIf="!isLoading && commandesCB.length === 0 && !errorMessage" class="no-commands">
+    Aucune commande CB en attente de retrait.
+  </div>
+
+  <!-- Tableau des commandes -->
+  <table *ngIf="!isLoading && commandesCB.length > 0 && !errorMessage" class="table-commandes">
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Produits</th>
+        <th>Montant</th>
+        <th>Date</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let commande of commandesCB">
+        <td>{{ commande.utilisateur?.prenom }} {{ commande.utilisateur?.nom }}</td>
+        <td>
+          <ul>
+            <li *ngFor="let ligne of commande.lignesCommande">
+              {{ ligne.produitNom }} ({{ ligne.quantite }}x)
+              <span class="details">Taille: {{ ligne.taille }}, Couleur: {{ ligne.couleur }}</span>
+              <span *ngIf="ligne.flocage">, Flocage: {{ ligne.flocage }}</span>
+            </li>
+          </ul>
+        </td>
+        <td>{{ commande.montantTotal }} €</td>
+        <td>{{ formatDateFR(commande.dateCommande) }}</td>
+        <td>
+          <span class="badge badge-payee">Payée (en attente de retrait)</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

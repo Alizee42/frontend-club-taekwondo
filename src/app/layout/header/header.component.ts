@@ -1,30 +1,36 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common'; // Assurez-vous que CommonModule est importé
 import { PanierService } from '../../services/panier.service';
 import { StripeService } from '../../services/stripe.service';
 import { CommandeService } from '../../services/commande.service';
+import { Produit } from '../../services/panier.service';
+
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule], 
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
+  // État du menu et des dropdowns
   menuOpen: boolean = false;
   dropdownOpenClub: boolean = false;
   profileMenuOpen: boolean = false;
   panierOpen: boolean = false;
 
+  // État utilisateur et panier
   isLoggedIn: boolean = false;
-  user: any = null;
-  panier: any[] = [];
+  user: { id: number; nom: string; prenom: string } | null = null;
+  panier: Produit[] = [];
   cartCount: number = 0;
 
-  showPaiementModal = false;
-  confirmationMessage = '';
+  // État des modales et messages
+  showPaiementModal: boolean = false;
+  showConfirmationModal: boolean = false;
+  confirmationMessage: string = '';
 
   constructor(
     private router: Router,
@@ -39,10 +45,19 @@ export class HeaderComponent implements OnInit {
     if (storedUser) {
       this.user = JSON.parse(storedUser);
     }
-    this.panier = this.panierService.getPanier();
-    this.cartCount = this.panierService.getCartCount();
+
+    // Abonnement aux changements du compteur de panier
+    this.panierService.cartCount$.subscribe((count) => {
+      this.cartCount = count;
+    });
+
+    // Abonnement aux changements du panier
+    this.panierService.panier$.subscribe((panier) => {
+      this.panier = panier;
+    });
   }
 
+  // Gestion des menus
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
   }
@@ -61,6 +76,24 @@ export class HeaderComponent implements OnInit {
     this.panierOpen = !this.panierOpen;
   }
 
+  closeMenu(): void {
+    this.menuOpen = false;
+    this.dropdownOpenClub = false;
+    this.profileMenuOpen = false;
+    this.panierOpen = false;
+  }
+
+  scrollToSection(sectionId: string): void {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      this.closeMenu();
+    } else {
+      console.warn(`Section avec l'ID "${sectionId}" introuvable.`);
+    }
+  }
+
+  // Navigation
   goToInscription(): void {
     this.router.navigate(['/inscription']);
     this.closeMenu();
@@ -105,9 +138,10 @@ export class HeaderComponent implements OnInit {
 
   goToBoutique(): void {
     this.router.navigate(['/boutique']);
-    this.closeMenu();
+    this.fermerConfirmationModal(); // Ferme la modale si elle est ouverte
   }
 
+  // Gestion de l'utilisateur
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -127,40 +161,14 @@ export class HeaderComponent implements OnInit {
     this.isLoggedIn = !!token && !!storedUser;
   }
 
-  closeMenu(): void {
-    this.menuOpen = false;
-    this.dropdownOpenClub = false;
-    this.profileMenuOpen = false;
-    this.panierOpen = false;
-  }
-
-  scrollToSection(sectionId: string): void {
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      this.closeMenu();
-    }
-  }
-
-  @HostListener('document:click', ['$event'])
-  handleClickOutside(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    if (
-      !target.closest('.cart-icon') &&
-      !target.closest('.cart-preview')
-    ) {
-      this.panierOpen = false;
-    }
-  }
-
+  // Gestion du panier
   supprimerDuPanier(index: number): void {
     this.panier.splice(index, 1);
     this.panierService.setPanier(this.panier);
-    this.cartCount = this.panier.length;
   }
 
+  // Paiement par CB
   payerParCB(): void {
-    const utilisateur = this.user;
     if (!this.isUserConnected()) {
       alert('Veuillez vous connecter pour passer une commande.');
       return;
@@ -169,20 +177,23 @@ export class HeaderComponent implements OnInit {
       alert('Votre panier est vide.');
       return;
     }
-
+  
     const paiementData = {
       amount: this.panier.reduce((total, p) => total + Number(p.prix), 0),
       currency: 'eur',
       typePaiement: 'unique',
       modePaiement: 'CB'
     };
-
+  
+    console.log('[HeaderComponent] Données de paiement envoyées à Stripe :', paiementData); // Log ajouté ici
+  
     this.stripeService.createPaymentIntent(paiementData).then((response: any) => {
+      console.log('[HeaderComponent] Réponse de Stripe :', response); // Log ajouté ici
       this.stripeService.clientSecret = response.clientSecret;
       this.showPaiementModal = true;
       setTimeout(() => this.monterStripeElement(), 0);
     }).catch((err: any) => {
-      console.error('❌ Erreur lors du paiement Stripe :', err);
+      console.error('[HeaderComponent] Erreur lors du paiement Stripe :', err);
       alert('Une erreur est survenue lors du paiement. Veuillez réessayer.');
     });
   }
@@ -200,100 +211,78 @@ export class HeaderComponent implements OnInit {
     this.stripeService.monterElementDans('#modal-card-element');
   }
 
-  async validerPaiement() {
-    const utilisateur = this.user;
-    const commandeDTO = {
-      utilisateurId: utilisateur.id,
-      modePaiement: 'CB',
-      lignesCommande: this.panier.map(p => ({
-        produitId: Number(p.id),
-        produitNom: String(p.nom),
-        quantite: Number(p.quantite),
-        prixUnitaire: Number(p.prix) / Number(p.quantite),
-        sousTotal: Number(p.prix),
-        taille: p.taille ?? null,
-        couleur: p.couleur ?? null,
-        flocage: p.flocage ?? null
-      }))
-    };
-
-    console.log('Commande envoyée :', commandeDTO);
-
+   async validerPaiement(): Promise<void> {
+    if (!this.user) return;
+  
+    const commandeDTO = this.creerCommandeDTO('CB');
+    console.log('[HeaderComponent] Données de commande envoyées au backend :', commandeDTO); // Log ajouté ici
+  
     const result = await this.stripeService.confirmerPaiement();
+    console.log('[HeaderComponent] Résultat de la confirmation de paiement :', result); // Log ajouté ici
+  
     if (result.success) {
       this.commandeService.creerCommandeAvecLignes(commandeDTO).subscribe({
         next: () => {
           this.confirmationMessage = '✅ Paiement effectué avec succès ! Merci pour votre achat.';
+          console.log('[HeaderComponent] Commande créée avec succès.'); // Log ajouté ici
+          this.panierService.viderPanier();
+          this.panier = [];
+          this.cartCount = 0;
+          this.showPaiementModal = false;
+        },
+        error: (err: any) => {
+          this.confirmationMessage = '❌ Paiement validé mais erreur lors de la commande. Contactez le club.';
+          console.error('[HeaderComponent] Erreur lors de la création de la commande :', err);
+        }
+      });
+    } else {
+      this.confirmationMessage = '❌ Paiement refusé : ' + result.message;
+      console.warn('[HeaderComponent] Paiement refusé :', result.message);
+    }
+  }
+
+  // Paiement au club
+        payerAuClub(): void {
+      if (!this.isUserConnected()) {
+        alert('Veuillez vous connecter pour passer une commande.');
+        return;
+      }
+      if (this.panier.length === 0) {
+        alert('Votre panier est vide.');
+        return;
+      }
+    
+      const commandeDTO = this.creerCommandeDTO('CLUB');
+      console.log('[HeaderComponent] Données de commande envoyées pour paiement au club :', commandeDTO); // Log ajouté ici
+    
+      this.commandeService.creerCommandeEnAttente(commandeDTO).subscribe({
+        next: () => {
+          this.confirmationMessage = '✅ Commande enregistrée avec succès ! Paiement au club.';
+          console.log('[HeaderComponent] Commande enregistrée avec succès pour paiement au club.'); // Log ajouté ici
+          this.showConfirmationModal = true;
           this.panierService.viderPanier();
           this.panier = [];
           this.cartCount = 0;
         },
         error: (err: any) => {
-          this.confirmationMessage = '❌ Paiement validé mais erreur lors de la commande. Contactez le club.';
-          console.error('❌ Erreur lors de la commande :', err);
+          console.error('[HeaderComponent] Erreur lors de la commande :', err);
+          alert('Une erreur est survenue. Veuillez réessayer.');
         }
       });
-    } else {
-      this.confirmationMessage = '❌ Paiement refusé : ' + result.message;
     }
+  
+  fermerConfirmationModal(): void {
+    this.showConfirmationModal = false;
+    this.confirmationMessage = ''; // Réinitialise le message de confirmation
   }
 
-  payerAuClub(): void {
-    const utilisateur = this.user;
-    if (!this.isUserConnected()) {
-      alert('Veuillez vous connecter pour passer une commande.');
-      return;
-    }
-    if (this.panier.length === 0) {
-      alert('Votre panier est vide.');
-      return;
-    }
-
-    const commandeDTO = {
-      utilisateurId: utilisateur.id,
-      modePaiement: 'CLUB',
-      lignesCommande: this.panier.map(p => ({
-        produitId: Number(p.id),
-        produitNom: String(p.nom),
-        quantite: Number(p.quantite),
-        prixUnitaire: Number(p.prix) / Number(p.quantite),
-        sousTotal: Number(p.prix),
-        taille: p.taille ?? null,
-        couleur: p.couleur ?? null,
-        flocage: p.flocage ?? null
-      }))
-    };
-
-    console.log('Commande envoyée :', commandeDTO);
-
-    this.commandeService.creerCommandeEnAttente(commandeDTO).subscribe({
-      next: () => {
-        alert('Commande enregistrée avec succès ! Paiement au club.');
-        this.panierService.viderPanier();
-        this.panier = [];
-        this.cartCount = 0;
-      },
-      error: (err: any) => {
-        console.error('❌ Erreur lors de la commande :', err);
-        alert('Une erreur est survenue. Veuillez réessayer.');
-      }
-    });
-  }
-
-  commander(modePaiement: string): void {
-    const utilisateur = this.user;
-    if (!this.isUserConnected()) {
-      alert('Veuillez vous connecter pour passer une commande.');
-      return;
-    }
-    if (this.panier.length === 0) {
-      alert('Votre panier est vide.');
-      return;
-    }
-
-    const commandeDTO = {
-      utilisateurId: utilisateur.id,
+  // Création de commande
+  private creerCommandeDTO(modePaiement: string): any {
+    const statutInitial = modePaiement === 'CB' ? 'PAYEE' : 'EN_ATTENTE';
+    const commande = {
+      utilisateurId: this.user?.id,
       modePaiement: modePaiement,
+      statut: statutInitial, // Ajouter le statut initial
       lignesCommande: this.panier.map(p => ({
         produitId: Number(p.id),
         produitNom: String(p.nom),
@@ -305,26 +294,18 @@ export class HeaderComponent implements OnInit {
         flocage: p.flocage ?? null
       }))
     };
-
-    console.log('Commande envoyée :', commandeDTO);
-
-    this.panierService.commander(commandeDTO).subscribe({
-      next: () => {
-        alert(`Commande enregistrée avec succès ! Mode de paiement : ${modePaiement}`);
-        this.panierService.viderPanier();
-        this.panier = [];
-        this.cartCount = 0;
-      },
-      error: err => {
-        console.error('❌ Erreur lors de la commande :', err);
-        alert('Une erreur est survenue. Veuillez réessayer.');
-      }
-    });
+  
+    console.log('[HeaderComponent] Commande générée :', commande);
+    return commande;
   }
 
   isUserConnected(): boolean {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    return !!token && !!storedUser;
+    return !!localStorage.getItem('token') && !!localStorage.getItem('user');
+  }
+
+  closeAllModals(): void {
+    this.confirmationMessage = '';
+    this.showPaiementModal = false;
+    this.showConfirmationModal = false;
   }
 }
