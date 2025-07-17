@@ -1,0 +1,41 @@
+<section id="actualites" class="section-actualites">
+    <div class="container">
+      <h2 class="section-title">Actualités</h2>
+  
+      <!-- Actualité à la une -->
+      <div *ngIf="featuredNews" class="actu-featured">
+        <div class="image-wrapper">
+          <img [src]="featuredNews.imageUrl || 'assets/images/default.jpg'"
+               alt="{{ featuredNews.titre }} - Image à la une"
+               (error)="onImageError($event)">
+          <span class="badge {{ featuredNews.typeActu | lowercase }}">{{ featuredNews.typeActu }}</span>
+        </div>
+        <div class="actu-content">
+          <h3>{{ featuredNews.titre }}</h3>
+          <p>{{ featuredNews.contenu | slice:0:200 }}...</p>
+          <a [routerLink]="['/actualite', featuredNews.id]" class="btn-link">En savoir plus</a>
+        </div>
+      </div>
+  
+      <!-- Autres actualités -->
+      <div class="actu-grid">
+        <div *ngFor="let actu of filteredNews; trackBy: trackById" class="actu-card">
+          <div class="image-wrapper">
+            <img [src]="actu.imageUrl || 'assets/images/default.jpg'" alt="Image actualité" (error)="onImageError($event)">
+            <span class="badge {{ actu.typeActu | lowercase }}">{{ actu.typeActu }}</span>
+          </div>
+          <div class="actu-content">
+            <h4>{{ actu.titre }}</h4>
+            <p>{{ actu.contenu | slice:0:100 }}...</p>
+            <a [routerLink]="['/actualite', actu.id]" class="btn-link small">Lire</a>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Pagination -->
+      <div class="pagination-controls">
+        <button (click)="loadLess()" *ngIf="currentPage > 1">Voir moins</button>
+        <button (click)="loadMore()">Charger plus</button>
+      </div>
+    </div>
+  </section>

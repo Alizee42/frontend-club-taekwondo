@@ -1,0 +1,21 @@
+<div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>📅 Gestion des Événements</h2>
+      <ul class="menu">
+        <li (click)="changerVue('evenements-liste')" [class.active]="vueActive === 'evenements-liste'">📅 Événements</li>
+        <li (click)="changerVue('inscriptions')" [class.active]="vueActive === 'inscriptions'">📝 Inscriptions</li>
+      </ul>
+    </aside>
+  
+    <!-- Contenu -->
+    <main class="content">
+      <ng-container [ngSwitch]="vueActive">
+        <app-evenements-liste *ngSwitchCase="'evenements-liste'"></app-evenements-liste>
+        <app-inscriptions *ngSwitchCase="'inscriptions'"></app-inscriptions>
+        <section *ngSwitchDefault>
+          <p>Choisissez une vue dans le menu.</p>
+        </section>
+      </ng-container>
+    </main>
+  </div>

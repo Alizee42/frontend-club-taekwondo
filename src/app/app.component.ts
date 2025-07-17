@@ -1,59 +1,67 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Pour *ngIf
-import { RouterModule } from '@angular/router'; // Pour router-outlet
-import { HeaderComponent } from './layout/header/header.component'; // Importer le header
-import { FooterComponent } from './layout/footer/footer.component'; // Importer le footer
-import { Router, NavigationEnd } from '@angular/router';
-import { ParametresPaiementService } from './services/parametres-paiement.service'; // adapte le chemin si besoin
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 
+import { HeaderComponent } from './layout/header/header.component';
+import { FooterComponent } from './layout/footer/footer.component';
+import { ConnectedHeaderComponent } from './components/shared/connected-header/connected-header.component';
+
+import { ParametresPaiementService } from './services/parametres-paiement.service';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
-  standalone: true, // Déclare le composant comme autonome
+  standalone: true,
   imports: [
-    CommonModule, // Pour les directives comme *ngIf
-    RouterModule, // Pour router-outlet
-    HeaderComponent, // Header général
-    FooterComponent, // Footer général
-  ]
+    CommonModule,
+    RouterModule,
+    HeaderComponent,
+    FooterComponent,
+    ConnectedHeaderComponent
+  ],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
-export class AppComponent {
-  isProfilRoute: boolean = false;
-  title(title: any) {
-    throw new Error('Method not implemented.');
-  }
-  isLoggedIn: boolean = false; // Vérifie si l'utilisateur est connecté
-  userRole: string | null = ''; // Rôle de l'utilisateur, "admin" ou "membre"
-  isAdminOrMembreRoute: boolean = false; // Indique si la route actuelle est admin ou membre
+export class AppComponent implements OnInit {
+  isLoggedIn = false;
+  userRole: 'admin' | 'membre' | null = null;
+  connectedRole: 'admin' | 'membre' = 'membre';
+
+  isConnectedRoute = false; // ✅ Nouvelle variable unifiée
 
   constructor(
     private router: Router,
-    private parametresService: ParametresPaiementService // ✅ injection du service
+    private parametresService: ParametresPaiementService
   ) {}
-  
 
   ngOnInit(): void {
-    // 🔐 Vérifie connexion
+    // Vérifie la connexion
     this.isLoggedIn = !!localStorage.getItem('token');
-    this.userRole = localStorage.getItem('role');
-  
-    // 📦 Charge les paramètres de paiement une seule fois
+    const role = localStorage.getItem('role');
+    this.userRole = role === 'admin' || role === 'membre' ? role : null;
+    if (this.userRole) {
+      this.connectedRole = this.userRole;
+    }
+
+    // Charge les paramètres globaux
     this.parametresService.chargerParametres();
-  
-    // 🔄 Surveille les routes
+
+    // Détecte les routes connectées (admin, membre ou profil)
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        this.isAdminOrMembreRoute = event.url.startsWith('/admin') || event.url.startsWith('/membre');
-        this.isProfilRoute = event.url.startsWith('/profil');
+        const url = event.urlAfterRedirects;
+        this.isConnectedRoute = 
+          url.includes('/admin') || url.includes('/membre') || url.includes('/profil');
+
+        if (url.includes('/admin')) {
+          this.connectedRole = 'admin';
+        } else if (url.includes('/membre')) {
+          this.connectedRole = 'membre';
+        }
       }
     });
   }
-  
 
-  // Méthode pour se déconnecter
-  logout() {
+  logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     this.isLoggedIn = false;

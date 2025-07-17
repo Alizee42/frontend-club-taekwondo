@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router'; // Pour router-outlet
-import { AdminHeaderComponent } from '../admin-header/admin-header.component'; // Importer le header admin
 
 @Component({
   selector: 'app-admin-layout',
@@ -9,7 +8,6 @@ import { AdminHeaderComponent } from '../admin-header/admin-header.component'; /
   standalone: true, // Déclare le composant comme autonome
   imports: [
     RouterModule, // Pour router-outlet
-    AdminHeaderComponent, // Ajout de AdminHeaderComponent
   ]
 })
 export class AdminLayoutComponent {}

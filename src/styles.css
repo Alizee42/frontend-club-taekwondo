@@ -77,3 +77,6 @@ select:focus {
   border-color: #3b82f6; /* couleur bleue focus */
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

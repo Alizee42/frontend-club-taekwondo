@@ -72,4 +72,7 @@ export class DashboardAdminComponent implements OnInit {
     navigateToGestionCommande(): void {
     this.router.navigate(['/admin/gestion-commande']); // Redirige vers la page Gestion des Commandes
   }
+  navigateToGestionEvenements(): void {
+    this.router.navigate(['/admin/gestion-evenement']); // Redirige vers la page Gestion des Événements
+  }
 }

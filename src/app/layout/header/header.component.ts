@@ -41,16 +41,17 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkLoginStatus();
-    const storedUser = localStorage.getItem('user');
+  
+    const storedUser = localStorage.getItem('utilisateur'); // Correction : clé correcte
     if (storedUser) {
       this.user = JSON.parse(storedUser);
     }
-
+  
     // Abonnement aux changements du compteur de panier
     this.panierService.cartCount$.subscribe((count) => {
       this.cartCount = count;
     });
-
+  
     // Abonnement aux changements du panier
     this.panierService.panier$.subscribe((panier) => {
       this.panier = panier;
@@ -123,6 +124,10 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/profil']);
   }
 
+  goToEvenements(): void {
+    this.router.navigate(['/evenements']);
+  }
+  
   goToDashboard(): void {
     const role = localStorage.getItem('role')?.toLowerCase();
     if (role === 'admin') {
@@ -157,8 +162,9 @@ export class HeaderComponent implements OnInit {
 
   checkLoginStatus(): void {
     const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem('utilisateur'); // Correction : clé correcte
     this.isLoggedIn = !!token && !!storedUser;
+    console.log('Statut de connexion :', this.isLoggedIn);
   }
 
   // Gestion du panier

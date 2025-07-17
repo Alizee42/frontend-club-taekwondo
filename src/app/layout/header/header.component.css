@@ -43,7 +43,7 @@
 
 .main-nav ul {
   display: flex;
-  align-items: center;
+  align-items: auto;
   gap: 1.5rem;
   list-style: none;
   padding: 0;
@@ -72,6 +72,43 @@
 
 .main-nav a:hover::after {
   width: 100%;
+}
+/* Dropdown style */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 34px;
+    left: -13px;
+    background-color: var(--blue-dark);
+    padding: 0.5rem 0;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+    min-width: 180px;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: flex;
+}
+
+.dropdown-menu li {
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+}
+
+.dropdown-menu li a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.dropdown-menu li a:hover {
+  color: var(--accent-hover);
 }
 
 /* BURGER MENU */
@@ -265,14 +302,13 @@
 }
 
 /* BOUTONS */
-/* Bouton Supprimer dans le panier */
 .btn-delete {
   padding: 6px 10px;
   font-size: 14px;
-  background-color: #dc3545; /* Rouge principal */
+  background-color: #dc3545; 
   color: white;
   border: none;
-  border-radius: 50%; /* Bouton rond */
+  border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   display: flex;
@@ -311,6 +347,26 @@
 .btn-pay:hover {
   background-color: #0056b3;
 }
+.profile-dropdown li button.logout-btn {
+  background-color: #dc3545 !important;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.profile-dropdown li button.logout-btn:hover {
+  background-color: #c82333 !important;
+  transform: scale(1.03);
+}
+
+.profile-dropdown li button.logout-btn:active {
+  transform: scale(0.98);
+}
+
 
 /* MODALE */
 .modal-backdrop {
@@ -526,6 +582,13 @@
   border-color: var(--blue-main); /* Bordure bleue foncée au focus */
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Ombre plus prononcée au focus */
 }
+.menu-separator {
+  border: none;
+  height: 1px;
+  background-color: #444;
+  margin: 6px 0;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AdminHeaderComponent } from "../../admin/layout/admin-header/admin-header.component";
-import { MembreHeaderComponent } from "../../membre/layout/membre-header/membre-header.component";
+
 import { Router } from "@angular/router";
 
 @Component({
@@ -11,7 +10,7 @@ import { Router } from "@angular/router";
   templateUrl: './profil.component.html',
   styleUrls: ['./profil.component.css'],
   standalone: true,
-  imports: [FormsModule, CommonModule, AdminHeaderComponent, MembreHeaderComponent] // Supprimez Router des imports
+  imports: [FormsModule, CommonModule] // Supprimez Router des imports
 })
 export class ProfilComponent implements OnInit {
   user: any = {};

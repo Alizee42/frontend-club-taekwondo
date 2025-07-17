@@ -1,0 +1,22 @@
+<section id="schedule-info" class="schedule-info-section">
+    <div class="container">
+      <h2 class="section-title">Horaires des Cours</h2>
+      <div class="schedule-info-container">
+        <div *ngFor="let horaire of horaires" class="schedule-card">
+          <h3>{{ horaire.jour }}</h3>
+          <div class="schedule-details">
+            <h4>Heures</h4>
+            <ul>
+              <li *ngFor="let heure of horaire.heures">
+                <span class="time">{{ heure.time }}</span> : {{ heure.groupe }}
+              </li>
+            </ul>
+          </div>
+          <div class="schedule-details">
+            <h4>Adresse</h4>
+            <p>{{ horaire.adresse }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>

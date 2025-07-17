@@ -1,0 +1,45 @@
+<div class="evenements-container">
+  <h2 class="titre-section">📅 Nos événements</h2>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="info-message success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="info-message error">{{ errorMessage }}</div>
+
+  <!-- Loading / Aucun événement -->
+  <div *ngIf="isLoading" class="info-message">Chargement des événements...</div>
+  <div *ngIf="!isLoading && evenements.length === 0" class="info-message">Aucun événement prévu pour le moment.</div>
+
+  <!-- Cartes d'événements -->
+  <div class="evenement-grid" *ngIf="!isLoading && evenements.length > 0">
+    <div class="evenement-card" *ngFor="let e of evenements">
+      <div class="image-wrapper" *ngIf="e.imageUrl">
+        <img [src]="e.imageUrl" alt="Image de l'événement" />
+      </div>
+      <div class="contenu">
+        <div class="header">
+          <h3>{{ e.titre }}</h3>
+          <span class="badge-date">{{ e.dateDebut | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <p class="lieu">📍 {{ e.lieu }}</p>
+        <p class="description">{{ e.description }}</p>
+        <button class="btn-inscription" (click)="inscrire(e)">Je m'inscris</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔵 Modale de confirmation -->
+<div class="modal-backdrop" *ngIf="modalVisible && evenementSelectionne">
+  <div class="modal-content">
+    <h2>Confirmer votre inscription</h2>
+    <p>Souhaitez-vous vous inscrire à <strong>{{ evenementSelectionne.titre }}</strong> ?</p>
+    <p class="modal-details">
+      📅 {{ evenementSelectionne.dateDebut | date:'fullDate' }} <br />
+      📍 {{ evenementSelectionne.lieu }}
+    </p>
+    <div class="modal-buttons">
+      <button class="btn-confirm" (click)="confirmerInscription()">✅ Confirmer</button>
+      <button class="btn-cancel" (click)="fermerModal()">❌ Annuler</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+/* STRUCTURE */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--background);
+  font-family: 'Poppins', sans-serif;
+}
+.content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--blue-dark);
+  color: white;
+  padding: 2rem 1rem;
+  position: sticky;
+  top: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  margin: 1rem 0;
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 0.5rem;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.menu li {
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+}
+
+.menu li.active,
+.menu li:hover {
+  background: var(--secondary-blue);
+}

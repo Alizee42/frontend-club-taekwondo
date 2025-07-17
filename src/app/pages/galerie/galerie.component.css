@@ -6,72 +6,72 @@
 }
 
 .grid-item {
-  width: 100%; /* La card occupe toute la largeur disponible */
-  height: auto; /* Ajuste automatiquement la hauteur en fonction du contenu */
+  width: 100%; 
+  height: 200px; 
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background-color: var(--card-bg); /* Couleur de fond des cartes */
-  border-radius: 12px; /* Coins arrondis pour la card */
-  box-shadow: var(--shadow); /* Ombre pour un effet de carte */
-  overflow: hidden; /* Cache les débordements */
+  background-color: var(--card-bg); 
+  border-radius: 12px; 
+  box-shadow: var(--shadow); 
+  overflow: hidden; 
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  padding: 16px; /* Ajoute un peu d'espace autour du contenu */
+  padding: 16px; 
 }
 
 .grid-item:hover {
-  transform: translateY(-8px); /* Légère élévation au survol */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Accentue l'ombre au survol */
+  transform: translateY(-8px); 
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
 }
 
 .grid-item img {
-  width: 100%; /* Remplit toute la largeur du conteneur */
-  max-height: 250px; /* Augmente la hauteur maximale de l'image */
-  background-color: #f4f4f4; /* Ajoute un fond gris clair pour les espaces vides */
-  border-radius: 8px 8px 0 0; /* Coins arrondis uniquement en haut */
-  margin-bottom: 12px; /* Ajoute un espacement entre l'image et le titre */
+  width: 100%; 
+  max-height: 250px; 
+  background-color: #f4f4f4; 
+  border-radius: 8px 8px 0 0; 
+  margin-bottom: 12px; 
 }
 
 .grid-item h3 {
-  font-size: 1rem; /* Réduit la taille du titre */
+  font-size: 1rem; 
   font-weight: bold;
-  margin: 8px 0; /* Réduit l'espacement autour du titre */
-  color: var(--blue-main); /* Couleur principale pour le titre */
+  margin: 8px 0; 
+  color: var(--blue-main); 
   text-align: center;
 }
 
 .grid-item p {
-  font-size: 0.8rem; /* Réduit la taille de la description */
-  color: var(--text-main); /* Couleur principale pour le texte */
-  margin: 0 16px 8px; /* Réduit l'espacement autour de la description */
+  font-size: 0.8rem; 
+  color: var(--text-main); 
+  margin: 0 16px 8px; 
   line-height: 1.4;
   text-align: center;
 }
 .gallery-title {
-  font-size: 2rem; /* Taille du titre */
+  font-size: 2rem;
   font-weight: bold;
-  text-align: center; /* Centre le titre */
-  color: var(--blue-main); /* Utilise la couleur principale */
-  margin-bottom: 24px; /* Ajoute un espacement sous le titre */
-  text-transform: uppercase; /* Met le texte en majuscules */
+  text-align: center; 
+  color: var(--blue-main); 
+  margin-bottom: 24px; 
+  text-transform: uppercase; 
   margin-top: 2%;
 }
 /* Responsive */
 @media (max-width: 992px) {
   .grid-gallery {
-    grid-template-columns: repeat(3, 1fr); /* 3 images par ligne pour tablettes */
+    grid-template-columns: repeat(3, 1fr); 
   }
 }
 
 @media (max-width: 768px) {
   .grid-gallery {
-    grid-template-columns: repeat(2, 1fr); /* 2 images par ligne pour mobiles */
+    grid-template-columns: repeat(2, 1fr); 
   }
 }
 
 @media (max-width: 480px) {
   .grid-gallery {
-    grid-template-columns: 1fr; /* 1 image par ligne pour très petits écrans */
+    grid-template-columns: 1fr; 
   }
 }

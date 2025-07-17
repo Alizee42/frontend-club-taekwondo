@@ -1,0 +1,52 @@
+.connected-header {
+    background-color: var(--blue-dark);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow);
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .logo {
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+  
+  .connected-nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .connected-nav a,
+  .connected-nav button {
+    color: white;
+    background: none;
+    border: none;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+  }
+  
+  .connected-nav a:hover,
+  .connected-nav button:hover {
+    background-color: var(--blue-hover);
+  }
+  .btn-logout {
+    background-color: #e53935 !important; /* Rouge vif */
+    color: white;
+  }
+  
+  .btn-logout:hover {
+    background-color: #c62828; /* Rouge foncé au survol */
+  }
+  
+  

@@ -9,19 +9,22 @@
     <nav class="main-nav" [class.open]="menuOpen">
       <ul>
         <li><a (click)="goHome()">Accueil</a></li>
-        <li class="dropdown" [class.active]="dropdownOpenClub">
-          <a (click)="toggleDropdown('club')">Le club ▾</a>
-          <ul class="dropdown-menu" *ngIf="dropdownOpenClub">
-            <li><a class="dropdown-link" (click)="scrollToSection('about')">À propos</a></li>
-            <li><a class="dropdown-link" (click)="scrollToSection('hschedule-info')">Horaires</a></li>
-            <li><a class="dropdown-link" (click)="scrollToSection('enseignants')">Professeur</a></li>
-            <li><a class="dropdown-link" (click)="scrollToSection('avis')">Avis</a></li>
-            <li><a class="dropdown-link" (click)="scrollToSection('actualites')">Actualités</a></li>
+        <li class="dropdown" (mouseenter)="dropdownOpenClub = true" (mouseleave)="dropdownOpenClub = false">
+          <a href="javascript:void(0)">Le club ▾</a>
+          <ul class="dropdown-menu" *ngIf="dropdownOpenClub" (mouseenter)="dropdownOpenClub = true"
+            (mouseleave)="dropdownOpenClub = false">
+            <li><a (click)="scrollToSection('about')">À propos</a></li>
+            <li><a (click)="scrollToSection('hschedule-info')">Horaires</a></li>
+            <li><a (click)="scrollToSection('enseignants')">Professeur</a></li>
+            <li><a (click)="scrollToSection('avis')">Avis</a></li>
+            <li><a (click)="scrollToSection('actualites')">Actualités</a></li>
           </ul>
         </li>
+
         <li><a (click)="goToGalerie()">Galerie</a></li>
         <li><a (click)="goToInscription()">Inscription</a></li>
         <li><a (click)="goToBoutique()">Boutique</a></li>
+        <li><a (click)="goToEvenements()">Événements</a></li>
         <li><a (click)="goToContact()">Contact</a></li>
         <li *ngIf="!isLoggedIn"><a (click)="goToConnexion()">Connexion</a></li>
       </ul>
@@ -48,9 +51,10 @@
           {{ getInitials() }}
         </div>
         <ul class="profile-dropdown" [class.open]="profileMenuOpen">
-          <li><a (click)="goToDashboard()">Tableau de bord</a></li>
-          <li><a (click)="goToProfil()">Modifier mon profil</a></li>
-          <li><button (click)="logout()">Se déconnecter</button></li>
+          <li><a (click)="goToDashboard()"><i class="ri-dashboard-line"></i> Tableau de bord</a></li>
+          <li><a (click)="goToProfil()"><i class="ri-user-line"></i> Modifier mon profil</a></li>
+          <hr class="menu-separator">
+          <li><button class="logout-btn"><i class="ri-logout-box-r-line"></i> Se déconnecter</button></li>          
         </ul>
       </div>
 

@@ -7,6 +7,9 @@ export interface Professeur {
   specialite: string;
   description: string;
   photo: string;
+  facebook?: string;
+  instagram?: string;
+  linkedin?: string;
 }
 
 @Injectable({

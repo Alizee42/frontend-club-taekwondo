@@ -8,19 +8,19 @@ export class AuthGuard implements CanActivate {
 
   constructor(private router: Router) {}
 
-  canActivate(
+    canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role')?.toLowerCase();
-
+  
     if (!token) {
       console.warn('Token non trouvé. Redirection vers la page de connexion.');
       this.router.navigate(['/connexion']);
       return false;
     }
-
+  
     if (role === 'admin' || role === 'membre') {
       return true;
     } else {
