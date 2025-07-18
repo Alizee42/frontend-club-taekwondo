@@ -1,59 +1,125 @@
-import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormArray
+} from '@angular/forms';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+
+interface MembrePayload {
+  nom: string;
+  prenom: string;
+  dateNaissance: string;
+  ceinture?: string;
+  numeroLicence?: string;
+  utilisateurId?: number;
+}
 
 @Component({
   selector: 'app-inscription',
   standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './inscription.component.html',
-  styleUrls: ['./inscription.component.css'],
-  imports: [CommonModule, ReactiveFormsModule]
+  styleUrls: ['./inscription.component.css']
 })
-export class InscriptionComponent {
-  inscriptionForm: FormGroup;
+export class InscriptionComponent implements OnInit {
+  utilisateurForm!: FormGroup;
+  membresForm!: FormGroup;
+  isSubmitted = false;
+  step = 1;
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {
-    this.inscriptionForm = this.fb.group({
+  constructor(private fb: FormBuilder, private http: HttpClient) {}
+
+  ngOnInit(): void {
+    // Formulaire de l'utilisateur (étape 1)
+    this.utilisateurForm = this.fb.group({
       nom: ['', Validators.required],
       prenom: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.pattern(/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/)
-      ]],
-      telephone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-      numeroLicence: [''], // Facultatif
+      password: ['', Validators.required],
+      dateNaissance: ['', Validators.required],
       adresse: ['', Validators.required],
-      ceinture: [''], // Facultatif
-      statutSante: ['Non renseigné'], // Valeur par défaut
-      dateNaissance: [''] // Facultatif
+      telephone: ['', Validators.required],
+      role: ['PARENT', Validators.required]
+    });
+
+    // Formulaire des membres (étape 2)
+    this.membresForm = this.fb.group({
+      membres: this.fb.array([])
     });
   }
 
-  onSubmit() {
-    if (this.inscriptionForm.valid) {
-      const formData = this.inscriptionForm.value;
+  // Accès rapide aux membres
+  get membres(): FormArray {
+    return this.membresForm.get('membres') as FormArray;
+  }
 
-      this.authService.register(formData).subscribe(
-        (response) => {
-          console.log('Inscription réussie :', response);
-          alert('Inscription réussie ! Vous pouvez maintenant vous connecter.');
-          this.router.navigate(['/connexion']); // Redirection vers la page de connexion
-        },
-        (error) => {
-          console.error('Erreur lors de l\'inscription :', error);
-          alert(error.error?.message || 'Une erreur est survenue lors de l\'inscription.');
+  // Ajouter un membre
+  addMembre(): void {
+    const membre = this.fb.group({
+      nom: ['', Validators.required],
+      prenom: ['', Validators.required],
+      dateNaissance: ['', Validators.required],
+      ceinture: [''],
+      numeroLicence: ['']
+    });
+    this.membres.push(membre);
+  }
+
+  // Supprimer un membre
+  removeMembre(index: number): void {
+    this.membres.removeAt(index);
+  }
+
+  // Étapes (navigation)
+  nextStep(): void {
+    if (this.step === 1 && this.utilisateurForm.invalid) return;
+    if (this.step === 2 && this.membresForm.invalid) return;
+    this.step++;
+  }
+
+  previousStep(): void {
+    if (this.step > 1) this.step--;
+  }
+
+  // Soumission finale
+  onSubmit(): void {
+    if (this.utilisateurForm.invalid) return;
+
+    const utilisateurData = this.utilisateurForm.value;
+
+    this.http.post('/api/utilisateurs', utilisateurData).subscribe({
+      next: (utilisateur: any) => {
+        const utilisateurId = utilisateur.id;
+        const membres: MembrePayload[] = this.membresForm.value.membres;
+
+        if (!membres || membres.length === 0) {
+          this.isSubmitted = true;
+          return;
         }
-      );
-    } else {
-      alert('Veuillez remplir tous les champs obligatoires.');
-    }
+
+        const requests = membres.map((m: MembrePayload) => ({
+          ...m,
+          utilisateurId
+        }));
+
+        let count = 0;
+        for (let membre of requests) {
+          this.http.post('/api/membres', membre).subscribe({
+            next: () => {
+              count++;
+              if (count === requests.length) {
+                this.isSubmitted = true;
+              }
+            },
+            error: err => console.error('Erreur membre :', err)
+          });
+        }
+      },
+      error: err => console.error('Erreur utilisateur :', err)
+    });
   }
 }

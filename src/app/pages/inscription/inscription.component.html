@@ -1,76 +1,100 @@
-<div class="inscription-wrapper">
-  <h1 class="page-title">Créer un compte</h1>
-  <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="nom">Nom :</label>
-      <input id="nom" formControlName="nom" type="text" required>
-      <div *ngIf="inscriptionForm.get('nom')?.invalid && inscriptionForm.get('nom')?.touched">
-        <small class="error">Le nom est requis.</small>
-      </div>
+<div class="stepper-container">
+  <!-- 🧭 Étapes visuelles -->
+  <div class="steps-indicator">
+    <div [class.active]="step === 1">1. Adulte</div>
+    <div [class.active]="step === 2">2. Membres</div>
+    <div [class.active]="step === 3">3. Confirmation</div>
+  </div>
+
+  <!-- 🧍 Étape 1 : Informations utilisateur -->
+  <form *ngIf="step === 1" [formGroup]="utilisateurForm" (ngSubmit)="nextStep()">
+    <h2>Informations de l'adulte</h2>
+
+    <label>Nom *</label>
+    <input formControlName="nom" type="text" required />
+
+    <label>Prénom *</label>
+    <input formControlName="prenom" type="text" required />
+
+    <label>Email *</label>
+    <input formControlName="email" type="email" required />
+
+    <label>Téléphone *</label>
+    <input formControlName="telephone" type="text" required />
+
+    <label>Adresse *</label>
+    <input formControlName="adresse" type="text" required />
+
+    <label>Date de naissance *</label>
+    <input formControlName="dateNaissance" type="date" required />
+
+    <label>Mot de passe *</label>
+    <input formControlName="password" type="password" required />
+
+    <div class="btn-group">
+      <button type="submit">Suivant</button>
     </div>
-    
-    <div class="form-group">
-      <label for="prenom">Prénom :</label>
-      <input id="prenom" formControlName="prenom" type="text" required>
-      <div *ngIf="inscriptionForm.get('prenom')?.invalid && inscriptionForm.get('prenom')?.touched">
-        <small class="error">Le prénom est requis.</small>
-      </div>
-    </div>
-    
-    <div class="form-group">
-      <label for="email">Email :</label>
-      <input id="email" formControlName="email" type="email" required>
-      <div *ngIf="inscriptionForm.get('email')?.invalid && inscriptionForm.get('email')?.touched">
-        <small class="error">Un email valide est requis.</small>
-      </div>
-    </div>
-    
-    <div class="form-group">
-      <label for="telephone">Téléphone :</label>
-      <input id="telephone" formControlName="telephone" type="tel" required>
-      <div *ngIf="inscriptionForm.get('telephone')?.invalid && inscriptionForm.get('telephone')?.touched">
-        <small class="error">Un numéro de téléphone valide est requis.</small>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="numeroLicence">Numéro de Licence :</label>
-      <input id="numeroLicence" formControlName="numeroLicence" type="text" required>
-      <div *ngIf="inscriptionForm.get('numeroLicence')?.invalid && inscriptionForm.get('numeroLicence')?.touched">
-        <small class="error">Le numéro de licence est requis.</small>
-      </div>
-    </div>
-    
-    <div class="form-group">
-      <label for="adresse">Adresse :</label>
-      <input id="adresse" formControlName="adresse" type="text" required>
-      <div *ngIf="inscriptionForm.get('adresse')?.invalid && inscriptionForm.get('adresse')?.touched">
-        <small class="error">L'adresse est requise.</small>
-      </div>
-    </div>
-    
-    <div class="form-group">
-      <label for="ceinture">Ceinture :</label>
-      <input id="ceinture" formControlName="ceinture" type="text">
-    </div>
-    
-    <div class="form-group">
-      <label for="statutSante">Statut Santé :</label>
-      <input id="statutSante" formControlName="statutSante" type="text">
-    </div>
-    
-    <div class="form-group">
-      <label for="dateNaissance">Date de Naissance :</label>
-      <input id="dateNaissance" formControlName="dateNaissance" type="date">
-    </div>
-    <div class="form-group">
-      <label for="password">Mot de passe :</label>
-      <input id="password" formControlName="password" type="password" required>
-      <div *ngIf="inscriptionForm.get('password')?.invalid && inscriptionForm.get('password')?.touched">
-        <small class="error">
-          Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.
-        </small>
-      </div>
-    </div>
-    <button type="submit" class="btn">S'inscrire</button>
   </form>
+
+  <!-- 👨‍👧 Étape 2 : Membres à inscrire -->
+  <form *ngIf="step === 2" [formGroup]="membresForm">
+    <h2>Membres à inscrire</h2>
+
+    <div formArrayName="membres">
+      <div *ngFor="let membre of membres.controls; let i = index" [formGroupName]="i" class="membre-block">
+        <h3>Membre {{ i + 1 }}</h3>
+
+        <label>Nom *</label>
+        <input formControlName="nom" type="text" required />
+
+        <label>Prénom *</label>
+        <input formControlName="prenom" type="text" required />
+
+        <label>Date de naissance *</label>
+        <input formControlName="dateNaissance" type="date" required />
+
+        <label>Ceinture</label>
+        <input formControlName="ceinture" type="text" />
+
+        <label>Numéro de licence</label>
+        <input formControlName="numeroLicence" type="text" />
+
+        <button type="button" (click)="removeMembre(i)">❌ Supprimer</button>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button type="button" (click)="addMembre()">➕ Ajouter un membre</button>
+    </div>
+
+    <div class="btn-group">
+      <button type="button" (click)="previousStep()">Précédent</button>
+      <button type="button" (click)="nextStep()">Suivant</button>
+    </div>
+  </form>
+
+  <!-- ✅ Étape 3 : Confirmation -->
+  <div *ngIf="step === 3" class="confirmation-step">
+    <h2>Confirmation</h2>
+
+    <h3>Adulte :</h3>
+    <p><strong>Nom :</strong> {{ utilisateurForm.value.nom }}</p>
+    <p><strong>Prénom :</strong> {{ utilisateurForm.value.prenom }}</p>
+    <p><strong>Email :</strong> {{ utilisateurForm.value.email }}</p>
+    <p><strong>Téléphone :</strong> {{ utilisateurForm.value.telephone }}</p>
+    <p><strong>Adresse :</strong> {{ utilisateurForm.value.adresse }}</p>
+    <p><strong>Date de naissance :</strong> {{ utilisateurForm.value.dateNaissance }}</p>
+
+    <h3>Membres :</h3>
+    <ul>
+      <li *ngFor="let m of membresForm.value.membres">
+        {{ m.prenom }} {{ m.nom }} - {{ m.dateNaissance }}
+      </li>
+    </ul>
+
+    <div class="btn-group">
+      <button type="button" (click)="previousStep()">Précédent</button>
+      <button type="button" (click)="onSubmit()">Valider l'inscription</button>
+    </div>
+  </div>
 </div>
