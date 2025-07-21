@@ -5,7 +5,9 @@ import {
   FormBuilder,
   FormGroup,
   Validators,
-  FormArray
+  FormArray,
+  ValidatorFn,
+  AbstractControl
 } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
@@ -30,34 +32,40 @@ export class InscriptionComponent implements OnInit {
   membresForm!: FormGroup;
   isSubmitted = false;
   step = 1;
+  showConfirmationModal = false;
+  erreurMessage = '';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {}
 
   ngOnInit(): void {
-    // Formulaire de l'utilisateur (étape 1)
     this.utilisateurForm = this.fb.group({
       nom: ['', Validators.required],
       prenom: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
+      confirmPassword: ['', Validators.required],
       dateNaissance: ['', Validators.required],
       adresse: ['', Validators.required],
       telephone: ['', Validators.required],
       role: ['PARENT', Validators.required]
-    });
+    }, { validators: this.matchPasswords });
 
-    // Formulaire des membres (étape 2)
     this.membresForm = this.fb.group({
       membres: this.fb.array([])
     });
   }
 
-  // Accès rapide aux membres
+  /** Vérifie que password et confirmPassword sont identiques */
+  matchPasswords: ValidatorFn = (group: AbstractControl): { [key: string]: boolean } | null => {
+    const password = group.get('password')?.value;
+    const confirm = group.get('confirmPassword')?.value;
+    return password && confirm && password !== confirm ? { passwordMismatch: true } : null;
+  };
+
   get membres(): FormArray {
     return this.membresForm.get('membres') as FormArray;
   }
 
-  // Ajouter un membre
   addMembre(): void {
     const membre = this.fb.group({
       nom: ['', Validators.required],
@@ -69,12 +77,10 @@ export class InscriptionComponent implements OnInit {
     this.membres.push(membre);
   }
 
-  // Supprimer un membre
   removeMembre(index: number): void {
     this.membres.removeAt(index);
   }
 
-  // Étapes (navigation)
   nextStep(): void {
     if (this.step === 1 && this.utilisateurForm.invalid) return;
     if (this.step === 2 && this.membresForm.invalid) return;
@@ -85,11 +91,21 @@ export class InscriptionComponent implements OnInit {
     if (this.step > 1) this.step--;
   }
 
-  // Soumission finale
-  onSubmit(): void {
-    if (this.utilisateurForm.invalid) return;
+  closeModal(): void {
+    this.showConfirmationModal = false;
+  }
 
-    const utilisateurData = this.utilisateurForm.value;
+  onSubmit(): void {
+    this.erreurMessage = '';
+
+    if (this.utilisateurForm.invalid) return;
+    if (this.utilisateurForm.errors?.['passwordMismatch']) {
+      this.erreurMessage = 'Les mots de passe ne correspondent pas.';
+      return;
+    }
+
+    const utilisateurData = { ...this.utilisateurForm.value };
+    delete utilisateurData.confirmPassword;
 
     this.http.post('/api/utilisateurs', utilisateurData).subscribe({
       next: (utilisateur: any) => {
@@ -97,7 +113,8 @@ export class InscriptionComponent implements OnInit {
         const membres: MembrePayload[] = this.membresForm.value.membres;
 
         if (!membres || membres.length === 0) {
-          this.isSubmitted = true;
+          this.step = 3;
+          this.showConfirmationModal = true;
           return;
         }
 
@@ -112,14 +129,25 @@ export class InscriptionComponent implements OnInit {
             next: () => {
               count++;
               if (count === requests.length) {
-                this.isSubmitted = true;
+                this.step = 3;
+                this.showConfirmationModal = true;
               }
             },
-            error: err => console.error('Erreur membre :', err)
+            error: err => {
+              console.error('Erreur membre :', err);
+              this.erreurMessage = 'Une erreur est survenue lors de l’ajout des membres.';
+            }
           });
         }
       },
-      error: err => console.error('Erreur utilisateur :', err)
+      error: err => {
+        console.error('Erreur utilisateur :', err);
+        if (err.status === 409) {
+          this.erreurMessage = 'Cet email est déjà utilisé. Veuillez en choisir un autre.';
+        } else {
+          this.erreurMessage = 'Une erreur est survenue lors de l’inscription.';
+        }
+      }
     });
   }
 }

@@ -1,0 +1,36 @@
+<div class="page-container">
+    <h1 class="page-title">📋 Inscriptions reçues</h1>
+  
+    <table class="table-inscriptions">
+      <thead>
+        <tr>
+          <th>Nom du parent / adulte</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Adresse</th>
+          <th>Membres inscrits</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let utilisateur of utilisateurs">
+          <td>{{ utilisateur.prenom }} {{ utilisateur.nom }}</td>
+          <td>{{ utilisateur.email }}</td>
+          <td>{{ utilisateur.telephone }}</td>
+          <td>{{ utilisateur.adresse }}</td>
+          <td>
+            <ul>
+              <li *ngFor="let m of utilisateur.membres">
+                {{ m.prenom }} {{ m.nom }} ({{ m.dateNaissance | date:'yyyy-MM-dd' }})
+              </li>
+            </ul>
+          </td>
+          <td>
+            <button class="btn btn-sm">📄 Voir</button>
+            <button class="btn btn-sm btn-contact">✉️ Contacter</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

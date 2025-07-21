@@ -23,6 +23,7 @@ import { BoutiqueComponent } from './pages/boutique/boutique.component';
 import { GestionCommandeComponent } from './admin/gestion-commande/gestion-commande.component';
 import { EvenementsComponent } from './pages/evenements/evenements.component';
 import { GestionEvenementsComponent } from './admin/gestion-evenements/gestion-evenements.component';
+import { GestionInscriptionsComponent } from './admin/gestion-inscriptions/gestion-inscriptions.component';
 
 export const routes: Routes = [
   // 🌐 Routes publiques
@@ -52,7 +53,8 @@ export const routes: Routes = [
       { path: 'documents', component: GestionDocumentsComponent },
       { path: 'paiements', component: GestionPaiementsComponent },
       { path: 'gestion-commande', component: GestionCommandeComponent },
-      { path: 'gestion-evenement', component: GestionEvenementsComponent }
+      { path: 'gestion-evenement', component: GestionEvenementsComponent },
+      { path: 'gestion-inscription', component: GestionInscriptionsComponent}
     ]
   },
 

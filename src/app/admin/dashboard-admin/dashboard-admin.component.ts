@@ -75,4 +75,8 @@ export class DashboardAdminComponent implements OnInit {
   navigateToGestionEvenements(): void {
     this.router.navigate(['/admin/gestion-evenement']); // Redirige vers la page Gestion des Événements
   }
+  navigateToGestionInscription(): void {
+    this.router.navigate(['/admin/gestion-inscription']); // ✅ correspond à la vraie route
+  }
+   
 }

@@ -1,100 +1,136 @@
 <div class="stepper-container">
-  <!-- 🧭 Étapes visuelles -->
+  <!-- Étapes du formulaire -->
   <div class="steps-indicator">
-    <div [class.active]="step === 1">1. Adulte</div>
-    <div [class.active]="step === 2">2. Membres</div>
-    <div [class.active]="step === 3">3. Confirmation</div>
+    <div class="step" [class.active]="step === 1">1. Adulte</div>
+    <div class="step" [class.active]="step === 2">2. Membres</div>
+    <div class="step" [class.active]="step === 3">3. Confirmation</div>
   </div>
 
-  <!-- 🧍 Étape 1 : Informations utilisateur -->
-  <form *ngIf="step === 1" [formGroup]="utilisateurForm" (ngSubmit)="nextStep()">
-    <h2>Informations de l'adulte</h2>
+  <!-- Étape 1 : Informations adulte -->
+  <form *ngIf="step === 1" [formGroup]="utilisateurForm" (ngSubmit)="nextStep()" class="step-form">
+    <fieldset class="form-section">
+      <legend class="form-legend">👤 Informations de l'adulte</legend>
 
-    <label>Nom *</label>
-    <input formControlName="nom" type="text" required />
-
-    <label>Prénom *</label>
-    <input formControlName="prenom" type="text" required />
-
-    <label>Email *</label>
-    <input formControlName="email" type="email" required />
-
-    <label>Téléphone *</label>
-    <input formControlName="telephone" type="text" required />
-
-    <label>Adresse *</label>
-    <input formControlName="adresse" type="text" required />
-
-    <label>Date de naissance *</label>
-    <input formControlName="dateNaissance" type="date" required />
-
-    <label>Mot de passe *</label>
-    <input formControlName="password" type="password" required />
-
-    <div class="btn-group">
-      <button type="submit">Suivant</button>
-    </div>
-  </form>
-
-  <!-- 👨‍👧 Étape 2 : Membres à inscrire -->
-  <form *ngIf="step === 2" [formGroup]="membresForm">
-    <h2>Membres à inscrire</h2>
-
-    <div formArrayName="membres">
-      <div *ngFor="let membre of membres.controls; let i = index" [formGroupName]="i" class="membre-block">
-        <h3>Membre {{ i + 1 }}</h3>
-
-        <label>Nom *</label>
-        <input formControlName="nom" type="text" required />
-
-        <label>Prénom *</label>
-        <input formControlName="prenom" type="text" required />
-
-        <label>Date de naissance *</label>
-        <input formControlName="dateNaissance" type="date" required />
-
-        <label>Ceinture</label>
-        <input formControlName="ceinture" type="text" />
-
-        <label>Numéro de licence</label>
-        <input formControlName="numeroLicence" type="text" />
-
-        <button type="button" (click)="removeMembre(i)">❌ Supprimer</button>
+      <div class="form-grid">
+        <div>
+          <label>Nom *</label>
+          <input formControlName="nom" type="text" required />
+        </div>
+        <div>
+          <label>Prénom *</label>
+          <input formControlName="prenom" type="text" required />
+        </div>
+        <div>
+          <label>Email *</label>
+          <input formControlName="email" type="email" required />
+        </div>
+        <div>
+          <label>Téléphone *</label>
+          <input formControlName="telephone" type="text" required />
+        </div>
+        <div>
+          <label>Adresse *</label>
+          <input formControlName="adresse" type="text" required />
+        </div>
+        <div>
+          <label>Date de naissance *</label>
+          <input formControlName="dateNaissance" type="date" required />
+        </div>
+        <div>
+          <label>Mot de passe *</label>
+          <input formControlName="password" type="password" required />
+        </div>
+        <div>
+          <label>Confirmer le mot de passe *</label>
+          <input formControlName="confirmPassword" type="password" required />
+        </div>
       </div>
-    </div>
 
-    <div class="btn-group">
-      <button type="button" (click)="addMembre()">➕ Ajouter un membre</button>
-    </div>
+      <div *ngIf="utilisateurForm.errors?.['passwordMismatch'] && utilisateurForm.touched" class="error-message">
+        ⚠️ Les mots de passe ne correspondent pas.
+      </div>
 
-    <div class="btn-group">
-      <button type="button" (click)="previousStep()">Précédent</button>
-      <button type="button" (click)="nextStep()">Suivant</button>
-    </div>
+      <div class="btn-group">
+        <button type="submit">Suivant</button>
+      </div>
+    </fieldset>
   </form>
 
-  <!-- ✅ Étape 3 : Confirmation -->
+  <!-- Étape 2 : Membres -->
+  <form *ngIf="step === 2" [formGroup]="membresForm" class="step-form">
+    <fieldset class="form-section">
+      <legend class="form-legend">👧 Membres à inscrire</legend>
+
+      <div formArrayName="membres">
+        <div *ngFor="let membre of membres.controls; let i = index" [formGroupName]="i" class="membre-card">
+          <h3>Membre {{ i + 1 }}</h3>
+
+          <div class="form-grid">
+            <div>
+              <label>Nom *</label>
+              <input formControlName="nom" type="text" required />
+            </div>
+            <div>
+              <label>Prénom *</label>
+              <input formControlName="prenom" type="text" required />
+            </div>
+            <div>
+              <label>Date de naissance *</label>
+              <input formControlName="dateNaissance" type="date" required />
+            </div>
+            <div>
+              <label>Ceinture</label>
+              <input formControlName="ceinture" type="text" />
+            </div>
+            <div>
+              <label>Numéro de licence</label>
+              <input formControlName="numeroLicence" type="text" />
+            </div>
+          </div>
+
+          <div class="btn-group align-right">
+            <button type="button" (click)="removeMembre(i)">❌ Supprimer</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button type="button" (click)="addMembre()">➕ Ajouter un membre</button>
+      </div>
+
+      <div class="btn-group">
+        <button type="button" (click)="previousStep()">Précédent</button>
+        <button type="button" (click)="nextStep()">Suivant</button>
+      </div>
+    </fieldset>
+  </form>
+
+  <!-- Étape 3 : Confirmation -->
   <div *ngIf="step === 3" class="confirmation-step">
-    <h2>Confirmation</h2>
+    <fieldset class="form-section">
+      <legend class="form-legend">Confirmation de l'inscription</legend>
 
-    <h3>Adulte :</h3>
-    <p><strong>Nom :</strong> {{ utilisateurForm.value.nom }}</p>
-    <p><strong>Prénom :</strong> {{ utilisateurForm.value.prenom }}</p>
-    <p><strong>Email :</strong> {{ utilisateurForm.value.email }}</p>
-    <p><strong>Téléphone :</strong> {{ utilisateurForm.value.telephone }}</p>
-    <p><strong>Adresse :</strong> {{ utilisateurForm.value.adresse }}</p>
-    <p><strong>Date de naissance :</strong> {{ utilisateurForm.value.dateNaissance }}</p>
+      <h3>Adulte :</h3>
+      <ul>
+        <li><strong>Nom :</strong> {{ utilisateurForm.value.nom }}</li>
+        <li><strong>Prénom :</strong> {{ utilisateurForm.value.prenom }}</li>
+        <li><strong>Email :</strong> {{ utilisateurForm.value.email }}</li>
+        <li><strong>Téléphone :</strong> {{ utilisateurForm.value.telephone }}</li>
+        <li><strong>Adresse :</strong> {{ utilisateurForm.value.adresse }}</li>
+        <li><strong>Date de naissance :</strong> {{ utilisateurForm.value.dateNaissance }}</li>
+      </ul>
 
-    <h3>Membres :</h3>
-    <ul>
-      <li *ngFor="let m of membresForm.value.membres">
-        {{ m.prenom }} {{ m.nom }} - {{ m.dateNaissance }}
-      </li>
-    </ul>
+      <h3>Membres :</h3>
+      <ul>
+        <li *ngFor="let m of membresForm.value.membres">
+          {{ m.prenom }} {{ m.nom }} – {{ m.dateNaissance }}
+        </li>
+      </ul>
 
-    <div class="btn-group">
-      <button type="button" (click)="previousStep()">Précédent</button>
-      <button type="button" (click)="onSubmit()">Valider l'inscription</button>
-    </div>
+      <div class="btn-group">
+        <button type="button" (click)="previousStep()">Précédent</button>
+        <button type="button" (click)="onSubmit()">✅ Valider l'inscription</button>
+      </div>
+    </fieldset>
   </div>
 </div>
