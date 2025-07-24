@@ -143,16 +143,18 @@ export class HeaderComponent implements OnInit {
 
   goToBoutique(): void {
     this.router.navigate(['/boutique']);
-    this.fermerConfirmationModal(); // Ferme la modale si elle est ouverte
+    this.fermerConfirmationModal(); 
   }
-
-  // Gestion de l'utilisateur
-  logout(): void {
+    logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('utilisateur');
     this.panierService.viderPanier();
     this.isLoggedIn = false;
-    this.router.navigate(['/connexion']);
+  
+    this.router.navigate(['/connexion']).then(() => {
+    }).catch((err) => {
+      console.error('Erreur lors de la redirection :', err);
+    });
   }
 
   getInitials(): string {
@@ -162,11 +164,9 @@ export class HeaderComponent implements OnInit {
 
   checkLoginStatus(): void {
     const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('utilisateur'); // Correction : clé correcte
+    const storedUser = localStorage.getItem('utilisateur');
     this.isLoggedIn = !!token && !!storedUser;
-    console.log('Statut de connexion :', this.isLoggedIn);
   }
-
   // Gestion du panier
   supprimerDuPanier(index: number): void {
     this.panier.splice(index, 1);

@@ -8,25 +8,31 @@ export class AuthGuard implements CanActivate {
 
   constructor(private router: Router) {}
 
-    canActivate(
+  canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean {
     const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role')?.toLowerCase();
-  
-    if (!token) {
-      console.warn('Token non trouvé. Redirection vers la page de connexion.');
+    const roles = JSON.parse(localStorage.getItem('roles') || '[]'); // Récupération des rôles sous forme de tableau
+
+    // Vérification de la présence du token
+    if (!token || token.trim() === '') {
+      console.warn('Token invalide ou non trouvé. Redirection vers la page de connexion.');
       this.router.navigate(['/connexion']);
       return false;
     }
-  
-    if (role === 'admin' || role === 'membre') {
-      return true;
-    } else {
-      console.warn('Rôle non autorisé ou non défini. Redirection vers la page de connexion.');
+
+    // Récupération des rôles requis pour la route
+    const requiredRoles = route.data['roles'] as string[]; // Rôles requis pour accéder à la route
+
+    // Vérification des rôles
+    if (requiredRoles && !requiredRoles.some(role => roles.includes(role))) {
+      console.warn('Accès refusé : rôle non autorisé. Redirection vers la page de connexion.');
       this.router.navigate(['/connexion']);
       return false;
     }
+
+    // Si toutes les vérifications passent, l'accès est autorisé
+    return true;
   }
 }

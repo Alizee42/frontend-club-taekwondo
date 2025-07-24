@@ -22,17 +22,17 @@ export interface Produit {
 })
 export class PanierService {
   private panier: Produit[] = [];
-  private panierSubject = new BehaviorSubject<Produit[]>([]); // Observable pour le panier
-  private cartCountSubject = new BehaviorSubject<number>(0); // Observable pour le badge
+  private panierSubject = new BehaviorSubject<Produit[]>([]); 
+  private cartCountSubject = new BehaviorSubject<number>(0); 
 
-  cartCount$ = this.cartCountSubject.asObservable(); // Observable exposé
-  panier$ = this.panierSubject.asObservable(); // Observable exposé pour le panier
+  cartCount$ = this.cartCountSubject.asObservable(); 
+  panier$ = this.panierSubject.asObservable(); 
 
   constructor(private http: HttpClient) {
     const storedPanier = localStorage.getItem('panier');
     this.panier = storedPanier ? JSON.parse(storedPanier) : [];
-    this.cartCountSubject.next(this.panier.length); // Initialisation du badge
-    this.panierSubject.next(this.panier); // Initialisation du panier
+    this.cartCountSubject.next(this.panier.length); 
+    this.panierSubject.next(this.panier); 
   }
 
   getPanier(): Produit[] {
@@ -55,7 +55,7 @@ export class PanierService {
   }
 
   private sauvegarderPanier(): void {
-    localStorage.setItem('panier', JSON.stringify(this.panier));
+    localStorage.setItem('panier', JSON.stringify(this.panier)); 
     this.cartCountSubject.next(this.panier.length); // Met à jour le badge
     this.panierSubject.next(this.panier); // Notifie les abonnés des changements
   }

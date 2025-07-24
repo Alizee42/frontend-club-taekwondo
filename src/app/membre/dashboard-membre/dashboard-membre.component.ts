@@ -25,6 +25,13 @@ export class DashboardMembreComponent implements OnInit {
 
   ngOnInit() {
     this.loadUtilisateurConnecte();
+
+    // Vérification des rôles
+    const roles = JSON.parse(localStorage.getItem('roles') || '[]');
+    if (!roles.includes('MEMBRE')) {
+      alert('Accès refusé. Vous n\'êtes pas autorisé à accéder à cette section.');
+      this.router.navigate(['/connexion']);
+    }
   }
 
   // Charger l'utilisateur connecté
@@ -32,6 +39,7 @@ export class DashboardMembreComponent implements OnInit {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('Utilisateur non connecté.');
+      this.router.navigate(['/connexion']); // Redirige vers la page de connexion si aucun token
       return;
     }
 
@@ -45,6 +53,7 @@ export class DashboardMembreComponent implements OnInit {
       error: (err) => {
         console.error('Erreur lors de la récupération de l\'utilisateur connecté :', err);
         alert('Impossible de récupérer les informations de l\'utilisateur connecté.');
+        this.router.navigate(['/connexion']); // Redirige vers la page de connexion en cas d'erreur
       }
     });
   }

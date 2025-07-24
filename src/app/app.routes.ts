@@ -8,7 +8,7 @@ import { DashboardAdminComponent } from './admin/dashboard-admin/dashboard-admin
 import { DashboardMembreComponent } from './membre/dashboard-membre/dashboard-membre.component';
 import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.component';
 import { MembreLayoutComponent } from './membre/layout/membre-layout/membre-layout.component';
-import { ProfilComponent } from './pages/profil/profil.component'; // Importer le composant Profil
+import { ProfilComponent } from './pages/profil/profil.component';
 import { AuthGuard } from './guards/auth.guard';
 import { GestionHorairesComponent } from './admin/gestion-horaires/gestion-horaires.component';
 import { GestionProfesseursComponent } from './admin/gestion-professeurs/gestion-professeurs.component';
@@ -17,8 +17,8 @@ import { GestionActualitesComponent } from './admin/gestion-actualites/gestion-a
 import { GestionGalerieComponent } from './admin/gestion-galerie/gestion-galerie.component';
 import { DocumentsComponent } from './membre/documents/documents.component';
 import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-documents.component';
-import { PaiementComponent } from './membre/paiement/paiement.component'; 
-import { GestionPaiementsComponent } from './admin/gestion-paiements/gestion-paiements.component'; // Importer le composant Paiement
+import { PaiementComponent } from './membre/paiement/paiement.component';
+import { GestionPaiementsComponent } from './admin/gestion-paiements/gestion-paiements.component';
 import { BoutiqueComponent } from './pages/boutique/boutique.component';
 import { GestionCommandeComponent } from './admin/gestion-commande/gestion-commande.component';
 import { EvenementsComponent } from './pages/evenements/evenements.component';
@@ -36,13 +36,14 @@ export const routes: Routes = [
   { path: 'evenements', component: EvenementsComponent },
 
   // 👤 Profil connecté (protégé)
-  { path: 'profil', component: ProfilComponent, canActivate: [AuthGuard] },
+  { path: 'profil', component: ProfilComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN', 'MEMBRE', 'PARENT'] } },
 
   // 🔐 Espace Admin
   {
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [AuthGuard],
+    data: { roles: ['ADMIN'] }, // Rôle requis pour accéder à l'espace Admin
     children: [
       { path: 'dashboard-admin', component: DashboardAdminComponent },
       { path: 'horaires', component: GestionHorairesComponent },
@@ -54,7 +55,7 @@ export const routes: Routes = [
       { path: 'paiements', component: GestionPaiementsComponent },
       { path: 'gestion-commande', component: GestionCommandeComponent },
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
-      { path: 'gestion-inscription', component: GestionInscriptionsComponent}
+      { path: 'gestion-inscription', component: GestionInscriptionsComponent }
     ]
   },
 
@@ -63,10 +64,22 @@ export const routes: Routes = [
     path: 'membre',
     component: MembreLayoutComponent,
     canActivate: [AuthGuard],
+    data: { roles: ['MEMBRE'] }, // Rôle requis pour accéder à l'espace Membre
     children: [
       { path: 'dashboard-membre', component: DashboardMembreComponent },
       { path: 'documents', component: DocumentsComponent },
       { path: 'paiements', component: PaiementComponent }
+    ]
+  },
+
+  // 👤 Espace Parent
+  {
+    path: 'parent',
+    component: MembreLayoutComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['PARENT'] }, // Rôle requis pour accéder à l'espace Parent
+    children: [
+      { path: 'dashboard-parent', component: DashboardMembreComponent }
     ]
   },
 
