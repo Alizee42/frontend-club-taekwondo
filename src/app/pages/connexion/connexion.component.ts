@@ -9,7 +9,7 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './connexion.component.html',
   styleUrls: ['./connexion.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
 })
 export class ConnexionComponent {
   email: string = '';
@@ -18,7 +18,10 @@ export class ConnexionComponent {
   constructor(private router: Router, private http: HttpClient) {}
 
   onSubmit(): void {
-    console.log('Tentative de connexion avec :', { email: this.email, password: this.password });
+    console.log('🔑 Tentative de connexion avec :', {
+      email: this.email,
+      password: this.password,
+    });
 
     if (!this.email || !this.password) {
       alert('Veuillez remplir correctement tous les champs.');
@@ -32,72 +35,87 @@ export class ConnexionComponent {
 
     const loginData = {
       email: this.email,
-      password: this.password
+      password: this.password,
     };
 
-    this.http.post<any>(
-      'http://localhost:8080/api/utilisateurs/login',
-      loginData
-    ).subscribe({
-      next: (response) => {
-        console.log('Réponse reçue :', response);
+    this.http
+      .post<any>('http://localhost:8080/api/utilisateurs/login', loginData)
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Réponse reçue du backend :', response);
 
-        const token = response.token;
-        const roles = response.roles || response.utilisateur?.roles; // Récupérer les rôles
-        const utilisateur = response.utilisateur;
+          const token = response.token;
+          const utilisateur = response.utilisateur;
 
-        // Stocker les données dans le localStorage
-        this.storeUserData(token, roles, utilisateur);
+          console.log('🧾 Utilisateur reçu :', utilisateur);
 
-        // Vérifier les rôles et rediriger
-        this.redirectBasedOnRoles(roles);
-      },
-      error: (err) => {
-        console.error('Erreur de connexion :', err);
-        this.handleError(err);
-      }
-    });
+          const rawRole = response.role || utilisateur?.role || '';
+          console.log(
+            '🧪 Rôle brut reçu (response.role ou utilisateur.role) :',
+            rawRole
+          );
+
+          const role = rawRole?.trim().toUpperCase() || '';
+          if (role) localStorage.setItem('role', role); // stocke en MAJUSCULE
+          console.log('📦 Rôle formaté :', role);
+
+          if (!role) {
+            console.warn('❌ Aucun rôle détecté après formatage.');
+            alert("Rôle non détecté. Veuillez contacter l'administrateur.");
+            return;
+          }
+
+          this.storeUserData(token, role, utilisateur);
+          this.redirectBasedOnRole(role);
+        },
+        error: (err) => {
+          console.error('❌ Erreur lors de la requête POST :', err);
+          this.handleError(err);
+        },
+      });
   }
 
-  private storeUserData(token: string, roles: any, utilisateur: any): void {
-    if (token) {
-      localStorage.setItem('token', token);
-    }
+  private storeUserData(token: string, role: string, utilisateur: any): void {
+    console.log(
+      '📥 Stockage du token, rôle et utilisateur dans le localStorage'
+    );
 
-    if (roles) {
-      localStorage.setItem('roles', JSON.stringify(roles)); // Stocker les rôles sous forme de JSON
-    }
-
+    if (token) localStorage.setItem('token', token);
+    if (role) localStorage.setItem('role', role); // stocke en MAJUSCULE
     if (utilisateur) {
       localStorage.setItem('utilisateur', JSON.stringify(utilisateur));
-      console.log('Utilisateur stocké dans localStorage :', utilisateur);
-
       if (utilisateur.email) {
         localStorage.setItem('email', utilisateur.email);
       }
     }
   }
 
-  private redirectBasedOnRoles(roles: any): void {
-    if (!roles || roles.length === 0) {
-      alert('Aucun rôle trouvé. Veuillez contacter l\'administrateur.');
-      return;
-    }
+  private redirectBasedOnRole(role: string): void {
+    const normalizedRole = role?.trim().toUpperCase(); // 🔥 Normalize une seule fois
 
-    const rolesArray = Array.isArray(roles) ? roles : Array.from(roles);
-
-    if (rolesArray.includes('ADMIN')) {
-      this.router.navigate(['/admin/dashboard-admin']);
-    } else if (rolesArray.includes('MEMBRE')) {
-      this.router.navigate(['/membre/dashboard-membre']);
-    } else if (rolesArray.includes('PARENT')) {
-      this.router.navigate(['/parent/dashboard-parent']);
-    } else {
-      alert('Rôle inconnu. Veuillez contacter l\'administrateur.');
+    switch (normalizedRole) {
+      case 'ADMIN':
+        console.log('➡️ Redirection vers /admin/dashboard-admin');
+        this.router.navigate(['/admin/dashboard-admin']);
+        break;
+      case 'MEMBRE':
+        console.log('➡️ Redirection vers /membre/dashboard-membre');
+        this.router.navigate(['/membre/dashboard-membre']);
+        break;
+      case 'PARENT':
+        console.log('➡️ Redirection vers /parent/dashboard-parent');
+        this.router.navigate(['/parent/dashboard-parent']);
+        break;
+      default:
+        console.warn('⚠️ Rôle non reconnu (normalisé) :', normalizedRole);
+        alert("Rôle inconnu. Veuillez contacter l'administrateur.");
+        break;
     }
   }
 
   private handleError(err: any): void {
+    console.error('📛 Erreur de connexion détectée :', err);
+
     if (err.status === 401) {
       alert('Email ou mot de passe incorrect.');
     } else {

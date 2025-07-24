@@ -6,7 +6,7 @@ interface Utilisateur {
   id: number;
   nom: string;
   email?: string;
-  roles?: string[]; // Mise à jour pour gérer plusieurs rôles
+  role?: string; // Rôle unique en String
   [key: string]: any;
 }
 
@@ -14,79 +14,89 @@ interface Utilisateur {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/utilisateurs'; // Backend
+  private apiUrl = 'http://localhost:8080/api/utilisateurs';
 
   constructor(private http: HttpClient) {}
 
-  // Méthode pour l'inscription
+  // Inscription
   register(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
 
-  // Méthode pour la connexion
+  // Connexion
   login(credentials: { email: string; password: string }): Observable<any> {
     return new Observable((observer) => {
       this.http.post(`${this.apiUrl}/login`, credentials).subscribe({
         next: (response: any) => {
           console.log('✅ Réponse du backend :', response);
 
-          // Nettoyer le localStorage avant de stocker les nouvelles données
+          // Nettoyage
           localStorage.clear();
 
-          // Enregistrer les nouvelles données
+          // Stockage
           if (response.token) {
             localStorage.setItem('token', response.token);
           }
 
-          if (response.roles) {
-            localStorage.setItem('roles', JSON.stringify(response.roles)); // Stocker les rôles sous forme de tableau
+          if (response.role) {
+            localStorage.setItem('role', response.role); // Rôle unique
           }
 
           if (response.utilisateur) {
             localStorage.setItem('utilisateur', JSON.stringify(response.utilisateur));
           }
 
-          observer.next(response); // Retourner la réponse au composant appelant
+          observer.next(response);
           observer.complete();
         },
         error: (err) => {
           console.error('❌ Erreur de connexion :', err);
-          observer.error(err); // Retourner l'erreur au composant appelant
+          observer.error(err);
         }
       });
     });
   }
 
-  // Méthode pour la déconnexion
+  // Déconnexion
   logout(): void {
     localStorage.clear();
   }
 
-  // Vérifier si l'utilisateur est connecté
+  // Vérifie si connecté
   isConnecte(): boolean {
-    return !!localStorage.getItem('token'); // Vérifie si un token est présent
+    return !!localStorage.getItem('token');
   }
 
-  // Récupérer l'utilisateur connecté
+  // Récupère l'utilisateur connecté
   getUtilisateurConnecte(): Utilisateur | null {
     const user = localStorage.getItem('utilisateur');
     return user ? JSON.parse(user) : null;
   }
 
-  // Récupérer le token
+  // Récupère le token
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  // Récupérer les rôles de l'utilisateur
-  getRoles(): string[] {
-    const roles = localStorage.getItem('roles');
-    return roles ? JSON.parse(roles) : [];
+  // Récupère le rôle
+  getRole(): string | null {
+    return localStorage.getItem('role');
   }
 
-  // Vérifier si l'utilisateur a un rôle spécifique
+  // Vérifie si le rôle est égal
   hasRole(role: string): boolean {
-    const roles = this.getRoles();
-    return roles.includes(role);
+    return this.getRole() === role;
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole('ADMIN');
+  }
+
+  isMembre(): boolean {
+    return this.hasRole('MEMBRE');
+  }
+
+  isParent(): boolean {
+    return this.hasRole('PARENT');
   }
 }

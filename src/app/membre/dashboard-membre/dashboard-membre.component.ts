@@ -26,9 +26,9 @@ export class DashboardMembreComponent implements OnInit {
   ngOnInit() {
     this.loadUtilisateurConnecte();
 
-    // Vérification des rôles
-    const roles = JSON.parse(localStorage.getItem('roles') || '[]');
-    if (!roles.includes('MEMBRE')) {
+    // Vérification du rôle unique
+    const role = localStorage.getItem('role');
+    if (role !== 'MEMBRE') {
       alert('Accès refusé. Vous n\'êtes pas autorisé à accéder à cette section.');
       this.router.navigate(['/connexion']);
     }

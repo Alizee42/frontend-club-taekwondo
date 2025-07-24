@@ -35,15 +35,19 @@ export const routes: Routes = [
   { path: 'boutique', component: BoutiqueComponent },
   { path: 'evenements', component: EvenementsComponent },
 
-  // 👤 Profil connecté (protégé)
-  { path: 'profil', component: ProfilComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN', 'MEMBRE', 'PARENT'] } },
+  // 👤 Profil (tout utilisateur connecté)
+  {
+    path: 'profil',
+    component: ProfilComponent,
+    canActivate: [AuthGuard]
+  },
 
   // 🔐 Espace Admin
   {
     path: 'admin',
     component: AdminLayoutComponent,
-    canActivate: [AuthGuard],
-    data: { roles: ['ADMIN'] }, // Rôle requis pour accéder à l'espace Admin
+    canActivateChild: [AuthGuard],
+    data: { role: 'ADMIN' },
     children: [
       { path: 'dashboard-admin', component: DashboardAdminComponent },
       { path: 'horaires', component: GestionHorairesComponent },
@@ -63,8 +67,8 @@ export const routes: Routes = [
   {
     path: 'membre',
     component: MembreLayoutComponent,
-    canActivate: [AuthGuard],
-    data: { roles: ['MEMBRE'] }, // Rôle requis pour accéder à l'espace Membre
+    canActivateChild: [AuthGuard],
+    data: { role: 'MEMBRE' },
     children: [
       { path: 'dashboard-membre', component: DashboardMembreComponent },
       { path: 'documents', component: DocumentsComponent },
@@ -76,13 +80,13 @@ export const routes: Routes = [
   {
     path: 'parent',
     component: MembreLayoutComponent,
-    canActivate: [AuthGuard],
-    data: { roles: ['PARENT'] }, // Rôle requis pour accéder à l'espace Parent
+    canActivateChild: [AuthGuard],
+    data: { role: 'PARENT' },
     children: [
       { path: 'dashboard-parent', component: DashboardMembreComponent }
     ]
   },
 
-  // 🧭 Redirection par défaut
+  // 🧭 Redirection inconnue
   { path: '**', redirectTo: '' }
 ];
