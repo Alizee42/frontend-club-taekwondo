@@ -107,6 +107,11 @@ export class InscriptionComponent implements OnInit {
     const utilisateurData = { ...this.utilisateurForm.value };
     delete utilisateurData.confirmPassword;
 
+    // ✅ Convertir rôle en MAJ pour l'enum Java
+    if (utilisateurData.role) {
+      utilisateurData.role = utilisateurData.role.toUpperCase();
+    }
+
     this.http.post('/api/utilisateurs', utilisateurData).subscribe({
       next: (utilisateur: any) => {
         const utilisateurId = utilisateur.id;

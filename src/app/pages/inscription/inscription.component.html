@@ -6,6 +6,16 @@
     <div class="step" [class.active]="step === 3">3. Confirmation</div>
   </div>
 
+  <!-- ✅ Message d'erreur global -->
+  <div *ngIf="erreurMessage" class="error-message-global">
+    {{ erreurMessage }}
+  </div>
+
+  <!-- ✅ Message de succès -->
+  <div *ngIf="showConfirmationModal && step === 3" class="success-message-global">
+    ✅ Inscription réussie ! Merci pour votre enregistrement.
+  </div>
+
   <!-- Étape 1 : Informations adulte -->
   <form *ngIf="step === 1" [formGroup]="utilisateurForm" (ngSubmit)="nextStep()" class="step-form">
     <fieldset class="form-section">
@@ -44,9 +54,17 @@
           <label>Confirmer le mot de passe *</label>
           <input formControlName="confirmPassword" type="password" required />
         </div>
+        <div>
+          <label>Rôle *</label>
+          <select formControlName="role" required>
+            <option value="">-- Choisissez un rôle --</option>
+            <option value="PARENT">Parent</option>
+            <option value="MEMBRE">Membre adulte</option>
+          </select>
+        </div>
       </div>
 
-      <div *ngIf="utilisateurForm.errors?.['passwordMismatch'] && utilisateurForm.touched" class="error-message">
+      <div *ngIf="utilisateurForm.errors?.['passwordMismatch'] && utilisateurForm.dirty" class="error-message">
         ⚠️ Les mots de passe ne correspondent pas.
       </div>
 
@@ -118,6 +136,7 @@
         <li><strong>Téléphone :</strong> {{ utilisateurForm.value.telephone }}</li>
         <li><strong>Adresse :</strong> {{ utilisateurForm.value.adresse }}</li>
         <li><strong>Date de naissance :</strong> {{ utilisateurForm.value.dateNaissance }}</li>
+        <li><strong>Rôle :</strong> {{ utilisateurForm.value.role }}</li>
       </ul>
 
       <h3>Membres :</h3>
