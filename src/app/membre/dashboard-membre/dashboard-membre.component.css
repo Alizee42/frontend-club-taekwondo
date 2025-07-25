@@ -85,7 +85,7 @@
     width: 100%;
     opacity: 0.1;
   }
-  
+
   .dashboard-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
