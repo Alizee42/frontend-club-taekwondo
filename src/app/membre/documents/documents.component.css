@@ -363,3 +363,25 @@
   font-size: 0.9rem; /* Taille de texte compacte */
 }
 
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+}
+
+.badge-payé {
+  background-color: #28a745; /* Vert */
+}
+
+.badge-en-attente {
+  background-color: #ffc107; /* Jaune */
+  color: #fff;
+}
+
+.badge-annulé {
+  background-color: #dc3545; /* Rouge */
+}

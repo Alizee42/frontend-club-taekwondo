@@ -12,17 +12,25 @@ export class ConnectedHeaderComponent {
   constructor(private router: Router) {}
 
   goToDashboard() {
-    this.router.navigate([this.role === 'admin' ? '/admin/dashboard' : '/membre/dashboard']);
+    const role = localStorage.getItem('role');
+    if (role === 'ADMIN') {
+      this.router.navigate(['/admin/dashboard-admin']);
+    } else if (role === 'MEMBRE') {
+      this.router.navigate(['/membre/dashboard-membre']);
+    } else if (role === 'PARENT') {
+      this.router.navigate(['/parent/dashboard-parent']);
+    } else {
+      this.router.navigate(['/connexion']);
+    }
   }
-
+  
   goToHome() {
     this.router.navigate(['/']);
   }
 
   goToProfil() {
-    this.router.navigate([this.role === 'admin' ? '/admin/profil' : '/membre/profil']);
+    this.router.navigate(['/profil']);
   }
-
   logout() {
     // ici tu peux ajouter un AuthService.logout()
     localStorage.clear();

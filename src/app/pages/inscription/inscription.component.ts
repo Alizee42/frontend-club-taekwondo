@@ -30,10 +30,15 @@ interface MembrePayload {
 export class InscriptionComponent implements OnInit {
   utilisateurForm!: FormGroup;
   membresForm!: FormGroup;
-  isSubmitted = false;
   step = 1;
   showConfirmationModal = false;
   erreurMessage = '';
+  loading = false;
+  togglePasswordVisibility = false;
+  toggleConfirmPasswordVisibility = false;
+  today: string = new Date().toISOString().split('T')[0];
+
+  ceinturesDisponibles = ['Blanche', 'Jaune', 'Orange', 'Verte', 'Bleue', 'Marron', 'Noire'];
 
   constructor(private fb: FormBuilder, private http: HttpClient) {}
 
@@ -42,20 +47,29 @@ export class InscriptionComponent implements OnInit {
       nom: ['', Validators.required],
       prenom: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
       dateNaissance: ['', Validators.required],
       adresse: ['', Validators.required],
       telephone: ['', Validators.required],
-      role: ['PARENT', Validators.required]
+      role: ['', Validators.required]
     }, { validators: this.matchPasswords });
 
     this.membresForm = this.fb.group({
       membres: this.fb.array([])
     });
+
+    const savedForm = localStorage.getItem('inscriptionData');
+    if (savedForm) {
+      const data = JSON.parse(savedForm);
+      this.utilisateurForm.patchValue(data.utilisateur);
+      data.membres.forEach((m: any) => this.addMembre(m));
+    }
+
+    this.utilisateurForm.valueChanges.subscribe(() => this.saveLocal());
+    this.membresForm.valueChanges.subscribe(() => this.saveLocal());
   }
 
-  /** Vérifie que password et confirmPassword sont identiques */
   matchPasswords: ValidatorFn = (group: AbstractControl): { [key: string]: boolean } | null => {
     const password = group.get('password')?.value;
     const confirm = group.get('confirmPassword')?.value;
@@ -66,19 +80,20 @@ export class InscriptionComponent implements OnInit {
     return this.membresForm.get('membres') as FormArray;
   }
 
-  addMembre(): void {
+  addMembre(values?: any): void {
     const membre = this.fb.group({
-      nom: ['', Validators.required],
-      prenom: ['', Validators.required],
-      dateNaissance: ['', Validators.required],
-      ceinture: [''],
-      numeroLicence: ['']
+      nom: [values?.nom || '', Validators.required],
+      prenom: [values?.prenom || '', Validators.required],
+      dateNaissance: [values?.dateNaissance || '', Validators.required],
+      ceinture: [values?.ceinture || ''],
+      numeroLicence: [values?.numeroLicence || '']
     });
     this.membres.push(membre);
   }
 
   removeMembre(index: number): void {
     this.membres.removeAt(index);
+    this.saveLocal();
   }
 
   nextStep(): void {
@@ -95,64 +110,96 @@ export class InscriptionComponent implements OnInit {
     this.showConfirmationModal = false;
   }
 
+  togglePassword(): void {
+    this.togglePasswordVisibility = !this.togglePasswordVisibility;
+  }
+
+  toggleConfirmPassword(): void {
+    this.toggleConfirmPasswordVisibility = !this.toggleConfirmPasswordVisibility;
+  }
+
+  isInvalid(field: string): boolean {
+    const control = this.utilisateurForm.get(field);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  redirectToLogin(): void {
+    window.location.href = '/connexion';
+  }
+
+  saveLocal(): void {
+    localStorage.setItem('inscriptionData', JSON.stringify({
+      utilisateur: this.utilisateurForm.value,
+      membres: this.membresForm.value.membres
+    }));
+  }
+
+  clearLocal(): void {
+    localStorage.removeItem('inscriptionData');
+  }
+
   onSubmit(): void {
     this.erreurMessage = '';
+    this.loading = true;
 
-    if (this.utilisateurForm.invalid) return;
-    if (this.utilisateurForm.errors?.['passwordMismatch']) {
-      this.erreurMessage = 'Les mots de passe ne correspondent pas.';
+    if (this.utilisateurForm.invalid || this.utilisateurForm.errors?.['passwordMismatch']) {
+      this.erreurMessage = 'Formulaire invalide ou mots de passe non identiques.';
+      this.loading = false;
       return;
     }
 
     const utilisateurData = { ...this.utilisateurForm.value };
     delete utilisateurData.confirmPassword;
+    utilisateurData.role = utilisateurData.role.toUpperCase();
 
-    // ✅ Convertir rôle en MAJ pour l'enum Java
-    if (utilisateurData.role) {
-      utilisateurData.role = utilisateurData.role.toUpperCase();
-    }
-
-    this.http.post('/api/utilisateurs', utilisateurData).subscribe({
+    this.http.post('/api/utilisateurs/register', utilisateurData).subscribe({
       next: (utilisateur: any) => {
         const utilisateurId = utilisateur.id;
         const membres: MembrePayload[] = this.membresForm.value.membres;
 
         if (!membres || membres.length === 0) {
-          this.step = 3;
-          this.showConfirmationModal = true;
+          this.finaliser();
           return;
         }
 
-        const requests = membres.map((m: MembrePayload) => ({
-          ...m,
-          utilisateurId
-        }));
-
         let count = 0;
+        let erreurs = 0;
+        const requests = membres.map(m => ({ ...m, utilisateurId }));
+
         for (let membre of requests) {
           this.http.post('/api/membres', membre).subscribe({
             next: () => {
               count++;
-              if (count === requests.length) {
-                this.step = 3;
-                this.showConfirmationModal = true;
-              }
+              if (count + erreurs === requests.length && erreurs === 0) this.finaliser();
+              if (count + erreurs === requests.length) this.loading = false;
             },
             error: err => {
-              console.error('Erreur membre :', err);
-              this.erreurMessage = 'Une erreur est survenue lors de l’ajout des membres.';
+              erreurs++;
+              if (err.status === 400 && err.error?.message?.includes('numéro de licence')) {
+                this.erreurMessage = `Le numéro de licence ${membre.numeroLicence} est déjà utilisé.`;
+              } else {
+                this.erreurMessage = "Erreur lors de l'ajout des membres.";
+              }
+              if (count + erreurs === requests.length) this.loading = false;
             }
           });
         }
       },
       error: err => {
-        console.error('Erreur utilisateur :', err);
-        if (err.status === 409) {
-          this.erreurMessage = 'Cet email est déjà utilisé. Veuillez en choisir un autre.';
+        this.loading = false;
+        if (err.status === 409 || err.status === 400) {
+          this.erreurMessage = err.error?.message || 'Email déjà utilisé.';
         } else {
-          this.erreurMessage = 'Une erreur est survenue lors de l’inscription.';
+          this.erreurMessage = "Erreur lors de l'inscription.";
         }
       }
     });
+  }
+
+  finaliser(): void {
+    this.loading = false;
+    this.clearLocal();
+    this.step = 3;
+    this.showConfirmationModal = true;
   }
 }

@@ -17,21 +17,21 @@
 
   <div class="documents-grid">
     <!-- 📄 Documents obligatoires -->
- <div class="required-documents">
-  <h2>Documents obligatoires</h2>
-  <p class="description">Ces documents sont nécessaires pour valider votre inscription :</p>
-  <ul>
-    <li *ngFor="let doc of requiredDocuments">
-      <span>{{ doc.label }}</span>
-      <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
-        <span [ngClass]="statusInfo.class">
-          {{ statusInfo.text }}
-          <i *ngIf="statusInfo.tooltip" class="tooltip-icon" [title]="statusInfo.tooltip">i</i>
-        </span>
-      </ng-container>
-    </li>
-  </ul>
-</div>
+    <div class="required-documents">
+      <h2>Documents obligatoires</h2>
+      <p class="description">Ces documents sont nécessaires pour valider votre inscription :</p>
+      <ul>
+        <li *ngFor="let doc of requiredDocuments">
+          <span>{{ doc.label }}</span>
+          <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
+            <span [ngClass]="statusInfo.class">
+              {{ statusInfo.text }}
+              <i *ngIf="statusInfo.tooltip" class="tooltip-icon" [title]="statusInfo.tooltip">i</i>
+            </span>
+          </ng-container>
+        </li>
+      </ul>
+    </div>
 
 
     <!-- ⬆️ Formulaire d'upload -->
@@ -76,25 +76,25 @@
             <td>{{ document.typeDocument }}</td>
             <td>{{ document.nomDocument }}</td>
             <td>
-              <span [ngClass]="getStatusClass(document.status)">
-                <i class="status-icon" [ngClass]="getStatusIcon(document.status)"></i>
+              <span class="badge" [ngClass]="{
+        'badge-payé': document.status === 'validé',
+        'badge-en-attente': document.status === 'en_attente',
+        'badge-annulé': document.status === 'refusé'
+      }">
+                {{ document.status === 'validé' ? '✔' :
+                document.status === 'en_attente' ? '⏳' : '❌' }}
                 {{ getStatusText(document.status) }}
               </span>
+
             </td>
-            <td>{{ document.dateDepot | date }}</td>
+            <td>{{ document.dateDepot | date: 'dd/MM/yyyy' }}</td>
             <td>
-              <button 
-                class="btn-action btn-edit" 
-                [disabled]="document.status === 'validé'" 
-                (click)="onEditDocument(document)"
-                title="Modifier le document" aria-label="Modifier le document">
+              <button class="btn-action btn-edit" [disabled]="document.status === 'validé'"
+                (click)="onEditDocument(document)" title="Modifier le document" aria-label="Modifier le document">
                 <i class="fas fa-edit"></i>
               </button>
-              <button 
-                class="btn-action btn-delete" 
-                [disabled]="document.status === 'validé'" 
-                (click)="onDeleteDocument(document)"
-                title="Supprimer le document" aria-label="Supprimer le document">
+              <button class="btn-action btn-delete" [disabled]="document.status === 'validé'"
+                (click)="onDeleteDocument(document)" title="Supprimer le document" aria-label="Supprimer le document">
                 <i class="fas fa-trash"></i>
               </button>
             </td>

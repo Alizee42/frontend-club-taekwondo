@@ -5,43 +5,37 @@
       Bienvenue, <span class="highlight">{{ utilisateurConnecte.prenom }} {{ utilisateurConnecte.nom }}</span> !
     </p>
   </div>
-  <p class="intro">Accédez rapidement à vos sections principales ci-dessous.</p>
+  <p class="intro">Bienvenue dans votre espace personnel. Retrouvez ici toutes vos informations utiles.</p>
 
   <div class="dashboard-grid">
-    <!-- Section Documents -->
+
+    <!-- Documents -->
     <a (click)="navigateToDocuments()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-file-alt"></i>
-      </div>
+      <div class="icon-container"><i class="fas fa-file-alt"></i></div>
       <h3>Documents</h3>
-      <p>Ajouter ou consulter vos documents (certificat médical, etc.).</p>
+      <p>Déposer ou consulter vos documents (certificat médical, etc.).</p>
     </a>
 
-    <!-- Section Paiements -->
+    <!-- Paiements -->
     <a (click)="navigateToPaiements()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-credit-card"></i>
-      </div>
+      <div class="icon-container"><i class="fas fa-credit-card"></i></div>
       <h3>Paiements</h3>
-      <p>Gérer vos paiements et consulter l'historique.</p>
+      <p>Consulter vos cotisations, échéances, et paiements en cours.</p>
     </a>
 
-    <!-- Section Store -->
-    <a (click)="navigateToStore()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-shopping-cart"></i>
-      </div>
-      <h3>Boutique</h3>
-      <p>Acheter des tenues et accessoires.</p>
+    <!-- Commandes -->
+    <a (click)="navigateToCommandes()" class="dashboard-card">
+      <div class="icon-container"><i class="fas fa-box-open"></i></div>
+      <h3>Mes commandes</h3>
+      <p>Suivre vos achats de tenues et accessoires.</p>
     </a>
 
-    <!-- Section Suivi personnel -->
-    <a (click)="navigateToSuivi()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-user"></i>
-      </div>
-      <h3>Suivi personnel</h3>
-      <p>Consulter vos informations personnelles et votre suivi.</p>
+    <!-- Événements -->
+    <a (click)="navigateToEvenements()" class="dashboard-card">
+      <div class="icon-container"><i class="fas fa-calendar-alt"></i></div>
+      <h3>Événements</h3>
+      <p>Voir vos inscriptions aux stages et événements.</p>
     </a>
+
   </div>
 </div>

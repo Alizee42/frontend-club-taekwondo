@@ -14,6 +14,7 @@
   --green-hover: #27ae60;
 }
 
+/* 🧭 Conteneur général */
 .stepper-container {
   max-width: 900px;
   margin: 2rem auto;
@@ -24,12 +25,12 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* 🧩 Indicateur d'étapes */
 .steps-indicator {
   display: flex;
   justify-content: space-between;
   margin-bottom: 2rem;
 }
-
 .step {
   flex: 1;
   text-align: center;
@@ -39,12 +40,10 @@
   color: var(--blue-dark);
   position: relative;
 }
-
 .step.active {
   border-color: var(--blue-main);
   color: var(--blue-main);
 }
-
 .step::after {
   content: "";
   position: absolute;
@@ -56,17 +55,16 @@
   border-radius: 50%;
   display: none;
 }
-
 .step.active::after {
   display: block;
 }
 
+/* 📄 Formulaire */
 .step-form fieldset {
   border: none;
   padding: 0;
   margin: 0;
 }
-
 .step-form legend {
   font-size: 1.3rem;
   font-weight: 600;
@@ -75,22 +73,19 @@
   border-left: 5px solid var(--blue-main);
   padding-left: 10px;
 }
-
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
-
 label {
   display: block;
   font-weight: 500;
   margin-bottom: 0.3rem;
   color: var(--text-main);
 }
-
-input {
+input, select {
   width: 100%;
   padding: 0.6rem;
   border: 1px solid #ccc;
@@ -99,13 +94,28 @@ input {
   background-color: white;
   box-sizing: border-box;
 }
-
-input:focus {
+input:focus, select:focus {
   border-color: var(--blue-main);
   outline: none;
   box-shadow: 0 0 0 2px rgba(30, 96, 145, 0.2);
 }
 
+/* 👁 Affichage mot de passe */
+.password-wrapper {
+  display: flex;
+}
+.password-wrapper input {
+  flex: 1;
+}
+.password-wrapper button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  font-size: 1.2rem;
+}
+
+/* 👧 Membre */
 .membre-card {
   background: var(--card-bg);
   padding: 1.2rem;
@@ -113,13 +123,13 @@ input:focus {
   box-shadow: var(--shadow);
   margin-bottom: 1.5rem;
 }
-
 .membre-card h3 {
   margin-top: 0;
   color: var(--blue-dark);
   margin-bottom: 1rem;
 }
 
+/* ✅ Boutons */
 .btn-group {
   display: flex;
   flex-wrap: wrap;
@@ -127,8 +137,9 @@ input:focus {
   justify-content: flex-end;
   margin-top: 1.5rem;
 }
-
-.btn-group button {
+.btn-group button,
+.modal-box button,
+.btn-simple {
   padding: 0.6rem 1.4rem;
   background-color: var(--blue-main);
   color: white;
@@ -138,38 +149,35 @@ input:focus {
   transition: background 0.3s ease;
   font-weight: 500;
 }
-
-.btn-group button:hover {
+.btn-group button:hover,
+.modal-box button:hover,
+.btn-simple:hover {
   background-color: var(--blue-hover);
 }
-
 .btn-group.align-right {
   justify-content: flex-end;
 }
 
+/* 🧾 Confirmation */
 .confirmation-step fieldset {
   background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 10px;
 }
-
 .confirmation-step h3 {
   margin-top: 1rem;
   color: var(--blue-dark);
 }
-
 .confirmation-step ul {
   list-style: none;
   padding-left: 0;
   margin: 0.5rem 0 1.5rem;
 }
-
 .confirmation-step li {
   margin-bottom: 0.5rem;
   padding-left: 1rem;
   position: relative;
 }
-
 .confirmation-step li::before {
   content: "✔";
   position: absolute;
@@ -177,6 +185,8 @@ input:focus {
   color: var(--green-main);
   font-size: 1rem;
 }
+
+/* 📦 Form section */
 .form-section {
   border: 2px solid var(--blue-main);
   border-radius: 8px;
@@ -184,7 +194,6 @@ input:focus {
   margin-bottom: 2rem;
   background-color: #fff;
 }
-
 .form-legend {
   font-weight: 700;
   color: var(--blue-main);
@@ -192,23 +201,9 @@ input:focus {
   font-size: 1.2rem;
   margin-bottom: 1rem;
 }
-select {
-  width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  background-color: white;
-}
 
-select:focus {
-  border-color: var(--blue-main);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(30, 96, 145, 0.2);
-}
-
-/* ✅ Messages */
-.error-message {
+/* 🔔 Messages */
+.error-message, .error-message-global {
   color: var(--red-main);
   background-color: #ffe6e6;
   padding: 0.8rem 1rem;
@@ -217,8 +212,7 @@ select:focus {
   border: 1px solid var(--red-hover);
   font-weight: 500;
 }
-
-.success-message {
+.success-message-global {
   color: var(--green-main);
   background-color: #e9f9ee;
   padding: 0.8rem 1rem;
@@ -228,32 +222,125 @@ select:focus {
   font-weight: 500;
 }
 
-/* ✅ Responsive */
+/* 🌀 Loading */
+.loading-spinner {
+  text-align: center;
+  font-weight: bold;
+  color: var(--blue-main);
+  margin-bottom: 1rem;
+}
+
+/* ✅ Modale */
+/* Ajoute ceci à ton inscription.component.css */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(30, 30, 30, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+  animation: fadeInScale 0.4s ease;
+}
+
+.modal-box h2 {
+  font-size: 24px;
+  margin-bottom: 1rem;
+  color: var(--green-main, #2ecc71);
+}
+
+.modal-box p {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.modal-box button {
+  background-color: var(--blue-main, #1e6091);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.modal-box button:hover {
+  background-color: var(--blue-hover, #283a5a);
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 2.5rem; /* espace pour l'icône */
+  box-sizing: border-box;
+}
+
+.password-wrapper i {
+  position: absolute;
+  right: 0.75rem;
+  font-size: 1.2rem;
+  color: var(--grey-def, #666);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.password-wrapper i:hover {
+  color: var(--blue-main, #1E6091);
+}
+
+
+/* 📱 Responsive */
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
   }
-
   .btn-group {
     justify-content: center;
   }
-
   .steps-indicator {
     flex-direction: column;
     gap: 0.5rem;
   }
-
   .step {
     border: none;
     border-left: 4px solid var(--card-bg);
     text-align: left;
     padding-left: 1rem;
   }
-
   .step.active {
     border-left-color: var(--blue-main);
   }
-
   .step.active::after {
     display: none;
   }
