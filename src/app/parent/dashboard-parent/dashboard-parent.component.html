@@ -1,0 +1,43 @@
+<div class="dashboard-container">
+  <!-- En-tête -->
+  <header class="dashboard-header">
+    <h1> Tableau de bord Parent</h1>
+    <div class="welcome-message">
+      Bienvenue, <span class="highlight">{{ utilisateurConnecte?.prenom }} {{ utilisateurConnecte?.nom }}</span>
+    </div>
+  </header>
+
+  <p class="intro">
+    Depuis cet espace, vous pouvez gérer les paiements de vos enfants, déposer des documents et commander des tenues.
+  </p>
+
+  <!-- Cartes de navigation -->
+  <section class="dashboard-grid">
+    <!-- Paiements -->
+    <article class="dashboard-card" (click)="navigateToPaiements()" aria-label="Accéder à Mes Paiements">
+      <div class="icon-container">
+        <i class="ri-wallet-3-line" aria-hidden="true"></i>
+      </div>
+      <h3>Mes Paiements</h3>
+      <p>Consultez et gérez les paiements de vos enfants.</p>
+    </article>
+
+    <!-- Documents -->
+    <article class="dashboard-card" (click)="navigateToDocuments()" aria-label="Accéder à Documents">
+      <div class="icon-container">
+        <i class="ri-folder-upload-line" aria-hidden="true"></i>
+      </div>
+      <h3>Documents</h3>
+      <p>Déposez les documents nécessaires pour vos enfants.</p>
+    </article>
+
+    <!-- Commandes -->
+    <article class="dashboard-card" (click)="navigateToCommandes()" aria-label="Accéder à Boutique">
+      <div class="icon-container">
+        <i class="ri-shopping-bag-line" aria-hidden="true"></i>
+      </div>
+      <h3>Boutique</h3>
+      <p>Commandez les tenues de Taekwondo pour vos enfants.</p>
+    </article>
+  </section>
+</div>

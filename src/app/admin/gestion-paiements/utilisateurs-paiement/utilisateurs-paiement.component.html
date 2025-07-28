@@ -1,133 +1,133 @@
 <div class="header-section">
   <h2 class="page-title"><i class="ri-user-3-line"></i> Liste des Membres</h2>
   <input
-      type="text"
-      placeholder="Rechercher un membre..."
-      [(ngModel)]="searchTerm"
-      (input)="filtrerUtilisateurs()"
-    />
+    type="text"
+    placeholder="Rechercher un membre..."
+    [(ngModel)]="searchTerm"
+    (input)="filtrerUtilisateurs()"
+  />
+</div>
+
+<table class="user-table">
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Email</th>
+      <th>Statut paiement</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let utilisateur of utilisateursFiltres">
+      <td>{{ utilisateur.nom }} {{ utilisateur.prenom }}</td>
+      <td>{{ utilisateur.email }}</td>
+      <td>
+        <span class="badge"
+          [ngClass]="{
+            'badge-success': getStatutPaiement(utilisateur) === 'à jour',
+            'badge-warning': getStatutPaiement(utilisateur) === 'en attente',
+            'badge-danger': getStatutPaiement(utilisateur) === 'en retard',
+            'badge-secondary': getStatutPaiement(utilisateur) === 'inconnu',
+            'badge-dark': getStatutPaiement(utilisateur) === 'annulé'
+          }"
+        >
+          {{ getStatutPaiement(utilisateur) }}
+        </span>
+      </td>
+      <td>
+        <button class="btn-icon btn-stats" (click)="voirStats(utilisateur)" title="Voir les statistiques">
+          <i class="ri-bar-chart-line"></i>
+        </button>
+        <button class="btn-icon btn-echeances" (click)="voirEcheances(utilisateur)" title="Voir les échéances">
+          <i class="ri-calendar-event-line"></i>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 📊 Modale Statistiques -->
+<div class="modal" *ngIf="modalStatsVisible">
+  <div class="modal-content">
+    <span class="close" (click)="fermerModale()">&times;</span>
+    <h3 class="modal-title">📊 Statistiques de {{ utilisateurSelectionne?.prenom }} {{ utilisateurSelectionne?.nom }}</h3>
+
+    <table class="modal-table" *ngIf="utilisateurSelectionne?.paiements?.length">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Date</th>
+          <th>Montant</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of utilisateurSelectionne.paiements">
+          <td>{{ p.type }}</td>
+          <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
+          <td>{{ p.montantTotal | currency:'EUR' }}</td>
+          <td>
+            <span class="badge"
+              [ngClass]="{
+                'badge-success': p.statut === 'payé',
+                'badge-warning': p.statut === 'en attente',
+                'badge-danger': p.statut === 'en retard'
+              }"
+            >
+              {{ p.statut }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!utilisateurSelectionne?.paiements?.length" class="empty-message">
+      Aucun paiement enregistré.
+    </div>
   </div>
-  
-  <table class="user-table">
-    <thead>
-      <tr>
-        <th>Nom</th>
-        <th>Email</th>
-        <th>Statut paiement</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let utilisateur of utilisateursFiltres">
-        <td>{{ utilisateur.nom }} {{ utilisateur.prenom }}</td>
-        <td>{{ utilisateur.email }}</td>
-        <td>
-          <span class="badge"
-            [ngClass]="{
-              'badge-success': getStatutPaiement(utilisateur) === 'à jour',
-              'badge-warning': getStatutPaiement(utilisateur) === 'en attente',
-              'badge-danger': getStatutPaiement(utilisateur) === 'en retard',
-              'badge-secondary': getStatutPaiement(utilisateur) === 'inconnu',
-              'badge-dark': getStatutPaiement(utilisateur) === 'annulé'
-            }">
-            {{ getStatutPaiement(utilisateur) }}
-          </span>
-        </td>
-               <td>
-          <button class="btn-icon btn-stats" (click)="voirStats(utilisateur)" title="Voir les statistiques">
-            <i class="ri-bar-chart-line"></i>
-          </button>
-          <button class="btn-icon btn-echeances" (click)="voirEcheances(utilisateur)" title="Voir les échéances">
-            <i class="ri-calendar-event-line"></i>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-    
-  <!-- 🔸 Modale Statistiques -->
-  <div class="modal" *ngIf="modalStatsVisible">
-    <div class="modal-content">
-      <span class="close" (click)="fermerModale()">&times;</span>
-      <h3 class="modal-title">📊 Statistiques de {{ utilisateurSelectionne?.prenom }} {{ utilisateurSelectionne?.nom }}</h3>
-  
-      <table class="modal-table" *ngIf="utilisateurSelectionne?.paiements?.length">
+</div>
+
+<!-- 📅 Modale Échéances -->
+<div class="modal" *ngIf="modalEcheancesVisible">
+  <div class="modal-content">
+    <span class="close" (click)="fermerModale()">&times;</span>
+    <h3 class="modal-title">📅 Échéances de {{ utilisateurSelectionne?.prenom }} {{ utilisateurSelectionne?.nom }}</h3>
+
+    <div *ngFor="let p of utilisateurSelectionne?.paiements" class="paiement-block">
+      <h4>{{ p.type }} – {{ p.modePaiement }}</h4>
+
+      <table class="modal-table" *ngIf="p.echeances?.length">
         <thead>
           <tr>
-            <th>Type</th>
+            <th>Numéro</th>
             <th>Date</th>
             <th>Montant</th>
             <th>Statut</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of utilisateurSelectionne.paiements">
-            <td>{{ p.type }}</td>
-            <td>{{ p.datePaiement || 'Non précisée' }}</td>
-            <td>{{ p.montantTotal | currency:'EUR' }}</td>
+          <tr *ngFor="let e of p.echeances.slice().reverse()">
+            <td>#{{ e.numero }}</td>
+            <td>{{ e.dateEcheance }}</td>
+            <td>{{ e.montant | currency:'EUR' }}</td>
             <td>
               <span class="badge"
                 [ngClass]="{
-                  'badge-success': p.statut === 'payé',
-                  'badge-warning': p.statut === 'en attente',
-                  'badge-danger': p.statut === 'en retard'
+                  'badge-success': e.statut === 'payé',
+                  'badge-warning': e.statut === 'en attente',
+                  'badge-danger': e.statut === 'en retard'
                 }"
               >
-                {{ p.statut }}
+                {{ e.statut }}
               </span>
             </td>
           </tr>
         </tbody>
       </table>
-  
-      <div *ngIf="!utilisateurSelectionne?.paiements?.length" class="empty-message">
-        Aucun paiement enregistré.
-      </div>
+
+      <div *ngIf="!p.echeances?.length" class="empty-message">Aucune échéance.</div>
     </div>
+
+    <div *ngIf="!utilisateurSelectionne?.paiements?.length" class="empty-message">Aucun paiement.</div>
   </div>
-  
-  <!-- 🔸 Modale Échéances -->
-  <div class="modal" *ngIf="modalEcheancesVisible">
-    <div class="modal-content">
-      <span class="close" (click)="fermerModale()">&times;</span>
-      <h3 class="modal-title">📅 Échéances de {{ utilisateurSelectionne?.prenom }} {{ utilisateurSelectionne?.nom }}</h3>
-  
-      <div *ngFor="let p of utilisateurSelectionne?.paiements" class="paiement-block">
-        <h4>{{ p.type }} – {{ p.modePaiement }}</h4>
-  
-        <table class="modal-table" *ngIf="p.echeances?.length">
-          <thead>
-            <tr>
-              <th>Numéro</th>
-              <th>Date</th>
-              <th>Montant</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let e of p.echeances">
-              <td>#{{ e.numero }}</td>
-              <td>{{ e.dateEcheance }}</td>
-              <td>{{ e.montant | currency:'EUR' }}</td>
-              <td>
-                <span class="badge"
-                  [ngClass]="{
-                    'badge-success': e.statut === 'payé',
-                    'badge-warning': e.statut === 'en attente',
-                    'badge-danger': e.statut === 'en retard'
-                  }"
-                >
-                  {{ e.statut }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-  
-        <div *ngIf="!p.echeances?.length" class="empty-message">Aucune échéance.</div>
-      </div>
-  
-      <div *ngIf="!utilisateurSelectionne?.paiements?.length" class="empty-message">Aucun paiement.</div>
-    </div>
-  </div>
-  
+</div>

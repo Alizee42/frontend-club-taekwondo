@@ -134,6 +134,8 @@ export class HeaderComponent implements OnInit {
       this.router.navigate(['/admin/dashboard-admin']);
     } else if (role === 'membre') {
       this.router.navigate(['/membre/dashboard-membre']);
+    } else if (role === 'parent') {
+      this.router.navigate(['/parent/dashboard-parent']);
     } else {
       console.error('Rôle inconnu ou non défini.');
       alert('Votre rôle est inconnu. Veuillez contacter l’administrateur.');

@@ -1,224 +1,234 @@
 :root {
-    --blue-main: #4A90E2;
-    --blue-hover: #357ABD;
-    --blue-dark: #2C3E50;
-    --background-light: #ffffff;
-    --text-dark: #333;
-    --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-  
-  .header-section h2 {
-    font-size: 24px;
-    color: var(--blue-dark);
-  }
-  
-  .header-section input {
-    padding: 8px 12px;
-    border: 1px solid var(--blue-main);
-    border-radius: 8px;
-    font-size: 14px;
-    width: 250px;
-    outline: none;
-    background-color: #fff;
-  }
-  
-  .user-table {
-    width: 100%;
-    border-collapse: collapse;
-    box-shadow: var(--shadow);
-    background-color: var(--background-light);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  
-  .user-table th {
-    background-color: var(--blue-main);
-    color: white;
-    padding: 12px 16px;
-    text-align: left;
-    font-weight: 600;
-  }
-  
-  .user-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .user-table tr:hover {
-    background-color: #f0f6fc;
-  }
-  
-  .user-table button {
-    background-color: var(--blue-main);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    margin-right: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .user-table button:hover {
-    background-color: var(--blue-hover);
-  }
-  
-  /* 🔹 Badges */
-  .badge {
-    padding: 5px 10px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    text-transform: capitalize;
-    font-weight: bold;
-    display: inline-block;
-  }
-  
-  .badge-success {
-    background-color: #28a745; /* vert plus foncé */
-    color: white;
-  }
-  
-  .badge-warning {
-    background-color: #ffb60a; /* jaune doré plus vif */
-    color: white;
-  }
-  
-  .badge-danger {
-    background-color: #dc3545; /* rouge vif */
-    color: white;
-  }
-  
-  .badge-secondary {
-    background-color: #6c757d; /* gris foncé */
-    color: white;
-  }
-  .badge-dark {
-    background-color: #bb2a2a;
-    color: white;
-  }
-  
-  
-  /* 🔹 Modale */
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.45);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80%;
-    overflow-y: auto;
-    box-shadow: var(--shadow);
-    position: relative;
-  }
-  .modal-title {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-    color: var(--blue-main);
-  }
-  .modal-content h4 {
-    margin-top: 24px;
-    margin-bottom: 12px;
-    font-size: 18px;
-    color: var(--blue-main); /* ou ajuste selon ta palette */
-  }
-  
-  .modal-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1.5rem;
-  }
-  
-  .modal-table th,
-  .modal-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-    font-size: 14px;
-  }
-  
-  .modal-table th {
-    background-color: var(--blue-main);
-    color: white;
-    font-weight: 600;
-  }
-  
-  .modal-table tr:hover {
-    background-color: #f4f7fb;
-  }
-  
-  .paiement-block {
-    margin-bottom: 2rem;
-  }
-  
-  .empty-message {
-    font-style: italic;
-    color: #999;
-    padding: 10px 0;
-  }
-  
-  .close {
-    position: absolute;
-    top: 12px;
-    right: 20px;
-    font-size: 28px;
-    cursor: pointer;
-    color: var(--blue-dark);
-  }
-    /* === Boutons d'action === */
-  .btn-icon {
-    background-color: var(--blue-main);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px;
-    font-size: 16px;
-    margin: 0 2px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .btn-icon:hover {
-    background-color: var(--blue-hover);
-    transform: scale(1.1); /* Ajout d'un effet de zoom au survol */
-  }
-  
-  /* Boutons spécifiques */
-  .btn-stats {
-    background-color: var(--blue-main);
-  }
-  
-  .btn-stats:hover {
-    background-color: var(--blue-hover);
-  }
-  
-  .btn-echeances {
-    background-color: var(--accent-hover); /* Doré clair */
-  }
-  
-  .btn-echeances:hover {
-    background-color: #d4a436; /* Variante hover */
-  }
+  --blue-main: #4A90E2;
+  --blue-hover: #357ABD;
+  --blue-dark: #2C3E50;
+  --accent-hover: #f0b429;
+  --accent-hover-dark: #d4a436;
+  --background-light: #ffffff;
+  --text-dark: #333;
+  --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-section h2 {
+  font-size: 24px;
+  color: var(--blue-dark);
+  margin: 0;
+}
+
+.header-section input {
+  padding: 8px 12px;
+  border: 1px solid var(--blue-main);
+  border-radius: 8px;
+  font-size: 14px;
+  width: 250px;
+  outline: none;
+  background-color: #fff;
+}
+
+/* 🧾 Tableau utilisateurs */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: var(--shadow);
+  background-color: var(--background-light);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.user-table th {
+  background-color: var(--blue-main);
+  color: white;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.user-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.user-table tr:hover {
+  background-color: #f0f6fc;
+}
+
+.user-table button {
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-right: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.user-table button:hover {
+  background-color: var(--blue-hover);
+}
+
+/* 🔹 Badges */
+.badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-warning {
+  background-color: #ffb60a;
+  color: white;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.badge-dark {
+  background-color: #bb2a2a;
+  color: white;
+}
+
+/* 🔹 Modale */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 85%;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: var(--blue-main);
+}
+
+.modal-content h4 {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: var(--blue-main);
+}
+
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.modal-table th,
+.modal-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  font-size: 14px;
+}
+
+.modal-table th {
+  background-color: var(--blue-main);
+  color: white;
+  font-weight: 600;
+}
+
+.modal-table tr:hover {
+  background-color: #f4f7fb;
+}
+
+.paiement-block {
+  margin-bottom: 2rem;
+}
+
+.empty-message {
+  font-style: italic;
+  color: #999;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--blue-dark);
+}
+
+/* === Boutons d'action === */
+.btn-icon {
+  background-color: var(--blue-main);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 16px;
+  margin: 0 2px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background-color: var(--blue-hover);
+  transform: scale(1.1);
+}
+
+/* Spécifiques */
+.btn-stats {
+  background-color: var(--blue-main);
+}
+
+.btn-stats:hover {
+  background-color: var(--blue-hover);
+}
+
+.btn-echeances {
+  background-color: var(--accent-hover);
+}
+
+.btn-echeances:hover {
+  background-color: var(--accent-hover-dark);
+}

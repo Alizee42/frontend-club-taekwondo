@@ -24,6 +24,9 @@ import { GestionCommandeComponent } from './admin/gestion-commande/gestion-comma
 import { EvenementsComponent } from './pages/evenements/evenements.component';
 import { GestionEvenementsComponent } from './admin/gestion-evenements/gestion-evenements.component';
 import { GestionInscriptionsComponent } from './admin/gestion-inscriptions/gestion-inscriptions.component';
+import { DashboardParentComponent } from './parent/dashboard-parent/dashboard-parent.component';
+import { ConnectedLayoutComponent } from './shared/layouts/connected-layout/connected-layout.component';
+import { PaiementParentComponent } from './parent/paiement-parent/paiement-parent.component';
 
 export const routes: Routes = [
   // 🌐 Routes publiques
@@ -45,7 +48,7 @@ export const routes: Routes = [
   // 🔐 Espace Admin
   {
     path: 'admin',
-    component: AdminLayoutComponent,
+    component: ConnectedLayoutComponent,
     canActivateChild: [AuthGuard],
     data: { role: 'ADMIN' },
     children: [
@@ -66,7 +69,7 @@ export const routes: Routes = [
   // 👤 Espace Membre
   {
     path: 'membre',
-    component: MembreLayoutComponent,
+    component: ConnectedLayoutComponent,
     canActivateChild: [AuthGuard],
     data: { role: 'MEMBRE' },
     children: [
@@ -79,11 +82,12 @@ export const routes: Routes = [
   // 👤 Espace Parent
   {
     path: 'parent',
-    component: MembreLayoutComponent,
+    component: ConnectedLayoutComponent,
     canActivateChild: [AuthGuard],
     data: { role: 'PARENT' },
     children: [
-      { path: 'dashboard-parent', component: DashboardMembreComponent }
+      { path: 'dashboard-parent', component: DashboardParentComponent },
+      { path: 'paiements', component: PaiementParentComponent } // au lieu de PaiementComponent
     ]
   },
 

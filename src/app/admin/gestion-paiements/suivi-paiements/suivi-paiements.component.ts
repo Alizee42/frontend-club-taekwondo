@@ -27,7 +27,7 @@ export class SuiviPaiementsComponent implements OnInit {
   modalOuverte = false;
   modalAnnulationVisible = false;
   modalEcheancesVisible = false;
-  modalFiltresVisible = false; // Ajout de la propriété manquante
+  modalFiltresVisible = false;
 
   paiementActuel: any = null;
   paiementEnAnnulation: any = null;
@@ -50,14 +50,14 @@ export class SuiviPaiementsComponent implements OnInit {
   ngOnInit(): void {
     this.chargerPaiements();
   }
-// Ajout des méthodes manquantes
-ouvrirModalFiltres(): void {
-  this.modalFiltresVisible = true;
-}
 
-fermerModalFiltres(): void {
-  this.modalFiltresVisible = false;
-}
+  ouvrirModalFiltres(): void {
+    this.modalFiltresVisible = true;
+  }
+
+  fermerModalFiltres(): void {
+    this.modalFiltresVisible = false;
+  }
 
   redirigerVersAjoutPaiement(): void {
     this.changementVue.emit('ajouter-paiement');
@@ -83,21 +83,12 @@ fermerModalFiltres(): void {
   }
 
   calculPourcentage(paiement: any): number {
-    if (!paiement || typeof paiement.montantTotal !== 'number' || paiement.montantTotal <= 0) return 0;
+    if (!paiement?.montantTotal || paiement.montantTotal <= 0) return 0;
+    return Math.round((paiement.montantPaye / paiement.montantTotal) * 100);
+  }
 
-    let montantPaye = 0;
-
-    if (paiement.modePaiement === 'échéances' && Array.isArray(paiement.echeances)) {
-      montantPaye = paiement.echeances
-        .filter((e: any) => e.statut === 'payé')
-        .reduce((sum: number, e: any) => sum + e.montant, 0);
-    } else {
-      const restant = typeof paiement.montantRestant === 'number' ? paiement.montantRestant : paiement.montantTotal;
-      montantPaye = paiement.montantTotal - restant;
-    }
-
-    const pourcentage = (montantPaye / paiement.montantTotal) * 100;
-    return Math.round(pourcentage);
+  getMontantPaye(paiement: any): number {
+    return paiement?.montantPaye || 0;
   }
 
   ouvrirModalStatut(paiement: any): void {
@@ -131,9 +122,7 @@ fermerModalFiltres(): void {
 
     this.http.post(`/api/paiements/${id}/${endpoint}`, {}).subscribe(() => {
       this.paiementActuel.statut = this.nouveauStatut;
-      if (this.nouveauStatut === 'payé') {
-        this.paiementActuel.montantRestant = 0;
-      }
+      this.paiementActuel.montantRestant = 0;
       this.modalStatutVisible = false;
       this.filtrerPaiements();
     });
@@ -185,7 +174,7 @@ fermerModalFiltres(): void {
           this.paiements = this.paiements.filter(p => p.id !== id);
           this.filtrerPaiements();
         },
-        error: (err) => {
+        error: () => {
           alert("La suppression du paiement a échoué.");
         }
       });
@@ -250,26 +239,26 @@ fermerModalFiltres(): void {
   }
 
   enregistrerPaiementManuel(): void {
-    const paiement = this.paiementManuel;
+    const p = this.paiementManuel;
 
-    if (!paiement.utilisateurNom || !paiement.utilisateurPrenom || !paiement.datePaiement) {
+    if (!p.utilisateurNom || !p.utilisateurPrenom || !p.datePaiement) {
       alert("Veuillez remplir tous les champs obligatoires.");
       return;
     }
 
-    const dto: any = {
-      utilisateurNom: paiement.utilisateurNom,
-      utilisateurPrenom: paiement.utilisateurPrenom,
-      utilisateurEmail: paiement.utilisateurEmail || null,
-      type: paiement.type,
-      montantTotal: paiement.montantTotal,
-      modePaiement: paiement.modePaiement,
-      datePaiement: paiement.datePaiement,
-      statut: paiement.modePaiement === 'échéances' ? 'en attente' : 'payé',
-      echeances: paiement.modePaiement === 'échéances' ? paiement.echeances : []
+    const dto = {
+      utilisateurNom: p.utilisateurNom,
+      utilisateurPrenom: p.utilisateurPrenom,
+      utilisateurEmail: p.utilisateurEmail || null,
+      type: p.type,
+      montantTotal: p.montantTotal,
+      modePaiement: p.modePaiement,
+      datePaiement: p.datePaiement,
+      statut: p.modePaiement === 'échéances' ? 'en attente' : 'payé',
+      echeances: p.modePaiement === 'échéances' ? p.echeances : []
     };
 
-    if (paiement.modePaiement === 'échéances') {
+    if (p.modePaiement === 'échéances') {
       const totalEcheances = dto.echeances.reduce((s: number, e: any) => s + (e.montant || 0), 0);
       if (totalEcheances !== dto.montantTotal) {
         alert("La somme des échéances doit être égale au montant total.");
@@ -277,7 +266,7 @@ fermerModalFiltres(): void {
       }
     }
 
-    const endpoint = paiement.modePaiement === 'échéances'
+    const endpoint = p.modePaiement === 'échéances'
       ? '/api/paiements/ajouter-complet'
       : '/api/paiements/ajouter-manuel';
 
@@ -291,19 +280,5 @@ fermerModalFiltres(): void {
         alert("Erreur lors de l'ajout : " + (err.error?.message || err.message));
       }
     });
-  }
-
-  getMontantPaye(paiement: any): number {
-    if (!paiement) return 0;
-
-    if (paiement.modePaiement === 'échéances' && Array.isArray(paiement.echeances)) {
-      return paiement.echeances
-        .filter((e: any) => e.statut === 'payé')
-        .reduce((sum: number, e: any) => sum + (e.montant || 0), 0);
-    }
-
-    return typeof paiement.montantRestant === 'number'
-      ? paiement.montantTotal - paiement.montantRestant
-      : paiement.montantTotal;
   }
 }

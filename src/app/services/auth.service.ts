@@ -5,8 +5,9 @@ import { Observable } from 'rxjs';
 interface Utilisateur {
   id: number;
   nom: string;
+  prenom?: string;
   email?: string;
-  role?: string; // Rôle unique en String
+  role?: string; // Rôle unique (ex : "MEMBRE", "PARENT", "ADMIN")
   [key: string]: any;
 }
 
@@ -18,32 +19,37 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  // Inscription
+  // 👉 Inscription
   register(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
 
-  // Connexion
+  // 👉 Connexion
   login(credentials: { email: string; password: string }): Observable<any> {
     return new Observable((observer) => {
       this.http.post(`${this.apiUrl}/login`, credentials).subscribe({
         next: (response: any) => {
           console.log('✅ Réponse du backend :', response);
 
-          // Nettoyage
+          // 🔐 Nettoyage de l'ancien stockage
           localStorage.clear();
 
-          // Stockage
+          // ✅ Stockage du token
           if (response.token) {
             localStorage.setItem('token', response.token);
           }
 
+          // ✅ Stockage du rôle
           if (response.role) {
-            localStorage.setItem('role', response.role); // Rôle unique
+            localStorage.setItem('role', response.role);
           }
 
+          // ✅ Stockage de l'utilisateur complet
           if (response.utilisateur) {
             localStorage.setItem('utilisateur', JSON.stringify(response.utilisateur));
+            if (response.utilisateur.id) {
+              localStorage.setItem('utilisateurId', response.utilisateur.id.toString());
+            }
           }
 
           observer.next(response);
@@ -57,37 +63,44 @@ export class AuthService {
     });
   }
 
-  // Déconnexion
+  // 👉 Déconnexion
   logout(): void {
     localStorage.clear();
   }
 
-  // Vérifie si connecté
+  // 👉 Vérifie si un token est présent
   isConnecte(): boolean {
     return !!localStorage.getItem('token');
   }
 
-  // Récupère l'utilisateur connecté
+  // 👉 Récupère le token JWT
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  // 👉 Récupère l'utilisateur connecté
   getUtilisateurConnecte(): Utilisateur | null {
     const user = localStorage.getItem('utilisateur');
     return user ? JSON.parse(user) : null;
   }
 
-  // Récupère le token
-  getToken(): string | null {
-    return localStorage.getItem('token');
+  // 👉 Récupère l'id utilisateur
+  getUtilisateurId(): number | null {
+    const id = localStorage.getItem('utilisateurId');
+    return id ? parseInt(id, 10) : null;
   }
 
-  // Récupère le rôle
+  // 👉 Récupère le rôle
   getRole(): string | null {
     return localStorage.getItem('role');
   }
 
-  // Vérifie si le rôle est égal
+  // 👉 Vérifie un rôle
   hasRole(role: string): boolean {
     return this.getRole() === role;
   }
 
+  // 👉 Rôles spécifiques
   isAdmin(): boolean {
     return this.hasRole('ADMIN');
   }

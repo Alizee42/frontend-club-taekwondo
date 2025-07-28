@@ -7,12 +7,12 @@ import { Router } from '@angular/router';
   styleUrls: ['./connected-header.component.css']
 })
 export class ConnectedHeaderComponent {
-  @Input() role: 'admin' | 'membre' = 'membre';
+  @Input() role: 'admin' | 'membre' | 'parent' = 'membre';
 
   constructor(private router: Router) {}
 
-  goToDashboard() {
-    const role = localStorage.getItem('role');
+  goToDashboard(): void {
+    const role = localStorage.getItem('role')?.toUpperCase();
     if (role === 'ADMIN') {
       this.router.navigate(['/admin/dashboard-admin']);
     } else if (role === 'MEMBRE') {
@@ -23,6 +23,7 @@ export class ConnectedHeaderComponent {
       this.router.navigate(['/connexion']);
     }
   }
+  
   
   goToHome() {
     this.router.navigate(['/']);

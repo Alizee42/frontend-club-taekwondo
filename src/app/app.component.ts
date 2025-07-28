@@ -23,10 +23,9 @@ import { ParametresPaiementService } from './services/parametres-paiement.servic
 })
 export class AppComponent implements OnInit {
   isLoggedIn = false;
-  userRole: 'admin' | 'membre' | null = null;
-  connectedRole: 'admin' | 'membre' = 'membre';
-
-  isConnectedRoute = false; // ✅ Nouvelle variable unifiée
+  userRole: 'admin' | 'membre' | 'parent' | null = null;
+  connectedRole: 'admin' | 'membre' | 'parent' = 'membre'; // par défaut
+  isConnectedRoute = false;
 
   constructor(
     private router: Router,
@@ -35,27 +34,37 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     // Vérifie la connexion
-    this.isLoggedIn = !!localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    this.userRole = role === 'admin' || role === 'membre' ? role : null;
-    if (this.userRole) {
-      this.connectedRole = this.userRole;
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role')?.toLowerCase();
+
+    this.isLoggedIn = !!token;
+
+    if (role === 'admin' || role === 'membre' || role === 'parent') {
+      this.userRole = role;
+      this.connectedRole = role;
     }
 
     // Charge les paramètres globaux
     this.parametresService.chargerParametres();
 
-    // Détecte les routes connectées (admin, membre ou profil)
+    // Gère les routes connectées
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         const url = event.urlAfterRedirects;
-        this.isConnectedRoute = 
-          url.includes('/admin') || url.includes('/membre') || url.includes('/profil');
+
+        this.isConnectedRoute = [
+          '/admin',
+          '/membre',
+          '/parent',
+          '/profil'
+        ].some(segment => url.includes(segment));
 
         if (url.includes('/admin')) {
           this.connectedRole = 'admin';
         } else if (url.includes('/membre')) {
           this.connectedRole = 'membre';
+        } else if (url.includes('/parent')) {
+          this.connectedRole = 'parent';
         }
       }
     });
@@ -64,6 +73,8 @@ export class AppComponent implements OnInit {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('email');
+    localStorage.removeItem('utilisateur');
     this.isLoggedIn = false;
     this.router.navigate(['/connexion']);
   }

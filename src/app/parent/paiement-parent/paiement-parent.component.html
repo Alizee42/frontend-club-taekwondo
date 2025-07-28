@@ -1,0 +1,53 @@
+<div class="paiement-container">
+    <div class="progress-bar">
+      <div [class.active]="step === 1">1. Sélection</div>
+      <div [class.active]="step === 2">2. Mode</div>
+      <div [class.active]="step === 3">3. Paiement</div>
+      <div [class.active]="step === 4">4. Confirmation</div>
+    </div>
+  
+    <!-- Étape 1 : Choix du membre -->
+    <div *ngIf="step === 1" class="step">
+      <h2>Quel enfant souhaitez-vous payer ?</h2>
+      <div class="paiement-card-container">
+        <div class="paiement-card" *ngFor="let membre of membres" (click)="selectMembre(membre)">
+          <h4>{{ membre.prenom }} {{ membre.nom }}</h4>
+          <p>Cliquez pour choisir ce membre</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Étape 2 : Mode de paiement -->
+    <div *ngIf="step === 2" class="step">
+      <h2>Choisissez le mode de paiement</h2>
+      <div class="choix-cartes">
+        <div class="carte-option" (click)="nextStep()">
+          <h3>Paiement en une fois</h3>
+          <p>Réglez l'intégralité maintenant</p>
+        </div>
+        <div class="carte-option" (click)="nextStep()">
+          <h3>Paiement en plusieurs fois</h3>
+          <p>Divisez le montant selon les conditions</p>
+        </div>
+      </div>
+      <button class="btn-prev" (click)="prevStep()">Retour</button>
+    </div>
+  
+    <!-- Étape 3 : Stripe -->
+    <div *ngIf="step === 3" class="step">
+      <h2>Paiement sécurisé</h2>
+      <div class="card-element">[Zone Stripe]</div>
+      <div class="btn-group">
+        <button class="btn-prev" (click)="prevStep()">Retour</button>
+        <button class="btn-payer" (click)="payerCotisation()">Payer</button>
+      </div>
+    </div>
+  
+    <!-- Étape 4 : Confirmation -->
+    <div *ngIf="step === 4" class="step confirmation">
+      <i class="ri-check-double-line confirmation-icon"></i>
+      <h2>Paiement effectué avec succès</h2>
+      <p>Merci pour votre paiement !</p>
+    </div>
+  </div>
+  

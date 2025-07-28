@@ -1,16 +1,15 @@
-<!-- Header (affiché uniquement en dehors des routes connectées) -->
+<!-- Header affiché uniquement sur les pages publiques -->
 <ng-container *ngIf="!isConnectedRoute; else connectedHeader">
-    <app-header></app-header>
-  </ng-container>
-  
-  <!-- Header connecté (admin, membre ou profil) -->
-  <ng-template #connectedHeader>
-    <app-connected-header [role]="connectedRole"></app-connected-header>
-  </ng-template>
-  
-  <!-- Contenu des routes -->
-  <router-outlet></router-outlet>
-  
-  <!-- Footer (uniquement pour les pages publiques) -->
-  <app-footer *ngIf="!isConnectedRoute"></app-footer>
-  
+  <app-header></app-header>
+</ng-container>
+
+<!-- Header connecté (admin, membre, parent, profil) -->
+<ng-template #connectedHeader>
+  <app-connected-header [role]="connectedRole"></app-connected-header>
+</ng-template>
+
+<!-- Contenu principal -->
+<router-outlet></router-outlet>
+
+<!-- Footer affiché uniquement sur les pages publiques -->
+<app-footer *ngIf="!isConnectedRoute"></app-footer>
