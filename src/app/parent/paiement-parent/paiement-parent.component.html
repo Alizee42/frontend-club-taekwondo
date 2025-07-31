@@ -17,15 +17,20 @@
       </div>
 
       <!-- Étape 1 : Choix des enfants -->
-      <section *ngIf="step === 1" class="step">
+           <section *ngIf="step === 1" class="step">
         <h2>Choisissez pour qui vous payez</h2>
         <div class="paiement-card-container">
-          <div class="paiement-card" *ngFor="let membre of membres" (click)="selectMembre(membre)">
+          <div
+            class="paiement-card"
+            *ngFor="let membre of membres"
+            [class.active]="enfantSelectionne === membre.id"
+            (click)="selectMembre(membre)"
+          >
             <h4>{{ membre.prenom }} {{ membre.nom }}</h4>
             <p>Cliquez pour choisir ce membre</p>
           </div>
         </div>
-        <button class="btn-next" [disabled]="!enfantSelectionne" (click)="nextStep()">Suivant</button>
+        <button class="btn-next" [disabled]="enfantSelectionne === null" (click)="nextStep()">Suivant</button>
       </section>
 
       <!-- Étape 2 : Choix du mode de paiement -->

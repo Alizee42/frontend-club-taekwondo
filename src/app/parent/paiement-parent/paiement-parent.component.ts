@@ -60,13 +60,14 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     // Charger les paramètres de paiement
-    this.parametresService.parametres$.subscribe((parametres) => {
-      if (parametres) {
-        this.montantInitial = parametres.montantCotisation;
-        this.echeancesOptions = Array.from({ length: parametres.echeancesAutorisees }, (_, i) => i + 1);
-      }
-      this.loadMembresEnfants();
-    });
+   this.parametresService.parametres$.subscribe((parametres) => {
+    if (parametres) {
+      this.montantInitial = parametres.montantCotisation;
+      this.echeancesOptions = Array.from({ length: parametres.echeancesAutorisees }, (_, i) => i + 1);
+      this.nombreEcheances = parametres.echeancesAutorisees; // Correction : initialise le nombre d'échéances
+    }
+    this.loadMembresEnfants();
+  });
 
     // Charger les paiements
     this.loadPaiements();
@@ -75,13 +76,26 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {}
 
   // Charger les membres enfants
-  loadMembresEnfants(): void {
-    // Simule le chargement des membres enfants
-    this.membres = [
-      { id: 1, nom: 'Dupont', prenom: 'Jean' },
-      { id: 2, nom: 'Martin', prenom: 'Claire' }
-    ];
+loadMembresEnfants(): void {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    this.membres = [];
+    return;
   }
+
+  this.http.get<{ id: number; nom: string; prenom: string }[]>(
+    'http://localhost:8080/api/membres/mes-enfants',
+    { headers: { Authorization: `Bearer ${token}` } }
+  ).subscribe({
+    next: (data) => {
+      this.membres = data;
+    },
+    error: (err) => {
+      console.error('Erreur chargement enfants', err);
+      this.membres = [];
+    }
+  });
+}
 
   // Étapes
   nextStep(): void {

@@ -87,11 +87,28 @@ export class ConnexionComponent {
       if (utilisateur.email) {
         localStorage.setItem('email', utilisateur.email);
       }
+      // Ajout récupération du membreId
+      if (utilisateur.id) {
+        this.http.get<any>('http://localhost:8080/api/membres/by-user/' + utilisateur.id)
+          .subscribe({
+            next: (membre) => {
+              if (membre && membre.id) {
+                localStorage.setItem('membreId', membre.id.toString());
+                console.log("✅ membreId stocké :", membre.id);
+              } else {
+                console.warn("Aucun membre trouvé pour cet utilisateur.");
+              }
+            },
+            error: () => {
+              console.error("Erreur lors de la récupération du membre.");
+            }
+          });
+      }
     }
   }
 
   private redirectBasedOnRole(role: string): void {
-    const normalizedRole = role?.trim().toUpperCase(); // 🔥 Normalize une seule fois
+    const normalizedRole = role?.trim().toUpperCase();
 
     switch (normalizedRole) {
       case 'ADMIN':

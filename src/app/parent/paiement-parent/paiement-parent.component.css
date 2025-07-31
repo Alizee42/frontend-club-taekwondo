@@ -332,12 +332,23 @@
   }
   
   .paiement-card {
-    flex: 1 1 calc(50% - 20px); /* Deux cartes par ligne */
-    background: #f7f9fd;
+    cursor: pointer;
+    border: 2px solid #e0e0e0;
     border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: var(--shadow);
+    padding: 16px;
+    margin: 8px;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 47%;
+  }
+  .paiement-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+  }
+  .paiement-card.active {
+    border-color: #007bff;
+    background: #e6f0ff;
+    box-shadow: 0 2px 12px rgba(0,123,255,0.12);
   }
   .paiement-card p {
     margin: 5px 0;

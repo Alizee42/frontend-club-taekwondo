@@ -13,56 +13,57 @@
     </div>
   </div>
   <table>
-
-    <thead>
-      <tr>
-        <th>Utilisateur</th>
-        <th>Type</th>
-        <th>Montant</th>
-        <th>Payé / Restant</th>
-        <th>Date</th>
-        <th>Mode</th>
-        <th>Statut</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let paiement of paiementsFiltres">
-        <td>{{ paiement.utilisateurNom }} {{ paiement.utilisateurPrenom }}</td>
-        <td>{{ paiement.type }}</td>
-        <td>{{ paiement.montantTotal | currency:'EUR' }}</td>
-        <td>
-          <div class="progress-bar" [style.width.%]="calculPourcentage(paiement)">
-            {{ calculPourcentage(paiement) }}%
-          </div>
-          <small>
-            {{ getMontantPaye(paiement) | currency:'EUR' }}
-            / {{ paiement.montantTotal | currency:'EUR' }}
-          </small>
-        </td>        
-        <td>{{ paiement.datePaiement | date:'dd/MM/yyyy' }}</td>
-        <td>{{ paiement.modePaiement }}</td>
-        <td>
-          <span class="badge"
-                [class.paye]="paiement.statut === 'payé'"
-                [class.attente]="paiement.statut === 'en attente'"
-                [class.annule]="paiement.statut === 'annulé'">
-            {{ paiement.statut }}
-          </span>
-        </td>
-        <td class="actions">
-          <button class="btn-icon btn-supprimer" (click)="supprimerPaiement(paiement)" title="Supprimer le paiement">
-            <i class="ri-delete-bin-line"></i>
-          </button>
-          <button class="btn-icon btn-annuler" (click)="ouvrirModalAnnulation(paiement)" title="Annuler le paiement">
-            <i class="ri-close-circle-line"></i>
-          </button>
-          <button class="btn-icon btn-echeance" (click)="ouvrirModalEcheances(paiement)" title="Voir les échéances">
-            <i class="ri-calendar-event-line"></i>
-          </button>
-        </td>        
-      </tr>
-    </tbody>
+<thead>
+  <tr>
+    <th>Utilisateur</th>
+    <th>Membre</th> <!-- Ajout -->
+    <th>Type</th>
+    <th>Montant</th>
+    <th>Payé / Restant</th>
+    <th>Date</th>
+    <th>Mode</th>
+    <th>Statut</th>
+    <th>Actions</th>
+  </tr>
+</thead>
+<tbody>
+  <tr *ngFor="let paiement of paiementsFiltres">
+    <td>{{ paiement.utilisateurNom }} {{ paiement.utilisateurPrenom }}</td>
+    <td>{{ paiement.membreNom }} {{ paiement.membrePrenom }}</td> <!-- Ajout -->
+    <td>{{ paiement.type }}</td>
+    <td>{{ paiement.montantTotal | currency:'EUR' }}</td>
+    <td>
+      <div class="progress-bar" [style.width.%]="calculPourcentage(paiement)">
+        {{ calculPourcentage(paiement) }}%
+      </div>
+      <small>
+        {{ getMontantPaye(paiement) | currency:'EUR' }}
+        / {{ paiement.montantTotal | currency:'EUR' }}
+      </small>
+    </td>
+    <td>{{ paiement.datePaiement | date:'dd/MM/yyyy' }}</td>
+    <td>{{ paiement.modePaiement }}</td>
+    <td>
+      <span class="badge"
+            [class.paye]="paiement.statut === 'payé'"
+            [class.attente]="paiement.statut === 'en attente'"
+            [class.annule]="paiement.statut === 'annulé'">
+        {{ paiement.statut }}
+      </span>
+    </td>
+    <td class="actions">
+      <button class="btn-icon btn-supprimer" (click)="supprimerPaiement(paiement)" title="Supprimer le paiement">
+        <i class="ri-delete-bin-line"></i>
+      </button>
+      <button class="btn-icon btn-annuler" (click)="ouvrirModalAnnulation(paiement)" title="Annuler le paiement">
+        <i class="ri-close-circle-line"></i>
+      </button>
+      <button class="btn-icon btn-echeance" (click)="ouvrirModalEcheances(paiement)" title="Voir les échéances">
+        <i class="ri-calendar-event-line"></i>
+      </button>
+    </td>
+  </tr>
+</tbody>
   </table>
 
   <!-- ✅ MODAL AJOUT RAPIDE -->

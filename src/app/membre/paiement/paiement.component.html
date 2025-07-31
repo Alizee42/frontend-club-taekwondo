@@ -55,16 +55,15 @@
             </li>
           </ul>
         </div>
-      
         <div id="card-element" class="card-element"></div>
         <div class="securite-zone">
           <p class="securite">🔒 Ce paiement est sécurisé par Stripe</p>
           <p class="rgpd">📄 Vos données ne sont jamais stockées sur notre site</p>
         </div>
-      
+        <div *ngIf="paiementErreur" class="error-message-global">{{ erreurMessage }}</div>
         <div class="btn-group">
-          <button class="btn-payer" (click)="initierPaiement()">Payer maintenant</button>
-          <button class="btn-prev" (click)="previousStep()">Retour</button>
+          <button class="btn-payer" (click)="initierPaiement()" [disabled]="enCoursDePaiement">Payer maintenant</button>
+          <button class="btn-prev" (click)="previousStep()" [disabled]="enCoursDePaiement">Retour</button>
         </div>
       </section>
 
@@ -187,8 +186,8 @@
     <p>Montant : {{ montantTotalAPayer.toFixed(2) }} €</p>
     <div id="card-element-modal" class="card-element"></div>
     <div class="btn-group">
-      <button class="btn-blue" (click)="payerEcheances()">Valider</button>
-      <button class="btn-red" (click)="fermerModalPaiement()">Annuler</button>
+      <button class="btn-blue" (click)="payerEcheances()" [disabled]="enCoursDePaiement">Valider</button>
+      <button class="btn-red" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement">Annuler</button>
     </div>
   </div>
 </div>

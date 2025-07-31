@@ -2,7 +2,7 @@
   <!-- 🔢 Étapes -->
   <div class="steps-indicator">
     <div class="step" [class.active]="step === 1">1. Adulte</div>
-    <div class="step" [class.active]="step === 2">2. Membres</div>
+    <div class="step" [class.active]="step === 2" *ngIf="!roleMembreSeul">2. Membres</div>
     <div class="step" [class.active]="step === 3">3. Confirmation</div>
   </div>
 
@@ -52,7 +52,7 @@
         </div>
         <div>
           <label>Rôle *</label>
-          <select formControlName="role" required>
+          <select formControlName="role" required (change)="onRoleChange()">
             <option value="">-- Qui êtes-vous ? --</option>
             <option value="PARENT">Je suis un parent (j’inscris un ou plusieurs enfants)</option>
             <option value="MEMBRE">Je suis un adulte qui s’inscrit seul</option>
@@ -71,7 +71,7 @@
   </form>
 
   <!-- 👦 Étape 2 : Membres -->
-  <form *ngIf="step === 2" [formGroup]="membresForm" class="step-form">
+  <form *ngIf="step === 2 && !roleMembreSeul" [formGroup]="membresForm" class="step-form">
     <fieldset class="form-section">
       <legend class="form-legend">👧 Membres à inscrire</legend>
       <div formArrayName="membres">
@@ -122,8 +122,8 @@
         <li><strong>Date de naissance :</strong> {{ utilisateurForm.value.dateNaissance | date:'dd/MM/yyyy' }}</li>
         <li><strong>Rôle :</strong> {{ utilisateurForm.value.role }}</li>
       </ul>
-      <h3>Membres :</h3>
-      <ul>
+      <h3 *ngIf="!roleMembreSeul">Membres :</h3>
+      <ul *ngIf="!roleMembreSeul">
         <li *ngFor="let m of membresForm.value.membres">
           {{ m.prenom }} {{ m.nom }} – {{ m.dateNaissance | date:'dd/MM/yyyy' }}
         </li>

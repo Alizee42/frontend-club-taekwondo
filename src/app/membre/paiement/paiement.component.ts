@@ -17,7 +17,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   paiementsUniques: any[] = [];
   paiementsEcheances: any[] = [];
 
-  montantInitial: number = 0; // Montant récupéré depuis les paramètres globaux
+  montantInitial: number = 0;
   modePaiement: string = 'unique';
   nombreEcheances: number = 1;
   echeancesOptions: number[] = [];
@@ -96,18 +96,33 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   }
 
   loadPaiements(): void {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+      const token = localStorage.getItem('token');
+    const membreId = Number(localStorage.getItem('membreId'));
+    console.log("initierPaiement - membreId:", membreId);
+    
+    if (!token) {
+      console.error("Erreur : token manquant");
+      return;
+    }
+    if (!membreId || membreId <= 0) {
+      this.erreurMessage = "Aucun membre sélectionné pour le paiement.";
+      this.paiementErreur = true;
+      console.error("Erreur : membreId non valide", membreId);
+      return;
+    }
 
     this.http.get<any[]>('http://localhost:8080/api/paiements', {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (data) => {
-        this.paiements = data.map(p => ({
-          ...p,
-          modePaiement: p.modePaiement === 'carte' ? 'unique' : p.modePaiement,
-          echeances: p.echeances || []
-        }));
+        console.log('Paiements reçus:', data); // Debug
+        this.paiements = data
+          .filter(p => p.membreId === membreId)
+          .map(p => ({
+            ...p,
+            modePaiement: p.modePaiement === 'carte' ? 'unique' : p.modePaiement,
+            echeances: p.echeances || []
+          }));
         this.mettreAJourFiltresPaiements();
       },
       error: (err) => {
@@ -124,7 +139,10 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   nextStep(): void {
     if (this.step < this.maxStep) {
       this.step++;
-      if (this.step === 2) setTimeout(() => this.initStripeElement(), 200);
+      if (this.step === 2) {
+        this.montantTotalAPayer = this.montantInitial; // Correction : montant affiché à l'étape 2
+        setTimeout(() => this.initStripeElement(), 200);
+      }
     }
   }
 
@@ -133,58 +151,74 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   }
 
   initierPaiement(): void {
-    if (this.enCoursDePaiement) return;
+  if (this.enCoursDePaiement) return;
 
-    const montant = this.montantInitial;
-    if (montant <= 0 || !this.cardElement) return alert("Erreur : montant invalide ou Stripe non chargé.");
-    this.montantTotalAPayer = montant;
+  const montant = this.montantInitial;
+  if (montant <= 0 || !this.cardElement) {
+    console.error("Erreur : montant invalide ou Stripe non chargé.", montant, this.cardElement);
+    return alert("Erreur : montant invalide ou Stripe non chargé.");
+  }
+  this.montantTotalAPayer = montant;
 
-    const token = localStorage.getItem('token');
-    const utilisateurId = Number(localStorage.getItem('utilisateurId'));
+  const token = localStorage.getItem('token');
+  const utilisateurId = Number(localStorage.getItem('utilisateurId'));
+  const membreId = Number(localStorage.getItem('membreId'));
 
-    if (!token) {
-      this.erreurMessage = 'Utilisateur non authentifié';
-      this.paiementErreur = true;
-      return;
-    }
+  console.log("initierPaiement - token:", token);
+  console.log("initierPaiement - utilisateurId:", utilisateurId);
+  console.log("initierPaiement - membreId:", membreId);
 
-    const data = {
-      amount: montant,
-      currency: 'eur',
-      modePaiement: this.modePaiement,
-      typePaiement: this.modePaiement === 'unique' ? 'unique' : 'echeances',
-      nombreEcheances: this.modePaiement === 'echeances' ? this.nombreEcheances : 1,
-      utilisateurId
-    };
+  if (!token) {
+    this.erreurMessage = 'Utilisateur non authentifié';
+    this.paiementErreur = true;
+    console.error("Erreur : utilisateur non authentifié");
+    return;
+  }
 
-    this.enCoursDePaiement = true;
-    this.paiementErreur = false;
-    this.paiementReussi = false;
+  const data = {
+    amount: montant,
+    currency: 'eur',
+    modePaiement: this.modePaiement,
+    typePaiement: this.modePaiement === 'unique' ? 'unique' : 'echeances',
+    nombreEcheances: this.modePaiement === 'echeances' ? this.nombreEcheances : 1,
+    utilisateurId,
+    membreId
+  };
 
-    this.http.post('http://localhost:8080/api/stripe/create-payment-intent', data, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: (res: any) => {
-        const clientSecret = res?.clientSecret;
-        if (!clientSecret) {
-          this.erreurMessage = 'Erreur : clientSecret non reçu.';
-          this.paiementErreur = true;
-          this.enCoursDePaiement = false;
-          return;
-        }
-        this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
-          this.loadPaiements();
-          this.paiementReussi = true;
-          this.enCoursDePaiement = false;
-        });
-      },
-      error: () => {
-        this.erreurMessage = 'Erreur lors de la création du paiement.';
+  console.log("initierPaiement - data envoyé au backend:", data);
+
+  this.enCoursDePaiement = true;
+  this.paiementErreur = false;
+  this.paiementReussi = false;
+
+  this.http.post('http://localhost:8080/api/stripe/create-payment-intent', data, {
+    headers: { Authorization: `Bearer ${token}` }
+  }).subscribe({
+    next: (res: any) => {
+      console.log('Réponse Stripe:', res);
+      const clientSecret = res?.clientSecret;
+      if (!clientSecret) {
+        this.erreurMessage = 'Erreur : clientSecret non reçu.';
         this.paiementErreur = true;
         this.enCoursDePaiement = false;
+        console.error("Erreur : clientSecret non reçu", res);
+        return;
       }
-    });
-  }
+      this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
+        this.loadPaiements();
+        this.paiementReussi = true;
+        this.enCoursDePaiement = false;
+        console.log("Paiement réussi, passage à l'étape 3");
+      });
+    },
+    error: (err) => {
+      this.erreurMessage = 'Erreur lors de la création du paiement.';
+      this.paiementErreur = true;
+      this.enCoursDePaiement = false;
+      console.error("Erreur lors de la création du paiement :", err);
+    }
+  });
+}
 
   confirmerPaiementStripe(clientSecret: string, element: any, callback: () => void): void {
     this.stripe.confirmCardPayment(clientSecret, {
@@ -206,72 +240,72 @@ export class PaiementComponent implements OnInit, AfterViewInit {
       console.error("Erreur : cette échéance ne peut pas être payée.");
       return;
     }
-  
+
     console.log("Ouverture de la modale pour l'échéance :", echeance);
-  
+
     this.paiementActuel = paiement;
     this.echeanceEnCours = echeance;
-  
+
     const montant = Number(echeance.montant);
     this.montantTotalAPayer = isNaN(montant) ? 0 : montant;
-  
-    this.modalOuverte = true; // Ouvre la modale
-  
+
+    this.modalOuverte = true;
+
     if (this.cardElementModal) {
       this.cardElementModal.unmount();
       this.cardElementModal = null;
     }
-  
-    setTimeout(() => this.initStripeElementModal(), 300); // Initialise Stripe après un délai
+
+    setTimeout(() => this.initStripeElementModal(), 300);
   }
 
-    fermerModalPaiement(): void {
-    this.modalOuverte = false; // Ferme la modale
+  fermerModalPaiement(): void {
+    this.modalOuverte = false;
     this.paiementActuel = null;
     this.echeanceEnCours = null;
-  
+
     if (this.cardElementModal) {
       this.cardElementModal.unmount();
       this.cardElementModal = null;
     }
   }
-  
-payerEcheances(): void {
-  if (!this.echeanceEnCours || !this.cardElementModal) {
-    alert("Erreur : informations manquantes.");
-    return;
-  }
 
-  const token = localStorage.getItem('token');
-  if (!token) {
-    this.erreurMessage = 'Authentification requise.';
-    this.paiementErreur = true;
-    return;
-  }
-
-  const data = {
-    id: this.echeanceEnCours.id,
-    montant: this.echeanceEnCours.montant
-  };
-
-  this.enCoursDePaiement = true;
-
-  this.http.post(`http://localhost:8080/api/paiements/${this.paiementActuel.id}/payer-echeance`, [data], {
-    headers: { Authorization: `Bearer ${token}` }
-  }).subscribe({
-    next: () => {
-      this.loadPaiements();
-      this.fermerModalPaiement();
-      this.paiementReussi = true;
-      this.enCoursDePaiement = false;
-    },
-    error: () => {
-      this.erreurMessage = 'Erreur lors du paiement de l’échéance.';
-      this.paiementErreur = true;
-      this.enCoursDePaiement = false;
+  payerEcheances(): void {
+    if (!this.echeanceEnCours || !this.cardElementModal) {
+      alert("Erreur : informations manquantes.");
+      return;
     }
-  });
-}
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.erreurMessage = 'Authentification requise.';
+      this.paiementErreur = true;
+      return;
+    }
+
+    const data = {
+      id: this.echeanceEnCours.id,
+      montant: this.echeanceEnCours.montant
+    };
+
+    this.enCoursDePaiement = true;
+
+    this.http.post(`http://localhost:8080/api/paiements/${this.paiementActuel.id}/payer-echeance`, [data], {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: () => {
+        this.loadPaiements();
+        this.fermerModalPaiement();
+        this.paiementReussi = true;
+        this.enCoursDePaiement = false;
+      },
+      error: () => {
+        this.erreurMessage = 'Erreur lors du paiement de l’échéance.';
+        this.paiementErreur = true;
+        this.enCoursDePaiement = false;
+      }
+    });
+  }
 
   toggleSection(section: string): void {
     this.sectionOuverte[section] = !this.sectionOuverte[section];
@@ -292,17 +326,18 @@ payerEcheances(): void {
     this.paiementErreur = false;
     this.erreurMessage = '';
   }
+
   genererEcheancier(paiement: any): any[] {
-    // Simule la génération d'un échéancier pour un paiement
     return paiement.echeances || [];
   }
+
   calculerMontantRestant(paiement: any): number {
     if (!paiement.echeances || paiement.echeances.length === 0) return paiement.montantTotal;
-  
+
     const montantPayé = paiement.echeances
-      .filter((echeance: any) => echeance.statut === 'payé') // Ajout du type explicite `any` pour `echeance`
-      .reduce((total: number, echeance: any) => total + echeance.montant, 0); // Ajout des types explicites `number` et `any`
-  
+      .filter((echeance: any) => echeance.statut === 'payé')
+      .reduce((total: number, echeance: any) => total + echeance.montant, 0);
+
     return paiement.montantTotal - montantPayé;
   }
 }

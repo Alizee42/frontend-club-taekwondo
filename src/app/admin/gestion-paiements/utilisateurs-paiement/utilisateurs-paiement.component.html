@@ -11,39 +11,46 @@
 <table class="user-table">
   <thead>
     <tr>
-      <th>Nom</th>
+      <th>Payé par</th>
+      <th>Pour</th>
       <th>Email</th>
       <th>Statut paiement</th>
       <th>Actions</th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let utilisateur of utilisateursFiltres">
-      <td>{{ utilisateur.nom }} {{ utilisateur.prenom }}</td>
-      <td>{{ utilisateur.email }}</td>
-      <td>
-        <span class="badge"
-          [ngClass]="{
-            'badge-success': getStatutPaiement(utilisateur) === 'à jour',
-            'badge-warning': getStatutPaiement(utilisateur) === 'en attente',
-            'badge-danger': getStatutPaiement(utilisateur) === 'en retard',
-            'badge-secondary': getStatutPaiement(utilisateur) === 'inconnu',
-            'badge-dark': getStatutPaiement(utilisateur) === 'annulé'
-          }"
-        >
-          {{ getStatutPaiement(utilisateur) }}
-        </span>
-      </td>
-      <td>
-        <button class="btn-icon btn-stats" (click)="voirStats(utilisateur)" title="Voir les statistiques">
-          <i class="ri-bar-chart-line"></i>
-        </button>
-        <button class="btn-icon btn-echeances" (click)="voirEcheances(utilisateur)" title="Voir les échéances">
-          <i class="ri-calendar-event-line"></i>
-        </button>
-      </td>
-    </tr>
-  </tbody>
+  <tr *ngFor="let utilisateur of utilisateursFiltres">
+    <td>{{ utilisateur.prenom }} {{ utilisateur.nom }}</td>
+    <td>
+      <!-- Affiche le membre du premier paiement (ou adapte selon besoin) -->
+      <span *ngIf="utilisateur.paiements.length">
+        {{ utilisateur.paiements[0].membrePrenom }} {{ utilisateur.paiements[0].membreNom }}
+      </span>
+    </td>
+    <td>{{ utilisateur.email }}</td>
+    <td>
+      <span class="badge"
+        [ngClass]="{
+          'badge-success': getStatutPaiement(utilisateur) === 'payé',
+          'badge-warning': getStatutPaiement(utilisateur) === 'en attente',
+          'badge-danger': getStatutPaiement(utilisateur) === 'en retard',
+          'badge-secondary': getStatutPaiement(utilisateur) === 'inconnu',
+          'badge-dark': getStatutPaiement(utilisateur) === 'annulé'
+        }"
+      >
+        {{ getStatutPaiement(utilisateur) }}
+      </span>
+    </td>
+    <td>
+      <button class="btn-icon btn-stats" (click)="voirStats(utilisateur)" title="Voir les statistiques">
+        <i class="ri-bar-chart-line"></i>
+      </button>
+      <button class="btn-icon btn-echeances" (click)="voirEcheances(utilisateur)" title="Voir les échéances">
+        <i class="ri-calendar-event-line"></i>
+      </button>
+    </td>
+  </tr>
+</tbody>
 </table>
 
 <!-- 📊 Modale Statistiques -->

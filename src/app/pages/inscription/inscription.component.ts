@@ -39,6 +39,7 @@ export class InscriptionComponent implements OnInit {
   today: string = new Date().toISOString().split('T')[0];
 
   ceinturesDisponibles = ['Blanche', 'Jaune', 'Orange', 'Verte', 'Bleue', 'Marron', 'Noire'];
+  roleMembreSeul: boolean = false; // Ajout pour la logique
 
   constructor(private fb: FormBuilder, private http: HttpClient) {}
 
@@ -96,10 +97,22 @@ export class InscriptionComponent implements OnInit {
     this.saveLocal();
   }
 
+  onRoleChange(): void {
+    const role = this.utilisateurForm.get('role')?.value;
+    this.roleMembreSeul = role === 'MEMBRE';
+    if (this.roleMembreSeul) {
+      this.step = 1; // Toujours sur l'étape 1
+    }
+  }
+
   nextStep(): void {
     if (this.step === 1 && this.utilisateurForm.invalid) return;
-    if (this.step === 2 && this.membresForm.invalid) return;
-    this.step++;
+    if (!this.roleMembreSeul && this.step === 2 && this.membresForm.invalid) return;
+    if (this.roleMembreSeul) {
+      this.step = 3; // Passe directement à la confirmation
+    } else {
+      this.step++;
+    }
   }
 
   previousStep(): void {
@@ -156,6 +169,29 @@ export class InscriptionComponent implements OnInit {
       next: (utilisateur: any) => {
         const utilisateurId = utilisateur.id;
         const membres: MembrePayload[] = this.membresForm.value.membres;
+
+               if (this.roleMembreSeul) {
+          // Création du membre pratiquant seul
+          const membreSeul: MembrePayload = {
+            nom: utilisateurData.nom,
+            prenom: utilisateurData.prenom,
+            dateNaissance: utilisateurData.dateNaissance,
+            ceinture: '',
+            numeroLicence: '',
+            utilisateurId
+          };
+          this.http.post('/api/membres', membreSeul).subscribe({
+            next: (membre: any) => {
+              localStorage.setItem('membreId', membre.id.toString()); // AJOUT ICI
+              this.finaliser();
+            },
+            error: () => {
+              this.erreurMessage = "Erreur lors de l'ajout du membre pratiquant seul.";
+              this.loading = false;
+            }
+          });
+          return;
+        }
 
         if (!membres || membres.length === 0) {
           this.finaliser();
