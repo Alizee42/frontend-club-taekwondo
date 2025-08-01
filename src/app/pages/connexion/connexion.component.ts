@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { MembreService } from '../../services/membre.service'; // ✅ import service
 
 @Component({
   selector: 'app-connexion',
@@ -15,7 +16,11 @@ export class ConnexionComponent {
   email: string = '';
   password: string = '';
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private membreService: MembreService
+  ) {}
 
   onSubmit(): void {
     console.log('🔑 Tentative de connexion avec :', {
@@ -50,13 +55,7 @@ export class ConnexionComponent {
           console.log('🧾 Utilisateur reçu :', utilisateur);
 
           const rawRole = response.role || utilisateur?.role || '';
-          console.log(
-            '🧪 Rôle brut reçu (response.role ou utilisateur.role) :',
-            rawRole
-          );
-
           const role = rawRole?.trim().toUpperCase() || '';
-          if (role) localStorage.setItem('role', role); // stocke en MAJUSCULE
           console.log('📦 Rôle formaté :', role);
 
           if (!role) {
@@ -66,7 +65,6 @@ export class ConnexionComponent {
           }
 
           this.storeUserData(token, role, utilisateur);
-          this.redirectBasedOnRole(role);
         },
         error: (err) => {
           console.error('❌ Erreur lors de la requête POST :', err);
@@ -76,41 +74,39 @@ export class ConnexionComponent {
   }
 
   private storeUserData(token: string, role: string, utilisateur: any): void {
-    console.log(
-      '📥 Stockage du token, rôle et utilisateur dans le localStorage'
-    );
+    console.log('📥 Stockage du token, rôle et utilisateur dans le localStorage');
 
     if (token) localStorage.setItem('token', token);
-    if (role) localStorage.setItem('role', role); // stocke en MAJUSCULE
+    if (role) localStorage.setItem('role', role);
     if (utilisateur) {
       localStorage.setItem('utilisateur', JSON.stringify(utilisateur));
       if (utilisateur.email) {
         localStorage.setItem('email', utilisateur.email);
       }
-      // Ajout récupération du membreId
-      if (utilisateur.id) {
-        this.http.get<any>('http://localhost:8080/api/membres/by-user/' + utilisateur.id)
-          .subscribe({
-            next: (membre) => {
-              if (membre && membre.id) {
-                localStorage.setItem('membreId', membre.id.toString());
-                console.log("✅ membreId stocké :", membre.id);
-              } else {
-                console.warn("Aucun membre trouvé pour cet utilisateur.");
-              }
-            },
-            error: () => {
-              console.error("Erreur lors de la récupération du membre.");
-            }
-          });
-      }
+
+      // ✅ Appel à /api/membres/me au lieu de /utilisateur/{id}
+      this.membreService.getMembreConnecte().subscribe({
+        next: (membre) => {
+          if (membre?.id) {
+            localStorage.setItem('membreId', String(membre.id));
+            console.log("✅ membreId stocké :", membre.id);
+          } else {
+            console.warn("⚠ Aucun membre retourné.");
+            localStorage.removeItem('membreId');
+          }
+          this.redirectBasedOnRole(role);
+        },
+        error: (err) => {
+          console.error("❌ Erreur récupération membre connecté :", err);
+          localStorage.removeItem('membreId');
+          this.redirectBasedOnRole(role);
+        }
+      });
     }
   }
 
   private redirectBasedOnRole(role: string): void {
-    const normalizedRole = role?.trim().toUpperCase();
-
-    switch (normalizedRole) {
+    switch (role) {
       case 'ADMIN':
         console.log('➡️ Redirection vers /admin/dashboard-admin');
         this.router.navigate(['/admin/dashboard-admin']);
@@ -124,7 +120,7 @@ export class ConnexionComponent {
         this.router.navigate(['/parent/dashboard-parent']);
         break;
       default:
-        console.warn('⚠️ Rôle non reconnu (normalisé) :', normalizedRole);
+        console.warn('⚠️ Rôle non reconnu :', role);
         alert("Rôle inconnu. Veuillez contacter l'administrateur.");
         break;
     }

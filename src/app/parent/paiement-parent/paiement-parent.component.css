@@ -123,10 +123,10 @@
     outline: none; 
   }
   
-  
   .btn-next,
   .btn-new-payment,
-  .btn-payer-echeance {
+  .btn-payer-echeance ,
+  .btn-prev{
   cursor: pointer;
     font-weight: 600;
     font-size: 1rem;
@@ -137,25 +137,17 @@
     color: white;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     margin-top: 14px;
-  
   }
-  .btn-next {
-    background: var(--blue-main);
-    margin-left: auto; 
-    display: block; 
-    margin-top: 2%;
+.btn-group {
+  display: flex;
+  justify-content: space-between;
+}
+  .btn-next{
+    background: var(--blue-main); /* Couleur principale */
   }
-  .btn-next:hover {
-    background: var(--blue-hover);
+  .btn-prev{
+    background: var(--red-main);
   }
-  
-  .btn-group {
-    display: flex; 
-    justify-content: flex-end;
-    gap: 20px; 
-    margin-top: 30px; 
-  }
-  
   .btn-payer {
     background: var(--blue-main); 
     color: white;
@@ -171,20 +163,6 @@
     background: var(--blue-hover); 
   }
   
-  .btn-prev {
-    background: var(--red-main); 
-    color: white;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .btn-prev:hover {
-    background: var(--red-hover); /* Rouge plus foncé au survol */
-  }
   .btn-payer-echeance {
     background-color: var(--blue-main); /* Couleur principale */
     color: #fff;
@@ -473,7 +451,7 @@
   }
   
   .modal-content .btn-red:hover {
-    background: var(--red-hover); /* Couleur au survol */
+    background: var(--red-hover); 
   }
   .modal-overlay {
     position: fixed;
@@ -569,4 +547,14 @@
   .securite-zone .rgpd {
     color: #888;
   }
-  
+  /* 🔹 Espacement entre les sections d'historique de chaque enfant */
+.historique-section > div {
+  margin-bottom: 40px; /* espace entre chaque enfant */
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e6ed; /* légère séparation visuelle */
+}
+
+/* 🔹 Espacement entre paiements uniques et échelonnés pour un même enfant */
+.historique-bloc {
+  margin-bottom: 25px;
+}

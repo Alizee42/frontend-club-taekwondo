@@ -17,20 +17,20 @@
       </div>
 
       <!-- Étape 1 : Choix des enfants -->
-           <section *ngIf="step === 1" class="step">
+      <section *ngIf="step === 1" class="step">
         <h2>Choisissez pour qui vous payez</h2>
         <div class="paiement-card-container">
           <div
             class="paiement-card"
-            *ngFor="let membre of membres"
-            [class.active]="enfantSelectionne === membre.id"
-            (click)="selectMembre(membre)"
+            *ngFor="let enfant of enfants"
+            [class.active]="enfantSelectionne === enfant.id"
+            (click)="selectMembre(enfant)"
           >
-            <h4>{{ membre.prenom }} {{ membre.nom }}</h4>
-            <p>Cliquez pour choisir ce membre</p>
+            <h4>{{ enfant.prenom }} {{ enfant.nom }}</h4>
+            <p>Cliquez pour choisir cet enfant</p>
           </div>
         </div>
-        <button class="btn-next" [disabled]="enfantSelectionne === null" (click)="nextStep()">Suivant</button>
+        <button class="btn-next" [disabled]="!enfantSelectionne" (click)="nextStep()">Suivant</button>
       </section>
 
       <!-- Étape 2 : Choix du mode de paiement -->
@@ -77,17 +77,18 @@
             </li>
           </ul>
         </div>
-      
+
         <div id="card-element" class="card-element"></div>
         <div class="securite-zone">
           <p class="securite">🔒 Ce paiement est sécurisé par Stripe</p>
           <p class="rgpd">📄 Vos données ne sont jamais stockées sur notre site</p>
         </div>
-      
+
         <div class="btn-group">
-          <button class="btn-payer" (click)="initierPaiement()">Payer maintenant</button>
-          <button class="btn-prev" (click)="previousStep()">Retour</button>
-        </div>
+  <button class="btn-prev" (click)="previousStep()">Retour</button>
+  <button class="btn-next" (click)="nextStep()">Suivant</button>
+</div>
+
       </section>
 
       <!-- Étape 4 : Confirmation -->
@@ -101,116 +102,62 @@
     </div>
   </div>
 </div>
-<!-- 🔷 Historique clair -->
+
+<!-- 🔷 Historique -->
 <div class="historique-section">
   <h2>Mes paiements</h2>
 
-  <!-- Paiements uniques -->
-  <div class="historique-bloc">
-    <button class="table-toggle" (click)="toggleSection('unique')">
-      Paiements uniques <span *ngIf="sectionOuverte['unique']">▼</span><span *ngIf="!sectionOuverte['unique']">▲</span>
-    </button>
-    <table class="historique-table" *ngIf="sectionOuverte['unique']">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Montant</th>
-          <th>Statut</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let paiement of paiementsUniques">
-          <td>{{ paiement.datePaiement | date: 'dd/MM/yyyy' }}</td>
-          <td>{{ paiement.montantTotal | currency:'EUR' }}</td>
-          <td>
-            <span class="badge" [ngClass]="{
-              'badge-payé': paiement.statut === 'payé',
-              'badge-en-attente': paiement.statut === 'en attente',
-              'badge-annulé': paiement.statut === 'annulé'
-            }">
-              {{ paiement.statut === 'payé' ? '✔' : (paiement.statut === 'en attente' ? '⏳' : '❌') }}
-              {{ paiement.statut }}
-            </span>
-          </td>
-        </tr>
-        <tr *ngIf="paiementsUniques.length === 0">
-          <td colspan="3">Aucun paiement unique trouvé.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <div *ngFor="let enfant of enfants">
+    <h3>👦 {{ enfant.prenom }} {{ enfant.nom }}</h3>
 
-  <!-- Paiements échelonnés -->
-  <div class="historique-bloc">
-    <button class="table-toggle" (click)="toggleSection('echeances')">
-      Paiements échelonnés <span *ngIf="sectionOuverte['echeances']">▼</span><span *ngIf="!sectionOuverte['echeances']">▲</span>
-    </button>
-    <div *ngIf="sectionOuverte['echeances']">
-      <div class="paiement-card-container">
-        <ng-container *ngIf="paiementsEcheances.length > 0; else aucunPaiementEchelonne">
-          <div class="paiement-card" *ngFor="let paiement of paiementsEcheances">
-            <div class="paiement-details-grid">
-              <div class="montants">
-                <p>Montant total : {{ paiement.montantTotal | currency:'EUR' }}</p>
-                <p>Montant restant : {{ calculerMontantRestant(paiement) | currency:'EUR' }}</p>
-              </div>
-              <div class="statut">
-                <span class="badge" [ngClass]="{
-                  'badge-payé': paiement.statut === 'payé',
-                  'badge-en-attente': paiement.statut === 'en attente',
-                  'badge-annulé': paiement.statut === 'annulé'
-                }">{{ paiement.statut }}</span>
-              </div>
-            </div>
-            <table class="echeancier-table">
-              <thead>
-                <tr>
-                  <th>Échéance</th>
-                  <th>Date</th>
-                  <th>Montant</th>
-                  <th>Statut</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let echeance of genererEcheancier(paiement)">
-                  <td>{{ echeance.numero }}</td>
-                  <td>{{ echeance.date | date: 'dd/MM/yyyy' }}</td>
-                  <td>{{ echeance.montant }} €</td>
-                  <td>
-                    <span class="badge" [ngClass]="{
-                      'badge-payé': echeance.statut === 'payé',
-                      'badge-en-attente': echeance.statut === 'en attente'
-                    }">
-                      {{ echeance.statut === 'payé' ? '✔' : '⏳' }} {{ echeance.statut }}
-                    </span>
-                  </td>
-                  <td>
-                    <button *ngIf="echeance.statut !== 'payé'" class="btn-payer-echeance"
-                      (click)="ouvrirModalPaiement(paiement, echeance)">
-                      Payer
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </ng-container>
-        <ng-template #aucunPaiementEchelonne>
-          <p>Aucun paiement échelonné trouvé.</p>
-        </ng-template>
-      </div>
+    <!-- Paiements uniques -->
+    <div class="historique-bloc" *ngIf="getPaiementsUniquesPourEnfant(enfant.id).length > 0">
+      <h4>Paiements uniques</h4>
+      <table class="historique-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Montant</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let paiement of getPaiementsUniquesPourEnfant(enfant.id)">
+            <td>{{ paiement.datePaiement | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ paiement.montantTotal | currency:'EUR' }}</td>
+            <td>{{ paiement.statut }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </div>
-</div>
-<div class="modal" *ngIf="modalOuverte">
-  <div class="modal-content">
-    <h3>Payer une échéance</h3>
-    <p>Montant : {{ montantTotalAPayer.toFixed(2) }} €</p>
-    <div id="card-element-modal" class="card-element"></div>
-    <div class="btn-group">
-      <button class="btn-blue" (click)="payerEcheances()">Valider</button>
-      <button class="btn-red" (click)="fermerModalPaiement()">Annuler</button>
+
+    <!-- Paiements échelonnés -->
+    <div class="historique-bloc" *ngIf="getPaiementsEcheancesPourEnfant(enfant.id).length > 0">
+      <h4>Paiements échelonnés</h4>
+      <table class="historique-table">
+        <thead>
+          <tr>
+            <th>Échéance</th>
+            <th>Date</th>
+            <th>Montant</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let echeance of genererEcheancierPourEnfant(enfant.id)">
+            <td>{{ echeance.numero }}</td>
+            <td>{{ echeance.dateEcheance | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ echeance.montant | currency:'EUR' }}</td>
+            <td>{{ echeance.statut }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Aucun paiement -->
+    <div *ngIf="getPaiementsUniquesPourEnfant(enfant.id).length === 0 
+                && getPaiementsEcheancesPourEnfant(enfant.id).length === 0">
+      <p>Aucun paiement trouvé pour cet enfant.</p>
     </div>
   </div>
 </div>

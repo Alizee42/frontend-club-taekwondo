@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StripeService } from '../../services/stripe.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
+import { MembreService } from '../../services/membre.service';
 
 @Component({
   selector: 'app-paiements',
@@ -41,20 +42,52 @@ export class PaiementComponent implements OnInit, AfterViewInit {
 
   sectionOuverte: { [key: string]: boolean } = { unique: true, echeances: true };
 
+  utilisateurId: number = 0;
+  membreId: number = 0;
+
   constructor(
     private http: HttpClient,
     private stripeService: StripeService,
-    private parametresService: ParametresPaiementService
+    private parametresService: ParametresPaiementService,
+    private membreService: MembreService
   ) {}
 
   ngOnInit(): void {
+    // Charger paramètres de paiement
     this.parametresService.parametres$.subscribe((parametres) => {
       if (parametres) {
         this.montantInitial = parametres.montantCotisation;
-        this.echeancesOptions = Array.from({ length: parametres.echeancesAutorisees }, (_, i) => i + 1);
+        this.echeancesOptions = Array.from(
+          { length: parametres.echeancesAutorisees },
+          (_, i) => i + 1
+        );
       }
     });
-    this.loadPaiements();
+
+    // Charger infos utilisateur depuis localStorage
+    const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || '{}');
+    this.utilisateurId = utilisateur?.id || 0;
+
+    // 🔹 On ne rappelle pas /utilisateur/{id}, mais /me
+    this.membreService.getMembreConnecte().subscribe({
+      next: (membre) => {
+        if (membre?.id) {
+          this.membreId = membre.id;
+          localStorage.setItem('membreId', String(this.membreId));
+          console.log('✅ Membre trouvé :', this.membreId);
+          this.loadPaiements();
+        } else {
+          this.erreurMessage = 'Aucun membre trouvé pour cet utilisateur.';
+          this.paiementErreur = true;
+          console.error('❌ Aucun membre trouvé pour cet utilisateur');
+        }
+      },
+      error: (err) => {
+        console.error('❌ Erreur récupération membre connecté :', err);
+        this.erreurMessage = 'Impossible de récupérer votre profil membre.';
+        this.paiementErreur = true;
+      }
+    });
   }
 
   ngAfterViewInit(): void {}
@@ -94,42 +127,36 @@ export class PaiementComponent implements OnInit, AfterViewInit {
       this.cardElementModal.mount('#card-element-modal');
     }
   }
+loadPaiements(): void {
+  const token = localStorage.getItem('token');
+  const membreId = Number(localStorage.getItem('membreId'));
 
-  loadPaiements(): void {
-      const token = localStorage.getItem('token');
-    const membreId = Number(localStorage.getItem('membreId'));
-    console.log("initierPaiement - membreId:", membreId);
-    
-    if (!token) {
-      console.error("Erreur : token manquant");
-      return;
-    }
-    if (!membreId || membreId <= 0) {
-      this.erreurMessage = "Aucun membre sélectionné pour le paiement.";
-      this.paiementErreur = true;
-      console.error("Erreur : membreId non valide", membreId);
-      return;
-    }
-
-    this.http.get<any[]>('http://localhost:8080/api/paiements', {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: (data) => {
-        console.log('Paiements reçus:', data); // Debug
-        this.paiements = data
-          .filter(p => p.membreId === membreId)
-          .map(p => ({
-            ...p,
-            modePaiement: p.modePaiement === 'carte' ? 'unique' : p.modePaiement,
-            echeances: p.echeances || []
-          }));
-        this.mettreAJourFiltresPaiements();
-      },
-      error: (err) => {
-        console.error("❌ Erreur lors du chargement des paiements :", err);
-      }
-    });
+  if (!token || !membreId) {
+    console.error("❌ Token ou membreId manquant");
+    return;
   }
+
+  this.http.get<any[]>('http://localhost:8080/api/paiements', {
+    headers: { Authorization: `Bearer ${token}` }
+  }).subscribe({
+    next: (data) => {
+      // 🔹 Garde uniquement les paiements du membre connecté
+      this.paiements = data
+        .filter(p => p.membreId === membreId)
+        .map(p => ({
+          ...p,
+          modePaiement: p.modePaiement === 'carte' ? 'unique' : p.modePaiement,
+          echeances: p.echeances || []
+        }));
+
+      this.mettreAJourFiltresPaiements();
+    },
+    error: (err) => {
+      console.error("❌ Erreur lors du chargement des paiements :", err);
+    }
+  });
+}
+
 
   mettreAJourFiltresPaiements(): void {
     this.paiementsUniques = this.paiements.filter(p => p.modePaiement === 'unique');

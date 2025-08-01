@@ -27,6 +27,7 @@ import { GestionInscriptionsComponent } from './admin/gestion-inscriptions/gesti
 import { DashboardParentComponent } from './parent/dashboard-parent/dashboard-parent.component';
 import { ConnectedLayoutComponent } from './shared/layouts/connected-layout/connected-layout.component';
 import { PaiementParentComponent } from './parent/paiement-parent/paiement-parent.component';
+import { DocumentsParentComponent } from './parent/documents-parent/documents-parent.component';
 
 export const routes: Routes = [
   // 🌐 Routes publiques
@@ -87,7 +88,8 @@ export const routes: Routes = [
     data: { role: 'PARENT' },
     children: [
       { path: 'dashboard-parent', component: DashboardParentComponent },
-      { path: 'paiements', component: PaiementParentComponent } // au lieu de PaiementComponent
+      { path: 'paiements', component: PaiementParentComponent },
+      { path: 'documents', component: DocumentsParentComponent }
     ]
   },
 
