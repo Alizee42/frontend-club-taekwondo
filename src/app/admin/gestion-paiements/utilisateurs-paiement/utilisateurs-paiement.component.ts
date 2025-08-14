@@ -14,8 +14,6 @@ export class UtilisateursPaiementComponent implements OnInit {
   utilisateurs: any[] = [];
   utilisateursFiltres: any[] = [];
   searchTerm: string = '';
-  paiements: any[] = [];
-  paiementsFiltres: any[] = [];
 
   // Modales
   modalStatsVisible: boolean = false;
@@ -29,32 +27,46 @@ export class UtilisateursPaiementComponent implements OnInit {
   }
 
   chargerPaiements(): void {
-    this.http.get<any[]>('/api/paiements').subscribe(data => {
-      const paiements = data;
-  
+    this.http.get<any[]>('http://localhost:8080/api/paiements').subscribe(data => {
+      const paiements = data || [];
+
       const utilisateursMap = new Map<number, any>();
-  
+
       paiements.forEach(p => {
-        const id = p.utilisateurId;
-        if (!utilisateursMap.has(id)) {
-          utilisateursMap.set(id, {
-            id: id,
+        // On prend l'ID du parent (utilisateur payeur)
+        const idParent = p.utilisateurId;
+
+        if (!utilisateursMap.has(idParent)) {
+          utilisateursMap.set(idParent, {
+            id: idParent,
             nom: p.utilisateurNom,
             prenom: p.utilisateurPrenom,
             email: p.utilisateurEmail || '—',
             paiements: []
           });
-        }        
-        utilisateursMap.get(id).paiements.push(p);
+        }
+
+        // On garde le statut exact tel que renvoyé par le backend
+        utilisateursMap.get(idParent).paiements.push({
+          ...p,
+          statut: p.statut ? p.statut.toLowerCase() : 'inconnu'
+        });
       });
-  
-      this.utilisateurs = Array.from(utilisateursMap.values());
+
+      // Conversion en tableau
+      let listeUtilisateurs = Array.from(utilisateursMap.values());
+
+      // ✅ On ne garde que ceux qui ont au moins un paiement "payé"
+      listeUtilisateurs = listeUtilisateurs.filter(u =>
+        u.paiements.some((pay: any) => pay.statut === 'payé')
+      );
+
+      this.utilisateurs = listeUtilisateurs;
       this.utilisateursFiltres = [...this.utilisateurs];
-  
-      console.log('Utilisateurs regroupés avec paiements :', this.utilisateurs);
+
+      console.log('✅ Utilisateurs avec au moins un paiement payé :', this.utilisateurs);
     });
   }
-  
 
   filtrerUtilisateurs(): void {
     const terme = this.searchTerm.toLowerCase();
@@ -67,32 +79,26 @@ export class UtilisateursPaiementComponent implements OnInit {
     if (!utilisateur.paiements || utilisateur.paiements.length === 0) {
       return 'inconnu';
     }
-  
-    let hasEnRetard = false;
-    let hasEnAttente = false;
-    let hasAnnule = false;
-  
-    for (const p of utilisateur.paiements) {
-      const statut = p.statut?.toLowerCase();
-      if (statut === 'en retard') {
-        hasEnRetard = true;
-      } else if (statut === 'en attente') {
-        hasEnAttente = true;
-      } else if (statut === 'annulé') {
-        hasAnnule = true;
-      } else if (statut === 'payé') {
-        // continue
-      }
+
+    // Si tous payés → à jour
+    if (utilisateur.paiements.every((p: any) => p.statut === 'payé')) {
+      return 'payé';
     }
-  
-    if (hasEnRetard) return 'en retard';
-    if (hasEnAttente) return 'en attente';
-    if (hasAnnule) return 'annulé'; // ✅ Ajouté
-  
-    return 'à jour';
+    // S'il y a au moins un en retard
+    if (utilisateur.paiements.some((p: any) => p.statut === 'en retard')) {
+      return 'en retard';
+    }
+    // S'il y a au moins un en attente
+    if (utilisateur.paiements.some((p: any) => p.statut === 'en attente')) {
+      return 'en attente';
+    }
+    // S'il y a au moins un annulé
+    if (utilisateur.paiements.some((p: any) => p.statut === 'annulé')) {
+      return 'annulé';
+    }
+
+    return 'inconnu';
   }
-  
-  
 
   voirStats(utilisateur: any): void {
     this.utilisateurSelectionne = utilisateur;

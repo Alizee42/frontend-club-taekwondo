@@ -1,77 +1,23 @@
 <div class="gestion-actualites-container">
-  <h1>Gestion des Actualités</h1>
 
-  <!-- Formulaire pour ajouter ou modifier une actualité -->
-  <form (ngSubmit)="onSubmit()" #actualiteForm="ngForm" class="actualite-form">
-    <div class="form-row">
-      <div class="form-group">
-        <label for="titre">Titre</label>
-        <input
-          type="text"
-          id="titre"
-          [(ngModel)]="actualite.titre"
-          name="titre"
-          placeholder="Entrez le titre de l'actualité"
-          required
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="typeActu">Type</label>
-        <select
-          id="typeActu"
-          [(ngModel)]="actualite.typeActu"
-          name="typeActu"
-          required
-        >
-          <option value="evenement">Événement</option>
-          <option value="competition">Compétition</option>
-          <option value="annonce">Annonce</option>
-        </select>
-      </div>
-
-      <!-- Mettre à la une -->
-      <div class="form-group form-featured">
-        <label for="isFeatured" class="form-featured-label">Mettre à la une</label>
-        <div class="form-featured-control">
-          <input
-            type="checkbox"
-            id="isFeatured"
-            [(ngModel)]="actualite.isFeatured"
-            name="isFeatured"
-            class="form-featured-checkbox"
-          />
-          <span class="form-featured-text">À la une</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="contenu">Contenu</label>
-      <textarea
-        id="contenu"
-        [(ngModel)]="actualite.contenu"
-        name="contenu"
-        placeholder="Entrez le contenu de l'actualité"
-        required
-      ></textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="image">Image</label>
-      <input type="file" id="image" (change)="onImageSelected($event)" />
-      <div class="image-preview" *ngIf="imageUrl">
-        <img [src]="imageUrl" alt="Prévisualisation de l'image" />
-      </div>
-    </div>
-
-    <button type="submit" class="btn-submit">
-      {{ actualite.id ? 'Mettre à jour' : 'Ajouter' }}
+  <!-- Bandeau titre -->
+  <div class="page-header">
+    <h1><i class="ri-newspaper-line"></i> Gestion des Actualités</h1>
+    <button class="btn-add" (click)="openModal()">
+      <i class="ri-add-line"></i> Nouvelle actualité
     </button>
-  </form>
+  </div>
 
-  <!-- Liste des actualités -->
-  <h2>Liste des Actualités</h2>
+  <!-- Barre outils tableau -->
+  <div class="table-toolbar">
+    <h2><i class="ri-list-check"></i> Liste des Actualités</h2>
+    <div class="search-box">
+      <i class="ri-search-line"></i>
+      <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" name="searchTerm" />
+    </div>
+  </div>
+
+  <!-- Tableau -->
   <div class="table-wrapper">
     <table class="actualites-table">
       <thead>
@@ -79,53 +25,100 @@
           <th>Titre</th>
           <th>Type</th>
           <th>Date</th>
-          <th>À la une</th>
           <th>Image</th>
+          <th>À la une</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          *ngFor="let actu of actualites"
-          [class.featured-row]="actu.isFeatured"
-        >
+        <tr *ngFor="let actu of filteredActualites()" [class.featured-row]="actu.isFeatured">
           <td>{{ actu.titre }}</td>
           <td>{{ actu.typeActu }}</td>
           <td>{{ actu.datePublication | date: 'dd/MM/yyyy' }}</td>
           <td>
-            <ng-container *ngIf="actu.isFeatured; else notFeatured">
-              <span class="badge-une">✔ À la une</span>
-            </ng-container>
-            <ng-template #notFeatured>
-              <button
-                (click)="setFeatured(actu)"
-                class="btn-feature"
-                [disabled]="actu.isFeatured"
-              >
-                Mettre à la une
-              </button>
-            </ng-template>
+            <img *ngIf="actu.imageUrl" [src]="actu.imageUrl" class="thumbnail" />
           </td>
           <td>
-            <img
-              *ngIf="actu.imageUrl"
-              [src]="actu.imageUrl"
-              class="thumbnail"
-              alt="Image de l'actualité"
-            />
+            <span *ngIf="actu.isFeatured" class="badge-featured-admin">🌟 À la une</span>
+            <button *ngIf="!actu.isFeatured" (click)="setFeatured(actu)" class="btn-feature-admin">
+              🌟 Mettre à la une
+            </button>
           </td>
           <td>
-            <button (click)="editActualite(actu)" class="btn-edit">Modifier</button>
-            <button
-              *ngIf="actu.id"
-              (click)="deleteActualite(actu.id)"
-              class="btn-delete"
-            >
-              Supprimer
+            <button (click)="editActualite(actu)" class="btn-edit">
+              <i class="ri-edit-line"></i>
+            </button>
+            <button (click)="deleteActualite(actu.id!)" class="btn-delete">
+              <i class="ri-delete-bin-line"></i>
             </button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
+
+  <!-- Modale formulaire -->
+  <div class="modal-overlay" *ngIf="isModalOpen">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>
+          <i class="ri-file-edit-line"></i>
+          {{ actualite.id ? 'Modifier' : 'Nouvelle' }} actualité
+        </h2>
+        <button class="modal-close" (click)="closeModal()">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form (ngSubmit)="onSubmit()" #actualiteForm="ngForm" class="modal-form">
+          <div class="form-group">
+            <label for="titre">Titre</label>
+            <input type="text" id="titre" [(ngModel)]="actualite.titre" name="titre" required />
+          </div>
+
+          <div class="form-group">
+            <label for="typeActu">Type</label>
+            <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
+              <option value="evenement">Événement</option>
+              <option value="competition">Compétition</option>
+              <option value="annonce">Annonce</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="contenu">Contenu</label>
+            <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="image">Image</label>
+            <input type="file" id="image" (change)="onImageSelected($event)" />
+            <div class="image-preview" *ngIf="imageUrl">
+              <img [src]="imageUrl" alt="Prévisualisation" />
+            </div>
+          </div>
+
+          <div class="form-featured">
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="actualite.isFeatured" name="isFeatured" />
+              <span class="slider round"></span>
+            </label>
+            <div>
+              <strong>Mettre cette actualité à la une</strong>
+              <p>Elle sera affichée en première position sur le site.</p>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit" class="btn-submit" (click)="onSubmit()">
+          {{ actualite.id ? 'Mettre à jour' : 'Ajouter' }}
+        </button>
+        <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
 </div>

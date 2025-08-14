@@ -21,18 +21,15 @@ interface Actualite {
   imports: [CommonModule, FormsModule]
 })
 export class GestionActualitesComponent implements OnInit {
+
   actualites: Actualite[] = [];
+  featuredNews: Actualite | null = null;
   imageUrl: string | ArrayBuffer | null = null;
   imageError: string = '';
+  searchTerm: string = '';
+  isModalOpen = false;
 
-  actualite: Actualite = {
-    titre: '',
-    contenu: '',
-    typeActu: '',
-    datePublication: new Date().toISOString(),
-    isFeatured: false,
-    imageUrl: ''
-  };
+  actualite: Actualite = this.getEmptyActualite();
 
   constructor(private actualiteService: ActualiteService) {}
 
@@ -41,64 +38,42 @@ export class GestionActualitesComponent implements OnInit {
   }
 
   loadActualites(): void {
-    this.actualiteService.getAll().subscribe((data: Actualite[]) => {
-      this.actualites = data;
-    });
-  }
-
-  onSubmit(): void {
-    this.actualite.datePublication = new Date().toISOString();
-
-    if (this.actualite.id) {
-      this.actualiteService.update(this.actualite.id, this.actualite).subscribe(() => {
-        this.loadActualites();
-        this.resetForm();
-        alert('Actualité mise à jour avec succès!');
-      });
-    } else {
-      this.actualiteService.create(this.actualite).subscribe(() => {
-        this.loadActualites();
-        this.resetForm();
-        alert('Actualité ajoutée avec succès!');
-      });
-    }
-  }
-
-  onImageSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      const fileType = file.type.split('/')[0];
-      if (fileType !== 'image') {
-        this.imageError = 'Veuillez télécharger une image valide.';
-        this.imageUrl = null;
-        return;
+    this.actualiteService.getAll().subscribe({
+      next: (data: Actualite[]) => {
+        console.log('✅ Actualités rechargées depuis l\'API :', data);
+        this.actualites = data;
+  
+        // Vérifiez si une actualité a isFeatured: true
+        const featured = this.actualites.find(actu => actu.isFeatured === true);
+        if (featured) {
+          console.log(`🌟 Actualité mise à la une détectée : ${featured.titre}`);
+        } else {
+          console.log('⚠️ Aucune actualité mise à la une détectée dans les données.');
+        }
+  
+        this.updateFeaturedNews(); // Met à jour l'actualité mise à la une
+      },
+      error: (err) => {
+        console.error('❌ Erreur lors du chargement des actualités :', err);
+        alert('Impossible de charger les actualités. Veuillez réessayer.');
       }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imageUrl = reader.result;
-        this.actualite.imageUrl = this.imageUrl as string;
-        this.imageError = '';
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  editActualite(actu: Actualite): void {
-    this.actualite = { ...actu };
-    this.imageUrl = actu.imageUrl || null;
-    this.imageError = '';
-  }
-
-  deleteActualite(id: string): void {
-    this.actualiteService.delete(id).subscribe(() => {
-      this.loadActualites();
-      alert('Actualité supprimée avec succès!');
     });
   }
 
-  resetForm(): void {
-    this.actualite = {
+  /** 🌟 Met à jour l'actualité mise à la une */
+  updateFeaturedNews(): void {
+    this.featuredNews = this.actualites.find((item: Actualite) => item.isFeatured === true) || null;
+  
+    if (this.featuredNews) {
+      console.log(`🌟 Actualité mise à la une : ${this.featuredNews.titre}`);
+    } else {
+      console.log('⚠️ Aucune actualité mise à la une.');
+    }
+  }
+
+  /** 🆕 Retourne une actualité vide */
+  private getEmptyActualite(): Actualite {
+    return {
       titre: '',
       contenu: '',
       typeActu: '',
@@ -106,21 +81,102 @@ export class GestionActualitesComponent implements OnInit {
       isFeatured: false,
       imageUrl: ''
     };
+  }
+
+  /** 🪟 Ouvre la modale (édition ou création) */
+  openModal(actu?: Actualite): void {
+    this.actualite = actu ? { ...actu } : this.getEmptyActualite();
+    this.imageUrl = actu?.imageUrl || null;
+    this.imageError = '';
+    this.isModalOpen = true;
+  }
+
+  /** ❌ Ferme la modale */
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.resetForm();
+  }
+
+  /** 🧼 Réinitialise le formulaire */
+  resetForm(): void {
+    this.actualite = this.getEmptyActualite();
     this.imageUrl = null;
     this.imageError = '';
   }
 
-  setFeatured(selectedActu: Actualite): void {
-    this.actualites.forEach(actu => {
-      if (actu.id !== selectedActu.id) {
-        actu.isFeatured = false;
-        this.actualiteService.update(actu.id!, actu).subscribe();
+  /** 💾 Soumet le formulaire (création ou mise à jour) */
+  onSubmit(): void {
+    this.actualite.datePublication = new Date().toISOString();
+
+    const request$ = this.actualite.id
+      ? this.actualiteService.update(this.actualite.id, this.actualite)
+      : this.actualiteService.create(this.actualite);
+
+    request$.subscribe(() => {
+      this.loadActualites();
+      this.closeModal();
+    });
+  }
+
+  /** 🖼️ Gestion de l'image sélectionnée */
+  onImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file || !file.type.startsWith('image/')) {
+      this.imageError = 'Veuillez sélectionner une image valide.';
+      this.imageUrl = null;
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imageUrl = reader.result;
+      this.actualite.imageUrl = this.imageUrl as string;
+      this.imageError = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /** 🗑️ Supprime une actualité */
+  deleteActualite(id: string): void {
+    if (confirm('Voulez-vous vraiment supprimer cette actualité ?')) {
+      this.actualiteService.delete(id).subscribe(() => {
+        this.loadActualites();
+      });
+    }
+  }
+
+  /** 🌟 Définit une actualité comme "À la une" */
+  setFeatured(actu: Actualite): void {
+    if (this.featuredNews && this.featuredNews.id === actu.id) {
+      alert('Cette actualité est déjà mise à la une.');
+      return;
+    }
+  
+    this.actualiteService.setFeatured(actu).subscribe({
+      next: () => {
+        console.log(`✅ Actualité mise à la une : ${actu.titre}`);
+        this.loadActualites(); // Recharge les actualités après la mise à jour
+      },
+      error: (err) => {
+        console.error('❌ Erreur lors de la mise à la une :', err);
+        alert('Une erreur est survenue lors de la mise à la une.');
       }
     });
+  }
 
-    selectedActu.isFeatured = true;
-    this.actualiteService.update(selectedActu.id!, selectedActu).subscribe(() => {
-      this.loadActualites();
-    });
+  /** 🔍 Filtrage */
+  filteredActualites(): Actualite[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.actualites;
+
+    return this.actualites.filter(actu =>
+      actu.titre.toLowerCase().includes(term) ||
+      actu.typeActu.toLowerCase().includes(term)
+    );
+  }
+
+  /** ✏️ Remplit le formulaire pour édition */
+  editActualite(actu: Actualite): void {
+    this.openModal(actu);
   }
 }

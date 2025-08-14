@@ -27,6 +27,7 @@ export class ActualitesComponent implements OnInit {
     this.loadActualites();
   }
 
+  /** 🔄 Charge toutes les actualités depuis le service */
   loadActualites(): void {
     this.actualiteService.getAll().subscribe({
       next: (data) => {
@@ -41,10 +42,17 @@ export class ActualitesComponent implements OnInit {
     });
   }
 
+  /** 🌟 Met à jour l'actualité mise à la une */
   updateFeaturedNews(): void {
     this.featuredNews = this.news.find(item => item.isFeatured) || null;
+    if (this.featuredNews) {
+      console.log(`🌟 Actualité mise à la une : ${this.featuredNews.titre}`);
+    } else {
+      console.log('⚠️ Aucune actualité mise à la une.');
+    }
   }
 
+  /** 🔄 Met à jour les actualités régulières */
   updateRegularNews(): void {
     this.regularNews = this.news.filter(item => !item.isFeatured);
   
@@ -56,26 +64,31 @@ export class ActualitesComponent implements OnInit {
     }
   }
 
+  /** 🔄 Met à jour les actualités filtrées pour la pagination */
   updateFilteredNews(): void {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
     this.filteredNews = this.regularNews.slice(start, end);
   }
 
+  /** ➕ Charge plus d'actualités */
   loadMore(): void {
     this.currentPage++;
     this.updateFilteredNews();
   }
 
+  /** ➖ Réinitialise la pagination */
   loadLess(): void {
     this.currentPage = 1;
     this.updateFilteredNews();
   }
 
+  /** 🔍 Suivi des actualités par ID */
   trackById(index: number, item: any): any {
     return item.id;
   }
 
+  /** 🖼️ Gestion des erreurs d'image */
   onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
     target.src = 'assets/images/default.jpg';

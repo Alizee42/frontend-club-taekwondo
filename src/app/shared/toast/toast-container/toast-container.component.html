@@ -1,0 +1,35 @@
+<div class="toast-stack bottom-right">
+    <div
+      *ngFor="let toast of (toasts$ | async); trackBy: trackById"
+      class="message-box"
+      [ngClass]="'message-box-' + normalizeType(toast.type)"
+      role="status"
+      aria-live="polite"
+    >
+      <!-- Icône RemixIcon à gauche -->
+      <div class="icon-circle" aria-hidden="true">
+        <i
+          [ngClass]="{
+            'ri-check-line':   normalizeType(toast.type) === 'success',
+            'ri-close-circle-line': normalizeType(toast.type) === 'error',
+            'ri-information-line':  normalizeType(toast.type) === 'info',
+            'ri-alert-line':   normalizeType(toast.type) === 'warning'
+          }"
+        ></i>
+      </div>
+  
+      <span class="message-text">
+        <strong>{{ getTitle(toast.type) }}</strong> {{ toast.message }}
+      </span>
+  
+      <button
+        *ngIf="toast.dismissible"
+        class="exit-button"
+        (click)="$event.stopPropagation(); removeToast(toast.id)"
+        aria-label="Fermer"
+      >
+        ×
+      </button>
+    </div>
+  </div>
+  

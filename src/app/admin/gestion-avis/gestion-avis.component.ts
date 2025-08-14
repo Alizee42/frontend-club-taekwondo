@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../shared/toast/toast.service';
 
 interface Avis {
   id: number;
@@ -27,49 +28,86 @@ export class GestionAvisComponent implements OnInit {
   avisApprouves: Avis[] = [];
   nouvelAvis: Partial<Avis> = { contenu: '', auteur: '', note: 5 };
 
-  constructor(private http: HttpClient) {}
+  loadingIds = new Set<number>();
+  errorMsg: string | null = null;
 
-  ngOnInit(): void {
-    this.chargerAvis();
-  }
+  private readonly baseUrl = 'http://localhost:8080/api/avis';
+
+  constructor(private http: HttpClient, private toast: ToastService) {}
+
+  ngOnInit(): void { this.chargerAvis(); }
+
+  trackByAvisId = (_: number, a: { id?: number }) => a?.id ?? _;
 
   chargerAvis(): void {
-    this.http.get<Avis[]>('http://localhost:8080/api/avis').subscribe((data) => {
-      this.avisEnAttente = data.filter((avis) => !avis.approuve);
-      this.avisApprouves = data.filter((avis) => avis.approuve);
+    this.errorMsg = null;
+    this.http.get<Avis[]>(this.baseUrl).subscribe({
+      next: (data) => {
+        this.avisEnAttente = (data || []).filter(a => !a.approuve);
+        this.avisApprouves = (data || []).filter(a => a.approuve);
+      },
+      error: () => {
+        this.errorMsg = 'Impossible de charger les avis.';
+        this.toast.error('Impossible de charger les avis. Réessayez dans un instant.');
+      }
     });
   }
 
   approuverAvis(id: number): void {
-    this.http.put(`http://localhost:8080/api/avis/${id}/approuver`, {}).subscribe(() => {
-      this.chargerAvis();
+    if (!id) return;
+    if (!confirm('Confirmer l’approbation de cet avis ?')) return;
+
+    this.loadingIds.add(id);
+    this.http.put(`${this.baseUrl}/${id}/approuver`, {}).subscribe({
+      next: () => { 
+        this.toast.success('Votre avis a été approuvé.'); 
+        this.chargerAvis(); 
+      },
+      error: () => this.toast.error('Impossible d’approuver cet avis. Veuillez réessayer.'),
+      complete: () => this.loadingIds.delete(id)
     });
   }
 
   supprimerAvis(id: number): void {
-    this.http.delete(`http://localhost:8080/api/avis/${id}`).subscribe(() => {
-      this.chargerAvis();
+    if (!id) return;
+    if (!confirm('Supprimer cet avis ?')) return;
+
+    this.loadingIds.add(id);
+    this.http.delete(`${this.baseUrl}/${id}`).subscribe({
+      next: () => { 
+        this.toast.info('Votre avis a été supprimé.'); 
+        this.chargerAvis(); 
+      },
+      error: () => this.toast.error('Impossible de supprimer cet avis. Veuillez réessayer.'),
+      complete: () => this.loadingIds.delete(id)
     });
   }
 
   ajouterAvis(): void {
-    if (this.nouvelAvis.contenu && this.nouvelAvis.auteur) {
-      this.http.post('/api/avis', this.nouvelAvis).subscribe(() => {
-        this.nouvelAvis = { contenu: '', auteur: '', note: 5 };
-        this.chargerAvis();
-      });
+    if (!this.nouvelAvis.contenu?.trim() || !this.nouvelAvis.auteur?.trim()) {
+      this.toast.warning('Veuillez renseigner le contenu et l’auteur.');
+      return;
     }
+    if (this.nouvelAvis.note != null) this.nouvelAvis.note = +this.nouvelAvis.note;
+
+    this.http.post(this.baseUrl, this.nouvelAvis).subscribe({
+      next: () => { 
+        this.toast.success('Votre avis a été ajouté.'); 
+        this.nouvelAvis = { contenu: '', auteur: '', note: 5 }; 
+        this.chargerAvis(); 
+      },
+      error: () => this.toast.error('Impossible d’ajouter l’avis. Veuillez réessayer.')
+    });
   }
 
   getInitials(nom: string): string {
     if (!nom) return '';
-    const parts = nom.trim().split(' ');
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
+    const p = nom.trim().split(/\s+/);
+    if (p.length === 1) return p[0][0]?.toUpperCase() ?? '';
+    return (p[0][0] + p[1][0]).toUpperCase();
   }
 
-  getPhotoUrl(photo: string): string {
-    return `http://localhost:8080/uploads/avis/${photo}`;
+  getPhotoUrl(photo?: string): string {
+    return photo ? `http://localhost:8080/uploads/avis/${encodeURIComponent(photo)}` : '';
   }
-  
 }

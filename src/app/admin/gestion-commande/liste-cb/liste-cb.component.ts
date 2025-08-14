@@ -11,10 +11,10 @@ import { CommandeDTO } from '../../../models/commande';
   styleUrls: ['./liste-cb.component.css']
 })
 export class ListeCbComponent implements OnInit {
-  commandesCB: CommandeDTO[] = [];        // Commandes payées par CB et non encore retirées
-  isLoading: boolean = true;              // Indicateur de chargement
-  isUpdating: boolean = false;            // Indicateur de mise à jour
-  errorMessage: string = '';              // Message d'erreur
+  commandesCB: CommandeDTO[] = [];   // Commandes payées par CB et non encore retirées
+  isLoading = true;
+  isUpdating = false;
+  errorMessage = '';
 
   constructor(private commandeService: CommandeService) {}
 
@@ -22,44 +22,61 @@ export class ListeCbComponent implements OnInit {
     this.chargerCommandesCB();
   }
 
-  // 🔹 Charger les commandes CB qui ne sont pas encore retirées
+  /** 🔹 Charge les commandes payées par CB qui ne sont pas encore "RETIRE" */
   chargerCommandesCB(): void {
     this.isLoading = true;
     this.errorMessage = '';
+
     this.commandeService.getCommandes().subscribe({
-      next: (commandes: CommandeDTO[]) => {
-        this.commandesCB = commandes.filter(
-          commande => commande.modePaiement === 'CB' && commande.statut !== 'RETIRE'
+      next: (commandes: any[]) => {
+        // Normalise -> CommandeDTO
+        const dtos = (commandes ?? []).map(c => this.toDTO(c));
+
+        // Filtre: modePaiement = 'CB' ET statut != 'RETIRE'
+        this.commandesCB = dtos.filter(c =>
+          (c.modePaiement ?? '').toUpperCase() === 'CB' &&
+          (c.statut ?? '').toUpperCase() !== 'RETIRE'
         );
+
         this.isLoading = false;
       },
-      error: (err) => {
-        this.handleError('Erreur lors du chargement des commandes CB.', err);
-      }
+      error: (err) => this.handleError('Erreur lors du chargement des commandes CB.', err)
     });
   }
 
-  // 🔹 Marquer une commande comme "RETIRE"
+  /** 🔹 Marque une commande comme "RETIRE" puis rafraîchit la liste */
   marquerCommeRetiree(id: number): void {
-      console.log(`Tentative de marquer la commande ${id} comme retirée`);
-      this.commandeService.changerStatut(id, 'RETIRE').subscribe({
-        next: () => {
-          console.log(`Commande ${id} marquée comme retirée avec succès`);
-          this.chargerCommandesCB(); // Rafraîchir la liste des commandes
-        },
-        error: (err) => {
-          console.error(`Erreur lors de la mise à jour du statut de la commande ${id}`, err);
-        }
-      });
-    }
-
-  // 🔹 Format de date FR (JJ/MM/AAAA)
-  formatDateFR(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('fr-FR');
+    this.isUpdating = true;
+    this.commandeService.changerStatut(id, 'RETIRE').subscribe({
+      next: () => {
+        this.isUpdating = false;
+        this.chargerCommandesCB();
+      },
+      error: (err) => this.handleError(`Erreur lors de la mise à jour du statut de la commande ${id}.`, err)
+    });
   }
 
-  // 🔹 Gestion d'erreurs centralisée
+  /** 🔹 Format JJ/MM/AAAA */
+  formatDateFR(dateStr?: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return isNaN(date.getTime()) ? '' : date.toLocaleDateString('fr-FR');
+  }
+
+  /** 🔧 Normalisation "any" -> CommandeDTO (évite les erreurs de type) */
+  private toDTO(c: any): CommandeDTO {
+    return {
+      id: c?.id ?? 0,
+      // essaie successivement plusieurs champs possibles pour la date
+      dateCommande: c?.dateCommande ?? c?.datePaiement ?? c?.createdAt ?? '',
+      montantTotal: c?.montantTotal ?? c?.total ?? 0,
+      lignesCommande: c?.lignesCommande ?? c?.lignes ?? [],
+      statut: c?.statut ?? 'EN_ATTENTE',
+      modePaiement: c?.modePaiement ?? c?.paymentMode ?? ''
+    };
+  }
+
+  /** ❗ Gestion erreurs */
   private handleError(message: string, error: any): void {
     console.error(message, error);
     this.errorMessage = message;

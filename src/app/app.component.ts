@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { ToastContainerComponent } from './shared/toast/toast-container/toast-container.component'; // <-- AJOUT
+
 
 import { HeaderComponent } from './layout/header/header.component';
 import { FooterComponent } from './layout/footer/footer.component';
@@ -16,7 +18,8 @@ import { ParametresPaiementService } from './services/parametres-paiement.servic
     RouterModule,
     HeaderComponent,
     FooterComponent,
-    ConnectedHeaderComponent
+    ConnectedHeaderComponent,
+    ToastContainerComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']

@@ -2,7 +2,7 @@
   <!-- 🔷 En-tête -->
   <div class="paiement-header">
     <h1>Paiement de votre cotisation</h1>
-    <p>Montant fixe : <strong>{{ montantInitial }} €</strong></p>
+    <p>Montant fixe : <strong>{{ montantInitial.toFixed(2) }} €</strong></p>
   </div>
 
   <!-- 🔷 Formulaire à étapes -->
@@ -39,7 +39,7 @@
         <div class="choix-cartes">
           <div class="carte-option" [class.active]="modePaiement === 'unique'" (click)="modePaiement = 'unique'">
             <h3>💳 Paiement en une fois</h3>
-            <p>Un seul règlement de <strong>{{ montantInitial }} €</strong>.</p>
+            <p>Un seul règlement de <strong>{{ montantInitial.toFixed(2) }} €</strong>.</p>
           </div>
           <div class="carte-option" [class.active]="modePaiement === 'echeances'" (click)="modePaiement = 'echeances'">
             <h3>📆 Paiement en plusieurs fois</h3>
@@ -63,7 +63,11 @@
       <!-- Étape 3 : Paiement -->
       <section *ngIf="step === 3" class="step">
         <h2>Informations de paiement</h2>
-        <p><strong>Montant à payer :</strong> {{ montantTotalAPayer.toFixed(2) }} €</p>
+        <p>
+          <strong>Montant à payer :</strong>
+          <span *ngIf="modePaiement === 'unique'">{{ montantInitial.toFixed(2) }} €</span>
+          <span *ngIf="modePaiement === 'echeances'">{{ getMontantParEcheance().toFixed(2) }} € / échéance</span>
+        </p>
         <div class="recapitulatif recap-bien-dispose">
           <h3>🧾 Résumé du paiement</h3>
           <ul class="recap-list">
@@ -85,17 +89,16 @@
         </div>
 
         <div class="btn-group">
-  <button class="btn-prev" (click)="previousStep()">Retour</button>
-  <button class="btn-next" (click)="nextStep()">Suivant</button>
-</div>
-
+          <button class="btn-prev" (click)="previousStep()">Retour</button>
+          <button class="btn-next" (click)="initierPaiement()">Payer</button>
+        </div>
       </section>
 
       <!-- Étape 4 : Confirmation -->
       <section *ngIf="step === 4" class="step confirmation">
         <div class="confirmation-icon">&#10004;</div>
         <h2>Paiement effectué avec succès</h2>
-        <p>Nous vous remercions pour votre règlement.✅ Un reçu vous a été envoyé par email.</p>
+        <p>Nous vous remercions pour votre règlement. ✅ Un reçu vous a été envoyé par email.</p>
         <p>Vous pouvez retrouver vos paiements dans la section <strong>“Mes paiements”</strong> ci-dessous.</p>
         <button class="btn-new-payment" (click)="step = 1">Effectuer un autre paiement</button>
       </section>
@@ -155,8 +158,10 @@
     </div>
 
     <!-- Aucun paiement -->
-    <div *ngIf="getPaiementsUniquesPourEnfant(enfant.id).length === 0 
-                && getPaiementsEcheancesPourEnfant(enfant.id).length === 0">
+    <div *ngIf="
+      getPaiementsUniquesPourEnfant(enfant.id).length === 0 && 
+      getPaiementsEcheancesPourEnfant(enfant.id).length === 0
+    ">
       <p>Aucun paiement trouvé pour cet enfant.</p>
     </div>
   </div>

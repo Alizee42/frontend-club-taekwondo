@@ -1,90 +1,120 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ActualiteService {
-  private apiUrl = 'http://localhost:8080/api/actualites'; // URL du backend
-  private actualitesSubject = new BehaviorSubject<any[]>([]); // Comportement dynamique des actualités
+  private apiUrl = 'http://localhost:8080/api/actualites';
+  private actualitesSubject = new BehaviorSubject<any[]>([]);
 
   constructor(private http: HttpClient) {
-    // Charger les actualités au démarrage du service
-    this.loadActualites();
+    this.reloadActualites(); // Initialisation des actualités
   }
 
-  // Récupérer les actualités
+  /** 🔹 Observable public pour récupérer les actualités */
   getAll(): Observable<any[]> {
+    console.log('🔄 Requête GET pour récupérer toutes les actualités');
     return this.actualitesSubject.asObservable();
   }
 
-  // Charger toutes les actualités depuis l'API
-  private loadActualites(): void {
-    this.http.get<any[]>(this.apiUrl).pipe(
-      catchError((error) => {
-        console.error('Erreur lors du chargement des actualités:', error);
-        throw error; // Gérer l'erreur si nécessaire (notifier l'utilisateur par exemple)
-      })
-    ).subscribe((data) => {
-      this.actualitesSubject.next(data); // Met à jour la liste des actualités dans le Subject
-    });
-  }
-
-  // Notifier les composants des changements
-  notifyChanges(): void {
-    this.reloadActualites(); // Recharge les actualités depuis l'API
-  }
-
-  // Ajouter un mécanisme pour recharger les actualités manuellement
+  /** 🔹 Recharge manuellement les actualités depuis l'API */
   reloadActualites(): void {
-    this.loadActualites(); // Recharge les actualités
+    console.log('🔄 Rechargement des actualités depuis l\'API...');
+    this.http.get<any[]>(this.apiUrl).pipe(
+      tap(data => {
+        console.log('✅ Actualités rechargées depuis l\'API :', data);
+        this.actualitesSubject.next(data);
+      }),
+      catchError(error => {
+        console.error('❌ Erreur lors du rechargement des actualités :', error);
+        return throwError(() => error);
+      })
+    ).subscribe();
   }
 
-  // Créer une nouvelle actualité
+  /** 🔹 Crée une nouvelle actualité */
   create(actualite: any): Observable<any> {
+    console.log('🆕 Création d\'une nouvelle actualité :', actualite);
     return this.http.post<any>(this.apiUrl, actualite).pipe(
-      catchError((error) => {
-        console.error('Erreur lors de la création de l\'actualité:', error);
-        throw error;
-      }),
-      tap(() => this.reloadActualites()) // Recharge les actualités après la création
-    );
-  }
-
-  // Mettre à jour une actualité existante
-  update(id: string, actualite: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, actualite).pipe(
-      catchError((error) => {
-        console.error('Erreur lors de la mise à jour de l\'actualité:', error);
-        throw error;
-      }),
-      tap(() => this.reloadActualites()) // Recharge les actualités après la mise à jour
-    );
-  }
-
-  // Supprimer une actualité
-  delete(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
-      catchError((error) => {
-        console.error('Erreur lors de la suppression de l\'actualité:', error);
-        throw error;
-      }),
       tap(() => {
-        // Optionnel : filtrer l'actualité supprimée du cache local
-        const currentActualites = this.actualitesSubject.getValue();
-        this.actualitesSubject.next(currentActualites.filter(actualite => actualite.id !== id));
+        console.log('✅ Actualité créée avec succès');
+        this.reloadActualites();
+      }),
+      catchError(error => {
+        console.error('❌ Erreur lors de la création de l\'actualité :', error);
+        return throwError(() => error);
       })
     );
   }
 
-  // Récupérer une actualité par ID
+  /** 🔹 Met à jour une actualité */
+  update(id: string, actualite: any): Observable<any> {
+    console.log('✏️ Mise à jour de l\'actualité avec ID :', id);
+    return this.http.put<any>(`${this.apiUrl}/${id}`, actualite).pipe(
+      tap(() => {
+        console.log('✅ Actualité mise à jour avec succès');
+        this.reloadActualites();
+      }),
+      catchError(error => {
+        console.error('❌ Erreur lors de la mise à jour de l\'actualité :', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /** 🔹 Supprime une actualité */
+  delete(id: string): Observable<any> {
+    console.log('🗑️ Requête DELETE pour supprimer l\'actualité avec ID :', id);
+    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
+        console.log('✅ Actualité supprimée avec succès');
+        this.reloadActualites();
+      }),
+      catchError(error => {
+        console.error('❌ Erreur lors de la suppression de l\'actualité :', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /** 🔹 Récupère une actualité par ID */
   getById(id: string): Observable<any> {
+    console.log('🔄 Requête GET pour récupérer l\'actualité avec ID :', id);
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      catchError((error) => {
-        console.error('Erreur lors de la récupération de l\'actualité :', error);
-        throw error;
+      tap(data => console.log('✅ Actualité récupérée :', data)),
+      catchError(error => {
+        console.error('❌ Erreur lors de la récupération de l\'actualité :', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /** 🔹 Définit une actualité comme "À la une" */
+  setFeatured(actu: any): Observable<any> {
+    console.log('🌟 Requête PUT pour mettre à la une l\'actualité :', actu);
+    return this.http.put<any>(`${this.apiUrl}/${actu.id}/featured`, actu).pipe(
+      tap(() => {
+        console.log('✅ Actualité mise à la une avec succès');
+        this.reloadActualites();
+      }),
+      catchError(error => {
+        console.error('❌ Erreur lors de la mise à la une :', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /** 🔹 Récupère les actualités à la une */
+  getFeatured(): Observable<any[]> {
+    console.log('🔄 Requête GET pour récupérer les actualités à la une');
+    return this.http.get<any[]>(`${this.apiUrl}/featured`).pipe(
+      tap(data => console.log('✅ Actualités à la une récupérées :', data)),
+      catchError(error => {
+        console.error('❌ Erreur lors de la récupération des actualités à la une :', error);
+        return throwError(() => error);
       })
     );
   }

@@ -1,121 +1,146 @@
 <section id="avis" class="avis-section">
-    <div class="container">
-      <h2 class="section-title">Ils parlent de nous</h2>
-  
-      <!-- Message de confirmation -->
-      <div *ngIf="messageConfirmation" class="alert alert-success">
-        {{ messageConfirmation }}
-      </div>
-  
-      <!-- Carrousel des avis -->
-      <div class="swiper avis-swiper">
-        <div class="swiper-wrapper">
-          <div *ngFor="let avis of avisApprouves" class="swiper-slide">
-            <div class="avis-card">
-              <p class="avis-text">“{{ avis.contenu }}”</p>
-              <div class="avis-author">
-                <div class="photo-container">
-                  <img
-                    *ngIf="avis.photo"
-                    [src]="getPhotoUrl(avis.photo)"
-                    alt="Photo de {{ avis.pseudoVisiteur }}"
-                    class="avis-photo"
-                  />
-                  <div
-                    *ngIf="!avis.photo"
-                    class="initials"
-                    [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || 'Anonyme')"
-                  >
-                    {{ getInitials(avis.pseudoVisiteur || 'Anonyme') }}
-                  </div>
-                </div>
-                <div>
-                  <strong>{{ avis.pseudoVisiteur || 'Anonyme' }}</strong><br />
-                  <span>{{ avis.typeAvis || 'Avis général' }}</span>
+  <div class="container">
+    <h2 class="section-title">Ils parlent de nous</h2>
+
+    <!-- Message de confirmation (aria-live pour lecteurs d'écran) -->
+    <div *ngIf="messageConfirmation" class="alert alert-success" role="status" aria-live="polite">
+      {{ messageConfirmation }}
+    </div>
+
+    <!-- Carrousel des avis -->
+    <div class="swiper avis-swiper" aria-label="Avis des visiteurs">
+      <div class="swiper-wrapper">
+        <!-- état vide -->
+        <div *ngIf="(avisApprouves?.length || 0) === 0" class="swiper-slide">
+          <div class="avis-card">
+            <p class="avis-text">Aucun avis pour le moment.</p>
+          </div>
+        </div>
+
+        <div *ngFor="let avis of avisApprouves; trackBy: trackByAvisId" class="swiper-slide">
+          <div class="avis-card">
+            <p class="avis-text">“{{ avis.contenu }}”</p>
+
+            <div class="avis-author">
+              <div class="photo-container">
+                <img
+                  *ngIf="avis.photo"
+                  [src]="getPhotoUrl(avis.photo)"
+                  alt="Photo de {{ avis.pseudoVisiteur || 'Anonyme' }}"
+                  class="avis-photo"
+                  loading="lazy"
+                  width="60" height="60"
+                />
+                <div
+                  *ngIf="!avis.photo"
+                  class="initials"
+                  [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || 'Anonyme')"
+                >
+                  {{ getInitials(avis.pseudoVisiteur || 'Anonyme') }}
                 </div>
               </div>
-              <div class="note-stars">
-                <i
-                  *ngFor="let star of [1, 2, 3, 4, 5]"
-                  class="fa"
-                  [class.fa-star]="star <= avis.note"
-                  [class.fa-star-o]="star > avis.note"
-                  aria-hidden="true"
-                ></i>
+              <div>
+                <strong>{{ avis.pseudoVisiteur || 'Anonyme' }}</strong><br />
+                <span>{{ avis.typeAvis || 'Avis général' }}</span>
               </div>
+            </div>
+
+            <div class="note-stars" [attr.aria-label]="'Note : ' + (avis.note || 0) + '/5'">
+              <span *ngFor="let star of [1,2,3,4,5]">
+                <i class="ri-star-fill" *ngIf="star <= (avis.note || 0)" aria-hidden="true"></i>
+                <i class="ri-star-line" *ngIf="star > (avis.note || 0)" aria-hidden="true"></i>
+              </span>
             </div>
           </div>
         </div>
-  
-      
-        <!-- Pagination -->
-        <div class="swiper-pagination"></div>
-      
-        <!-- Flèches -->
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
       </div>
-  
-      <!-- Bouton pour laisser un avis -->
-      <button class="btn-leave-review" (click)="ouvrirModale()">Laisser un avis</button>
+
+      <!-- Pagination -->
+      <div class="swiper-pagination" aria-label="Pagination des avis"></div>
+
+      <!-- Flèches -->
+      <div class="swiper-button-prev" aria-label="Avis précédent"></div>
+      <div class="swiper-button-next" aria-label="Avis suivant"></div>
     </div>
-  
-    <!-- Modale pour laisser un avis -->
-    <div class="modale" [class.active]="modaleOuverte">
-      <div class="modale-content">
-        <button class="modale-close" (click)="fermerModale()">×</button>
-    
-        <h3>Laisser un avis</h3>
-        <form (ngSubmit)="envoyerAvis()">
-          <div class="form-group">
-            <label for="pseudo">Votre nom :</label>
-            <input
-              type="text"
-              id="pseudo"
-              [(ngModel)]="nouvelAvis.pseudoVisiteur"
-              name="pseudo"
-              placeholder="Entrez votre nom"
-              required
-            />
+
+    <!-- Bouton pour laisser un avis -->
+    <button class="btn-leave-review" type="button" (click)="ouvrirModale()">Laisser un avis</button>
+  </div>
+
+  <!-- Modale pour laisser un avis -->
+  <div class="modale" [class.active]="modaleOuverte">
+    <div
+      class="modale-content"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="avisModalTitle"
+      aria-describedby="avisModalDesc"
+      (click)="$event.stopPropagation()"
+    >
+      <button class="modale-close" type="button" (click)="fermerModale()" aria-label="Fermer">×</button>
+
+      <h3 id="avisModalTitle">Laisser un avis</h3>
+      <p id="avisModalDesc" class="sr-only">Formulaire pour déposer un avis public.</p>
+
+      <form (ngSubmit)="envoyerAvis()">
+        <div class="form-group">
+          <label for="pseudo">Votre nom :</label>
+          <input
+            type="text"
+            id="pseudo"
+            [(ngModel)]="nouvelAvis.pseudoVisiteur"
+            name="pseudo"
+            placeholder="Entrez votre nom"
+            required
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="contenu">Votre témoignage :</label>
+          <textarea
+            id="contenu"
+            [(ngModel)]="nouvelAvis.contenu"
+            name="contenu"
+            placeholder="Partagez votre expérience"
+            required
+            minlength="5"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="note">Votre note :</label>
+          <select id="note" [(ngModel)]="nouvelAvis.note" name="note" required>
+            <option *ngFor="let star of [1,2,3,4,5]" [value]="star">
+              {{ star }} étoile{{ star > 1 ? 's' : '' }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Sujet OPTIONNEL : aucune valeur par défaut -->
+        <div class="form-group">
+          <label for="typeAvis">Sujet (optionnel) :</label>
+          <select id="typeAvis" [(ngModel)]="nouvelAvis.typeAvis" name="typeAvis">
+            <option value="">Avis général</option>
+            <option value="cours">Cours</option>
+            <option value="entraineurs">Entraîneurs</option>
+            <option value="evenements">Événements</option>
+            <option value="organisation">Organisation</option>
+            <option value="competitions">Compétitions</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="photo">Votre photo (optionnelle) :</label>
+          <input type="file" id="photo" (change)="onPhotoSelected($event)" accept="image/*" />
+          <div *ngIf="photoPreview" class="photo-preview">
+            <img [src]="photoPreview" alt="Aperçu de la photo" width="100" height="100" />
           </div>
-          <div class="form-group">
-            <label for="contenu">Votre témoignage :</label>
-            <textarea
-              id="contenu"
-              [(ngModel)]="nouvelAvis.contenu"
-              name="contenu"
-              placeholder="Partagez votre expérience"
-              required
-            ></textarea>
-          </div>
-          <div class="form-group">
-            <label for="note">Votre note :</label>
-            <select
-              id="note"
-              [(ngModel)]="nouvelAvis.note"
-              name="note"
-              required
-            >
-              <option *ngFor="let star of [1, 2, 3, 4, 5]" [value]="star">
-                {{ star }} étoile{{ star > 1 ? 's' : '' }}
-              </option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="photo">Votre photo (optionnelle) :</label>
-            <input
-              type="file"
-              id="photo"
-              (change)="onPhotoSelected($event)"
-              accept="image/*"
-            />
-            <div *ngIf="photoPreview" class="photo-preview">
-              <img [src]="photoPreview" alt="Aperçu de la photo" />
-            </div>
-          </div>
-          <button type="submit" class="btn-submit">Envoyer</button>
-          <button type="button" class="btn-close" (click)="fermerModale()">Annuler</button>
-        </form>
-      </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Envoyer</button>
+        <button type="button" class="btn-close" (click)="fermerModale()">Annuler</button>
+      </form>
     </div>
-  </section>
+  </div>
+</section>

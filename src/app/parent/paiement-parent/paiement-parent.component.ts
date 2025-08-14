@@ -28,7 +28,6 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   modePaiement = 'unique';
   nombreEcheances = 1;
   echeancesOptions: number[] = [];
-  montantTotalAPayer = 0;
 
   stripe: any;
   cardElement: any;
@@ -45,8 +44,10 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    console.log("🔄 [INIT] Chargement des paramètres de paiement...");
     this.parametresService.parametres$.subscribe((parametres) => {
       if (parametres) {
+        console.log("✅ [Paramètres] Reçus :", parametres);
         this.montantInitial = parametres.montantCotisation;
         this.echeancesOptions = Array.from({ length: parametres.echeancesAutorisees }, (_, i) => i + 1);
         this.nombreEcheances = parametres.echeancesAutorisees;
@@ -60,32 +61,44 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   /** 🔹 Charger les enfants */
   loadEnfants(): void {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      console.warn("⚠️ [Enfants] Aucun token trouvé");
+      return;
+    }
+
+    console.log("📥 [Enfants] Chargement depuis API /mes-enfants ...");
 
     this.http.get<{ id: number; nom: string; prenom: string }[]>(
       'http://localhost:8080/api/membres/mes-enfants',
       { headers: { Authorization: `Bearer ${token}` } }
     ).subscribe({
       next: (data) => {
+        console.log("✅ [Enfants] Données reçues :", data);
         this.enfants = data || [];
         if (this.enfants.length === 1) {
           this.selectMembre(this.enfants[0]);
         }
         this.loadPaiements();
       },
-      error: (err) => console.error('❌ Erreur chargement enfants', err)
+      error: (err) => console.error('❌ [Enfants] Erreur chargement', err)
     });
   }
 
   /** 🔹 Charger les paiements */
   loadPaiements(): void {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      console.warn("⚠️ [Paiements] Aucun token trouvé");
+      return;
+    }
+
+    console.log("📥 [Paiements] Chargement depuis API /parent/mes-paiements ...");
 
     this.http.get<any[]>('http://localhost:8080/api/paiements/parent/mes-paiements', {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (data) => {
+        console.log("✅ [Paiements] Données reçues :", data);
         this.paiements = (data || []).map(p => ({
           ...p,
           membreId: p.membreId ?? null,
@@ -94,14 +107,17 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
         }));
         this.mettreAJourFiltresPaiements();
       },
-      error: (err) => console.error("❌ Erreur chargement paiements", err)
+      error: (err) => console.error("❌ [Paiements] Erreur chargement", err)
     });
   }
 
   /** 🔹 Mise à jour des filtres */
   mettreAJourFiltresPaiements(): void {
+    console.log("📊 [Paiements] Mise à jour des filtres...");
     this.paiementsUniques = this.paiements.filter(p => p.modePaiement === 'unique');
     this.paiementsEcheances = this.paiements.filter(p => p.modePaiement === 'echeances');
+    console.log("📊 [Paiements] Uniques :", this.paiementsUniques);
+    console.log("📊 [Paiements] Échelonnés :", this.paiementsEcheances);
   }
 
   /** 🔹 Filtrer pour affichage HTML */
@@ -118,23 +134,25 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
 
   /** 🔹 Navigation étapes */
   nextStep(): void {
-    if (this.step < this.maxStep) {
-      this.step++;
-      if (this.step === 3) setTimeout(() => this.initStripeElement(), 200);
-    }
+    this.step++;
+    console.log("➡️ [Navigation] Passage à l'étape", this.step);
+    if (this.step === 3) setTimeout(() => this.initStripeElement(), 200);
   }
   previousStep(): void {
-    if (this.step > 1) this.step--;
+    this.step--;
+    console.log("⬅️ [Navigation] Retour à l'étape", this.step);
   }
 
   /** 🔹 Sélection enfant */
   selectMembre(membre: { id: number; nom: string; prenom: string }): void {
+    console.log("👦 [Sélection enfant]", membre);
     this.enfantSelectionne = membre.id;
     this.enfantSelectionneNom = `${membre.prenom} ${membre.nom}`;
   }
 
   /** 🔹 Init Stripe */
   initStripeElement(): void {
+    console.log("💳 [Stripe] Initialisation de l'élément de carte...");
     const container = document.querySelector('#card-element');
     if (!container) return;
     this.stripeService.getStripeInstance().then((stripe: any) => {
@@ -148,6 +166,8 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   /** 🔹 Paiement principal */
   initierPaiement(): void {
     if (this.enCoursDePaiement || !this.enfantSelectionne || !this.cardElement) return;
+
+    console.log("🚀 [Paiement] Initialisation paiement Stripe...");
 
     const montant = this.montantInitial;
     const token = localStorage.getItem('token');
@@ -163,21 +183,24 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
       enfantId: this.enfantSelectionne
     };
 
+    console.log("📤 [Stripe] Données envoyées au backend :", data);
+
     this.enCoursDePaiement = true;
     this.http.post('http://localhost:8080/api/stripe/create-payment-intent', data, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (res: any) => {
+        console.log("✅ [Stripe] clientSecret reçu :", res);
         const clientSecret = res?.clientSecret;
         if (!clientSecret) return;
         this.confirmerPaiementStripe(clientSecret, this.cardElement, () => {
-          this.loadPaiements(); // 🔹 Rechargement après paiement
           this.paiementReussi = true;
           this.enCoursDePaiement = false;
           this.nextStep();
         });
       },
-      error: () => {
+      error: (err) => {
+        console.error("❌ [Stripe] Erreur création paiement :", err);
         this.erreurMessage = 'Erreur création paiement';
         this.paiementErreur = true;
         this.enCoursDePaiement = false;
@@ -187,13 +210,51 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
 
   /** 🔹 Confirmation Stripe */
   confirmerPaiementStripe(clientSecret: string, element: any, callback: () => void): void {
+    console.log("🔑 [Stripe] Confirmation paiement...");
     this.stripe.confirmCardPayment(clientSecret, {
       payment_method: { card: element }
     }).then((result: any) => {
       if (result.error) {
+        console.error("❌ [Stripe] Erreur de paiement :", result.error.message);
         this.erreurMessage = result.error.message;
         this.paiementErreur = true;
       } else {
+        console.log("✅ [Stripe] Paiement validé :", result);
+        // ✅ Paiement Stripe OK → enregistrer en BDD
+        this.enregistrerPaiementBDD(() => {
+          callback();
+        });
+      }
+    });
+  }
+
+  /** 🔹 Enregistrement du paiement en BDD */
+  enregistrerPaiementBDD(callback: () => void): void {
+    const token = localStorage.getItem('token');
+    if (!token || !this.enfantSelectionne) {
+      console.warn("⚠️ [Paiement BDD] Token ou enfant non défini !");
+      return;
+    }
+
+    const paiementDTO = {
+      membreId: this.enfantSelectionne,
+      type: 'cotisation',
+      modePaiement: this.modePaiement,
+      montantTotal: this.montantInitial
+    };
+
+    console.log("📤 [Paiement BDD] Envoi au backend :", paiementDTO);
+
+    this.http.post('http://localhost:8080/api/paiements/parent/ajouter', paiementDTO, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (res) => {
+        console.log("✅ [Paiement BDD] Sauvegardé en BDD :", res);
+        this.loadPaiements();
+        callback();
+      },
+      error: (err) => {
+        console.error('❌ [Paiement BDD] Erreur sauvegarde', err);
         callback();
       }
     });

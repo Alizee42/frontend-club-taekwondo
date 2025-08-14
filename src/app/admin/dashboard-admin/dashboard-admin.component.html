@@ -1,91 +1,104 @@
-<div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>Tableau de bord</h1>
-    <p class="welcome-message" *ngIf="administrateurConnecte">
-      Bienvenue, <span class="highlight">{{ administrateurConnecte.prenom }} {{ administrateurConnecte.nom }}</span> !
-    </p>
+<div class="dashboard-admin">
+
+  <div class="header-dashboard">
+    <h1>Bienvenue, {{ prenomUtilisateur }}</h1>
   </div>
-  <p class="intro">Bienvenue sur l’espace de gestion du site Olympique Villeurbanne Taekwondo.</p>
 
+  <!-- KPI -->
+  <div class="kpi-container">
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-icon-wrapper"><i class="ri-team-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ nbMembres }}</h3>
+        <p>Membres inscrits</p>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-green">
+      <div class="kpi-icon-wrapper"><i class="ri-hand-coin-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ totalPaiements | currency:'EUR' }}</h3>
+        <p>Paiements reçus</p>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-icon-wrapper"><i class="ri-time-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ paiementsAttente }}</h3>
+        <p>Paiements en attente</p>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-blue-light">
+      <div class="kpi-icon-wrapper"><i class="ri-calendar-event-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ evenementsAVenir }}</h3>
+        <p>Événements à venir</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sections -->
   <div class="dashboard-grid">
-    <a (click)="navigateToHoraires()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-clock"></i>
-      </div>
-      <h3>Horaires</h3>
-      <p>Gérer les créneaux, cours et disponibilités</p>
-    </a>
 
-    <a (click)="navigateToprofesseurs()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-chalkboard-teacher"></i>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-community-line"></i></div>
+        <h2>Gestion du club</h2>
       </div>
-      <h3>Professeurs</h3>
-      <p>Ajouter ou modifier les enseignants</p>
-    </a>
+      <ul>
+        <li (click)="navigateToGestionEvenements()"><i class="ri-calendar-event-line"></i> Événements</li>
+        <li (click)="navigateToGalerie()"><i class="ri-image-line"></i> Galerie / Médias</li>
+        <li (click)="navigateToHoraires()"><i class="ri-time-line"></i> Horaires</li>
+      </ul>
+    </div>
 
-    <a (click)="navigateToavis()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-comments"></i>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-user-line"></i></div>
+        <h2>Gestion des membres</h2>
       </div>
-      <h3>Avis</h3>
-      <p>Modérer et consulter les retours</p>
-    </a>
+      <ul>
+        <li class="has-badge" (click)="navigateToGestionInscription()">
+          <i class="ri-user-add-line"></i> Inscriptions
+          <span class="badge" *ngIf="badge.inscriptions > 0">{{ badge.inscriptions }}</span>
+        </li>
+        <li (click)="navigateToDocument()"><i class="ri-file-list-line"></i> Documents</li>
+        <li (click)="navigateToProfesseurs()"><i class="ri-user-star-line"></i> Professeurs</li>
+      </ul>
+    </div>
 
-    <a (click)="navigateToGestionInscription()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-user-plus"></i>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-wallet-3-line"></i></div>
+        <h2>Gestion financière</h2>
       </div>
-      <h3>Inscriptions</h3>
-      <p>Suivre les demandes et candidatures</p>
-    </a>
+      <ul>
+        <li class="has-badge" (click)="navigateToPaiement()">
+          <i class="ri-money-euro-circle-line"></i> Paiements
+          <span class="badge" *ngIf="badge.paiements > 0">{{ badge.paiements }}</span>
+        </li>
+        <li class="has-badge" (click)="navigateToGestionCommande()">
+          <i class="ri-shopping-bag-3-line"></i> Commandes
+          <span class="badge" *ngIf="badge.commandes > 0">{{ badge.commandes }}</span>
+        </li>
+      </ul>
+    </div>
 
-    <a (click)="navigateToGalerie()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-images"></i>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-settings-3-line"></i></div>
+        <h2>Administration</h2>
       </div>
-      <h3>Galerie</h3>
-      <p>Ajouter photos et vidéos</p>
-    </a>
+      <ul>
+        <li class="has-badge" (click)="navigateToavis()">
+          <i class="ri-star-line"></i> Avis
+          <span class="badge" *ngIf="badge.avis > 0">{{ badge.avis }}</span>
+        </li>
+        <li (click)="navigateToActualites()"><i class="ri-newspaper-line"></i> Actualités</li>
+      </ul>
+    </div>
 
-    <a (click)="navigateToActualites()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-newspaper"></i>
-      </div>
-      <h3>Actualités</h3>
-      <p>Gérer les articles et annonces</p>
-    </a>
-
-    <a (click)="navigateToDocument()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-file-alt"></i>
-      </div>
-      <h3>Documents</h3>
-      <p>Gérer les documents soumis par les membres</p>
-    </a>
-    
-    <a (click)="navigateToPaiement()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-file-alt"></i>
-      </div>
-      <h3>Paiement</h3>
-      <p>Gérer les paiements effectués par les membres pour les cotisations</p>
-    </a>
-
-    <!-- Carte corrigée pour la gestion des commandes -->
-    <a (click)="navigateToGestionCommande()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-shopping-cart"></i>
-      </div>
-      <h3>Commandes</h3>
-      <p>Gérer les commandes des membres</p>
-    </a>
-    <a (click)="navigateToGestionEvenements()" class="dashboard-card">
-      <div class="icon-container">
-        <i class="fas fa-calendar-alt"></i>
-      </div>
-      <h3>Événements</h3>
-      <p>Gérer les événements organisés par le club</p>
-    </a>
   </div>
 </div>

@@ -8,35 +8,33 @@
       Aucun avis en attente.
     </div>
 
-    <div *ngFor="let avis of avisEnAttente" class="avis-card">
+    <div *ngFor="let avis of avisEnAttente; trackBy: trackByAvisId" class="avis-card">
       <div class="avis-infos">
         <div class="photo-container">
           <img
-          *ngIf="avis.photo"
-          [src]="getPhotoUrl(avis.photo)"
-          alt="Photo de {{ avis.pseudoVisiteur }}"
-          class="photo"
-        />
-        
-          <div *ngIf="!avis.photo" class="initials" [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || avis.auteur)">
-            {{ getInitials(avis.pseudoVisiteur || avis.auteur) }}
+            *ngIf="avis.photo"
+            [src]="getPhotoUrl(avis.photo)"
+            alt="Photo de {{ avis.pseudoVisiteur || avis.auteur || 'Anonyme' }}"
+            class="photo"
+            loading="lazy"
+            width="60" height="60"
+          />
+          <div *ngIf="!avis.photo" class="initials"
+               [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || avis.auteur || 'Anonyme')">
+            {{ getInitials(avis.pseudoVisiteur || avis.auteur || 'Anonyme') }}
           </div>
         </div>
 
         <p>
-          <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> –
-          {{ avis.typeAvis }} – {{ avis.datePub | date }}
+          <strong>{{ avis.pseudoVisiteur || avis.auteur || 'Anonyme' }}</strong> –
+          {{ (avis.typeAvis || 'Avis') | titlecase }} – {{ avis.datePub | date:'dd/MM/yyyy' }}
         </p>
         <p>{{ avis.contenu }}</p>
 
         <div class="note-stars" aria-label="Note">
           <span *ngFor="let star of [1, 2, 3, 4, 5]">
-            <i
-              class="fa"
-              [class.fa-star]="star <= (avis.note || 0)"
-              [class.fa-star-o]="star > (avis.note || 0)"
-              aria-hidden="true"
-            ></i>
+            <i class="ri-star-fill" *ngIf="star <= (avis.note || 0)" aria-hidden="true"></i>
+            <i class="ri-star-line" *ngIf="star > (avis.note || 0)" aria-hidden="true"></i>
           </span>
         </div>
       </div>
@@ -45,14 +43,18 @@
         <button
           class="btn-approve"
           (click)="approuverAvis(avis.id)"
+          [disabled]="loadingIds.has(avis.id)"
           aria-label="Approuver l'avis"
+          title="Approuver"
         >
           ✔
         </button>
         <button
           class="btn-delete"
           (click)="supprimerAvis(avis.id)"
+          [disabled]="loadingIds.has(avis.id)"
           aria-label="Supprimer l'avis"
+          title="Supprimer"
         >
           ✖
         </button>
@@ -67,35 +69,33 @@
       Aucun avis approuvé.
     </div>
 
-    <div *ngFor="let avis of avisApprouves" class="avis-card">
+    <div *ngFor="let avis of avisApprouves; trackBy: trackByAvisId" class="avis-card">
       <div class="avis-infos">
         <div class="photo-container">
           <img
-  *ngIf="avis.photo"
-  [src]="getPhotoUrl(avis.photo)"
-  alt="Photo de {{ avis.pseudoVisiteur }}"
-  class="photo"
-/>
-
-          <div *ngIf="!avis.photo" class="initials" [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || avis.auteur)">
-            {{ getInitials(avis.pseudoVisiteur || avis.auteur) }}
+            *ngIf="avis.photo"
+            [src]="getPhotoUrl(avis.photo)"
+            alt="Photo de {{ avis.pseudoVisiteur || avis.auteur || 'Anonyme' }}"
+            class="photo"
+            loading="lazy"
+            width="60" height="60"
+          />
+          <div *ngIf="!avis.photo" class="initials"
+               [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || avis.auteur || 'Anonyme')">
+            {{ getInitials(avis.pseudoVisiteur || avis.auteur || 'Anonyme') }}
           </div>
         </div>
 
         <p>
-          <strong>{{ avis.pseudoVisiteur || avis.auteur }}</strong> –
-          {{ avis.typeAvis }} – {{ avis.datePub | date }}
+          <strong>{{ avis.pseudoVisiteur || avis.auteur || 'Anonyme' }}</strong> –
+          {{ (avis.typeAvis || 'Avis') | titlecase }} – {{ avis.datePub | date:'dd/MM/yyyy' }}
         </p>
         <p>{{ avis.contenu }}</p>
 
         <div class="note-stars" aria-label="Note">
           <span *ngFor="let star of [1, 2, 3, 4, 5]">
-            <i
-              class="fa"
-              [class.fa-star]="star <= (avis.note || 0)"
-              [class.fa-star-o]="star > (avis.note || 0)"
-              aria-hidden="true"
-            ></i>
+            <i class="ri-star-fill" *ngIf="star <= (avis.note || 0)" aria-hidden="true"></i>
+            <i class="ri-star-line" *ngIf="star > (avis.note || 0)" aria-hidden="true"></i>
           </span>
         </div>
       </div>
@@ -104,7 +104,9 @@
         <button
           class="btn-delete"
           (click)="supprimerAvis(avis.id)"
+          [disabled]="loadingIds.has(avis.id)"
           aria-label="Supprimer l'avis"
+          title="Supprimer"
         >
           ✖
         </button>
