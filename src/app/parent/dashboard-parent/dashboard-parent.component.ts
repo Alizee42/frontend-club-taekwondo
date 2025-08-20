@@ -45,7 +45,7 @@ export class DashboardParentComponent implements OnInit {
       return;
     }
 
-    this.http.get<Utilisateur>('http://localhost:8080/api/utilisateurs/me', {
+    this.http.get<Utilisateur>('/api/utilisateurs/me', {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (utilisateur) => {

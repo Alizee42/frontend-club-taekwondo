@@ -21,8 +21,8 @@ export interface Paiement {
 
 @Injectable({ providedIn: 'root' })
 export class PaiementService {
-  private apiUrl = 'http://localhost:8080/api/paiements';
-  private stripeUrl = 'http://localhost:8080/api/stripe/create-payment-intent';
+  private apiUrl = '/api/paiements';
+  private stripeUrl = '/api/stripe/create-payment-intent';
 
   // 🔁 adapte si ton backend utilise EN_ATTENTE_PROBATION
   private readonly STATUT_ATTENTE = 'EN_ATTENTE';

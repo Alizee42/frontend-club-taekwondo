@@ -1,111 +1,204 @@
-<h2 class="page-title"><i class="ri-money-euro-circle-line"></i> Ajout d’un Paiement</h2>
+<h2 class="page-title">➕ Ajout d’un Paiement</h2>
 
 <div class="ajout-paiement-container">
-  <!-- Barre d'étapes -->
-  <div class="stepper">
-    <div *ngFor="let step of steps; let i = index" [class.active]="currentStep === i">
-      {{ step.label }}
-    </div>
-  </div>
+  <!-- Stepper -->
+  <ol class="stepper">
+    <li *ngFor="let step of steps; let i = index"
+        [class.active]="currentStep === i"
+        [class.done]="i < currentStep">
+      <span class="index">{{ i + 1 }}</span> {{ step.label }}
+    </li>
+  </ol>
 
-  <!-- Étape 1 : Utilisateur -->
-  <div *ngIf="currentStep === 0" class="form-step">
-    <h3>👤 Informations utilisateur</h3>
-    <label>Nom :
-      <input type="text" [(ngModel)]="paiement.utilisateurNom" placeholder="Nom de l’utilisateur" />
-    </label>
-    <label>Prénom :
-      <input type="text" [(ngModel)]="paiement.utilisateurPrenom" placeholder="Prénom" />
-    </label>
-    <label>Email :
-      <input type="email" [(ngModel)]="paiement.utilisateurEmail" placeholder="Email (facultatif)" />
-    </label>
-  </div>
+  <div class="card">
+    <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+    <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
 
-  <!-- Étape 2 : Détails paiement -->
-  <div *ngIf="currentStep === 1" class="form-step">
-    <h3>💳 Détails du paiement</h3>
-    <label>Type :
-      <select [(ngModel)]="paiement.type">
-        <option value="Cotisation">Cotisation</option>
-        <option value="Licence">Licence</option>
-        <option value="Événement">Événement</option>
-      </select>
-    </label>
+    <!-- Step 0 : Profil -->
+    <section *ngIf="currentStep === 0" class="form-step">
+      <header class="section-title">👤 Profil</header>
 
-    <label>Montant total :
-      <input type="number" [(ngModel)]="paiement.montantTotal" min="0" step="0.01"
-             [readonly]="paiement.type === 'Cotisation' && parametresGlobaux" />
-    </label>
-
-    <label>Mode de paiement :
-      <select [(ngModel)]="paiement.modePaiement" (change)="onModePaiementChange()">
-        <option *ngFor="let mode of modesDisponibles" [value]="mode">
-          {{ mode | titlecase }}
-        </option>
-      </select>
-    </label>
-
-    <label>Date de paiement :
-      <input type="date" [(ngModel)]="paiement.datePaiement" />
-    </label>
-  </div>
-
-  <!-- Étape 3 : Échéances -->
-  <div *ngIf="currentStep === 2 && paiement.modePaiement === 'échéances'" class="form-step">
-    <h3>📆 Échéances</h3>
-    <label>Nombre d’échéances :
-      <input type="number" [(ngModel)]="nombreEcheances" (change)="genererEcheances()" min="1" max="10" />
-    </label>
-
-    <button type="button" (click)="genererEcheances()">🔄 Générer automatiquement</button>
-
-    <div class="echeance-row" *ngFor="let echeance of paiement.echeances; let i = index">
-      <label>Date :
-        <input type="date" [(ngModel)]="echeance.dateEcheance" />
+      <label class="inline">
+        <input type="checkbox" [(ngModel)]="creationManuelle" />
+        <span>Créer un nouvel utilisateur/membre</span>
       </label>
-      <label>Montant :
-        <input type="number" [(ngModel)]="echeance.montant" min="0" step="0.01" />
-      </label>
-      <label>Statut :
-        <select [(ngModel)]="echeance.statut">
-          <option value="payé">Payé</option>
-          <option value="en attente">En attente</option>
-        </select>
-      </label>
-      <button type="button" (click)="supprimerEcheance(i)">❌</button>
-    </div>
+
+      <!-- Création manuelle -->
+      <div *ngIf="creationManuelle" class="grid2">
+        <label>Prénom
+          <input type="text" [(ngModel)]="nouvelUtilisateur.prenom" placeholder="Ex. Alice" />
+        </label>
+        <label>Nom
+          <input type="text" [(ngModel)]="nouvelUtilisateur.nom" placeholder="Ex. Durand" />
+        </label>
+        <label>Email (facultatif)
+          <input type="email" [(ngModel)]="nouvelUtilisateur.email" placeholder="alice@exemple.com" />
+        </label>
+        <label>Rôle
+          <select [(ngModel)]="nouvelUtilisateur.role">
+            <option value="ADULTE">Adulte</option>
+            <option value="PARENT">Parent</option>
+          </select>
+        </label>
+
+        <div class="info muted" *ngIf="nouvelUtilisateur.role==='PARENT'">
+          Si des enfants existent déjà en base, tu peux les rattacher ci-dessous après avoir choisi un parent existant
+          ou laisser vide (ils pourront être créés plus tard).
+        </div>
+      </div>
+
+      <!-- Sélection d'existants -->
+      <div *ngIf="!creationManuelle" class="grid2">
+        <label>Type de profil
+          <select [(ngModel)]="typeProfil"
+                  (change)="selectedAdulteId=undefined; selectedParentId=undefined; selectedMembreIds=[]">
+            <option value="ADULTE">Adulte inscrit</option>
+            <option value="PARENT">Parent + enfant(s)</option>
+          </select>
+        </label>
+
+        <!-- Adulte -->
+        <ng-container *ngIf="typeProfil==='ADULTE'">
+          <label>Rechercher un adulte
+            <input type="search" [ngModel]="qAdulte" (ngModelChange)="onSearchAdulte($event)"
+                   placeholder="Nom, prénom, email..." />
+          </label>
+          <label>Adulte
+            <select [(ngModel)]="selectedAdulteId">
+              <option [ngValue]="undefined">— Sélectionner —</option>
+              <option *ngFor="let u of adultes" [ngValue]="u.id">{{u.prenom}} {{u.nom}} · {{u.email}}</option>
+            </select>
+          </label>
+        </ng-container>
+
+        <!-- Parent -->
+        <ng-container *ngIf="typeProfil==='PARENT'">
+          <label>Rechercher un parent
+            <input type="search" [ngModel]="qParent" (ngModelChange)="onSearchParent($event)"
+                   placeholder="Nom, prénom, email..." />
+          </label>
+          <label>Parent
+            <select [(ngModel)]="selectedParentId" (change)="onChangeParent()">
+              <option [ngValue]="undefined">— Sélectionner —</option>
+              <option *ngFor="let p of parents" [ngValue]="p.id">{{p.prenom}} {{p.nom}} · {{p.email}}</option>
+            </select>
+          </label>
+
+          <div *ngIf="enfantsDuParent?.length">
+            <label>Enfant(s) (facultatif)</label>
+            <div class="chips">
+              <label class="chip" *ngFor="let m of enfantsDuParent">
+                <input type="checkbox"
+                       [checked]="selectedMembreIds.includes(m.id)"
+                       (change)="toggleMembre($event, m.id)" />
+                <span>{{m.prenom}} {{m.nom}}</span>
+              </label>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </section>
+
+    <!-- Step 1 : Détails -->
+    <section *ngIf="currentStep === 1" class="form-step">
+      <header class="section-title">💳 Détails du paiement</header>
+
+      <div class="grid3">
+        <label>Montant total
+          <input type="number" [(ngModel)]="montantTotal" min="0" step="0.01" />
+        </label>
+
+        <label>Type de paiement
+          <select [(ngModel)]="typePaiement" (change)="genererEcheances()">
+            <option value="unique">Paiement unique</option>
+            <option value="echeances">En plusieurs échéances</option>
+          </select>
+        </label>
+
+        <label>Mode de paiement
+          <select [(ngModel)]="modePaiement">
+            <option value="especes">Espèces</option>
+            <option value="virement">Virement</option>
+            <option value="stripe">Stripe</option>
+          </select>
+        </label>
+
+        <label>Date de paiement
+          <input type="date" [(ngModel)]="datePaiement" />
+        </label>
+      </div>
+    </section>
+
+    <!-- Step 2 : Échéances -->
+    <section *ngIf="currentStep === 2 && typePaiement === 'echeances'" class="form-step">
+      <header class="section-title">📆 Échéances</header>
+
+      <div class="grid3">
+        <label>Nombre d’échéances
+          <input type="number" [(ngModel)]="nombreEcheances" min="1" max="12" (change)="genererEcheances()" />
+        </label>
+        <label>Première date
+          <input type="date" [(ngModel)]="premiereDate" (change)="genererEcheances()" />
+        </label>
+        <label>Intervalle (jours)
+          <input type="number" [(ngModel)]="intervalDays" min="7" max="60" (change)="genererEcheances()" />
+        </label>
+        <button type="button" class="btn ghost" (click)="genererEcheances()">🔄 Générer</button>
+      </div>
+
+      <div class="echeance-row" *ngFor="let e of echeances; let i = index">
+        <label>Date
+          <input type="date" [(ngModel)]="e.dateEcheance" />
+        </label>
+        <label>Montant
+          <input type="number" [(ngModel)]="e.montant" step="0.01" />
+        </label>
+        <label>Statut
+          <select [(ngModel)]="e.statut">
+            <option value="en attente">En attente</option>
+            <option value="payé">Payé</option>
+          </select>
+        </label>
+        <button type="button" class="btn danger" (click)="echeances.splice(i,1)">❌</button>
+      </div>
+    </section>
+
+    <!-- Step 3 : Récap & justificatif -->
+    <section *ngIf="(currentStep === 2 && typePaiement !== 'echeances') || currentStep === 3" class="form-step">
+      <header class="section-title">📁 Récap & Justificatif</header>
+
+      <div class="grid2">
+        <label>Justificatif (optionnel)
+          <input type="file" (change)="onFileSelected($event)" />
+        </label>
+        <div class="nom-fichier" *ngIf="nomFichier">Fichier sélectionné : {{ nomFichier }}</div>
+      </div>
+
+      <div class="resume">
+        <h4>🧾 Résumé</h4>
+        <ul>
+          <li *ngIf="creationManuelle">
+            👤 Nouveau {{ nouvelUtilisateur.role === 'ADULTE' ? 'Adulte' : 'Parent' }} :
+            {{ nouvelUtilisateur.prenom }} {{ nouvelUtilisateur.nom }}
+            <span *ngIf="nouvelUtilisateur.email">({{ nouvelUtilisateur.email }})</span>
+          </li>
+          <li *ngIf="!creationManuelle && typeProfil==='ADULTE'">👤 Adulte #{{ selectedAdulteId }}</li>
+          <li *ngIf="!creationManuelle && typeProfil==='PARENT'">👤 Parent #{{ selectedParentId }} (Enfants: {{ selectedMembreIds.join(', ') || '—' }})</li>
+          <li>💳 {{ typePaiement }} — {{ montantTotal | currency:'EUR' }}</li>
+          <li>📅 Paiement: {{ datePaiement | date:'dd/MM/yyyy' }}</li>
+          <li>💼 Mode: {{ modePaiement }}</li>
+          <li *ngIf="typePaiement==='echeances'">{{ echeances.length }} échéance(s)</li>
+        </ul>
+      </div>
+    </section>
   </div>
 
-  <!-- Étape 4 : Justificatif & Résumé -->
-  <div *ngIf="(currentStep === 2 && paiement.modePaiement !== 'échéances') || currentStep === 3" class="form-step">
-    <h3>📁 Justificatif & Résumé</h3>
-    <label>Fichier justificatif :
-      <input type="file" (change)="onFileSelected($event)" />
-    </label>
-    <div *ngIf="nomFichier" class="nom-fichier">
-      Fichier sélectionné : {{ nomFichier }}
-    </div>
-
-    <div class="resume-paiement">
-      <h4>🧾 Résumé</h4>
-      <ul>
-        <li>👤 {{ paiement.utilisateurNom }} {{ paiement.utilisateurPrenom }}</li>
-        <li>📧 {{ paiement.utilisateurEmail }}</li>
-        <li>💳 {{ paiement.type }} - {{ paiement.montantTotal | currency:'EUR' }}</li>
-        <li>📅 {{ paiement.datePaiement | date:'dd/MM/yyyy' }}</li>
-        <li>💼 Mode : {{ paiement.modePaiement }}</li>
-        <li *ngIf="paiement.modePaiement === 'échéances'">
-          {{ paiement.echeances.length }} échéance(s)
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Navigation -->
+  <!-- Nav -->
   <div class="step-buttons">
-    <button type="button" (click)="prevStep()" [disabled]="currentStep === 0">⬅️ Précédent</button>
-    <button type="button" *ngIf="!isLastStep()" (click)="nextStep()">➡️ Suivant</button>
-    <button type="button" *ngIf="isLastStep()" class="bouton-validation" (click)="validerPaiement()">✅ Valider le paiement</button>
+    <button class="btn" type="button" (click)="prev()" [disabled]="currentStep===0">⬅️ Précédent</button>
+    <button class="btn primary" type="button" *ngIf="!isLastStep()" (click)="next()">➡️ Suivant</button>
+    <button class="btn success" type="button" *ngIf="isLastStep()" (click)="validerPaiement()" [disabled]="loading">
+      {{ loading ? '⏳ Envoi...' : '✅ Valider le paiement' }}
+    </button>
   </div>
 </div>

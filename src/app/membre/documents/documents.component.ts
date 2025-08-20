@@ -52,7 +52,7 @@ export class DocumentsComponent implements OnInit {
 
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    this.http.get<Utilisateur>('http://localhost:8080/api/utilisateurs/me', { headers }).subscribe({
+    this.http.get<Utilisateur>('/api/utilisateurs/me', { headers }).subscribe({
       next: (utilisateur) => {
         this.utilisateurConnecte = utilisateur;
         localStorage.setItem('utilisateurId', utilisateur.id.toString());
@@ -72,7 +72,7 @@ export class DocumentsComponent implements OnInit {
       return;
     }
 
-    this.http.get<Document[]>(`http://localhost:8080/api/documents/utilisateur/${utilisateurId}`).subscribe({
+    this.http.get<Document[]>(`/api/documents/utilisateur/${utilisateurId}`).subscribe({
       next: (documents) => {
         this.documents = documents || [];
         this.updateRequiredDocumentsStatus();
@@ -135,7 +135,7 @@ export class DocumentsComponent implements OnInit {
     formData.append('typeDocument', this.documentType);
     formData.append('utilisateurId', utilisateurId);
 
-    this.http.post('http://localhost:8080/api/documents', formData).subscribe({
+    this.http.post('/api/documents', formData).subscribe({
       next: () => {
         alert('Document téléversé avec succès.');
         this.selectedFile = null;
@@ -174,7 +174,7 @@ export class DocumentsComponent implements OnInit {
     }
 
     if (confirm(`Supprimer le document : ${document.nomDocument} ?`)) {
-      this.http.delete(`http://localhost:8080/api/documents/${document.id}`).subscribe({
+      this.http.delete(`/api/documents/${document.id}`).subscribe({
         next: () => {
           alert('Document supprimé.');
           this.loadDocuments();

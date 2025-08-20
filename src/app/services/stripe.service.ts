@@ -7,7 +7,7 @@ import { loadStripe, Stripe } from '@stripe/stripe-js';
 })
 export class StripeService {
   private stripePromise: Promise<Stripe | null>;
-  private backendUrl = 'http://localhost:8080/api/stripe'; // URL de votre backend Stripe
+  private backendUrl = '/api/stripe'; // URL de votre backend Stripe
   public cardElement: any; // Doit être public pour accès externe
   public clientSecret: string | null = null; // Stocke le clientSecret pour le paiement
 

@@ -7,7 +7,7 @@ import { catchError, tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ActualiteService {
-  private apiUrl = 'http://localhost:8080/api/actualites';
+  private apiUrl = '/api/actualites';
   private actualitesSubject = new BehaviorSubject<any[]>([]);
 
   constructor(private http: HttpClient) {

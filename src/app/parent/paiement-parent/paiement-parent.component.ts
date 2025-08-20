@@ -69,7 +69,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
     console.log("📥 [Enfants] Chargement depuis API /mes-enfants ...");
 
     this.http.get<{ id: number; nom: string; prenom: string }[]>(
-      'http://localhost:8080/api/membres/mes-enfants',
+      '/api/membres/mes-enfants',
       { headers: { Authorization: `Bearer ${token}` } }
     ).subscribe({
       next: (data) => {
@@ -94,7 +94,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
 
     console.log("📥 [Paiements] Chargement depuis API /parent/mes-paiements ...");
 
-    this.http.get<any[]>('http://localhost:8080/api/paiements/parent/mes-paiements', {
+    this.http.get<any[]>('/api/paiements/parent/mes-paiements', {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (data) => {
@@ -186,7 +186,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
     console.log("📤 [Stripe] Données envoyées au backend :", data);
 
     this.enCoursDePaiement = true;
-    this.http.post('http://localhost:8080/api/stripe/create-payment-intent', data, {
+    this.http.post('/api/stripe/create-payment-intent', data, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (res: any) => {
@@ -245,7 +245,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
 
     console.log("📤 [Paiement BDD] Envoi au backend :", paiementDTO);
 
-    this.http.post('http://localhost:8080/api/paiements/parent/ajouter', paiementDTO, {
+    this.http.post('/api/paiements/parent/ajouter', paiementDTO, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (res) => {

@@ -1,189 +1,178 @@
-:root {
-  --blue-main: #1E6091;
-  --blue-hover: #283a5a;
-  --blue-dark: #1B263B;
-  --green-main: #2ecc71;
-  --green-hover: #27ae60;
-  --red-main: #E63946;
-  --red-hover: #b22e39;
-  --background-light: #fdfdfd;
-  --text-main: #1e1e1e;
-  --card-bg: #f4f4f4;
-  --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.ajout-paiement-container {
-  max-width: 950px;
-  margin: 40px auto;
-  padding: 30px 40px;
-  background: var(--background-light);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  font-family: "Poppins", sans-serif;
-  color: var(--text-main);
-}
-
-.ajout-paiement-container h2 {
-  text-align: center;
-  font-size: 28px;
-  color: var(--blue-main);
-  margin-bottom: 30px;
-}
-
-/* Stepper */
-.stepper {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 30px;
-}
-.stepper div {
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  background-color: #eee;
-  border-radius: 6px;
-  font-weight: 600;
-  color: #666;
-  margin: 0 5px;
-}
-.stepper div.active {
-  background-color: var(--blue-main);
-  color: white;
-}
-
-/* Étapes */
-.form-step {
-  margin-bottom: 30px;
-}
-
-label {
-  display: block;
-  margin-bottom: 18px;
-  font-weight: 500;
-  color: var(--text-main);
-}
-
-label input,
-label select {
-  display: block;
-  width: 100%;
-  padding: 10px 14px;
-  font-size: 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #fff;
-  transition: border-color 0.3s;
-  margin-top: 6px;
-}
-label input:focus,
-label select:focus {
-  outline: none;
-  border-color: var(--blue-main);
-}
-
-/* Échéances */
-.echeance-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: flex-end;
-  margin-bottom: 15px;
-}
-.echeance-row label {
-  flex: 1;
-  min-width: 120px;
-}
-.echeance-row button {
-  background-color: var(--red-main);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: 5px;
-  cursor: pointer;
-  height: 42px;
-  transition: background-color 0.3s ease;
-}
-.echeance-row button:hover {
-  background-color: var(--red-hover);
-}
-
-/* Justificatif */
-.nom-fichier {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #555;
-}
-input[type="file"] {
-  margin-top: 8px;
-}
-
-/* Résumé */
-.resume-paiement {
-  background: #f9f9f9;
-  padding: 20px;
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-.resume-paiement h4 {
-  margin-bottom: 10px;
-  color: var(--blue-main);
-}
-.resume-paiement ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.resume-paiement li {
-  margin-bottom: 8px;
-}
-
-/* Navigation entre étapes */
-.step-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 30px;
-  gap: 10px;
-}
-.step-buttons button {
-  flex: 1;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  color: white;
-  background-color: var(--blue-main);
-  transition: background-color 0.3s ease;
-}
-.step-buttons button:hover {
-  background-color: var(--blue-hover);
-}
-.bouton-validation {
-  background-color: var(--green-main) !important;
-}
-.bouton-validation:hover {
-  background-color: var(--green-hover) !important;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
+/* --- Layout de page --- */
+.page-title {
+    font: 600 24px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: #0f172a;
+    margin: 0 0 12px;
+  }
+  
   .ajout-paiement-container {
-    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
   }
-
-  .echeance-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .step-buttons {
-    flex-direction: column;
-  }
-
+  
+  /* --- Stepper --- */
   .stepper {
-    flex-direction: column;
-    gap: 10px;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 0;
+    margin: 0 0 14px;
   }
-}
+  .stepper li {
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font: 600 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fafafa;
+  }
+  .stepper li .index {
+    display: inline-grid;
+    place-items: center;
+    width: 22px; height: 22px;
+    border-radius: 999px;
+    border: 2px solid #cbd5e1;
+  }
+  .stepper li.active {
+    border-color: #3b82f6;
+    color: #1e3a8a;
+    background: #eff6ff;
+  }
+  .stepper li.active .index { border-color: #3b82f6; }
+  .stepper li.done {
+    border-color: #22c55e;
+    color: #14532d;
+    background: #f0fdf4;
+  }
+  .stepper li.done .index { border-color: #22c55e; }
+  
+  /* --- Carte --- */
+  .card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    background: #fff;
+  }
+  
+  /* --- Sections --- */
+  .section-title {
+    font: 700 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: #0f172a;
+    margin-bottom: 8px;
+  }
+  
+  /* --- Form --- */
+  .form-step { display: grid; gap: 14px; }
+  
+  label {
+    display: grid;
+    gap: 6px;
+    font: 600 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: #0f172a;
+  }
+  
+  input, select, textarea {
+    font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+  }
+  
+  .inline { display: inline-flex; align-items: center; gap: 8px; }
+  
+  .grid2 { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
+  .grid3 { display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr); }
+  
+  @media (max-width: 900px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+  }
+  
+  /* --- Échéances --- */
+  .echeance-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) 110px;
+    gap: 10px;
+    align-items: end;
+  }
+  
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    background: #f8fafc;
+    font-size: 13px;
+  }
+  
+  /* --- Résumé --- */
+  .resume {
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 12px;
+    background: #f8fafc;
+  }
+  .resume h4 {
+    margin: 0 0 8px;
+    font: 700 15px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .resume ul { margin: 0; padding-left: 16px; }
+  
+  /* --- Boutons --- */
+  .step-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .btn {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #0f172a;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font: 600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    cursor: pointer;
+    transition: transform .05s ease, box-shadow .15s;
+  }
+  .btn:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+  .btn.success { background: #22c55e; color: #fff; border-color: #22c55e; }
+  .btn.danger { background: #ef4444; color: #fff; border-color: #ef4444; }
+  .btn.ghost { background: #f1f5f9; color: #0f172a; }
+  
+  /* --- Alerts --- */
+  .alert {
+    padding: 10px 12px;
+    border-radius: 10px;
+    font: 600 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    margin-bottom: 10px;
+  }
+  .alert.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+  .alert.success { background: #dcfce7; color: #14532d; border: 1px solid #bbf7d0; }
+  
+  .nom-fichier { font-size: 13px; color: #334155; }
+  .info.muted { font-size: 13px; color: #64748b; }
+  

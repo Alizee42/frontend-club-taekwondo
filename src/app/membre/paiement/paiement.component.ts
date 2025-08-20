@@ -136,7 +136,7 @@ loadPaiements(): void {
     return;
   }
 
-  this.http.get<any[]>('http://localhost:8080/api/paiements', {
+  this.http.get<any[]>('/api/paiements', {
     headers: { Authorization: `Bearer ${token}` }
   }).subscribe({
     next: (data) => {
@@ -218,7 +218,7 @@ loadPaiements(): void {
   this.paiementErreur = false;
   this.paiementReussi = false;
 
-  this.http.post('http://localhost:8080/api/stripe/create-payment-intent', data, {
+  this.http.post('/api/stripe/create-payment-intent', data, {
     headers: { Authorization: `Bearer ${token}` }
   }).subscribe({
     next: (res: any) => {
@@ -317,7 +317,7 @@ loadPaiements(): void {
 
     this.enCoursDePaiement = true;
 
-    this.http.post(`http://localhost:8080/api/paiements/${this.paiementActuel.id}/payer-echeance`, [data], {
+    this.http.post(`/api/paiements/${this.paiementActuel.id}/payer-echeance`, [data], {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: () => {

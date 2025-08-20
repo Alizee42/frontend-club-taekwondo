@@ -51,7 +51,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   prenomUtilisateur = 'Admin';
 
   private destroy$ = new Subject<void>();
-  private API = 'http://localhost:8080'; // environment.apiUrl si dispo
+
+  // ✅ Base API root-absolu (évite les 404 sur /admin/...)
+  private readonly base = '/api'.replace(/\/+$/, '');
+  private url = (path: string) => `${this.base}/${String(path).replace(/^\/+/, '')}`;
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -80,7 +83,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** KPIs dashboard (tes stats globales) */
   private chargerStats(): void {
-    this.http.get<DashboardStats>(`${this.API}/api/dashboard/admin`).subscribe({
+    this.http.get<DashboardStats>(this.url('dashboard/admin')).subscribe({
       next: (data) => {
         this.nbMembres = data?.nbMembres ?? 0;
         this.totalPaiements = data?.totalPaiements ?? 0;
@@ -110,7 +113,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   private fetchAvis(): Observable<number> {
     const params = new HttpParams().set('approuve', STATUS.AVIS_NON_APPROUVE);
     return this.http
-      .get<any[]>(`${this.API}/api/avis`, { params })
+      .get<any[]>(this.url('avis'), { params })
       .pipe(
         // fallback si l'API ignore le paramètre
         map(list => Array.isArray(list) ? list.filter(a => a?.approuve === false).length : 0),
@@ -121,8 +124,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   /** Paiements en attente UNIQUEMENT (robuste: /filter → fallback /api/paiements) */
   private fetchPaiements(): Observable<number> {
     const params = new HttpParams().set('statut', STATUS.PAIEMENT_EN_ATTENTE);
-    const filtered$ = this.http.get<any[]>(`${this.API}/api/paiements/filter`, { params });
-    const all$ = this.http.get<any[]>(`${this.API}/api/paiements`);
+    const filtered$ = this.http.get<any[]>(this.url('paiements/filter'), { params });
+    const all$ = this.http.get<any[]>(this.url('paiements'));
 
     return filtered$.pipe(
       // si /filter n'existe pas → fallback
@@ -141,7 +144,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   private fetchInscriptions(): Observable<number> {
     const params = new HttpParams().set('statut', STATUS.INSCRIPTION_EN_ATTENTE);
     return this.http
-      .get<any[]>(`${this.API}/api/inscriptions`, { params })
+      .get<any[]>(this.url('inscriptions'), { params })
       .pipe(
         map(list => Array.isArray(list) ? list.filter(i => this.norm(i?.statut) === this.norm(STATUS.INSCRIPTION_EN_ATTENTE)).length : 0),
         catchError(() => of(0))
@@ -152,7 +155,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   private fetchCommandes(): Observable<number> {
     const params = new HttpParams().set('statut', STATUS.COMMANDE_A_TRAITER);
     return this.http
-      .get<any[]>(`${this.API}/api/commandes`, { params })
+      .get<any[]>(this.url('commandes'), { params })
       .pipe(
         map(list => Array.isArray(list) ? list.filter(c => this.norm(c?.statut) === this.norm(STATUS.COMMANDE_A_TRAITER)).length : 0),
         catchError(() => of(0))

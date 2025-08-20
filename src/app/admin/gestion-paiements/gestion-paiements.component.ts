@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 
 // ✅ Importe tous les composants Angular utilisés dans le HTML
 import { DashboardPaiementComponent } from './dashboard-paiement/dashboard-paiement.component';
-import { UtilisateursPaiementComponent } from './utilisateurs-paiement/utilisateurs-paiement.component';
 import { SuiviPaiementsComponent } from './suivi-paiements/suivi-paiements.component';
 import { EcheancesComponent } from './echeances/echeances.component';
 import { AjoutPaiementComponent } from './ajout-paiement/ajout-paiement.component';
@@ -15,7 +14,6 @@ import { ParametresPaiementComponent } from './parametres-paiement/parametres-pa
   imports: [
     CommonModule,
     DashboardPaiementComponent,
-    UtilisateursPaiementComponent,
     SuiviPaiementsComponent,
     EcheancesComponent,
     AjoutPaiementComponent,
@@ -27,7 +25,7 @@ import { ParametresPaiementComponent } from './parametres-paiement/parametres-pa
 export class GestionPaiementsComponent {
   vueActive: string = 'dashboard';
 
-  changerVue(vue: string) {
-    this.vueActive = vue;
-  }
+  changerVue(view: string) {
+    this.vueActive = view;
+  }  
 }

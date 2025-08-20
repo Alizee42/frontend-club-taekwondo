@@ -31,7 +31,8 @@ export class GestionAvisComponent implements OnInit {
   loadingIds = new Set<number>();
   errorMsg: string | null = null;
 
-  private readonly baseUrl = 'http://localhost:8080/api/avis';
+  // ✅ root-absolu (passe via le proxy /api)
+  private readonly baseUrl = '/api/avis';
 
   constructor(private http: HttpClient, private toast: ToastService) {}
 
@@ -107,7 +108,7 @@ export class GestionAvisComponent implements OnInit {
     return (p[0][0] + p[1][0]).toUpperCase();
   }
 
-  getPhotoUrl(photo?: string): string {
-    return photo ? `http://localhost:8080/uploads/avis/${encodeURIComponent(photo)}` : '';
-  }
+  getPhotoUrl(photo: string | null | undefined): string {
+    return photo ? `/api/uploads/avis/${encodeURIComponent(photo)}` : '';
+  }  
 }

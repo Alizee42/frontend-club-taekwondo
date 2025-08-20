@@ -1,208 +1,341 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ParametresPaiementService } from '../../../services/parametres-paiement.service';
-import { ParametresPaiement } from '../../../models/parametres-paiement';
+import {
+  PaymentAdminService,
+  AjoutPaiementPayload
+} from '../../../services/payment-admin.service';
+import { debounce } from './utils/debounce';
+
+type TypeProfil = 'ADULTE' | 'PARENT';
+type TypePaiement = 'unique' | 'echeances';
+type ModePaiement = 'especes' | 'virement' | 'stripe';
+
+interface EcheanceInput {
+  dateEcheance: string; // yyyy-MM-dd
+  montant: number;
+  statut?: 'en attente' | 'payé';
+  numero?: number;
+}
 
 @Component({
   selector: 'app-ajout-paiement',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './ajout-paiement.component.html',
   styleUrls: ['./ajout-paiement.component.css']
 })
 export class AjoutPaiementComponent implements OnInit {
+  @Output() saved = new EventEmitter<void>();
   @Output() changementVue = new EventEmitter<string>();
 
+  // Stepper
   currentStep = 0;
-
   steps = [
-    { label: '👤 Utilisateur' },
+    { label: '👤 Profil' },
     { label: '💳 Détails' },
     { label: '📆 Échéances' },
-    { label: '📁 Justificatif' }
+    { label: '📁 Récap & Justificatif' }
   ];
 
-  paiement: any = {
-    utilisateurNom: '',
-    utilisateurPrenom: '',
-    utilisateurEmail: '',
-    type: 'Cotisation',
-    montantTotal: 0,
-    modePaiement: '',
-    datePaiement: '',
-    echeances: [],
-    justificatif: null
-  };
+  // Profil
+  typeProfil: TypeProfil = 'ADULTE';
+  creationManuelle = false;
+  nouvelUtilisateur = { prenom: '', nom: '', email: '', role: 'ADULTE' as TypeProfil };
 
-  nomFichier: string | null = null;
-  nombreEcheances = 1;
-  parametresGlobaux: ParametresPaiement | null = null;
-  modesDisponibles: string[] = [];
+  // Recherches & sélections
+  qAdulte = '';
+  qParent = '';
+  adultes: any[] = [];
+  parents: any[] = [];
+  enfantsDuParent: any[] = [];
 
-  constructor(
-    private http: HttpClient,
-    private parametresService: ParametresPaiementService
-  ) {}
+  selectedAdulteId?: number;
+  selectedParentId?: number;
+  selectedMembreIds: number[] = [];
+
+  // Paiement
+  typePaiement: TypePaiement = 'unique';
+  modePaiement: ModePaiement = 'especes';
+  montantTotal = 0;
+  datePaiement = this.today();
+
+  // Échéances
+  nombreEcheances = 2;
+  premiereDate = this.today();
+  intervalDays = 30;
+  echeances: EcheanceInput[] = [];
+
+  // Justificatif
+  justificatifFile?: File;
+  nomFichier = '';
+
+  // (facultatif)
+  commentaire = '';
+
+  // UI
+  loading = false;
+  errorMsg = '';
+  successMsg = '';
+
+  constructor(private api: PaymentAdminService) {}
 
   ngOnInit(): void {
-    this.parametresService.parametres$.subscribe({
-      next: (parametres: ParametresPaiement | null) => {
-        if (parametres) {
-          this.parametresGlobaux = parametres;
-  
-          // ✅ Compatible avec structure plate
-          this.modesDisponibles = ['virement', 'especes', 'stripe'].filter(mode => (parametres as any)[mode]);
-  
-          this.paiement.modePaiement = parametres.modePaiementParDefaut;
-          this.nombreEcheances = parametres.echeancesAutorisees || 1;
-  
-          if (this.paiement.type === 'Cotisation') {
-            this.paiement.montantTotal = parametres.montantCotisation;
-          }
-        }
-      },
-      error: () => {
-        console.error("❌ Échec du chargement des paramètres globaux");
-      }
-    });
-  }
-  
-
-  nextStep(): void {
-    if (!this.isLastStep()) this.currentStep++;
+    // charge des listes de base au démarrage
+    this.rechercheAdultes('');
+    this.rechercheParents('');
   }
 
-  prevStep(): void {
-    if (this.currentStep > 0) this.currentStep--;
+  // --- Helpers ---
+  today(): string {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
   }
 
-  isLastStep(): boolean {
-    return this.paiement.modePaiement === 'échéances'
-      ? this.currentStep === 3
-      : this.currentStep === 2;
-  }
-
-  onModePaiementChange(): void {
-    if (this.paiement.modePaiement === 'échéances') {
-      this.nombreEcheances = this.parametresGlobaux?.echeancesAutorisees || 1;
-      this.genererEcheances();
-    } else {
-      this.paiement.echeances = [];
+  onFileSelected(ev: Event) {
+    const input = ev.target as HTMLInputElement | null;
+    const f = input?.files?.[0];
+    if (f) {
+      this.justificatifFile = f;
+      this.nomFichier = f.name;
     }
   }
 
-  genererEcheances(): void {
-    const montant = Number(this.paiement.montantTotal);
-    const nombre = Number(this.nombreEcheances);
-    if (!montant || !nombre || nombre <= 0) return;
+  // Recherches avec debounce
+  rechercheAdultes = debounce((q: string) => {
+    this.api.getAdultes(q).subscribe((res) => (this.adultes = res || []));
+  }, 250);
 
-    const montantParEcheance = +(montant / nombre).toFixed(2);
-    this.paiement.echeances = [];
+  rechercheParents = debounce((q: string) => {
+    this.api.getParents(q).subscribe((res) => (this.parents = res || []));
+  }, 250);
 
-    for (let i = 0; i < nombre; i++) {
-      this.paiement.echeances.push({
-        dateEcheance: '',
-        montant: montantParEcheance,
+  onSearchAdulte(q: string) {
+    this.qAdulte = q;
+    this.rechercheAdultes(q);
+  }
+
+  onSearchParent(q: string) {
+    this.qParent = q;
+    this.rechercheParents(q);
+  }
+
+  onChangeParent() {
+    this.selectedMembreIds = [];
+    if (this.selectedParentId) {
+      this.api.getMembresByParent(this.selectedParentId).subscribe(res => {
+        this.enfantsDuParent = res || [];
+      });
+    } else {
+      this.enfantsDuParent = [];
+    }
+  }
+
+  // Échéances
+  genererEcheances() {
+    if (this.typePaiement !== 'echeances') {
+      this.echeances = [];
+      return;
+    }
+    if (!this.montantTotal || !this.nombreEcheances || !this.premiereDate) return;
+
+    const montantBase = Math.floor((this.montantTotal / this.nombreEcheances) * 100) / 100;
+    const res: EcheanceInput[] = [];
+    let totalRep = 0;
+
+    const start = new Date(this.premiereDate);
+    for (let i = 0; i < this.nombreEcheances; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i * this.intervalDays);
+      const montant = montantBase;
+      totalRep += montant;
+      res.push({
+        dateEcheance: d.toISOString().slice(0, 10),
+        montant,
         statut: 'en attente',
         numero: i + 1
       });
     }
+    const diff = Math.round((this.montantTotal - totalRep) * 100) / 100;
+    if (diff !== 0 && res.length) res[res.length - 1].montant = +(res[res.length - 1].montant + diff).toFixed(2);
+    this.echeances = res;
   }
 
-  supprimerEcheance(index: number): void {
-    this.paiement.echeances.splice(index, 1);
+  // Navigation
+  next() {
+    if (!this.canGoNext(this.currentStep)) return;
+    this.currentStep = Math.min(this.currentStep + 1, this.steps.length - 1);
   }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files?.length) {
-      this.paiement.justificatif = input.files[0];
-      this.nomFichier = input.files[0].name;
-    }
+  prev() {
+    this.currentStep = Math.max(this.currentStep - 1, 0);
   }
+  isLastStep() { return this.currentStep === this.steps.length - 1; }
 
-  validerPaiement(): void {
-    const p = this.paiement;
-
-    if (!p.utilisateurNom || !p.utilisateurPrenom || !p.type || !p.datePaiement || p.montantTotal <= 0) {
-      alert("Merci de remplir tous les champs obligatoires avec des valeurs valides.");
-      return;
-    }
-
-    if (p.modePaiement === 'échéances') {
-      if (p.echeances.length === 0) {
-        alert("Veuillez ajouter au moins une échéance.");
-        return;
-      }
-      const somme = p.echeances.reduce((s: number, e: any) => s + Number(e.montant), 0);
-      if (Math.abs(somme - p.montantTotal) > 0.01) {
-        alert("La somme des échéances ne correspond pas au montant total.");
-        return;
+  canGoNext(step: number): boolean {
+    this.errorMsg = '';
+    if (step === 0) {
+      if (this.creationManuelle) {
+        if (!this.nouvelUtilisateur.prenom?.trim()) { this.errorMsg = 'Prénom requis'; return false; }
+        if (!this.nouvelUtilisateur.nom?.trim()) { this.errorMsg = 'Nom requis'; return false; }
+      } else {
+        if (this.typeProfil === 'ADULTE' && !this.selectedAdulteId) { this.errorMsg = 'Sélectionne un adulte.'; return false; }
+        if (this.typeProfil === 'PARENT' && !this.selectedParentId) { this.errorMsg = 'Sélectionne un parent.'; return false; }
       }
     }
+    if (step === 1) {
+      if (this.montantTotal <= 0) { this.errorMsg = 'Montant invalide.'; return false; }
+      if (this.typePaiement === 'echeances' && !this.echeances.length) { this.errorMsg = 'Génère les échéances.'; return false; }
+    }
+    if (step === 2 && this.typePaiement === 'echeances') {
+      const sum = this.echeances.reduce((s, e) => s + (e.montant || 0), 0);
+      if (Math.abs(sum - this.montantTotal) > 0.01) { this.errorMsg = 'Somme des échéances ≠ montant total.'; return false; }
+    }
+    return true;
+  }
 
-    const montantPaye = p.modePaiement === 'échéances'
-      ? p.echeances.filter((e: any) => e.statut === 'payé').reduce((s: number, e: any) => s + Number(e.montant), 0)
-      : p.montantTotal;
+  // Gestion checkbox enfants
+  toggleMembre(ev: Event, id: number) {
+    const checked = (ev.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.selectedMembreIds.includes(id)) {
+        this.selectedMembreIds = [...this.selectedMembreIds, id];
+      }
+    } else {
+      this.selectedMembreIds = this.selectedMembreIds.filter(x => x !== id);
+    }
+  }
 
-    const montantRestant = p.montantTotal - montantPaye;
+  // Payload
+  buildPayload(): AjoutPaiementPayload {
+    const base: AjoutPaiementPayload = {
+      modePaiement: this.modePaiement.toUpperCase() as any, // ESPECES | VIREMENT | STRIPE (backend)
+      typePaiement: (this.typePaiement === 'unique' ? 'UNIQUE' : 'ECHEANCES') as any,
+      montantTotal: +this.montantTotal,
+      datePaiement: this.datePaiement,
+      commentaire: this.commentaire?.trim() || undefined
+    };
 
-    const formData = new FormData();
-    formData.append('utilisateurNom', p.utilisateurNom);
-    formData.append('utilisateurPrenom', p.utilisateurPrenom);
-    formData.append('utilisateurEmail', p.utilisateurEmail || '');
-    formData.append('type', p.type);
-    formData.append('montantTotal', String(p.montantTotal));
-    formData.append('montantPaye', String(montantPaye));
-    formData.append('montantRestant', String(montantRestant));
-    formData.append('modePaiement', p.modePaiement);
-    formData.append('datePaiement', p.datePaiement);
-    formData.append('statut', p.modePaiement === 'échéances' ? 'en attente' : 'payé');
+    if (this.creationManuelle) {
+      base.nouvelUtilisateur = {
+        prenom: this.nouvelUtilisateur.prenom.trim(),
+        nom: this.nouvelUtilisateur.nom.trim(),
+        email: this.nouvelUtilisateur.email?.trim() || undefined,
+        role: this.nouvelUtilisateur.role
+      };
+      if (this.nouvelUtilisateur.role === 'PARENT' && this.selectedMembreIds?.length) {
+        base.membreIds = this.selectedMembreIds;
+      }
+    } else {
+      base.typeProfil = this.typeProfil;
+      if (this.typeProfil === 'ADULTE') {
+        base.utilisateurId = this.selectedAdulteId!;
+      } else {
+        base.parentId = this.selectedParentId!;
+        if (this.selectedMembreIds?.length) base.membreIds = this.selectedMembreIds;
+      }
+    }
 
-    if (p.modePaiement === 'échéances') {
-      formData.append('echeances', JSON.stringify(
-        p.echeances.map((e: any, i: number) => ({
+    if (this.typePaiement === 'echeances') {
+      base.echeances = this.echeances.map(e => ({
+        dateEcheance: e.dateEcheance,
+        montant: +e.montant,
+        statut: e.statut || 'en attente',
+        numero: e.numero
+      }));
+    }
+    return base;
+  }
+
+  // Soumission
+  validerPaiement() {
+    this.loading = true;
+    this.errorMsg = '';
+    this.successMsg = '';
+  
+    // helper: type attendu par le back
+    const typeBack: 'unique' | 'échelonné' =
+      this.typePaiement === 'echeances' ? 'échelonné' : 'unique';
+  
+    // helper: échéances au format back
+    const echeancesBack = this.typePaiement === 'echeances'
+      ? this.echeances.map(e => ({
           dateEcheance: e.dateEcheance,
-          montant: e.montant,
-          statut: e.statut,
-          numero: i + 1
+          montant: +e.montant,
+          statut: e.statut || 'en attente',
+          numero: e.numero
         }))
-      ));
+      : undefined;
+  
+    // ========= CAS 1 : Création manuelle -> FormData (/ajouter-complet) =========
+    if (this.creationManuelle) {
+      const nom = (this.nouvelUtilisateur.nom || '').trim();
+      const prenom = (this.nouvelUtilisateur.prenom || '').trim();
+      if (!nom || !prenom) {
+        this.loading = false;
+        this.errorMsg = 'Nom et prénom sont requis pour la création.';
+        return;
+      }
+  
+      this.api.ajouterPaiementCompletFormData({
+        utilisateurNom: nom,
+        utilisateurPrenom: prenom,
+        utilisateurEmail: (this.nouvelUtilisateur.email || '').trim() || undefined,
+        type: typeBack,                          // 'unique' | 'échelonné'
+        montantTotal: this.montantTotal,
+        modePaiement: this.modePaiement,         // 'especes' | 'virement' | 'stripe'
+        datePaiement: this.datePaiement,         // yyyy-MM-dd
+        echeances: echeancesBack,
+        justificatif: this.justificatifFile || null
+      }).subscribe({
+        next: () => {
+          this.loading = false;
+          this.successMsg = 'Paiement ajouté avec succès.';
+          this.saved.emit();
+          this.changementVue.emit('paiements');
+        },
+        error: (err) => {
+          this.loading = false;
+          this.errorMsg = err?.error?.message || 'Erreur lors de la création du paiement.';
+        }
+      });
+  
+      return; // on sort ici
     }
-
-    if (p.justificatif) {
-      formData.append('justificatif', p.justificatif);
+  
+    // ========= CAS 2 : Utilisateur existant -> JSON (/ajouter-manuel) =========
+    const dto: any = {
+      type: typeBack,                            // 'unique' | 'échelonné'
+      montantTotal: +this.montantTotal,
+      modePaiement: this.modePaiement,
+      datePaiement: this.datePaiement,
+      echeances: echeancesBack,
+      commentaire: this.commentaire?.trim() || undefined
+    };
+  
+    // Selon le profil sélectionné, on passe l’identifiant approprié
+    if (this.typeProfil === 'ADULTE') {
+      dto.utilisateurId = this.selectedAdulteId;
+    } else {
+      // ⚠️ Si ton back attend utilisateurId même pour un parent, remplace par:
+      // dto.utilisateurId = this.selectedParentId;
+      dto.parentId = this.selectedParentId;
+      // Optionnel: si tu veux transmettre les enfants sélectionnés:
+      if (this.selectedMembreIds?.length) {
+        dto.membreIds = this.selectedMembreIds;
+      }
     }
-
-    this.http.post('/api/paiements/ajouter-complet', formData).subscribe({
+  
+    this.api.ajouterPaiementManuel(dto).subscribe({
       next: () => {
-        alert("✅ Paiement enregistré avec succès !");
-        this.resetFormulaire();
-        this.changementVue.emit("paiements");
+        this.loading = false;
+        this.successMsg = 'Paiement ajouté avec succès.';
+        this.saved.emit();
+        this.changementVue.emit('paiements');
       },
-      error: err => {
-        console.error(err);
-        alert("❌ Erreur lors de l'enregistrement du paiement.");
+      error: (err) => {
+        this.loading = false;
+        this.errorMsg = err?.error?.message || 'Erreur lors de l’ajout du paiement.';
       }
     });
-  }
-
-  resetFormulaire(): void {
-    this.paiement = {
-      utilisateurNom: '',
-      utilisateurPrenom: '',
-      utilisateurEmail: '',
-      type: 'Cotisation',
-      montantTotal: this.parametresGlobaux?.montantCotisation || 0,
-      modePaiement: this.parametresGlobaux?.modePaiementParDefaut || 'espèces',
-      datePaiement: '',
-      echeances: [],
-      justificatif: null
-    };
-    this.nomFichier = null;
-    this.nombreEcheances = this.parametresGlobaux?.echeancesAutorisees || 1;
-    this.currentStep = 0;
-  }
+  }  
 }

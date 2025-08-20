@@ -5,7 +5,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { AvisService, Avis } from '../../../services/avis.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import Swiper from 'swiper/bundle';
-import 'swiper/css/bundle';
 
 @Component({
   selector: 'app-avis',
@@ -129,6 +128,6 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getPhotoUrl(photo: string): string {
-    return `http://localhost:8080/uploads/avis/${encodeURIComponent(photo)}`;
-  }
+    return `/api/uploads/avis/${encodeURIComponent(photo)}`;
+  }  
 }

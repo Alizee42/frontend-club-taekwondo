@@ -1,215 +1,323 @@
-<div class="suivi-paiements">
-  <h2 class="page-title"><i class="ri-list-check-2"></i> Suivi des Paiements</h2>
+<div class="suivi">
+  <h2 class="page-title"><i class="ri-list-check-2"></i> Suivi des paiements</h2>
 
-  <div class="top-bar">
-    <input type="text" class="search-input" [(ngModel)]="filter.utilisateur" (input)="filtrerPaiements()" placeholder="🔍 Rechercher un utilisateur...">
-  
-    <div class="btn-group">
-      <button class="icon-btn" (click)="ouvrirModalFiltres()" title="Filtres avancés">
-        <i class="ri-filter-3-line"></i>
+  <!-- TOOLBAR unifiée : onglets + recherche + refresh -->
+  <div class="toolbar">
+    <!-- Segmented control -->
+    <div class="segmented" role="tablist" aria-label="Vue">
+      <button role="tab"
+              class="seg-btn"
+              [class.active]="mode==='paiements'"
+              [attr.aria-selected]="mode==='paiements' ? 'true' : 'false'"
+              (click)="mode='paiements'">
+        <i class="ri-money-euro-circle-line"></i>
+        <span>Par paiement</span>
       </button>
-      <button class="action-btn" (click)="ouvrirFormulairePaiement()">+ Paiement rapide</button>
-      <button class="action-btn" (click)="redirigerVersAjoutPaiement()">Ajout avancé</button>
-    </div>
-  </div>
-  <table>
-<thead>
-  <tr>
-    <th>Utilisateur</th>
-    <th>Membre</th> <!-- Ajout -->
-    <th>Type</th>
-    <th>Montant</th>
-    <th>Payé / Restant</th>
-    <th>Date</th>
-    <th>Mode</th>
-    <th>Statut</th>
-    <th>Actions</th>
-  </tr>
-</thead>
-<tbody>
-  <tr *ngFor="let paiement of paiementsFiltres">
-    <td>{{ paiement.utilisateurNom }} {{ paiement.utilisateurPrenom }}</td>
-    <td>{{ paiement.membreNom }} {{ paiement.membrePrenom }}</td> <!-- Ajout -->
-    <td>{{ paiement.type }}</td>
-    <td>{{ paiement.montantTotal | currency:'EUR' }}</td>
-    <td>
-      <div class="progress-bar" [style.width.%]="calculPourcentage(paiement)">
-        {{ calculPourcentage(paiement) }}%
-      </div>
-      <small>
-        {{ getMontantPaye(paiement) | currency:'EUR' }}
-        / {{ paiement.montantTotal | currency:'EUR' }}
-      </small>
-    </td>
-    <td>{{ paiement.datePaiement | date:'dd/MM/yyyy' }}</td>
-    <td>{{ paiement.modePaiement }}</td>
-    <td>
-      <span class="badge"
-            [class.paye]="paiement.statut === 'payé'"
-            [class.attente]="paiement.statut === 'en attente'"
-            [class.annule]="paiement.statut === 'annulé'">
-        {{ paiement.statut }}
-      </span>
-    </td>
-    <td class="actions">
-      <button class="btn-icon btn-supprimer" (click)="supprimerPaiement(paiement)" title="Supprimer le paiement">
-        <i class="ri-delete-bin-line"></i>
+      <button role="tab"
+              class="seg-btn"
+              [class.active]="mode==='utilisateurs'"
+              [attr.aria-selected]="mode==='utilisateurs' ? 'true' : 'false'"
+              (click)="mode='utilisateurs'">
+        <i class="ri-user-3-line"></i>
+        <span>Par utilisateur</span>
       </button>
-      <button class="btn-icon btn-annuler" (click)="ouvrirModalAnnulation(paiement)" title="Annuler le paiement">
-        <i class="ri-close-circle-line"></i>
-      </button>
-      <button class="btn-icon btn-echeance" (click)="ouvrirModalEcheances(paiement)" title="Voir les échéances">
-        <i class="ri-calendar-event-line"></i>
-      </button>
-    </td>
-  </tr>
-</tbody>
-  </table>
-
-  <!-- ✅ MODAL AJOUT RAPIDE -->
-  <div class="modal" *ngIf="modalOuverte">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Ajout rapide d’un paiement</h2>
-        <button class="close-btn" (click)="fermerFormulairePaiement()" aria-label="Fermer">
-          <i class="ri-close-line"></i>
-        </button>
-      </div>
-  
-      <p class="info-message">
-        Ce formulaire permet d’ajouter rapidement un paiement (sans échéances ni justificatif). Pour plus d’options, utilisez l’ajout avancé.
-      </p>
-  
-      <form (ngSubmit)="enregistrerPaiementManuel()" #paiementForm="ngForm">
-        <div class="form-group">
-          <label>Nom :</label>
-          <input type="text" [(ngModel)]="paiementManuel.utilisateurNom" name="utilisateurNom" required />
-        </div>
-  
-        <div class="form-group">
-          <label>Prénom :</label>
-          <input type="text" [(ngModel)]="paiementManuel.utilisateurPrenom" name="utilisateurPrenom" required />
-        </div>
-  
-        <div class="form-group">
-          <label>Email :</label>
-          <input type="email" [(ngModel)]="paiementManuel.utilisateurEmail" name="utilisateurEmail" />
-        </div>
-  
-        <div class="form-group">
-          <label>Type de paiement :</label>
-          <select [(ngModel)]="paiementManuel.type" name="type" required>
-            <option value="cotisation">Cotisation</option>
-            <option value="licence">Licence</option>
-            <option value="événement">Événement</option>
-          </select>
-        </div>
-  
-        <div class="form-group">
-          <label>Mode de paiement :</label>
-          <select [(ngModel)]="paiementManuel.modePaiement" name="modePaiement" required>
-            <option value="espèces">Espèces</option>
-            <option value="virement">Virement</option>
-            <option value="chèque">Chèque</option>
-          </select>
-        </div>
-  
-        <div class="form-group">
-          <label>Montant :</label>
-          <input type="number" [(ngModel)]="paiementManuel.montantAttendu" name="montantAttendu" required />
-        </div>
-  
-        <div class="form-group">
-          <label>Date de paiement :</label>
-          <input type="date" [(ngModel)]="paiementManuel.datePaiement" name="datePaiement" required />
-        </div>
-  
-        <div class="modal-actions">
-          <button type="submit" class="btn btn-submit">Ajouter</button>
-          <button type="button" class="btn btn-cancel" (click)="fermerFormulairePaiement()">Annuler</button>
-        </div>
-      </form>
-    </div>
-  </div>
-  
-  <!-- ✅ MODAL ANNULATION -->
-<div class="modal" *ngIf="modalAnnulationVisible">
-  <div class="modal-content">
-    <h2>🛑 Annuler le paiement</h2>
-    <p>Veuillez indiquer le <strong>motif</strong> de l’annulation :</p>
-
-    <form (ngSubmit)="confirmerAnnulationPaiement()">
-      <div class="form-group">
-        <label>Motif d'annulation :</label>
-        <textarea [(ngModel)]="motifAnnulation" name="motifAnnulation" rows="3" required></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button type="submit">✅ Confirmer l’annulation</button>
-        <button type="button" (click)="fermerModalAnnulation()">Annuler</button>
-      </div>
-    </form>
-  </div>
-</div>
-<div class="modal" *ngIf="modalFiltresVisible">
-  <div class="modal-content">
-    <h2>Filtres avancés</h2>
-
-    <div class="form-group">
-      <label>Type :</label>
-      <select [(ngModel)]="filter.type">
-        <option value="">Tous</option>
-        <option value="cotisation">Cotisation</option>
-        <option value="licence">Licence</option>
-        <option value="événement">Événement</option>
-      </select>
     </div>
 
-    <div class="form-group">
-      <label>Statut :</label>
-      <select [(ngModel)]="filter.statut">
-        <option value="">Tous</option>
+    <!-- Recherche centrée (unique, s'adapte à l'onglet) -->
+    <div class="search">
+      <i class="ri-search-line"></i>
+      <!-- Recherche pour l'onglet Paiements -->
+      <input *ngIf="mode==='paiements'"
+             class="search-input"
+             placeholder="Rechercher (parent / enfant / email)"
+             [(ngModel)]="filtres.q"
+             (input)="applyFilters()" />
+      <!-- Recherche pour l'onglet Utilisateurs -->
+      <input *ngIf="mode==='utilisateurs'"
+             class="search-input"
+             placeholder="Rechercher (nom / email / enfant)"
+             [(ngModel)]="searchUsers"
+             (input)="filtrerUtilisateurs()" />
+    </div>
+
+    <!-- Actions -->
+    <div class="toolbar-actions">
+      <button class="btn refresh" (click)="refresh()">
+        <i class="ri-refresh-line"></i> Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <!-- Erreur & loader -->
+  <div class="error" *ngIf="error"><i class="ri-error-warning-line"></i> {{ error }}</div>
+  <div class="loader" *ngIf="loading">Chargement…</div>
+
+  <!-- ==========================
+       ONGLET 1 : PAR PAIEMENT
+       ========================== -->
+  <ng-container *ngIf="!loading && mode==='paiements'">
+    <!-- Filtres compacts (sans champ recherche) -->
+    <div class="filters compact">
+      <select class="pill-select" [(ngModel)]="filtres.statut" (change)="applyFilters()">
+        <option value="">Statut</option>
         <option value="payé">Payé</option>
         <option value="en attente">En attente</option>
+        <option value="en retard">En retard</option>
         <option value="annulé">Annulé</option>
       </select>
-    </div>
 
-    <div class="modal-actions">
-      <button class="action-btn" (click)="filtrerPaiements(); fermerModalFiltres()">✅ Appliquer</button>
-      <button class="cancel-btn" (click)="fermerModalFiltres()">Annuler</button>
-    </div>
-  </div>
-</div>
-<!-- ✅ MODAL ÉCHÉANCES -->
-<div class="modal" *ngIf="modalEcheancesVisible">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Échéances du paiement</h2>
-      <button class="close-btn" (click)="fermerModalEcheances()" aria-label="Fermer">
-        <i class="ri-close-line"></i>
+      <select class="pill-select" [(ngModel)]="filtres.type" (change)="applyFilters()">
+        <option value="">Type</option>
+        <option value="unique">Unique</option>
+        <option value="échelonné">Échelonné</option>
+      </select>
+
+      <select class="pill-select" [(ngModel)]="filtres.mode" (change)="applyFilters()">
+        <option value="">Mode</option>
+        <option value="stripe">Stripe</option>
+        <option value="virement">Virement</option>
+        <option value="espèces">Espèces</option>
+      </select>
+
+      <label class="switch sm">
+        <input type="checkbox" [(ngModel)]="groupByParent" />
+        <span class="slider"></span>
+        <span class="switch-label">Grouper par parent</span>
+      </label>
+
+      <button class="btn ghost sm" (click)="resetFilters()">
+        <i class="ri-eraser-line"></i><span>Réinitialiser</span>
       </button>
     </div>
 
-    <div *ngIf="paiementActuel?.echeances?.length > 0; else aucuneEcheance">
-      <ul class="echeance-list">
-        <li *ngFor="let e of paiementActuel.echeances">
-          <span>📅 {{ e.dateEcheance | date:'dd/MM/yyyy' }}</span>
-          <span>💶 {{ e.montant | currency:'EUR' }}</span>
-          <span class="badge"
-                [class.paye]="e.statut === 'payé'"
-                [class.attente]="e.statut === 'en attente'"
-                [class.annule]="e.statut === 'annulé'">
-            {{ e.statut }}
-          </span>
-        </li>
-      </ul>
+    <!-- Vide -->
+    <div class="empty" *ngIf="!paiementsFiltres.length && !error">Aucun paiement trouvé.</div>
+
+    <!-- Tableau paiements (normal) -->
+    <div class="table-wrapper" *ngIf="paiementsFiltres.length && !groupByParent">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Payé par</th>
+            <th>Pour</th>
+            <th>Type de paiement</th>
+            <th class="num">Total</th>
+            <th class="num">Payé</th>
+            <th class="num">Restant</th>
+            <th>Statut</th>
+            <th class="actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of paiementsFiltres; trackBy: trackByPaiement">
+            <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
+            <td>{{ p.utilisateurPrenom }} {{ p.utilisateurNom }}</td>
+            <td><span class="chip">{{ p.membrePrenom }} {{ p.membreNom }}</span></td>
+            <td>{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</td>
+            <td class="num">{{ p.montantTotal | currency:'EUR' }}</td>
+            <td class="num">{{ montantPaye(p) | currency:'EUR' }}</td>
+            <td class="num">{{ montantRestant(p) | currency:'EUR' }}</td>
+            <td><span [class]="classeBadge(p.statut)">{{ p.statut }}</span></td>
+            <td class="actions">
+              <button class="btn-icon" (click)="ouvrirEcheances(p)" title="Voir les échéances"><i class="ri-calendar-event-line"></i></button>
+              <button class="btn-icon danger" (click)="ouvrirAnnulation(p)" title="Annuler le paiement"><i class="ri-close-circle-line"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <ng-template #aucuneEcheance>
-      <p>Aucune échéance pour ce paiement.</p>
-    </ng-template>
-  </div>
-</div>
+    <!-- Tableau paiements (groupé par parent) -->
+    <div class="table-wrapper" *ngIf="paiementsFiltres.length && groupByParent">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Payé par</th>
+            <th>Enfants</th>
+            <th class="num">Nombre de paiements</th>
+            <th class="num">Total</th>
+            <th class="num">Payé</th>
+            <th class="num">Restant</th>
+            <th>Statut global</th>
+            <th class="actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let g of paiementsGroupes; trackBy: trackByUtilisateur">
+            <td>{{ g.prenom }} {{ g.nom }}<div class="muted">{{ g.email }}</div></td>
+            <td>
+              <div class="chips">
+                <span class="chip" *ngFor="let c of g.enfants">{{ c }}</span>
+              </div>
+            </td>
+            <td class="num">
+              <span class="count-badge">{{ g.paiements.length }} paiements</span>
+            </td>
+            <td class="num">{{ g.total | currency:'EUR' }}</td>
+            <td class="num">{{ g.paye | currency:'EUR' }}</td>
+            <td class="num">{{ g.restant | currency:'EUR' }}</td>
+            <td><span [class]="classeBadge(g.statut)">{{ g.statut }}</span></td>
+            <td class="actions">
+              <!-- ✳️ On repasse l’objet attendu comme dans ta version d’origine -->
+              <button class="btn-icon"
+                      (click)="userVoirStats({ id: g.id, nom: g.nom, prenom: g.prenom, email: g.email, paiements: g.paiements })"
+                      title="Détails"><i class="ri-bar-chart-2-line"></i></button>
+              <button class="btn-icon"
+                      (click)="userVoirEcheances({ id: g.id, nom: g.nom, prenom: g.prenom, email: g.email, paiements: g.paiements })"
+                      title="Échéances"><i class="ri-calendar-line"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
+    <!-- Modale Échéances (paiement unique) -->
+    <div class="modal" *ngIf="modalEcheancesVisible">
+      <div class="modal-content">
+        <span class="close" (click)="fermerEcheances()">&times;</span>
+        <h3>Échéances – {{ paiementActuel?.utilisateurPrenom }} {{ paiementActuel?.utilisateurNom }}</h3>
+
+        <table class="modal-table" *ngIf="paiementActuel?.echeances?.length; else noEch">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th class="num">Montant</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of paiementActuel?.echeances; trackBy: trackByEcheance">
+              <td>#{{ e.numero }}</td>
+              <td>{{ e.dateEcheance | date:'dd/MM/yyyy' }}</td>
+              <td class="num">{{ e.montant | currency:'EUR' }}</td>
+              <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noEch><div class="empty">Aucune échéance.</div></ng-template>
+      </div>
+    </div>
+
+    <!-- Modale Annulation -->
+    <div class="modal" *ngIf="modalAnnulationVisible">
+      <div class="modal-content">
+        <span class="close" (click)="fermerAnnulation()">&times;</span>
+        <h3>Annuler le paiement</h3>
+        <p>Vous allez annuler le paiement de <strong>{{ paiementActuel?.utilisateurPrenom }} {{ paiementActuel?.utilisateurNom }}</strong>.</p>
+        <label>Motif</label>
+        <textarea class="input" rows="3" [(ngModel)]="motifAnnulation" placeholder="Ex: erreur, doublon, etc."></textarea>
+        <div class="modal-actions">
+          <button class="btn subtle" (click)="fermerAnnulation()">Annuler</button>
+          <button class="btn danger" (click)="confirmerAnnulation()">Confirmer</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ============================
+       ONGLET 2 : PAR UTILISATEUR
+       ============================ -->
+  <ng-container *ngIf="!loading && mode==='utilisateurs'">
+    <div class="empty" *ngIf="!utilisateursFiltres.length && !error">Aucun utilisateur trouvé.</div>
+
+    <div class="table-wrapper" *ngIf="utilisateursFiltres.length">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Payé par</th>
+            <th>Enfants</th>
+            <th>Email</th>
+            <th class="num">Nombre de paiements</th>
+            <th>Statut global</th>
+            <th class="actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of utilisateursFiltres; trackBy: trackByUtilisateur">
+            <td>{{ u.prenom }} {{ u.nom }}</td>
+            <td>
+              <div class="chips">
+                <span class="chip" *ngFor="let c of (u.enfants || [])">{{ c }}</span>
+              </div>
+            </td>
+            <td>{{ u.email }}</td>
+            <td class="num"><span class="count-badge">{{ u.paiements.length }} paiements</span></td>
+            <td><span [class]="classeBadge(statutGlobal(u))">{{ statutGlobal(u) }}</span></td>
+            <td class="actions">
+              <button class="btn-icon" (click)="userVoirStats(u)" title="Statistiques"><i class="ri-bar-chart-2-line"></i></button>
+              <button class="btn-icon" (click)="userVoirEcheances(u)" title="Échéances"><i class="ri-calendar-line"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modale Stats utilisateur -->
+    <div class="modal" *ngIf="modalUserStatsVisible">
+      <div class="modal-content">
+        <span class="close" (click)="userFermerModales()">&times;</span>
+        <h3>Stats – {{ utilisateurSelectionne?.prenom }} {{ utilisateurSelectionne?.nom }}</h3>
+
+        <table class="modal-table" *ngIf="utilisateurSelectionne?.paiements?.length; else noPayUser">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type de paiement</th>
+              <th class="num">Total</th>
+              <th class="num">Payé</th>
+              <th class="num">Restant</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of utilisateurSelectionne?.paiements; trackBy: trackByPaiement">
+              <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
+              <td class="cap">{{ p.type }} – {{ p.modePaiement }}</td>
+              <td class="num">{{ p.montantTotal | currency:'EUR' }}</td>
+              <td class="num">{{ montantPaye(p) | currency:'EUR' }}</td>
+              <td class="num">{{ montantRestant(p) | currency:'EUR' }}</td>
+              <td><span [class]="classeBadge(p.statut)">{{ p.statut }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noPayUser><div class="empty">Aucun paiement.</div></ng-template>
+      </div>
+    </div>
+
+    <!-- Modale Échéances utilisateur -->
+    <div class="modal" *ngIf="modalUserEcheancesVisible">
+      <div class="modal-content">
+        <span class="close" (click)="userFermerModales()">&times;</span>
+        <h3>Échéances – {{ utilisateurSelectionne?.prenom }} {{ utilisateurSelectionne?.nom }}</h3>
+
+        <ng-container *ngIf="utilisateurSelectionne?.paiements?.length; else noPayUser2">
+          <div class="paiement-block" *ngFor="let p of utilisateurSelectionne?.paiements; trackBy: trackByPaiement">
+            <h4>{{ p.type }} – {{ p.modePaiement }} ({{ p.datePaiement | date:'dd/MM/yyyy' }})</h4>
+            <table class="modal-table" *ngIf="p.echeances?.length; else noEchUser">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th class="num">Montant</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let e of p.echeances; trackBy: trackByEcheance">
+                  <td>#{{ e.numero }}</td>
+                  <td>{{ e.dateEcheance | date:'dd/MM/yyyy' }}</td>
+                  <td class="num">{{ e.montant | currency:'EUR' }}</td>
+                  <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noEchUser><div class="empty">Aucune échéance.</div></ng-template>
+          </div>
+        </ng-container>
+        <ng-template #noPayUser2><div class="empty">Aucun paiement.</div></ng-template>
+      </div>
+    </div>
+  </ng-container>
 </div>

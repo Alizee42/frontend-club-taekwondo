@@ -1,370 +1,250 @@
-/* === Global Styles === */
-.suivi-paiements h2 {
-  margin-bottom: 1.5rem;
+/* ========= Palette & variables (alignées sur utilisateurs-paiement) ========== */
+:root {
+  --blue-main: #4A90E2;
+  --blue-hover: #357ABD;
+  --blue-dark: #2C3E50;
+  --blue-verylight: #eef6ff;
+  --background-light: #ffffff;
+
+  --text-dark: #333;
+  --muted: #6b7280;
+
+  --border: #e6e6e6;
+  --shadow: 0 2px 5px rgba(0,0,0,.1);
+
+  --success: #28a745;
+  --warning: #ffb60a;
+  --danger:  #dc3545;
+  --secondary:#6c757d;
+
+  /* Hauteur et arrondis uniformes pour tous les contrôles */
+  --control-h: 36px;
+  --radius: 10px;
 }
 
-/* === Layout === */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
+/* ======================= Titre ======================= */
+.page-title{
+  font-size: 24px;
+  color: var(--blue-dark);
+  margin: 0 0 .8rem;
+  display:flex; align-items:center; gap:.5rem;
+}
+
+/* =================== Toolbar unifiée ================== */
+.toolbar{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: .75rem;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.actions-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* === Table Styles === */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  box-shadow: var(--shadow);
-  background: var(--card-bg);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-th, td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid #e2e2e2;
-}
-
-th {
-  background-color: var(--blue-main);
-  color: white;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  letter-spacing: 0.5px;
-}
-
-td {
-  font-size: 0.9rem;
-  vertical-align: middle;
-}
-
-/* === Buttons === */
-.action-btn {
-  background-color: var(--blue-main);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.action-btn:hover {
-  background-color: #135ca2;
-}
-
-.icon-btn {
-  background-color: #eee;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.icon-btn:hover {
-  background-color: #ddd;
-}
-
-.btn-icon {
-  background-color: var(--blue-main) ;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px;
-  font-size: 16px;
-  margin: 0 2px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-icon:hover {
-  background-color: var(--blue-hover);
-}
-/* === Boutons d'action spécifiques === */
-
-.btn-statut {
-  background-color: var(--blue-main);
-}
-.btn-statut:hover {
-  background-color: var(--blue-hover);
-}
-
-.btn-supprimer {
-  background-color: var(--red-main);
-}
-.btn-supprimer:hover {
-  background-color: var(--red-hover);
-}
-
-.btn-echeance {
-  background-color: var(--accent-hover); /* doré clair */
-  color: var(--text-main);
-}
-.btn-echeance:hover {
-  background-color: #d4a436; /* variante hover + contrastée */
-}
-
-.btn-annuler {
-  background-color: var(--accent-dark); /* bordeaux foncé */
-  color: #fff;
-}
-.btn-annuler:hover {
-  background-color: #7e1414; /* plus foncé encore */
-}
-.badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: capitalize;
-  white-space: nowrap; /* <-- évite les retours à la ligne */
-  text-align: center;
-  min-width: 90px; /* <-- suffisant pour "en attente" */
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-
-.badge.paye {
-  background-color: #28a745;
-  color: white;
-}
-
-.badge.attente {
-  background-color: #ffb60a;
-  color: white;
-}
-
-.badge.annule {
-  background-color: #bb2a2a;
-  color: white;
-}
-
-/* === Modal Styles === */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-  padding: 1rem;
-  overflow-y: auto; /* Permet de scroller si la modale dépasse */
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
+  background: #fff;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh; /* Limite la hauteur à 90% de l'écran */
+  padding: .6rem .8rem;
   box-shadow: var(--shadow);
-  font-family: 'Poppins', sans-serif;
-  color: var(--text-main);
-  overflow-y: auto; /* Ajoute un scroll interne si nécessaire */
-  position: relative;
+  margin-bottom: .8rem;
 }
 
-.modal-content h3, .modal-content h2 {
-  margin-top: 0;
-  color: var(--blue-dark);
-  font-size: 1.4rem;
+/* Segmented control (onglets) */
+.segmented{
+  display:inline-flex; gap:4px;
+  background:#f4f7fb;
+  border:1px solid #dfe8f3;
+  border-radius:999px;
+  padding:3px;
+}
+.seg-btn{
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.35rem .75rem;
+  border:none; background:transparent; cursor:pointer;
+  border-radius:999px;
+  font-weight:600; color:#415a77;
+  transition: background .15s ease,color .15s ease;
+}
+.seg-btn.active{ background: var(--blue-verylight); color:#1e40af; }
+
+/* Recherche dans la toolbar (unique) */
+.search{
+  display:flex; align-items:center; gap:.45rem;
+  height: var(--control-h);
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 .6rem;
+  background:#fff;
+}
+.search i{ color: var(--muted); }
+.search-input{
+  border:none; outline:none; background:transparent; color:var(--text-dark);
+  width:100%; min-width:260px; font-size:.95rem;
 }
 
-/* Header modale avec croix */
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  position: relative; 
+/* Actions à droite */
+.toolbar-actions .btn{
+  display:inline-flex; align-items:center; gap:.35rem;
+  height: var(--control-h);
+  padding:0 .75rem; border-radius: var(--radius); cursor:pointer;
+  border:1px solid #cfe2ff; background:#f0f7ff; color:#1e40af;
 }
+.toolbar-actions .btn:hover{ background:#e3f0ff; }
 
-.close-btn {
-  position: absolute;
-  bottom: 38px;
-  left: 98%;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--blue-dark); /* Couleur de la croix */
-  padding: 0.5rem; /* Ajoute un espace autour de la croix */
-  transition: color 0.3s ease;
+/* ======================= Boutons ======================= */
+.btn{
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.45rem .8rem; border:1px solid var(--border);
+  border-radius:8px; background:#fff; cursor:pointer;
 }
+.btn.refresh{ background:#f0f7ff; border-color:#cfe2ff; }
+.btn.subtle{ background:#fbfbfb; }
+.btn.danger{ background:#fff1f2; border-color:#fecdd3; }
 
-.close-btn:hover {
-  color: var(--red-main); /* Couleur au survol */
-}
-.modal-content label {
-  display: block;
-  margin-top: 1rem;
-  font-weight: 500;
-}
-
-.modal-content input,
-.modal-content select {
-  width: 100%;
-  padding: 8px 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-family: 'Poppins', sans-serif;
-}
-
-.modal-content select,
-.modal-content label {
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.modal-content select {
-  padding: 6px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.modal-actions button {
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.modal-actions button:first-child {
+.btn-icon{
   background-color: var(--blue-main);
-  color: white;
+  color:#fff; border:none; border-radius:8px;
+  padding:6px 10px; margin-right:4px; cursor:pointer;
+  transition: background-color .2s ease, transform .15s ease;
+}
+.btn-icon:hover{ background-color: var(--blue-hover); transform: translateY(-1px); }
+.btn-icon.danger{ background-color: #dc3545; }
+.btn-icon.danger:hover{ background-color:#b91c1c; }
+
+/* ================== États (erreur, vide) ================== */
+.error{
+  background:#fff1f1; color:#7a0000; border:1px solid #ffd6d6;
+  padding:.6rem .8rem; border-radius:8px; margin-bottom:.6rem;
+}
+.loader,.empty{
+  background:#f8fafc; border:1px dashed #cbd5e1; color:#475569;
+  padding:.7rem .9rem; border-radius:8px; margin:.6rem 0;
 }
 
-.modal-actions button:last-child {
-  background-color: #ccc;
-  color: #333;
-}
-/* Header modale avec croix */
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+/* ======================= Filtres compacts ======================= */
+/* (uniquement visibles en mode Paiements) */
+.filters.compact{
+  display:flex; 
+  flex-wrap:wrap; 
+  gap:.4rem; 
+  margin: 16px 7px;
+  align-items:center;
 }
 
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.7rem;
-  cursor: pointer;
-  color: var(--blue-dark);
+/* Selects "pills" compacts et cohérents avec la toolbar */
+.pill-select{
+  height: var(--control-h);
+  padding: 0 .6rem;
+  min-width: 140px;
+  border:1px solid var(--border);
+  border-radius: 999px;
+  background:#fff;
+  font-size:.9rem;
+}
+.pill-select:focus{
+  outline:none; border-color:#cfe2ff;
+  box-shadow:0 0 0 3px rgba(79,125,201,.15);
 }
 
-.close-btn:hover {
-  color: var(--red-main);
+/* Switch compact */
+.switch{ display:inline-flex; align-items:center; gap:.45rem; }
+.switch.sm .slider{
+  position:relative; width:34px; height:18px; background:#e5e7eb; border-radius:999px; display:inline-block; transition:.2s;
+}
+.switch.sm .slider::after{
+  content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:.2s;
+}
+.switch.sm input{ display:none; }
+.switch.sm input:checked + .slider{ background: var(--blue-main); }
+.switch.sm input:checked + .slider::after{ transform: translateX(16px); }
+.switch .switch-label{ color:#475569; font-size:.9rem; }
+
+/* Bouton ghost compact */
+.btn.ghost.sm{
+  height: var(--control-h);
+  padding: 0 .75rem;
+  border:1px solid var(--border);
+  background:#fbfbfb; color:#334155; border-radius: var(--radius);
+}
+.btn.ghost.sm:hover{ background:#f3f4f6; }
+
+/* ================== Tableau harmonisé ================== */
+.table-wrapper{ background:#fff; border-radius:12px; overflow:auto; box-shadow: var(--shadow); }
+.user-table{
+  width:100%; border-collapse:collapse; background: var(--background-light);
+  border-radius:12px; overflow:hidden;
+}
+.user-table th{
+  background: var(--blue-main); color:#fff;
+  padding:12px 16px; text-align:left; font-weight:700;
+  position:sticky; top:0; z-index:1;
+}
+.user-table td{
+  padding:12px 16px; border-bottom:1px solid #eee; vertical-align:middle;
+}
+.user-table tr:hover{ background:#f0f6fc; }
+.user-table .num{ text-align:right; }
+.user-table .cap{ text-transform:capitalize; }
+.user-table .actions{ white-space:nowrap; }
+.muted{ color:#777; font-size:.86rem; }
+
+/* ======================= Chips ======================== */
+.chips{ display:flex; flex-wrap:wrap; gap:.35rem; }
+.chip{
+  background:#e9f2ff; color:#1e40af; border:1px solid #cfe2ff;
+  border-radius:999px; padding:.15rem .5rem; font-size:.85rem;
 }
 
+/* ======================= Badges ======================= */
+.badge{ padding:5px 10px; border-radius:12px; font-size:.85rem; text-transform:capitalize; font-weight:700; display:inline-block; }
+.badge-success{ background-color: var(--success); color:#fff; }
+.badge-warning{ background-color: var(--warning); color:#fff; }
+.badge-danger { background-color: var(--danger);  color:#fff; }
+.badge-secondary{background-color: var(--secondary); color:#fff; }
+.badge-dark{ background-color:#bb2a2a; color:#fff; }
 
+/* ======================= Modales ====================== */
+.modal{
+  position:fixed; inset:0; background:rgba(0,0,0,.45);
+  display:flex; justify-content:center; align-items:center;
+  z-index:1000; padding:1rem;
+}
+.modal-content{
+  background:#fff; padding:1rem 1rem 1.2rem; border-radius:12px;
+  width:90%; max-width:900px; max-height:85vh; overflow:auto;
+  box-shadow: var(--shadow); position:relative;
+}
+.modal h3{ margin:.2rem 0 1rem; color: var(--blue-main); }
+.close{ position:absolute; top:8px; right:14px; font-size:28px; cursor:pointer; color: var(--blue-dark); }
 
-.cancel-btn {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
+/* Table modale */
+.modal-table{ width:100%; border-collapse:collapse; }
+.modal-table th, .modal-table td{ padding:10px; border-bottom:1px solid #ddd; text-align:left; font-size:14px; }
+.modal-table th{ background: var(--blue-main); color:#fff; font-weight:700; }
+.modal-table td.num{ text-align:right; }
+
+/* Contenu modale utilisateur */
+.paiement-block{
+  margin-bottom:1rem; border:1px solid #eee; border-radius:10px;
+  padding:.6rem .8rem; background:#fcfcfc;
+}
+.modal-actions{ display:flex; justify-content:flex-end; gap:.5rem; margin-top:.8rem; }
+
+/* Base + variantes (global) */
+.badge{
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  display: inline-block;
 }
 
-.cancel-btn:hover {
-  background-color: #d32f2f;
-}
+.badge-success  { background-color: #28a745; color: #fff; }
+.badge-warning  { background-color: #ffb60a; color: #fff; }
+.badge-danger   { background-color: #dc3545; color: #fff; }
+.badge-secondary{ background-color: #6c757d; color: #fff; }
+.badge-dark     { background-color: #bb2a2a; color: #fff; }
 
-/* === Top Bar === */
-.search-input {
-  flex: 1;
-  min-width: 200px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.btn-group {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-echeance-list {
-  list-style: none; /* Supprime les puces */
-  padding: 0;
-  margin: 0;
-}
-
-.echeance-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid #e2e2e2; /* Ligne de séparation */
-}
-
-.echeance-list li span {
-  font-size: 0.9rem;
-  color: var(--text-main);
-}
-
-.echeance-list li .badge {
-  margin-left: auto; /* Place la badge à droite */
-}
-/* === Progress Bar === */
-.progress-bar {
-  background-color: var(--blue-main); /* Couleur principale */
-  height: 12px; /* Hauteur de la barre */
-  border-radius: 4px; /* Coins arrondis */
-  color: white; /* Couleur du texte */
-  font-size: 0.7rem; /* Taille du texte */
-  font-weight: bold; /* Texte en gras */
-  text-align: center; /* Centrer le texte */
-  white-space: nowrap; /* Empêche le retour à la ligne */
-  transition: width 0.4s ease; /* Animation fluide */
-}
-
-.progress-bar-container {
-  background-color: #e0e0e0; /* Couleur de fond */
-  height: 12px; /* Hauteur de la barre */
-  border-radius: 4px; /* Coins arrondis */
-  overflow: hidden; /* Empêche le débordement */
-  margin-bottom: 4px; /* Espacement en bas */
+/* ====================== Responsive ===================== */
+@media (max-width: 720px){
+  :root{ --control-h: 32px; }
+  .toolbar{ grid-template-columns: 1fr; gap:.5rem; }
+  .search-input{ min-width: 0; }
+  .user-table th, .user-table td{ padding:10px 12px; }
 }

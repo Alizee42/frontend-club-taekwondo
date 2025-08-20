@@ -12,7 +12,7 @@ export interface Membre {
   providedIn: 'root'
 })
 export class MembreService {
-  private readonly apiUrl = 'http://localhost:8080/api/membres';
+  private readonly apiUrl = '/api/membres';
 
   constructor(private http: HttpClient) {}
 

@@ -30,11 +30,11 @@
 <div class="chart-section">
   <h3>Répartition des paiements</h3>
   <div class="chart-container">
-    <canvas id="doughnutChart"></canvas>
+    <canvas id="doughnutChart" role="img" aria-label="Répartition des paiements"></canvas>
   </div>
 </div>
 <!-- 🔹 Membres en retard -->
-<div class="alert-section" *ngIf="stats.membresEnRetard?.length">
+<div class="alert-section" *ngIf="(stats?.membresEnRetard?.length ?? 0) > 0">
   <h3>⏳ Membres en retard</h3>
   <p class="alert-text">
     ⚠️ {{ stats.membresEnRetard.length }} membre{{ stats.membresEnRetard.length > 1 ? 's' : '' }} en retard de paiement

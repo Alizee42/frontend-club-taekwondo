@@ -14,7 +14,7 @@ import { Router } from "@angular/router";
 })
 export class ProfilComponent implements OnInit {
   user: any = {};
-  apiUrl = 'http://localhost:8080/api/utilisateurs';
+  apiUrl = '/api/utilisateurs';
   editMode: any = {};
   showPasswordModal = false; // Contrôle l'affichage de la modale
   passwordData = { newPassword: '', confirmPassword: '' }; // Données pour le mot de passe

@@ -1,83 +1,141 @@
-:root {
-    --blue-main: #1E6091;
-    --blue-hover: #283a5a;
-    --blue-dark: #1B263B;
-    --red-main: #E63946;
-    --red-hover: #b22e39;
-    --accent-dark: #9e1b1b;
-    --orange-main: #F1A208;
-    --accent-hover: #e4b343;
-    --text-main: #1e1e1e;
-    --background-light: #fdfdfd;
-    --card-bg: #f4f4f4;
-    --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    --green-main: #2ecc71;
-    --green-hover: #27ae60;
-  }
-  
-/* Réinitialisation globale */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    list-style: none;
-}
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+:root{
+  /* Brand */
+  --blue-main:#1E6091;
+  --blue-hover:#283a5a;
+  --blue-dark:#1B263B;
+  --red-main:#E63946;
+  --red-hover:#b22e39;
+  --orange-main:#F1A208;
+  --accent-hover:#e4b343;
+
+  /* UI */
+  --text-main:#1e1e1e;
+  --background-light:#fdfdfd;
+  --card-bg:#f4f4f4;
+  --shadow:0 8px 20px rgba(0,0,0,.1);
+
+  /* Status colors */
+  --success:#2ecc71;
+  --success-ink:#1b5e36;
+  --warning:#f59e0b;
+  --warning-ink:#7a4f00;
+  --danger:#ef4444;
+  --danger-ink:#7f1d1d;
+
+  /* Controls */
+  --control-h:40px;
+  --radius:8px;
+  --border:#e5e7eb;
+  --focus:#3b82f6;
 }
 
+/* Reset minimal */
+*{margin:0;padding:0;box-sizing:border-box;list-style:none}
+html,body{height:100%}
+body{font-family:Roboto,"Helvetica Neue",Arial,system-ui,sans-serif;color:var(--text-main);background:var(--background-light)}
 
-/* Styles pour les statuts */
+/* ---------- STATUS BADGES ---------- */
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  font-weight:600;
+  font-size:.9rem;
+  line-height:1;
+  padding:.45rem .65rem;
+  border-radius:999px;           /* pill */
+  border:1px solid transparent;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  user-select:none;
+}
+
+/* Icône (peut être <i> ou <span>) */
+.status-badge .status-icon{
+  font-size:1.05rem;            /* légèrement plus grande */
+  line-height:1;
+}
+
+/* Variants */
 .status-validé,
+.status--success{ 
+  @apply status-badge;          /* si tu n’utilises pas Tailwind, ignore */
+  background:color-mix(in srgb, var(--success) 12%, white);
+  color:var(--success-ink);
+  border-color:color-mix(in srgb, var(--success) 35%, white);
+}
+
 .status-en-attente,
-.status-refusé {
-  display: inline-flex; /* Permet d'aligner l'icône et le texte */
-  align-items: center; /* Centre verticalement l'icône et le texte */
-  font-weight: bold;
-  font-size: 0.9rem; /* Ajuste la taille du texte */
+.status--warning{
+  @apply status-badge;
+  background:color-mix(in srgb, var(--warning) 14%, white);
+  color:var(--warning-ink);
+  border-color:color-mix(in srgb, var(--warning) 38%, white);
 }
 
-.status-validé {
-  color: green; /* Couleur pour "validé" */
+.status-refusé,
+.status--danger{
+  @apply status-badge;
+  background:color-mix(in srgb, var(--danger) 12%, white);
+  color:var(--danger-ink);
+  border-color:color-mix(in srgb, var(--danger) 36%, white);
 }
 
-.status-en-attente {
-  color: orange; /* Couleur pour "en attente" */
-}
+/* Si @apply n’est pas disponible, garde juste .status-badge sur l’élément */
 
-.status-refusé {
-  color: red; /* Couleur pour "refusé" */
-}
-
-.status-icon {
-  margin-right: 0.5rem; /* Ajoute un espace entre l'icône et le texte */
-  font-size: 1.2rem; /* Ajuste la taille de l'icône */
-}
-
+/* ---------- FORM CONTROLS ---------- */
 input[type="text"],
 input[type="email"],
 input[type="number"],
 input[type="date"],
-select {
-  padding: 8px 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-family: inherit;
-  height: 40px;
-  box-sizing: border-box;
-  background-color: #fff;
-  color: #333;
+select{
+  display:inline-flex;
+  align-items:center;
+  height:var(--control-h);
+  padding:8px 10px;
+  font-size:14px;
+  color:#333;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:6px;
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
 }
+
+input::placeholder,
+select::placeholder{color:#9ca3af}
 
 input:focus,
-select:focus {
-  outline: none;
-  border-color: #3b82f6; /* couleur bleue focus */
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+select:focus{
+  outline:0;
+  border-color:var(--focus);
+  /* focus ring accessible */
+  box-shadow:0 0 0 2px rgba(59,130,246,.2);
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* Désactivés */
+input:disabled,
+select:disabled{
+  background:#f9fafb;
+  color:#9ca3af;
+  cursor:not-allowed;
+}
+
+/* ---------- UTILES TABLE ---------- */
+.table-status{
+  white-space:nowrap;           /* évite les retours à la ligne pour les badges */
+  vertical-align:middle;
+}
+
+/* Cartes / blocs */
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:var(--shadow);
+}
+
+/* Petits helpers */
+.mt-1{margin-top:.25rem}
+.mt-2{margin-top:.5rem}
+.mt-3{margin-top:.75rem}
+.gap-1{gap:.25rem}
+.gap-2{gap:.5rem}

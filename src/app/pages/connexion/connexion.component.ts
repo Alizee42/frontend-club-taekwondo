@@ -44,7 +44,7 @@ export class ConnexionComponent {
     };
 
     this.http
-      .post<any>('http://localhost:8080/api/utilisateurs/login', loginData)
+      .post<any>('/api/utilisateurs/login', loginData)
       .subscribe({
         next: (response) => {
           console.log('✅ Réponse reçue du backend :', response);

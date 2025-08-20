@@ -13,7 +13,7 @@ export interface Commande {
 
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
-  private apiUrl = 'http://localhost:8080/api/commandes';
+  private apiUrl = '/api/commandes';
   private jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
   // 👉 change ici si ton backend utilise EN_ATTENTE_PROBATION
@@ -41,7 +41,7 @@ export class CommandeService {
 
   /** Récupérer un utilisateur par ID */
   getUtilisateur(utilisateurId: number): Observable<any> {
-    return this.http.get<any>(`http://localhost:8080/api/utilisateurs/${utilisateurId}`)
+    return this.http.get<any>(`/api/utilisateurs/${utilisateurId}`)
       .pipe(catchError(this.handleError));
   }
 

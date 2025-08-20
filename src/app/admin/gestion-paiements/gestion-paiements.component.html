@@ -3,8 +3,7 @@
   <aside class="sidebar">
     <h2>💼 Paiements Admin</h2>
     <ul class="menu">
-      <li (click)="changerVue('dashboard')" [class.active]="vueActive === 'dashboard'">🏠 Dashboard</li>
-      <li (click)="changerVue('utilisateurs')" [class.active]="vueActive === 'utilisateurs'">👥 Membres</li>
+      <li (click)="changerVue('dashboard')" [class.active]="vueActive === 'dashboard'">🏠 Tableau de bord</li>
       <li (click)="changerVue('paiements')" [class.active]="vueActive === 'paiements'">💰 Paiements</li>
       <li (click)="changerVue('echeances')" [class.active]="vueActive === 'echeances'">📅 Échéances</li>
       <li (click)="changerVue('ajouter-paiement')" [class.active]="vueActive === 'ajouter-paiement'">➕ Ajouter</li>
@@ -19,12 +18,8 @@
         <app-dashboard-paiement></app-dashboard-paiement>
       </section>
 
-      <section *ngSwitchCase="'utilisateurs'">
-        <app-utilisateurs-paiement></app-utilisateurs-paiement>
-      </section>
-
       <section *ngSwitchCase="'paiements'">
-        <app-suivi-paiements (changementVue)="changerVue($event)"></app-suivi-paiements>
+        <app-suivi-paiements (changementVue)="changerVue('paiements')"></app-suivi-paiements>
       </section>
 
       <section *ngSwitchCase="'echeances'">

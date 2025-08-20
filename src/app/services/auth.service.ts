@@ -15,7 +15,7 @@ interface Utilisateur {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/utilisateurs';
+  private apiUrl = '/api/utilisateurs';
 
   constructor(private http: HttpClient) {}
 

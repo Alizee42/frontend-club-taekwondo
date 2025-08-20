@@ -28,7 +28,7 @@ export class GestionDocumentsComponent implements OnInit {
   }
 
   loadDocuments() {
-    this.http.get<any[]>('http://localhost:8080/api/documents').subscribe({
+    this.http.get<any[]>('/api/documents').subscribe({
       next: (documents) => {
         const utilisateursMap = new Map();
 
@@ -68,7 +68,7 @@ export class GestionDocumentsComponent implements OnInit {
 
   validerDocument(document: any) {
     this.http
-      .put(`http://localhost:8080/api/documents/${document.id}/valider`, {})
+      .put(`/api/documents/${document.id}/valider`, {})
       .subscribe({
         next: () => {
           this.loadDocuments();
@@ -81,7 +81,7 @@ export class GestionDocumentsComponent implements OnInit {
 
   refuserDocument(document: any) {
     this.http
-      .put(`http://localhost:8080/api/documents/${document.id}/refuser`, {})
+      .put(`/api/documents/${document.id}/refuser`, {})
       .subscribe({
         next: () => {
           this.loadDocuments();
@@ -106,21 +106,20 @@ export class GestionDocumentsComponent implements OnInit {
     docsARefuser.forEach((d: any) => this.refuserDocument(d));
   }
 
-getStatusText(status: string): string {
-  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
+  getStatusText(status: string): string {
+    const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
 
-  switch (normalised) {
-    case 'validé':
-      return 'Validé';
-    case 'refusé':
-      return 'Refusé';
-    case 'en_attente':
-      return 'En attente de validation';
-    default:
-      return status;
+    switch (normalised) {
+      case 'validé':
+        return 'Validé';
+      case 'refusé':
+        return 'Refusé';
+      case 'en_attente':
+        return 'En attente de validation';
+      default:
+        return status;
+    }
   }
-}
-
 
   getGlobalStatusText(documents: any[]): string {
     const status = this.getGlobalStatus(documents);
@@ -136,37 +135,35 @@ getStatusText(status: string): string {
     }
   }
 
-getStatusClass(status: string): string {
-  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
+  getStatusClass(status: string): string {
+    const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
 
-  switch (normalised) {
-    case 'validé':
-      return 'status-validé';
-    case 'refusé':
-      return 'status-refusé';
-    case 'en_attente':
-      return 'status-en-attente';
-    default:
-      return '';
+    switch (normalised) {
+      case 'validé':
+        return 'status-validé';
+      case 'refusé':
+        return 'status-refusé';
+      case 'en_attente':
+        return 'status-en-attente';
+      default:
+        return '';
+    }
   }
-}
 
+  getStatusIcon(status: string): string {
+    const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
 
-getStatusIcon(status: string): string {
-  const normalised = status?.trim().toLowerCase().replace(/\s+/g, '_');
-
-  switch (normalised) {
-    case 'validé':
-      return 'ri-check-line';
-    case 'refusé':
-      return 'ri-close-line';
-    case 'en_attente':
-      return 'ri-time-line';
-    default:
-      return '';
+    switch (normalised) {
+      case 'validé':
+        return 'ri-check-line';
+      case 'refusé':
+        return 'ri-close-line';
+      case 'en_attente':
+        return 'ri-time-line';
+      default:
+        return '';
+    }
   }
-}
-
 
   getGlobalStatus(documents: any[]): string {
     if (documents.every((d) => d.status === 'validé')) return 'validé';
@@ -207,8 +204,9 @@ getStatusIcon(status: string): string {
   }
 
   getSafeUrl(chemin: string): SafeResourceUrl {
+    // Au cas où tu reçoives encore "documents/xxx"
     chemin = chemin.replace(/^documents\//, '');
-    const fullUrl = `http://localhost:8080/uploads/documents/${encodeURIComponent(chemin)}`;
+    const fullUrl = `/api/uploads/documents/${encodeURIComponent(chemin)}`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(fullUrl);
   }
 

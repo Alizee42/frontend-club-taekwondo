@@ -12,7 +12,7 @@ export interface Inscription {
 
 @Injectable({ providedIn: 'root' })
 export class InscriptionsService {
-  private apiUrl = 'http://localhost:8080/api/inscriptions'; // adapte si besoin
+  private apiUrl = '/api/inscriptions'; // adapte si besoin
 
   constructor(private http: HttpClient) {}
 
