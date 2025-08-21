@@ -2,11 +2,11 @@
 
 <div class="ajout-paiement-container">
   <!-- Stepper -->
-  <ol class="stepper">
+  <ol class="stepper" role="list">
     <li *ngFor="let step of steps; let i = index"
         [class.active]="currentStep === i"
         [class.done]="i < currentStep">
-      <span class="index">{{ i + 1 }}</span> {{ step.label }}
+      <span class="index" aria-hidden="true">{{ i + 1 }}</span> {{ step.label }}
     </li>
   </ol>
 
@@ -41,9 +41,25 @@
           </select>
         </label>
 
-        <div class="info muted" *ngIf="nouvelUtilisateur.role==='PARENT'">
-          Si des enfants existent déjà en base, tu peux les rattacher ci-dessous après avoir choisi un parent existant
-          ou laisser vide (ils pourront être créés plus tard).
+        <!-- Ajout d’enfants à la volée si rôle = PARENT -->
+        <div *ngIf="nouvelUtilisateur.role==='PARENT'" class="enfants-nouveaux" style="grid-column:1/-1;">
+          <header class="section-subtitle">👧👦 Enfant(s) à créer maintenant</header>
+
+          <div class="chips" *ngIf="enfantsNouveaux?.length">
+            <div class="chip" *ngFor="let e of enfantsNouveaux; let i = index">
+              <input type="text" [(ngModel)]="e.prenom" placeholder="Prénom" style="width:120px">
+              <input type="text" [(ngModel)]="e.nom" placeholder="Nom" style="width:140px">
+              <button type="button" class="btn danger sm" (click)="removeEnfant(i)" aria-label="Supprimer l’enfant">✖</button>
+            </div>
+          </div>
+
+          <button type="button" class="btn ghost" (click)="addEnfant()">➕ Ajouter un enfant</button>
+          <p class="muted" style="margin-top:.5rem">Tu peux laisser vide si tu créeras les enfants plus tard.</p>
+        </div>
+
+        <div class="info muted" *ngIf="nouvelUtilisateur.role==='PARENT'" style="grid-column:1/-1;">
+          Si des enfants existent déjà en base et que tu choisis un parent existant (mode non “création manuelle”),
+          tu pourras les cocher plus bas.
         </div>
       </div>
 
@@ -84,7 +100,7 @@
             </select>
           </label>
 
-          <div *ngIf="enfantsDuParent?.length">
+          <div *ngIf="enfantsDuParent?.length" class="fullrow">
             <label>Enfant(s) (facultatif)</label>
             <div class="chips">
               <label class="chip" *ngFor="let m of enfantsDuParent">
@@ -159,7 +175,7 @@
             <option value="payé">Payé</option>
           </select>
         </label>
-        <button type="button" class="btn danger" (click)="echeances.splice(i,1)">❌</button>
+        <button type="button" class="btn danger" (click)="echeances.splice(i,1)" aria-label="Supprimer l’échéance">❌</button>
       </div>
     </section>
 
@@ -181,12 +197,25 @@
             👤 Nouveau {{ nouvelUtilisateur.role === 'ADULTE' ? 'Adulte' : 'Parent' }} :
             {{ nouvelUtilisateur.prenom }} {{ nouvelUtilisateur.nom }}
             <span *ngIf="nouvelUtilisateur.email">({{ nouvelUtilisateur.email }})</span>
+            <ng-container *ngIf="nouvelUtilisateur.role==='PARENT' && enfantsNouveaux?.length">
+              — Enfant(s) créé(s) :
+              <strong>{{ formatEnfantsNouveaux() }}</strong>
+            </ng-container>
           </li>
-          <li *ngIf="!creationManuelle && typeProfil==='ADULTE'">👤 Adulte #{{ selectedAdulteId }}</li>
-          <li *ngIf="!creationManuelle && typeProfil==='PARENT'">👤 Parent #{{ selectedParentId }} (Enfants: {{ selectedMembreIds.join(', ') || '—' }})</li>
+
+          <li *ngIf="!creationManuelle && typeProfil==='ADULTE'">
+            👤 Adulte #{{ selectedAdulteId }}
+          </li>
+
+          <li *ngIf="!creationManuelle && typeProfil==='PARENT'">
+            👤 Parent #{{ selectedParentId }}
+            <span *ngIf="selectedMembreIds?.length"> (Enfants: {{ selectedMembreIds.join(', ') }})</span>
+            <span *ngIf="!selectedMembreIds?.length"> (Enfants: —)</span>
+          </li>
+
           <li>💳 {{ typePaiement }} — {{ montantTotal | currency:'EUR' }}</li>
           <li>📅 Paiement: {{ datePaiement | date:'dd/MM/yyyy' }}</li>
-          <li>💼 Mode: {{ modePaiement }}</li>
+          <li>💼 Mode: {{ modePaiement === 'stripe' ? 'CB (Stripe)' : modePaiement }}</li>
           <li *ngIf="typePaiement==='echeances'">{{ echeances.length }} échéance(s)</li>
         </ul>
       </div>

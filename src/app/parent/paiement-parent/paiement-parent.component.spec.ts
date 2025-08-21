@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { PaiementParentComponent } from './paiement-parent.component';
 
 describe('PaiementParentComponent', () => {
@@ -8,9 +8,8 @@ describe('PaiementParentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PaiementParentComponent]
-    })
-    .compileComponents();
+      imports: [PaiementParentComponent, HttpClientTestingModule]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PaiementParentComponent);
     component = fixture.componentInstance;

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ListeClubComponent } from './liste-club.component';
 
 describe('ListeClubComponent', () => {
@@ -8,9 +8,11 @@ describe('ListeClubComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ListeClubComponent]
-    })
-    .compileComponents();
+      imports: [
+        ListeClubComponent,
+        HttpClientTestingModule
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ListeClubComponent);
     component = fixture.componentInstance;

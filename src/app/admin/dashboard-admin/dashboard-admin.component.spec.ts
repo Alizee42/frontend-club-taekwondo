@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';  // ✅ ajout
 import { DashboardAdminComponent } from './dashboard-admin.component';
 
 describe('DashboardAdminComponent', () => {
@@ -8,9 +8,11 @@ describe('DashboardAdminComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DashboardAdminComponent]
-    })
-    .compileComponents();
+      imports: [
+        DashboardAdminComponent,
+        HttpClientTestingModule   // ✅ ajout pour corriger NG0201
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardAdminComponent);
     component = fixture.componentInstance;

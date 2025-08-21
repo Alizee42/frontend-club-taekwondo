@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { DocumentsParentComponent } from './documents-parent.component';
 
 describe('DocumentsParentComponent', () => {
@@ -8,9 +8,8 @@ describe('DocumentsParentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DocumentsParentComponent]
-    })
-    .compileComponents();
+      imports: [DocumentsParentComponent, HttpClientTestingModule]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DocumentsParentComponent);
     component = fixture.componentInstance;

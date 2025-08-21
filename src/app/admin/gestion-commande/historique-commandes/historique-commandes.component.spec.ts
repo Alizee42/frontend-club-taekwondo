@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { HistoriqueCommandesComponent } from './historique-commandes.component';
 
 describe('HistoriqueCommandesComponent', () => {
@@ -8,9 +8,11 @@ describe('HistoriqueCommandesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HistoriqueCommandesComponent]
-    })
-    .compileComponents();
+      imports: [
+        HistoriqueCommandesComponent,
+        HttpClientTestingModule
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(HistoriqueCommandesComponent);
     component = fixture.componentInstance;
