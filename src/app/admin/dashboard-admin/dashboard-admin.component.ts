@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
 import { Observable, of, forkJoin, interval, Subject } from 'rxjs';
-import { map, catchError, takeUntil, switchMap } from 'rxjs/operators';
+import { map, catchError, takeUntil, switchMap, filter } from 'rxjs/operators';
 
 interface DashboardStats {
   nbMembres: number;
@@ -29,6 +29,11 @@ const STATUS = {
   COMMANDE_A_TRAITER: 'A_TRAITER'
 };
 
+// 🔒 clés de persistance locale
+const LS_KEYS = {
+  lastSeenPendingPaiements: 'last_seen_pending_paiements'
+};
+
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
@@ -52,6 +57,9 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  // pour calcul "non lus"
+  private lastPendingPaiements = 0; // dernier total "en attente" vu du serveur
+
   // ✅ Base API root-absolu (évite les 404 sur /admin/...)
   private readonly base = '/api'.replace(/\/+$/, '');
   private url = (path: string) => `${this.base}/${String(path).replace(/^\/+/, '')}`;
@@ -62,7 +70,27 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     this.recupererUtilisateur();
     this.chargerStats();
     this.refreshBadges();
+
+    // rafraîchit périodiquement
     interval(30000).pipe(takeUntil(this.destroy$)).subscribe(() => this.refreshBadges());
+
+    // si on est DÉJÀ sur /admin/paiements au chargement → badge à 0
+    if (this.router.url.startsWith('/admin/paiements')) {
+      this.markPaiementsAsSeen();
+    }
+
+    // à chaque navigation vers /admin/paiements → badge à 0
+    this.router.events
+      .pipe(
+        filter(e => e instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((e: any) => {
+        const url = e?.urlAfterRedirects ?? e?.url ?? '';
+        if (url.startsWith('/admin/paiements')) {
+          this.markPaiementsAsSeen();
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -98,13 +126,43 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   private refreshBadges(): void {
     forkJoin({
       avis: this.fetchAvis(),
-      paiements: this.fetchPaiements(),
+      paiements: this.fetchPaiements(),          // renvoie le TOTAL "en attente"
       inscriptions: this.fetchInscriptions(),
       commandes: this.fetchCommandes()
     }).subscribe({
-      next: (res) => (this.badge = res),
-      error: () => {}
+      next: (res) => {
+        // ----- calcul des "non lus" pour Paiements -----
+        const pending = Number(res.paiements || 0);
+        this.lastPendingPaiements = pending;
+
+        const lastSeenRaw = localStorage.getItem(LS_KEYS.lastSeenPendingPaiements);
+        let unread: number;
+
+        if (lastSeenRaw === null) {
+          // 1er chargement : on considère tout "vu" (badge = 0)
+          localStorage.setItem(LS_KEYS.lastSeenPendingPaiements, String(pending));
+          unread = 0;
+        } else {
+          const lastSeen = parseInt(lastSeenRaw, 10) || 0;
+          unread = Math.max(0, pending - lastSeen);
+        }
+
+        this.badge = {
+          avis: res.avis,
+          inscriptions: res.inscriptions,
+          commandes: res.commandes,
+          paiements: unread
+        };
+      },
+      error: () => { /* noop */ }
     });
+  }
+
+  /** Marque les paiements "en attente" comme vus → badge = 0 */
+  private markPaiementsAsSeen(): void {
+    localStorage.setItem(LS_KEYS.lastSeenPendingPaiements, String(this.lastPendingPaiements));
+    // met immédiatement le badge à 0 pour l'UX
+    this.badge = { ...this.badge, paiements: 0 };
   }
 
   // ===== Requêtes directes (filtrées) =====
@@ -184,7 +242,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   }
 
   // 🚀 Navigation
-  navigateToPaiement()           { this.router.navigate(['/admin/paiements']); }
+  navigateToPaiement() {
+    this.markPaiementsAsSeen();               // retire le badge immédiatement au clic
+    this.router.navigate(['/admin/paiements']);
+  }
   navigateToGestionCommande()    { this.router.navigate(['/admin/gestion-commande']); }
   navigateToGestionEvenements()  { this.router.navigate(['/admin/gestion-evenement']); }
   navigateToGestionInscription() { this.router.navigate(['/admin/gestion-inscription']); }
