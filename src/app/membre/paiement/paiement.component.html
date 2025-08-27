@@ -78,7 +78,8 @@
     </div>
   </div>
 </div>
-<!-- 🔷 Historique clair -->
+
+<!-- 🔷 Historique -->
 <div class="historique-section">
   <h2>Mes paiements</h2>
 
@@ -97,16 +98,11 @@
       </thead>
       <tbody>
         <tr *ngFor="let paiement of paiementsUniques">
-          <td>{{ paiement.datePaiement | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ paiement.dateAffichable | date: 'dd/MM/yyyy' }}</td>
           <td>{{ paiement.montantTotal | currency:'EUR' }}</td>
           <td>
-            <span class="badge" [ngClass]="{
-              'badge-payé': paiement.statut === 'payé',
-              'badge-en-attente': paiement.statut === 'en attente',
-              'badge-annulé': paiement.statut === 'annulé'
-            }">
-              {{ paiement.statut === 'payé' ? '✔' : (paiement.statut === 'en attente' ? '⏳' : '❌') }}
-              {{ paiement.statut }}
+            <span class="badge" [ngClass]="paiement.statutCss">
+              {{ paiement.statutDisplay }}
             </span>
           </td>
         </tr>
@@ -132,11 +128,7 @@
                 <p>Montant restant : {{ calculerMontantRestant(paiement) | currency:'EUR' }}</p>
               </div>
               <div class="statut">
-                <span class="badge" [ngClass]="{
-                  'badge-payé': paiement.statut === 'payé',
-                  'badge-en-attente': paiement.statut === 'en attente',
-                  'badge-annulé': paiement.statut === 'annulé'
-                }">{{ paiement.statut }}</span>
+                <span class="badge" [ngClass]="paiement.statutCss">{{ paiement.statutDisplay }}</span>
               </div>
             </div>
             <table class="echeancier-table">
@@ -152,18 +144,15 @@
               <tbody>
                 <tr *ngFor="let echeance of genererEcheancier(paiement)">
                   <td>{{ echeance.numero }}</td>
-                  <td>{{ echeance.date | date: 'dd/MM/yyyy' }}</td>
+                  <td>{{ echeance.dateAffichable | date: 'dd/MM/yyyy' }}</td>
                   <td>{{ echeance.montant }} €</td>
                   <td>
-                    <span class="badge" [ngClass]="{
-                      'badge-payé': echeance.statut === 'payé',
-                      'badge-en-attente': echeance.statut === 'en attente'
-                    }">
-                      {{ echeance.statut === 'payé' ? '✔' : '⏳' }} {{ echeance.statut }}
+                    <span class="badge" [ngClass]="echeance.statutCss">
+                      {{ echeance.statutDisplay }}
                     </span>
                   </td>
                   <td>
-                    <button *ngIf="echeance.statut !== 'payé'" class="btn-payer-echeance"
+                    <button *ngIf="echeance.statutDisplay !== 'payé'" class="btn-payer-echeance"
                       (click)="ouvrirModalPaiement(paiement, echeance)">
                       Payer
                     </button>
@@ -180,6 +169,8 @@
     </div>
   </div>
 </div>
+
+<!-- Modal échéance -->
 <div class="modal" *ngIf="modalOuverte">
   <div class="modal-content">
     <h3>Payer une échéance</h3>
