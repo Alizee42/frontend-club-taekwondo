@@ -2,7 +2,7 @@
   <!-- 🔷 En-tête -->
   <div class="paiement-header">
     <h1>Paiement de votre cotisation</h1>
-    <p>Montant fixe : <strong>{{ montantInitial }} €</strong></p>
+    <p>Montant fixe : <strong>{{ montantInitial | number:'1.2-2' }} €</strong></p>
   </div>
 
   <!-- 🔷 Formulaire à étapes -->
@@ -21,7 +21,7 @@
         <div class="choix-cartes">
           <div class="carte-option" [class.active]="modePaiement === 'unique'" (click)="modePaiement = 'unique'">
             <h3>💳 Paiement en une fois</h3>
-            <p>Un seul règlement de <strong>{{ montantInitial }} €</strong>.</p>
+            <p>Un seul règlement de <strong>{{ montantInitial | number:'1.2-2' }} €</strong>.</p>
           </div>
           <div class="carte-option" [class.active]="modePaiement === 'echeances'" (click)="modePaiement = 'echeances'">
             <h3>📆 Paiement en plusieurs fois</h3>
@@ -31,8 +31,8 @@
               <select [(ngModel)]="nombreEcheances">
                 <option *ngFor="let n of echeancesOptions" [value]="n">{{ n }}</option>
               </select>
-              <p>Montant total : <strong>{{ montantInitial.toFixed(2) }} €</strong></p>
-              <p>Montant par échéance : <strong>{{ getMontantParEcheance().toFixed(2) }} €</strong></p>
+              <p>Montant total : <strong>{{ montantInitial | number:'1.2-2' }} €</strong></p>
+              <p>Montant par échéance : <strong>{{ getMontantParEcheance() | number:'1.2-2' }} €</strong></p>
             </div>
           </div>
         </div>
@@ -42,16 +42,16 @@
       <!-- Étape 2 -->
       <section *ngIf="step === 2" class="step">
         <h2>Informations de paiement</h2>
-        <p><strong>Montant à payer :</strong> {{ montantTotalAPayer.toFixed(2) }} €</p>
+        <p><strong>Montant à payer :</strong> {{ montantTotalAPayer | number:'1.2-2' }} €</p>
         <div class="recapitulatif recap-bien-dispose">
           <h3>🧾 Résumé du paiement</h3>
           <ul class="recap-list">
-            <li><strong>Montant total :</strong> {{ montantInitial.toFixed(2) }} €</li>
+            <li><strong>Montant total :</strong> {{ montantInitial | number:'1.2-2' }} €</li>
             <li><strong>Mode de paiement :</strong>
               {{ modePaiement === 'unique' ? 'Paiement en une fois' : nombreEcheances + ' échéances' }}
             </li>
             <li *ngIf="modePaiement === 'echeances'">
-              <strong>Montant par échéance :</strong> {{ getMontantParEcheance().toFixed(2) }} €
+              <strong>Montant par échéance :</strong> {{ getMontantParEcheance() | number:'1.2-2' }} €
             </li>
           </ul>
         </div>
@@ -71,7 +71,7 @@
       <section *ngIf="step === 3" class="step confirmation">
         <div class="confirmation-icon">&#10004;</div>
         <h2>Paiement effectué avec succès</h2>
-        <p>Nous vous remercions pour votre règlement.✅ Un reçu vous a été envoyé par email.</p>
+        <p>Nous vous remercions pour votre règlement. ✅ Un reçu vous a été envoyé par email.</p>
         <p>Vous pouvez retrouver vos paiements dans la section <strong>“Mes paiements”</strong> ci-dessous.</p>
         <button class="btn-new-payment" (click)="step = 1">Effectuer un autre paiement</button>
       </section>
@@ -86,7 +86,9 @@
   <!-- Paiements uniques -->
   <div class="historique-bloc">
     <button class="table-toggle" (click)="toggleSection('unique')">
-      Paiements uniques <span *ngIf="sectionOuverte['unique']">▼</span><span *ngIf="!sectionOuverte['unique']">▲</span>
+      Paiements uniques
+      <span *ngIf="sectionOuverte['unique']">▼</span>
+      <span *ngIf="!sectionOuverte['unique']">▲</span>
     </button>
     <table class="historique-table" *ngIf="sectionOuverte['unique']">
       <thead>
@@ -98,12 +100,10 @@
       </thead>
       <tbody>
         <tr *ngFor="let paiement of paiementsUniques">
-          <td>{{ paiement.dateAffichable | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ paiement.dateAffichable | date:'dd/MM/yyyy' }}</td>
           <td>{{ paiement.montantTotal | currency:'EUR' }}</td>
           <td>
-            <span class="badge" [ngClass]="paiement.statutCss">
-              {{ paiement.statutDisplay }}
-            </span>
+            <span class="badge" [ngClass]="paiement.statutCss">{{ paiement.statutDisplay }}</span>
           </td>
         </tr>
         <tr *ngIf="paiementsUniques.length === 0">
@@ -116,8 +116,11 @@
   <!-- Paiements échelonnés -->
   <div class="historique-bloc">
     <button class="table-toggle" (click)="toggleSection('echeances')">
-      Paiements échelonnés <span *ngIf="sectionOuverte['echeances']">▼</span><span *ngIf="!sectionOuverte['echeances']">▲</span>
+      Paiements échelonnés
+      <span *ngIf="sectionOuverte['echeances']">▼</span>
+      <span *ngIf="!sectionOuverte['echeances']">▲</span>
     </button>
+
     <div *ngIf="sectionOuverte['echeances']">
       <div class="paiement-card-container">
         <ng-container *ngIf="paiementsEcheances.length > 0; else aucunPaiementEchelonne">
@@ -131,7 +134,41 @@
                 <span class="badge" [ngClass]="paiement.statutCss">{{ paiement.statutDisplay }}</span>
               </div>
             </div>
-            <table class="echeancier-table">
+
+            <!-- ✅ Prochaine échéance (compact) -->
+            <ng-container *ngIf="nextUnpaid(paiement) as next">
+              <table class="echeancier-table compact">
+                <thead>
+                  <tr>
+                    <th>Prochaine échéance</th>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>n° {{ next.numero }}</td>
+                    <td>{{ next.dateAffichable | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ next.montant | currency:'EUR' }}</td>
+                    <td>
+                      <button class="btn-payer-echeance"
+                              (click)="ouvrirModalPaiement(paiement, next)">
+                        Payer
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ng-container>
+
+            <!-- 🔽 Dépliable : toutes les échéances -->
+            <button class="table-toggle"
+                    (click)="paiement._showTable = !paiement._showTable">
+              {{ paiement._showTable ? 'Masquer le détail' : 'Voir le détail des échéances' }}
+            </button>
+
+            <table class="echeancier-table" *ngIf="paiement._showTable">
               <thead>
                 <tr>
                   <th>Échéance</th>
@@ -144,24 +181,27 @@
               <tbody>
                 <tr *ngFor="let echeance of genererEcheancier(paiement)">
                   <td>{{ echeance.numero }}</td>
-                  <td>{{ echeance.dateAffichable | date: 'dd/MM/yyyy' }}</td>
-                  <td>{{ echeance.montant }} €</td>
+                  <td>{{ echeance.dateAffichable | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ echeance.montant | currency:'EUR' }}</td>
                   <td>
-                    <span class="badge" [ngClass]="echeance.statutCss">
-                      {{ echeance.statutDisplay }}
-                    </span>
+                    <span class="badge" [ngClass]="echeance.statutCss">{{ echeance.statutDisplay }}</span>
                   </td>
                   <td>
-                    <button *ngIf="echeance.statutDisplay !== 'payé'" class="btn-payer-echeance"
-                      (click)="ouvrirModalPaiement(paiement, echeance)">
+                    <button class="btn-payer-echeance"
+                            *ngIf="echeance.statutCss !== 'badge-payé'"
+                            (click)="ouvrirModalPaiement(paiement, echeance)">
                       Payer
                     </button>
                   </td>
+                </tr>
+                <tr *ngIf="genererEcheancier(paiement).length === 0">
+                  <td colspan="5">Aucune échéance pour ce paiement.</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </ng-container>
+
         <ng-template #aucunPaiementEchelonne>
           <p>Aucun paiement échelonné trouvé.</p>
         </ng-template>
@@ -174,7 +214,7 @@
 <div class="modal" *ngIf="modalOuverte">
   <div class="modal-content">
     <h3>Payer une échéance</h3>
-    <p>Montant : {{ montantTotalAPayer.toFixed(2) }} €</p>
+    <p>Montant : {{ montantTotalAPayer | number:'1.2-2' }} €</p>
     <div id="card-element-modal" class="card-element"></div>
     <div class="btn-group">
       <button class="btn-blue" (click)="payerEcheances()" [disabled]="enCoursDePaiement">Valider</button>

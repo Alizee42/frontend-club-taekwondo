@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { StripeService } from '../../services/stripe.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
 import { MembreService } from '../../services/membre.service';
@@ -14,39 +15,48 @@ import { MembreService } from '../../services/membre.service';
   styleUrls: ['./paiement.component.css']
 })
 export class PaiementComponent implements OnInit, AfterViewInit {
-  /** Base API (ajuste ici si besoin) */
   private readonly API = '/api';
 
+  // Données
   paiements: any[] = [];
   paiementsUniques: any[] = [];
   paiementsEcheances: any[] = [];
 
-  montantInitial: number = 0;
+  // Paramètres paiement
+  montantInitial = 0;
   modePaiement: 'unique' | 'echeances' = 'unique';
-  nombreEcheances: number = 1;
+  nombreEcheances = 1;
   echeancesOptions: number[] = [];
 
+  // Stripe
   stripe: any;
   cardElement: any;
   cardElementModal: any;
+  private lastPaymentIntentId: string | null = null;
 
-  modalOuverte: boolean = false;
+  // Modale échéance
+  modalOuverte = false;
   paiementActuel: any = null;
   echeanceEnCours: any = null;
-  montantTotalAPayer: number = 0;
+  montantTotalAPayer = 0;
 
-  enCoursDePaiement: boolean = false;
-  paiementReussi: boolean = false;
-  paiementErreur: boolean = false;
-  erreurMessage: string = '';
+  // États
+  enCoursDePaiement = false;
+  paiementReussi = false;
+  paiementErreur = false;
+  erreurMessage = '';
+  private confirming = false; // ← anti double-clic / double confirm
 
-  step: number = 1;
-  maxStep: number = 3;
+  // Wizard
+  step = 1;
+  maxStep = 3;
 
+  // UI
   sectionOuverte: { [key: string]: boolean } = { unique: true, echeances: true };
 
-  utilisateurId: number = 0;
-  membreId: number = 0;
+  // Identifiants
+  utilisateurId = 0;
+  membreId = 0;
 
   constructor(
     private http: HttpClient,
@@ -55,67 +65,48 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     private membreService: MembreService
   ) {}
 
-  // -----------------------------
-  // Lifecycle
-  // -----------------------------
+  // ===================== Lifecycle =====================
   ngOnInit(): void {
-    console.log('🟢 [PaiementComponent] Init');
-
-    // Paramètres de paiement (le service gère un fallback si le GET sécurisé échoue)
-    this.parametresService.parametres$.subscribe((parametres) => {
-      console.log('📥 [Params] Reçus:', parametres);
-      if (parametres) {
-        this.montantInitial = parametres.montantCotisation;
-        this.echeancesOptions = Array.from(
-          { length: parametres.echeancesAutorisees },
-          (_, i) => i + 1
-        );
-        console.log('✅ [Params] montantInitial:', this.montantInitial, 'echeancesOptions:', this.echeancesOptions);
+    this.parametresService.parametres$.subscribe((p) => {
+      if (p) {
+        this.montantInitial = Number(p.montantCotisation || 0);
+        const maxEch = Math.max(1, Number(p.echeancesAutorisees || 1));
+        this.echeancesOptions = Array.from({ length: maxEch }, (_, i) => i + 1);
       }
     });
 
-    // Données locales
     const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || '{}');
     this.utilisateurId = utilisateur?.id || 0;
-    console.log('👤 [LocalStorage] utilisateurId:', this.utilisateurId);
 
-    // Membre connecté
     this.membreService.getMembreConnecte().subscribe({
       next: (membre) => {
-        console.log('📥 [Membre] Réponse:', membre);
         if (membre?.id) {
           this.membreId = membre.id;
           localStorage.setItem('membreId', String(this.membreId));
-          console.log('✅ [Membre] Id:', this.membreId, '(stocké localStorage)');
           this.loadPaiements();
         } else {
-          this.erreurMessage = 'Aucun membre trouvé pour cet utilisateur.';
-          this.paiementErreur = true;
-          console.error('❌ [Membre] Aucun membre trouvé');
+          this.fail('Aucun membre trouvé pour cet utilisateur.');
         }
       },
       error: (err) => {
-        console.error('❌ [Membre] Erreur récupération membre connecté :', err);
-        this.erreurMessage = 'Impossible de récupérer votre profil membre.';
-        this.paiementErreur = true;
+        console.error('❌ [Membre] Erreur récupération membre :', err);
+        this.fail('Impossible de récupérer votre profil membre.');
       }
     });
   }
 
   ngAfterViewInit(): void {
-    console.log('ℹ️ [AfterViewInit]');
+    // Stripe monté à l’étape 2 / dans la modale
   }
 
-  // -----------------------------
-  // Helpers backend
-  // -----------------------------
-  private toTypePaiementBack(mode: 'unique' | 'echeances'): 'UNIQUE' | 'ECHELONNE' {
-    return mode === 'echeances' ? 'ECHELONNE' : 'UNIQUE';
+  // ===================== Utils =====================
+  private authHeaders() {
+    const token = localStorage.getItem('token') || '';
+    return { Authorization: `Bearer ${token}` };
   }
-  private toModePaiementBack(): 'CB' { return 'CB'; }
 
-  private getLSKeyPaiement(): string {
-    return `paiementIdEnCours:${this.membreId}`;
+  private log(where: string, payload?: any) {
+    console.log(`[Membre][${where}]`, payload ?? '');
   }
 
   private norm(val: any): string {
@@ -128,446 +119,359 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     const t = this.norm(s);
     if (t.includes('PAYE')) return { display: 'payé', css: 'badge-payé' };
     if (t.includes('ANNUL')) return { display: 'annulé', css: 'badge-annulé' };
-    // EN_ATTENTE / PENDING / EN ATTENTE…
     return { display: 'en attente', css: 'badge-en-attente' };
   }
 
-  // -----------------------------
-  // Stripe Elements
-  // -----------------------------
-  initStripeElement(): void {
-    console.log('🧩 [Stripe] initStripeElement()');
-    setTimeout(() => {
-      const container = document.querySelector('#card-element');
-      if (!container) {
-        console.warn('⚠️ [Stripe] #card-element introuvable');
-        return;
-      }
+  private extractPiIdFromClientSecret(clientSecret?: string | null): string | null {
+    if (!clientSecret) return null;
+    const idx = clientSecret.indexOf('_secret_');
+    return idx > 0 ? clientSecret.substring(0, idx) : null;
+  }
 
-      if (!this.stripe) {
-        this.stripeService.getStripeInstance().then((stripe: any) => {
-          this.stripe = stripe;
-          const elements = stripe.elements();
-          this.cardElement = elements.create('card');
-          this.cardElement.mount('#card-element');
-          console.log('✅ [Stripe] Card element monté');
-        });
-      } else {
-        const elements = this.stripe.elements();
-        this.cardElement = elements.create('card');
-        this.cardElement.mount('#card-element');
-        console.log('✅ [Stripe] Card element monté (instance existante)');
-      }
-    }, 0);
+  /** Appel de sync qui se purge pour ne jamais rejouer le même PI */
+  private async syncPaymentIntentOnce(): Promise<void> {
+    if (!this.lastPaymentIntentId) return;
+    const pi = this.lastPaymentIntentId;
+    this.lastPaymentIntentId = null; // purge d’abord
+    try {
+      await firstValueFrom(
+        this.http.post(
+          `${this.API}/stripe/sync-payment`,
+          { paymentIntentId: pi },
+          { headers: this.authHeaders() }
+        )
+      );
+      this.log('sync-payment.ok', pi);
+    } catch (e) {
+      this.log('sync-payment.err', e);
+      // ignoré en dev si endpoint absent; le webhook fera la mise à jour
+    }
+  }
+
+  private fail(msg: string, err?: any) {
+    console.error('❌', msg, err || '');
+    this.erreurMessage = msg;
+    this.paiementErreur = true;
+    this.enCoursDePaiement = false;
+    this.confirming = false;
+  }
+
+  // ===================== Chargements =====================
+  loadPaiements(): void {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    this.http.get<any[]>(`${this.API}/paiements`, { headers: this.authHeaders() })
+      .subscribe({
+        next: (data) => {
+          const mapped = (Array.isArray(data) ? data : []).map((p: any) => {
+            const utilisateurId = Number(p?.utilisateurId ?? p?.utilisateur?.id ?? NaN);
+            const membreId = Number(
+              p?.membreId ??
+              p?.membre?.id ??
+              p?.beneficiaireId ??
+              p?.enfantId ??
+              NaN
+            );
+
+            let type = this.norm(p?.type ?? p?.typePaiement);
+            if (!type) {
+              type = Array.isArray(p?.echeances) && p.echeances.length > 0 ? 'ECHELONNE' : 'UNIQUE';
+            }
+
+            const statut = this.mapStatut(p?.statut);
+            const mode = this.norm(p?.modePaiement ?? p?.mode);
+
+            const echeances = Array.isArray(p?.echeances)
+              ? p.echeances.map((e: any) => {
+                  const eStatut = this.mapStatut(e?.statut);
+                  const dateEcheance = e?.dateEcheance ?? e?.date ?? null;
+                  return {
+                    ...e,
+                    dateEcheance,
+                    dateAffichable: dateEcheance ? new Date(dateEcheance) : null,
+                    statutDisplay: eStatut.display,
+                    statutCss: eStatut.css
+                  };
+                }).sort((a: any, b: any) => (a.numero ?? 0) - (b.numero ?? 0))
+              : [];
+
+            return {
+              ...p,
+              utilisateurId,
+              membreId,
+              type,
+              modePaiement: mode,
+              statutDisplay: statut.display,
+              statutCss: statut.css,
+              echeances
+            };
+          });
+
+          const membreIdLS = Number(localStorage.getItem('membreId'));
+          this.paiements = mapped.filter(p =>
+            Number(p.utilisateurId) === this.utilisateurId ||
+            Number(p.membreId) === membreIdLS
+          );
+
+          this.paiementsUniques   = this.paiements.filter(p => p.type === 'UNIQUE');
+          this.paiementsEcheances = this.paiements.filter(p => p.type.startsWith('ECHEL'));
+
+          this.log('loadPaiements.done', {
+            uniques: this.paiementsUniques.length,
+            echeances: this.paiementsEcheances.length
+          });
+        },
+        error: (err) => console.error('❌ [Paiements] Erreur:', err)
+      });
+  }
+
+  // Affichage compact
+  nextUnpaid(paiement: any) {
+    const list = Array.isArray(paiement?.echeances) ? paiement.echeances : [];
+    return list.find((e: any) => e?.statutCss !== 'badge-payé') || null;
+  }
+
+  // ===================== Stripe Elements =====================
+  initStripeElement(): void {
+    const container = document.querySelector('#card-element');
+    if (!container) return;
+
+    this.stripeService.getStripeInstance().then((stripe: any) => {
+      this.stripe = stripe;
+      const elements = stripe.elements();
+      if (this.cardElement) { try { this.cardElement.unmount(); } catch {} }
+      this.cardElement = elements.create('card');
+      this.cardElement.mount('#card-element');
+      this.log('stripe.card.mounted');
+    });
   }
 
   initStripeElementModal(): void {
-    console.log('🧩 [Stripe] initStripeElementModal()');
     const container = document.querySelector('#card-element-modal');
-    if (!container) {
-      console.warn('⚠️ [Stripe] #card-element-modal introuvable');
-      return;
-    }
+    if (!container) return;
 
-    if (!this.stripe) {
-      this.stripeService.getStripeInstance().then((stripe: any) => {
-        this.stripe = stripe;
-        const elements = stripe.elements();
-        this.cardElementModal = elements.create('card');
-        this.cardElementModal.mount('#card-element-modal');
-        console.log('✅ [Stripe] Card element modal monté');
-      });
-    } else {
-      const elements = this.stripe.elements();
+    this.stripeService.getStripeInstance().then((stripe: any) => {
+      this.stripe = stripe;
+      const elements = stripe.elements();
+      if (this.cardElementModal) { try { this.cardElementModal.unmount(); } catch {} }
       this.cardElementModal = elements.create('card');
       this.cardElementModal.mount('#card-element-modal');
-      console.log('✅ [Stripe] Card element modal monté (instance existante)');
-    }
-  }
-
-  // -----------------------------
-  // Chargement historique
-  // -----------------------------
-  loadPaiements(): void {
-    console.log('📡 [Paiements] Chargement…');
-    const token = localStorage.getItem('token');
-    const membreIdLS = Number(localStorage.getItem('membreId'));
-
-    if (!token) {
-      console.error('❌ [Paiements] Token manquant');
-      return;
-    }
-
-    this.http.get<any[]>(`${this.API}/paiements`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: (data) => {
-        console.log('✅ [Paiements] Réponse backend:', data);
-
-        // Normalisation large pour couvrir tous les cas de DTO
-        const mapped = (Array.isArray(data) ? data : []).map((p: any) => {
-          const utilisateurId = Number(p?.utilisateurId ?? p?.utilisateur?.id ?? NaN);
-          const membreId = Number(
-            p?.membreId ??
-            p?.membre?.id ??
-            p?.beneficiaireId ?? // compat éventuelle
-            p?.enfantId ??
-            NaN
-          );
-
-          const typeRaw = p?.type ?? p?.typePaiement;
-          let type = this.norm(typeRaw);
-          if (!type) {
-            // fallback: s'il y a des échéances, considère ECHELONNE
-            type = Array.isArray(p?.echeances) && p.echeances.length > 0 ? 'ECHELONNE' : 'UNIQUE';
-          }
-
-          const statut = this.mapStatut(p?.statut);
-          const mode = this.norm(p?.modePaiement ?? p?.mode);
-
-          // date "affichable" pour la ligne de paiement
-          const dateAffichable =
-            (p?.datePaiement ? new Date(p.datePaiement) : null) ??
-            (p?.dateCreation ? new Date(p.dateCreation) : null) ??
-            null;
-
-          // map échéances → garantir dateEcheance + dateAffichable + statutDisplay/css
-          const echeances = Array.isArray(p?.echeances)
-            ? p.echeances.map((e: any) => {
-                const eStatut = this.mapStatut(e?.statut);
-                const dateEcheance = e?.dateEcheance ?? e?.date ?? null;
-                const dateAffichableE = dateEcheance ? new Date(dateEcheance) : null;
-                return {
-                  ...e,
-                  dateEcheance,
-                  dateAffichable: dateAffichableE,
-                  statutDisplay: eStatut.display,
-                  statutCss: eStatut.css
-                };
-              })
-            : [];
-
-          return {
-            ...p,
-            utilisateurId,
-            membreId,
-            type,
-            modePaiement: mode,
-            dateAffichable,
-            statutDisplay: statut.display,
-            statutCss: statut.css,
-            echeances
-          };
-        });
-
-        // IMPORTANT : on garde les paiements du user connecté
-        this.paiements = mapped.filter(p =>
-          Number(p.utilisateurId) === this.utilisateurId ||
-          Number(p.membreId) === membreIdLS
-        );
-
-        this.mettreAJourFiltresPaiements();
-      },
-      error: (err) => {
-        console.error('❌ [Paiements] Erreur lors du chargement :', err);
-      }
+      this.log('stripe.card.modal.mounted');
     });
   }
 
-  mettreAJourFiltresPaiements(): void {
-    this.paiementsUniques   = this.paiements.filter(p => p.type === 'UNIQUE');
-    this.paiementsEcheances = this.paiements.filter(p => p.type.startsWith('ECHEL'));
-    console.log('📊 [Paiements] Répartition:', {
-      uniques: this.paiementsUniques.length,
-      echeances: this.paiementsEcheances.length
-    });
-  }
-
-  // -----------------------------
-  // Wizard
-  // -----------------------------
+  // ===================== Wizard =====================
   nextStep(): void {
     if (this.step < this.maxStep) {
       this.step++;
-      console.log('➡️ [Wizard] Étape ->', this.step);
       if (this.step === 2) {
-        this.montantTotalAPayer = this.montantInitial;
+        this.montantTotalAPayer = this.getMontantParEcheance(); // affichage logique
         setTimeout(() => this.initStripeElement(), 200);
       }
     }
   }
-
   previousStep(): void {
-    if (this.step > 1) {
-      this.step--;
-      console.log('⬅️ [Wizard] Étape ->', this.step);
-    }
+    if (this.step > 1) this.step--;
   }
 
-  // -----------------------------
-  // Création Paiement (idempotent côté front)
-  // -----------------------------
-  /** Étape 1 : créer (ou réutiliser) un Paiement en BDD via la route MEMBRE sécurisée */
+  // ===================== Création Paiement (idempotent front) =====================
+  private getLSKeyPaiement(): string {
+    return `paiementIdEnCours:${this.membreId}`;
+  }
+
+  private toTypePaiementBack(mode: 'unique' | 'echeances'): 'UNIQUE' | 'ECHELONNE' {
+    return mode === 'echeances' ? 'ECHELONNE' : 'UNIQUE';
+  }
+  private toModePaiementBack(): 'CB' { return 'CB'; }
+
   private creerPaiementBdd(montant: number): Promise<number> {
     const token = localStorage.getItem('token') || '';
-    if (!token) {
-      console.error('❌ [BDD] Pas de token pour créer le paiement en BDD');
-      return Promise.reject('Non authentifié');
-    }
+    if (!token) return Promise.reject('Non authentifié');
 
     const lsKey = this.getLSKeyPaiement();
     const deja = localStorage.getItem(lsKey);
     if (deja) {
       const idReutilise = Number(deja);
-      console.log('♻️ [BDD] Réutilisation paiementId en cours depuis localStorage ->', idReutilise);
+      this.log('bdd.reuse', idReutilise);
       return Promise.resolve(idReutilise);
     }
 
-    const payloadBdd: any = {
-      montantTotal: montant,                                   // euros
-      type: this.toTypePaiementBack(this.modePaiement),        // 'UNIQUE' | 'ECHELONNE'
-      modePaiement: this.toModePaiementBack(),                 // 'CB'
-      membreId: this.membreId,                                 // le serveur vérifiera avec le JWT
-      utilisateurId: this.utilisateurId,                       // ignoré côté serveur si inutile
+    const payload = {
+      montantTotal: montant,
+      type: this.toTypePaiementBack(this.modePaiement),
+      modePaiement: this.toModePaiementBack(),
+      membreId: this.membreId,
+      utilisateurId: this.utilisateurId,
       nombreEcheances: this.modePaiement === 'echeances' ? Number(this.nombreEcheances) : null
     };
-
-    console.log('📦 [BDD] Création Paiement ->', payloadBdd);
+    this.log('bdd.create.payload', payload);
 
     return new Promise((resolve, reject) => {
-      this.http.post<any>(`${this.API}/paiements/ajouter-membre`, payloadBdd, {
-        headers: { Authorization: `Bearer ${token}` }
+      this.http.post<any>(`${this.API}/paiements/ajouter-membre`, payload, {
+        headers: this.authHeaders()
       }).subscribe({
         next: (res) => {
           const paiementId =
-            res?.paiementId ??
-            res?.id ??
-            res?.paiement?.id ??
-            (Array.isArray(res) ? res[0]?.id : null);
-
-          console.log('✅ [BDD] Paiement créé (ajouter-membre), id =', paiementId, 'réponse =', res);
-          if (!paiementId) {
-            return reject('ID paiement non retourné par le backend');
-          }
-          // 🔒 Idempotence front : on mémorise l’ID tant que non soldé
+            res?.paiementId ?? res?.id ?? res?.paiement?.id ?? (Array.isArray(res) ? res[0]?.id : null);
+          this.log('bdd.create.res', res);
+          if (!paiementId) return reject('ID paiement non retourné');
           localStorage.setItem(lsKey, String(paiementId));
           resolve(Number(paiementId));
         },
-        error: (err) => {
-          console.error('❌ [BDD] Erreur création paiement (ajouter-membre) :', err);
-          reject(err?.error?.error || err?.error?.message || 'Erreur création paiement');
-        }
+        error: (err) => reject(err?.error?.error || err?.error?.message || 'Erreur création paiement')
       });
     });
   }
 
-  /** Étape 2 : demander le PaymentIntent Stripe avec { paiementId } */
-  private demarrerIntentStripe(paiementId: number): Promise<string> {
+  private demarrerIntentStripe(paiementId: number, echeanceId?: number): Promise<string> {
     const token = localStorage.getItem('token') || '';
-    if (!token) {
-      console.error('❌ [Stripe] Pas de token pour create-payment-intent');
-      return Promise.reject('Non authentifié');
-    }
+    if (!token) return Promise.reject('Non authentifié');
 
-    console.log('📡 [Stripe] POST', `${this.API}/stripe/create-payment-intent`, '->', { paiementId });
+    const payload: any = { paiementId };
+    if (echeanceId) payload.echeanceId = echeanceId; // ✅ cible une échéance
+    this.log('pi.create.payload', payload);
 
     return new Promise((resolve, reject) => {
-      this.http.post<any>(`${this.API}/stripe/create-payment-intent`, { paiementId }, {
-        headers: { Authorization: `Bearer ${token}` }
+      this.http.post<any>(`${this.API}/stripe/create-payment-intent`, payload, {
+        headers: this.authHeaders()
       }).subscribe({
         next: (res) => {
-          console.log('✅ [Stripe] Réponse:', res);
+          this.log('pi.create.res', res);
           const clientSecret = res?.clientSecret;
-          if (!clientSecret) {
-            console.error('❌ [Stripe] clientSecret manquant');
-            return reject('clientSecret non reçu');
-          }
+          if (!clientSecret) return reject('clientSecret non reçu');
+          // mémorise l’ID du PI (renvoyé ou extrait)
+          this.lastPaymentIntentId = res?.paymentIntentId || this.extractPiIdFromClientSecret(clientSecret);
           resolve(clientSecret);
         },
-        error: (err) => {
-          console.error('❌ [Stripe] Erreur create-payment-intent:', err);
-          reject(err?.error?.error || err?.error?.message || 'Erreur Stripe');
-        }
+        error: (err) => reject(err?.error?.error || err?.error?.message || 'Erreur Stripe')
       });
     });
   }
 
-  /** Étape 3 : chaîne complète (BDD -> Stripe -> Confirmation) */
   initierPaiement(): void {
-    console.log('🟢 [Paiement] initierPaiement()');
-    if (this.enCoursDePaiement) return;
+    if (this.enCoursDePaiement || this.confirming) return;
 
-    const montant = this.montantInitial;
+    const montant = this.getMontantParEcheance(); // cohérent avec l’écran
     if (montant <= 0 || !this.cardElement) {
-      console.error('❌ [Paiement] Montant invalide ou Stripe non chargé.', { montant, cardElement: !!this.cardElement });
       alert('Erreur : montant invalide ou Stripe non chargé.');
       return;
     }
 
     this.enCoursDePaiement = true;
+    this.confirming = true;
     this.paiementErreur = false;
     this.paiementReussi = false;
     this.montantTotalAPayer = montant;
 
     const lsKey = this.getLSKeyPaiement();
     const savedId = localStorage.getItem(lsKey);
-    const idPromise = savedId ? Promise.resolve(Number(savedId)) : this.creerPaiementBdd(montant);
+    const idPromise = savedId ? Promise.resolve(Number(savedId)) : this.creerPaiementBdd(this.montantInitial);
 
     idPromise
-      .then((paiementId) => this.demarrerIntentStripe(paiementId))
+      .then((paiementId) => this.demarrerIntentStripe(paiementId)) // le back choisit la 1ʳᵉ échéance impayée
       .then((clientSecret) => {
-        console.log('📡 [Stripe] confirmCardPayment…');
+        this.log('stripe.confirm.start');
         return this.stripe.confirmCardPayment(clientSecret, {
           payment_method: { card: this.cardElement, billing_details: { name: 'Nom du client' } }
         });
       })
-      .then((result: any) => {
+      .then(async (result: any) => {
         this.enCoursDePaiement = false;
+        this.confirming = false;
+
+        this.log('stripe.confirm.result', result);
         if (result?.error) {
-          console.error('❌ [Stripe] confirmCardPayment error:', result.error);
-          this.erreurMessage = result.error.message || 'Erreur de paiement Stripe';
-          this.paiementErreur = true;
-          // ⚠️ On garde l’ID en local pour pouvoir relancer sans recréer
+          this.fail(result.error.message || 'Erreur de paiement Stripe');
           return;
         }
-        console.log('🎉 [Paiement] Confirmé par Stripe');
-        // ✅ Paiement OK → purge l’ID en cours pour éviter les doublons futurs
+        // Fallback dev local si le webhook ne touche pas ton back
+        await this.syncPaymentIntentOnce();
+        // succès → purge l’ID brouillon pour éviter doublons
         localStorage.removeItem(lsKey);
         this.loadPaiements();
         this.paiementReussi = true;
         this.step = 3;
       })
-      .catch((err) => {
-        console.error('❌ [Paiement] échec du flux:', err);
-        this.erreurMessage = String(err);
-        this.paiementErreur = true;
-        this.enCoursDePaiement = false;
-      });
+      .catch((err) => this.fail(String(err)));
   }
 
-  /** Purge manuelle de l’ID en cours (si bloqué) */
   clearPaiementEnCours(): void {
     const lsKey = this.getLSKeyPaiement();
     localStorage.removeItem(lsKey);
-    console.log('🧹 [Paiement] paiementIdEnCours purgé pour membre', this.membreId);
+    this.log('bdd.id.clear', lsKey);
   }
 
-  // -----------------------------
-  // Modal échéance (admin-only endpoint côté serveur)
-  // -----------------------------
-  confirmerPaiementStripe(clientSecret: string, element: any, callback: () => void): void {
-    console.log('📡 [Stripe] confirmCardPayment, clientSecret:', clientSecret);
-    this.stripe.confirmCardPayment(clientSecret, {
-      payment_method: { card: element, billing_details: { name: 'Nom du client' } }
-    }).then((result: any) => {
-      this.enCoursDePaiement = false;
-      if (result.error) {
-        console.error('❌ [Stripe] confirmCardPayment error:', result.error);
-        this.erreurMessage = result.error.message;
-        this.paiementErreur = true;
-      } else {
-        console.log('✅ [Stripe] Paiement confirmé');
-        callback();
-      }
-    });
-  }
-
+  // ===================== Paiement d’échéance (modale) =====================
   ouvrirModalPaiement(paiement: any, echeance: any): void {
-    if (!paiement || !echeance || String(echeance?.statutDisplay ?? '').toLowerCase() === 'payé') {
-      console.error('❌ [Modal] Échéance non payable', { paiement, echeance });
-      return;
-    }
-
-    console.log('🪟 [Modal] Ouverture pour échéance:', echeance);
+    if (!paiement || !echeance) return;
+    if ((echeance?.statutCss || '') === 'badge-payé') return; // ✅ check fiable
 
     this.paiementActuel = paiement;
     this.echeanceEnCours = echeance;
-
-    const montant = Number(echeance.montant);
-    this.montantTotalAPayer = isNaN(montant) ? 0 : montant;
-
+    this.montantTotalAPayer = Number(echeance?.montant || 0);
     this.modalOuverte = true;
 
     if (this.cardElementModal) {
-      this.cardElementModal.unmount();
+      try { this.cardElementModal.unmount(); } catch {}
       this.cardElementModal = null;
     }
-
-    setTimeout(() => this.initStripeElementModal(), 300);
+    setTimeout(() => this.initStripeElementModal(), 250);
   }
 
   fermerModalPaiement(): void {
-    console.log('🪟 [Modal] Fermeture');
     this.modalOuverte = false;
     this.paiementActuel = null;
     this.echeanceEnCours = null;
-
     if (this.cardElementModal) {
-      this.cardElementModal.unmount();
+      try { this.cardElementModal.unmount(); } catch {}
       this.cardElementModal = null;
     }
   }
 
-  // NOTE : /api/paiements/{id}/payer-echeance est @PreAuthorize('ADMIN')
-payerEcheances(): void {
-  console.log('🟢 [Echéance] payerEcheances()');
+  payerEcheances(): void {
+    if (this.enCoursDePaiement || this.confirming) return;
+    if (!this.paiementActuel || !this.cardElementModal || !this.echeanceEnCours) {
+      alert('Informations manquantes pour payer cette échéance.');
+      return;
+    }
 
-  if (!this.echeanceEnCours || !this.cardElementModal) {
-    console.error('❌ [Echéance] Informations manquantes.', { echeance: this.echeanceEnCours, card: !!this.cardElementModal });
-    alert('Erreur : informations manquantes.');
-    return;
+    this.enCoursDePaiement = true;
+    this.confirming = true;
+    this.paiementErreur = false;
+    this.erreurMessage = '';
+
+    const paiementId = Number(this.paiementActuel?.id || this.paiementActuel?.paiementId);
+    const echeanceId = Number(this.echeanceEnCours?.id);
+
+    this.demarrerIntentStripe(paiementId, echeanceId) // ✅ cible explicitement l’échéance
+      .then((clientSecret) => {
+        this.log('stripe.confirm.modal.start');
+        return this.stripe.confirmCardPayment(clientSecret, {
+          payment_method: { card: this.cardElementModal, billing_details: { name: 'Nom du payeur' } }
+        });
+      })
+      .then(async (result: any) => {
+        this.enCoursDePaiement = false;
+        this.confirming = false;
+
+        this.log('stripe.confirm.modal.result', result);
+        if (result?.error) {
+          this.fail(result.error.message || 'Erreur de paiement Stripe');
+          return;
+        }
+
+        await this.syncPaymentIntentOnce();   // ✅ se purge
+        this.fermerModalPaiement();
+        this.loadPaiements();
+        this.paiementReussi = true;
+      })
+      .catch((err) => this.fail(String(err)));
   }
 
-  const token = localStorage.getItem('token');
-  if (!token) {
-    this.erreurMessage = 'Authentification requise.';
-    this.paiementErreur = true;
-    console.error('❌ [Echéance] Pas de token');
-    return;
-  }
-
-  this.enCoursDePaiement = true;
-  this.paiementErreur = false;
-  this.erreurMessage = '';
-
-  // 1) Demande un client_secret pour la prochaine échéance impayée de ce paiement
-  this.demarrerIntentStripe(this.paiementActuel.id)
-    .then((clientSecret) => {
-      console.log('📡 [Stripe] confirmCardPayment (échéance)…');
-      // 2) Confirmation Stripe sur l’élément de la modale
-      return this.stripe.confirmCardPayment(clientSecret, {
-        payment_method: { card: this.cardElementModal, billing_details: { name: 'Nom du payeur' } }
-      });
-    })
-    .then((result: any) => {
-      this.enCoursDePaiement = false;
-
-      if (result?.error) {
-        console.error('❌ [Stripe] confirmCardPayment error:', result.error);
-        this.erreurMessage = result.error.message || 'Erreur de paiement Stripe';
-        this.paiementErreur = true;
-        return;
-      }
-
-      console.log('🎉 [Echéance] Paiement confirmé par Stripe');
-      this.fermerModalPaiement();   // ferme la modale
-      this.loadPaiements();         // recharge la liste
-      this.paiementReussi = true;
-    })
-    .catch((err) => {
-      this.enCoursDePaiement = false;
-      console.error('❌ [Echéance] échec du flux:', err);
-      this.erreurMessage = String(err);
-      this.paiementErreur = true;
-    });
-}
-
-  // -----------------------------
-  // UI helpers
-  // -----------------------------
+  // ===================== UI helpers =====================
   toggleSection(section: 'unique' | 'echeances'): void {
     this.sectionOuverte[section] = !this.sectionOuverte[section];
-    console.log('🗂️ [Historique] Toggle section:', section, '->', this.sectionOuverte[section] ? 'ouvert' : 'fermé');
   }
 
   getMontantTotalEcheances(): number {
@@ -575,29 +479,28 @@ payerEcheances(): void {
   }
 
   getMontantParEcheance(): number {
-    const val = this.modePaiement === 'echeances' && this.nombreEcheances > 0
+    return this.modePaiement === 'echeances' && this.nombreEcheances > 0
       ? this.montantInitial / this.nombreEcheances
-      : 0;
-    return val;
+      : this.montantInitial; // en "unique", montant complet
   }
 
   fermerModale(): void {
-    console.log('ℹ️ [UI] fermerModale -> reset états erreur/succès');
     this.paiementReussi = false;
     this.paiementErreur = false;
     this.erreurMessage = '';
   }
 
   genererEcheancier(paiement: any): any[] {
-    return paiement.echeances || [];
+    return Array.isArray(paiement?.echeances) ? paiement.echeances : [];
   }
 
   calculerMontantRestant(paiement: any): number {
-    if (!paiement.echeances || paiement.echeances.length === 0) return paiement.montantTotal;
+    if (!Array.isArray(paiement?.echeances) || paiement.echeances.length === 0) {
+      return Number(paiement?.montantTotal || 0);
+    }
     const montantPaye = paiement.echeances
-      .filter((e: any) => String(e?.statutDisplay ?? '').toLowerCase() === 'payé')
-      .reduce((total: number, e: any) => total + (e.montant || 0), 0);
-    const restant = (paiement.montantTotal || 0) - montantPaye;
-    return restant;
+      .filter((e: any) => (e?.statutCss || '') === 'badge-payé')
+      .reduce((sum: number, e: any) => sum + Number(e?.montant || 0), 0);
+    return Math.max(0, Number(paiement?.montantTotal || 0) - montantPaye);
   }
 }
