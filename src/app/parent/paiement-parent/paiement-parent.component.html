@@ -1,264 +1,354 @@
 <div class="page">
-  <!-- Onglets -->
-  <div class="tabs">
-    <button class="tab" [class.active]="activeTab==='PAYER'" (click)="activeTab='PAYER'">Payer</button>
-    <button class="tab" [class.active]="activeTab==='HISTO'" (click)="activeTab='HISTO'">Historique</button>
-  </div>
 
-  <!-- Bandeau échéance (onglet Payer uniquement) -->
-  <div class="due-banner" *ngIf="activeTab==='PAYER' && nextDue" [ngClass]="dueState(nextDue.echeance)">
-    <div class="due-left">
-      <div class="due-icon">⏳</div>
-      <div class="due-text">
-        <div class="title">{{ dueTitle(nextDue.echeance) }}</div>
-        <div class="desc">
-          {{ nextDue.enfant.prenom }} {{ nextDue.enfant.nom }} — échéance #{{ nextDue.echeance.numero }}
-          {{ daysLabel(daysUntil(nextDue.echeance)) }}
-          ({{ nextDue.echeance.montant | currency:'EUR' }})
+  <!-- Header -->
+  <header class="page-header">
+    <div class="headline">
+      <h1>Paiement de votre cotisation</h1>
+      <p class="muted">Renseignez les étapes pour procéder au règlement.</p>
+    </div>
+  </header>
+
+  <!-- ====== LAYOUT PRINCIPAL : 2 COLONNES ====== -->
+  <section class="grid-page">
+
+    <!-- ====== COLONNE GAUCHE : TUNNEL ====== -->
+    <main class="flow card panel payment-panel">
+
+      <!-- Étapes + barre -->
+      <ol class="steps">
+        <li [class.active]="step >= 1"><span>1</span> Enfant</li>
+        <li [class.active]="step >= 2"><span>2</span> Mode</li>
+        <li [class.active]="step >= 3"><span>3</span> Paiement</li>
+        <li [class.active]="step >= 4"><span>4</span> Confirmation</li>
+      </ol>
+      <div class="progress-steps" aria-hidden="true">
+        <div class="progress-steps__bar" [style.width.%]="(step-1) * 33.33"></div>
+      </div>
+
+      <!-- Étape 1 : Enfant -->
+      <div class="step-body" *ngIf="step === 1">
+        <h2 class="step-title">Pour qui souhaitez-vous payer ?</h2>
+
+        <div class="child-grid">
+          <button class="child-card"
+                  *ngFor="let enfant of enfants"
+                  [class.active]="enfantSelectionne === enfant.id"
+                  (click)="selectMembre(enfant)"
+                  [attr.aria-label]="'Sélectionner ' + enfant.prenom + ' ' + enfant.nom">
+            <div class="avatar">{{ (enfant.prenom && enfant.prenom[0]) || '👤' }}</div>
+            <div class="meta">
+              <div class="name">{{ enfant.prenom }} {{ enfant.nom }}</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="actions center">
+          <button class="btn primary wide"
+                  [disabled]="!enfantSelectionne"
+                  (click)="nextStep()">
+            Continuer
+          </button>
         </div>
       </div>
-    </div>
-    <button class="btn btn-pay" (click)="ouvrirModalPaiement(nextDue.plan, nextDue.echeance)">Payer maintenant</button>
-  </div>
 
-  <!-- ============== ONGLET PAYER ============== -->
-  <section class="surface payment full" *ngIf="activeTab==='PAYER'">
-    <header class="surface-head">
-      <h1>Paiement de cotisation</h1>
-      <p class="muted">Montant annuel : <strong>{{ montantInitial | currency:'EUR' }}</strong></p>
-    </header>
+      <!-- Étape 2 : Mode -->
+      <div class="step-body" *ngIf="step === 2">
+        <h2 class="step-title">Mode de règlement</h2>
 
-    <!-- Etapes -->
-    <div class="steps">
-      <div class="step-dot" [class.active]="step >= 1">1</div><div class="line"></div>
-      <div class="step-dot" [class.active]="step >= 2">2</div><div class="line"></div>
-      <div class="step-dot" [class.active]="step >= 3">3</div><div class="line"></div>
-      <div class="step-dot" [class.active]="step >= 4">4</div>
-    </div>
+        <div class="mode-grid">
+          <!-- UNIQUE -->
+          <label class="mode-card" [class.active]="typeChoisi === 'UNIQUE'">
+            <input type="radio" name="mode" (change)="setMode('UNIQUE')" [checked]="typeChoisi==='UNIQUE'">
+            <div class="mode-body">
+              <div class="mode-icon">💳</div>
+              <div class="mode-title">En une fois</div>
+              <div class="mode-desc muted">Un seul règlement. Aucun paramétrage nécessaire.</div>
+            </div>
+          </label>
 
-    <!-- Étape 1 : Enfant -->
-    <div *ngIf="step === 1" class="panel big">
-      <h3 class="panel-title">Pour qui souhaitez-vous payer ?</h3>
-      <div class="kids">
-        <button
-          class="kid"
-          *ngFor="let enfant of enfants"
-          [class.active]="enfantSelectionne === enfant.id"
-          (click)="selectMembre(enfant)"
-        >
-          <div class="avatar">{{ (enfant.prenom && enfant.prenom[0]) || '?' }}</div>
-          <div class="label">{{ enfant.prenom }} {{ enfant.nom }}</div>
-        </button>
+          <!-- ECHELONNE -->
+          <label class="mode-card" [class.active]="typeChoisi === 'ECHELONNE'">
+            <input type="radio" name="mode" (change)="setMode('ECHELONNE')" [checked]="typeChoisi==='ECHELONNE'">
+            <div class="mode-body">
+              <div class="mode-icon">📆</div>
+              <div class="mode-title">En plusieurs fois</div>
+
+              <!-- Petit texte gris quand les options sont MASQUÉES -->
+              <p class="mode-hint" *ngIf="typeChoisi !== 'ECHELONNE'">
+                Choisir le nombre d’échéances.
+              </p>
+
+              <!-- Options visibles UNIQUEMENT quand ECHELONNE est sélectionné -->
+              <div class="split-line" *ngIf="typeChoisi === 'ECHELONNE' && echeancesOptions.length">
+                <div class="field">
+                  <div class="label">Nombre d’échéances</div>
+                  <select [(ngModel)]="nombreEcheances"
+                          (focus)="onEcheancesFocusOrChange()"
+                          (change)="onEcheancesFocusOrChange()"
+                          aria-label="Nombre d’échéances">
+                    <ng-container *ngFor="let n of echeancesOptions">
+                      <option *ngIf="n > 1" [value]="n">{{ n }}</option>
+                    </ng-container>
+                  </select>
+                </div>
+
+                <div class="figures">
+                  <div class="figure">
+                    <div class="k">Total</div>
+                    <div class="v">{{ montantInitial | currency:'EUR' }}</div>
+                  </div>
+                  <div class="figure">
+                    <div class="k">Par échéance</div>
+                    <div class="v">{{ getMontantParEcheance() | currency:'EUR' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cas où l’échelonné est choisi mais aucune option dispo -->
+              <p class="mode-hint" *ngIf="typeChoisi === 'ECHELONNE' && !echeancesOptions.length">
+                Le paiement échelonné n’est pas disponible pour le moment.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn link" (click)="previousStep()">← Retour</button>
+          <button class="btn primary" (click)="nextStep()">Continuer</button>
+        </div>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-primary xl" [disabled]="!enfantSelectionne" (click)="nextStep()">Suivant</button>
-      </div>
-    </div>
 
-    <!-- Étape 2 : Type -->
-    <div *ngIf="step === 2" class="panel big">
-      <h3 class="panel-title">Mode de règlement</h3>
+      <!-- Étape 3 : Récap + action (paiement via MODALE) -->
+      <div class="step-body" *ngIf="step === 3">
+        <h2 class="step-title">Récapitulatif</h2>
 
-      <div class="choices vertical">
-        <!-- Unique -->
-        <label class="choice" [class.active]="typeChoisi === 'UNIQUE'">
-          <input type="radio" name="type" value="UNIQUE" [(ngModel)]="typeChoisi" />
-          <div class="icon">💳</div>
-          <div class="choice-body">
-            <h4>En une fois</h4>
-            <p>Un seul règlement de <strong>{{ montantInitial | currency:'EUR' }}</strong>.</p>
+        <div class="recap strong-border">
+          <div class="rec-row">
+            <div class="k">Enfant</div>
+            <div class="v">{{ enfantSelectionneNom || '—' }}</div>
           </div>
-        </label>
+          <div class="rec-row">
+            <div class="k">Mode</div>
+            <div class="v">{{ typeChoisi === 'UNIQUE' ? 'En une fois' : (nombreEcheances + ' échéances') }}</div>
+          </div>
+          <div class="rec-row" *ngIf="typeChoisi === 'UNIQUE'">
+            <div class="k">Montant</div>
+            <div class="v strong">{{ montantInitial | currency:'EUR' }}</div>
+          </div>
+          <div class="rec-row" *ngIf="typeChoisi === 'ECHELONNE'">
+            <div class="k">Par échéance</div>
+            <div class="v strong">{{ getMontantParEcheance() | currency:'EUR' }}</div>
+          </div>
+        </div>
 
-        <!-- Échelonné -->
-        <label class="choice" [class.active]="typeChoisi === 'ECHELONNE'">
-          <input type="radio" name="type" value="ECHELONNE" [(ngModel)]="typeChoisi" />
-          <div class="icon">📆</div>
-          <div class="choice-body wide">
-            <h4>En plusieurs fois</h4>
+        <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
 
-            <div class="echeance-row" *ngIf="typeChoisi === 'ECHELONNE'">
-              <div class="select">
-                <label>Nombre d’échéances</label>
-                <select [(ngModel)]="nombreEcheances">
-                  <option *ngFor="let n of echeancesOptions" [value]="n">
-                    {{ n }} {{ n===1 ? 'échéance' : 'échéances' }}
-                  </option>
-                </select>
-              </div>
-              <div class="stats-inline">
-                <div class="pill-stat">Total&nbsp;: <strong>{{ montantInitial | currency:'EUR' }}</strong></div>
-                <div class="pill-stat">Par échéance&nbsp;: <strong>{{ getMontantParEcheance() | currency:'EUR' }}</strong></div>
-              </div>
+        <div class="actions">
+          <button class="btn link" (click)="previousStep()" [disabled]="enCoursDePaiement">← Retour</button>
+          <button class="btn primary" (click)="ouvrirModalCarte()" [disabled]="enCoursDePaiement">Payer maintenant</button>
+        </div>
+      </div>
+
+      <!-- Étape 4 : Confirmation -->
+      <div class="step-body" *ngIf="step === 4">
+        <div class="confirm">
+          <div class="confirm-icon" aria-hidden="true">🎉</div>
+          <h3>Paiement confirmé</h3>
+          <p class="lead">
+            Merci ! Votre règlement du
+            <strong>{{ (paymentDate || today) | date:'dd/MM/yyyy HH:mm' }}</strong>
+            a bien été pris en compte.
+          </p>
+
+          <div class="doc-box">
+            <p class="muted">Vous pouvez récupérer vos justificatifs :</p>
+            <div class="actions center" style="gap:8px; flex-wrap: wrap;">
+              <a class="btn primary"
+                 *ngIf="factureUrl"
+                 [href]="factureUrl"
+                 target="_blank"
+                 rel="noopener"
+                 download>
+                Télécharger la facture (PDF)
+              </a>
+
+              <!-- ✅ Reçu Stripe natif (ouvre l’URL sécurisée Stripe) -->
+              <button class="btn ghost"
+                      *ngIf="canOpenStripeReceipt()"
+                      (click)="openStripeReceipt()">
+                Voir le reçu carte (Stripe)
+              </button>
             </div>
           </div>
-        </label>
+
+          <div class="actions center" style="margin-top: 8px">
+            <button class="btn ghost" (click)="step = 1">Effectuer un autre paiement</button>
+          </div>
+        </div>
       </div>
 
-      <div class="btn-row">
-        <button class="btn btn-ghost" (click)="previousStep()">Retour</button>
-        <button class="btn btn-primary xl" (click)="nextStep()">Suivant</button>
-      </div>
-    </div>
+    </main>
 
-    <!-- Étape 3 : Récap + Carte (stack, grands éléments) -->
-    <div *ngIf="step === 3" class="panel big">
-      <h3 class="panel-title">Vérification & paiement</h3>
+    <!-- ====== COLONNE DROITE : RÉCAP (progressif) ====== -->
+    <aside class="aside card">
+      <div class="aside-inner">
+        <h3 class="aside-title">Récapitulatif</h3>
 
-      <div class="stack">
-        <!-- Récap large -->
         <div class="recap">
-          <div class="row"><span>Enfant</span><strong>{{ enfantSelectionneNom || '—' }}</strong></div>
-          <div class="row">
-            <span>Type</span>
-            <strong>
-              <span *ngIf="typeChoisi === 'UNIQUE'" class="tag tag-unique">En une fois</span>
-              <span *ngIf="typeChoisi === 'ECHELONNE'" class="tag tag-echelon">{{ labelEcheances(nombreEcheances) }}</span>
-            </strong>
+          <div class="rec-row" *ngIf="enfantSelectionneNom">
+            <div class="k">Enfant</div>
+            <div class="v">{{ enfantSelectionneNom }}</div>
           </div>
-          <div class="row" *ngIf="typeChoisi === 'UNIQUE'">
-            <span>Montant</span><strong class="bigger">{{ montantInitial | currency:'EUR' }}</strong>
+          <div class="rec-row" *ngIf="step >= 2">
+            <div class="k">Mode</div>
+            <div class="v">{{ typeChoisi === 'UNIQUE' ? 'En une fois' : 'Échelonné' }}</div>
           </div>
-          <div class="row" *ngIf="typeChoisi === 'ECHELONNE'">
-            <span>Par échéance</span><strong class="bigger">{{ getMontantParEcheance() | currency:'EUR' }}</strong>
+          <div class="rec-row" *ngIf="step >= 2 && typeChoisi === 'ECHELONNE'">
+            <div class="k">Échéances</div>
+            <div class="v">{{ nombreEcheances }}</div>
           </div>
         </div>
 
-        <!-- Carte très visible -->
-        <div class="card-box bigcard">
-          <div class="pay-now">
-            <div class="label">À payer maintenant</div>
-            <div class="amount">{{ getMontantAPayerMaintenant() | currency:'EUR' }}</div>
-          </div>
-
-          <div id="card-element" class="card-element"></div>
-          <p class="note"><strong>🔒 Stripe</strong> — aucune donnée bancaire n’est stockée chez nous.</p>
-
-          <div *ngIf="paiementErreur" class="alert alert-danger mt-1">{{ erreurMessage }}</div>
-
-          <div class="btn-row">
-            <button class="btn btn-ghost" (click)="previousStep()" [disabled]="enCoursDePaiement">Retour</button>
-            <button class="btn btn-pay xl" (click)="initierPaiement()" [disabled]="enCoursDePaiement">Payer</button>
-          </div>
-        </div>
+        <p class="muted small">Les montants sont affichés en étape 3.</p>
       </div>
-    </div>
-
-    <!-- Étape 4 -->
-    <div *ngIf="step === 4" class="panel success big">
-      <div class="success-icon">✔</div>
-      <h3>Paiement confirmé</h3>
-      <p>Un reçu vous a été envoyé par email.</p>
-      <button class="btn btn-primary" (click)="step = 1; activeTab='HISTO'">Voir l’historique</button>
-    </div>
+    </aside>
   </section>
 
-  <!-- ============== ONGLET HISTORIQUE ============== -->
-  <section class="surface history full" *ngIf="activeTab==='HISTO'">
-    <header class="surface-head">
+  <!-- ====== HISTORIQUE ====== -->
+  <section id="historique" class="panel history-panel card">
+    <div class="panel-head">
       <h2>Historique</h2>
-      <div class="segmented">
-        <button class="seg" [class.active]="historyFilter==='AUTO'" (click)="setHistoryFilter('AUTO')">Auto</button>
-        <button class="seg" [class.active]="historyFilter==='ECHELONNE'" (click)="setHistoryFilter('ECHELONNE')">Échelonné</button>
-        <button class="seg" [class.active]="historyFilter==='UNIQUE'" (click)="setHistoryFilter('UNIQUE')">Unique</button>
-      </div>
-    </header>
+      <p class="muted">Gérez vos échéances et vos paiements uniques par enfant.</p>
+    </div>
 
-    <ng-container *ngFor="let enfant of enfants">
-      <article class="child">
-        <div class="child-head">
-          <div class="avatar">{{ (enfant.prenom && enfant.prenom[0]) || '?' }}</div>
-          <div>
-            <h3>{{ enfant.prenom }} {{ enfant.nom }}</h3>
-            <small class="muted" *ngIf="hasPlans(enfant.id); else noPlan">Plan échelonné disponible</small>
-            <ng-template #noPlan><small class="muted">Aucun plan échelonné</small></ng-template>
-          </div>
-        </div>
+    <div class="history-grid">
+      <ng-container *ngFor="let enfant of enfants">
 
-        <!-- Plans (selon filtre) -->
-        <ng-container *ngIf="shouldShowPlanFor(enfant.id)">
-          <div class="plan-summary" *ngIf="getFirstPlan(enfant.id) as plan">
-            <div class="stats">
-              <div class="kv"><span>Total</span><strong>{{ plan.montantTotal | currency:'EUR' }}</strong></div>
-              <div class="kv"><span>Restant</span><strong>{{ calculerMontantRestant(plan) | currency:'EUR' }}</strong></div>
-              <div class="kv">
-                <span>Prochaine</span>
-                <strong *ngIf="nextUnpaid(plan) as e; else noDue"> {{ e.dateAffichable | date:'dd/MM' }} — {{ e.montant | currency:'EUR' }}</strong>
-                <ng-template #noDue><strong>—</strong></ng-template>
+        <div class="child-history card-lite">
+          <!-- En-tête enfant avec badge dans la même ligne -->
+          <ng-container *ngIf="getFirstPlan(enfant.id) as plan; else headerSansPlan">
+            <div class="child-line">
+              <div class="avatar">{{ (enfant.prenom && enfant.prenom[0]) || '👤' }}</div>
+              <div class="title">
+                <h3>{{ enfant.prenom }} {{ enfant.nom }}</h3>
+              </div>
+              <div class="pill" [ngClass]="plan.statutCss">{{ plan.statutDisplay }}</div>
+            </div>
+          </ng-container>
+
+          <ng-template #headerSansPlan>
+            <div class="child-line">
+              <div class="avatar">{{ (enfant.prenom && enfant.prenom[0]) || '👤' }}</div>
+              <div class="title">
+                <h3>{{ enfant.prenom }} {{ enfant.nom }}</h3>
               </div>
             </div>
-            <div class="progress"><div class="bar" [style.width.%]="progressPercent(plan)"></div></div>
-            <small class="muted">{{ paidCount(plan) }} / {{ plan.echeances?.length || 0 }} payées</small>
+          </ng-template>
+
+          <!-- Cas SANS AUCUN paiement -->
+          <div class="empty" *ngIf="!hasPlans(enfant.id) && !hasUniques(enfant.id)">
+            Aucun paiement effectué.
           </div>
 
-          <div class="accordion" *ngFor="let plan of getPaiementsEcheancesPourEnfant(enfant.id)">
-            <details>
-              <summary>Voir l’échéancier</summary>
-
-              <!-- À payer -->
-              <ul class="list" *ngIf="unpaidEcheances(plan).length">
-                <li class="item" *ngFor="let e of unpaidEcheances(plan)">
-                  <span class="muted">#{{ e.numero }}</span>
-                  <span class="muted">{{ e.dateAffichable | date:'dd/MM' }}</span>
-                  <span class="grow">{{ e.montant | currency:'EUR' }}</span>
-                  <span class="badge" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
-                  <button class="btn btn-link" (click)="ouvrirModalPaiement(plan, e)">Payer</button>
-                </li>
-              </ul>
-
-              <!-- Payées (toggle) -->
-              <div class="paid-toggle" *ngIf="paidEcheances(plan).length">
-                <button class="btn btn-chip" (click)="toggleShowPaid(plan.id)">
-                  {{ isShowPaid(plan.id) ? 'Masquer' : 'Afficher' }} les payées ({{ paidEcheances(plan).length }})
-                </button>
+          <!-- Plans échelonnés -->
+          <ng-container *ngIf="hasPlans(enfant.id)">
+            <div class="plan-summary" *ngIf="getFirstPlan(enfant.id) as plan">
+              <div class="stats">
+                <div class="stat">
+                  <div class="k">Total</div>
+                  <div class="v">{{ plan.montantTotal | currency:'EUR' }}</div>
+                </div>
+                <div class="stat">
+                  <div class="k">Restant</div>
+                  <div class="v">{{ calculerMontantRestant(plan) | currency:'EUR' }}</div>
+                </div>
+                <div class="stat">
+                  <div class="k">Avancement</div>
+                  <div class="v">{{ paidCount(plan) }} / {{ plan.echeances?.length || 0 }}</div>
+                </div>
               </div>
-              <ul class="list faded" *ngIf="isShowPaid(plan.id)">
-                <li class="item" *ngFor="let e of paidEcheances(plan)">
-                  <span class="muted">#{{ e.numero }}</span>
-                  <span class="muted">{{ e.dateAffichable | date:'dd/MM' }}</span>
-                  <span class="grow">{{ e.montant | currency:'EUR' }}</span>
-                  <span class="badge" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
-                </li>
-              </ul>
 
-              <div class="empty" *ngIf="!unpaidEcheances(plan).length && !paidEcheances(plan).length">
-                Aucune échéance.
+              <div class="progress big">
+                <div class="bar" [style.width.%]="progressPercent(plan)"></div>
               </div>
-            </details>
-          </div>
-        </ng-container>
 
-        <!-- Uniques (selon filtre) -->
-        <ng-container *ngIf="shouldShowUniquesFor(enfant.id)">
-          <h4 class="block-title">Paiements uniques</h4>
-          <ul class="list" *ngIf="getPaiementsUniquesPourEnfant(enfant.id).length; else noUnique">
-            <li class="item" *ngFor="let p of getPaiementsUniquesPourEnfant(enfant.id)">
-              <span class="muted">{{ (p.datePaiement || p.dateAffichable) | date:'dd/MM/yyyy' }}</span>
-              <span class="grow">{{ p.montantTotal | currency:'EUR' }}</span>
-              <span class="badge" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
-            </li>
-          </ul>
-          <ng-template #noUnique><div class="empty">Aucun paiement unique.</div></ng-template>
-        </ng-container>
-      </article>
-    </ng-container>
+              <details class="accordion">
+                <summary>Voir l’échéancier</summary>
 
-    <div class="empty" *ngIf="!enfants?.length">Aucun enfant à afficher.</div>
+                <!-- Non payées -->
+                <ul class="list compact" *ngIf="unpaidEcheances(plan).length">
+                  <li class="item" *ngFor="let e of unpaidEcheances(plan)">
+                    <span class="muted">#{{ e.numero }}</span>
+                    <span class="muted">{{ e.dateAffichable | date:'dd/MM/yyyy' }}</span>
+                    <span class="grow">{{ e.montant | currency:'EUR' }}</span>
+                    <span class="pill" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
+                    <button class="btn chip" (click)="ouvrirModalPaiement(plan, e)">Payer</button>
+                  </li>
+                </ul>
+
+                <!-- Payées -->
+                <div class="paid-toggle" *ngIf="paidEcheances(plan).length">
+                  <button class="btn link" (click)="toggleShowPaid(plan.id)">
+                    {{ isShowPaid(plan.id) ? 'Masquer' : 'Afficher' }} les payées ({{ paidEcheances(plan).length }})
+                  </button>
+                </div>
+                <ul class="list compact faded" *ngIf="isShowPaid(plan.id)">
+                  <li class="item" *ngFor="let e of paidEcheances(plan)">
+                    <span class="muted">#{{ e.numero }}</span>
+                    <span class="muted">{{ e.dateAffichable | date:'dd/MM/yyyy' }}</span>
+                    <span class="grow">{{ e.montant | currency:'EUR' }}</span>
+                    <span class="pill" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
+                  </li>
+                </ul>
+              </details>
+            </div>
+          </ng-container>
+
+          <!-- Paiements uniques -->
+          <ng-container *ngIf="hasUniques(enfant.id)">
+            <ul class="list">
+              <li class="item" *ngFor="let p of getPaiementsUniquesPourEnfant(enfant.id)">
+                <span class="muted">{{ (p.datePaiement || p.dateAffichable) | date:'dd/MM/yyyy' }}</span>
+                <span class="grow">{{ p.montantTotal | currency:'EUR' }}</span>
+                <span class="pill" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
+              </li>
+            </ul>
+          </ng-container>
+
+        </div>
+      </ng-container>
+    </div>
   </section>
 </div>
 
-<!-- Modal -->
+<!-- Modal paiement échéance -->
 <div class="modal" *ngIf="modalOuverte">
   <div class="modal-content">
     <h3>Payer une échéance</h3>
-    <p class="muted">Montant : {{ montantTotalAPayer | currency:'EUR' }}</p>
-    <div id="card-element-parent-modal" class="card-element"></div>
-
-    <div *ngIf="paiementErreur" class="alert alert-danger mt-1">{{ erreurMessage }}</div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" (click)="payerEcheances()" [disabled]="enCoursDePaiement">Valider</button>
-      <button class="btn btn-ghost" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement">Annuler</button>
+    <p>Montant : <strong>{{ montantTotalAPayer | currency:'EUR' }}</strong></p>
+    <div id="card-element-parent-modal" class="stripe-card" aria-label="Saisie de carte pour l’échéance"></div>
+    <div class="actions">
+      <button class="btn primary" (click)="payerEcheances()" [disabled]="enCoursDePaiement">Payer</button>
+      <button class="btn ghost danger" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement">Annuler</button>
     </div>
+    <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
+  </div>
+</div>
+
+<!-- Modal carte principale -->
+<div class="modal" *ngIf="modalCarteOuverte">
+  <div class="modal-content">
+    <h3>Coordonnées bancaires</h3>
+    <p class="muted small">Saisie sécurisée via Stripe.</p>
+    <div id="card-element-main-modal" class="stripe-card" aria-label="Saisie de la carte"></div>
+    <div class="actions">
+      <button class="btn primary"
+              (click)="validerCarte()"
+              [disabled]="!stripeReady || enCoursDePaiement">
+        {{ enCoursDePaiement ? 'Paiement en cours…' : 'Payer' }}
+      </button>
+      <button class="btn ghost danger" (click)="fermerModalCarte()" [disabled]="enCoursDePaiement">Annuler</button>
+    </div>
+    <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
   </div>
 </div>

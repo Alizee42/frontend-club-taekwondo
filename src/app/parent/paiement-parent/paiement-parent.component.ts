@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +17,7 @@ type MainTab = 'PAYER' | 'HISTO';
   templateUrl: './paiement-parent.component.html',
   styleUrls: ['./paiement-parent.component.css']
 })
-export class PaiementParentComponent implements OnInit, AfterViewInit {
+export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly API = '/api';
 
   // Onglets
@@ -45,9 +45,9 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   readonly modePaiement = 'CB';
 
   // Stripe
-  stripe: any;
-  cardElement: any;
-  cardElementParentModal: any;
+  stripe: any = null;
+  cardElement: any = null;               // carte (modale principale)
+  cardElementParentModal: any = null;    // carte (modale échéance)
 
   // États paiement
   enCoursDePaiement = false;
@@ -62,20 +62,39 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   // Anti double-clic
   private confirming = false;
 
-  // Modal échéance (parent)
+  // Modal échéance (historique)
   modalOuverte = false;
   paiementActuel: any = null;
   echeanceEnCours: any = null;
   montantTotalAPayer = 0;
 
+  // —— Modale carte principale (checkout) ——
+  modalCarteOuverte = false;
+  cartePrete = false;          // flag interne: carte saisie OK
+  stripeReady = false;         // Stripe Element monté
+  private stripeElementMounted = false; // éviter double montage
+
   // Affichage “échéances payées” par plan
   private showPaidByPlanId: Record<number, boolean> = {};
 
-  // Bandeau global “À régler”
+  // Bandeau “À régler”
   nextDue: { enfant: any; plan: any; echeance: any } | null = null;
 
   // Filtre historique
   historyFilter: HistoryFilter = 'AUTO';
+
+  // Confirmation (Step 4)
+  factureUrl: string | null = null;
+  paymentDate: Date | null = null;
+  montantPaye = 0;
+
+  // Email client pour reçu Stripe
+  private customerEmail: string = (localStorage.getItem('userEmail')
+    || localStorage.getItem('email')
+    || '').trim();
+
+  // Utilisé par le template
+  today: Date = new Date();
 
   constructor(
     private http: HttpClient,
@@ -83,23 +102,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
     private parametresService: ParametresPaiementService
   ) {}
 
-  ngOnInit(): void {
-    this.parametresService.parametres$.subscribe((p) => {
-      if (p) {
-        this.montantInitial = Number(p.montantCotisation || 0);
-        const maxEch = Math.max(1, Number(p.echeancesAutorisees || 1));
-        this.echeancesOptions = Array.from({ length: maxEch }, (_, i) => i + 1);
-        this.nombreEcheances = this.typeChoisi === 'ECHELONNE' ? maxEch : 1;
-      }
-      this.loadEnfants();
-    });
-  }
-
-  ngAfterViewInit(): void {
-    // Stripe monté à l’étape 3 et dans la modale
-  }
-
-  // Utils
+  // ===== Utils
   private authHeaders() {
     const token = localStorage.getItem('token') || '';
     return { Authorization: `Bearer ${token}` };
@@ -109,18 +112,79 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   private extractPiIdFromClientSecret(clientSecret?: string | null): string | null {
     if (!clientSecret) return null;
     const i = clientSecret.indexOf('_secret_'); return i > 0 ? clientSecret.substring(0, i) : null;
+    }
+  private buildFactureUrl(paiementId: number){ return `${this.API}/paiements/${paiementId}/facture`; }
+  telechargerFacture(){ if (this.factureUrl) window.open(this.factureUrl, '_blank', 'noopener'); }
+
+  // ✅ bouton “Reçu Stripe” (HTML l’utilise)
+  canOpenStripeReceipt(): boolean {
+    return !!this.lastPaymentIntentId;
   }
+  openStripeReceipt(): void {
+    if (!this.lastPaymentIntentId) return;
+    const url = `${this.API}/stripe/receipt/${encodeURIComponent(this.lastPaymentIntentId)}`;
+    window.open(url, '_blank', 'noopener');
+  }
+
   private async syncPaymentIntentOnce(): Promise<void> {
     if (!this.lastPaymentIntentId) return;
     try {
-      await firstValueFrom(this.http.post(`${this.API}/stripe/sync-payment`,
-        { paymentIntentId: this.lastPaymentIntentId }, { headers: this.authHeaders() }));
+      this.log('sync-payment.req', this.lastPaymentIntentId);
+      await firstValueFrom(this.http.post(
+        `${this.API}/stripe/sync-payment`,
+        { paymentIntentId: this.lastPaymentIntentId },
+        { headers: this.authHeaders() }
+      ));
       this.log('sync-payment.ok');
-    } catch (e) { this.log('sync-payment.err', e); }
-    finally { this.lastPaymentIntentId = null; }
+    } catch (e) {
+      this.log('sync-payment.err', e);
+    } finally {
+      // on garde lastPaymentIntentId pour le bouton “reçu” (ne pas nullifier ici)
+    }
   }
 
-  // Chargements
+  // ===== Cycle de vie
+  ngOnInit(): void {
+    this.parametresService.parametres$.subscribe((p) => {
+      this.log('parametres$', p);
+      if (p) {
+        this.montantInitial = Number(p.montantCotisation || 0);
+
+        const maxEch = Math.max(1, Number(p.echeancesAutorisees || 1));
+        // ⚠️ options à partir de 2 (on enlève "1")
+        this.echeancesOptions = maxEch > 1
+          ? Array.from({ length: maxEch - 1 }, (_, i) => i + 2)
+          : [];
+
+        if (this.typeChoisi === 'ECHELONNE') {
+          if (this.echeancesOptions.length) {
+            if (this.nombreEcheances < 2) this.nombreEcheances = this.echeancesOptions[0];
+          } else {
+            this.typeChoisi = 'UNIQUE';
+            this.nombreEcheances = 1;
+          }
+        } else {
+          this.nombreEcheances = 1;
+        }
+      }
+      this.loadEnfants();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Stripe est monté uniquement dans les modales
+  }
+
+  ngOnDestroy(): void {
+    try { if (this.cardElement) this.cardElement.unmount(); } catch {}
+    try { if (this.cardElementParentModal) this.cardElementParentModal.unmount(); } catch {}
+    this.cardElement = null;
+    this.cardElementParentModal = null;
+    this.stripeElementMounted = false;
+    this.stripeReady = false;
+  }
+
+  // ===== Chargements
   loadEnfants(): void {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -130,6 +194,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
       { headers: this.authHeaders() }
     ).subscribe({
       next: (data) => {
+        this.log('enfants', data);
         this.enfants = data || [];
         if (this.enfants.length === 1) this.selectMembre(this.enfants[0]);
         this.loadPaiements();
@@ -146,11 +211,11 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
       headers: this.authHeaders()
     }).subscribe({
       next: (data) => {
+        this.log('paiements.raw', data);
         const mapped = (data || []).map(p => {
           const type = String(p?.type ?? '').toUpperCase();
           const mode = String(p?.modePaiement ?? p?.mode ?? '').toUpperCase();
           const { statutDisplay, statutCss } = this.normalizeStatut(p?.statut);
-
           const membreId = Number(p?.membreId ?? p?.membre?.id ?? p?.beneficiaireId ?? p?.enfantId ?? NaN);
 
           const echeances = Array.isArray(p?.echeances)
@@ -180,9 +245,8 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
     const s = String(raw ?? '')
       .normalize('NFD').replace(/\p{Diacritic}/gu, '')
       .toLowerCase().trim();
-
-    if (s === 'paye' || s === 'payé' || s === 'payee' || s === 'payée') return { statutDisplay: 'payé', statutCss: 'badge-payé' };
-    if (s === 'annule' || s === 'annulé') return { statutDisplay: 'annulé', statutCss: 'badge-annulé' };
+    if (['paye','payé','payee','payée'].includes(s)) return { statutDisplay: 'payé', statutCss: 'badge-payé' };
+    if (['annule','annulé'].includes(s)) return { statutDisplay: 'annulé', statutCss: 'badge-annulé' };
     return { statutDisplay: 'en attente', statutCss: 'badge-en-attente' };
   }
 
@@ -191,11 +255,12 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
     this.paiementsEcheances = this.paiements.filter(p => p.type === 'ECHELONNE');
   }
 
-  // Sélecteurs / helpers
+  // ===== Sélecteurs / helpers historique
   getPaiementsUniquesPourEnfant(enfantId: number){ return this.paiementsUniques.filter(p => p.membreId === enfantId); }
   getPaiementsEcheancesPourEnfant(enfantId: number){ return this.paiementsEcheances.filter(p => p.membreId === enfantId); }
   getFirstPlan(enfantId: number){ const list = this.getPaiementsEcheancesPourEnfant(enfantId); return list?.[0] || null; }
   hasPlans(enfantId: number){ return this.getPaiementsEcheancesPourEnfant(enfantId).length > 0; }
+  hasUniques(enfantId: number){ return this.getPaiementsUniquesPourEnfant(enfantId).length > 0; }
 
   setHistoryFilter(v: HistoryFilter){ this.historyFilter = v; }
   shouldShowPlanFor(enfantId: number){
@@ -218,11 +283,13 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   progressPercent(paiement: any){ const total = Array.isArray(paiement?.echeances) ? paiement.echeances.length : 0; if (!total) return 0; return Math.round((this.paidCount(paiement) / total) * 100); }
   calculerMontantRestant(paiement: any): number{
     if (!Array.isArray(paiement?.echeances) || paiement.echeances.length === 0) return Number(paiement?.montantTotal || 0);
-    const paye = paiement.echeances.filter((e: any) => (e?.statutCss || '') === 'badge-payé').reduce((sum: number, e: any) => sum + Number(e?.montant || 0), 0);
+    const paye = paiement.echeances
+      .filter((e: any) => (e?.statutCss || '') === 'badge-payé')
+      .reduce((sum: number, e: any) => sum + Number(e?.montant || 0), 0);
     return Math.max(0, Number(paiement?.montantTotal || 0) - paye);
   }
 
-  // Bandeau “À régler”
+  // ===== Bandeau “À régler”
   private refreshNextDue(){
     let best: { enfant: any; plan: any; echeance: any } | null = null;
     for (const enfant of this.enfants) {
@@ -242,7 +309,8 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   }
   daysUntil(e:any): number{
     if (!e?.dateAffichable) return 9999;
-    const today = new Date(); const floorToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const today = new Date();
+    const floorToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const d = new Date(e.dateAffichable);
     return Math.floor((d.getTime() - floorToday.getTime()) / 86400000);
   }
@@ -252,13 +320,36 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   dueTitle(e:any): string{ const s = this.dueState(e); if (s === 'late') return 'En retard'; if (s === 'soon') return 'À régler'; return 'Prochaine échéance'; }
   daysLabel(n:number): string{ if (n < 0) return `${Math.abs(n)} j de retard`; if (n === 0) return `— aujourd'hui`; if (n === 1) return `— demain`; return `— dans ${n} jours`; }
 
-  // Wizard
+  // ===== Mode de paiement (Étape 2)
+  setMode(mode: TypePaiement) {
+    this.log('setMode', mode);
+    this.typeChoisi = mode;
+
+    if (mode === 'ECHELONNE') {
+      if (!this.echeancesOptions.length) {
+        this.typeChoisi = 'UNIQUE';
+        this.nombreEcheances = 1;
+      } else if (this.nombreEcheances < 2) {
+        this.nombreEcheances = this.echeancesOptions[0]; // min=2
+      }
+    } else {
+      this.nombreEcheances = 1; // neutre pour UNIQUE
+    }
+  }
+
+  onEcheancesFocusOrChange() {
+    // si l'utilisateur touche le select, passe automatiquement en ECHELONNE
+    this.setMode('ECHELONNE');
+  }
+
+  // ===== Wizard
   nextStep(): void{
     if (this.step < this.maxStep) {
       this.step++;
       if (this.step === 3) {
         this.montantTotalAPayer = this.getMontantParEcheance();
-        setTimeout(() => this.initStripeElement(), 200);
+        this.cartePrete = false;
+        this.log('step->3', { enfant: this.enfantSelectionneNom, type: this.typeChoisi, nEch: this.nombreEcheances });
       }
     }
   }
@@ -266,25 +357,72 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
   selectMembre(membre: { id: number; nom: string; prenom: string }): void{
     this.enfantSelectionne = membre.id;
     this.enfantSelectionneNom = `${membre.prenom} ${membre.nom}`;
+    this.log('selectMembre', { id: membre.id, nom: this.enfantSelectionneNom });
   }
 
-  // Stripe (écran principal)
-  initStripeElement(): void{
-    const container = document.querySelector('#card-element'); if (!container) return;
-    this.stripeService.getStripeInstance().then((stripe: any) => {
-      this.stripe = stripe; const elements = stripe.elements();
+  // ===== Modale carte principale (checkout)
+  ouvrirModalCarte(): void {
+    this.log('ouvrirModalCarte');
+    this.modalCarteOuverte = true;
+    setTimeout(() => this.mountStripeOn('card-element-main-modal'), 0);
+  }
+  fermerModalCarte(): void {
+    this.log('fermerModalCarte');
+    this.modalCarteOuverte = false;
+  }
+
+  /**
+   * Bouton "Payer" dans la modale principale :
+   * - la carte est saisie dans la modale
+   * - on lance le paiement immédiatement
+   * - on passe à la confirmation (step 4) si OK
+   */
+  validerCarte(): void {
+    this.log('validerCarte.click');
+    this.cartePrete = true;
+    this.enCoursDePaiement = true;
+    this.initierPaiement(true); // true => depuis la modale
+  }
+
+  private async mountStripeOn(targetId: string): Promise<void> {
+    if (this.stripeElementMounted) { this.stripeReady = true; return; }
+    const container = document.getElementById(targetId);
+    if (!container) { this.log('mountStripeOn.noContainer', targetId); return; }
+
+    try {
+      const stripe = await this.stripeService.getStripeInstance();
+      if (!stripe) { this.log('mountStripeOn.noStripe'); this.stripeReady = false; return; }
+
+      this.stripe = stripe;
+      const elements = this.stripe.elements();
+
       if (this.cardElement) { try { this.cardElement.unmount(); } catch {} }
-      this.cardElement = elements.create('card'); this.cardElement.mount('#card-element');
-    });
+      this.cardElement = elements.create('card');
+      this.cardElement.mount(`#${targetId}`);
+
+      this.stripeElementMounted = true;
+      this.stripeReady = true;
+      this.log('mountStripeOn.ok', targetId);
+    } catch (e) {
+      this.log('mountStripeOn.err', e);
+      this.stripeReady = false;
+    }
   }
 
-  // Création Paiement
-  initierPaiement(): void{
-    if (this.enCoursDePaiement || this.confirming) return;
-    if (!this.enfantSelectionne || !this.cardElement) return;
+  // ===== Création + confirmation paiement (checkout principal)
+  initierPaiement(fromModal = false): void{
+    if ((this.enCoursDePaiement && this.confirming) && !fromModal) return;
+    if (!this.enfantSelectionne) { this.log('initierPaiement.abort.noChild'); return; }
+
+    if (!this.cartePrete || !this.cardElement) {
+      this.paiementErreur = true;
+      this.erreurMessage = 'Veuillez saisir votre carte dans la fenêtre sécurisée.';
+      this.log('initierPaiement.abort.noCard');
+      return;
+    }
 
     this.enCoursDePaiement = true; this.confirming = true;
-    this.paiementErreur = false; this.erreurMessage = ''; this.lastPaymentIntentId = null;
+    this.paiementErreur = false; this.erreurMessage = ''; // on garde lastPaymentIntentId pour le reçu
 
     const utilisateurId = Number(localStorage.getItem('utilisateurId')) || undefined;
     const dtoCreation = {
@@ -295,7 +433,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
       nombreEcheances: this.typeChoisi === 'ECHELONNE' ? this.nombreEcheances : 1,
       utilisateurId
     };
-    this.log('initierPaiement.create.payload', dtoCreation);
+    this.log('initierPaiement.create.req', dtoCreation);
 
     this.http.post<any>(`${this.API}/paiements/parent/ajouter`, dtoCreation, { headers: this.authHeaders() })
       .subscribe({
@@ -305,6 +443,11 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
           if (!paiementId) { this.failPaiement('ID de paiement introuvable après création'); this.confirming = false; return; }
           this.paiementIdEnCours = Number(paiementId);
 
+          // Facture
+          this.factureUrl = creationRes?.factureUrl || this.buildFactureUrl(this.paiementIdEnCours);
+          this.montantPaye = this.getMontantAPayerMaintenant();
+
+          // Échéance à payer si plan
           let echeanceIdToPay: number | undefined = undefined;
           if (Array.isArray(creationRes?.echeances)) {
             const firstUnpaid = (creationRes.echeances as any[])
@@ -313,37 +456,60 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
             echeanceIdToPay = firstUnpaid?.id;
           }
 
-          const piPayload: any = { paiementId: this.paiementIdEnCours };
+          const piPayload: any = {
+            paiementId: this.paiementIdEnCours,
+            customerEmail: this.customerEmail || undefined
+          };
           if (echeanceIdToPay) piPayload.echeanceId = echeanceIdToPay;
+          this.log('create-payment-intent.req', piPayload);
 
           this.http.post<any>(`${this.API}/stripe/create-payment-intent`, piPayload, { headers: this.authHeaders() })
             .subscribe({
               next: async (resPI) => {
+                this.log('create-payment-intent.res', resPI);
                 const clientSecret = resPI?.clientSecret;
                 this.lastPaymentIntentId = resPI?.paymentIntentId ?? this.extractPiIdFromClientSecret(clientSecret);
                 if (!clientSecret) { this.failPaiement('Client secret Stripe manquant'); this.confirming = false; return; }
 
                 try {
+                  if (!this.stripe) { this.failPaiement('Stripe non initialisé'); this.confirming = false; return; }
+                  this.log('confirmCardPayment.req', { fromModal });
                   const result = await this.stripe.confirmCardPayment(clientSecret, { payment_method: { card: this.cardElement } });
                   if (result?.error) { this.failPaiement(result.error.message || 'Erreur de paiement'); this.confirming = false; return; }
 
                   await this.syncPaymentIntentOnce();
-                  this.paiementReussi = true; this.enCoursDePaiement = false; this.confirming = false; this.step = 4;
+                  this.paymentDate = new Date();
+
+                  // Succès
+                  if (fromModal) this.modalCarteOuverte = false;
+                  this.paiementReussi = true;
+                  this.enCoursDePaiement = false;
+                  this.confirming = false;
+                  this.step = 4;
+                  this.log('paiement.succes', { paiementId: this.paiementIdEnCours, factureUrl: this.factureUrl });
+
+                  // Recharge l’historique
                   this.loadPaiements();
-                } catch (e) { this.failPaiement('Exception lors de la confirmation Stripe', e); this.confirming = false; }
+                } catch (e) {
+                  this.failPaiement('Exception lors de la confirmation Stripe'); this.log('confirmCardPayment.err', e);
+                  this.confirming = false;
+                }
               },
-              error: (errPI) => { this.failPaiement('Erreur création PaymentIntent Stripe', errPI); this.confirming = false; }
+              error: (errPI) => { this.failPaiement('Erreur création PaymentIntent Stripe'); this.log('create-payment-intent.err', errPI); this.confirming = false; }
             });
         },
-        error: (err) => { this.failPaiement('Erreur création du paiement en BDD', err); this.confirming = false; }
+        error: (err) => { this.failPaiement('Erreur création du paiement en BDD'); this.log('initierPaiement.create.err', err); this.confirming = false; }
       });
   }
 
-  private failPaiement(msg: string, err?: any){
-    console.error('❌', msg, err || ''); this.erreurMessage = msg; this.paiementErreur = true; this.enCoursDePaiement = false;
+  private failPaiement(msg: string){
+    this.erreurMessage = msg;
+    this.paiementErreur = true;
+    this.enCoursDePaiement = false;
+    this.log('paiement.fail', msg);
   }
 
-  // Paiement d’échéance (parent)
+  // ===== Paiement d’échéance (historique)
   ouvrirModalPaiement(paiement: any, echeance: any): void{
     if (!paiement || !echeance) return;
     if ((echeance?.statutCss || '') === 'badge-payé') return;
@@ -363,6 +529,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
       this.stripe = stripe; const elements = stripe.elements();
       if (this.cardElementParentModal) { try { this.cardElementParentModal.unmount(); } catch {} }
       this.cardElementParentModal = elements.create('card'); this.cardElementParentModal.mount('#card-element-parent-modal');
+      this.log('stripe.element.parentModal.mounted');
     });
   }
   payerEcheances(): void{
@@ -370,38 +537,49 @@ export class PaiementParentComponent implements OnInit, AfterViewInit {
     if (!this.paiementActuel || !this.cardElementParentModal || !this.echeanceEnCours) return;
 
     this.enCoursDePaiement = true; this.confirming = true;
-    this.paiementErreur = false; this.erreurMessage = ''; this.lastPaymentIntentId = null;
+    this.paiementErreur = false; this.erreurMessage = ''; // garder lastPaymentIntentId pour reçu
 
     const paiementId = Number(this.paiementActuel?.id || this.paiementActuel?.paiementId);
     const echeanceId = Number(this.echeanceEnCours?.id);
 
-    const payload = { paiementId, echeanceId };
+    const payload: any = {
+      paiementId,
+      echeanceId,
+      customerEmail: this.customerEmail || undefined
+    };
+    this.log('echeance.createPI.req', payload);
 
     this.http.post<any>(`${this.API}/stripe/create-payment-intent`, payload, { headers: this.authHeaders() })
       .subscribe({
         next: async (resPI) => {
+          this.log('echeance.createPI.res', resPI);
           const clientSecret = resPI?.clientSecret;
           this.lastPaymentIntentId = resPI?.paymentIntentId ?? this.extractPiIdFromClientSecret(clientSecret);
           if (!clientSecret) { this.failPaiement('Client secret Stripe manquant'); this.confirming = false; return; }
 
           try {
+            if (!this.stripe) { this.failPaiement('Stripe non initialisé'); this.confirming = false; return; }
             const result = await this.stripe.confirmCardPayment(clientSecret, { payment_method: { card: this.cardElementParentModal } });
             this.enCoursDePaiement = false;
             if (result?.error) { this.paiementErreur = true; this.erreurMessage = result.error.message || 'Erreur de paiement'; this.confirming = false; return; }
 
             await this.syncPaymentIntentOnce();
             this.paiementReussi = true; this.fermerModalPaiement(); this.loadPaiements(); this.confirming = false;
-          } catch (e) { this.failPaiement('Exception lors de la confirmation Stripe', e); this.confirming = false; }
+          } catch (e) { this.failPaiement('Exception lors de la confirmation Stripe'); this.log('echeance.confirm.err', e); this.confirming = false; }
         },
-        error: (err) => { this.failPaiement('Erreur création PaymentIntent Stripe', err); this.confirming = false; }
+        error: (err) => { this.failPaiement('Erreur création PaymentIntent Stripe'); this.log('echeance.createPI.err', err); this.confirming = false; }
       });
   }
 
-  // Aides
+  // ===== Aides montants
   getMontantParEcheance(): number{
-    return this.typeChoisi === 'ECHELONNE' && this.nombreEcheances > 0
-      ? this.montantInitial / this.nombreEcheances : this.montantInitial;
+    if (this.typeChoisi !== 'ECHELONNE' || this.nombreEcheances < 2) return this.montantInitial;
+    return this.montantInitial / this.nombreEcheances;
   }
-  getMontantAPayerMaintenant(): number{ return this.typeChoisi === 'ECHELONNE' ? this.getMontantParEcheance() : this.montantInitial; }
+  getMontantAPayerMaintenant(): number{
+    return this.typeChoisi === 'ECHELONNE' && this.nombreEcheances >= 2
+      ? this.getMontantParEcheance()
+      : this.montantInitial;
+  }
   labelEcheances(n:number){ return n===1 ? '1 échéance' : `${n} échéances`; }
 }
