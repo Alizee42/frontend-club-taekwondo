@@ -1,36 +1,142 @@
-<div class="page-container">
-    <h1 class="page-title">📋 Inscriptions reçues</h1>
-  
-    <table class="table-inscriptions">
+<div class="admin-container">
+  <header class="admin-header">
+    <h1>📋 Inscriptions</h1>
+
+    <div class="toolbar">
+      <div class="search">
+        <input
+          type="search"
+          placeholder="Rechercher (nom, email, ville…)"
+          [(ngModel)]="query"
+          (ngModelChange)="applyFilters()"
+          aria-label="Rechercher une inscription" />
+        <button class="btn-icon" (click)="clearSearch()" [disabled]="!query" aria-label="Effacer la recherche">✕</button>
+      </div>
+
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()" aria-label="Filtrer par statut">
+        <option value="">Tous les statuts</option>
+        <option value="NOUVEAU">Nouveaux</option>
+        <option value="VALIDE">Validés</option>
+        <option value="REFUSE">Refusés</option>
+      </select>
+
+      <select [(ngModel)]="pageSize" (change)="goToPage(1)" aria-label="Nombre par page">
+        <option [ngValue]="10">10 / page</option>
+        <option [ngValue]="25">25 / page</option>
+        <option [ngValue]="50">50 / page</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Etat vide -->
+  <div class="empty-state" *ngIf="paged.length === 0">
+    <div class="empty-card">
+      <div class="emoji">🗂️</div>
+      <h3>Aucune inscription</h3>
+      <p>Modifie les filtres ou la recherche pour voir des résultats.</p>
+      <button class="btn" (click)="resetFilters()">Réinitialiser les filtres</button>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-wrap" *ngIf="paged.length > 0">
+    <table class="table">
       <thead>
         <tr>
-          <th>Nom du parent / adulte</th>
-          <th>Email</th>
-          <th>Téléphone</th>
+          <th (click)="sortBy('nom')" [class.sorted]="sortKey==='nom'">
+            Parent / Adulte
+            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='nom'"></span>
+          </th>
+          <th (click)="sortBy('email')" [class.sorted]="sortKey==='email'">
+            Email
+            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='email'"></span>
+          </th>
+          <th (click)="sortBy('telephone')" [class.sorted]="sortKey==='telephone'">
+            Téléphone
+            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='telephone'"></span>
+          </th>
           <th>Adresse</th>
-          <th>Membres inscrits</th>
+          <th (click)="sortBy('nbMembres')" [class.sorted]="sortKey==='nbMembres'">
+            Membres
+            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='nbMembres'"></span>
+          </th>
+          <th (click)="sortBy('etat')" [class.sorted]="sortKey==='etat'">
+            Statut
+            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='etat'"></span>
+          </th>
           <th>Actions</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr *ngFor="let utilisateur of utilisateurs">
-          <td>{{ utilisateur.prenom }} {{ utilisateur.nom }}</td>
-          <td>{{ utilisateur.email }}</td>
-          <td>{{ utilisateur.telephone }}</td>
-          <td>{{ utilisateur.adresse }}</td>
+        <tr *ngFor="let u of paged; trackBy: trackById">
           <td>
-            <ul>
-              <li *ngFor="let m of utilisateur.membres">
-                {{ m.prenom }} {{ m.nom }} ({{ m.dateNaissance | date:'yyyy-MM-dd' }})
-              </li>
-            </ul>
+            <div class="who">
+              <div class="name">{{ u.prenom }} {{ u.nom }}</div>
+              <div class="role-badges">
+                <span class="badge" [class.badge-parent]="u.role==='PARENT'" [class.badge-membre]="u.role==='MEMBRE'">
+                  {{ u.role === 'PARENT' ? 'Parent' : 'Adulte seul' }}
+                </span>
+              </div>
+            </div>
           </td>
+
           <td>
-            <button class="btn btn-sm">📄 Voir</button>
-            <button class="btn btn-sm btn-contact">✉️ Contacter</button>
+            <a class="link" [href]="'mailto:'+u.email">{{ u.email }}</a>
+          </td>
+
+          <td>
+            <a class="link" [href]="'tel:'+u.telephone">{{ u.telephone }}</a>
+          </td>
+
+          <td>
+            <div class="addr">
+              <div>{{ u.adresseLigne1 }}<ng-container *ngIf="u.adresseLigne2">, {{ u.adresseLigne2 }}</ng-container></div>
+              <small>{{ u.codePostal }} {{ u.ville }}, {{ u.pays }}</small>
+            </div>
+          </td>
+
+          <td>
+            <div class="members">
+              <span class="pill">{{ u.membres?.length || 0 }}</span>
+              <button class="btn-link" *ngIf="(u.membres?.length||0) > 0" (click)="u._expand = !u._expand">
+                {{ u._expand ? 'Masquer' : 'Voir' }}
+              </button>
+              <ul class="members-list" *ngIf="u._expand">
+                <li *ngFor="let m of u.membres">
+                  {{ m.prenom }} {{ m.nom }} — {{ m.dateNaissance | date:'dd/MM/yyyy' }} <span *ngIf="m.ceinture">— {{ m.ceinture }}</span>
+                </li>
+              </ul>
+            </div>
+          </td>
+
+          <td>
+            <span class="status"
+                  [class.s-new]="u.etat==='NOUVEAU'"
+                  [class.s-ok]="u.etat==='VALIDE'"
+                  [class.s-ko]="u.etat==='REFUSE'">
+              {{ labelStatut(u.etat) }}
+            </span>
+          </td>
+
+          <td>
+            <div class="actions">
+              <button class="btn btn-ghost" (click)="view(u)">📄 Voir</button>
+              <button class="btn btn-ok"    (click)="approve(u)" [disabled]="u.etat==='VALIDE'">✔ Valider</button>
+              <button class="btn btn-ko"    (click)="reject(u)"  [disabled]="u.etat==='REFUSE'">✖ Refuser</button>
+              <button class="btn btn-light" (click)="contact(u)">✉ Contacter</button>
+              <button class="btn btn-danger" (click)="remove(u)">🗑 Supprimer</button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button class="btn" (click)="prevPage()" [disabled]="page===1">‹</button>
+      <span>Page <strong>{{ page }}</strong> / <strong>{{ totalPages }}</strong></span>
+      <button class="btn" (click)="nextPage()" [disabled]="page===totalPages">›</button>
+    </div>
   </div>
-  
+</div>

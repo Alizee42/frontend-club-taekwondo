@@ -1,8 +1,13 @@
+/* =========================
+   Dashboard Admin (corrigé)
+   ========================= */
+
 /* Container global */
 .dashboard-admin {
   padding: 20px;
   margin: 15px;
   font-family: 'Poppins', sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* En-tête */
@@ -13,7 +18,7 @@
 .header-dashboard h1 {
   font-size: 1.4rem;
   font-weight: 600;
-  color: var(--blue-main);
+  color: var(--blue-main, #2563eb);
 }
 
 /* KPI */
@@ -25,13 +30,13 @@
 }
 
 .kpi-card {
-  background: #fff;
+  background: var(--white-card, #fff);
   border-radius: 14px;
   padding: 18px;
   display: flex;
   align-items: center;
   gap: 15px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow, 0 6px 18px rgba(0,0,0,.06));
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -51,15 +56,16 @@
   color: #fff;
 }
 
-.kpi-blue .kpi-icon-wrapper   { background: var(--blue-main); }
-.kpi-green .kpi-icon-wrapper  { background: var(--green-main); }
-.kpi-orange .kpi-icon-wrapper { background: var(--orange-main); }
-.kpi-blue-light .kpi-icon-wrapper { background: #4ea8de; }
+.kpi-blue .kpi-icon-wrapper   { background: var(--blue-main, #2563eb); }
+.kpi-green .kpi-icon-wrapper  { background: var(--green-main, #16a34a); }
+.kpi-orange .kpi-icon-wrapper { background: var(--orange-main, #f59e0b); }
+.kpi-blue-light .kpi-icon-wrapper { background: var(--blue-300, #4ea8de); }
 
 .kpi-info h3 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .kpi-info p {
@@ -76,10 +82,11 @@
 }
 
 .dashboard-section {
-  background: #fff;
+  background: var(--white-card, #fff);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow, 0 6px 18px rgba(0,0,0,.06));
+  border: 1px solid rgba(0,0,0,0.04); /* contour léger pour mieux délimiter */
 }
 
 /* Bandeau unique pour toutes les sections */
@@ -88,12 +95,12 @@
   align-items: center;
   gap: 10px;
   padding: 12px;
-  background: var(--blue-main);
+  background: var(--blue-main, #2563eb);
   color: #fff;
 }
 
 .section-icon {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -125,12 +132,24 @@
   gap: 8px;
   border-radius: 6px;
   position: relative; /* pour le badge */
-  transition: background 0.2s ease, padding-left 0.2s ease;
+  transition: background 0.2s ease, padding-left 0.2s ease, box-shadow 0.2s ease;
+  outline: none; /* on gère le focus visible ci-dessous */
 }
 
 .dashboard-section ul li:hover {
-  background: var(--card-bg);
+  background: var(--card-bg, rgba(37,99,235,0.06));
   padding-left: 5px;
+}
+
+/* Focus clavier accessible */
+.dashboard-section ul li:focus-visible {
+  box-shadow: 0 0 0 3px var(--ring, rgba(37,99,235,0.2)) inset;
+  background: var(--card-bg, rgba(37,99,235,0.06));
+}
+
+/* Action feedback */
+.dashboard-section ul li:active {
+  transform: translateY(1px);
 }
 
 /* Badge pour les compteurs */
@@ -144,13 +163,38 @@
   right: 10px;
   min-width: 20px;
   height: 20px;
-  padding: 0 6px;
+  padding: 0 8px;               /* + de place pour 2-3 chiffres */
+  display: inline-flex;          /* centrage parfait */
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
-  background: #e53935; /* rouge alerte */
+  background: var(--badge-red, #e53935); /* rouge alerte */
   color: #fff;
   font-size: 12px;
-  line-height: 20px;
+  line-height: 1;
   text-align: center;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  user-select: none;
+  pointer-events: none; /* évite les clics fantômes sur le badge */
+}
+
+/* Réduction des animations pour accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  .kpi-card,
+  .dashboard-section ul li {
+    transition: none !important;
+  }
+  .dashboard-section ul li:active {
+    transform: none !important;
+  }
+}
+
+/* Responsif léger */
+@media (max-width: 480px) {
+  .header-dashboard h1 { font-size: 1.2rem; }
+  .kpi-info h3 { font-size: 1.25rem; }
+  .has-badge { padding-right: 30px; }
+  .badge { top: 6px; right: 8px; }
 }

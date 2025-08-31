@@ -17,22 +17,29 @@ type BadgeCounts = {
   paiements: number;
   inscriptions: number;
   commandes: number;
+  documents: number;
 };
 
 type UserLocalStorage = { prenom?: string; nom?: string } | null;
 
-// 🔖 centralise ici les statuts (change si besoin)
+// 🔖 centralise ici les statuts (adapte si besoin pour coller à ton backend)
 const STATUS = {
   AVIS_NON_APPROUVE: 'false',            // query ?approuve=false
-  PAIEMENT_EN_ATTENTE: 'EN_ATTENTE',     // si ton backend est "en attente", on gère via normalisation
+  PAIEMENT_EN_ATTENTE: 'EN_ATTENTE',     // normalisation
   INSCRIPTION_EN_ATTENTE: 'EN_ATTENTE_PROBATION',
   COMMANDE_A_TRAITER: 'A_TRAITER'
 };
 
-// 🔒 clés de persistance locale
+// 🔒 clés de persistance locale (par section)
 const LS_KEYS = {
-  lastSeenPendingPaiements: 'last_seen_pending_paiements'
-};
+  paiements: 'last_seen_pending_paiements',
+  documents: 'last_seen_documents',
+  inscriptions: 'last_seen_inscriptions',
+  commandes: 'last_seen_commandes',
+  avis: 'last_seen_avis'
+} as const;
+
+type SectionKey = keyof typeof LS_KEYS;
 
 @Component({
   selector: 'app-dashboard-admin',
@@ -49,18 +56,18 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   paiementsAttente = 0;
   evenementsAVenir = 0;
 
-  // Badges
-  badge: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0 };
+  // Badges (affichés dans l'UI)
+  badge: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0 };
+
+  // Compteurs courants (ce que renvoie l’API pour chaque section)
+  private currentCounts: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0 };
 
   // Bonjour
   prenomUtilisateur = 'Admin';
 
   private destroy$ = new Subject<void>();
 
-  // pour calcul "non lus"
-  private lastPendingPaiements = 0; // dernier total "en attente" vu du serveur
-
-  // ✅ Base API root-absolu (évite les 404 sur /admin/...)
+  // ✅ Base API root (évite les 404 sur /admin/...)
   private readonly base = '/api'.replace(/\/+$/, '');
   private url = (path: string) => `${this.base}/${String(path).replace(/^\/+/, '')}`;
 
@@ -74,23 +81,13 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     // rafraîchit périodiquement
     interval(30000).pipe(takeUntil(this.destroy$)).subscribe(() => this.refreshBadges());
 
-    // si on est DÉJÀ sur /admin/paiements au chargement → badge à 0
-    if (this.router.url.startsWith('/admin/paiements')) {
-      this.markPaiementsAsSeen();
-    }
+    // Si on arrive déjà sur une route cible → marquer comme vu
+    this.applyMarkAsSeenForUrl(this.router.url);
 
-    // à chaque navigation vers /admin/paiements → badge à 0
+    // À chaque navigation, marquer si on entre dans une section
     this.router.events
-      .pipe(
-        filter(e => e instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((e: any) => {
-        const url = e?.urlAfterRedirects ?? e?.url ?? '';
-        if (url.startsWith('/admin/paiements')) {
-          this.markPaiementsAsSeen();
-        }
-      });
+      .pipe(filter(e => e instanceof NavigationEnd), takeUntil(this.destroy$))
+      .subscribe((e: any) => this.applyMarkAsSeenForUrl(e?.urlAfterRedirects ?? e?.url ?? ''));
   }
 
   ngOnDestroy(): void {
@@ -125,44 +122,62 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   /** Centralisation des compteurs pour badges */
   private refreshBadges(): void {
     forkJoin({
-      avis: this.fetchAvis(),
-      paiements: this.fetchPaiements(),          // renvoie le TOTAL "en attente"
-      inscriptions: this.fetchInscriptions(),
-      commandes: this.fetchCommandes()
+      avis: this.fetchAvis(),               // total avis non approuvés
+      paiements: this.fetchPaiements(),     // total paiements en attente
+      inscriptions: this.fetchInscriptions(), // total inscriptions en attente
+      commandes: this.fetchCommandes(),     // total commandes à traiter
+      documents: this.fetchDocuments()      // total documents (ou non traités si tu as un statut)
     }).subscribe({
       next: (res) => {
-        // ----- calcul des "non lus" pour Paiements -----
-        const pending = Number(res.paiements || 0);
-        this.lastPendingPaiements = pending;
+        // Mémorise les valeurs courantes renvoyées par l'API
+        this.currentCounts = {
+          avis: Number(res.avis || 0),
+          paiements: Number(res.paiements || 0),
+          inscriptions: Number(res.inscriptions || 0),
+          commandes: Number(res.commandes || 0),
+          documents: Number(res.documents || 0)
+        };
 
-        const lastSeenRaw = localStorage.getItem(LS_KEYS.lastSeenPendingPaiements);
-        let unread: number;
-
-        if (lastSeenRaw === null) {
-          // 1er chargement : on considère tout "vu" (badge = 0)
-          localStorage.setItem(LS_KEYS.lastSeenPendingPaiements, String(pending));
-          unread = 0;
-        } else {
-          const lastSeen = parseInt(lastSeenRaw, 10) || 0;
-          unread = Math.max(0, pending - lastSeen);
-        }
-
+        // Calcule les badges = max(0, courant - dernierVu)
         this.badge = {
-          avis: res.avis,
-          inscriptions: res.inscriptions,
-          commandes: res.commandes,
-          paiements: unread
+          avis: this.computeUnread('avis', this.currentCounts.avis),
+          paiements: this.computeUnread('paiements', this.currentCounts.paiements),
+          inscriptions: this.computeUnread('inscriptions', this.currentCounts.inscriptions),
+          commandes: this.computeUnread('commandes', this.currentCounts.commandes),
+          documents: this.computeUnread('documents', this.currentCounts.documents)
         };
       },
       error: () => { /* noop */ }
     });
   }
 
-  /** Marque les paiements "en attente" comme vus → badge = 0 */
-  private markPaiementsAsSeen(): void {
-    localStorage.setItem(LS_KEYS.lastSeenPendingPaiements, String(this.lastPendingPaiements));
-    // met immédiatement le badge à 0 pour l'UX
-    this.badge = { ...this.badge, paiements: 0 };
+  /** Calcule le non-lu pour une section */
+  private computeUnread(section: SectionKey, current: number): number {
+    const lastRaw = localStorage.getItem(LS_KEYS[section]);
+    if (lastRaw === null) {
+      // 1er chargement → on considère "tout vu"
+      try { localStorage.setItem(LS_KEYS[section], String(current)); } catch {}
+      return 0;
+    }
+    const last = parseInt(lastRaw, 10) || 0;
+    return Math.max(0, current - last);
+  }
+
+  /** Marque la section comme vue (badge=0 et stockage du “dernier vu”) */
+  private markSectionAsSeen(section: SectionKey): void {
+    try { localStorage.setItem(LS_KEYS[section], String(this.currentCounts[section])); } catch {}
+    this.badge = { ...this.badge, [section]: 0 };
+  }
+
+  /** Marquage automatique en fonction de l’URL atteinte */
+  private applyMarkAsSeenForUrl(url: string): void {
+    if (!url) return;
+    // Adapte ces routes si tes paths diffèrent
+    if (url.startsWith('/admin/paiements')) this.markSectionAsSeen('paiements');
+    if (url.startsWith('/admin/documents')) this.markSectionAsSeen('documents');
+    if (url.startsWith('/admin/gestion-commande')) this.markSectionAsSeen('commandes');
+    if (url.startsWith('/admin/gestion-inscription') || url.startsWith('/admin/inscriptions')) this.markSectionAsSeen('inscriptions');
+    if (url.startsWith('/admin/avis')) this.markSectionAsSeen('avis');
   }
 
   // ===== Requêtes directes (filtrées) =====
@@ -170,25 +185,20 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   /** Avis non approuvés UNIQUEMENT */
   private fetchAvis(): Observable<number> {
     const params = new HttpParams().set('approuve', STATUS.AVIS_NON_APPROUVE);
-    return this.http
-      .get<any[]>(this.url('avis'), { params })
-      .pipe(
-        // fallback si l'API ignore le paramètre
-        map(list => Array.isArray(list) ? list.filter(a => a?.approuve === false).length : 0),
-        catchError(() => of(0))
-      );
+    return this.http.get<any[]>(this.url('avis'), { params }).pipe(
+      map(list => Array.isArray(list) ? list.filter(a => a?.approuve === false).length : 0),
+      catchError(() => of(0))
+    );
   }
 
-  /** Paiements en attente UNIQUEMENT (robuste: /filter → fallback /api/paiements) */
+  /** Paiements en attente (robuste: /filter → fallback /api/paiements) */
   private fetchPaiements(): Observable<number> {
     const params = new HttpParams().set('statut', STATUS.PAIEMENT_EN_ATTENTE);
     const filtered$ = this.http.get<any[]>(this.url('paiements/filter'), { params });
     const all$ = this.http.get<any[]>(this.url('paiements'));
 
     return filtered$.pipe(
-      // si /filter n'existe pas → fallback
       catchError(() => all$),
-      // si /filter répond mais libellé différent → re-teste via /api/paiements + filtrage front
       switchMap(list => {
         const count = this.countPendingPaiements(list);
         if (count > 0) return of(count);
@@ -201,23 +211,28 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   /** Inscriptions en attente de probation UNIQUEMENT */
   private fetchInscriptions(): Observable<number> {
     const params = new HttpParams().set('statut', STATUS.INSCRIPTION_EN_ATTENTE);
-    return this.http
-      .get<any[]>(this.url('inscriptions'), { params })
-      .pipe(
-        map(list => Array.isArray(list) ? list.filter(i => this.norm(i?.statut) === this.norm(STATUS.INSCRIPTION_EN_ATTENTE)).length : 0),
-        catchError(() => of(0))
-      );
+    return this.http.get<any[]>(this.url('inscriptions'), { params }).pipe(
+      map(list => Array.isArray(list) ? list.filter(i => this.norm(i?.statut) === this.norm(STATUS.INSCRIPTION_EN_ATTENTE)).length : 0),
+      catchError(() => of(0))
+    );
   }
 
   /** Commandes à traiter UNIQUEMENT */
   private fetchCommandes(): Observable<number> {
     const params = new HttpParams().set('statut', STATUS.COMMANDE_A_TRAITER);
-    return this.http
-      .get<any[]>(this.url('commandes'), { params })
-      .pipe(
-        map(list => Array.isArray(list) ? list.filter(c => this.norm(c?.statut) === this.norm(STATUS.COMMANDE_A_TRAITER)).length : 0),
-        catchError(() => of(0))
-      );
+    return this.http.get<any[]>(this.url('commandes'), { params }).pipe(
+      map(list => Array.isArray(list) ? list.filter(c => this.norm(c?.statut) === this.norm(STATUS.COMMANDE_A_TRAITER)).length : 0),
+      catchError(() => of(0))
+    );
+  }
+
+  /** Documents (par défaut : total). Si tu as un statut "à valider", filtre-le ici. */
+  private fetchDocuments(): Observable<number> {
+    // 👉 Si tu as un statut spécifique (ex: ?statut=A_VALIDER), adapte ci-dessous.
+    return this.http.get<any[]>(this.url('documents')).pipe(
+      map(list => Array.isArray(list) ? list.length : 0),
+      catchError(() => of(0))
+    );
   }
 
   // —— Helpers de normalisation & comptage (paiements) ——
@@ -241,18 +256,17 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     return String(v ?? '').toLowerCase().replace(/[_-]+/g, ' ').trim();
   }
 
-  // 🚀 Navigation
-  navigateToPaiement() {
-    this.markPaiementsAsSeen();               // retire le badge immédiatement au clic
-    this.router.navigate(['/admin/paiements']);
-  }
-  navigateToGestionCommande()    { this.router.navigate(['/admin/gestion-commande']); }
-  navigateToGestionEvenements()  { this.router.navigate(['/admin/gestion-evenement']); }
-  navigateToGestionInscription() { this.router.navigate(['/admin/gestion-inscription']); }
-  navigateToavis()               { this.router.navigate(['/admin/avis']); }
-  navigateToActualites()         { this.router.navigate(['/admin/actualites']); }
+  // 🚀 Navigation (on marque la section comme vue AVANT de naviguer)
+  navigateToPaiement()           { this.markSectionAsSeen('paiements');   this.router.navigate(['/admin/paiements']); }
+  navigateToDocument()           { this.markSectionAsSeen('documents');   this.router.navigate(['/admin/documents']); }
+  navigateToGestionCommande()    { this.markSectionAsSeen('commandes');   this.router.navigate(['/admin/gestion-commande']); }
+  navigateToGestionInscription() { this.markSectionAsSeen('inscriptions');this.router.navigate(['/admin/gestion-inscription']); }
+  navigateToavis()               { this.markSectionAsSeen('avis');        this.router.navigate(['/admin/avis']); }
+
+  // Sections sans badge
+  navigateToGestionEvenements()  { this.router.navigate(['/admin/gestion-evenements']); /* vérifie ton path exact */ }
   navigateToGalerie()            { this.router.navigate(['/admin/galerie']); }
-  navigateToDocument()           { this.router.navigate(['/admin/documents']); }
   navigateToProfesseurs()        { this.router.navigate(['/admin/professeurs']); }
   navigateToHoraires()           { this.router.navigate(['/admin/horaires']); }
+  navigateToActualites()         { this.router.navigate(['/admin/actualites']); }
 }

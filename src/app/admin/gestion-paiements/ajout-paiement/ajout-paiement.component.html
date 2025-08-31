@@ -215,7 +215,7 @@
 
           <li>💳 {{ typePaiement }} — {{ montantTotal | currency:'EUR' }}</li>
           <li>📅 Paiement: {{ datePaiement | date:'dd/MM/yyyy' }}</li>
-          <li>💼 Mode: {{ modePaiement === 'stripe' ? 'CB (Stripe)' : modePaiement }}</li>
+          <li>💼 Mode: {{ modePaiement === 'stripe' ? 'CB' : modePaiement }}</li>
           <li *ngIf="typePaiement==='echeances'">{{ echeances.length }} échéance(s)</li>
         </ul>
       </div>

@@ -64,7 +64,10 @@
           <i class="ri-user-add-line"></i> Inscriptions
           <span class="badge" *ngIf="badge.inscriptions > 0">{{ badge.inscriptions }}</span>
         </li>
-        <li (click)="navigateToDocument()"><i class="ri-file-list-line"></i> Documents</li>
+        <li class="has-badge" (click)="navigateToDocument()">
+          <i class="ri-file-list-line"></i> Documents
+          <span class="badge" *ngIf="badge.documents > 0">{{ badge.documents }}</span>
+        </li>
         <li (click)="navigateToProfesseurs()"><i class="ri-user-star-line"></i> Professeurs</li>
       </ul>
     </div>

@@ -1,88 +1,197 @@
 <div class="stepper-container">
-  <!-- 🔢 Étapes -->
-  <div class="steps-indicator">
-    <div class="step" [class.active]="step === 1">1. Adulte</div>
-    <div class="step" [class.active]="step === 2" *ngIf="!roleMembreSeul">2. Membres</div>
-    <div class="step" [class.active]="step === 3">3. Confirmation</div>
+  <!-- En-tête progress (compteur) -->
+  <div class="progress-header" role="progressbar"
+       aria-valuemin="1"
+       [attr.aria-valuemax]="roleMembreSeul ? 2 : 3"
+       [attr.aria-valuenow]="step">
+    <div class="progress-title">
+      <i class="ri-flag-2-line"></i>
+      Étape <strong>{{ step }}</strong> / <strong>{{ roleMembreSeul ? 2 : 3 }}</strong>
+    </div>
   </div>
 
-  <!-- ⏳ Chargement / erreur -->
+  <!-- Progress bar -->
+  <div class="progress" [attr.data-step]="step">
+    <div class="progress-fill" [style.width.%]="progressPercent">
+      <span class="progress-thumb" *ngIf="progressPercent > 0"></span>
+    </div>
+  </div>
+
+  <!-- Étapes -->
+  <div class="steps-indicator">
+    <div class="step" [class.active]="step === 1">1. Adulte</div>
+
+    <div class="step" *ngIf="!roleMembreSeul" [class.active]="step === 2">
+      2. Membres
+    </div>
+
+    <div class="step"
+         [class.active]="step === (roleMembreSeul ? 2 : 3)">
+      {{ roleMembreSeul ? '2. Confirmation' : '3. Confirmation' }}
+    </div>
+  </div>
+
+  <!-- Loading / erreur globale -->
   <div *ngIf="loading" class="loading-spinner">Chargement...</div>
   <div *ngIf="erreurMessage" class="error-message-global">{{ erreurMessage }}</div>
 
-  <!-- ✅ Modale de confirmation -->
+  <!-- Modale succès -->
   <div class="modal-overlay" *ngIf="showConfirmationModal">
     <div class="modal-box">
       <i class="ri-checkbox-circle-line modal-icon"></i>
       <h2>Inscription réussie</h2>
       <p>Merci ! Votre compte a bien été créé.</p>
-      <button class="modal-button" (click)="redirectToLogin()">Aller à la connexion</button>
+      <button class="modal-button" (click)="redirectToLogin()">
+        <i class="ri-login-circle-line"></i> Aller à la connexion
+      </button>
     </div>
   </div>
 
-  <!-- 🧍 Étape 1 : Informations adulte -->
+  <!-- Étape 1 -->
   <form *ngIf="step === 1" [formGroup]="utilisateurForm" (ngSubmit)="nextStep()" class="step-form">
     <fieldset class="form-section">
-      <legend class="form-legend">👤 Informations de l'adulte</legend>
+      <legend class="form-legend"><i class="ri-user-3-line"></i> Informations de l'adulte</legend>
+
       <div class="form-grid">
-        <div><label>Nom *</label><input formControlName="nom" type="text" required placeholder="Dupont" /></div>
-        <div><label>Prénom *</label><input formControlName="prenom" type="text" required placeholder="Jean" /></div>
-        <div><label>Email *</label><input formControlName="email" type="email" required placeholder="ex : jean@mail.com" /></div>
-        <div><label>Téléphone *</label><input formControlName="telephone" type="text" required placeholder="0600000000" /></div>
-        <div><label>Adresse *</label><input formControlName="adresse" type="text" required placeholder="ex : 15 rue des Lilas, Bât. A, 69001 Lyon" /></div>
+        <div>
+          <label>Nom *</label>
+          <input formControlName="nom" type="text" required placeholder="Dupont" [ngClass]="{'is-invalid': isInvalid('nom')}"/>
+          <small class="field-error" *ngIf="isInvalid('nom')">Le nom est requis (min. 2 caractères).</small>
+        </div>
+
+        <div>
+          <label>Prénom *</label>
+          <input formControlName="prenom" type="text" required placeholder="Jean" [ngClass]="{'is-invalid': isInvalid('prenom')}"/>
+          <small class="field-error" *ngIf="isInvalid('prenom')">Le prénom est requis (min. 2 caractères).</small>
+        </div>
+
+        <div>
+          <label>Email *</label>
+          <input formControlName="email" type="email" required placeholder="ex : jean@mail.com" [ngClass]="{'is-invalid': isInvalid('email')}"/>
+          <small class="field-error" *ngIf="isInvalid('email')">Saisis un email valide.</small>
+        </div>
+
+        <div>
+          <label>Téléphone *</label>
+          <input formControlName="telephone" type="text" required placeholder="0600000000" [ngClass]="{'is-invalid': isInvalid('telephone')}"/>
+          <small class="field-error" *ngIf="isInvalid('telephone')">Numéro invalide.</small>
+        </div>
+
+        <input type="hidden" formControlName="adresse" />
+
+        <div class="col-span-2">
+          <label>Adresse (ligne 1) *</label>
+          <input formControlName="adresseLigne1" type="text" required placeholder="15 rue des Lilas" [ngClass]="{'is-invalid': isInvalid('adresseLigne1')}"/>
+          <small class="field-error" *ngIf="isInvalid('adresseLigne1')">Adresse obligatoire.</small>
+        </div>
+
+        <div class="col-span-2">
+          <label>Complément d'adresse</label>
+          <input formControlName="adresseLigne2" type="text" placeholder="Bât. A, Esc. 2, 3e étage" />
+        </div>
+
+        <div>
+          <label>Code postal *</label>
+          <input formControlName="codePostal" type="text" inputmode="numeric" maxlength="5" placeholder="69001" required [ngClass]="{'is-invalid': isInvalid('codePostal')}"/>
+          <small class="field-error" *ngIf="isInvalid('codePostal')">Code postal à 5 chiffres.</small>
+        </div>
+
+        <div>
+          <label>Ville *</label>
+          <input formControlName="ville" type="text" required placeholder="LYON" [ngClass]="{'is-invalid': isInvalid('ville')}"/>
+          <small class="field-error" *ngIf="isInvalid('ville')">Ville obligatoire.</small>
+        </div>
+
+        <div>
+          <label>Pays *</label>
+          <select formControlName="pays" required [ngClass]="{'is-invalid': isInvalid('pays')}">
+            <option value="France">France</option>
+            <option value="Belgique">Belgique</option>
+            <option value="Suisse">Suisse</option>
+            <option value="Luxembourg">Luxembourg</option>
+            <option value="Autre">Autre</option>
+          </select>
+          <small class="field-error" *ngIf="isInvalid('pays')">Sélectionne un pays.</small>
+        </div>
+
         <div>
           <label>Date de naissance *</label>
-          <input formControlName="dateNaissance" type="date" required [max]="today" />
+          <input formControlName="dateNaissance" type="date" required [max]="today" [ngClass]="{'is-invalid': isInvalid('dateNaissance')}"/>
+          <small class="field-error" *ngIf="isInvalid('dateNaissance')">Date obligatoire.</small>
         </div>
+
         <div>
           <label>Mot de passe *</label>
           <div class="password-wrapper">
-            <input [type]="togglePasswordVisibility ? 'text' : 'password'" formControlName="password" required placeholder="Minimum 6 caractères" />
+            <input [type]="togglePasswordVisibility ? 'text' : 'password'"
+                   formControlName="password"
+                   required placeholder="Minimum 6 caractères"
+                   [ngClass]="{'is-invalid': isInvalid('password')}"/>
             <i class="ri-eye-line" *ngIf="!togglePasswordVisibility" (click)="togglePassword()" aria-label="Afficher le mot de passe"></i>
             <i class="ri-eye-off-line" *ngIf="togglePasswordVisibility" (click)="togglePassword()" aria-label="Masquer le mot de passe"></i>
           </div>
+
+          <!-- mètre de force (visible seulement quand on tape) -->
+          <div class="strength-meter"
+               *ngIf="passwordValue.length > 0"
+               [style.--strength-color]="passwordStrengthColor">
+            <span class="bar" [class.filled]="passwordStrength >= 1"></span>
+            <span class="bar" [class.filled]="passwordStrength >= 2"></span>
+            <span class="bar" [class.filled]="passwordStrength >= 3"></span>
+            <span class="bar" [class.filled]="passwordStrength >= 4"></span>
+            <small class="strength-label">{{ passwordStrengthLabel }}</small>
+          </div>
         </div>
+
         <div>
           <label>Confirmer le mot de passe *</label>
           <div class="password-wrapper">
-            <input [type]="toggleConfirmPasswordVisibility ? 'text' : 'password'" formControlName="confirmPassword" required placeholder="Répétez le mot de passe" />
+            <input [type]="toggleConfirmPasswordVisibility ? 'text' : 'password'"
+                   formControlName="confirmPassword"
+                   required placeholder="Répétez le mot de passe"
+                   [ngClass]="{'is-invalid': utilisateurForm.errors?.['passwordMismatch'] && (utilisateurForm.dirty || utilisateurForm.touched)}"/>
             <i class="ri-eye-line" *ngIf="!toggleConfirmPasswordVisibility" (click)="toggleConfirmPassword()" aria-label="Afficher le mot de passe"></i>
             <i class="ri-eye-off-line" *ngIf="toggleConfirmPasswordVisibility" (click)="toggleConfirmPassword()" aria-label="Masquer le mot de passe"></i>
           </div>
+          <small class="field-error" *ngIf="utilisateurForm.errors?.['passwordMismatch'] && utilisateurForm.dirty">Les mots de passe ne correspondent pas.</small>
         </div>
+
         <div>
           <label>Rôle *</label>
-          <select formControlName="role" required (change)="onRoleChange()">
+          <select formControlName="role" required (change)="onRoleChange()" [ngClass]="{'is-invalid': isInvalid('role')}">
             <option value="">-- Qui êtes-vous ? --</option>
             <option value="PARENT">Je suis un parent (j’inscris un ou plusieurs enfants)</option>
             <option value="MEMBRE">Je suis un adulte qui s’inscrit seul</option>
           </select>
+          <small class="field-error" *ngIf="isInvalid('role')">Choisis un rôle.</small>
         </div>
       </div>
 
-      <div *ngIf="utilisateurForm.errors?.['passwordMismatch'] && utilisateurForm.dirty" class="error-message">
-        ⚠️ Les mots de passe ne correspondent pas.
-      </div>
-
       <div class="btn-group">
-        <button type="submit">Étape suivante</button>
+        <button type="submit"><i class="ri-arrow-right-line"></i> Étape suivante</button>
       </div>
     </fieldset>
   </form>
 
-  <!-- 👦 Étape 2 : Membres -->
+  <!-- Étape 2 -->
   <form *ngIf="step === 2 && !roleMembreSeul" [formGroup]="membresForm" class="step-form">
     <fieldset class="form-section">
-      <legend class="form-legend">👧 Membres à inscrire</legend>
+      <legend class="form-legend"><i class="ri-team-line"></i> Membres à inscrire</legend>
       <div formArrayName="membres">
         <div *ngFor="let membre of membres.controls; let i = index" [formGroupName]="i" class="membre-card">
-          <h3>Membre {{ i + 1 }}</h3>
+          <h3><i class="ri-user-line"></i> Membre {{ i + 1 }}</h3>
           <div class="form-grid">
-            <div><label>Nom *</label><input formControlName="nom" type="text" required /></div>
-            <div><label>Prénom *</label><input formControlName="prenom" type="text" required /></div>
+            <div>
+              <label>Nom *</label>
+              <input formControlName="nom" type="text" required [ngClass]="{'is-invalid': membre.get('nom')?.invalid && (membre.get('nom')?.touched || membre.get('nom')?.dirty)}"/>
+            </div>
+            <div>
+              <label>Prénom *</label>
+              <input formControlName="prenom" type="text" required [ngClass]="{'is-invalid': membre.get('prenom')?.invalid && (membre.get('prenom')?.touched || membre.get('prenom')?.dirty)}"/>
+            </div>
             <div>
               <label>Date de naissance *</label>
-              <input formControlName="dateNaissance" type="date" required [max]="today" />
+              <input formControlName="dateNaissance" type="date" required [max]="today" [ngClass]="{'is-invalid': membre.get('dateNaissance')?.invalid && (membre.get('dateNaissance')?.touched || membre.get('dateNaissance')?.dirty)}"/>
             </div>
             <div>
               <label>Ceinture</label>
@@ -91,46 +200,57 @@
                 <option *ngFor="let c of ceinturesDisponibles" [value]="c">{{ c }}</option>
               </select>
             </div>
-            <div><label>Numéro de licence</label><input formControlName="numeroLicence" type="text" /></div>
+            <div>
+              <label>Numéro de licence</label>
+              <input formControlName="numeroLicence" type="text" />
+            </div>
           </div>
           <div class="btn-group align-right">
-            <button type="button" (click)="removeMembre(i)">❌ Supprimer</button>
+            <button type="button" (click)="removeMembre(i)"><i class="ri-delete-bin-6-line"></i> Supprimer</button>
           </div>
         </div>
       </div>
       <div class="btn-group">
-        <button type="button" (click)="addMembre()">➕ Ajouter un membre</button>
+        <button type="button" (click)="addMembre()"><i class="ri-add-line"></i> Ajouter un membre</button>
       </div>
       <div class="btn-group">
-        <button type="button" (click)="previousStep()">Retour</button>
-        <button type="button" (click)="nextStep()">Étape suivante</button>
+        <button type="button" (click)="previousStep()"><i class="ri-arrow-left-line"></i> Retour</button>
+        <button type="button" (click)="nextStep()"><i class="ri-arrow-right-line"></i> Étape suivante</button>
       </div>
     </fieldset>
   </form>
 
-  <!-- ✅ Étape 3 : Confirmation -->
-  <div *ngIf="step === 3" class="confirmation-step">
+  <!-- Étape 3 -->
+  <div *ngIf="step === (roleMembreSeul ? 2 : 3)" class="confirmation-step">
     <fieldset class="form-section">
-      <legend class="form-legend">Confirmation de l'inscription</legend>
+      <legend class="form-legend"><i class="ri-check-double-line"></i> Confirmation de l'inscription</legend>
+
       <h3>Adulte :</h3>
       <ul>
         <li><strong>Nom :</strong> {{ utilisateurForm.value.nom }}</li>
         <li><strong>Prénom :</strong> {{ utilisateurForm.value.prenom }}</li>
         <li><strong>Email :</strong> {{ utilisateurForm.value.email }}</li>
         <li><strong>Téléphone :</strong> {{ utilisateurForm.value.telephone }}</li>
-        <li><strong>Adresse :</strong> {{ utilisateurForm.value.adresse }}</li>
+        <li><strong>Adresse :</strong>
+          {{ utilisateurForm.value.adresseLigne1 }}
+          <ng-container *ngIf="utilisateurForm.value.adresseLigne2">, {{ utilisateurForm.value.adresseLigne2 }}</ng-container>,
+          {{ utilisateurForm.value.codePostal }} {{ utilisateurForm.value.ville }},
+          {{ utilisateurForm.value.pays }}
+        </li>
         <li><strong>Date de naissance :</strong> {{ utilisateurForm.value.dateNaissance | date:'dd/MM/yyyy' }}</li>
         <li><strong>Rôle :</strong> {{ utilisateurForm.value.role }}</li>
       </ul>
+
       <h3 *ngIf="!roleMembreSeul">Membres :</h3>
       <ul *ngIf="!roleMembreSeul">
         <li *ngFor="let m of membresForm.value.membres">
           {{ m.prenom }} {{ m.nom }} – {{ m.dateNaissance | date:'dd/MM/yyyy' }}
         </li>
       </ul>
+
       <div class="btn-group">
-        <button type="button" (click)="previousStep()">Retour</button>
-        <button type="button" (click)="onSubmit()">✅ Finaliser l'inscription</button>
+        <button type="button" (click)="previousStep()"><i class="ri-arrow-left-line"></i> Retour</button>
+        <button type="button" (click)="onSubmit()"><i class="ri-send-plane-2-line"></i> Finaliser l'inscription</button>
       </div>
     </fieldset>
   </div>

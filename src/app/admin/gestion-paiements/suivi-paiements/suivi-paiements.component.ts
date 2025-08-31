@@ -155,7 +155,7 @@ export class SuiviPaiementsComponent implements OnInit {
     const v = this.sansAccents(m);
     if (!v) return '—';
     if (v.includes('echeanc')) return '—';
-    if (v === 'cb' || v.includes('carte') || v.includes('stripe')) return 'CB (Stripe)';
+    if (v === 'cb' || v.includes('carte') || v.includes('stripe')) return 'CB';
     if (v.includes('virement')) return 'Virement';
     if (v.includes('espece')) return 'Espèces';
     if (v.includes('cheque')) return 'Chèque';
