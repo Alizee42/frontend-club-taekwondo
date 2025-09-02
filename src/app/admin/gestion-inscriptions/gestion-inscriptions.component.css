@@ -57,7 +57,7 @@
 .s-ok { background:#ecfdf5; color:var(--green); border-color:#a7f3d0; }
 .s-ko { background:#fef2f2; color:var(--red); border-color:#fecaca; }
 
-.actions{ display:flex; flex-wrap:wrap; gap:8px; }
+/* Boutons texte génériques (pagination) */
 .btn{
   padding:.5rem .8rem; border:none; border-radius:10px; cursor:pointer; background:var(--blue); color:#fff; font-weight:700;
   transition:transform .05s ease, filter .2s ease;
@@ -66,22 +66,30 @@
 .btn:hover{ filter:brightness(.97); }
 .btn:active{ transform:translateY(1px); }
 
-.btn-ghost{ background:#f1f5f9; color:#0f172a; }
-.btn-light{ background:#eef2ff; color:#3730a3; }
-.btn-ok{ background:#16a34a; }
-.btn-ko{ background:#ef4444; }
-.btn-danger{ background:#991b1b; }
-
 .pagination{ display:flex; align-items:center; justify-content:flex-end; gap:12px; padding:12px; background:#f8fafc; border-top:1px solid var(--line); }
 .pagination span{ color:#0f172a; }
 
-.empty-state{ display:grid; place-items:center; padding:36px; }
-.empty-card{ text-align:center; background:#ffffff; border:1px solid var(--line); border-radius:12px; padding:28px; box-shadow:var(--shadow); }
-.empty-card .emoji{ font-size:42px; }
-.empty-card h3{ margin:.5rem 0; color:#0f172a; }
-.empty-card p{ color:var(--muted); margin:.25rem 0 1rem; }
+/* Actions icônes */
+.th-actions { width: 180px; }
+.actions.icons-only { display:flex; gap:8px; align-items:center; }
 
-/* RESPONSIVE: bascule en “cartes” sous 860px */
+.icon-btn{
+  width:36px; height:36px; border:none; border-radius:10px; cursor:pointer;
+  display:grid; place-items:center; font-size:18px;
+  transition:transform .05s ease, filter .2s ease, background .2s ease;
+}
+.icon-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.icon-btn:active{ transform: translateY(1px); }
+
+.icon-btn.ghost{ background:#f1f5f9; color:#0f172a; }
+.icon-btn.light{ background:#eef2ff; color:#3730a3; }
+.icon-btn.ok{ background:#16a34a; color:#fff; }
+.icon-btn.ko{ background:#ef4444; color:#fff; }
+.icon-btn.danger{ background:#991b1b; color:#fff; }
+
+.icon-btn:hover{ filter:brightness(.97); }
+
+/* RESPONSIVE en “cartes” */
 @media (max-width: 860px){
   .table thead{ display:none; }
   .table, .table tbody, .table tr, .table td{ display:block; width:100%; }

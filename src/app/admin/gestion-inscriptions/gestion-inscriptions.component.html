@@ -1,6 +1,6 @@
 <div class="admin-container">
   <header class="admin-header">
-    <h1>📋 Inscriptions</h1>
+    <h1>📋 Inscriptions reçues</h1>
 
     <div class="toolbar">
       <div class="search">
@@ -8,17 +8,10 @@
           type="search"
           placeholder="Rechercher (nom, email, ville…)"
           [(ngModel)]="query"
-          (ngModelChange)="applyFilters()"
+          (ngModelChange)="fetchUtilisateurs()"
           aria-label="Rechercher une inscription" />
         <button class="btn-icon" (click)="clearSearch()" [disabled]="!query" aria-label="Effacer la recherche">✕</button>
       </div>
-
-      <select [(ngModel)]="statusFilter" (change)="applyFilters()" aria-label="Filtrer par statut">
-        <option value="">Tous les statuts</option>
-        <option value="NOUVEAU">Nouveaux</option>
-        <option value="VALIDE">Validés</option>
-        <option value="REFUSE">Refusés</option>
-      </select>
 
       <select [(ngModel)]="pageSize" (change)="goToPage(1)" aria-label="Nombre par page">
         <option [ngValue]="10">10 / page</option>
@@ -28,18 +21,21 @@
     </div>
   </header>
 
-  <!-- Etat vide -->
-  <div class="empty-state" *ngIf="paged.length === 0">
+  <!-- Etat vide / loading -->
+  <div class="empty-state" *ngIf="loading">
+    <div class="empty-card"><div class="emoji">⏳</div><h3>Chargement…</h3></div>
+  </div>
+  <div class="empty-state" *ngIf="!loading && paged.length === 0">
     <div class="empty-card">
       <div class="emoji">🗂️</div>
       <h3>Aucune inscription</h3>
-      <p>Modifie les filtres ou la recherche pour voir des résultats.</p>
-      <button class="btn" (click)="resetFilters()">Réinitialiser les filtres</button>
+      <p *ngIf="!erreurMessage">Modifie la recherche pour voir des résultats.</p>
+      <p *ngIf="erreurMessage" class="error">{{ erreurMessage }}</p>
     </div>
   </div>
 
   <!-- Tableau -->
-  <div class="table-wrap" *ngIf="paged.length > 0">
+  <div class="table-wrap" *ngIf="!loading && paged.length > 0">
     <table class="table">
       <thead>
         <tr>
@@ -64,13 +60,13 @@
             Statut
             <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='etat'"></span>
           </th>
-          <th>Actions</th>
+          <th class="th-actions">Actions</th>
         </tr>
       </thead>
 
       <tbody>
         <tr *ngFor="let u of paged; trackBy: trackById">
-          <td>
+          <td data-label="Parent / Adulte">
             <div class="who">
               <div class="name">{{ u.prenom }} {{ u.nom }}</div>
               <div class="role-badges">
@@ -81,58 +77,75 @@
             </div>
           </td>
 
-          <td>
-            <a class="link" [href]="'mailto:'+u.email">{{ u.email }}</a>
-          </td>
+          <td data-label="Email"><a class="link" [href]="'mailto:'+u.email">{{ u.email }}</a></td>
+          <td data-label="Téléphone"><a class="link" [href]="'tel:'+u.telephone">{{ u.telephone }}</a></td>
 
-          <td>
-            <a class="link" [href]="'tel:'+u.telephone">{{ u.telephone }}</a>
-          </td>
-
-          <td>
+          <td data-label="Adresse">
             <div class="addr">
-              <div>{{ u.adresseLigne1 }}<ng-container *ngIf="u.adresseLigne2">, {{ u.adresseLigne2 }}</ng-container></div>
+              <div>
+                {{ u.adresseLigne1 }}<ng-container *ngIf="u.adresseLigne2">, {{ u.adresseLigne2 }}</ng-container>
+              </div>
               <small>{{ u.codePostal }} {{ u.ville }}, {{ u.pays }}</small>
             </div>
           </td>
 
-          <td>
+          <td data-label="Membres">
             <div class="members">
-              <span class="pill">{{ u.membres?.length || 0 }}</span>
-              <button class="btn-link" *ngIf="(u.membres?.length||0) > 0" (click)="u._expand = !u._expand">
-                {{ u._expand ? 'Masquer' : 'Voir' }}
+              <!-- Affiche … tant que les enfants ne sont pas chargés (pour les parents) -->
+              <span class="pill">
+                {{ u.role==='PARENT' ? (u._membersLoaded ? u.membres.length : '…') : u.membres.length }}
+              </span>
+
+              <!-- Bouton qui charge puis ouvre/ferme -->
+              <button class="btn-link" *ngIf="u.role==='PARENT'" (click)="toggleExpand(u)">
+                <ng-container *ngIf="!u._membersLoading">
+                  {{ u._expand ? 'Masquer' : (u._membersLoaded ? 'Voir' : 'Charger') }}
+                </ng-container>
+                <ng-container *ngIf="u._membersLoading">Chargement…</ng-container>
               </button>
+
+              <!-- Liste des enfants -->
               <ul class="members-list" *ngIf="u._expand">
                 <li *ngFor="let m of u.membres">
-                  {{ m.prenom }} {{ m.nom }} — {{ m.dateNaissance | date:'dd/MM/yyyy' }} <span *ngIf="m.ceinture">— {{ m.ceinture }}</span>
+                  {{ m.prenom }} {{ m.nom }} — {{ m.dateNaissance | date:'dd/MM/yyyy' }}
+                  <span *ngIf="m.ceinture">— {{ m.ceinture }}</span>
                 </li>
               </ul>
             </div>
           </td>
 
-          <td>
+          <td data-label="Statut">
             <span class="status"
                   [class.s-new]="u.etat==='NOUVEAU'"
                   [class.s-ok]="u.etat==='VALIDE'"
                   [class.s-ko]="u.etat==='REFUSE'">
-              {{ labelStatut(u.etat) }}
+              {{ u.etat === 'NOUVEAU' ? 'Nouveau' : (u.etat === 'VALIDE' ? 'Validé' : 'Refusé') }}
             </span>
           </td>
 
-          <td>
-            <div class="actions">
-              <button class="btn btn-ghost" (click)="view(u)">📄 Voir</button>
-              <button class="btn btn-ok"    (click)="approve(u)" [disabled]="u.etat==='VALIDE'">✔ Valider</button>
-              <button class="btn btn-ko"    (click)="reject(u)"  [disabled]="u.etat==='REFUSE'">✖ Refuser</button>
-              <button class="btn btn-light" (click)="contact(u)">✉ Contacter</button>
-              <button class="btn btn-danger" (click)="remove(u)">🗑 Supprimer</button>
+          <td data-label="Actions">
+            <div class="actions icons-only">
+              <button class="icon-btn ghost" (click)="view(u)" title="Voir la fiche" aria-label="Voir la fiche">
+                <i class="ri-file-2-line"></i>
+              </button>
+              <button class="icon-btn ok" (click)="approve(u)" [disabled]="u.etat==='VALIDE'" title="Valider" aria-label="Valider">
+                <i class="ri-check-line"></i>
+              </button>
+              <button class="icon-btn ko" (click)="reject(u)" [disabled]="u.etat==='REFUSE'" title="Refuser" aria-label="Refuser">
+                <i class="ri-close-line"></i>
+              </button>
+              <button class="icon-btn light" (click)="contact(u)" title="Contacter" aria-label="Contacter">
+                <i class="ri-mail-line"></i>
+              </button>
+              <button class="icon-btn danger" (click)="remove(u)" title="Supprimer" aria-label="Supprimer">
+                <i class="ri-delete-bin-6-line"></i>
+              </button>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Pagination -->
     <div class="pagination">
       <button class="btn" (click)="prevPage()" [disabled]="page===1">‹</button>
       <span>Page <strong>{{ page }}</strong> / <strong>{{ totalPages }}</strong></span>
