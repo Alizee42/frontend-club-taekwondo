@@ -100,7 +100,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let document of documents">
-            <td>{{ document.typeDocument }}</td>
+            <td>{{ labelFor(document.typeDocument) }}</td>
             <td>
               <button class="btn-apercu" type="button" (click)="onPreview(document)">
                 <i class="ri-search-line" aria-hidden="true"></i> {{ document.nomDocument }}

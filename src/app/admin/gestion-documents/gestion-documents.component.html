@@ -4,8 +4,18 @@
 
   <!-- 🔍 Recherche & filtre -->
   <div class="filter-bar">
-    <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un membre..." (input)="filtrerUtilisateurs()" />
-    <select [(ngModel)]="filtreStatut" (change)="filtrerUtilisateurs()">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Rechercher un membre..."
+      (input)="filtrerUtilisateurs()"
+      aria-label="Rechercher un membre"
+    />
+    <select
+      [(ngModel)]="filtreStatut"
+      (change)="filtrerUtilisateurs()"
+      aria-label="Filtrer par statut"
+    >
       <option value="">Tous les statuts</option>
       <option value="validé">Validé</option>
       <option value="refusé">Refusé</option>
@@ -21,18 +31,20 @@
           <p>{{ utilisateur.email }} — {{ utilisateur.telephone }}</p>
         </div>
 
-        <!-- 🟢 Badge statut -->
-        <span class="badge" [ngClass]="getGlobalStatusClass(utilisateur.documents)">
+        <!-- 🟢 Badge statut global -->
+        <span class="badge" [ngClass]="getGlobalStatus(utilisateur.documents)">
           {{ getGlobalStatusText(utilisateur.documents) }}
         </span>
 
-        <button class="accordion-toggle">{{ utilisateur.isOpen ? 'Réduire' : 'Afficher' }}</button>
+        <button class="accordion-toggle" type="button">
+          {{ utilisateur.isOpen ? 'Réduire' : 'Afficher' }}
+        </button>
       </div>
 
       <div class="accordion-body" *ngIf="utilisateur.isOpen">
         <div class="bulk-actions">
-          <button (click)="validerTous(utilisateur)">Tout valider</button>
-          <button (click)="refuserTous(utilisateur)">Tout refuser</button>
+          <button type="button" (click)="validerTous(utilisateur)">Tout valider</button>
+          <button type="button" (click)="refuserTous(utilisateur)">Tout refuser</button>
         </div>
 
         <table>
@@ -47,52 +59,77 @@
           </thead>
           <tbody>
             <tr *ngFor="let document of utilisateur.documents" [ngClass]="document.status">
-              <td>{{ document.typeDocument }}</td>
+              <!-- Libellé humain du type -->
+              <td>{{ labelFor(document.typeDocument) }}</td>
+
               <td>
-                <button class="btn-apercu" (click)="ouvrirApercu(document)">
+                <button class="btn-apercu" type="button" (click)="ouvrirApercu(document)">
                   <i class="ri-search-line" style="margin-right: 6px;"></i>
                   {{ document.nomDocument }}
                 </button>
               </td>
 
-
               <td>{{ document.dateDepot | date:'dd/MM/yyyy' }}</td>
+
               <td>
                 <span [ngClass]="getStatusClass(document.status)">
                   <i class="status-icon" [ngClass]="getStatusIcon(document.status)"></i>
                   {{ getStatusText(document.status) }}
                 </span>
               </td>
+
               <td>
                 <div class="actions-buttons">
-                  <button class="btn-validate" (click)="validerDocument(document)"
-                    [disabled]="estFinalise(document)">Valider</button>
-                  <button class="btn-refuse" (click)="refuserDocument(document)"
-                    [disabled]="estFinalise(document)">Refuser</button>
+                  <button
+                    class="btn-validate"
+                    type="button"
+                    (click)="validerDocument(document)"
+                    [disabled]="estFinalise(document)"
+                  >
+                    Valider
+                  </button>
+                  <button
+                    class="btn-refuse"
+                    type="button"
+                    (click)="refuserDocument(document)"
+                    [disabled]="estFinalise(document)"
+                  >
+                    Refuser
+                  </button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
+
       </div>
     </div>
   </div>
 
   <!-- 📄 MODALE APERCU -->
   <div class="modal-overlay" *ngIf="documentEnApercu">
-    <div class="modal-content">
-      <button class="close-button" (click)="fermerApercu()">×</button>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Aperçu du document">
+      <button class="close-button" type="button" (click)="fermerApercu()">×</button>
       <h2>Aperçu du document</h2>
 
-      <!-- Option intelligente : image ou PDF -->
+      <!-- Image ou PDF automatiquement -->
       <ng-container *ngIf="estImage(documentEnApercu.nomDocument); else pdfBlock">
-        <img [src]="getSafeUrl(documentEnApercu.cheminFichier)" width="100%"
-          style="max-height: 500px; object-fit: contain;" />
+        <img
+          [src]="getSafeUrl(documentEnApercu.cheminFichier)"
+          alt="Aperçu du document image"
+          width="100%"
+          style="max-height: 500px; object-fit: contain;"
+        />
       </ng-container>
-      <ng-template #pdfBlock>
-        <iframe [src]="getSafeUrl(documentEnApercu.cheminFichier)" width="100%" height="500px"></iframe>
-      </ng-template>
 
+      <ng-template #pdfBlock>
+        <iframe
+          [src]="getSafeUrl(documentEnApercu.cheminFichier)"
+          width="100%"
+          height="500"
+          title="Aperçu du document PDF"
+        ></iframe>
+      </ng-template>
     </div>
   </div>
 </div>

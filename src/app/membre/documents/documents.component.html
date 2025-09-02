@@ -24,15 +24,18 @@
         <li *ngFor="let doc of requiredDocuments">
           <span>{{ doc.label }}</span>
           <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
-            <span [ngClass]="statusInfo.class">
+            <span class="status-chip"
+                  [class.ok]="statusInfo.state==='validé'"
+                  [class.wait]="statusInfo.state==='en_attente'"
+                  [class.ko]="statusInfo.state==='refusé'"
+                  [title]="statusInfo.tooltip || ''">
+              {{ statusInfo.state==='validé' ? '✔' : (statusInfo.state==='en_attente' ? '⏳' : '❌') }}
               {{ statusInfo.text }}
-              <i *ngIf="statusInfo.tooltip" class="tooltip-icon" [title]="statusInfo.tooltip">i</i>
             </span>
           </ng-container>
         </li>
       </ul>
     </div>
-
 
     <!-- ⬆️ Formulaire d'upload -->
     <div class="upload-section">
@@ -41,15 +44,18 @@
       <form (ngSubmit)="onUploadDocument()" enctype="multipart/form-data">
         <div class="form-group">
           <label for="documentType">Type de document :</label>
-          <select id="documentType" [(ngModel)]="documentType" name="documentType" required>
-            <option *ngFor="let doc of requiredDocuments" [value]="doc.type" [disabled]="doc.uploaded">
+          <select id="documentType" class="styled-select"
+                  [(ngModel)]="documentType" name="documentType" required>
+            <option *ngFor="let doc of requiredDocuments"
+                    [value]="doc.type" [disabled]="doc.uploaded">
               {{ doc.label }}
             </option>
           </select>
         </div>
         <div class="form-group">
           <label for="documentFile">Fichier :</label>
-          <input type="file" id="documentFile" (change)="onFileSelected($event)" required />
+          <input type="file" id="documentFile" accept=".pdf,.png,.jpg,.jpeg"
+                 (change)="onFileSelected($event)" required />
           <small class="error-message" *ngIf="selectedFile && !isValidFile(selectedFile)">
             Type ou taille de fichier invalide. Fichier PNG, JPEG ou PDF &lt; 5 Mo.
           </small>
@@ -73,28 +79,34 @@
         </thead>
         <tbody>
           <tr *ngFor="let document of documents">
-            <td>{{ document.typeDocument }}</td>
+            <!-- libellé humain -->
+            <td>{{ labelFor(document.typeDocument) }}</td>
             <td>{{ document.nomDocument }}</td>
             <td>
               <span class="badge" [ngClass]="{
-        'badge-payé': document.status === 'validé',
-        'badge-en-attente': document.status === 'en_attente',
-        'badge-annulé': document.status === 'refusé'
-      }">
+                    'badge-valid': document.status === 'validé',
+                    'badge-pending': document.status === 'en_attente',
+                    'badge-refused': document.status === 'refusé'
+                  }">
                 {{ document.status === 'validé' ? '✔' :
-                document.status === 'en_attente' ? '⏳' : '❌' }}
+                   document.status === 'en_attente' ? '⏳' : '❌' }}
                 {{ getStatusText(document.status) }}
               </span>
-
             </td>
             <td>{{ document.dateDepot | date: 'dd/MM/yyyy' }}</td>
             <td>
-              <button class="btn-action btn-edit" [disabled]="document.status === 'validé'"
-                (click)="onEditDocument(document)" title="Modifier le document" aria-label="Modifier le document">
+              <button class="btn-action btn-edit"
+                      [disabled]="document.status === 'validé'"
+                      (click)="onEditDocument(document)"
+                      title="Modifier le document"
+                      aria-label="Modifier le document">
                 <i class="fas fa-edit"></i>
               </button>
-              <button class="btn-action btn-delete" [disabled]="document.status === 'validé'"
-                (click)="onDeleteDocument(document)" title="Supprimer le document" aria-label="Supprimer le document">
+              <button class="btn-action btn-delete"
+                      [disabled]="document.status === 'validé'"
+                      (click)="onDeleteDocument(document)"
+                      title="Supprimer le document"
+                      aria-label="Supprimer le document">
                 <i class="fas fa-trash"></i>
               </button>
             </td>

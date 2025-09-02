@@ -36,9 +36,7 @@ h1 {
 }
 
 /* 📦 Accordéon */
-.accordion {
-  margin-top: 1rem;
-}
+.accordion { margin-top: 1rem; }
 
 .accordion-item {
   border: 1px solid #ddd;
@@ -60,14 +58,8 @@ h1 {
   flex-wrap: wrap;
 }
 
-.accordion-header h3 {
-  margin: 0;
-}
-
-.accordion-header p {
-  margin: 0;
-  font-size: 0.9rem;
-}
+.accordion-header h3 { margin: 0; }
+.accordion-header p { margin: 0; font-size: 0.9rem; }
 
 .accordion-toggle {
   background-color: transparent;
@@ -77,31 +69,23 @@ h1 {
   cursor: pointer;
 }
 
-/* 🟢 Badge */
+/* 🟢 Badge (statut global) */
 .badge {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: bold;
   text-transform: capitalize;
-  color: white;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
 }
-.badge.validé {
-  background-color: #28a745;
-}
-.badge.refusé {
-  background-color: #dc3545;
-}
-.badge.en_attente {
-  background-color: #ffc107;
-  color: #333;
-}
+.badge.validé     { background-color: #28a745; }
+.badge.refusé     { background-color: #dc3545; }
+.badge.en_attente { background-color: #ffc107; color: #333; }
 
 /* 📃 Table de documents */
-.accordion-body {
-  background-color: #f9f9f9;
-  padding: 1rem;
-}
+.accordion-body { background-color: #f9f9f9; padding: 1rem; }
 
 .accordion-body table {
   width: 100%;
@@ -123,55 +107,38 @@ h1 {
 }
 
 .accordion-body tr:hover {
-  background-color: var(--background-hover);
+  background-color: var(--background-hover, #eef3ff);
 }
 
-/* 🎯 Lignes colorées */
-.validé {
-  background-color: #e6ffee;
-}
+/* 🎯 Lignes colorées (status ligne = 'validé' / 'refusé' / 'en_attente') */
+.validé     { background-color: #e6ffee; }
+.refusé     { background-color: #ffe6e6; }
+.en_attente { background-color: #fffbe6; }
 
-.refusé {
-  background-color: #ffe6e6;
-}
-
-.en_attente {
-  background-color: #fffbe6;
-}
-
-/* 🎯 Statut */
+/* 🎯 Badge de statut par document */
 .status-validé,
 .status-refusé,
 .status-en-attente {
   font-weight: bold;
-  display: flex;
+  display: inline-flex;
   align-items: center;
 }
 
-.status-validé {
-  color: green;
-}
-
-.status-refusé {
-  color: red;
-}
-
-.status-en-attente {
-  color: orange;
-}
+.status-validé { color: #28a745; }
+.status-refusé { color: #dc3545; }
+.status-en-attente { color: #b45309; } /* orange soutenu pour lisibilité */
 
 .status-icon {
   margin-right: 0.5rem;
   font-size: 1.2rem;
 }
 
-/* 📦 Actions groupées */
+/* 📦 Actions groupées (boutons "Tout valider/refuser") */
 .bulk-actions {
- margin-bottom: 1rem;
+  margin-bottom: 1rem;
   display: flex;
   gap: 1rem;
-  float: right;
-
+  justify-content: flex-end; /* ✅ plus de float */
 }
 
 .bulk-actions button {
@@ -181,42 +148,37 @@ h1 {
   border-radius: 6px;
   cursor: pointer;
   background-color: var(--blue-main);
-  color: white;
+  color: #fff;
   transition: background-color 0.2s ease;
 }
-.bulk-actions button:hover {
-  background-color: #0056b3;
-}
+.bulk-actions button:hover { background-color: #0056b3; }
 
 /* ✅ Boutons d'action */
-.actions-buttons {
-  display: flex;
-  gap: 1rem;
-}
+.actions-buttons { display: flex; gap: 1rem; }
 
 .btn-validate,
 .btn-refuse {
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 6px;
-  color: white;
+  color: #fff;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.btn-validate {
-  background-color: #28a745;
-}
-.btn-validate:hover {
-  background-color: #218838;
-}
+.btn-validate { background-color: #28a745; }
+.btn-validate:hover { background-color: #218838; }
 
-.btn-refuse {
-  background-color: #dc3545;
-}
-.btn-refuse:hover {
-  background-color: #c82333;
+.btn-refuse { background-color: #dc3545; }
+.btn-refuse:hover { background-color: #c82333; }
+
+/* États focus pour accessibilité */
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(0, 123, 255, .4);
+  outline-offset: 2px;
 }
 
 /* Désactivé */
@@ -230,10 +192,7 @@ button:disabled {
 /* 📄 Modale d’aperçu */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
@@ -242,10 +201,12 @@ button:disabled {
 }
 
 .modal-content {
-  background-color: white;
+  background-color: #fff;
   padding: 2rem;
   width: 80%;
   max-width: 800px;
+  max-height: 90vh;          /* ✅ scrollable si trop grand */
+  overflow: auto;            /* ✅ */
   border-radius: 10px;
   position: relative;
 }
@@ -259,6 +220,8 @@ button:disabled {
   border: none;
   cursor: pointer;
 }
+
+/* Liens / bouton d'aperçu */
 .btn-link {
   background: none;
   border: none;
@@ -268,13 +231,12 @@ button:disabled {
   text-decoration: underline;
   font: inherit;
 }
-.btn-link:hover {
-  color: #0056b3;
-}
+.btn-link:hover { color: #0056b3; }
+
 .btn-apercu {
   background: none;
   border: none;
-  color: var(--blue-def);
+  color: var(--blue-def, #0d6efd); /* ✅ fallback si variable absente */
   cursor: pointer;
   text-align: left;
   font-weight: 500;
@@ -284,7 +246,11 @@ button:disabled {
   padding: 0;
   font-size: 14px;
 }
+.btn-apercu:hover { text-decoration: underline; }
 
-.btn-apercu:hover {
-  text-decoration: underline;
+/* 📱 Responsive léger */
+@media (max-width: 640px) {
+  .accordion-header { align-items: flex-start; }
+  .bulk-actions { justify-content: stretch; }
+  .accordion-body table { display: block; overflow-x: auto; }
 }
