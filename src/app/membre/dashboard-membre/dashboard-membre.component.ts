@@ -1,64 +1,63 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { CommonModule, DatePipe } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
-// Interface pour représenter un utilisateur
 interface Utilisateur {
-  id: number;
+  id: number | string;
   nom: string;
   prenom: string;
-  email: string;
+  email?: string;
+  telephone?: string;        // <-- ajouté
+  dateNaissance?: string;    // <-- ajouté (ISO yyyy-MM-dd)
+  role?: string;
 }
 
 @Component({
-  selector: 'app-dashboard-membre',
   standalone: true,
+  selector: 'app-dashboard-membre',
   templateUrl: './dashboard-membre.component.html',
   styleUrls: ['./dashboard-membre.component.css'],
-  imports: [CommonModule]
+  imports: [CommonModule, FormsModule, HttpClientModule, DatePipe],
 })
 export class DashboardMembreComponent implements OnInit {
+  private readonly API_BASE = '/api';
+
   utilisateurConnecte: Utilisateur | null = null;
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  ngOnInit() {
-    this.loadUtilisateurConnecte();
-
-    // Vérifie que l'utilisateur a bien le rôle MEMBRE
-    const role = localStorage.getItem('role');
-    if (role !== 'MEMBRE') {
-      alert('Accès refusé. Vous n\'êtes pas autorisé à accéder à cette section.');
-      this.router.navigate(['/connexion']);
-    }
+  ngOnInit(): void {
+    this.loadUtilisateur();
   }
 
-  // Récupère les infos du membre connecté
-  loadUtilisateurConnecte() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Utilisateur non connecté.');
-      this.router.navigate(['/connexion']);
-      return;
-    }
-
-    this.http.get<Utilisateur>('/api/utilisateurs/me', {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: (utilisateur) => {
-        this.utilisateurConnecte = utilisateur;
-        localStorage.setItem('utilisateurId', utilisateur.id.toString());
+  private loadUtilisateur(): void {
+    // Adapter l’endpoint à ton backend si besoin (ex: /api/auth/me)
+    this.http.get<Utilisateur | any>(`${this.API_BASE}/utilisateurs/me`).subscribe({
+      next: (u: any) => {
+        this.utilisateurConnecte = this.normalizeUser(u);
       },
-      error: (err) => {
-        console.error('Erreur lors de la récupération de l\'utilisateur connecté :', err);
-        alert('Impossible de récupérer les informations de l\'utilisateur connecté.');
-        this.router.navigate(['/connexion']);
+      error: () => {
+        // fallback: rien de bloquant pour la compilation/affichage
+        this.utilisateurConnecte = null;
       }
     });
   }
 
-  // Redirections vers les pages liées
+  private normalizeUser(u: any): Utilisateur {
+    return {
+      id: u?.id ?? u?._id ?? u?.uuid,
+      nom: (u?.nom ?? '').trim(),
+      prenom: (u?.prenom ?? '').trim(),
+      email: u?.email ?? '',
+      telephone: u?.telephone ?? '',
+      dateNaissance: u?.dateNaissance ?? undefined,
+      role: u?.role ?? '',
+    };
+  }
+
+  // Handlers communs
   navigateToDocuments() {
     this.router.navigate(['/membre/documents']);
   }

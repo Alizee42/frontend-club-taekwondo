@@ -1,387 +1,227 @@
-.documents-container {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  /* Conteneur pour le titre et la carte utilisateur */
-/* Conteneur pour le titre et la carte utilisateur */
-.documents-header {
-  display: flex;
-  align-items: center; /* Centre verticalement */
-  justify-content: space-between; /* Aligne le titre à gauche et la carte à droite */
-  margin-bottom: 1rem;
-  position: relative; /* Permet de centrer le titre */
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-.welcome-message {
-  font-size: 1.2rem;
-  color: var(--blue-main);
-  font-weight: bold;
-  margin-top: 0.5rem;
+/* ================== Variables (fallback locales) ================== */
+:root{
+  --blue-main:#1E6091;
+  --blue-hover:#19517b;
+  --red-main:#E63946;
+  --red-hover:#c22f3a;
+  --card-bg:#ffffff;
+  --text-main:#0f172a;
+  --background-hover:#f5f7fb;
 }
 
-/* Centrer le titre */
-.documents-header h1 {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  margin: 0;
-  font-size: 1.8rem; /* Taille du titre */
-  color: var(--blue-main);
+/* ================== Layout global ================== */
+.documents-container{
+  padding:2rem;
+  max-width:1200px;
+  margin:0 auto;
 }
 
-/* Carte utilisateur améliorée */
-.user-info-card {
-  background-color: #e8e8e8; /* Fond blanc */
-  border: 2px solid var(--blue-main); /* Bordure bleue */
-  padding: 1rem; /* Espacement interne */
-  border-radius: 8px; /* Coins arrondis */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre légère */
-  font-size: 0.9rem; /* Taille de texte compacte */
-  display: flex;
-  flex-direction: column; /* Affiche les infos verticalement */
-  gap: 0.5rem; /* Espacement entre les lignes */
-  max-width: 250px; /* Largeur maximale */
+/* ================== Header (titre centré + carte user) ================== */
+.documents-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;
+  margin-bottom:1.5rem;
+  text-align:center;
 }
 
-/* Élément individuel dans la carte */
-.user-info-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem; /* Espacement entre l'icône et le texte */
+/* Titre centré au milieu du header sur desktop */
+.documents-header h1{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  margin:0;
+  font-size:1.8rem;
+  color:var(--blue-main);
 }
 
-/* Icônes */
-.user-info-item i {
-  font-size: 1.2rem; /* Taille des icônes */
-  color: var(--red-main); /* Couleur rouge pour les icônes */
+/* Carte utilisateur à droite */
+.user-info-card{
+  background-color:#e8e8e8;
+  border:2px solid var(--blue-main);
+  padding:1rem;
+  border-radius:8px;
+  box-shadow:0 4px 6px rgba(0,0,0,.1);
+  font-size:.9rem;
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+  max-width:260px;
 }
 
-/* Texte */
-.user-info-item span {
-  font-size: 0.9rem; /* Taille du texte */
-  color: var(--text-main); /* Couleur principale pour le texte */
+.user-info-item{
+  display:flex; align-items:center; gap:.5rem;
+}
+.user-info-item i{
+  font-size:1.2rem;
+  color:var(--blue-main); /* cohérent avec le reste */
+}
+.user-info-item span{
+  font-size:.9rem; color:var(--text-main);
 }
 
-  h1 {
-    color: var(--blue-main);
-    margin-bottom: 0.5rem;
-    text-align: center;
+/* Titre et header en mobile : on empile, on retire le position:absolute */
+@media (max-width: 720px){
+  .documents-header{
+    display:block;
   }
-  
-  .intro {
-    text-align: center;
-    color: var(--text-main);
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
+  .documents-header h1{
+    position:static;
+    transform:none;
+    margin-bottom:.75rem;
   }
-  
-  .documents-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
+  .user-info-card{
+    margin:0 auto; /* centre la carte sous le titre */
   }
-  
-  .required-documents {
-    background-color: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .required-documents h2 {
-    color: var(--blue-main);
-    margin-bottom: 1rem;
-  }
-  
-  .required-documents .description {
-    color: var(--text-main);
-    margin-bottom: 1rem;
-  }
-  
-  .required-documents ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .required-documents li {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 4px;
-  }
-  
-  .required-documents li span.uploaded {
-    color: green;
-    font-weight: bold;
-  }
-  
-  .required-documents li span.not-uploaded {
-    color: red;
-    font-weight: bold;
-  }
-  
-  .upload-section {
-    background-color: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .upload-section h2 {
-    color: var(--blue-main);
-    margin-bottom: 1rem;
-  }
-  
-  .upload-section .description {
-    color: var(--text-main);
-    margin-bottom: 1rem;
-  }
-  
-  .upload-section .form-group {
-    margin-bottom: 1rem;
-  }
-  
-  .upload-section label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  }
-
-/* Style commun pour les champs */
-.upload-section select,
-.upload-section input[type="file"] {
-  width: 100%; /* Prend toute la largeur disponible */
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem; /* Taille uniforme */
-  box-sizing: border-box; /* Inclut le padding dans la largeur */
-  appearance: none; /* Supprime le style natif du navigateur */
 }
 
-/* Ajout d'un focus visuel */
-.upload-section select:focus,
-.upload-section input[type="file"]:focus {
-  outline: none;
-  border-color: #007bff; /* Bordure bleue au focus */
-  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Ombre bleue au focus */
-}
-  
-  .upload-section button {
-    background-color: var(--blue-main);
-    color: #fff;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  
-  .upload-section button:hover {
-    background-color: var(--blue-hover);
-  }
-  
-  .documents-list {
-    grid-column: 1 / -1; /* Prend toute la largeur sous les deux blocs */
-    margin-top: 2rem;
-  }
-  
-  .documents-list h2 {
-    color: var(--blue-main);
-    margin-bottom: 1rem;
-  }
-  
-  .full-width-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-  }
-  
-  .full-width-table th,
-  .full-width-table td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .full-width-table th {
-    background-color: var(--blue-main);
-    color: #fff;
-    font-weight: bold;
-    text-transform: uppercase;
-    width: 7%;
-  }
-  
-  .full-width-table tr:hover {
-    background-color: var(--background-hover);
-  }
-  
-  .full-width-table td {
-    color: var(--text-main);
-  }
-  .full-width-table td:last-child {
-    display: flex;
-    gap: 0.5rem; /* Espacement entre les boutons */
-    justify-content: flex-start; /* Aligne les boutons à gauche */
-  }
-  .status-validé {
-    color: green;
-    font-weight: bold;
-  }
-  
-  .status-en-attente {
-    color: orange;
-    font-weight: bold;
-  }
-  
-  .status-refusé {
-    color: red;
-    font-weight: bold;
-  }
-  .refused {
-    color: red;
-    font-weight: bold;
-    margin-left: 1rem;
-  }
-  .btn-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem; /* Largeur fixe pour uniformiser les boutons */
-    height: 2.5rem; /* Hauteur fixe pour uniformiser les boutons */
-    border-radius: 50%; /* Boutons ronds */
-    border: none; /* Supprime les bordures */
-    cursor: pointer; /* Curseur interactif */
-    transition: background-color 0.3s ease, transform 0.2s ease;
-  }
-  .btn-edit {
-    background-color: var(--blue-main);
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 0.5rem;
-  }
-  
-  .btn-edit:hover {
-    background-color: var(--blue-hover);
-  }
-  
-  .btn-delete {
-    background-color: var(--red-main);
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .btn-delete:hover {
-    background-color: var(--red-hover);
-  }
-  /* Boutons désactivés */
-.btn-action:disabled {
-  background-color: #ccc; /* Couleur grise */
-  color: #666; /* Couleur du texte grisé */
-  cursor: not-allowed; /* Curseur non interactif */
-  opacity: 0.6; /* Apparence atténuée */
-}
-  /* Info-bulle native (optionnelle pour personnalisation) */
-.status-icon-container[title] {
-  cursor: pointer;
-}
-/* Texte "Refusé" */
-.refused {
-  color: red;
-  font-weight: bold;
-  margin-left: 1rem;
-  display: inline-flex;
-  align-items: center;
+/* ================== Intro ================== */
+h1{ color:var(--blue-main); text-align:center; }
+.intro{
+  text-align:center; color:var(--text-main);
+  margin-bottom:2rem; font-size:1.05rem;
 }
 
-/* Icône "i" pour l'info-bulle */
-.tooltip-icon {
-  margin-left: 0.5rem;
-  background-color: #ddd;
-  color: #333;
-  font-size: 0.8rem;
-  font-weight: bold;
-  width: 1.2rem;
-  height: 1.2rem;
-  border-radius: 50%;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  position: relative;
+/* ================== Grille 2 colonnes ================== */
+.documents-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2rem;
+}
+@media (max-width: 920px){
+  .documents-grid{ grid-template-columns:1fr; }
 }
 
-/* Info-bulle native (utilise l'attribut title) */
-.tooltip-icon[title] {
-  position: relative;
+/* ================== Bloc: Documents obligatoires ================== */
+.required-documents{
+  background-color:var(--card-bg);
+  padding:1.5rem;
+  border-radius:8px;
+  box-shadow:0 4px 6px rgba(0,0,0,.1);
+}
+.required-documents h2{ color:var(--blue-main); margin:0 0 1rem 0; }
+.required-documents .description{ color:var(--text-main); margin-bottom:1rem; }
+
+.required-documents ul{ list-style:none; padding:0; margin:0; }
+.required-documents li{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:.5rem; padding:.5rem .75rem; border-radius:6px;
 }
 
-.tooltip-icon[title]::after {
+/* États basiques conservés (si ton TS renvoie .uploaded/.not-uploaded) */
+.required-documents li span.uploaded{ color:#166534; font-weight:bold; }
+.required-documents li span.not-uploaded{ color:#b45309; font-weight:bold; }
+
+/* Variante “chip” générique si le TS renvoie une classe personnalisée */
+.status-chip{
+  display:inline-flex; align-items:center; gap:.35rem; font-weight:700; font-size:.9rem;
+  padding:.25rem .55rem; border-radius:999px; border:1px solid transparent;
+}
+.status-chip.ok{ background:#ecfdf5; color:#166534; border-color:#a7f3d0; }
+.status-chip.wait{ background:#fff7ed; color:#b45309; border-color:#fed7aa; }
+.status-chip.ko{ background:#fef2f2; color:#991b1b; border-color:#fecaca; }
+
+.tooltip-icon{
+  margin-left:.4rem; background:#ddd; color:#333; font-size:.8rem; font-weight:800;
+  width:1.1rem; height:1.1rem; border-radius:999px; display:inline-grid; place-items:center; cursor:pointer;
+  position:relative;
+}
+.tooltip-icon[title]::after{
   content: attr(title);
-  position: absolute;
-  bottom: 125%; /* Position au-dessus de l'icône */
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #333;
-  color: #fff;
-  padding: 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease-in-out;
-  z-index: 10;
+  position:absolute; bottom:125%; left:50%; transform:translateX(-50%);
+  background:#333; color:#fff; padding:.45rem .6rem; border-radius:4px; font-size:.8rem; white-space:nowrap;
+  opacity:0; visibility:hidden; transition:opacity .2s ease-in-out; z-index:10;
+}
+.tooltip-icon[title]:hover::after{ opacity:1; visibility:visible; }
+
+/* ================== Bloc: Upload ================== */
+.upload-section{
+  background-color:var(--card-bg);
+  padding:1.5rem;
+  border-radius:8px;
+  box-shadow:0 4px 6px rgba(0,0,0,.1);
+}
+.upload-section h2{ color:var(--blue-main); margin:0 0 1rem 0; }
+.upload-section .description{ color:var(--text-main); margin-bottom:1rem; }
+.upload-section .form-group{ margin-bottom:1rem; }
+.upload-section label{ display:block; font-weight:800; margin-bottom:.45rem; }
+
+/* Champs */
+.upload-section select,
+.upload-section input[type="file"]{
+  width:100%;
+  padding:.55rem .65rem;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:1rem;
+  box-sizing:border-box;
+  appearance:none;
+}
+.upload-section select:focus,
+.upload-section input[type="file"]:focus{
+  outline:none; border-color:var(--blue-main);
+  box-shadow:0 0 0 3px rgba(30,96,145,.15);
+}
+.error-message{ color:#b91c1c; display:block; margin-top:.3rem; }
+
+/* Bouton upload */
+.upload-section button{
+  background-color:var(--blue-main); color:#fff;
+  padding:.7rem 1.2rem; border:none; border-radius:10px; cursor:pointer; font-size:1rem; font-weight:800;
+  transition:filter .2s ease, transform .05s ease;
+}
+.upload-section button:hover{ filter:brightness(.97); }
+.upload-section button:disabled{ opacity:.6; cursor:not-allowed; }
+
+/* ================== Bloc: Liste des documents ================== */
+.documents-list{ grid-column:1 / -1; margin-top:2rem; }
+.documents-list h2{ color:var(--blue-main); margin:0 0 1rem 0; }
+
+.full-width-table{ width:100%; border-collapse:collapse; margin-top:1rem; }
+.full-width-table th, .full-width-table td{
+  padding:.75rem 1rem; text-align:left; border-bottom:1px solid #ddd;
+}
+.full-width-table th{
+  background-color:var(--blue-main); color:#fff; font-weight:bold; text-transform:uppercase; letter-spacing:.02em;
+}
+.full-width-table tr:hover{ background-color:var(--background-hover); }
+.full-width-table td{ color:var(--text-main); }
+.full-width-table td:last-child{
+  display:flex; gap:.5rem; justify-content:flex-start; flex-wrap:wrap;
 }
 
-.tooltip-icon[title]:hover::after {
-  opacity: 1;
-  visibility: visible;
+/* Statuts (table) — on garde tes classes existantes */
+.status-validé{ color:green; font-weight:bold; }
+.status-en-attente{ color:orange; font-weight:bold; }
+.status-refusé{ color:red; font-weight:bold; }
+
+/* Badges colorés cohérents */
+.badge{ display:inline-flex; align-items:center; font-weight:800; padding:.25rem .55rem; border-radius:999px; }
+.badge-payé{ background:#ecfdf5; color:#166534; }
+.badge-en-attente{ background:#fff7ed; color:#b45309; }
+.badge-annulé{ background:#fef2f2; color:#991b1b; }
+
+/* ================== Boutons d'action (alignés, plus de conflit) ================== */
+.btn-action{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:.5rem .9rem;
+  border:none; border-radius:10px; cursor:pointer;
+  transition:background-color .2s ease, transform .05s ease, filter .2s ease;
+}
+.btn-action:disabled{ background-color:#ccc; color:#666; cursor:not-allowed; opacity:.6; }
+.btn-action:hover{ filter:brightness(.97); }
+.btn-action:active{ transform:translateY(1px); }
+
+.btn-edit{ background-color:var(--blue-main); color:#fff; }
+.btn-edit:hover{ background-color:var(--blue-hover); }
+.btn-delete{ background-color:var(--red-main); color:#fff; }
+.btn-delete:hover{ background-color:var(--red-hover); }
+
+/* ================== Barre info utilisateur (si utilisée ailleurs) ================== */
+.user-info-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  background-color:#f9f9f9; padding:.8rem 1rem; border-radius:8px;
+  box-shadow:0 2px 4px rgba(0,0,0,.1); margin-bottom:1.5rem; font-size:.9rem;
 }
 
-/* Barre d'informations utilisateur */
-.user-info-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Espacement égal entre les éléments */
-  background-color: #f9f9f9; /* Fond clair */
-  padding: 0.8rem 1rem; /* Espacement interne */
-  border-radius: 8px; /* Coins arrondis */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombre légère */
-  margin-bottom: 1.5rem; /* Espacement en bas */
-  font-size: 0.9rem; /* Taille de texte compacte */
-}
-
-.badge {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-align: center;
-  color: #fff;
-}
-
-.badge-payé {
-  background-color: #28a745; /* Vert */
-}
-
-.badge-en-attente {
-  background-color: #ffc107; /* Jaune */
-  color: #fff;
-}
-
-.badge-annulé {
-  background-color: #dc3545; /* Rouge */
-}
+/* Nettoyage doublons */
+.refused{ color:red; font-weight:bold; margin-left:1rem; display:inline-flex; align-items:center; }

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 
 type Statut = 'NOUVEAU'|'VALIDE'|'REFUSE'|string;
 
@@ -9,14 +10,14 @@ interface Membre {
   id: string|number;
   nom: string;
   prenom: string;
-  dateNaissance: string; // ISO
+  dateNaissance: string; // ISO (yyyy-MM-dd ok)
   ceinture?: string;
   numeroLicence?: string;
 }
 
 interface Utilisateur {
   id: string|number;
-  role: 'PARENT'|'MEMBRE';
+  role: 'PARENT'|'MEMBRE'|string;
   nom: string;
   prenom: string;
   email: string;
@@ -26,12 +27,16 @@ interface Utilisateur {
   codePostal: string;
   ville: string;
   pays: string;
+  dateNaissance?: string;
   membres: Membre[];
-  etat: Statut;
+  etat?: Statut; // consultatif
   _expand?: boolean;
   _membersLoaded?: boolean;
   _membersLoading?: boolean;
 }
+
+/** Tri utilisable (pas de 'etat' en consultatif) */
+type SortKey = 'nom' | 'email' | 'telephone' | 'nbMembres';
 
 @Component({
   selector: 'app-gestion-inscriptions',
@@ -47,7 +52,7 @@ export class GestionInscriptionsComponent implements OnInit {
   erreurMessage = '';
 
   query = '';
-  sortKey: keyof (Utilisateur & { nbMembres:number }) = 'nom';
+  sortKey: SortKey = 'nom';
   sortDir: 'asc'|'desc' = 'asc';
   page = 1; pageSize = 10; totalPages = 1;
 
@@ -55,10 +60,67 @@ export class GestionInscriptionsComponent implements OnInit {
   filtered: Utilisateur[] = [];
   paged: Utilisateur[] = [];
 
+  selectedUser: Utilisateur | null = null;
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.fetchUtilisateurs();
+  }
+
+  // ===== Helpers =====
+  private emptyToUndef = (v: any) => (v === '' || v === null || v === undefined) ? undefined : v;
+
+  /** Parse une adresse "ligne cp ville" en morceaux si dispo */
+  private splitOneLineAddress(addr?: string) {
+    const out = { l1: '', l2: '', cp: '', ville: '', pays: '' };
+    if (!addr) return out;
+    const s = addr.trim().replace(/\s+/g, ' ');
+    // Cherche CP + ville à la fin
+    const m = s.match(/^(.*?)(?:,\s*)?(\d{4,5})\s+([^,]+)(?:,\s*(.*))?$/i);
+    if (m) {
+      out.l1 = (m[1] || '').trim();
+      out.cp = (m[2] || '').trim();
+      out.ville = (m[3] || '').trim();
+      out.pays = (m[4] || '').trim();
+    } else {
+      out.l1 = s;
+    }
+    return out;
+  }
+
+  private mapKid = (m: any): Membre => ({
+    id: m.id ?? m._id ?? m.uuid,
+    nom: m.nom ?? '',
+    prenom: m.prenom ?? '',
+    dateNaissance: m.dateNaissance ?? '',
+    ceinture: this.emptyToUndef(m.ceinture),
+    numeroLicence: this.emptyToUndef(m.numeroLicence),
+  });
+
+  private normalizeUser(u: any): Utilisateur {
+    // L'API fournit "adresse" en une ligne : on tente de découper
+    const parsed = this.splitOneLineAddress(u.adresse || undefined);
+
+    return {
+      id: u.id ?? u._id ?? u.uuid,
+      role: String(u.role || '').toUpperCase(),
+      nom: (u.nom ?? '').trim(),
+      prenom: (u.prenom ?? '').trim(),
+      email: (u.email ?? '').trim(),
+      telephone: (u.telephone ?? '').trim(),
+      adresseLigne1: parsed.l1,
+      adresseLigne2: '',
+      codePostal: parsed.cp,
+      ville: parsed.ville,
+      pays: parsed.pays,
+      dateNaissance: u.dateNaissance ?? undefined,
+      membres: [], // remplis après jointure
+      etat: u.etat, // consultatif
+      _expand: false,
+      _membersLoaded: false,
+      _membersLoading: false
+    };
   }
 
   // ===== API =====
@@ -66,18 +128,57 @@ export class GestionInscriptionsComponent implements OnInit {
     this.loading = true;
     this.erreurMessage = '';
 
-    let params: HttpParams = new HttpParams();
-    if (this.query.trim()) params = params.set('q', this.query.trim());
+    // On charge utilisateurs + membres en parallèle
+    const params = this.query.trim() ? new HttpParams().set('q', this.query.trim()) : new HttpParams();
 
-    this.http.get<any>(`${this.API_BASE}/utilisateurs`, { params }).subscribe({
-      next: (res: any) => {
-        const items: any[] = Array.isArray(res) ? res
-          : Array.isArray(res?.items) ? res.items
-          : Array.isArray(res?.data) ? res.data
-          : Array.isArray(res?.results) ? res.results
-          : Array.isArray(res?.utilisateurs) ? res.utilisateurs
+    const reqUsers = this.http.get<any>(`${this.API_BASE}/utilisateurs`, { params });
+    const reqKids  = this.http.get<any>(`${this.API_BASE}/membres`);
+
+    forkJoin([reqUsers, reqKids]).subscribe({
+      next: ([usersRes, kidsRes]) => {
+        const usersArr: any[] = Array.isArray(usersRes) ? usersRes
+          : Array.isArray(usersRes?.items) ? usersRes.items
+          : Array.isArray(usersRes?.data) ? usersRes.data
+          : Array.isArray(usersRes?.results) ? usersRes.results
+          : Array.isArray(usersRes?.utilisateurs) ? usersRes.utilisateurs
           : [];
-        this.utilisateurs = items.map((u: any) => this.normalizeUser(u));
+
+        const kidsArr: any[] = Array.isArray(kidsRes) ? kidsRes
+          : Array.isArray(kidsRes?.items) ? kidsRes.items
+          : Array.isArray(kidsRes?.data) ? kidsRes.data
+          : Array.isArray(kidsRes?.results) ? kidsRes.results
+          : Array.isArray(kidsRes?.membres) ? kidsRes.membres
+          : [];
+
+        // 1) Normalise tous les utilisateurs
+        let users = usersArr
+          .map(u => this.normalizeUser(u))
+          // on ne liste pas les ADMIN ici
+          .filter(u => u.role === 'PARENT' || u.role === 'MEMBRE');
+
+        // 2) Groupe les enfants par utilisateurId
+        const kidsByParent: Record<string, Membre[]> = {};
+        for (const k of kidsArr) {
+          const parentId = k.utilisateurId;
+          if (parentId == null) continue;
+          const list = (kidsByParent[parentId] ||= []);
+          list.push(this.mapKid(k));
+        }
+
+        // 3) Attache les enfants aux PARENTs
+        users = users.map(u => {
+          if (u.role === 'PARENT') {
+            const kids = kidsByParent[String(u.id)] || [];
+            u.membres = this.sortMembers(kids);
+            u._membersLoaded = true;
+          } else {
+            u.membres = []; // adulte seul
+            u._membersLoaded = true;
+          }
+          return u;
+        });
+
+        this.utilisateurs = users;
         this.applyFilters();
       },
       error: () => this.erreurMessage = 'Impossible de charger les inscriptions.',
@@ -85,123 +186,28 @@ export class GestionInscriptionsComponent implements OnInit {
     });
   }
 
-  private normalizeUser(u: any): Utilisateur {
-    // Adresse combinée éventuelle
-    const addr = u.adresse as string | undefined;
-    let adresseLigne1 = u.adresseLigne1 || '';
-    let codePostal = u.codePostal || '';
-    let ville = u.ville || '';
-    let pays = u.pays || '';
-
-    if (addr && !adresseLigne1) {
-      const parts = addr.split(',');
-      adresseLigne1 = parts[0]?.trim() || '';
-      const rest = parts.slice(1).join(',').trim();
-      const m = rest.match(/(\d{4,5})\s+([^,]+)(?:,\s*(.*))?/);
-      if (m) { codePostal ||= m[1]; ville ||= m[2]; if (!pays && m[3]) pays = m[3]; }
-    }
-
-    // Si le backend renvoie déjà les enfants (membres|enfants)
-    const initialKidsRaw: any[] =
-      Array.isArray(u.membres) ? u.membres :
-      Array.isArray(u.enfants) ? u.enfants : [];
-
-    const initialKids: Membre[] = initialKidsRaw.map((m: any) => ({
-      id: m.id ?? m._id ?? m.uuid,
-      nom: m.nom || '',
-      prenom: m.prenom || '',
-      dateNaissance: m.dateNaissance || '',
-      ceinture: m.ceinture,
-      numeroLicence: m.numeroLicence
-    }));
-
-    const declaredRole = String(u.role || '').toUpperCase();
-    const inferredParent = initialKids.length > 0;
-    const role: 'PARENT'|'MEMBRE' =
-      declaredRole === 'PARENT' ? 'PARENT' :
-      declaredRole === 'MEMBRE' ? 'MEMBRE' :
-      (inferredParent ? 'PARENT' : 'MEMBRE');
-
-    return {
-      id: u.id ?? u._id ?? u.uuid,
-      role,
-      nom: u.nom || '',
-      prenom: u.prenom || '',
-      email: u.email || '',
-      telephone: u.telephone || '',
-      adresseLigne1,
-      adresseLigne2: u.adresseLigne2 || '',
-      codePostal, ville, pays,
-      membres: initialKids,                             // 👈 pré-rempli si dispo
-      etat: u.etat || 'NOUVEAU',
-      _expand: false,
-      _membersLoaded: role !== 'PARENT' ? true : initialKids.length > 0, // parent déjà chargé si enfants fournis
-      _membersLoading: false
-    };
+  /** Tri lisible des enfants : prénom puis nom */
+  private sortMembers(list: Membre[]): Membre[] {
+    return [...(list || [])].sort((a, b) => {
+      const pa = (a.prenom || '').toLowerCase();
+      const pb = (b.prenom || '').toLowerCase();
+      if (pa < pb) return -1; if (pa > pb) return 1;
+      const na = (a.nom || '').toLowerCase();
+      const nb = (b.nom || '').toLowerCase();
+      if (na < nb) return -1; if (na > nb) return 1;
+      return 0;
+    });
   }
 
-  // ——— Membres: charge via /membres/by-parent/{id} + fallbacks ———
-  private extractMembersArray(res: any): any[] {
-    return Array.isArray(res) ? res
-      : Array.isArray(res?.items) ? res.items
-      : Array.isArray(res?.data) ? res.data
-      : Array.isArray(res?.results) ? res.results
-      : Array.isArray(res?.membres) ? res.membres
-      : [];
-  }
-
-  private loadMembers(u: Utilisateur, expandAfter = false): void {
-    if (u._membersLoaded || u._membersLoading || u.role !== 'PARENT') {
-      if (expandAfter) u._expand = !u._expand;
-      return;
-    }
-    u._membersLoading = true;
-
-    const tryUrls: string[] = [
-      `${this.API_BASE}/membres/by-parent/${u.id}`,           // ✅ route principale (liste enfants)
-      `${this.API_BASE}/utilisateurs/${u.id}/membres`,        // fallback possible
-      `${this.API_BASE}/membres?parentId=${u.id}`,            // fallback query variant
-      `${this.API_BASE}/membres?utilisateurId=${u.id}`        // autre variant
-    ];
-
-    const tryNext = (i: number) => {
-      if (i >= tryUrls.length) {
-        u.membres = [];
-        u._membersLoaded = true;
-        u._membersLoading = false;
-        if (expandAfter) u._expand = true;
-        return;
-      }
-      const url = tryUrls[i];
-      // console.debug('👶 GET enfants ->', url);
-      this.http.get<any>(url).subscribe({
-        next: (res: any) => {
-          const arr = this.extractMembersArray(res);
-          u.membres = (arr || []).map((m: any) => ({
-            id: m.id ?? m._id ?? m.uuid,
-            nom: m.nom || '',
-            prenom: m.prenom || '',
-            dateNaissance: m.dateNaissance || '',
-            ceinture: m.ceinture,
-            numeroLicence: m.numeroLicence
-          }));
-          u._membersLoaded = true;
-          u._membersLoading = false;
-          if (expandAfter) u._expand = true;
-        },
-        error: () => tryNext(i + 1)
-      });
-    };
-
-    tryNext(0);
+  // ===== Expand membres (plus d’appel réseau, tout est préchargé) =====
+  loadMembers(u: Utilisateur, expandAfter = false): void {
+    // plus nécessaire : tout est déjà en mémoire
+    if (expandAfter) u._expand = !u._expand;
   }
 
   toggleExpand(u: Utilisateur): void {
-    if (!u._membersLoaded) {
-      this.loadMembers(u, true); // charge puis ouvre
-    } else {
-      u._expand = !u._expand;
-    }
+    if (u.role !== 'PARENT') return;
+    u._expand = !u._expand;
   }
 
   // ===== Filtres / tri / pagination =====
@@ -209,23 +215,23 @@ export class GestionInscriptionsComponent implements OnInit {
     const q = this.query.trim().toLowerCase();
 
     this.filtered = this.utilisateurs.filter((u: Utilisateur) => {
-      const txt = [u.nom,u.prenom,u.email,u.telephone,u.ville,u.pays,u.adresseLigne1,u.adresseLigne2,u.codePostal]
-        .filter(Boolean).join(' ').toLowerCase();
+      const txt = [
+        u.nom, u.prenom, u.email, u.telephone, u.ville, u.pays, u.adresseLigne1, u.adresseLigne2, u.codePostal
+      ].filter(Boolean).join(' ').toLowerCase();
       return q === '' || txt.includes(q);
     });
 
-    const getKey = (u: Utilisateur) => {
+    const getKey = (u: Utilisateur): string | number => {
       switch (this.sortKey) {
-        case 'etat': return u.etat;
-        case 'email': return u.email.toLowerCase();
-        case 'telephone': return u.telephone;
+        case 'email': return (u.email || '').toLowerCase();
+        case 'telephone': return u.telephone || '';
         case 'nom': return `${u.nom} ${u.prenom}`.toLowerCase();
         case 'nbMembres': return u.membres.length;
-        default: return (u as any)[this.sortKey];
       }
     };
+
     this.filtered.sort((a: Utilisateur, b: Utilisateur) => {
-      const va = getKey(a), vb = getKey(b);
+      const va = getKey(a) as any, vb = getKey(b) as any;
       if (va < vb) return this.sortDir === 'asc' ? -1 : 1;
       if (va > vb) return this.sortDir === 'asc' ? 1 : -1;
       return 0;
@@ -236,7 +242,7 @@ export class GestionInscriptionsComponent implements OnInit {
     this.slicePage();
   }
 
-  sortBy(key: any): void {
+  sortBy(key: SortKey): void {
     if (this.sortKey === key) {
       this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
     } else {
@@ -253,27 +259,71 @@ export class GestionInscriptionsComponent implements OnInit {
   slicePage(): void {
     const start = (this.page - 1) * this.pageSize;
     this.paged = this.filtered.slice(start, start + this.pageSize);
-    // précharge les membres (compteurs) uniquement pour les parents non chargés
-    this.paged.forEach((u: Utilisateur) => {
-      if (u.role === 'PARENT' && !u._membersLoaded && !u._membersLoading) {
-        this.loadMembers(u, false);
-      }
-    });
   }
 
   clearSearch(): void { this.query = ''; this.fetchUtilisateurs(); }
 
-  // ===== Actions =====
-  view(u: Utilisateur): void { alert(`Détails de ${u.prenom} ${u.nom}`); }
-  contact(u: Utilisateur): void { window.location.href = `mailto:${u.email}`; }
-  approve(u: Utilisateur): void { u.etat = 'VALIDE'; }
-  reject(u: Utilisateur): void { u.etat = 'REFUSE'; }
-  remove(u: Utilisateur): void {
-    if (confirm('Supprimer cette inscription ?')) {
-      this.utilisateurs = this.utilisateurs.filter((x: Utilisateur) => x.id !== u.id);
-      this.applyFilters();
-    }
+  // ===== Helpers UI =====
+  formatAddress(u: Partial<Utilisateur> | null | undefined): string {
+    if (!u) return '';
+    const simple = (u as any).adresse as string | undefined;
+
+    const l1 = (u.adresseLigne1 ?? '').trim();
+    const l2 = (u.adresseLigne2 ?? '').trim();
+    const cp = (u.codePostal ?? '').trim();
+    const ville = (u.ville ?? '').trim();
+    const pays = (u.pays ?? '').trim();
+
+    const parts: string[] = [];
+    if (simple) parts.push(simple);
+    if (l1) parts.push(l1);
+    if (l2) parts.push(l2);
+    const lastLine = [cp, ville, pays].filter(Boolean).join(' ');
+    if (lastLine) parts.push(lastLine);
+
+    return Array.from(new Set(parts.filter(Boolean))).join(', ');
   }
 
   trackById(_: number, item: Utilisateur){ return item.id; }
+
+  // ===== Modale =====
+  view(u: Utilisateur): void {
+    this.selectedUser = u;
+    document.body.classList.add('modal-open');
+  }
+
+  closeModal(): void {
+    this.selectedUser = null;
+    document.body.classList.remove('modal-open');
+  }
+
+  viewInNewTab(u: Utilisateur): void {
+    window.open(`mailto:${u.email}`, '_blank');
+  }
+
+  remove(u: Utilisateur): void {
+    if (!u || !u.id) return;
+    const ok = confirm(`Supprimer l'utilisateur ${u.prenom} ${u.nom} ?`);
+    if (!ok) return;
+
+    this.http.delete(`${this.API_BASE}/utilisateurs/${u.id}`, { observe: 'response' })
+      .subscribe({
+        next: () => {
+          this.utilisateurs = this.utilisateurs.filter(x => x.id !== u.id);
+          this.applyFilters();
+        },
+        error: () => {
+          this.utilisateurs = this.utilisateurs.filter(x => x.id !== u.id);
+          this.applyFilters();
+        }
+      });
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscKeydown(ev: KeyboardEvent): void {
+    if (this.selectedUser) {
+      ev.preventDefault();
+      this.closeModal();
+    }
+  }
 }

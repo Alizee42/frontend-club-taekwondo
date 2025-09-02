@@ -1,41 +1,54 @@
 <div class="dashboard-container">
-  <div class="dashboard-header">
+  <header class="dashboard-header">
     <h1>Tableau de bord</h1>
     <p class="welcome-message" *ngIf="utilisateurConnecte">
-      Bienvenue, <span class="highlight">{{ utilisateurConnecte.prenom }} {{ utilisateurConnecte.nom }}</span> !
+      Bienvenue, <span class="highlight">{{ utilisateurConnecte.prenom }} {{ utilisateurConnecte.nom }}</span>
     </p>
-  </div>
-  <p class="intro">Bienvenue dans votre espace personnel. Retrouvez ici toutes vos informations utiles.</p>
+  </header>
 
-  <div class="dashboard-grid">
+  <!-- Résumé profil -->
+  <section class="profile-summary" *ngIf="utilisateurConnecte">
+    <div class="profile-row">
+      <div><i class="ri-mail-line" aria-hidden="true"></i> {{ utilisateurConnecte.email || '—' }}</div>
+      <div><i class="ri-phone-line" aria-hidden="true"></i> {{ utilisateurConnecte.telephone || '—' }}</div>
+      <div *ngIf="utilisateurConnecte.dateNaissance">
+        <i class="ri-cake-2-line" aria-hidden="true"></i> {{ utilisateurConnecte.dateNaissance | date:'dd/MM/yyyy' }}
+      </div>
+    </div>
+  </section>
 
-    <!-- Documents -->
-    <a (click)="navigateToDocuments()" class="dashboard-card">
-      <div class="icon-container"><i class="fas fa-file-alt"></i></div>
-      <h3>Documents</h3>
-      <p>Déposer ou consulter vos documents (certificat médical, etc.).</p>
-    </a>
-
-    <!-- Paiements -->
-    <a (click)="navigateToPaiements()" class="dashboard-card">
-      <div class="icon-container"><i class="fas fa-credit-card"></i></div>
+  <!-- Grille d’actions commune -->
+  <section class="dashboard-grid">
+    <article class="dashboard-card" role="button" tabindex="0"
+             (click)="navigateToPaiements()" (keyup.enter)="navigateToPaiements()"
+             aria-label="Accéder à Paiements">
+      <div class="icon-container"><i class="ri-wallet-3-line" aria-hidden="true"></i></div>
       <h3>Paiements</h3>
-      <p>Consulter vos cotisations, échéances, et paiements en cours.</p>
-    </a>
+      <p>Consulte tes cotisations et échéances.</p>
+    </article>
 
-    <!-- Commandes -->
-    <a (click)="navigateToCommandes()" class="dashboard-card">
-      <div class="icon-container"><i class="fas fa-box-open"></i></div>
-      <h3>Mes commandes</h3>
-      <p>Suivre vos achats de tenues et accessoires.</p>
-    </a>
+    <article class="dashboard-card" role="button" tabindex="0"
+             (click)="navigateToDocuments()" (keyup.enter)="navigateToDocuments()"
+             aria-label="Accéder à Documents">
+      <div class="icon-container"><i class="ri-folder-upload-line" aria-hidden="true"></i></div>
+      <h3>Documents</h3>
+      <p>Dépose/consulte certificat médical, etc.</p>
+    </article>
 
-    <!-- Événements -->
-    <a (click)="navigateToEvenements()" class="dashboard-card">
-      <div class="icon-container"><i class="fas fa-calendar-alt"></i></div>
+    <article class="dashboard-card" role="button" tabindex="0"
+             (click)="navigateToCommandes()" (keyup.enter)="navigateToCommandes()"
+             aria-label="Accéder à Commandes">
+      <div class="icon-container"><i class="ri-shopping-bag-line" aria-hidden="true"></i></div>
+      <h3>Commandes</h3>
+      <p>Suivi des achats (tenues & accessoires).</p>
+    </article>
+
+    <article class="dashboard-card" role="button" tabindex="0"
+             (click)="navigateToEvenements()" (keyup.enter)="navigateToEvenements()"
+             aria-label="Accéder à Événements">
+      <div class="icon-container"><i class="ri-calendar-event-line" aria-hidden="true"></i></div>
       <h3>Événements</h3>
-      <p>Voir vos inscriptions aux stages et événements.</p>
-    </a>
-
-  </div>
+      <p>Inscription et historique des stages.</p>
+    </article>
+  </section>
 </div>

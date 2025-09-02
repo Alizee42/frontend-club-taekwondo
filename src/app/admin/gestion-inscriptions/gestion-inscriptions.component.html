@@ -10,7 +10,7 @@
           [(ngModel)]="query"
           (ngModelChange)="fetchUtilisateurs()"
           aria-label="Rechercher une inscription" />
-        <button class="btn-icon" (click)="clearSearch()" [disabled]="!query" aria-label="Effacer la recherche">✕</button>
+        <button class="btn-icon" type="button" (click)="clearSearch()" [disabled]="!query" aria-label="Effacer la recherche">✕</button>
       </div>
 
       <select [(ngModel)]="pageSize" (change)="goToPage(1)" aria-label="Nombre par page">
@@ -56,10 +56,6 @@
             Membres
             <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='nbMembres'"></span>
           </th>
-          <th (click)="sortBy('etat')" [class.sorted]="sortKey==='etat'">
-            Statut
-            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='etat'"></span>
-          </th>
           <th class="th-actions">Actions</th>
         </tr>
       </thead>
@@ -82,62 +78,41 @@
 
           <td data-label="Adresse">
             <div class="addr">
-              <div>
-                {{ u.adresseLigne1 }}<ng-container *ngIf="u.adresseLigne2">, {{ u.adresseLigne2 }}</ng-container>
-              </div>
-              <small>{{ u.codePostal }} {{ u.ville }}, {{ u.pays }}</small>
+              <div>{{ formatAddress(u) }}</div>
             </div>
           </td>
 
           <td data-label="Membres">
             <div class="members">
-              <!-- Affiche … tant que les enfants ne sont pas chargés (pour les parents) -->
               <span class="pill">
                 {{ u.role==='PARENT' ? (u._membersLoaded ? u.membres.length : '…') : u.membres.length }}
               </span>
 
-              <!-- Bouton qui charge puis ouvre/ferme -->
-              <button class="btn-link" *ngIf="u.role==='PARENT'" (click)="toggleExpand(u)">
+              <button class="btn-link" type="button" *ngIf="u.role==='PARENT'"
+                      (click)="toggleExpand(u)"
+                      [attr.aria-expanded]="u._expand">
                 <ng-container *ngIf="!u._membersLoading">
                   {{ u._expand ? 'Masquer' : (u._membersLoaded ? 'Voir' : 'Charger') }}
                 </ng-container>
                 <ng-container *ngIf="u._membersLoading">Chargement…</ng-container>
               </button>
 
-              <!-- Liste des enfants -->
-              <ul class="members-list" *ngIf="u._expand">
-                <li *ngFor="let m of u.membres">
-                  {{ m.prenom }} {{ m.nom }} — {{ m.dateNaissance | date:'dd/MM/yyyy' }}
-                  <span *ngIf="m.ceinture">— {{ m.ceinture }}</span>
-                </li>
-              </ul>
+              <!-- Chips prénom + nom -->
+              <div class="chips" *ngIf="u._expand" [attr.aria-label]="'Membres de ' + u.prenom + ' ' + u.nom">
+                <span class="chip" *ngFor="let m of u.membres">
+                  {{ m.prenom }} {{ m.nom }}
+                </span>
+                <span class="chip chip-muted" *ngIf="u.membres.length === 0">Aucun membre</span>
+              </div>
             </div>
-          </td>
-
-          <td data-label="Statut">
-            <span class="status"
-                  [class.s-new]="u.etat==='NOUVEAU'"
-                  [class.s-ok]="u.etat==='VALIDE'"
-                  [class.s-ko]="u.etat==='REFUSE'">
-              {{ u.etat === 'NOUVEAU' ? 'Nouveau' : (u.etat === 'VALIDE' ? 'Validé' : 'Refusé') }}
-            </span>
           </td>
 
           <td data-label="Actions">
             <div class="actions icons-only">
-              <button class="icon-btn ghost" (click)="view(u)" title="Voir la fiche" aria-label="Voir la fiche">
+              <button class="icon-btn primary" type="button" (click)="view(u)" title="Voir la fiche" aria-label="Voir la fiche">
                 <i class="ri-file-2-line"></i>
               </button>
-              <button class="icon-btn ok" (click)="approve(u)" [disabled]="u.etat==='VALIDE'" title="Valider" aria-label="Valider">
-                <i class="ri-check-line"></i>
-              </button>
-              <button class="icon-btn ko" (click)="reject(u)" [disabled]="u.etat==='REFUSE'" title="Refuser" aria-label="Refuser">
-                <i class="ri-close-line"></i>
-              </button>
-              <button class="icon-btn light" (click)="contact(u)" title="Contacter" aria-label="Contacter">
-                <i class="ri-mail-line"></i>
-              </button>
-              <button class="icon-btn danger" (click)="remove(u)" title="Supprimer" aria-label="Supprimer">
+              <button class="icon-btn danger" type="button" (click)="remove(u)" title="Supprimer" aria-label="Supprimer">
                 <i class="ri-delete-bin-6-line"></i>
               </button>
             </div>
@@ -147,9 +122,93 @@
     </table>
 
     <div class="pagination">
-      <button class="btn" (click)="prevPage()" [disabled]="page===1">‹</button>
+      <button class="btn" type="button" (click)="prevPage()" [disabled]="page===1">‹</button>
       <span>Page <strong>{{ page }}</strong> / <strong>{{ totalPages }}</strong></span>
-      <button class="btn" (click)="nextPage()" [disabled]="page===totalPages">›</button>
+      <button class="btn" type="button" (click)="nextPage()" [disabled]="page===totalPages">›</button>
     </div>
+  </div>
+</div>
+
+<!-- MODALE FICHE UTILISATEUR -->
+<div class="modal-backdrop" *ngIf="selectedUser" (click)="closeModal()" aria-hidden="false">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="userModalTitle" (click)="$event.stopPropagation()">
+
+    <header class="modal-header">
+      <div class="user-head">
+        <div class="avatar-xl">{{ (selectedUser.prenom || 'U') | slice:0:1 }}</div>
+        <div>
+          <h2 id="userModalTitle" class="modal-title">
+            {{ selectedUser.prenom }} {{ selectedUser.nom }}
+          </h2>
+          <div class="role-line">
+            <span class="badge"
+                  [class.badge-parent]="selectedUser.role==='PARENT'"
+                  [class.badge-membre]="selectedUser.role==='MEMBRE'">
+              {{ selectedUser.role === 'PARENT' ? 'Parent' : 'Adulte seul' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <button class="icon-btn ghost close-x" type="button" (click)="closeModal()" title="Fermer" aria-label="Fermer la fiche">✕</button>
+    </header>
+
+    <div class="modal-body">
+      <section class="grid-2">
+        <div class="card-info">
+          <h3>Contact</h3>
+          <ul class="kv">
+            <li><span>Email</span><a class="link" [href]="'mailto:'+selectedUser.email">{{ selectedUser.email }}</a></li>
+            <li><span>Téléphone</span><a class="link" [href]="'tel:'+selectedUser.telephone">{{ selectedUser.telephone }}</a></li>
+            <li><span>Adresse</span><span>{{ formatAddress(selectedUser) }}</span></li>
+          </ul>
+        </div>
+
+        <div class="card-info">
+          <h3>Profil</h3>
+          <ul class="kv">
+            <li><span>Rôle</span><span>{{ selectedUser.role }}</span></li>
+            <li *ngIf="selectedUser.dateNaissance">
+              <span>Date de naissance</span>
+              <span>{{ selectedUser.dateNaissance | date:'dd/MM/yyyy' }}</span>
+            </li>
+            <li>
+              <span>Nombre de membres</span><span>{{ selectedUser.membres.length }}</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section *ngIf="selectedUser.membres.length" class="card-info">
+        <h3>Enfants / Membres liés</h3>
+        <div class="subtable-wrap">
+          <table class="subtable">
+            <thead>
+              <tr>
+                <th>Prénom / Nom</th>
+                <th>Date de naissance</th>
+                <th>Ceinture</th>
+                <th>Licence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let m of selectedUser.membres">
+                <td>{{ m.prenom }} {{ m.nom }}</td>
+                <td>{{ m.dateNaissance ? (m.dateNaissance | date:'dd/MM/yyyy') : '—' }}</td>
+                <td>{{ m.ceinture || '—' }}</td>
+                <td>{{ m.numeroLicence || '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <footer class="modal-footer">
+      <button class="btn" type="button" (click)="closeModal()">Fermer</button>
+      <button class="btn" type="button" style="background:var(--green)" (click)="viewInNewTab(selectedUser)">
+        Ouvrir dans un onglet
+      </button>
+    </footer>
   </div>
 </div>
