@@ -7,6 +7,13 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 /* ========= Types ========= */
 type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
 
+interface ChildItem {
+  id: number | string;
+  prenom?: string;
+  nom?: string;
+  numeroLicence?: string;
+}
+
 interface DocumentItem {
   id: number | string;
   typeDocument: string;
@@ -14,15 +21,24 @@ interface DocumentItem {
   status: StatutDoc;
   dateDepot?: string | Date;
   cheminFichier?: string;
+
+  // Associations utilisateur / enfant
   utilisateur?: {
     id: number | string;
     nom: string;
     prenom: string;
     email: string;
     telephone?: string;
+    role?: string;
+    enfants?: ChildItem[];
   };
   utilisateurId?: number | string;
+
+  // Pour les enfants (membres rattachés)
   membreId?: number | string;
+  enfantId?: number | string;
+  enfant?: ChildItem | null;
+
   commentaire?: string;
 }
 
@@ -32,8 +48,15 @@ interface UtilisateurRow {
   prenom: string;
   email: string;
   telephone?: string;
+  role?: string;
+
+  // Gestion UI
   isOpen: boolean;
+  selectedChildFilter?: number | string | null;
+
+  // Données
   documents: DocumentItem[];
+  enfants?: ChildItem[];
 }
 
 /* ===== Catalogue & helpers libellés ===== */
@@ -104,6 +127,100 @@ export class GestionDocumentsComponent implements OnInit {
     return headers;
   }
 
+  /* ===== Helpers rôle & enfants (par utilisateur) ===== */
+  private normRole(val: any): string {
+    return (val ?? '').toString().trim().toUpperCase();
+  }
+  isParentRow(u: UtilisateurRow): boolean {
+    const r = this.normRole(u.role);
+    if (r === 'PARENT') return true;
+    return u.documents?.some(d => this.getDocChildId(d) != null) ?? false;
+  }
+  isMembreSeulRow(u: UtilisateurRow): boolean {
+    const r = this.normRole(u.role);
+    return r === 'MEMBRE' || r === 'MEMBRE_SEUL' || (!this.isParentRow(u));
+  }
+
+  hasKids(u: UtilisateurRow): boolean {
+    return Array.isArray(u.enfants) && u.enfants.length > 0;
+  }
+  multipleKids(u: UtilisateurRow): boolean {
+    return Array.isArray(u.enfants) && u.enfants.length > 1;
+  }
+
+  private getDocChildId(doc: DocumentItem): number | string | null {
+    return (doc?.enfantId ?? doc?.membreId ?? doc?.enfant?.id ?? null) as any;
+  }
+
+  /** Essaie de déduire un enfant (id, prénom, nom, licence) depuis un document brut */
+  private inferChildFromDoc(d: any): ChildItem | null {
+    const id =
+      d?.enfantId ?? d?.membreId ??
+      d?.kidId ?? d?.enfant?.id ?? d?.membre?.id ?? null;
+
+    const prenom =
+      d?.enfant?.prenom ?? d?.membre?.prenom ??
+      d?.enfantPrenom ?? d?.prenomMembre ?? d?.kidPrenom ?? null;
+
+    const nom =
+      d?.enfant?.nom ?? d?.membre?.nom ??
+      d?.enfantNom ?? d?.nomMembre ?? d?.kidNom ?? null;
+
+    const numeroLicence =
+      d?.enfant?.numeroLicence ?? d?.membre?.numeroLicence ??
+      d?.enfantLicence ?? d?.numeroLicence ?? null;
+
+    if (id == null) return null;
+    return {
+      id,
+      prenom: prenom || undefined,
+      nom: nom || undefined,
+      numeroLicence: numeroLicence || undefined,
+    };
+  }
+
+  /** Depuis un doc + utilisateur parent, retrouve le ChildItem le plus riche possible */
+  private resolveChildForDoc(doc: DocumentItem, u: UtilisateurRow): ChildItem | null {
+    if (doc?.enfant && doc.enfant.id != null) return doc.enfant;
+    const id = this.getDocChildId(doc);
+    if (id != null && this.hasKids(u)) {
+      const found = u.enfants!.find(k => String(k.id) === String(id));
+      if (found) return found;
+    }
+    if (id != null) return { id };
+    return null;
+  }
+
+  /** Nom complet à afficher (toujours "Prénom Nom") */
+  childName(k: ChildItem, u?: UtilisateurRow): string {
+    const direct = [k?.prenom, k?.nom].filter(Boolean).join(' ').trim();
+    if (direct) return direct;
+
+    const kidId = k?.id;
+    if (u) {
+      const doc = (u.documents || []).find(d => String(this.getDocChildId(d)) === String(kidId));
+      if (doc) {
+        const inferred = doc.enfant || this.resolveChildForDoc(doc, u);
+        const alt = [inferred?.prenom, inferred?.nom].filter(Boolean).join(' ').trim();
+        if (alt) return alt;
+      }
+    }
+    return 'Nom inconnu';
+  }
+
+  enfantLabelFor(doc: DocumentItem, u: UtilisateurRow): string {
+    const child = this.resolveChildForDoc(doc, u) || doc.enfant || null;
+    if (!child) return 'Nom inconnu';
+    return this.childName(child, u);
+  }
+
+  filteredDocs(u: UtilisateurRow): DocumentItem[] {
+    const docs = u?.documents ?? [];
+    const filterId = u?.selectedChildFilter ?? null;
+    if (!filterId) return docs;
+    return docs.filter(d => String(this.getDocChildId(d)) === String(filterId));
+  }
+
   /* ===== Normalisation statut ===== */
   private normalizeStatus(s: any): StatutDoc {
     const v = String(s || '').toLowerCase();
@@ -118,8 +235,12 @@ export class GestionDocumentsComponent implements OnInit {
     this.http.get<any[]>(`${this.API_BASE}/documents`, { headers: this.getAuthHeaders() }).subscribe({
       next: (docsRaw) => {
         const utilisateursMap = new Map<string | number, UtilisateurRow>();
+        const enfantsByUser = new Map<string | number, Map<string, ChildItem>>();
 
         (docsRaw || []).forEach((d: any) => {
+          const child = this.inferChildFromDoc(d);
+          const enfantId = child?.id ?? null;
+
           const doc: DocumentItem = {
             id: d?.id ?? d?._id ?? d?.uuid,
             typeDocument: unifyType(d?.typeDocument ?? d?.type ?? ''),
@@ -128,33 +249,61 @@ export class GestionDocumentsComponent implements OnInit {
             dateDepot: d?.dateDepot ?? d?.createdAt,
             cheminFichier: d?.cheminFichier ?? d?.url,
             utilisateur: d?.utilisateur,
-            utilisateurId: d?.utilisateurId ?? d?.utilisateur?.id
+            utilisateurId: d?.utilisateurId ?? d?.utilisateur?.id,
+            membreId: d?.membreId ?? undefined,
+            enfantId: enfantId ?? undefined,
+            enfant: child ?? null,
+            commentaire: d?.commentaire
           };
 
-        const u = d?.utilisateur;
-        if (u?.id) {
-          const uid = u.id as number | string;
-          if (!utilisateursMap.has(uid)) {
-            utilisateursMap.set(uid, {
-              id: uid,
-              nom: (u.nom || '').trim(),
-              prenom: (u.prenom || '').trim(),
-              email: u.email || '—',
-              telephone: u.telephone || '',
-              isOpen: false,
-              documents: []
-            });
-          }
-          utilisateursMap.get(uid)!.documents.push(doc);
-        } else {
-          console.warn('Document sans utilisateur associé :', d);
-        }
-      });
+          const u = d?.utilisateur;
+          if (u?.id != null) {
+            const uid = u.id as number | string;
 
-        // liste triée par nom/prénom
-        this.utilisateurs = Array.from(utilisateursMap.values()).sort((a, b) =>
-          `${a.nom} ${a.prenom}`.localeCompare(`${b.nom} ${b.prenom}`, 'fr', { sensitivity: 'base' })
-        );
+            if (!utilisateursMap.has(uid)) {
+              utilisateursMap.set(uid, {
+                id: uid,
+                nom: (u.nom || '').trim(),
+                prenom: (u.prenom || '').trim(),
+                email: u.email || '—',
+                telephone: u.telephone || '',
+                role: u.role,
+                isOpen: false,
+                selectedChildFilter: null,
+                documents: [],
+                enfants: Array.isArray(u.enfants) ? [...u.enfants] : []
+              });
+            }
+
+            utilisateursMap.get(uid)!.documents.push(doc);
+
+            if (!enfantsByUser.has(uid)) {
+              enfantsByUser.set(uid, new Map<string, ChildItem>());
+            }
+            const childIdx = enfantsByUser.get(uid)!;
+
+            if (child && child.id != null) {
+              childIdx.set(String(child.id), child);
+            }
+          } else {
+            console.warn('Document sans utilisateur associé :', d);
+          }
+        });
+
+        this.utilisateurs = Array.from(utilisateursMap.values())
+          .map(u => {
+            const idx = enfantsByUser.get(u.id);
+            if (idx) {
+              const inf = Array.from(idx.values());
+              const byId = new Map<string, ChildItem>();
+              (u.enfants || []).forEach(k => byId.set(String(k.id), k));
+              inf.forEach(k => byId.set(String(k.id), { ...(byId.get(String(k.id)) || {}), ...k }));
+              u.enfants = Array.from(byId.values());
+            }
+            return u;
+          })
+          .sort((a, b) => `${a.nom} ${a.prenom}`.localeCompare(`${b.nom} ${b.prenom}`, 'fr', { sensitivity: 'base' }));
+
         this.utilisateursFiltres = [...this.utilisateurs];
       },
       error: (err) => {
@@ -248,7 +397,7 @@ export class GestionDocumentsComponent implements OnInit {
     return 'badge ' + this.getGlobalStatus(documents);
   }
 
-  /* ===== Filtre ===== */
+  /* ===== Filtre global (recherche + statut) ===== */
   filtrerUtilisateurs() {
     const term = this.searchTerm.trim().toLowerCase();
     const stat = this.filtreStatut;
@@ -265,21 +414,81 @@ export class GestionDocumentsComponent implements OnInit {
   ouvrirApercu(doc: DocumentItem) { this.documentEnApercu = doc; }
   fermerApercu() { this.documentEnApercu = null; }
 
-  getSafeUrl(path: string | undefined): SafeResourceUrl {
-    if (!path) return this.sanitizer.bypassSecurityTrustResourceUrl('');
-    // normalise quelques variantes courantes provenant du backend
-    let p = path.replace(/^documents\//, '');
-    // si déjà absolu (http/https) → laisser
-    if (/^https?:\/\//i.test(p)) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(p);
+  /* ================= Preview / URL robustes ================= */
+  /** Encode seulement le dernier segment du chemin (le nom de fichier), en tentant de décoder d’abord. */
+  private encodeLastSegment(p: string): string {
+    const parts = p.split('/');
+    const last = parts.pop() || '';
+    let decoded = last;
+    try { decoded = decodeURIComponent(last); } catch { /* ignore */ }
+    parts.push(encodeURIComponent(decoded));
+    return parts.join('/');
+  }
+
+  /** Construit une URL exploitable par le navigateur depuis cheminFichier */
+  private buildUrl(path?: string): string {
+    if (!path) return '';
+    let p = String(path).trim();
+
+    // Absolu => on laisse
+    if (/^https?:\/\//i.test(p)) return p;
+
+    // Normalise './', '//'...
+    p = p.replace(/^\.?\/+/, '');
+
+    // Remap "documents/xxx" -> "uploads/documents/xxx"
+    if (p.startsWith('documents/')) {
+      p = `uploads/${p}`;
     }
-    // si le backend sert via /api/uploads/documents/...
-    if (!p.startsWith('/')) p = `/api/uploads/documents/${encodeURIComponent(p)}`;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(p);
+    // Si ça ne commence pas par "uploads/", on force "uploads/documents/"
+    if (!p.startsWith('uploads/')) {
+      p = `uploads/documents/${p}`;
+    }
+
+    // Préfixes nécessaires
+    if (!p.startsWith('/')) p = `/${p}`;
+    if (!p.startsWith('/api/')) p = `/api${p}`;
+
+    // Encode seulement le nom de fichier
+    return this.encodeLastSegment(p);
+  }
+
+  /** URL pour les balises sécurisées (iframe/object/img) */
+  getSafeUrl(path: string | undefined): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.buildUrl(path));
+  }
+
+  /** URL brute pour un <a target="_blank"> */
+  rawUrl(path?: string): string {
+    return this.buildUrl(path);
+  }
+
+  /** Fallback image si 404 ou CORS */
+  onImgError(ev: Event) {
+    const el = ev.target as HTMLImageElement;
+    el.src = '/assets/file-placeholder.png';
   }
 
   estImage(nom: string | undefined): boolean {
     return !!nom && /\.(png|jpe?g|gif|bmp|webp)$/i.test(nom);
+  }
+
+  // + nouvelle méthode
+estImagePath(path?: string): boolean {
+  if (!path) return false;
+  const p = String(path).split('?')[0]; // enlève les query params
+  return /\.(png|jpe?g|gif|bmp|webp)$/i.test(p);
+}
+
+  /** Affichage court d’un nom de fichier (utile dans la liste) */
+  shortName(name: string, max = 28): string {
+    if (!name) return '';
+    if (name.length <= max) return name;
+    const dot = name.lastIndexOf('.');
+    if (dot <= 0 || dot >= name.length - 1) return name.slice(0, max - 1) + '…';
+    const ext = name.slice(dot);
+    const head = max - ext.length - 2;
+    return name.slice(0, Math.max(8, head)) + '…' + ext;
   }
 
   // expose helper au template si besoin

@@ -1,5 +1,5 @@
-/* ================== Variables (fallback locales) ================== */
-:root{
+/* ================== Variables ================== */
+:root {
   --blue-main:#1E6091;
   --blue-hover:#19517b;
   --red-main:#E63946;
@@ -7,6 +7,7 @@
   --card-bg:#ffffff;
   --text-main:#0f172a;
   --background-hover:#f5f7fb;
+  --border:#e5e7eb;
 }
 
 /* ================== Layout global ================== */
@@ -25,7 +26,6 @@
   margin-bottom:1.5rem;
   text-align:center;
 }
-
 .documents-header h1{
   position:absolute;
   left:50%;
@@ -37,11 +37,11 @@
 
 /* Carte utilisateur à droite */
 .user-info-card{
-  background:#e8e8e8;
-  border:2px solid var(--blue-main);
+  background:#f2f4f8;
+  border:1px solid var(--border);
   padding:1rem;
-  border-radius:8px;
-  box-shadow:0 4px 6px rgba(0,0,0,.1);
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.06);
   font-size:.9rem;
   display:flex;
   flex-direction:column;
@@ -81,11 +81,12 @@ h1{ color:var(--blue-main); text-align:center; }
 .kid-picker select{
   flex:1;
   padding:.55rem .65rem;
-  border:1px solid #ddd;
+  border:1px solid var(--border);
   border-radius:8px;
   font-size:1rem;
   box-sizing:border-box;
   appearance:none;
+  background:#fff;
 }
 .kid-picker select:focus{
   outline:none; border-color:var(--blue-main);
@@ -107,8 +108,9 @@ h1{ color:var(--blue-main); text-align:center; }
 .required-documents{
   background:var(--card-bg);
   padding:1.5rem;
-  border-radius:8px;
-  box-shadow:0 4px 6px rgba(0,0,0,.1);
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,.06);
+  border:1px solid var(--border);
 }
 .required-documents h2{ color:var(--blue-main); margin:0 0 1rem 0; }
 .required-documents .description{ color:var(--text-main); margin-bottom:1rem; }
@@ -119,11 +121,7 @@ h1{ color:var(--blue-main); text-align:center; }
   margin-bottom:.5rem; padding:.5rem .75rem; border-radius:6px;
 }
 
-/* États simples si tu utilises uploaded/not-uploaded */
-.required-documents li span.uploaded{ color:#166534; font-weight:bold; }
-.required-documents li span.not-uploaded{ color:#b45309; font-weight:bold; }
-
-/* Variante “chip” générique */
+/* Chips de statut */
 .status-chip{
   display:inline-flex; align-items:center; gap:.35rem; font-weight:700; font-size:.9rem;
   padding:.25rem .55rem; border-radius:999px; border:1px solid transparent;
@@ -149,8 +147,9 @@ h1{ color:var(--blue-main); text-align:center; }
 .upload-section{
   background:var(--card-bg);
   padding:1.5rem;
-  border-radius:8px;
-  box-shadow:0 4px 6px rgba(0,0,0,.1);
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,.06);
+  border:1px solid var(--border);
 }
 .upload-section h2{ color:var(--blue-main); margin:0 0 1rem 0; }
 .upload-section .description{ color:var(--text-main); margin-bottom:1rem; }
@@ -162,11 +161,12 @@ h1{ color:var(--blue-main); text-align:center; }
 .upload-section input[type="file"]{
   width:100%;
   padding:.55rem .65rem;
-  border:1px solid #ddd;
+  border:1px solid var(--border);
   border-radius:8px;
   font-size:1rem;
   box-sizing:border-box;
   appearance:none;
+  background:#fff;
 }
 .upload-section select:focus,
 .upload-section input[type="file"]:focus{
@@ -190,7 +190,8 @@ h1{ color:var(--blue-main); text-align:center; }
 
 .full-width-table{ width:100%; border-collapse:collapse; margin-top:1rem; }
 .full-width-table th, .full-width-table td{
-  padding:.75rem 1rem; text-align:left; border-bottom:1px solid #ddd;
+  padding:.75rem 1rem; text-align:left; border-bottom:1px solid var(--border);
+  vertical-align:middle;
 }
 .full-width-table th{
   background:var(--blue-main); color:#fff; font-weight:bold; text-transform:uppercase; letter-spacing:.02em;
@@ -201,14 +202,15 @@ h1{ color:var(--blue-main); text-align:center; }
   display:flex; gap:.5rem; justify-content:flex-start; flex-wrap:wrap;
 }
 
-/* Statuts (compat si tu utilises ces classes) */
-.badge-valid{ background:#dcfce7; color:#166534; }
-.badge-pending{ background:#ffedd5; color:#9a3412; }
-.badge-refused{ background:#fee2e2; color:#991b1b; }
+/* Colonne Aperçu compacte */
+.col-apercu{ width:120px; text-align:center; }
+.cell-apercu{ display:flex; align-items:center; gap:8px; }
 
-
-/* Badges colorés (utilisés dans le tableau) */
-.badge{ display:inline-flex; align-items:center; font-weight:800; padding:.25rem .55rem; border-radius:999px; }
+/* ================== Badges (UNIFIÉS) ================== */
+.badge{
+  display:inline-flex; align-items:center; font-weight:800;
+  padding:.25rem .55rem; border-radius:999px;
+}
 .badge-valid{ background:#ecfdf5; color:#166534; }
 .badge-pending{ background:#fff7ed; color:#b45309; }
 .badge-refused{ background:#fef2f2; color:#991b1b; }
@@ -223,25 +225,89 @@ h1{ color:var(--blue-main); text-align:center; }
 .btn-action:hover{ filter:brightness(.97); }
 .btn-action:active{ transform:translateY(1px); }
 .btn-action:disabled{ background:#ccc; color:#666; cursor:not-allowed; opacity:.6; }
-
 .btn-edit{ background:var(--blue-main); color:#fff; }
 .btn-edit:hover{ background:var(--blue-hover); }
 .btn-delete{ background:var(--red-main); color:#fff; }
 .btn-delete:hover{ background:var(--red-hover); }
 
-/* ================== Aperçu (image/PDF) ================== */
+/* ================== Boutons icône: Aperçu / Télécharger (liste & modale) ================== */
+.icon-btn,
+.btn-apercu{
+  width:36px; height:36px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  color:var(--blue-main);
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  cursor:pointer;
+  transition:transform .05s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
+  text-decoration:none;
+}
+.icon-btn i,
+.btn-apercu i{ font-size:18px; line-height:1; }
+.icon-btn:hover,
+.btn-apercu:hover{
+  background:var(--background-hover);
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  transform:translateY(-1px);
+}
+.icon-btn:focus-visible,
+.btn-apercu:focus-visible{
+  outline:3px solid rgba(30,96,145,.25);
+  outline-offset:2px;
+}
+
+/* ================== Modale Aperçu (style “gestion-documents”) ================== */
 .modal-overlay{
   position:fixed; inset:0; background:rgba(2,6,23,.6);
   display:flex; align-items:center; justify-content:center; z-index:1200; padding:16px;
 }
 .modal-content{
   background:#fff; border-radius:14px; box-shadow:0 10px 26px rgba(2,6,23,.08);
-  width:min(960px,100%); padding:1rem; position:relative;
+  width:min(980px,96vw); max-height:92vh; padding:1rem; position:relative;
+  display:flex; flex-direction:column; gap:12px;
+  border:1px solid var(--border);
+}
+
+/* Barre d’actions en haut à droite (ouvrir / télécharger / fermer) */
+.modal-top-actions{
+  position:absolute; top:10px; right:10px;
+  display:flex; align-items:center; gap:.5rem;
 }
 .close-button{
-  position:absolute; right:10px; top:10px; background:transparent; border:none; font-size:1.6rem; cursor:pointer;
+  width:36px; height:36px;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:#fff; border:1px solid var(--border); border-radius:999px;
+  font-size:1.6rem; line-height:1; cursor:pointer;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  transition:background .15s ease, transform .05s ease, box-shadow .15s ease;
 }
-.btn-apercu{
-  background:none; border:none; color:var(--blue-main); cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:6px;
+.close-button:hover{ background:var(--background-hover); box-shadow:0 2px 8px rgba(0,0,0,.08); transform:translateY(-1px); }
+.close-button:focus-visible{ outline:3px solid rgba(30,96,145,.25); outline-offset:2px; }
+
+/* Zone d’aperçu */
+.preview-image{
+  width:100%; height:auto; max-height:74vh;
+  object-fit:contain; border-radius:8px; border:1px solid var(--border);
 }
-.btn-apercu:hover{ text-decoration:underline; }
+.preview-frame{
+  width:100%; height:74vh; border:1px solid var(--border); border-radius:8px; background:#fff;
+}
+
+/* Actions en bas (si jamais utilisées) */
+.modal-actions{
+  margin-top:.25rem;
+  display:flex; gap:.5rem; justify-content:flex-end; flex-wrap:wrap;
+}
+
+/* ================== Petites améliorations ================== */
+.full-width-table th:nth-child(2),
+.full-width-table td:nth-child(2){ text-align:center; }
+.full-width-table td a, .full-width-table td button { white-space:nowrap; }
+
+/* Responsive modale */
+@media (max-width:640px){
+  .preview-frame { height:68vh; }
+  .preview-image { max-height:68vh; }
+}

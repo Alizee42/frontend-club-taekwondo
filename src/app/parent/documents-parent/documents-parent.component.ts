@@ -54,7 +54,7 @@ const DOC_CATALOG: Array<{ code: string; label: string; aliases?: string[] }> = 
     aliases: ["PHOTO D'IDENTITE", 'PHOTO_IDENTITÉ', 'PHOTO', 'PHOTOGRAPHIE', "PHOTO D'IDENTITÉ"]
   },
   {
-    code: 'DOCUMENT_IDENTITE', // CNI / passeport
+    code: 'DOCUMENT_IDENTITE',
     label: "Document d'identité",
     aliases: [
       'PIECE_IDENTITE', "PIÈCE D'IDENTITÉ", 'CARTE_IDENTITE', "CARTE D'IDENTITÉ",
@@ -69,10 +69,8 @@ const LABEL_BY_CODE: Record<string, string> =
 function unifyType(input: any): string {
   const raw = String(input || '').trim();
   if (!raw) return raw;
-  // Code exact
   if (DOC_CATALOG.some(t => t.code === raw)) return raw;
 
-  // Normalisation (accents/espaces/casse)
   const norm = raw
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().replace(/[\s'’_-]+/g, '');
@@ -87,7 +85,7 @@ function unifyType(input: any): string {
       return t.code;
     }
   }
-  return raw; // inconnu → on garde tel quel
+  return raw;
 }
 
 function labelFor(code: string) {
@@ -110,7 +108,7 @@ export class DocumentsParentComponent implements OnInit {
   enfants: Enfant[] = [];
   selectedKidId: string | number | null = null;
 
-  // Référentiel des documents requis (UNIQUEMENT ces 3 types)
+  // Référentiel des documents requis
   requiredDocuments: RequiredDoc[] = DOC_CATALOG.map(t => ({
     type: t.code,
     label: t.label,
@@ -127,7 +125,7 @@ export class DocumentsParentComponent implements OnInit {
   // Aperçu
   previewing: DocumentItem | null = null;
 
-  // Expose helper au template (pour afficher les labels humains)
+  // Expose helper au template
   labelFor = labelFor;
 
   constructor(
@@ -141,10 +139,8 @@ export class DocumentsParentComponent implements OnInit {
 
   // =================== LOAD ===================
   private loadParentAndKids(): void {
-    console.log("Chargement des informations de l'utilisateur connecté...");
     this.http.get<any>(`${this.API_BASE}/utilisateurs/me`, { headers: this.getAuthHeaders() }).subscribe({
       next: (u: any) => {
-        console.log('Utilisateur connecté:', u);
         this.utilisateurConnecte = {
           id: u?.id ?? u?._id ?? u?.uuid,
           nom: (u?.nom ?? '').trim(),
@@ -154,7 +150,6 @@ export class DocumentsParentComponent implements OnInit {
         };
 
         if (this.utilisateurConnecte.role !== 'PARENT') {
-          console.log('Utilisateur non parent, réinitialisation des enfants et documents');
           this.enfants = [];
           this.selectedKidId = null;
           this.documents = [];
@@ -162,10 +157,9 @@ export class DocumentsParentComponent implements OnInit {
           return;
         }
 
-        // ✅ Enfants du parent connecté (déduit du JWT côté backend)
+        // Enfants du parent connecté
         this.http.get<any>(`${this.API_BASE}/membres/mes-enfants`, { headers: this.getAuthHeaders() }).subscribe({
           next: (res: any) => {
-            console.log('Enfants (mes-enfants):', res);
             const arr: any[] = Array.isArray(res) ? res
               : Array.isArray(res?.items) ? res.items
               : Array.isArray(res?.data) ? res.data
@@ -179,12 +173,9 @@ export class DocumentsParentComponent implements OnInit {
               numeroLicence: (m?.numeroLicence || '') || undefined,
             }));
 
-            // Sélection automatique du premier enfant si aucun sélectionné
             if (!this.selectedKidId && this.enfants.length > 0) {
               this.selectedKidId = this.enfants[0].id;
             }
-            console.log('Enfant sélectionné:', this.selectedKidId);
-
             if (this.selectedKidId != null) {
               this.loadDocumentsForKid(String(this.selectedKidId));
             } else {
@@ -192,8 +183,7 @@ export class DocumentsParentComponent implements OnInit {
               this.refreshRequiredUploaded();
             }
           },
-          error: (err) => {
-            console.error('Erreur lors du chargement des enfants:', err);
+          error: () => {
             this.enfants = [];
             this.selectedKidId = null;
             this.documents = [];
@@ -201,8 +191,7 @@ export class DocumentsParentComponent implements OnInit {
           }
         });
       },
-      error: (err) => {
-        console.error("Erreur lors du chargement de l'utilisateur:", err);
+      error: () => {
         this.utilisateurConnecte = null;
         this.enfants = [];
         this.selectedKidId = null;
@@ -222,7 +211,6 @@ export class DocumentsParentComponent implements OnInit {
   }
 
   onSelectKid(): void {
-    console.log("Sélection de l'enfant:", this.selectedKidId);
     if (this.selectedKidId == null) {
       this.documents = [];
       this.refreshRequiredUploaded();
@@ -232,15 +220,8 @@ export class DocumentsParentComponent implements OnInit {
   }
 
   private loadDocumentsForKid(kidId: string): void {
-    console.log("Chargement des documents pour l'enfant ID:", kidId);
     this.http.get<any>(`${this.API_BASE}/documents/membre/${kidId}`, { headers: this.getAuthHeaders() }).subscribe({
       next: (res: any) => {
-        console.log('Documents chargés:', res);
-        if (res == null) {
-          this.documents = [];
-          this.refreshRequiredUploaded();
-          return;
-        }
         const arr: any[] = Array.isArray(res) ? res
           : Array.isArray(res?.items) ? res.items
           : Array.isArray(res?.data) ? res.data
@@ -250,8 +231,7 @@ export class DocumentsParentComponent implements OnInit {
         this.documents = arr.map(this.mapDoc);
         this.refreshRequiredUploaded();
       },
-      error: (err) => {
-        console.error('Erreur lors du chargement des documents:', err);
+      error: () => {
         this.documents = [];
         this.refreshRequiredUploaded();
       }
@@ -259,7 +239,6 @@ export class DocumentsParentComponent implements OnInit {
   }
 
   private mapDoc = (d: any): DocumentItem => {
-    console.log('Mapping du document:', d);
     return {
       id: d?.id ?? d?._id ?? d?.uuid,
       typeDocument: unifyType(d?.typeDocument ?? d?.type ?? ''),
@@ -274,7 +253,6 @@ export class DocumentsParentComponent implements OnInit {
   };
 
   private normalizeStatus(s: any): StatutDoc {
-    console.log('Normalisation du statut:', s);
     const v = String(s || '').toLowerCase();
     if (['valide', 'validé', 'validee', 'validée', 'approved'].includes(v)) return 'validé';
     if (['pending', 'en_attente', 'en attente', 'attente'].includes(v)) return 'en_attente';
@@ -283,40 +261,39 @@ export class DocumentsParentComponent implements OnInit {
   }
 
   private refreshRequiredUploaded(): void {
-    console.log('Rafraîchissement des documents requis et uploadés');
     const set = new Set(this.documents.map(d => unifyType(d.typeDocument)));
-    this.requiredDocuments = this.requiredDocuments.map(r => ({ ...r, uploaded: set.has(r.type) }));
+    this.requiredDocuments = DOC_CATALOG.map(t => ({
+      type: t.code,
+      label: t.label,
+      uploaded: set.has(t.code)
+    }));
   }
 
   // =================== UPLOAD ===================
   onFileSelected(ev: Event): void {
     const input = ev.target as HTMLInputElement;
     this.selectedFile = (input?.files && input.files.length > 0) ? input.files[0] : null;
-    console.log('Fichier sélectionné:', this.selectedFile);
   }
 
   isValidFile(file: File | null): boolean {
     if (!file) return false;
     const okType = /\.(pdf|png|jpe?g)$/i.test(file.name);
     const okSize = file.size <= 5 * 1024 * 1024; // 5 Mo
-    console.log('Validation du fichier:', okType, okSize);
     return okType && okSize;
   }
 
   onUploadDocumentForKid(): void {
-    console.log("Upload du document pour l'enfant ID:", this.selectedKidId);
     if (!this.selectedKidId || !this.documentType || !this.selectedFile || !this.isValidFile(this.selectedFile)) return;
     if (!this.utilisateurConnecte?.id) return;
 
     const fd = new FormData();
-    fd.append('typeDocument', this.documentType); // code catalogue (ex: DOCUMENT_IDENTITE)
-    fd.append('file', this.selectedFile);        // IMPORTANT: clé "file"
-    fd.append('utilisateurId', String(this.utilisateurConnecte.id)); // id du parent
-    fd.append('membreId', String(this.selectedKidId));               // id de l'enfant
+    fd.append('typeDocument', this.documentType);
+    fd.append('file', this.selectedFile); // clé backend: "file"
+    fd.append('utilisateurId', String(this.utilisateurConnecte.id));
+    fd.append('membreId', String(this.selectedKidId));
 
     this.http.post<any>(`${this.API_BASE}/documents`, fd, { headers: this.getAuthHeaders() }).subscribe({
       next: (created: any) => {
-        console.log('Document créé:', created);
         const doc = this.mapDoc(created);
         if (!doc.id) {
           (doc as any).id = `tmp_${Date.now()}`;
@@ -328,9 +305,7 @@ export class DocumentsParentComponent implements OnInit {
         this.selectedFile = null;
         this.refreshRequiredUploaded();
       },
-      error: (err) => {
-        console.error("Erreur lors de l'upload du document", err);
-      }
+      error: () => {}
     });
   }
 
@@ -346,16 +321,15 @@ export class DocumentsParentComponent implements OnInit {
       if (!file || !this.isValidFile(file)) return;
 
       const fd = new FormData();
-      fd.append('file', file); // ✅ clé correcte
+      fd.append('file', file);
 
       this.http.put<any>(`${this.API_BASE}/documents/${doc.id}/file`, fd, { headers: this.getAuthHeaders() }).subscribe({
         next: (updated: any) => {
-          console.log('Document mis à jour:', updated);
           const mapped = this.mapDoc(updated);
           this.documents = this.documents.map(d => d.id === doc.id ? mapped : d);
           this.refreshRequiredUploaded();
         },
-        error: (err) => { console.error('Erreur lors de la mise à jour du document', err); }
+        error: () => {}
       });
     };
     input.click();
@@ -368,12 +342,11 @@ export class DocumentsParentComponent implements OnInit {
 
     this.http.delete(`${this.API_BASE}/documents/${doc.id}`, { observe: 'response', headers: this.getAuthHeaders() }).subscribe({
       next: () => {
-        console.log('Document supprimé:', doc.id);
         this.documents = this.documents.filter(d => d.id !== doc.id);
         this.refreshRequiredUploaded();
       },
-      error: (err) => {
-        console.error('Erreur lors de la suppression du document', err);
+      error: () => {
+        // on retire quand même en cas d'erreur côté affichage
         this.documents = this.documents.filter(d => d.id !== doc.id);
         this.refreshRequiredUploaded();
       }
@@ -392,22 +365,20 @@ export class DocumentsParentComponent implements OnInit {
   getDocumentStatusInfo(type: string): { state: 'validé' | 'refusé' | 'en_attente', text: string, tooltip?: string } {
     const code = unifyType(type);
     const docs = this.documents.filter(d => unifyType(d.typeDocument) === code);
-  
+
     const hasValid = docs.some(d => this.normalizeStatus(d.status) === 'validé');
     const hasRefused = docs.some(d => this.normalizeStatus(d.status) === 'refusé');
     const hasPending = docs.some(d => this.normalizeStatus(d.status) === 'en_attente');
-  
+
     if (hasValid) return { state: 'validé', text: 'Validé' };
     if (hasRefused) {
       const refused = docs.find(d => this.normalizeStatus(d.status) === 'refusé');
       return { state: 'refusé', text: 'Refusé', tooltip: refused?.commentaire || 'Document refusé' };
     }
     if (hasPending) return { state: 'en_attente', text: 'En attente' };
-  
-    // Aucun document fourni -> rouge
+
     return { state: 'refusé', text: 'Non transmis' };
   }
-  
 
   onPreview(doc: DocumentItem): void {
     this.previewing = doc;
@@ -420,12 +391,59 @@ export class DocumentsParentComponent implements OnInit {
   isImage(name: string): boolean {
     return /\.(png|jpe?g)$/i.test(name || '');
   }
-
-  getSafeUrl(path: string): SafeResourceUrl {
-    const url = this.toAbsoluteUrl(path);
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  isImagePath(path?: string): boolean {
+    return !!path && /\.(png|jpe?g|gif|bmp|webp)$/i.test(path);
   }
 
+  // =================== URLS (aperçu / téléchargement) ===================
+  private encodeLastSegment(p: string): string {
+    // conserve ?query et #hash, encode uniquement le dernier segment du chemin
+    const q = p.indexOf('?');
+    const h = p.indexOf('#');
+    const cut = (q === -1) ? h : (h === -1 ? q : Math.min(q, h));
+    const base = cut === -1 ? p : p.slice(0, cut);
+    const suffix = cut === -1 ? '' : p.slice(cut);
+
+    const parts = base.split('/');
+    const last = parts.pop() || '';
+    parts.push(encodeURIComponent(last));
+    return parts.join('/') + suffix;
+  }
+
+  private buildUrl(path?: string): string {
+    if (!path) return '';
+    let p = String(path).trim();
+
+    // URL absolue => on encode juste le nom de fichier
+    if (/^https?:\/\//i.test(p)) return this.encodeLastSegment(p);
+
+    // normalise './', '//'...
+    p = p.replace(/^\.?\/+/, '');
+
+    // "documents/xxx" -> "uploads/documents/xxx"
+    if (p.startsWith('documents/')) p = `uploads/${p}`;
+
+    // si pas de "uploads/", force "uploads/documents/"
+    if (!p.startsWith('uploads/')) p = `uploads/documents/${p}`;
+
+    // préfixes requis
+    if (!p.startsWith('/')) p = `/${p}`;
+    if (!p.startsWith('/api/')) p = `/api${p}`;
+
+    return this.encodeLastSegment(p);
+  }
+
+  /** URL pour les balises sécurisées (iframe/object/img) */
+  getSafeUrl(path: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.buildUrl(path));
+  }
+
+  /** URL brute pour <a> (ouvrir/télécharger) */
+  rawUrl(path?: string): string {
+    return this.buildUrl(path);
+  }
+
+  /** (fallback simple si tu en as besoin ailleurs) */
   private toAbsoluteUrl(path: string): string {
     if (!path) return '';
     if (/^https?:\/\//i.test(path)) return path;

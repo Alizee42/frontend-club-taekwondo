@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MembreService } from '../../services/membre.service'; // ✅ import service
+import { FormsModule } from '@angular/forms';  // Import FormsModule pour ngModel
 
 @Component({
   selector: 'app-connexion',
   templateUrl: './connexion.component.html',
   styleUrls: ['./connexion.component.css'],
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  standalone: true,  // Indiquer que ce composant est standalone
+  imports: [FormsModule],  // Ajouter FormsModule dans les imports
 })
 export class ConnexionComponent {
   email: string = '';
@@ -22,12 +21,14 @@ export class ConnexionComponent {
     private membreService: MembreService
   ) {}
 
+  // Soumission du formulaire de connexion
   onSubmit(): void {
     console.log('🔑 Tentative de connexion avec :', {
       email: this.email,
       password: this.password,
     });
 
+    // Vérifications de validation des champs
     if (!this.email || !this.password) {
       alert('Veuillez remplir correctement tous les champs.');
       return;
@@ -38,11 +39,13 @@ export class ConnexionComponent {
       return;
     }
 
+    // Préparation des données de connexion
     const loginData = {
       email: this.email,
       password: this.password,
     };
 
+    // Envoi des données de connexion au backend
     this.http
       .post<any>('/api/utilisateurs/login', loginData)
       .subscribe({
@@ -64,6 +67,7 @@ export class ConnexionComponent {
             return;
           }
 
+          // Stockage des données utilisateur dans le localStorage
           this.storeUserData(token, role, utilisateur);
         },
         error: (err) => {
@@ -73,6 +77,7 @@ export class ConnexionComponent {
       });
   }
 
+  // Stockage des données de l'utilisateur après une connexion réussie
   private storeUserData(token: string, role: string, utilisateur: any): void {
     console.log('📥 Stockage du token, rôle et utilisateur dans le localStorage');
 
@@ -84,7 +89,7 @@ export class ConnexionComponent {
         localStorage.setItem('email', utilisateur.email);
       }
 
-      // ✅ Appel à /api/membres/me au lieu de /utilisateur/{id}
+      // Appel au service pour récupérer les informations du membre
       this.membreService.getMembreConnecte().subscribe({
         next: (membre) => {
           if (membre?.id) {
@@ -105,7 +110,9 @@ export class ConnexionComponent {
     }
   }
 
+  // Redirection après connexion en fonction du rôle
   private redirectBasedOnRole(role: string): void {
+    const redirectUrl = this.router.url.includes('connexion') ? '/' : this.router.url; // Redirection conditionnelle
     switch (role) {
       case 'ADMIN':
         console.log('➡️ Redirection vers /admin/dashboard-admin');
@@ -126,6 +133,7 @@ export class ConnexionComponent {
     }
   }
 
+  // Gestion des erreurs de connexion
   private handleError(err: any): void {
     console.error('📛 Erreur de connexion détectée :', err);
 
@@ -136,6 +144,7 @@ export class ConnexionComponent {
     }
   }
 
+  // Validation de l'email avec une regex
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);

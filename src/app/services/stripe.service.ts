@@ -1,6 +1,12 @@
+// src/app/services/stripe.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { loadStripe, Stripe } from '@stripe/stripe-js';
+import {
+  loadStripe,
+  Stripe,
+  StripeCardElement,
+  StripeElements,
+} from '@stripe/stripe-js';
 import { firstValueFrom } from 'rxjs';
 
 type CreatePiByPaiementId = {
@@ -10,8 +16,8 @@ type CreatePiByPaiementId = {
 };
 
 type CreatePiByAmount = {
-  amount: number;
-  currency: string;
+  amount: number;   // en cents, ex: 2500 = 25,00 €
+  currency: string; // ex: 'eur'
   typePaiement?: string;
   modePaiement?: string;
   customerEmail?: string;
@@ -26,102 +32,155 @@ type CreatePiResponse = {
 
 @Injectable({ providedIn: 'root' })
 export class StripeService {
-  private stripePromise: Promise<Stripe | null>;
-  /**
-   * Si tu utilises le proxy Angular (proxy.conf.json -> /api -> http://localhost:8080),
-   * garde '/api/stripe'. Sinon, mets 'http://localhost:8080/api/stripe'.
-   */
-  private backendUrl = '/api/stripe';
+  private readonly backendUrl = '/api/stripe';
 
-  public cardElement: any;               // utilisé par le composant
+  private stripe: Stripe | null = null;
+  private elements: StripeElements | null = null;
+  private publicKeyPromise: Promise<string> | null = null;
+
+  public cardElement: StripeCardElement | null = null;
   public clientSecret: string | null = null;
 
-  constructor(private http: HttpClient) {
-    this.stripePromise = loadStripe('pk_test_51QY3k3Bruaz5mgsEvMmjKUl3R9Q98EqJ2twVTYOVi9nPBrcfVexwtOpSkELyoMAzN0jOf2MvNVM9F9X8O3E2O9JE00YryVYFdp');
+  constructor(private http: HttpClient) {}
+
+  // ---------- INIT Stripe ----------
+
+  /** Récupère et met en cache la clé publique Stripe depuis le backend */
+  private getPublicKey(): Promise<string> {
+    if (!this.publicKeyPromise) {
+      this.publicKeyPromise = firstValueFrom(
+        this.http.get<{ publicKey: string }>(`${this.backendUrl}/public-key`)
+      ).then(r => r.publicKey);
+    }
+    return this.publicKeyPromise;
   }
 
-  getStripeInstance(): Promise<Stripe | null> {
-    return this.stripePromise;
+  /** Initialise Stripe une fois, puis réutilise l'instance */
+  async ensureStripe(): Promise<Stripe> {
+    if (this.stripe) return this.stripe;
+    const pk = await this.getPublicKey();
+    const stripe = await loadStripe(pk);
+    if (!stripe) throw new Error('Stripe non initialisé (clé publique invalide ?)');
+    this.stripe = stripe;
+    return stripe;
   }
 
-  // -------- API BACKEND --------
+  /** Compat: garde l’ancienne signature utilisée par tes composants */
+  getStripeInstance(): Promise<Stripe> {
+    return this.ensureStripe();
+  }
+
+  // ---------- API BACKEND ----------
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token') ?? '';
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+  }
 
   /**
-   * Crée (ou réutilise si confirmable) un PaymentIntent côté backend.
-   * Le backend actuel attend { paiementId, ... }.
-   * On autorise aussi un payload "amount/currency" côté TS pour compiler,
-   * mais on lève une erreur explicite si paiementId est absent.
+   * Crée un PaymentIntent côté backend.
+   * ⚠️ Ton endpoint actuel attend { paiementId }. Si tu veux payer “au montant”,
+   * expose aussi un endpoint /create-payment-intent-by-amount côté backend.
    */
   async createPaymentIntent(paiementData: CreatePiPayload): Promise<CreatePiResponse> {
-    // Garde runtime: ton endpoint /api/stripe/create-payment-intent côté Spring exige un paiementId
     if (!('paiementId' in paiementData)) {
       throw new Error(
         'createPaymentIntent: payload sans "paiementId". ' +
-        'Le backend /api/stripe/create-payment-intent attend { paiementId, echeanceId?, customerEmail? }. ' +
-        'Crée d’abord le paiement en BDD pour obtenir un paiementId, ' +
-        'ou expose un endpoint boutique dédié acceptant { amount, currency, ... }.'
+        'Ton backend /api/stripe/create-payment-intent attend { paiementId, ... }. ' +
+        'Soit crée la commande pour obtenir un paiementId, soit implémente un endpoint “by-amount”.'
       );
     }
 
-    const token = localStorage.getItem('token') ?? '';
-    const headers: HttpHeaders = new HttpHeaders(
-      token ? { Authorization: `Bearer ${token}` } : {}
+    const res = await firstValueFrom(
+      this.http.post<CreatePiResponse>(
+        `${this.backendUrl}/create-payment-intent`,
+        paiementData,
+        { headers: this.getAuthHeaders() }
+      )
     );
 
-    const obs$ = this.http.post<CreatePiResponse>(
-      `${this.backendUrl}/create-payment-intent`,
-      paiementData,
-      { headers }
-    );
-
-    const res = await firstValueFrom(obs$);
-    // on stocke le clientSecret pour confirmCardPayment
-    if (res?.clientSecret) this.clientSecret = res.clientSecret;
+    this.clientSecret = res?.clientSecret || null;
     return res;
   }
 
-  // -------- STRIPE ELEMENTS --------
+  /** Optionnel si tu crées l’endpoint by-amount côté backend */
+  async createPaymentIntentByAmount(data: CreatePiByAmount): Promise<CreatePiResponse> {
+    const res = await firstValueFrom(
+      this.http.post<CreatePiResponse>(
+        `${this.backendUrl}/create-payment-intent-by-amount`,
+        data,
+        { headers: this.getAuthHeaders() }
+      )
+    );
+    this.clientSecret = res?.clientSecret || null;
+    return res;
+  }
 
-  /** Monte le Card Element dans un sélecteur CSS (ex: '#stripe-card') */
-  async monterElementDans(selector: string) {
-    const stripe = await this.stripePromise;
-    if (!stripe) {
-      console.error('Stripe non initialisé');
-      return;
-    }
+  // ---------- STRIPE ELEMENTS ----------
 
-    // démonter l’élément précédent si existant
+  /** Monte le Card Element dans un sélecteur (ex: '#stripe-card') */
+  async monterElementDans(selector: string): Promise<void> {
+    const stripe = await this.ensureStripe();
+
+    // (re)crée les elements avec locale FR
+    this.elements = stripe.elements({ locale: 'fr' });
+
+    // démonte l’éventuel précédent
     if (this.cardElement) {
       try { this.cardElement.unmount(); } catch {}
       this.cardElement = null;
     }
 
-    const elements = stripe.elements();
-    this.cardElement = elements.create('card');
-    this.cardElement.mount(selector);
+    const card = this.elements.create('card', { hidePostalCode: true });
+    card.mount(selector);
+    this.cardElement = card;
 
-    // Optionnel : gestion des erreurs de saisie
-    this.cardElement.on('change', (event: any) => {
-      if (event.error) {
-        console.error("Erreur dans l'élément de carte :", event.error.message);
-      }
+    card.on('change', (event) => {
+      if (event.error) console.error('[Stripe] Erreur saisie:', event.error.message);
     });
   }
 
-  /** Confirme le paiement côté Stripe.js avec le clientSecret renvoyé par le backend */
-  async confirmerPaiement(): Promise<{ success: boolean; message: string }> {
-    const stripe = await this.stripePromise;
-    if (!stripe) return { success: false, message: 'Stripe non initialisé' };
+  /** À appeler dans ngOnDestroy du composant */
+  unmount(): void {
+    if (this.cardElement) {
+      try { this.cardElement.unmount(); } catch {}
+      this.cardElement = null;
+    }
+    this.elements = null;
+  }
+
+  setClientSecret(clientSecret: string | null): void {
+    this.clientSecret = clientSecret;
+  }
+
+  /** Confirme le paiement avec Stripe.js */
+  async confirmerPaiement(): Promise<{
+    success: boolean;
+    status?: string;
+    paymentIntentId?: string;
+    message?: string;
+  }> {
+    const stripe = await this.ensureStripe();
     if (!this.cardElement) return { success: false, message: 'Élément carte non monté' };
     if (!this.clientSecret) return { success: false, message: 'Client secret manquant' };
 
-    const { error } = await stripe.confirmCardPayment(this.clientSecret, {
+    const result = await stripe.confirmCardPayment(this.clientSecret, {
       payment_method: { card: this.cardElement },
     });
 
-    if (error) {
-      return { success: false, message: error.message ?? 'Erreur inconnue' };
+    if (result.error) {
+      return { success: false, message: result.error.message || 'Paiement refusé' };
     }
-    return { success: true, message: '' };
+
+    const pi = result.paymentIntent;
+    const status = pi?.status;
+
+    if (status === 'succeeded' || status === 'processing') {
+      return { success: true, status, paymentIntentId: pi?.id };
+    }
+    if (status === 'requires_action') {
+      return { success: false, status, message: 'Action supplémentaire requise.' };
+    }
+    return { success: false, status, message: 'Paiement non confirmé.' };
   }
 }

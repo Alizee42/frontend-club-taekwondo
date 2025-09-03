@@ -18,13 +18,15 @@
   <div class="kid-picker" *ngIf="enfants?.length">
     <label for="kidSelect">Sélectionner l’enfant :</label>
     <select id="kidSelect" [(ngModel)]="selectedKidId" (change)="onSelectKid()">
+      <option [ngValue]="null" disabled selected hidden>Sélectionnez un enfant </option>
       <option *ngFor="let e of enfants" [value]="e.id">
-        {{ e.prenom }} {{ e.nom }} <ng-container *ngIf="e.numeroLicence">— #{{ e.numeroLicence }}</ng-container>
+        {{ e.prenom }} {{ e.nom }}
+        <ng-container *ngIf="e.numeroLicence">— #{{ e.numeroLicence }}</ng-container>
       </option>
     </select>
   </div>
-  <p class="intro" *ngIf="!enfants?.length">Aucun enfant lié à ce compte.</p>
 
+  <p class="intro" *ngIf="!enfants?.length">Aucun enfant lié à ce compte.</p>
   <p class="intro" *ngIf="enfants?.length">Ajoutez les documents obligatoires pour l’enfant sélectionné.</p>
 
   <div class="documents-grid" *ngIf="selectedKidId">
@@ -36,10 +38,8 @@
         <li *ngFor="let doc of requiredDocuments">
           <span>{{ doc.label }}</span>
           <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
-            <span class="status-chip"
-                  [class.ok]="statusInfo.state==='validé'"
-                  [class.wait]="statusInfo.state==='en_attente'"
-                  [class.ko]="statusInfo.state==='refusé'">
+            <span class="status-chip" [class.ok]="statusInfo.state==='validé'"
+              [class.wait]="statusInfo.state==='en_attente'" [class.ko]="statusInfo.state==='refusé'">
               <i class="ri-check-line" *ngIf="statusInfo.state==='validé'"></i>
               <i class="ri-time-line" *ngIf="statusInfo.state==='en_attente'"></i>
               <i class="ri-close-line" *ngIf="statusInfo.state==='refusé'"></i>
@@ -60,6 +60,7 @@
         <div class="form-group">
           <label for="documentType">Type de document :</label>
           <select id="documentType" [(ngModel)]="documentType" name="documentType" required>
+            <option [ngValue]="null" disabled selected hidden>Sélectionnez un document</option>
             <option *ngFor="let doc of requiredDocuments" [value]="doc.type" [disabled]="doc.uploaded">
               {{ doc.label }}
             </option>
@@ -68,18 +69,15 @@
 
         <div class="form-group">
           <label for="documentFile">Fichier :</label>
-          <input id="documentFile"
-                 type="file"
-                 (change)="onFileSelected($event)"
-                 accept=".pdf,.png,.jpg,.jpeg"
-                 required />
+          <input id="documentFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.png,.jpg,.jpeg"
+            required />
           <small class="error-message" *ngIf="selectedFile && !isValidFile(selectedFile)">
             Type ou taille de fichier invalide. Fichier PNG, JPEG ou PDF &lt; 5 Mo.
           </small>
         </div>
 
         <button type="submit" class="btn-upload"
-                [disabled]="!selectedKidId || !documentType || !selectedFile || !isValidFile(selectedFile)">
+          [disabled]="!selectedKidId || !documentType || !selectedFile || !isValidFile(selectedFile)">
           Téléverser
         </button>
       </form>
@@ -92,23 +90,32 @@
         <thead>
           <tr>
             <th>Type</th>
-            <th>Nom du fichier</th>
+            <th style="width:120px;">Aperçu</th>
             <th>Statut</th>
             <th>Date</th>
             <th>Actions</th>
           </tr>
         </thead>
+
         <tbody>
           <tr *ngFor="let document of documents">
             <td>{{ labelFor(document.typeDocument) }}</td>
+
+            <!-- APERÇU = 2 icônes (voir + télécharger), pas de nom de fichier -->
             <td>
-              <button class="btn-apercu" type="button" (click)="onPreview(document)">
-                <i class="ri-search-line" aria-hidden="true"></i> {{ document.nomDocument }}
+              <button class="btn-apercu" type="button" title="Aperçu" aria-label="Aperçu" (click)="onPreview(document)">
+                <i class="ri-eye-line" aria-hidden="true"></i>
               </button>
+
+              <a class="btn-apercu" title="Télécharger" aria-label="Télécharger"
+                [attr.href]="document?.cheminFichier ? rawUrl(document.cheminFichier) : null" [attr.download]="''"
+                rel="noopener">
+                <i class="ri-download-2-line" aria-hidden="true"></i>
+              </a>
             </td>
+
             <td>
-              <span class="badge"
-                    [ngClass]="{
+              <span class="badge" [ngClass]="{
                       'badge-valid': document.status === 'validé',
                       'badge-pending': document.status === 'en_attente',
                       'badge-refused': document.status === 'refusé'
@@ -116,16 +123,16 @@
                 {{ getStatusText(document.status) }}
               </span>
             </td>
+
             <td>{{ document.dateDepot | date:'dd/MM/yyyy' }}</td>
+
             <td>
-              <button class="btn-action btn-edit" type="button"
-                      title="Modifier" aria-label="Modifier"
-                      (click)="onEditDocument(document)" [disabled]="document.status==='validé'">
+              <button class="btn-action btn-edit" type="button" title="Modifier" aria-label="Modifier"
+                (click)="onEditDocument(document)" [disabled]="document.status==='validé'">
                 Modifier
               </button>
-              <button class="btn-action btn-delete" type="button"
-                      title="Supprimer" aria-label="Supprimer"
-                      (click)="onDeleteDocument(document)" [disabled]="document.status==='validé'">
+              <button class="btn-action btn-delete" type="button" title="Supprimer" aria-label="Supprimer"
+                (click)="onDeleteDocument(document)" [disabled]="document.status==='validé'">
                 Supprimer
               </button>
             </td>
@@ -133,17 +140,43 @@
         </tbody>
       </table>
 
-      <!-- Aperçu (image ou PDF) -->
+      <!-- Modale d'aperçu : image/PDF + actions Ouvrir / Télécharger -->
+      <!-- Modale d'aperçu : image/PDF + actions Ouvrir / Télécharger -->
       <div class="modal-overlay" *ngIf="previewing" (click)="closePreview()">
-        <div class="modal-content" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-label="Aperçu du document"
+          (click)="$event.stopPropagation()">
           <button class="close-button" type="button" (click)="closePreview()">×</button>
+
+          <!-- IMAGE -->
           <ng-container *ngIf="isImage(previewing.nomDocument); else pdfBlock">
-            <img [src]="getSafeUrl(previewing.cheminFichier)" alt="Aperçu image"
-                 style="max-height:70vh;width:100%;object-fit:contain;">
+            <img [attr.src]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" alt="Aperçu image"
+              style="max-height:70vh;width:100%;object-fit:contain;">
           </ng-container>
+
+          <!-- PDF -->
           <ng-template #pdfBlock>
-            <iframe [src]="getSafeUrl(previewing.cheminFichier)" width="100%" height="600"></iframe>
+            <object [data]="getSafeUrl(previewing.cheminFichier)" type="application/pdf" width="100%" height="600">
+              <p>
+                Impossible d’afficher le PDF.
+                <a [attr.href]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" target="_blank"
+                  rel="noopener">Ouvrir dans un onglet</a>.
+              </p>
+            </object>
           </ng-template>
+
+          <!-- Actions modale -->
+          <div class="modal-actions" style="margin-top:.75rem; display:flex; gap:.5rem; justify-content:flex-end;">
+            <a class="btn-action btn-edit"
+              [attr.href]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" target="_blank"
+              rel="noopener">
+              Ouvrir dans un onglet
+            </a>
+            <a class="btn-action btn-edit"
+              [attr.href]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" [attr.download]="''"
+              rel="noopener">
+              Télécharger
+            </a>
+          </div>
         </div>
       </div>
     </div>

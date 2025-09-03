@@ -1,43 +1,67 @@
 <div class="boutique-container">
   <h2>Boutique - Dobok Taekwondo</h2>
 
-  <div class="produit">
+  <div class="produit" *ngFor="let p of produits">
     <div class="produit-image-container">
-      <img src="assets/images/dobok.jpg" alt="Dobok Taekwondo" class="produit-image">
+      <img [src]="p.imageUrl" [alt]="p.nom" class="produit-image" />
     </div>
 
     <div class="produit-info">
-      <h3>Dobok Taekwondo</h3>
-      <p>Tenue blanche officielle en coton pour la pratique du Taekwondo.</p>
-      <p class="prix-base">Prix : <strong>30 €</strong></p>
+      <h3>{{ p.nom }}</h3>
+      <p>{{ p.description }}</p>
+      <p class="prix-base">Prix : <strong>{{ p.prixBase | number:'1.2-2' }} €</strong></p>
 
       <div class="options">
+        <!-- Taille -->
         <div class="option">
-          <label for="taille">Taille :</label>
-          <select id="taille" (change)="updatePrixTotal()">
-            <option value="">-- Sélectionnez --</option>
-            <option value="120">120 cm</option>
-            <option value="130">130 cm</option>
-            <option value="140">140 cm</option>
-            <option value="150">150 cm</option>
-            <option value="160">160 cm</option>
+          <label [for]="'taille-' + p.id">Taille :</label>
+          <select
+            [id]="'taille-' + p.id"
+            [(ngModel)]="selections[p.id].taille"
+            (ngModelChange)="onChangeTaille(p, $event)">
+            <option [ngValue]="null">-- Sélectionnez --</option>
+            <option *ngFor="let t of tailles" [value]="t">{{ t }}</option>
           </select>
         </div>
 
+        <!-- Flocage -->
         <div class="option flocage-option">
-          <input type="checkbox" id="flocage" (change)="updatePrixTotal()" />
-          <label for="flocage">Flocage "Tkt Villeurbannais" (+10 €)</label>
+          <input
+            type="checkbox"
+            [id]="'flocage-' + p.id"
+            [(ngModel)]="selections[p.id].floquageActif"
+            (ngModelChange)="onToggleFloquage(p, $event)" />
+          <label [for]="'flocage-' + p.id">Flocage "Tkt Villeurbannais" (+10 €)</label>
         </div>
 
+        <!-- Quantité -->
         <div class="option">
-          <label for="quantite">Quantité :</label>
-          <input id="quantite" type="number" min="1" value="1" (change)="updatePrixTotal()" />
+          <label [for]="'quantite-' + p.id">Quantité :</label>
+          <input
+            [id]="'quantite-' + p.id"
+            type="number"
+            min="1"
+            [(ngModel)]="selections[p.id].quantite"
+            (ngModelChange)="onChangeQuantite(p, $event)" />
         </div>
 
-        <p class="prix-total">Prix total : <span id="prix-total">30</span> €</p>
+        <!-- Prix live -->
+        <p class="prix-total">
+          Prix unitaire :
+          <strong>{{ getPrixUnitaire(p) | number:'1.2-2' }} €</strong><br>
+          Prix total :
+          <strong>{{ getPrixTotal(p) | number:'1.2-2' }} €</strong>
+        </p>
       </div>
 
-      <button class="btn-ajouter-panier" (click)="ajouterAuPanier(produits[0])">Ajouter au panier</button>
+      <button
+        class="btn-ajouter-panier"
+        (click)="ajouterAuPanier(p)"
+        [disabled]="!selections[p.id].taille">
+        Ajouter au panier
+      </button>
+
+      <p class="confirmation" *ngIf="confirmationMessage">{{ confirmationMessage }}</p>
     </div>
   </div>
 </div>
