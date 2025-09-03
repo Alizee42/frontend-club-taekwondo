@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';   // *ngIf, *ngFor, number
+import { CommonModule } from '@angular/common';   // *ngIf, *ngFor
 import { FormsModule } from '@angular/forms';     // [(ngModel)]
 import { PanierService } from '../../services/panier.service';
 
@@ -7,19 +7,19 @@ interface Produit {
   id: number;
   nom: string;
   description: string;
-  prixBase: number;  // prix unitaire hors options
-  prix: number;      // prix total (unitaire * quantité) enregistré dans le panier
+  prixBase: number;   // prix unitaire hors options
+  prix: number;       // prix unitaire (⚠️ pas le total ligne)
   imageUrl: string;
   taille?: string;
   couleur?: string;
-  floquageActif?: boolean;
+  flocageActif?: boolean;
   flocage?: string;
   quantite?: number;
 }
 
 type Selection = {
   taille: string | null;
-  floquageActif: boolean;
+  flocageActif: boolean;
   quantite: number;
 };
 
@@ -48,32 +48,32 @@ export class BoutiqueComponent implements OnInit {
       (_, i) => `${120 + i * 10} cm`
     );
 
-    // Ton unique produit (extensible plus tard)
+    // Exemple de produit (extensible plus tard)
     this.produits = [
       {
         id: 1,
         nom: 'Dobok Taekwondo',
         description: 'Tenue blanche officielle',
         prixBase: 30,
-        prix: 30, // recalculé à l’ajout
+        prix: 30, // prix unitaire initial = prixBase
         imageUrl: 'assets/images/dobok.jpg',
         taille: '',
         couleur: 'Blanc',
-        floquageActif: false,
+        flocageActif: false,
         flocage: '',
       },
     ];
 
     // État initial des sélections (clé = p.id)
     for (const p of this.produits) {
-      this.selections[p.id] = { taille: null, floquageActif: false, quantite: 1 };
+      this.selections[p.id] = { taille: null, flocageActif: false, quantite: 1 };
     }
   }
 
   /** (sécurité) s’assure qu’une entrée existe pour un id produit donné */
   private ensureSelection(productId: number): Selection {
     if (!this.selections[productId]) {
-      this.selections[productId] = { taille: null, floquageActif: false, quantite: 1 };
+      this.selections[productId] = { taille: null, flocageActif: false, quantite: 1 };
     }
     return this.selections[productId];
   }
@@ -82,7 +82,7 @@ export class BoutiqueComponent implements OnInit {
   getPrixUnitaire(p: Produit): number {
     const sel = this.ensureSelection(p.id);
     let total = p.prixBase;
-    if (sel.floquageActif) total += 10; // +10€ si flocage
+    if (sel.flocageActif) total += 10; // +10€ si flocage
     return total;
   }
 
@@ -95,24 +95,25 @@ export class BoutiqueComponent implements OnInit {
   /** Ajout au panier (autorisé même déconnecté) */
   ajouterAuPanier(p: Produit): void {
     const sel = this.ensureSelection(p.id);
-
     if (!sel.taille) {
       alert('Veuillez sélectionner une taille.');
       return;
     }
 
     const quantite = Math.max(1, Number(sel.quantite || 1));
-    const prixTotal = this.getPrixUnitaire(p) * quantite;
+    const prixUnitaire = this.getPrixUnitaire(p); // ✅ unit price
 
     const item: Produit = {
       ...p,
-      taille: sel.taille,
-      floquageActif: sel.floquageActif,
+      taille: sel.taille!,
+      flocageActif: sel.flocageActif,
       quantite,
-      prix: prixTotal,
+      prix: prixUnitaire, // ✅ on enregistre le prix unitaire
     };
 
     this.panierService.ajouterAuPanier(item);
+    this.panierService.openCart(); // 👉 ouvre le mini-panier dans le header
+
     this.confirmationMessage = 'Produit ajouté au panier !';
     setTimeout(() => (this.confirmationMessage = ''), 2000);
   }
@@ -122,8 +123,9 @@ export class BoutiqueComponent implements OnInit {
     this.ensureSelection(p.id).taille = taille || null;
   }
 
+  // On garde le nom "onToggleFloquage" si ton template l'emploie déjà
   onToggleFloquage(p: Produit, checked: boolean) {
-    this.ensureSelection(p.id).floquageActif = !!checked;
+    this.ensureSelection(p.id).flocageActif = !!checked;
   }
 
   onChangeQuantite(p: Produit, val: string | number) {

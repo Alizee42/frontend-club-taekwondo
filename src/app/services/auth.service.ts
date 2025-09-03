@@ -51,10 +51,12 @@ export class AuthService {
   readonly authState$ = this._authState$.asObservable();
   /** Observable booléen utile pour le header / guards */
   readonly isConnecte$ = this.authState$.pipe(map(s => s.isConnecte));
-  /** Observable rôle (facile pour *ngIf role === 'ADMIN'*) */
+  /** Observable rôle */
   readonly role$ = this.authState$.pipe(map(s => s.role));
   /** Observable utilisateur courant */
   readonly user$ = this.authState$.pipe(map(s => s.user));
+  /** Alias pour coller au plan (currentUser$) */
+  readonly currentUser$ = this.user$;
 
   constructor(private http: HttpClient) {
     // au démarrage : recharge depuis le storage + vérifie l’expiration
@@ -98,6 +100,11 @@ export class AuthService {
     return this._authState$.value.user;
   }
 
+  /** Getter pratique si tu veux `auth.currentUser` en TS */
+  get currentUser(): Utilisateur | null {
+    return this._authState$.value.user;
+  }
+
   getUtilisateurId(): number | null {
     return this._authState$.value.user?.id ?? null;
   }
@@ -118,22 +125,28 @@ export class AuthService {
   // ========= internes =========
 
   private storeAuth(res: LoginResponse) {
+    // Normalisations & fallbacks
+    const normalizedRole = (res.role ?? res.utilisateur?.role ?? '').toString().toUpperCase() as Role | string;
+    const utilisateur: Utilisateur = {
+      ...(res.utilisateur ?? {}),
+      email: res.utilisateur?.email ?? res.email ?? undefined,
+      role: normalizedRole,
+    };
+
     // Stockage
     localStorage.setItem(this.K_TOKEN, res.token);
-    if (res.role) localStorage.setItem(this.K_ROLE, String(res.role));
-    if (res.utilisateur) {
-      localStorage.setItem(this.K_USER, JSON.stringify(res.utilisateur));
-      if (res.utilisateur.id != null) {
-        localStorage.setItem(this.K_USER_ID, String(res.utilisateur.id));
-      }
+    if (normalizedRole) localStorage.setItem(this.K_ROLE, String(normalizedRole));
+    localStorage.setItem(this.K_USER, JSON.stringify(utilisateur));
+    if (utilisateur.id != null) {
+      localStorage.setItem(this.K_USER_ID, String(utilisateur.id));
     }
 
     // Réduction d’état + check expiration
     const expired = this.isTokenExpired(res.token);
     this._authState$.next({
       token: expired ? null : res.token,
-      role: expired ? null : (res.role ?? null),
-      user: expired ? null : (res.utilisateur ?? null),
+      role: expired ? null : normalizedRole,
+      user: expired ? null : utilisateur,
       isConnecte: !expired
     });
 
@@ -145,7 +158,8 @@ export class AuthService {
 
   private hydrateFromStorage() {
     const token = localStorage.getItem(this.K_TOKEN);
-    const role = localStorage.getItem(this.K_ROLE);
+    const roleRaw = localStorage.getItem(this.K_ROLE);
+    const role = roleRaw ? roleRaw.toUpperCase() : null;
     const rawUser = localStorage.getItem(this.K_USER);
     const user: Utilisateur | null = rawUser ? JSON.parse(rawUser) : null;
 
@@ -155,10 +169,13 @@ export class AuthService {
       return;
     }
 
+    // Cohérence: propage le rôle dans l'objet user s'il manque
+    const userWithRole = user ? { ...user, role: user.role ?? role ?? undefined } : null;
+
     this._authState$.next({
-      token,
+      token: token ?? null,
       role,
-      user,
+      user: userWithRole,
       isConnecte: !!token
     });
   }
@@ -166,7 +183,7 @@ export class AuthService {
   private isTokenExpired(token: string): boolean {
     try {
       const payload = this.decodeJwt(token);
-      if (!payload || !payload.exp) return false; // pas d’exp → on considère valide côté client
+      if (!payload || typeof payload.exp !== 'number') return false; // pas d’exp → on considère valide côté client
       const nowSec = Math.floor(Date.now() / 1000);
       return payload.exp < nowSec;
     } catch {
@@ -175,10 +192,29 @@ export class AuthService {
     }
   }
 
-  /** Décodage simple (non vérifié cryptographiquement) */
+  /** Décodage JWT base64url robuste (sans `escape` déprécié) */
   private decodeJwt(token: string): any {
-    const [, payload] = token.split('.');
-    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-    return JSON.parse(decodeURIComponent(escape(json)));
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    const payloadB64 = parts[1];
+    const json = this.base64UrlDecode(payloadB64);
+    return JSON.parse(json);
+  }
+
+  /** base64url → string UTF-8 */
+  private base64UrlDecode(str: string): string {
+    let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = base64.length % 4;
+    if (pad) base64 += '='.repeat(4 - pad);
+    const binary = atob(base64);
+    try {
+      // Convertit correctement en UTF-8
+      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+      const decoder = new TextDecoder(); // support moderne (DOM lib)
+      return decoder.decode(bytes);
+    } catch {
+      // Fallback (ASCII)
+      return binary;
+    }
   }
 }

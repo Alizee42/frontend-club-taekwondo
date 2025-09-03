@@ -32,7 +32,7 @@
         <li><a [routerLink]="['/evenements']" (click)="closeMenus()">Événements</a></li>
         <li><a [routerLink]="['/contact']" (click)="closeMenus()">Contact</a></li>
 
-        <!-- Connexion visible quand déconnecté -->
+        <!-- Connexion visible quand déconnecté (page /connexion avec redirection par rôle côté page) -->
         <li *ngIf="!isLoggedIn">
           <a [routerLink]="['/connexion']" (click)="closeMenus()">Connexion</a>
         </li>
@@ -66,7 +66,11 @@
               <p><strong>{{ item.nom }}</strong></p>
               <p *ngIf="item.taille">Taille : {{ item.taille }}</p>
               <p>Quantité : {{ item.quantite }}</p>
-              <p>Prix total : {{ item.prix | number:'1.2-2' }} €</p>
+              <!-- ✅ Prix total = item.prix (déjà totalisé dans BoutiqueComponent) -->
+              <p>
+                Prix total :
+                <strong>{{ item.prix | number:'1.2-2' }} €</strong>
+              </p>
             </div>
             <button class="btn-delete" (click)="supprimerDuPanier(i)">
               <i class="ri-delete-bin-line"></i>
@@ -81,7 +85,8 @@
             <button class="btn-pay" (click)="payerAuClub()">Payer au club</button>
           </ng-container>
           <ng-template #inviteActions>
-            <button class="btn-return" [routerLink]="['/connexion']" (click)="closeMenus()">
+            <!-- 👉 Modale (pas de navigation vers /connexion) -->
+            <button type="button" class="btn-return" (click)="openConnexionModal()">
               Se connecter pour payer
             </button>
           </ng-template>
@@ -110,10 +115,12 @@
   </div>
 </header>
 
-<!-- Modale générique -->
-<div *ngIf="confirmationMessage || showPaiementModal" class="modal-overlay">
-  <div class="modal-content">
-    <button class="modal-close" (click)="closeAllModals()">×</button>
+<!-- Modale générique Confirmation / Paiement -->
+<div *ngIf="confirmationMessage || showPaiementModal"
+     class="modal-overlay"
+     role="dialog" aria-modal="true">
+  <div class="modal-content" [ngClass]="{'is-wide': showPaiementModal}">
+    <button class="modal-close" (click)="closeAllModals()" aria-label="Fermer">×</button>
 
     <!-- Confirmation -->
     <ng-container *ngIf="confirmationMessage">
@@ -129,10 +136,38 @@
       <h2>Paiement sécurisé</h2>
       <div id="modal-card-element" style="margin: 16px 0;"></div>
       <button (click)="validerPaiement()">Valider le paiement</button>
-      <button (click)="fermerPaiementModal()">Annuler</button>
+      <button type="button" (click)="fermerPaiementModal()">Annuler</button>
       <div class="paiement-securite">
         <p>🔒 Paiement sécurisé via Stripe. Ne partagez jamais vos informations bancaires.</p>
       </div>
     </ng-container>
+  </div>
+</div>
+
+<!-- Modale de connexion (uniquement déclenchée depuis le panier) -->
+<div *ngIf="showConnexionModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <button class="modal-close" (click)="fermerConnexionModal()" aria-label="Fermer">×</button>
+    <h2>Connexion</h2>
+
+    <form (ngSubmit)="onLoginSubmit()">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input id="login-email" name="loginEmail" type="email"
+               [(ngModel)]="loginEmail" required autofocus />
+      </div>
+
+      <div class="form-group">
+        <label for="login-password">Mot de passe</label>
+        <input id="login-password" name="loginPassword" type="password"
+               [(ngModel)]="loginPassword" required />
+      </div>
+
+      <p class="error" *ngIf="connexionError">{{ connexionError }}</p>
+
+      <button type="submit" class="btn-pay" [disabled]="loginLoading">
+        {{ loginLoading ? 'Connexion...' : 'Se connecter' }}
+      </button>
+    </form>
   </div>
 </div>

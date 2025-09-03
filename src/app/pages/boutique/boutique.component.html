@@ -29,9 +29,9 @@
           <input
             type="checkbox"
             [id]="'flocage-' + p.id"
-            [(ngModel)]="selections[p.id].floquageActif"
+            [(ngModel)]="selections[p.id].flocageActif"
             (ngModelChange)="onToggleFloquage(p, $event)" />
-          <label [for]="'flocage-' + p.id">Flocage "Tkt Villeurbannais" (+10 €)</label>
+          <label [for]="'flocage-' + p.id">Flocage "TKT Villeurbannais" (+10 €)</label>
         </div>
 
         <!-- Quantité -->

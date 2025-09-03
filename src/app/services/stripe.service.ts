@@ -45,12 +45,56 @@ export class StripeService {
 
   // ---------- INIT Stripe ----------
 
-  /** Récupère et met en cache la clé publique Stripe depuis le backend */
+  /** Lit une meta si présente (fallback dev) */
+  private getMeta(name: string): string | null {
+    const el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+    return el?.content || null;
+  }
+
+  /**
+   * Récupère et met en cache la clé publique Stripe.
+   * Ordre: /api/stripe/public-key -> /api/parametres-paiement (admin) -> /public -> <meta>.
+   */
   private getPublicKey(): Promise<string> {
     if (!this.publicKeyPromise) {
-      this.publicKeyPromise = firstValueFrom(
-        this.http.get<{ publicKey: string }>(`${this.backendUrl}/public-key`)
-      ).then(r => r.publicKey);
+      this.publicKeyPromise = (async () => {
+        // 0) endpoint historique (si dispo)
+        try {
+          const r = await firstValueFrom(
+            this.http.get<any>(`${this.backendUrl}/public-key`)
+          );
+          const k = r?.publicKey ?? r?.key ?? r?.stripePublicKey;
+          if (k) return k;
+        } catch {/* 404 attendu chez toi, on enchaîne */}
+
+        // 1) paramètres admin (peut nécessiter auth)
+        try {
+          const admin = await firstValueFrom(
+            this.http.get<any>('/api/parametres-paiement', { headers: this.getAuthHeaders() })
+          );
+          const k = admin?.stripePublicKey ?? admin?.clePubliqueStripe ?? admin?.publishableKey ?? admin?.stripe_pk;
+          if (k) return k;
+        } catch {/* ignore, on tente la publique */}
+
+        // 2) paramètres publics (OK d’après tes logs)
+        try {
+          const pub = await firstValueFrom(
+            this.http.get<any>('/api/parametres-paiement/public')
+          );
+          const k = pub?.stripePublicKey ?? pub?.clePubliqueStripe ?? pub?.publishableKey ?? pub?.stripe_pk;
+          if (k) return k;
+        } catch {/* on tentera meta */}
+
+        // 3) fallback meta dans index.html (dev)
+        const metaKey =
+          this.getMeta('stripe-public-key') ||
+          this.getMeta('stripePublicKey')   ||
+          this.getMeta('stripe-pk')         ||
+          this.getMeta('stripe_pk');
+        if (metaKey) return metaKey;
+
+        throw new Error('Clé publique Stripe introuvable (public-key / paramètres / meta).');
+      })();
     }
     return this.publicKeyPromise;
   }
