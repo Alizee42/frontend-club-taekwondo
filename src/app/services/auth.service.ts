@@ -1,8 +1,7 @@
 // src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, map, tap } from 'rxjs';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, map, tap, Observable } from 'rxjs';
 
 type Role = 'ADMIN' | 'PARENT' | 'MEMBRE';
 
@@ -33,7 +32,7 @@ interface AuthState {
 export class AuthService {
   private readonly apiUrl = '/api/utilisateurs';
 
-  // clés de stockage (ne jamais clear tout le localStorage)
+  // Clés de stockage (ne jamais clear tout le localStorage)
   private readonly K_TOKEN = 'token';
   private readonly K_ROLE = 'role';
   private readonly K_USER = 'utilisateur';
@@ -55,11 +54,11 @@ export class AuthService {
   readonly role$ = this.authState$.pipe(map(s => s.role));
   /** Observable utilisateur courant */
   readonly user$ = this.authState$.pipe(map(s => s.user));
-  /** Alias pour coller au plan (currentUser$) */
+  /** Alias */
   readonly currentUser$ = this.user$;
 
   constructor(private http: HttpClient) {
-    // au démarrage : recharge depuis le storage + vérifie l’expiration
+    // Au démarrage : recharge depuis le storage + vérifie l’expiration
     this.hydrateFromStorage();
   }
 
@@ -81,6 +80,11 @@ export class AuthService {
     localStorage.removeItem(this.K_USER);
     localStorage.removeItem(this.K_USER_ID);
     this._authState$.next({ token: null, role: null, user: null, isConnecte: false });
+  }
+
+  /** À appeler au bootstrap si besoin (ex: app.component) */
+  restoreSession(): void {
+    this.hydrateFromStorage();
   }
 
   isConnecte(): boolean {
@@ -126,7 +130,10 @@ export class AuthService {
 
   private storeAuth(res: LoginResponse) {
     // Normalisations & fallbacks
-    const normalizedRole = (res.role ?? res.utilisateur?.role ?? '').toString().toUpperCase() as Role | string;
+    const normalizedRole = (res.role ?? res.utilisateur?.role ?? '')
+      .toString()
+      .toUpperCase() as Role | string;
+
     const utilisateur: Utilisateur = {
       ...(res.utilisateur ?? {}),
       email: res.utilisateur?.email ?? res.email ?? undefined,
@@ -160,10 +167,19 @@ export class AuthService {
     const token = localStorage.getItem(this.K_TOKEN);
     const roleRaw = localStorage.getItem(this.K_ROLE);
     const role = roleRaw ? roleRaw.toUpperCase() : null;
-    const rawUser = localStorage.getItem(this.K_USER);
-    const user: Utilisateur | null = rawUser ? JSON.parse(rawUser) : null;
 
-    // Si token expiré → purge immédiate
+    // JSON.parse sécurisé
+    let user: Utilisateur | null = null;
+    const rawUser = localStorage.getItem(this.K_USER);
+    if (rawUser) {
+      try {
+        user = JSON.parse(rawUser);
+      } catch {
+        localStorage.removeItem(this.K_USER); // purge si corrompu
+      }
+    }
+
+    // Token expiré → purge immédiate
     if (token && this.isTokenExpired(token)) {
       this.logout();
       return;
@@ -172,11 +188,12 @@ export class AuthService {
     // Cohérence: propage le rôle dans l'objet user s'il manque
     const userWithRole = user ? { ...user, role: user.role ?? role ?? undefined } : null;
 
+    const connected = !!token && !this.isTokenExpired(token);
     this._authState$.next({
       token: token ?? null,
       role,
       user: userWithRole,
-      isConnecte: !!token
+      isConnecte: connected
     });
   }
 
@@ -187,12 +204,12 @@ export class AuthService {
       const nowSec = Math.floor(Date.now() / 1000);
       return payload.exp < nowSec;
     } catch {
-      // token illisible → prudence: on le considère invalide
+      // token illisible → prudence: invalide
       return true;
     }
   }
 
-  /** Décodage JWT base64url robuste (sans `escape` déprécié) */
+  /** Décodage JWT base64url robuste */
   private decodeJwt(token: string): any {
     const parts = token.split('.');
     if (parts.length < 2) return null;
@@ -208,9 +225,8 @@ export class AuthService {
     if (pad) base64 += '='.repeat(4 - pad);
     const binary = atob(base64);
     try {
-      // Convertit correctement en UTF-8
       const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-      const decoder = new TextDecoder(); // support moderne (DOM lib)
+      const decoder = new TextDecoder();
       return decoder.decode(bytes);
     } catch {
       // Fallback (ASCII)

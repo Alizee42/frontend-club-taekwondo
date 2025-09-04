@@ -2,25 +2,34 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';   // *ngIf, *ngFor
 import { FormsModule } from '@angular/forms';     // [(ngModel)]
 import { PanierService } from '../../services/panier.service';
+import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 interface Produit {
   id: number;
   nom: string;
   description: string;
-  prixBase: number;   // prix unitaire hors options
-  prix: number;       // prix unitaire (⚠️ pas le total ligne)
+  prixBase: number;
+  prix: number;
   imageUrl: string;
   taille?: string;
   couleur?: string;
   flocageActif?: boolean;
   flocage?: string;
   quantite?: number;
+  paiementId?: number;
 }
 
 type Selection = {
   taille: string | null;
   flocageActif: boolean;
   quantite: number;
+};
+
+type CreerCommandeResponse = {
+  paiementId: number;
+  [k: string]: any;
 };
 
 @Component({
@@ -36,26 +45,31 @@ export class BoutiqueComponent implements OnInit {
   couleurs: string[] = ['Blanc'];
   confirmationMessage = '';
 
-  /** selections[p.id] est toujours défini (on l'initialise dans ngOnInit) */
   selections: Record<number, Selection> = {};
+  private readonly creerCommandeUrl = '/api/paiements/commande';
 
-  constructor(private panierService: PanierService) {}
+  constructor(
+    private panierService: PanierService,
+    private router: Router,
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
-    // Tailles 120 → 210 par pas de 10
+    console.log('[Boutique] ngOnInit');
+
     this.tailles = Array.from(
       { length: (210 - 120) / 10 + 1 },
       (_, i) => `${120 + i * 10} cm`
     );
+    console.log('[Boutique] tailles disponibles =', this.tailles);
 
-    // Exemple de produit (extensible plus tard)
     this.produits = [
       {
         id: 1,
         nom: 'Dobok Taekwondo',
         description: 'Tenue blanche officielle',
         prixBase: 30,
-        prix: 30, // prix unitaire initial = prixBase
+        prix: 30,
         imageUrl: 'assets/images/dobok.jpg',
         taille: '',
         couleur: 'Blanc',
@@ -63,14 +77,14 @@ export class BoutiqueComponent implements OnInit {
         flocage: '',
       },
     ];
+    console.log('[Boutique] produits init =', this.produits);
 
-    // État initial des sélections (clé = p.id)
     for (const p of this.produits) {
       this.selections[p.id] = { taille: null, flocageActif: false, quantite: 1 };
     }
+    console.log('[Boutique] selections init =', this.selections);
   }
 
-  /** (sécurité) s’assure qu’une entrée existe pour un id produit donné */
   private ensureSelection(productId: number): Selection {
     if (!this.selections[productId]) {
       this.selections[productId] = { taille: null, flocageActif: false, quantite: 1 };
@@ -78,57 +92,158 @@ export class BoutiqueComponent implements OnInit {
     return this.selections[productId];
   }
 
-  /** Prix unitaire selon options */
   getPrixUnitaire(p: Produit): number {
     const sel = this.ensureSelection(p.id);
     let total = p.prixBase;
-    if (sel.flocageActif) total += 10; // +10€ si flocage
+    if (sel.flocageActif) total += 10;
     return total;
   }
 
-  /** Prix total (unitaire * quantité) pour affichage */
   getPrixTotal(p: Produit): number {
     const sel = this.ensureSelection(p.id);
     return this.getPrixUnitaire(p) * Math.max(1, sel.quantite);
   }
 
-  /** Ajout au panier (autorisé même déconnecté) */
   ajouterAuPanier(p: Produit): void {
     const sel = this.ensureSelection(p.id);
     if (!sel.taille) {
       alert('Veuillez sélectionner une taille.');
+      console.warn('[Boutique] ajout refusé: taille manquante pour produit', p.id);
       return;
     }
 
     const quantite = Math.max(1, Number(sel.quantite || 1));
-    const prixUnitaire = this.getPrixUnitaire(p); // ✅ unit price
+    const prixUnitaire = this.getPrixUnitaire(p);
 
     const item: Produit = {
       ...p,
       taille: sel.taille!,
       flocageActif: sel.flocageActif,
       quantite,
-      prix: prixUnitaire, // ✅ on enregistre le prix unitaire
+      prix: prixUnitaire,
     };
 
+    console.log('[Boutique] ajout au panier item =', item);
     this.panierService.ajouterAuPanier(item);
-    this.panierService.openCart(); // 👉 ouvre le mini-panier dans le header
+    this.panierService.openCart();
 
     this.confirmationMessage = 'Produit ajouté au panier !';
     setTimeout(() => (this.confirmationMessage = ''), 2000);
   }
 
-  /** Handlers pour (ngModelChange) — gardent l’état cohérent */
   onChangeTaille(p: Produit, taille: string) {
     this.ensureSelection(p.id).taille = taille || null;
+    console.log('[Boutique] change taille ->', { produitId: p.id, taille });
   }
 
-  // On garde le nom "onToggleFloquage" si ton template l'emploie déjà
   onToggleFloquage(p: Produit, checked: boolean) {
     this.ensureSelection(p.id).flocageActif = !!checked;
+    console.log('[Boutique] toggle flocage ->', { produitId: p.id, checked });
   }
 
   onChangeQuantite(p: Produit, val: string | number) {
-    this.ensureSelection(p.id).quantite = Math.max(1, Number(val || 1));
+    const q = Math.max(1, Number(val || 1));
+    this.ensureSelection(p.id).quantite = q;
+    console.log('[Boutique] change quantite ->', { produitId: p.id, q });
+  }
+
+  private buildCommandePayload() {
+    const panier = this.panierService.getPanier();
+    console.log('[Boutique] buildCommandePayload panier =', panier);
+
+    const lignes = panier.map((it) => {
+      const quantite = Math.max(1, Number(it.quantite || 1));
+      const prixUnitaire = it.prix;
+      const totalLigne = Math.round(prixUnitaire * quantite * 100) / 100;
+
+      return {
+        produitId: it.id,
+        nom: it.nom,
+        quantite,
+        prixUnitaire,
+        taille: it.taille ?? null,
+        couleur: it.couleur ?? null,
+        flocageActif: !!it.flocageActif,
+        flocage: it.flocage ?? null,
+        totalLigne,
+      };
+    });
+
+    const totalPanier = lignes.reduce((s: number, l: any) => s + l.totalLigne, 0);
+    const payload = {
+      source: 'BOUTIQUE',
+      devise: 'EUR',
+      lignes,
+      total: totalPanier,
+    };
+    console.log('[Boutique] payload commande =', payload);
+    return payload;
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token =
+      localStorage.getItem('auth_token') ??
+      localStorage.getItem('token') ??
+      '';
+    if (token) {
+      console.log('[Boutique] Auth token présent (len=', token.length, ')');
+    } else {
+      console.warn('[Boutique] Aucun token trouvé pour la création de commande');
+    }
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+  }
+
+  private async createCommandeOnServer(): Promise<number> {
+    const payload = this.buildCommandePayload();
+    try {
+      const res = await this.http
+        .post<CreerCommandeResponse>(this.creerCommandeUrl, payload, { headers: this.getAuthHeaders() })
+        .toPromise();
+
+      console.log('Réponse de création commande:', res);  // Log pour vérifier la réponse
+      const paiementId = res?.paiementId;
+      if (!paiementId || !Number.isFinite(paiementId)) {
+        throw new Error("Réponse backend invalide : 'paiementId' manquant.");
+      }
+
+      // Stockage du paiementId dans localStorage pour un accès futur
+      localStorage.setItem('paiementId', String(paiementId));
+
+      return paiementId;
+    } catch (e: any) {
+      console.error('Erreur création commande:', e);
+      alert(e?.message || 'Impossible de créer la commande.');
+      throw e;
+    }
+  }
+
+  async payerMaintenant(): Promise<void> {
+    const panier = this.panierService.getPanier();
+    console.log('[Boutique] payerMaintenant() panier =', panier);
+
+    if (!panier || panier.length === 0) {
+      alert('Votre panier est vide.');
+      console.warn('[Boutique] paiement annulé: panier vide');
+      return;
+    }
+
+    try {
+      const paiementId = await this.createCommandeOnServer();
+      console.log('[Boutique] paiementId obtenu =', paiementId);
+
+      localStorage.setItem('paiementId', String(paiementId));
+      console.log('[Boutique] paiementId stocké dans localStorage');
+
+      await this.router.navigate([], {
+        queryParams: { startPay: 1, paiementId },
+        queryParamsHandling: 'merge',
+      });
+      console.log('[Boutique] navigation pour déclencher le paiement (startPay=1, paiementId=', paiementId, ')');
+
+      this.panierService.openCart();
+    } catch (e: any) {
+      console.error('[Boutique] Erreur création commande:', e);
+      alert(e?.message || 'Impossible de créer la commande.');
+    }
   }
 }

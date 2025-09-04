@@ -13,6 +13,7 @@ export interface Produit {
   flocage?: string;
   flocageActif?: boolean;  // ✅ nom normalisé
   quantite?: number;       // par défaut 1
+  paiementId?: number;     // Ajout du paiementId au produit
 }
 
 type Variante = {
@@ -66,6 +67,11 @@ export class PanierService {
 
     // Normalise l’item ajouté (prix unitaire, quantite mini 1, nom champ flocageActif)
     const toAdd = this.normalizeItem({ ...produit, quantite });
+
+    // Ajout du paiementId si non présent
+    if (!toAdd.paiementId) {
+      toAdd.paiementId = this.generatePaiementId(); // Assurez-vous que cette méthode existe
+    }
 
     const idx = this.findIndex(toAdd.id, {
       taille: toAdd.taille,
@@ -191,7 +197,8 @@ export class PanierService {
       couleur: p.couleur,
       flocage: p.flocage,
       flocageActif: !!flocageActif,
-      quantite: Math.max(1, Number(p.quantite ?? 1))
+      quantite: Math.max(1, Number(p.quantite ?? 1)),
+      paiementId: p.paiementId // Assurez-vous de l'ajouter ici aussi
     };
   }
 
@@ -214,5 +221,10 @@ export class PanierService {
       flocageActif: variante.flocageActif
     });
     return this._panier$.value.findIndex(p => this.keyOf(p) === targetKey);
+  }
+
+  private generatePaiementId(): number {
+    // Simple méthode pour générer un paiementId, mais vous pouvez la rendre plus sophistiquée
+    return Date.now(); // Retourne l'heure actuelle en millisecondes
   }
 }

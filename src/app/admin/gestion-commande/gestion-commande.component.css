@@ -1,49 +1,65 @@
-.admin-container {
+.base-container {
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.page-title {
+  margin-bottom: 1rem;
+  color: var(--blue-main);
+}
+
+.filters {
   display: flex;
-  min-height: 100vh;
-  background: var(--background);
-  font-family: 'Poppins', sans-serif;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
-.sidebar {
-  width: 280px;
-  background: var(--blue-dark);
-  color: white;
-  padding: 2rem 1rem;
-  position: sticky;
-  top: 0;
-  height: auto;
+.filters input, .filters select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.table-commandes {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-commandes th, .table-commandes td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+.badge.en\ attente { background: orange; color: #fff; }
+.badge.payé { background: green; color: #fff; }
+.badge.retiré { background: blue; color: #fff; }
+.badge.annulé { background: red; color: #fff; }
+
+.modal {
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.6);
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
-
-.sidebar h2 {
-  margin: 1rem 0;
-  font-size: 1.2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 0.5rem;
+.modal-content {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  width:600px;
+  max-height:80vh;
+  overflow:auto;
 }
-
-.menu {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 2rem 0;
-}
-
-.menu li {
-  padding: 0.5rem;
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: background 0.2s;
-}
-
-.menu li.active,
-.menu li:hover {
-  background: var(--secondary-blue);
-}
-
-.content {
-  flex: 1;
-  padding: 2rem;
-  background: var(--background-light);
+.modal-actions {
+  margin-top: 15px;
+  text-align: right;
 }

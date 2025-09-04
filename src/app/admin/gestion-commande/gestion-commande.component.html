@@ -1,21 +1,86 @@
-<div class="admin-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2>📦 Commandes</h2>
-      <ul class="menu">
-        <li (click)="changerVue('cb')" [class.active]="vueActive === 'cb'">💳 Commandes CB</li>
-        <li (click)="changerVue('club')" [class.active]="vueActive === 'club'">🏠 Paiement au club</li>
-        <li (click)="changerVue('disponibilite')" [class.active]="vueActive === 'disponibilite'">📦 Disponibilité retrait</li>
-        <li (click)="changerVue('historique')" [class.active]="vueActive === 'historique'">📚 Historique</li>
-      </ul>
-    </aside>
-  
-    <!-- Contenu dynamique -->
-    <section class="content">
-      <app-liste-cb *ngIf="vueActive === 'cb'"></app-liste-cb>
-      <app-liste-club *ngIf="vueActive === 'club'"></app-liste-club>
-      <app-disponibilite *ngIf="vueActive === 'disponibilite'"></app-disponibilite>
-      <app-historique-commandes *ngIf="vueActive === 'historique'"></app-historique-commandes>
-    </section>
+<div class="base-container">
+  <h1 class="page-title">📦 Gestion des commandes</h1>
+
+  <!-- 🔍 Filtres -->
+  <div class="filters">
+    <input type="text" [(ngModel)]="search" placeholder="Rechercher par nom ou email..." />
+    <select [(ngModel)]="statutFilter">
+      <option value="">-- Tous statuts --</option>
+      <option value="en attente">En attente</option>
+      <option value="payé">Payé</option>
+      <option value="retiré">Retiré</option>
+      <option value="annulé">Annulé</option>
+    </select>
+    <select [(ngModel)]="modeFilter">
+      <option value="">-- Tous modes --</option>
+      <option value="cb">Carte bancaire</option>
+      <option value="club">Paiement au club</option>
+    </select>
+    <button (click)="chargerCommandes()">Filtrer</button>
   </div>
-  
+
+  <!-- 📋 Tableau -->
+  <table class="table-commandes">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>Utilisateur</th>
+        <th>Email</th>
+        <th>Montant</th>
+        <th>Mode</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of commandes">
+        <td>{{ c.id }}</td>
+        <td>{{ c.dateCommande | date:'dd/MM/yyyy' }}</td>
+        <td>{{ c.utilisateurNom }} {{ c.utilisateurPrenom }}</td>
+        <td>{{ c.utilisateurEmail }}</td>
+        <td>{{ c.montantTotal | currency:'EUR' }}</td>
+        <td>{{ c.modePaiement | uppercase }}</td>
+        <td>
+          <span class="badge" [ngClass]="c.statut">{{ c.statut }}</span>
+        </td>
+        <td>
+          <button *ngIf="c.modePaiement==='club' && c.statut==='en attente'" (click)="marquerPaye(c.id)">💶 Marquer payé</button>
+          <button *ngIf="c.statut==='payé'" (click)="marquerRetiree(c.id)">📦 Marquer retiré</button>
+          <button (click)="voirDetails(c)">🔍 Détails</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 📑 Modale Détails -->
+  <div class="modal" *ngIf="commandeSelectionnee">
+    <div class="modal-content">
+      <h2>Détails commande #{{ commandeSelectionnee.id }}</h2>
+      <p><b>Utilisateur :</b> {{ commandeSelectionnee.utilisateurNom }} {{ commandeSelectionnee.utilisateurPrenom }}</p>
+      <p><b>Email :</b> {{ commandeSelectionnee.utilisateurEmail }}</p>
+      <p><b>Mode :</b> {{ commandeSelectionnee.modePaiement }}</p>
+      <p><b>Statut :</b> {{ commandeSelectionnee.statut }}</p>
+
+      <h3>Produits</h3>
+      <table>
+        <tr>
+          <th>Produit</th><th>Taille</th><th>Couleur</th><th>Quantité</th><th>Prix</th>
+        </tr>
+        <tr *ngFor="let l of commandeSelectionnee.lignes">
+          <td>{{ l.produitNom }}</td>
+          <td>{{ l.taille }}</td>
+          <td>{{ l.couleur }}</td>
+          <td>{{ l.quantite }}</td>
+          <td>{{ l.prix | currency:'EUR' }}</td>
+        </tr>
+      </table>
+
+      <p><b>Total :</b> {{ commandeSelectionnee.montantTotal | currency:'EUR' }}</p>
+
+      <div class="modal-actions">
+        <button (click)="fermerDetails()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

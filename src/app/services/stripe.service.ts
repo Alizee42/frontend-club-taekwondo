@@ -9,24 +9,15 @@ import {
 } from '@stripe/stripe-js';
 import { firstValueFrom } from 'rxjs';
 
-type CreatePiByPaiementId = {
+type CreatePiPayload = {
   paiementId: number;
   echeanceId?: number;
   customerEmail?: string;
 };
 
-type CreatePiByAmount = {
-  amount: number;   // en cents, ex: 2500 = 25,00 €
-  currency: string; // ex: 'eur'
-  typePaiement?: string;
-  modePaiement?: string;
-  customerEmail?: string;
-};
-
-type CreatePiPayload = CreatePiByPaiementId | CreatePiByAmount;
-
 type CreatePiResponse = {
   clientSecret: string;
+  paymentIntentId?: string;
   [k: string]: any;
 };
 
@@ -45,7 +36,6 @@ export class StripeService {
 
   // ---------- INIT Stripe ----------
 
-  /** Lit une meta si présente (fallback dev) */
   private getMeta(name: string): string | null {
     const el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
     return el?.content || null;
@@ -58,14 +48,12 @@ export class StripeService {
   private getPublicKey(): Promise<string> {
     if (!this.publicKeyPromise) {
       this.publicKeyPromise = (async () => {
-        // 0) endpoint historique (si dispo)
+        // 0) endpoint public clé Stripe (recommandé)
         try {
-          const r = await firstValueFrom(
-            this.http.get<any>(`${this.backendUrl}/public-key`)
-          );
+          const r = await firstValueFrom(this.http.get<any>(`${this.backendUrl}/public-key`));
           const k = r?.publicKey ?? r?.key ?? r?.stripePublicKey;
           if (k) return k;
-        } catch {/* 404 attendu chez toi, on enchaîne */}
+        } catch { /* 204/404/401 -> fallbacks */ }
 
         // 1) paramètres admin (peut nécessiter auth)
         try {
@@ -74,18 +62,16 @@ export class StripeService {
           );
           const k = admin?.stripePublicKey ?? admin?.clePubliqueStripe ?? admin?.publishableKey ?? admin?.stripe_pk;
           if (k) return k;
-        } catch {/* ignore, on tente la publique */}
+        } catch { /* ignore */ }
 
-        // 2) paramètres publics (OK d’après tes logs)
+        // 2) paramètres publics
         try {
-          const pub = await firstValueFrom(
-            this.http.get<any>('/api/parametres-paiement/public')
-          );
+          const pub = await firstValueFrom(this.http.get<any>('/api/parametres-paiement/public'));
           const k = pub?.stripePublicKey ?? pub?.clePubliqueStripe ?? pub?.publishableKey ?? pub?.stripe_pk;
           if (k) return k;
-        } catch {/* on tentera meta */}
+        } catch { /* ignore */ }
 
-        // 3) fallback meta dans index.html (dev)
+        // 3) meta fallback (dev)
         const metaKey =
           this.getMeta('stripe-public-key') ||
           this.getMeta('stripePublicKey')   ||
@@ -109,7 +95,7 @@ export class StripeService {
     return stripe;
   }
 
-  /** Compat: garde l’ancienne signature utilisée par tes composants */
+  /** Compat */
   getStripeInstance(): Promise<Stripe> {
     return this.ensureStripe();
   }
@@ -117,21 +103,20 @@ export class StripeService {
   // ---------- API BACKEND ----------
 
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token') ?? '';
+    // accepte auth_token OU token (pas d’interceptor)
+    const token =
+      localStorage.getItem('auth_token') ??
+      localStorage.getItem('token') ??
+      '';
     return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 
-  /**
-   * Crée un PaymentIntent côté backend.
-   * ⚠️ Ton endpoint actuel attend { paiementId }. Si tu veux payer “au montant”,
-   * expose aussi un endpoint /create-payment-intent-by-amount côté backend.
-   */
+  /** Crée (ou réutilise) un PaymentIntent côté backend par paiementId. */
   async createPaymentIntent(paiementData: CreatePiPayload): Promise<CreatePiResponse> {
-    if (!('paiementId' in paiementData)) {
+    if (!paiementData?.paiementId) {
       throw new Error(
-        'createPaymentIntent: payload sans "paiementId". ' +
-        'Ton backend /api/stripe/create-payment-intent attend { paiementId, ... }. ' +
-        'Soit crée la commande pour obtenir un paiementId, soit implémente un endpoint “by-amount”.'
+        'createPaymentIntent: "paiementId" est requis. ' +
+        'Crée la commande pour obtenir un paiementId avant d’initier le paiement.'
       );
     }
 
@@ -147,22 +132,9 @@ export class StripeService {
     return res;
   }
 
-  /** Optionnel si tu crées l’endpoint by-amount côté backend */
-  async createPaymentIntentByAmount(data: CreatePiByAmount): Promise<CreatePiResponse> {
-    const res = await firstValueFrom(
-      this.http.post<CreatePiResponse>(
-        `${this.backendUrl}/create-payment-intent-by-amount`,
-        data,
-        { headers: this.getAuthHeaders() }
-      )
-    );
-    this.clientSecret = res?.clientSecret || null;
-    return res;
-  }
-
   // ---------- STRIPE ELEMENTS ----------
 
-  /** Monte le Card Element dans un sélecteur (ex: '#stripe-card') */
+  /** Monte le Card Element dans un sélecteur (ex: '#stripe-card' ou '#modal-card-element') */
   async monterElementDans(selector: string): Promise<void> {
     const stripe = await this.ensureStripe();
 
