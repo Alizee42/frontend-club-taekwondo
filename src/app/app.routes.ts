@@ -20,7 +20,8 @@ import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-doc
 import { PaiementComponent } from './membre/paiement/paiement.component';
 import { GestionPaiementsComponent } from './admin/gestion-paiements/gestion-paiements.component';
 import { BoutiqueComponent } from './pages/boutique/boutique.component';
-import { GestionCommandesComponent } from './admin/gestion-commande/gestion-commande.component';import { EvenementsComponent } from './pages/evenements/evenements.component';
+import { GestionCommandeComponent } from './admin/gestion-commande/gestion-commande.component';
+import { EvenementsComponent } from './pages/evenements/evenements.component';
 import { GestionEvenementsComponent } from './admin/gestion-evenements/gestion-evenements.component';
 import { GestionInscriptionsComponent } from './admin/gestion-inscriptions/gestion-inscriptions.component';
 import { DashboardParentComponent } from './parent/dashboard-parent/dashboard-parent.component';
@@ -60,7 +61,7 @@ export const routes: Routes = [
       { path: 'galerie', component: GestionGalerieComponent },
       { path: 'documents', component: GestionDocumentsComponent },
       { path: 'paiements', component: GestionPaiementsComponent },
-{ path: 'gestion-commande', component: GestionCommandesComponent },
+{ path: 'gestion-commande', component: GestionCommandeComponent },
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
       { path: 'gestion-inscription', component: GestionInscriptionsComponent }
     ]

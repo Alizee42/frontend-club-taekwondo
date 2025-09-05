@@ -55,13 +55,12 @@ export class BoutiqueComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('[Boutique] ngOnInit');
 
     this.tailles = Array.from(
       { length: (210 - 120) / 10 + 1 },
       (_, i) => `${120 + i * 10} cm`
     );
-    console.log('[Boutique] tailles disponibles =', this.tailles);
+    
 
     this.produits = [
       {
@@ -77,12 +76,10 @@ export class BoutiqueComponent implements OnInit {
         flocage: '',
       },
     ];
-    console.log('[Boutique] produits init =', this.produits);
 
     for (const p of this.produits) {
       this.selections[p.id] = { taille: null, flocageActif: false, quantite: 1 };
     }
-    console.log('[Boutique] selections init =', this.selections);
   }
 
   private ensureSelection(productId: number): Selection {
@@ -123,7 +120,6 @@ export class BoutiqueComponent implements OnInit {
       prix: prixUnitaire,
     };
 
-    console.log('[Boutique] ajout au panier item =', item);
     this.panierService.ajouterAuPanier(item);
     this.panierService.openCart();
 
@@ -133,23 +129,19 @@ export class BoutiqueComponent implements OnInit {
 
   onChangeTaille(p: Produit, taille: string) {
     this.ensureSelection(p.id).taille = taille || null;
-    console.log('[Boutique] change taille ->', { produitId: p.id, taille });
   }
 
   onToggleFloquage(p: Produit, checked: boolean) {
     this.ensureSelection(p.id).flocageActif = !!checked;
-    console.log('[Boutique] toggle flocage ->', { produitId: p.id, checked });
   }
 
   onChangeQuantite(p: Produit, val: string | number) {
     const q = Math.max(1, Number(val || 1));
     this.ensureSelection(p.id).quantite = q;
-    console.log('[Boutique] change quantite ->', { produitId: p.id, q });
   }
 
   private buildCommandePayload() {
     const panier = this.panierService.getPanier();
-    console.log('[Boutique] buildCommandePayload panier =', panier);
 
     const lignes = panier.map((it) => {
       const quantite = Math.max(1, Number(it.quantite || 1));
@@ -176,7 +168,6 @@ export class BoutiqueComponent implements OnInit {
       lignes,
       total: totalPanier,
     };
-    console.log('[Boutique] payload commande =', payload);
     return payload;
   }
 
@@ -186,7 +177,6 @@ export class BoutiqueComponent implements OnInit {
       localStorage.getItem('token') ??
       '';
     if (token) {
-      console.log('[Boutique] Auth token présent (len=', token.length, ')');
     } else {
       console.warn('[Boutique] Aucun token trouvé pour la création de commande');
     }
@@ -200,7 +190,6 @@ export class BoutiqueComponent implements OnInit {
         .post<CreerCommandeResponse>(this.creerCommandeUrl, payload, { headers: this.getAuthHeaders() })
         .toPromise();
 
-      console.log('Réponse de création commande:', res);  // Log pour vérifier la réponse
       const paiementId = res?.paiementId;
       if (!paiementId || !Number.isFinite(paiementId)) {
         throw new Error("Réponse backend invalide : 'paiementId' manquant.");
@@ -219,7 +208,6 @@ export class BoutiqueComponent implements OnInit {
 
   async payerMaintenant(): Promise<void> {
     const panier = this.panierService.getPanier();
-    console.log('[Boutique] payerMaintenant() panier =', panier);
 
     if (!panier || panier.length === 0) {
       alert('Votre panier est vide.');
@@ -229,16 +217,13 @@ export class BoutiqueComponent implements OnInit {
 
     try {
       const paiementId = await this.createCommandeOnServer();
-      console.log('[Boutique] paiementId obtenu =', paiementId);
 
       localStorage.setItem('paiementId', String(paiementId));
-      console.log('[Boutique] paiementId stocké dans localStorage');
 
       await this.router.navigate([], {
         queryParams: { startPay: 1, paiementId },
         queryParamsHandling: 'merge',
       });
-      console.log('[Boutique] navigation pour déclencher le paiement (startPay=1, paiementId=', paiementId, ')');
 
       this.panierService.openCart();
     } catch (e: any) {

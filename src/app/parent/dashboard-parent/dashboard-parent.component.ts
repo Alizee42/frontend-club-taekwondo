@@ -49,7 +49,6 @@ export class DashboardParentComponent implements OnInit {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (utilisateur) => {
-        console.log('[✅ UTILISATEUR CONNECTÉ]', utilisateur);
         this.utilisateurConnecte = utilisateur;
         localStorage.setItem('utilisateurId', utilisateur.id.toString());
       },

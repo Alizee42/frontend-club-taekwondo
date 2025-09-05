@@ -40,15 +40,12 @@ export class GestionActualitesComponent implements OnInit {
   loadActualites(): void {
     this.actualiteService.getAll().subscribe({
       next: (data: Actualite[]) => {
-        console.log('✅ Actualités rechargées depuis l\'API :', data);
         this.actualites = data;
   
         // Vérifiez si une actualité a isFeatured: true
         const featured = this.actualites.find(actu => actu.isFeatured === true);
         if (featured) {
-          console.log(`🌟 Actualité mise à la une détectée : ${featured.titre}`);
         } else {
-          console.log('⚠️ Aucune actualité mise à la une détectée dans les données.');
         }
   
         this.updateFeaturedNews(); // Met à jour l'actualité mise à la une
@@ -65,9 +62,7 @@ export class GestionActualitesComponent implements OnInit {
     this.featuredNews = this.actualites.find((item: Actualite) => item.isFeatured === true) || null;
   
     if (this.featuredNews) {
-      console.log(`🌟 Actualité mise à la une : ${this.featuredNews.titre}`);
     } else {
-      console.log('⚠️ Aucune actualité mise à la une.');
     }
   }
 
@@ -154,7 +149,6 @@ export class GestionActualitesComponent implements OnInit {
   
     this.actualiteService.setFeatured(actu).subscribe({
       next: () => {
-        console.log(`✅ Actualité mise à la une : ${actu.titre}`);
         this.loadActualites(); // Recharge les actualités après la mise à jour
       },
       error: (err) => {

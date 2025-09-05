@@ -51,7 +51,6 @@ export class EvenementsComponent implements OnInit {
 
   confirmerInscription(): void {
     const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || 'null');
-        console.log('Utilisateur récupéré depuis localStorage :', utilisateur);
     if (!utilisateur || !utilisateur.id) {
       alert("Veuillez vous connecter pour vous inscrire.");
       this.fermerModal();
@@ -64,7 +63,6 @@ export class EvenementsComponent implements OnInit {
       utilisateurId: utilisateur.id,
       commentaire: this.commentaire
     };
-    console.log('Données envoyées :', dto);
     
     this.http.post('/api/inscriptions', dto).subscribe({
       next: () => {

@@ -5,15 +5,20 @@ import {
   ActivatedRoute,
   NavigationEnd,
 } from '@angular/router';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, filter, firstValueFrom } from 'rxjs';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { PanierService, Produit } from '../../services/panier.service';
 import { StripeService } from '../../services/stripe.service';
+
+interface PanierItem extends Produit {
+  beneficiaireId?: number | null;
+  beneficiairePrenom?: string;
+  beneficiaireNom?: string;
+}
 
 @Component({
   standalone: true,
@@ -35,8 +40,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   showConfirmationModal = false;
   confirmationMessage = '';
 
-  // Panier
-  panier: Produit[] = [];
+  // Panier (👉 typé PanierItem)
+  panier: PanierItem[] = [];
   cartCount = 0;
 
   // Connexion modale
@@ -48,11 +53,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // Post-login actions
   private pendingOpenCart = false;
   private pendingStartPay = false;
-  private pendingPaiementId: number | null = null; // mémorise un paiementId éventuel depuis l’URL
+  private pendingPaiementId: number | null = null;
 
-  // ✅ Etat d’auth réactif (remplace les getters)
+  // Auth
   isLoggedIn = false;
   user: Utilisateur | null = null;
+
+  // Enfants (Parent)
+  enfants: { id: number; prenom: string; nom: string }[] = [];
+  private enfantsLoaded = false;
 
   private subs: Subscription[] = [];
 
@@ -62,69 +71,55 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private panierService: PanierService,
     private stripeService: StripeService,
-    private http: HttpClient  // 🔽 Ajout
-
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
-    console.log('[Header] ngOnInit');
-
-    // ✅ S'abonner à l'état d'auth pour garder le header synchronisé
+    // Etat d'auth
     this.subs.push(
       this.auth.authState$.subscribe((s) => {
         this.isLoggedIn = s.isConnecte;
         this.user = s.user;
-        // Debug utile
-        console.log('[Header] authState$ -> isLoggedIn:', this.isLoggedIn, 'user:', this.user);
+        if (this.isLoggedIn && this.isParent() && !this.enfantsLoaded) {
+          this.loadEnfants();
+        }
       })
     );
 
-    // Panier réactif
+    // Panier
     this.subs.push(
-      this.panierService.cartCount$.subscribe((n) => {
-        this.cartCount = n;
-        console.log('[Header] cartCount$ ->', n);
-      })
+      this.panierService.cartCount$.subscribe((n) => (this.cartCount = n))
     );
     this.subs.push(
       this.panierService.panier$.subscribe((items) => {
-        this.panier = items;
-        console.log('[Header] panier$ ->', items);
+        this.panier = items as PanierItem[];
+        this.applyBeneficiaryDefault();
       })
     );
 
-    // Ouvrir le mini-panier quand la Boutique le demande
+    // Ouvrir mini-panier sur demande
     this.subs.push(
-      this.panierService.openCart$.subscribe(() => {
-        console.log('[Header] openCart$ -> ouvrir mini-panier');
-        this.panierOpen = true;
-      })
+      this.panierService.openCart$.subscribe(() => (this.panierOpen = true))
     );
 
-    // Sur navigation : lire les query params (compat)
+    // Navigation / query params
     this.subs.push(
       this.router.events
         .pipe(filter((e) => e instanceof NavigationEnd))
-        .subscribe((e) => {
-          console.log('[Header] NavigationEnd ->', e);
-          this.applyQueryParamActions();
-        })
+        .subscribe(() => this.applyQueryParamActions())
     );
     this.applyQueryParamActions();
 
-    // Détecter le login pour exécuter les actions en attente (ouvrir panier / lancer paiement)
+    // Actions en attente après login
     this.subs.push(
       this.auth.isConnecte$.subscribe((isIn) => {
-        console.log('[Header] isConnecte$ ->', isIn);
         if (isIn) {
           if (this.pendingOpenCart) {
             this.panierOpen = true;
             this.pendingOpenCart = false;
-            console.log('[Header] pendingOpenCart consommé');
           }
           if (this.pendingStartPay) {
             this.pendingStartPay = false;
-            console.log('[Header] pendingStartPay consommé -> tenter paiement');
             if (this.panier.length > 0) this.payerParCB();
           }
         }
@@ -133,11 +128,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    console.log('[Header] ngOnDestroy');
     this.subs.forEach((s) => s.unsubscribe());
     this.stripeService.unmount();
   }
 
+  // ======= Utils =======
+  private isParent(): boolean {
+    const role = (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
+    return role === 'PARENT';
+  }
+  private isMembre(): boolean {
+    const role = (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
+    return role === 'MEMBRE';
+  }
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('auth_token') ?? localStorage.getItem('token') ?? '';
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+  }
   private deepest(route: ActivatedRoute): ActivatedRoute {
     let r = route;
     while (r.firstChild) r = r.firstChild;
@@ -150,50 +157,33 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     const openCart = qp.get('openCart');
     const startPay = qp.get('startPay');
-    const qpPaiementId = qp.get('paiementId'); // supporte ?paiementId=123
-
-    console.log('[Header] QueryParams ->', { openCart, startPay, qpPaiementId });
+    const qpPaiementId = qp.get('paiementId');
 
     this.pendingPaiementId = qpPaiementId ? Number(qpPaiementId) : null;
     if (this.pendingPaiementId && !Number.isFinite(this.pendingPaiementId)) {
       console.warn('[Header] qpPaiementId non numérique ->', qpPaiementId);
       this.pendingPaiementId = null;
     }
-
     if (!this.pendingPaiementId) {
       const pidLS = localStorage.getItem('paiementId');
-      console.log('[Header] fallback localStorage.paiementId =', pidLS);
-      if (pidLS && Number.isFinite(Number(pidLS))) {
-        this.pendingPaiementId = Number(pidLS);
-      }
+      if (pidLS && Number.isFinite(Number(pidLS))) this.pendingPaiementId = Number(pidLS);
     }
 
-    console.log('[Header] pendingPaiementId final =', this.pendingPaiementId);
-
-    if (openCart != null) {
-      this.panierOpen = true;
-      console.log('[Header] openCart -> ouverture mini-panier');
-    }
+    if (openCart != null) this.panierOpen = true;
 
     if (startPay != null) {
-      console.log('[Header] startPay détecté, loggedIn =', this.isLoggedIn);
       if (this.isLoggedIn) {
-        if (this.panier.length > 0) {
-          console.log('[Header] startPay -> déclenche payerParCB()');
-          this.payerParCB();
-        } else {
-          console.warn('[Header] startPay mais panier vide');
-        }
+        if (this.panier.length > 0) this.payerParCB();
+        else console.warn('[Header] startPay mais panier vide');
       } else {
         this.pendingOpenCart = true;
         this.pendingStartPay = true;
-        console.log('[Header] pas connecté -> pendingOpenCart+pendingStartPay puis ouvrir modal');
         this.openConnexionModal();
       }
     }
   }
 
-  // --------- Navigation ---------
+  // ======= Navigation =======
   goHome(): void { this.router.navigate(['/']); this.closeMenus(); }
   goToGalerie(): void { this.router.navigate(['/galerie']); this.closeMenus(); }
   goToInscription(): void { this.router.navigate(['/inscription']); this.closeMenus(); }
@@ -202,21 +192,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
   goToContact(): void { this.router.navigate(['/contact']); this.closeMenus(); }
 
   goToConnexion(): void {
-    if (!this.isLoggedIn) {
-      this.openConnexionModal(); // on reste en SPA
-    } else {
-      this.router.navigate(['/connexion']);
-    }
+    if (!this.isLoggedIn) this.openConnexionModal();
+    else this.router.navigate(['/connexion']);
     this.closeMenus();
   }
 
   goToDashboard(): void {
-    // On route selon le rôle courant
     const role = (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
     if (role === 'ADMIN') this.router.navigate(['/admin/dashboard-admin']);
     else if (role === 'MEMBRE') this.router.navigate(['/membre/dashboard-membre']);
     else if (role === 'PARENT') this.router.navigate(['/parent/dashboard-parent']);
-    else this.router.navigate(['/dashboard']); // fallback générique si tu as cette route
+    else this.router.navigate(['/dashboard']);
     this.closeMenus();
   }
 
@@ -228,43 +214,45 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.closeMenus();
   }
 
-  // --------- Menus / toggles ---------
+  // ======= Menus / toggles =======
   toggleMenu(): void { this.menuOpen = !this.menuOpen; }
   toggleProfileMenu(): void { this.profileMenuOpen = !this.profileMenuOpen; this.panierOpen = false; }
-  togglePanier(): void { this.panierOpen = !this.panierOpen; this.profileMenuOpen = false; }
+  togglePanier(): void {
+    const opening = !this.panierOpen;
+    this.panierOpen = opening;
+    this.profileMenuOpen = false;
+
+    if (opening && this.isLoggedIn && this.isParent() && !this.enfantsLoaded) {
+      this.loadEnfants();
+    }
+  }
   closeMenus(): void { this.menuOpen = false; this.profileMenuOpen = false; this.panierOpen = false; }
 
-  // --------- Auth ---------
+  // ======= Auth =======
   logout(): void {
-    console.log('[Header] logout()');
-    this.auth.logout(); // met à jour l'état réactif
+    this.auth.logout();
     this.closeMenus();
     this.router.navigate(['/']);
   }
 
   openConnexionModal(): void {
-    console.log('[Header] openConnexionModal()');
     this.showConnexionModal = true;
     this.connexionError = null;
   }
-
-  fermerConnexionModal(): void {
-    console.log('[Header] fermerConnexionModal()');
-    this.showConnexionModal = false;
-  }
+  fermerConnexionModal(): void { this.showConnexionModal = false; }
 
   onLoginSubmit(): void {
     if (!this.loginEmail || !this.loginPassword) return;
     this.loginLoading = true;
     this.connexionError = null;
-    console.log('[Header] onLoginSubmit email=', this.loginEmail);
 
     this.auth.login({ email: this.loginEmail, password: this.loginPassword }).subscribe({
       next: () => {
         this.loginLoading = false;
         this.showConnexionModal = false;
-        this.panierOpen = true; // rouvre le panier
-        console.log('[Header] login OK, pendingStartPay=', this.pendingStartPay);
+        this.panierOpen = true;
+
+        if (this.isParent() && !this.enfantsLoaded) this.loadEnfants();
 
         if (this.pendingStartPay) {
           this.pendingStartPay = false;
@@ -279,166 +267,187 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --------- Panier ---------
+  // ======= Panier =======
   supprimerDuPanier(index: number): void {
-    console.log('[Header] supprimerDuPanier index=', index);
     const copy = [...this.panier];
     copy.splice(index, 1);
-    this.panierService.setPanier(copy);
+    this.panierService.setPanier(copy as unknown as Produit[]);
   }
 
-  // --------- Paiement (Option A : paiementId requis) ---------
+  // ======= Enfants / Bénéficiaire =======
+  private async loadEnfants(): Promise<void> {
+    try {
+      const list = await this.getEnfantsParent();
+      this.enfants = list ?? [];
+      this.enfantsLoaded = true;
+      this.applyBeneficiaryDefault();
+    } catch (e) {
+      console.error('[Header] loadEnfants error:', e);
+      this.enfants = [];
+      this.enfantsLoaded = true;
+    }
+  }
+
+  private applyBeneficiaryDefault(): void {
+    if (!this.isParent() || this.enfants.length !== 1) return;
+    const uniqueChildId = this.enfants[0].id;
+    const copy: PanierItem[] = this.panier.map((it) =>
+      it.beneficiaireId == null ? { ...it, beneficiaireId: uniqueChildId } : it
+    );
+    this.panier = copy;
+    this.panierService.setPanier(copy as unknown as Produit[]);
+  }
+
   private async getEnfantsParent(): Promise<any[]> {
-  try {
-    const response = await this.http.get<any[]>('/api/membres/mes-enfants', {
-      headers: this.getAuthHeaders()
-    }).toPromise();
-    return response || [];
-  } catch (error) {
-    console.error('[Header] Erreur récupération enfants:', error);
-    return [];
-  }
-}
-
-// Remplacez complètement la méthode payerParCB() par cette version robuste :
-async payerParCB(): Promise<void> {
-  console.log('[Header] payerParCB() lancé, isLoggedIn=', this.isLoggedIn, 'panier=', this.panier);
-
-  if (!this.isLoggedIn) {
-    console.log('[Header] pas connecté → on attend connexion');
-    this.pendingOpenCart = true;
-    this.pendingStartPay = true;
-    this.openConnexionModal();
-    return;
+    try {
+      const obs = this.http.get<any[]>('/api/membres/mes-enfants', {
+        headers: this.getAuthHeaders(),
+      });
+      const response = await firstValueFrom(obs);
+      return response || [];
+    } catch (error) {
+      console.error('[Header] Erreur récupération enfants:', error);
+      return [];
+    }
   }
 
-  if (this.panier.length === 0) {
-    console.warn('[Header] panier vide, stop paiement');
-    alert('Le panier est vide. Ajoutez des produits avant de procéder au paiement.');
-    return;
+  // ======= Récup MembreId (plus de /me /moi) =======
+  private async getMonMembreId(): Promise<number | null> {
+    // 1) si l'auth transporte déjà l'info
+    const raw: any = this.user as any;
+    if (raw?.membreId) return Number(raw.membreId);
+
+    const uid = this.user?.id;
+    if (!uid) return null;
+
+    // 2) endpoint by-utilisateur/{userId}
+    try {
+      const dto: any = await firstValueFrom(
+        this.http.get(`/api/membres/by-utilisateur/${uid}`, { headers: this.getAuthHeaders() })
+      );
+      if (dto && dto.id) return Number(dto.id);
+    } catch {}
+
+    // 3) endpoint via query ?utilisateurId=
+    try {
+      const list: any[] = await firstValueFrom(
+        this.http.get<any[]>(`/api/membres?utilisateurId=${uid}`, { headers: this.getAuthHeaders() })
+      );
+      if (Array.isArray(list) && list.length > 0 && list[0]?.id) return Number(list[0].id);
+    } catch {}
+
+    return null;
   }
 
-  try {
-    let membreId: number | null = null;
-    
-    // 🔽 GESTION DYNAMIQUE DU MEMBRE_ID
-    console.log('[Header] Rôle utilisateur:', this.user?.role);
-    
-    if (this.user?.role === 'PARENT') {
-      console.log('[Header] Parent détecté - récupération des enfants...');
-      const enfants = await this.getEnfantsParent();
-      console.log('[Header] Enfants trouvés:', enfants);
-      
-      if (enfants.length === 0) {
-        alert('Aucun enfant trouvé pour effectuer l\'achat. Veuillez contacter l\'administration.');
-        return;
+  private async resolveMembreIdPourAchat(): Promise<number | null> {
+    if (this.isParent()) {
+      if (!this.enfantsLoaded) await this.loadEnfants();
+
+      // Au moins un beneficiaire par les lignes ?
+      const ids = Array.from(
+        new Set((this.panier as any[]).map(i => (i as any).beneficiaireId).filter((x: any) => x != null))
+      ) as number[];
+
+      if (ids.length === 1) return ids[0];
+      if (ids.length === 0 && this.enfants.length === 1) return this.enfants[0].id;
+
+      if (ids.length === 0 && this.enfants.length > 1) {
+        alert('Sélectionne un bénéficiaire (enfant) pour au moins un article.');
+        return null;
       }
-      
-      if (enfants.length === 1) {
-        // Un seul enfant : utilisation automatique
-        membreId = enfants[0].id;
-        console.log('[Header] Un seul enfant trouvé:', enfants[0].nom, enfants[0].prenom, 'ID:', membreId);
-      } else {
-        // Plusieurs enfants : sélection du premier par défaut
-        // TODO: Implémenter une sélection utilisateur plus tard
-        membreId = enfants[0].id;
-        console.log('[Header] Plusieurs enfants - sélection automatique du premier:', enfants[0].nom, enfants[0].prenom, 'ID:', membreId);
-      }
-    } else if (this.user?.role === 'MEMBRE') {
-      // Pour un membre : pas besoin de membreId explicite (le backend le déduira)
-      console.log('[Header] Membre détecté - pas de membreId explicite requis');
-      membreId = null;
-    } else {
-      console.log('[Header] Rôle non géré pour achat boutique:', this.user?.role);
+      // mélange : on prend le 1er pour satisfaire la contrainte membre_id (le back utilisera aussi les lignes)
+      if (ids.length >= 1) return ids[0];
+      return null;
     }
 
-    // 1) Créer le paiement depuis le panier
-    console.log('[Header] Création du paiement depuis le panier...');
-    
-    const requestBody: any = {
-      modePaiement: 'stripe',
-      items: this.panier.map(item => ({
-        produitId: item.id,
-        quantite: item.quantite,
-        taille: item.taille,
-        couleur: item.couleur,
-        flocageActif: item.flocageActif,
-        flocage: item.flocage
-      }))
-    };
-
-    // Ajouter membreId seulement si nécessaire
-    if (membreId) {
-      requestBody.membreId = membreId;
-      console.log('[Header] membreId ajouté à la requête:', membreId);
+    // Membre simple
+    const mid = await this.getMonMembreId();
+    if (!mid) {
+      alert('Impossible de retrouver votre identifiant de membre.');
+      return null;
     }
-    
-    console.log('[Header] Corps de la requête:', requestBody);
-    
-    const createResponse = await this.http.post<any>('/api/paiements/from-cart', requestBody, {
-      headers: this.getAuthHeaders()
-    }).toPromise();
-
-    const paiementId = createResponse?.paiementId;
-    if (!paiementId) {
-      throw new Error('Impossible de créer le paiement');
-    }
-
-    console.log('[Header] Paiement créé avec ID:', paiementId);
-
-    // 2) Procéder au paiement Stripe
-    this.showPaiementModal = true;
-    await Promise.resolve();
-
-    await this.stripeService.ensureStripe();
-    console.log('[Header] Stripe initialisé');
-    
-    await this.stripeService.monterElementDans('#modal-card-element');
-    console.log('[Header] Card Element monté');
-
-    console.log('[Header] Appel createPaymentIntent() →', {
-      paiementId,
-      customerEmail: this.user?.email || undefined,
-    });
-
-    const res = await this.stripeService.createPaymentIntent({
-      paiementId,
-      customerEmail: this.user?.email || undefined,
-    });
-
-    console.log('[Header] PaymentIntent OK ->', res);
-
-  } catch (e: any) {
-    this.showPaiementModal = false;
-    console.error('[Header] Erreur préparation paiement:', e);
-    
-    // Messages d'erreur plus spécifiques
-    let errorMessage = 'Erreur lors de la préparation du paiement.';
-    if (e?.error?.error) {
-      errorMessage = e.error.error;
-    } else if (e?.message) {
-      errorMessage = e.message;
-    }
-    
-    alert(errorMessage);
+    return mid;
   }
-}
-  
-  private getAuthHeaders(): any {
-    const token = localStorage.getItem('auth_token') ?? localStorage.getItem('token') ?? '';
-    return token ? { Authorization: `Bearer ${token}` } : {};
+
+  // ======= Helpers prix =======
+  private unitPriceOf(item: PanierItem): number {
+    const total = Number((item as any).prix ?? 0);
+    if (total && item.quantite) return +(total / item.quantite).toFixed(2);
+    const pu = Number((item as any).prixUnitaire ?? 0);
+    return pu || 0;
+  }
+
+  // ======= Paiement CB (Stripe) =======
+  async payerParCB(): Promise<void> {
+    if (!this.isLoggedIn) {
+      this.pendingOpenCart = true;
+      this.pendingStartPay = true;
+      this.openConnexionModal();
+      return;
+    }
+    if (this.panier.length === 0) {
+      alert('Le panier est vide. Ajoutez des produits avant de procéder au paiement.');
+      return;
+    }
+
+    if (this.isParent() && !this.enfantsLoaded) {
+      await this.loadEnfants();
+    }
+
+    try {
+      const membreId = await this.resolveMembreIdPourAchat();
+      if (!membreId) return;
+
+      const items = this.panier.map((raw: PanierItem) => {
+        let benId: number | null = raw.beneficiaireId ?? null;
+        if (benId == null && this.isParent() && this.enfants.length === 1) {
+          benId = this.enfants[0].id;
+        }
+        return {
+          produitId: raw.id,
+          quantite: raw.quantite,
+          taille: raw.taille ?? null,
+          couleur: raw.couleur ?? null,
+          flocageActif: (raw as any).flocageActif ?? false,
+          flocage: (raw as any).flocage ?? null,
+          beneficiaireId: benId,
+        };
+      });
+
+      const requestBody: any = { membreId, modePaiement: 'stripe', items };
+
+      const createResponse = await firstValueFrom(
+        this.http.post<any>('/api/paiements/from-cart', requestBody, {
+          headers: this.getAuthHeaders(),
+        })
+      );
+
+      const paiementId = createResponse?.paiementId;
+      if (!paiementId) throw new Error('Impossible de créer le paiement');
+
+      this.showPaiementModal = true;
+      await Promise.resolve();
+
+      await this.stripeService.ensureStripe();
+      await this.stripeService.monterElementDans('#modal-card-element');
+      await this.stripeService.createPaymentIntent({
+        paiementId,
+        customerEmail: this.user?.email || undefined,
+      });
+    } catch (e: any) {
+      this.showPaiementModal = false;
+      console.error('[Header] Erreur préparation paiement:', e);
+      const msg = e?.error?.error || e?.message || 'Erreur lors de la préparation du paiement.';
+      alert(msg);
+    }
   }
 
   async validerPaiement(): Promise<void> {
-    console.log('[Header] validerPaiement()');
     const res = await this.stripeService.confirmerPaiement();
-    console.log('[Header] confirmerPaiement ->', res);
-
     if (res.success) {
       this.showPaiementModal = false;
       this.confirmationMessage = '✅ Paiement réussi ! Un reçu vous a été envoyé.';
       this.panierService.viderPanier();
-      console.log('[Header] paiement OK, panier vidé');
       setTimeout(() => (this.confirmationMessage = ''), 4000);
     } else {
       console.warn('[Header] paiement non confirmé:', res);
@@ -447,13 +456,12 @@ async payerParCB(): Promise<void> {
   }
 
   fermerPaiementModal(): void {
-    console.log('[Header] fermerPaiementModal()');
     this.showPaiementModal = false;
     this.stripeService.unmount();
   }
 
-  payerAuClub(): void {
-    console.log('[Header] payerAuClub()');
+  // ======= Paiement au club → crée EN_ATTENTE / CLUB =======
+  async payerAuClub(): Promise<void> {
     if (!this.isLoggedIn) {
       this.pendingOpenCart = true;
       this.openConnexionModal();
@@ -461,14 +469,84 @@ async payerParCB(): Promise<void> {
     }
     if (this.panier.length === 0) return;
 
-    this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
-    this.showConfirmationModal = true;
-    this.panierService.viderPanier();
-    console.log('[Header] commande au club enregistrée, panier vidé');
+    if (this.isParent() && !this.enfantsLoaded) {
+      await this.loadEnfants();
+    }
+
+    // Prépare les lignes
+    const lignes = this.panier.map((p: PanierItem) => {
+      const prixUnitaire = this.unitPriceOf(p);
+      const sousTotal = +(prixUnitaire * (p.quantite || 1)).toFixed(2);
+      return {
+        produitId: p.id,
+        quantite: p.quantite,
+        prixUnitaire,
+        sousTotal,
+        taille: p.taille ?? null,
+        couleur: p.couleur ?? null,
+        flocage: (p as any).flocage ?? null,
+        // beneficiaireId: p.beneficiaireId ?? null, // décommente si supporté
+      };
+    });
+    const montantTotal = lignes.reduce((s: number, l: any) => s + Number(l.sousTotal || 0), 0);
+
+    // DTO complet
+    const payloadFull: any = {
+      utilisateurId: this.user?.id ?? null,
+      modePaiement: 'CLUB',
+      statut: 'EN_ATTENTE',
+      dateCommande: new Date().toISOString().slice(0, 10),
+      montantTotal,
+      lignesCommande: lignes,
+    };
+
+    // 1) Endpoint dédié /with-lignes (si mappé)
+    try {
+      await firstValueFrom(
+        this.http.post('/api/commandes/with-lignes', payloadFull, { headers: this.getAuthHeaders() })
+      );
+      this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
+      this.showConfirmationModal = true;
+      this.panierService.viderPanier();
+      return;
+    } catch (e1: any) {
+      console.warn('[Header] /api/commandes/with-lignes indisponible, on tente /api/commandes', e1);
+    }
+
+    // 2) Fallback : /api/commandes (même payload)
+    try {
+      await firstValueFrom(
+        this.http.post('/api/commandes', payloadFull, { headers: this.getAuthHeaders() })
+      );
+      this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
+      this.showConfirmationModal = true;
+      this.panierService.viderPanier();
+      return;
+    } catch (e2: any) {
+      console.warn('[Header] /api/commandes KO avec payload complet, essai payload minimal', e2);
+    }
+
+    // 3) Ultime fallback : payload minimal (le service calcule statut/total)
+    try {
+      const minimal: any = {
+        utilisateurId: this.user?.id ?? null,
+        modePaiement: 'CLUB',
+        lignesCommande: lignes,
+      };
+      await firstValueFrom(
+        this.http.post('/api/commandes', minimal, { headers: this.getAuthHeaders() })
+      );
+      this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
+      this.showConfirmationModal = true;
+      this.panierService.viderPanier();
+    } catch (e3: any) {
+      console.error('[Header] création commande CLUB KO:', e3);
+      alert(e3?.error?.message || 'Impossible de créer la commande au club.');
+    }
   }
 
+  // ======= Modales =======
   closeAllModals(): void {
-    console.log('[Header] closeAllModals()');
     this.showPaiementModal = false;
     this.showConfirmationModal = false;
     this.confirmationMessage = '';

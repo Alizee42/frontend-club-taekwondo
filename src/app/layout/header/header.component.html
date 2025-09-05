@@ -32,7 +32,7 @@
         <li><a [routerLink]="['/evenements']" (click)="closeMenus()">Événements</a></li>
         <li><a [routerLink]="['/contact']" (click)="closeMenus()">Contact</a></li>
 
-        <!-- Connexion visible quand déconnecté (page /connexion avec redirection par rôle côté page) -->
+        <!-- Connexion visible quand déconnecté -->
         <li *ngIf="!isLoggedIn">
           <a [routerLink]="['/connexion']" (click)="closeMenus()">Connexion</a>
         </li>
@@ -44,7 +44,7 @@
       <span></span><span></span><span></span>
     </div>
 
-    <!-- Actions (panier toujours visible, profil seulement si connecté) -->
+    <!-- Actions -->
     <div class="user-actions">
       <!-- Panier -->
       <div class="cart-icon" (click)="togglePanier()">
@@ -66,12 +66,35 @@
               <p><strong>{{ item.nom }}</strong></p>
               <p *ngIf="item.taille">Taille : {{ item.taille }}</p>
               <p>Quantité : {{ item.quantite }}</p>
-              <!-- ✅ Prix total = item.prix (déjà totalisé dans BoutiqueComponent) -->
+
+              <!-- ✅ Sélection du bénéficiaire (si parent avec enfants) -->
+              <div class="beneficiaire-select"
+                   *ngIf="isLoggedIn && enfants?.length"
+                   aria-label="Sélection du bénéficiaire">
+                <label>Pour :</label>
+                <select
+                  [(ngModel)]="item.beneficiaireId"
+                  [ngModelOptions]="{ standalone: true }"
+                >
+                  <option [ngValue]="null">— Moi —</option>
+                  <option *ngFor="let e of enfants" [ngValue]="e.id">
+                    {{ e.prenom }} {{ e.nom }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Etiquette si déjà choisi -->
+              <p class="muted" *ngIf="!enfants?.length && item.beneficiaireNom">
+                Pour : {{ item.beneficiairePrenom }} {{ item.beneficiaireNom }}
+              </p>
+
+              <!-- ✅ Prix total = item.prix (déjà totalisé) -->
               <p>
                 Prix total :
                 <strong>{{ item.prix | number:'1.2-2' }} €</strong>
               </p>
             </div>
+
             <button class="btn-delete" (click)="supprimerDuPanier(i)">
               <i class="ri-delete-bin-line"></i>
             </button>
@@ -85,7 +108,6 @@
             <button class="btn-pay" (click)="payerAuClub()">Payer au club</button>
           </ng-container>
           <ng-template #inviteActions>
-            <!-- 👉 Modale (pas de navigation vers /connexion) -->
             <button type="button" class="btn-return" (click)="openConnexionModal()">
               Se connecter pour payer
             </button>
@@ -144,7 +166,7 @@
   </div>
 </div>
 
-<!-- Modale de connexion (uniquement déclenchée depuis le panier) -->
+<!-- Modale de connexion -->
 <div *ngIf="showConnexionModal" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal-content">
     <button class="modal-close" (click)="fermerConnexionModal()" aria-label="Fermer">×</button>

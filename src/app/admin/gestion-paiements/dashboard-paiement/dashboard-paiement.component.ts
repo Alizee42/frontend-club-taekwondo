@@ -34,12 +34,10 @@ export class DashboardPaiementComponent implements OnInit, OnDestroy {
   constructor(private paymentService: PaymentAdminService) {}
 
   ngOnInit(): void {
-    console.log('[🔄 INIT] Écoute des données dashboard...');
 
     // 👂 On s'abonne au flux observable
     this.statsSubscription = this.paymentService.dashboardStats$.subscribe(data => {
       if (!data) return;
-      console.log('[✅ STATS RÉACTIVES REÇUES]', data);
 
       this.stats = {
         totalPayes: data.totalPayes,
@@ -60,7 +58,6 @@ export class DashboardPaiementComponent implements OnInit, OnDestroy {
    * Recharge les données depuis le backend
    */
   refreshStats(): void {
-    console.log('[🔁] Rechargement des données Dashboard...');
     this.paymentService.refreshDashboardStats().subscribe({
       next: () => console.log('[✔️] Dashboard actualisé'),
       error: err => console.error('[❌] Erreur lors du refresh', err)

@@ -1,85 +1,195 @@
-<div class="base-container">
-  <h1 class="page-title">📦 Gestion des commandes</h1>
+<div class="gestion-commandes">
+  <h2 class="page-title"><i class="ri-shopping-bag-3-line"></i> Gestion des commandes</h2>
 
-  <!-- 🔍 Filtres -->
-  <div class="filters">
-    <input type="text" [(ngModel)]="search" placeholder="Rechercher par nom ou email..." />
-    <select [(ngModel)]="statutFilter">
-      <option value="">-- Tous statuts --</option>
-      <option value="en attente">En attente</option>
-      <option value="payé">Payé</option>
-      <option value="retiré">Retiré</option>
-      <option value="annulé">Annulé</option>
-    </select>
-    <select [(ngModel)]="modeFilter">
-      <option value="">-- Tous modes --</option>
-      <option value="cb">Carte bancaire</option>
-      <option value="club">Paiement au club</option>
-    </select>
-    <button (click)="chargerCommandes()">Filtrer</button>
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <!-- Filtres principaux -->
+    <div class="filters compact">
+      <select class="pill-select" [(ngModel)]="modeFilter" (change)="chargerCommandes()">
+        <option value="">Mode</option>
+        <option value="cb">CB</option>
+        <option value="club">Paiement au club</option>
+      </select>
+
+      <select class="pill-select" [(ngModel)]="statutFilter" (change)="chargerCommandes()">
+        <option value="">Statut</option>
+        <option value="en attente">En attente</option>
+        <option value="payé">Payé</option>
+        <option value="retiré">Retiré</option>
+        <option value="annulé">Annulé</option>
+      </select>
+
+      <button class="btn ghost sm" (click)="modeFilter=''; statutFilter=''; search=''; chargerCommandes()">
+        <i class="ri-eraser-line"></i><span>Réinitialiser</span>
+      </button>
+    </div>
+
+    <!-- Recherche -->
+    <div class="search">
+      <i class="ri-search-line"></i>
+      <input class="search-input" placeholder="Rechercher (nom / email / id commande)" [(ngModel)]="search"
+        (keyup.enter)="chargerCommandes()" (input)="onSearchChange()" />
+    </div>
+
+    <!-- Actions -->
+    <div class="toolbar-actions">
+      <button class="btn refresh" (click)="chargerCommandes()">
+        <i class="ri-refresh-line"></i> Rafraîchir
+      </button>
+    </div>
   </div>
 
-  <!-- 📋 Tableau -->
-  <table class="table-commandes">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Date</th>
-        <th>Utilisateur</th>
-        <th>Email</th>
-        <th>Montant</th>
-        <th>Mode</th>
-        <th>Statut</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let c of commandes">
-        <td>{{ c.id }}</td>
-        <td>{{ c.dateCommande | date:'dd/MM/yyyy' }}</td>
-        <td>{{ c.utilisateurNom }} {{ c.utilisateurPrenom }}</td>
-        <td>{{ c.utilisateurEmail }}</td>
-        <td>{{ c.montantTotal | currency:'EUR' }}</td>
-        <td>{{ c.modePaiement | uppercase }}</td>
-        <td>
-          <span class="badge" [ngClass]="c.statut">{{ c.statut }}</span>
-        </td>
-        <td>
-          <button *ngIf="c.modePaiement==='club' && c.statut==='en attente'" (click)="marquerPaye(c.id)">💶 Marquer payé</button>
-          <button *ngIf="c.statut==='payé'" (click)="marquerRetiree(c.id)">📦 Marquer retiré</button>
-          <button (click)="voirDetails(c)">🔍 Détails</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="loader" *ngIf="isLoading">Chargement…</div>
+  <div class="error" *ngIf="errorMsg"><i class="ri-error-warning-line"></i> {{ errorMsg }}</div>
 
-  <!-- 📑 Modale Détails -->
+  <!-- TABLEAU COMMANDES -->
+  <div class="table-wrapper">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Email</th>
+          <th>Mode</th>
+          <th class="num">Total</th>
+          <th>Statut</th>
+          <th class="actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of commandes; trackBy: trackByCommande">
+          <td>{{ c.dateCommande | date:'dd/MM/yyyy' }}</td>
+
+<td>
+  <div>{{ c.utilisateurPrenom }} {{ c.utilisateurNom }}</div>
+  <div class="muted" *ngIf="beneficiairesLabel(c)">
+    Pour : {{ beneficiairesLabel(c) }}
+  </div>
+</td>
+
+
+          <td class="muted">{{ c.utilisateurEmail }}</td>
+
+          <td class="cap">
+            <ng-container [ngSwitch]="c.modePaiement">
+              <span *ngSwitchCase="'cb'">CB</span>
+              <span *ngSwitchCase="'club'">Paiement au club</span>
+              <span *ngSwitchDefault class="muted">—</span>
+            </ng-container>
+          </td>
+
+          <td class="num">{{ c.montantTotal | currency:'EUR' }}</td>
+
+          <!-- STATUT + STEPPER -->
+          <td>
+            <div class="status-cell">
+              <span [class]="classeBadgeCommande(c.statut)">{{ c.statut }}</span>
+
+              <div class="status-flow" [attr.aria-label]="'Progression statut commande ' + c.id">
+                <!-- 1 : En attente -->
+                <button class="flow-step" type="button" [class.active]="c.statut === 'en attente'" [disabled]="true"
+                  title="En attente" aria-disabled="true">1</button>
+
+                <div class="flow-line"></div>
+
+                <!-- 2 : Payé -->
+                <button class="flow-step" type="button" [class.active]="c.statut === 'payé'" [disabled]="!canGoPaid(c)"
+                  [attr.aria-disabled]="!canGoPaid(c)" (click)="goPaid(c)"
+                  [attr.title]="canGoPaid(c) ? 'Passer à Payé' : 'Action indisponible'">
+                  <i class="ri-checkbox-circle-line"></i>
+                </button>
+
+                <div class="flow-line"></div>
+
+                <!-- 3 : Retiré -->
+                <button class="flow-step" type="button" [class.active]="c.statut === 'retiré'"
+                  [disabled]="!canGoRetired(c)" [attr.aria-disabled]="!canGoRetired(c)" (click)="goRetired(c)"
+                  [attr.title]="canGoRetired(c) ? 'Passer à Retiré' : 'Action indisponible'">
+                  <i class="ri-hand-heart-line"></i>
+                </button>
+              </div>
+
+              <!-- Aides contextuelles -->
+              <small class="muted hint" *ngIf="c.modePaiement === 'cb' && c.statut === 'payé'">
+                CB validé — marquer « Retiré » quand l’article est récupéré.
+              </small>
+              <small class="muted hint"
+                *ngIf="(c.modePaiement === 'club' || !c.modePaiement) && c.statut === 'en attente'">
+                Paiement au club : clique sur l’étape « Payé » quand le règlement est fait.
+              </small>
+            </div>
+          </td>
+
+          <!-- ACTIONS -->
+          <td class="actions">
+            <button class="btn-icon" (click)="voirDetails(c)" title="Détails">
+              <i class="ri-eye-line"></i>
+            </button>
+
+            <button class="btn-icon danger" *ngIf="c.statut === 'en attente'" (click)="annulerCommande(c.id)"
+              title="Annuler la commande">
+              <i class="ri-close-circle-line"></i>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!commandes.length && !isLoading && !errorMsg">
+          <td colspan="7" class="muted">Aucune commande.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODALE DETAILS -->
   <div class="modal" *ngIf="commandeSelectionnee">
     <div class="modal-content">
-      <h2>Détails commande #{{ commandeSelectionnee.id }}</h2>
-      <p><b>Utilisateur :</b> {{ commandeSelectionnee.utilisateurNom }} {{ commandeSelectionnee.utilisateurPrenom }}</p>
-      <p><b>Email :</b> {{ commandeSelectionnee.utilisateurEmail }}</p>
-      <p><b>Mode :</b> {{ commandeSelectionnee.modePaiement }}</p>
-      <p><b>Statut :</b> {{ commandeSelectionnee.statut }}</p>
+      <span class="close" (click)="fermerDetails()">&times;</span>
+      <h3>Détails – Commande #{{ commandeSelectionnee!.id }}</h3>
 
-      <h3>Produits</h3>
-      <table>
-        <tr>
-          <th>Produit</th><th>Taille</th><th>Couleur</th><th>Quantité</th><th>Prix</th>
-        </tr>
-        <tr *ngFor="let l of commandeSelectionnee.lignes">
-          <td>{{ l.produitNom }}</td>
-          <td>{{ l.taille }}</td>
-          <td>{{ l.couleur }}</td>
-          <td>{{ l.quantite }}</td>
-          <td>{{ l.prix | currency:'EUR' }}</td>
-        </tr>
+      <table class="modal-table">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Options</th>
+            <th class="num">Qté</th>
+            <th class="num">Prix</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let l of commandeSelectionnee!.lignes">
+            <td>
+              <div>{{ l.produitNom }}</div>
+              <div class="muted">ID: {{ l.produitId }}</div>
+            </td>
+            <td>
+              <div class="chips">
+                <span class="chip" *ngIf="l.taille">Taille: {{ l.taille }}</span>
+                <span class="chip" *ngIf="l.couleur">Couleur: {{ l.couleur }}</span>
+                <!-- Bénéficiaire : on affiche UNIQUEMENT si présent -->
+                <span class="chip" *ngIf="l.beneficiairePrenom || l.beneficiaireNom">
+                  Pour: {{ l.beneficiairePrenom }} {{ l.beneficiaireNom }}
+                </span>
+              </div>
+            </td>
+            <td class="num">{{ l.quantite }}</td>
+            <td class="num">{{ l.prix | currency:'EUR' }}</td>
+          </tr>
+        </tbody>
       </table>
 
-      <p><b>Total :</b> {{ commandeSelectionnee.montantTotal | currency:'EUR' }}</p>
-
       <div class="modal-actions">
-        <button (click)="fermerDetails()">Fermer</button>
+        <button class="btn subtle" (click)="fermerDetails()">Fermer</button>
+
+        <button class="btn"
+          *ngIf="commandeSelectionnee!.modePaiement === 'club' && commandeSelectionnee!.statut === 'en attente'"
+          (click)="marquerPaye(commandeSelectionnee!.id)">
+          <i class="ri-checkbox-circle-line"></i> Marquer payé
+        </button>
+
+        <button class="btn" *ngIf="commandeSelectionnee!.statut === 'payé'"
+          (click)="marquerRetiree(commandeSelectionnee!.id)">
+          <i class="ri-hand-heart-line"></i> Marquer retiré
+        </button>
       </div>
     </div>
   </div>

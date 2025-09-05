@@ -28,7 +28,6 @@ export class ParametresPaiementService {
   /** En-têtes HTTP avec le token (pour la route admin) */
   private authHeaders(): HttpHeaders {
     const token = localStorage.getItem('token') || '';
-    console.log('🔑 Token récupéré pour parametres-paiement:', token ? 'présent' : 'absent');
     return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 
@@ -39,12 +38,10 @@ export class ParametresPaiementService {
    * 3) Si encore échec => valeurs par défaut
    */
   chargerParametres(): void {
-    console.log('📡 Tentative GET (admin) ->', `${this.API}`);
     this.http.get<ParametresPaiement>(`${this.API}`, { headers: this.authHeaders() })
       .pipe(
         catchError((errAdmin) => {
           console.warn('⚠️ Échec GET admin, on tente la route publique:', errAdmin);
-          console.log('📡 Tentative GET (public) ->', `${this.API}/public`);
           return this.http.get<ParametresPaiement>(`${this.API}/public`)
             .pipe(
               catchError((errPublic) => {
@@ -54,7 +51,6 @@ export class ParametresPaiementService {
             );
         }),
         tap((data) => {
-          console.log('✅ Paramètres chargés:', data);
           this.parametresSubject.next(data || this.defaultParametres);
         })
       )
@@ -63,14 +59,12 @@ export class ParametresPaiementService {
 
   /** Alias pratique pour recharger */
   reload(): void {
-    console.log('🔄 Reload des paramètres...');
     this.chargerParametres();
   }
 
   /** Accès synchrone au cache courant */
   getParametres(): ParametresPaiement {
     const current = this.parametresSubject.value;
-    console.log('📥 Paramètres courants (cache):', current);
     return current;
   }
 
@@ -79,11 +73,9 @@ export class ParametresPaiementService {
    * Si ton backend attend un PUT, remplace `post` par `put`.
    */
   sauvegarder(parametres: ParametresPaiement): Observable<any> {
-    console.log('📡 POST (admin) ->', `${this.API}`, 'payload:', parametres);
     return this.http.post(`${this.API}`, parametres, { headers: this.authHeaders() })
       .pipe(
         tap(() => {
-          console.log('✅ Paramètres sauvegardés, mise à jour locale.');
           this.parametresSubject.next(parametres);
         }),
         catchError((err) => {

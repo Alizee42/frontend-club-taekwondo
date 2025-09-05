@@ -251,6 +251,5 @@ export class EcheancesComponent implements OnInit {
   }
 
   relancerEcheance(e: Echeance): void {
-    console.log('Relance envoyée pour échéance', e);
   }
 }

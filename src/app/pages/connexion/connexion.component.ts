@@ -50,16 +50,13 @@ export class ConnexionComponent {
       .post<any>('/api/utilisateurs/login', loginData)
       .subscribe({
         next: (response) => {
-          console.log('✅ Réponse reçue du backend :', response);
 
           const token = response.token;
           const utilisateur = response.utilisateur;
 
-          console.log('🧾 Utilisateur reçu :', utilisateur);
 
           const rawRole = response.role || utilisateur?.role || '';
           const role = rawRole?.trim().toUpperCase() || '';
-          console.log('📦 Rôle formaté :', role);
 
           if (!role) {
             console.warn('❌ Aucun rôle détecté après formatage.');
@@ -79,7 +76,6 @@ export class ConnexionComponent {
 
   // Stockage des données de l'utilisateur après une connexion réussie
   private storeUserData(token: string, role: string, utilisateur: any): void {
-    console.log('📥 Stockage du token, rôle et utilisateur dans le localStorage');
 
     if (token) localStorage.setItem('token', token);
     if (role) localStorage.setItem('role', role);
@@ -94,7 +90,6 @@ export class ConnexionComponent {
         next: (membre) => {
           if (membre?.id) {
             localStorage.setItem('membreId', String(membre.id));
-            console.log("✅ membreId stocké :", membre.id);
           } else {
             console.warn("⚠ Aucun membre retourné.");
             localStorage.removeItem('membreId');
@@ -115,15 +110,12 @@ export class ConnexionComponent {
     const redirectUrl = this.router.url.includes('connexion') ? '/' : this.router.url; // Redirection conditionnelle
     switch (role) {
       case 'ADMIN':
-        console.log('➡️ Redirection vers /admin/dashboard-admin');
         this.router.navigate(['/admin/dashboard-admin']);
         break;
       case 'MEMBRE':
-        console.log('➡️ Redirection vers /membre/dashboard-membre');
         this.router.navigate(['/membre/dashboard-membre']);
         break;
       case 'PARENT':
-        console.log('➡️ Redirection vers /parent/dashboard-parent');
         this.router.navigate(['/parent/dashboard-parent']);
         break;
       default:

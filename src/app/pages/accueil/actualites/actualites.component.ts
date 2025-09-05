@@ -46,9 +46,7 @@ export class ActualitesComponent implements OnInit {
   updateFeaturedNews(): void {
     this.featuredNews = this.news.find(item => item.isFeatured) || null;
     if (this.featuredNews) {
-      console.log(`🌟 Actualité mise à la une : ${this.featuredNews.titre}`);
     } else {
-      console.log('⚠️ Aucune actualité mise à la une.');
     }
   }
 
