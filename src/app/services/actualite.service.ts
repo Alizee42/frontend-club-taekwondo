@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class ActualiteService {
-  private apiUrl = '/api/actualites';
+  private apiUrl = `${environment.apiUrl}/actualites`;
   private actualitesSubject = new BehaviorSubject<any[]>([]);
 
   constructor(private http: HttpClient) {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Inscription {
   id?: number;
@@ -12,7 +13,7 @@ export interface Inscription {
 
 @Injectable({ providedIn: 'root' })
 export class InscriptionsService {
-  private apiUrl = '/api/inscriptions'; // adapte si besoin
+  private apiUrl = `${environment.apiUrl}/inscriptions`;
 
   constructor(private http: HttpClient) {}
 

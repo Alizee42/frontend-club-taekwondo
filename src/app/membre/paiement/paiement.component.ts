@@ -469,6 +469,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
       this.log('stripe.element.parentModal.mounted');
     });
   }
+  
   payerEcheances(): void{
     if (this.enCoursDePaiement || this.confirming) return;
     if (!this.paiementActuel || !this.cardElementParentModal || !this.echeanceEnCours) return;
@@ -478,7 +479,6 @@ export class PaiementComponent implements OnInit, AfterViewInit {
 
     const paiementId = Number(this.paiementActuel?.id || this.paiementActuel?.paiementId);
     const echeanceId = Number(this.echeanceEnCours?.id);
-
     const payload: any = { paiementId, echeanceId };
     if (this.userEmail) payload.customerEmail = this.userEmail; // ✅ reçu Stripe
     this.log('echeance.createPI.req', payload);

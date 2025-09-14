@@ -115,18 +115,13 @@ max-width: 97%;
 .user-table th{
   background: var(--blue-main);   /* thead bleu */
   color:#fff;
-  padding:12px 16px; 
-  text-align:left; 
-  font-weight:700;
-  position:sticky; 
-  top:0; 
-  z-index:1;
 }
 
-.user-table td{
-  padding: 9px 48px;
-  border-bottom:1px solid #eee; 
-  vertical-align:middle;
+.user-table th,
+.user-table td {
+  padding: 10px 40px;
+  text-align: left;
+  vertical-align: middle;
 }
 
 .user-table tr:hover{ 
@@ -242,6 +237,29 @@ max-width: 97%;
 }
 
 .hint { display:block; line-height:1.2; }
+
+/* Colonne membres : même rendu "chips" que Suivi paiements */
+.membre-cell .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+
+.membre-cell .chip {
+  background: #e9f2ff;           /* même bleu clair */
+  color: #1e40af;                /* bleu texte */
+  border: 1px solid #cfe2ff;
+  border-radius: 999px;
+  padding: .15rem .5rem;         /* compact comme dans suivi */
+  font-size: .85rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Optionnel : limite une hauteur si trop d'enfants, avec wrap propre */
+.membre-cell {
+  max-width: 320px;
+}
 
 /* ========= Responsive ========= */
 @media (max-width: 820px){

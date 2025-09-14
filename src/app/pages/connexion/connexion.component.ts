@@ -1,19 +1,22 @@
+// src/app/pages/connexion/connexion.component.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { MembreService } from '../../services/membre.service'; // ✅ import service
-import { FormsModule } from '@angular/forms';  // Import FormsModule pour ngModel
+import { MembreService } from '../../services/membre.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-connexion',
   templateUrl: './connexion.component.html',
   styleUrls: ['./connexion.component.css'],
-  standalone: true,  // Indiquer que ce composant est standalone
-  imports: [FormsModule],  // Ajouter FormsModule dans les imports
+  standalone: true,
+  imports: [FormsModule,CommonModule],
 })
 export class ConnexionComponent {
-  email: string = '';
-  password: string = '';
+  email = '';
+  password = '';
 
   constructor(
     private router: Router,
@@ -21,124 +24,80 @@ export class ConnexionComponent {
     private membreService: MembreService
   ) {}
 
-  // Soumission du formulaire de connexion
   onSubmit(): void {
-    console.log('🔑 Tentative de connexion avec :', {
-      email: this.email,
-      password: this.password,
-    });
+    if (!this.email || !this.password) { alert('Veuillez remplir tous les champs.'); return; }
+    if (!this.isValidEmail(this.email)) { alert('Email invalide.'); return; }
 
-    // Vérifications de validation des champs
-    if (!this.email || !this.password) {
-      alert('Veuillez remplir correctement tous les champs.');
-      return;
-    }
-
-    if (!this.isValidEmail(this.email)) {
-      alert('Veuillez fournir une adresse email valide.');
-      return;
-    }
-
-    // Préparation des données de connexion
-    const loginData = {
-      email: this.email,
-      password: this.password,
-    };
-
-    // Envoi des données de connexion au backend
-    this.http
-      .post<any>('/api/utilisateurs/login', loginData)
+    this.http.post<any>('/api/utilisateurs/login', { email: this.email, password: this.password })
       .subscribe({
         next: (response) => {
+          const token = (response?.token || '').trim();
+          const utilisateur = response?.utilisateur || null;
+          const rawRole = response?.role || utilisateur?.role || '';
+          const role = String(rawRole || '').trim().toUpperCase();
 
-          const token = response.token;
-          const utilisateur = response.utilisateur;
+          if (!token || !role) { alert('Connexion incomplète (token/role manquant).'); return; }
 
-
-          const rawRole = response.role || utilisateur?.role || '';
-          const role = rawRole?.trim().toUpperCase() || '';
-
-          if (!role) {
-            console.warn('❌ Aucun rôle détecté après formatage.');
-            alert("Rôle non détecté. Veuillez contacter l'administrateur.");
-            return;
-          }
-
-          // Stockage des données utilisateur dans le localStorage
           this.storeUserData(token, role, utilisateur);
         },
         error: (err) => {
-          console.error('❌ Erreur lors de la requête POST :', err);
+          console.error('❌ Login échoué', err);
           this.handleError(err);
-        },
-      });
-  }
-
-  // Stockage des données de l'utilisateur après une connexion réussie
-  private storeUserData(token: string, role: string, utilisateur: any): void {
-
-    if (token) localStorage.setItem('token', token);
-    if (role) localStorage.setItem('role', role);
-    if (utilisateur) {
-      localStorage.setItem('utilisateur', JSON.stringify(utilisateur));
-      if (utilisateur.email) {
-        localStorage.setItem('email', utilisateur.email);
-      }
-
-      // Appel au service pour récupérer les informations du membre
-      this.membreService.getMembreConnecte().subscribe({
-        next: (membre) => {
-          if (membre?.id) {
-            localStorage.setItem('membreId', String(membre.id));
-          } else {
-            console.warn("⚠ Aucun membre retourné.");
-            localStorage.removeItem('membreId');
-          }
-          this.redirectBasedOnRole(role);
-        },
-        error: (err) => {
-          console.error("❌ Erreur récupération membre connecté :", err);
-          localStorage.removeItem('membreId');
-          this.redirectBasedOnRole(role);
         }
       });
-    }
   }
 
-  // Redirection après connexion en fonction du rôle
+  private storeUserData(token: string, role: string, utilisateur: any): void {
+    // ✅ unifier : on stocke token sous les deux clés (certaines pages lisent auth_token)
+    localStorage.setItem('token', token);
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('role', role);
+    if (utilisateur) {
+      localStorage.setItem('utilisateur', JSON.stringify(utilisateur));
+      if (utilisateur.email) localStorage.setItem('email', utilisateur.email);
+    }
+
+    // récupérer (optionnel) le membre lié ; si 400/401 → silencieux
+    this.membreService.getMembreConnecte().subscribe({
+      next: (membre) => {
+        if (membre?.id) localStorage.setItem('membreId', String(membre.id));
+        this.redirectBasedOnRole(role);
+      },
+      error: (err) => {
+        // ne pas faire peur en console pour 400/401
+        if (err?.status === 400 || err?.status === 401) {
+          console.debug('ℹ️ Membre non renvoyé (pas lié ou non requis).');
+        } else {
+          console.error('Erreur /membres/me', err);
+        }
+        localStorage.removeItem('membreId');
+        this.redirectBasedOnRole(role);
+      }
+    });
+  }
+
   private redirectBasedOnRole(role: string): void {
-    const redirectUrl = this.router.url.includes('connexion') ? '/' : this.router.url; // Redirection conditionnelle
     switch (role) {
-      case 'ADMIN':
-        this.router.navigate(['/admin/dashboard-admin']);
-        break;
-      case 'MEMBRE':
-        this.router.navigate(['/membre/dashboard-membre']);
-        break;
-      case 'PARENT':
-        this.router.navigate(['/parent/dashboard-parent']);
-        break;
+      case 'ADMIN':  this.router.navigate(['/admin/dashboard-admin']); break;
+      case 'MEMBRE': this.router.navigate(['/membre/dashboard-membre']); break;
+      case 'PARENT': this.router.navigate(['/parent/dashboard-parent']); break;
       default:
-        console.warn('⚠️ Rôle non reconnu :', role);
         alert("Rôle inconnu. Veuillez contacter l'administrateur.");
-        break;
     }
   }
 
-  // Gestion des erreurs de connexion
   private handleError(err: any): void {
-    console.error('📛 Erreur de connexion détectée :', err);
-
-    if (err.status === 401) {
-      alert('Email ou mot de passe incorrect.');
-    } else {
-      alert('Une erreur est survenue. Veuillez réessayer plus tard.');
-    }
+    if (err?.status === 401) alert('Email ou mot de passe incorrect.');
+    else alert('Une erreur est survenue. Réessayez plus tard.');
   }
 
-  // Validation de l'email avec une regex
   private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
+
+  showPassword = false;
+
+  
+togglePassword() { this.showPassword = !this.showPassword; }
+
 }

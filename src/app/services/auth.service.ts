@@ -2,6 +2,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, map, tap, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+
 
 type Role = 'ADMIN' | 'PARENT' | 'MEMBRE';
 
@@ -30,8 +32,8 @@ interface AuthState {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly apiUrl = '/api/utilisateurs';
-
+  private readonly apiUrl = `${environment.apiUrl}/utilisateurs`;
+  
   // Clés de stockage (ne jamais clear tout le localStorage)
   private readonly K_TOKEN = 'token';
   private readonly K_ROLE = 'role';
@@ -120,7 +122,6 @@ export class AuthService {
   isMembre(): boolean { return this.hasRole('MEMBRE'); }
   isParent(): boolean { return this.hasRole('PARENT'); }
 
-  /** Headers avec Bearer pour tes requêtes protégées */
   getAuthHeaders(): HttpHeaders {
     const t = this.getToken();
     return t ? new HttpHeaders({ Authorization: `Bearer ${t}` }) : new HttpHeaders();
@@ -168,24 +169,21 @@ export class AuthService {
     const roleRaw = localStorage.getItem(this.K_ROLE);
     const role = roleRaw ? roleRaw.toUpperCase() : null;
 
-    // JSON.parse sécurisé
     let user: Utilisateur | null = null;
     const rawUser = localStorage.getItem(this.K_USER);
     if (rawUser) {
       try {
         user = JSON.parse(rawUser);
       } catch {
-        localStorage.removeItem(this.K_USER); // purge si corrompu
+        localStorage.removeItem(this.K_USER); 
       }
     }
 
-    // Token expiré → purge immédiate
     if (token && this.isTokenExpired(token)) {
       this.logout();
       return;
     }
 
-    // Cohérence: propage le rôle dans l'objet user s'il manque
     const userWithRole = user ? { ...user, role: user.role ?? role ?? undefined } : null;
 
     const connected = !!token && !this.isTokenExpired(token);

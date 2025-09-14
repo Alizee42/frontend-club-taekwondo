@@ -32,24 +32,36 @@ export class DashboardMembreComponent implements OnInit {
     this.loadUtilisateur();
   }
 
-  private loadUtilisateur(): void {
-    // Adapter l’endpoint à ton backend si besoin (ex: /api/auth/me)
-    this.http.get<Utilisateur | any>(`${this.API_BASE}/utilisateurs/me`).subscribe({
-      next: (u: any) => {
-        this.utilisateurConnecte = this.normalizeUser(u);
+    private loadUtilisateur(): void {
+    const token = localStorage.getItem('token'); // Récupérer le token depuis le localStorage
+    if (!token) {
+      console.error('Token manquant. Redirection vers la page de connexion.');
+      this.router.navigate(['/connexion']); // Rediriger si le token est manquant
+      return;
+    }
+  
+    const headers = { Authorization: `Bearer ${token}` }; // Ajouter le token dans les en-têtes
+  
+    this.http.get<Utilisateur>(`${this.API_BASE}/utilisateurs/me`, { headers }).subscribe({
+      next: (u) => {
+        console.log('Utilisateur récupéré avec succès :', u);
+        this.utilisateurConnecte = u;
       },
-      error: () => {
-        // fallback: rien de bloquant pour la compilation/affichage
-        this.utilisateurConnecte = null;
+      error: (err) => {
+        console.error('Erreur lors de la récupération de l\'utilisateur :', err);
+        if (err.status === 401) {
+          console.warn('Token invalide ou expiré. Redirection vers la page de connexion.');
+          this.router.navigate(['/connexion']); // Rediriger si le token est invalide
+        }
       }
     });
   }
 
-  private normalizeUser(u: any): Utilisateur {
+    private normalizeUser(u: any): Utilisateur {
     return {
       id: u?.id ?? u?._id ?? u?.uuid,
-      nom: (u?.nom ?? '').trim(),
-      prenom: (u?.prenom ?? '').trim(),
+      nom: (u?.nom ?? u?.lastName ?? '').trim(),
+      prenom: (u?.prenom ?? u?.firstName ?? '').trim(),
       email: u?.email ?? '',
       telephone: u?.telephone ?? '',
       dateNaissance: u?.dateNaissance ?? undefined,

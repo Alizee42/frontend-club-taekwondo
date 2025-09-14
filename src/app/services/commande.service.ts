@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Commande {
   id?: number;
@@ -13,7 +14,7 @@ export interface Commande {
 
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
-  private apiUrl = '/api/commandes';
+  private apiUrl = `${environment.apiUrl}/commandes`;
   private jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
   // 👉 change ici si ton backend utilise EN_ATTENTE_PROBATION

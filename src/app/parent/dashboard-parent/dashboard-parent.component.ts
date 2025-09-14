@@ -72,4 +72,7 @@ export class DashboardParentComponent implements OnInit {
   navigateToCommandes(): void {
     this.router.navigate(['/parent/commandes']);
   }
+    navigateToEvenements(): void {
+    this.router.navigate(['/parent/evenements']);
+  }
 }

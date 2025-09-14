@@ -8,6 +8,7 @@ import {
   StripeElements,
 } from '@stripe/stripe-js';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 type CreatePiPayload = {
   paiementId: number;
@@ -23,7 +24,7 @@ type CreatePiResponse = {
 
 @Injectable({ providedIn: 'root' })
 export class StripeService {
-  private readonly backendUrl = '/api/stripe';
+  private readonly backendUrl = `${environment.apiUrl}/stripe`;
 
   private stripe: Stripe | null = null;
   private elements: StripeElements | null = null;

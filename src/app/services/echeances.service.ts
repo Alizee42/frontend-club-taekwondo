@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Echeance {
   id: number;
@@ -20,7 +21,7 @@ export interface Echeance {
 
 @Injectable({ providedIn: 'root' })
 export class EcheancesService {
-  private apiUrl = '/api/echeances';
+  private apiUrl = `${environment.apiUrl}/echeances`;
 
   constructor(private http: HttpClient) {}
 

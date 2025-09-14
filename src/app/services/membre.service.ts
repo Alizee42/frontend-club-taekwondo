@@ -1,6 +1,9 @@
+// src/app/services/membre.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Membre {
   id: number;
@@ -8,29 +11,39 @@ export interface Membre {
   prenom: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class MembreService {
-  private readonly apiUrl = '/api/membres';
+  private apiUrl = `${environment.apiUrl}/membres`;
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * 🔹 Récupère les enfants du parent connecté
-   */
-  getMembresPourParentConnecte(): Observable<Membre[]> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<Membre[]>(`${this.apiUrl}/mes-enfants`, { headers });
+  private authHeaders(): HttpHeaders {
+    // lit token OU auth_token ; n’ajoute le header que si présent
+    const token = (localStorage.getItem('token') || localStorage.getItem('auth_token') || '').trim();
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 
-  /**
-   * 🔹 Récupère le membre lié à l'utilisateur connecté
-   */
-  getMembreConnecte(): Observable<Membre> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<Membre>(`${this.apiUrl}/me`, { headers });
+  /** Enfants du parent connecté */
+  getMembresPourParentConnecte(): Observable<Membre[] | null> {
+    const headers = this.authHeaders();
+    if (!headers.has('Authorization')) return of(null);
+    return this.http.get<Membre[]>(`${this.apiUrl}/mes-enfants`, { headers }).pipe(
+      catchError(err => {
+        if (err.status === 400 || err.status === 401) return of(null);
+        return of(null);
+      })
+    );
+  }
+
+  /** Membre lié à l’utilisateur connecté */
+  getMembreConnecte(): Observable<Membre | null> {
+    const headers = this.authHeaders();
+    if (!headers.has('Authorization')) return of(null);
+    return this.http.get<Membre>(`${this.apiUrl}/me`, { headers }).pipe(
+      catchError(err => {
+        if (err.status === 400 || err.status === 401) return of(null);
+        return of(null);
+      })
+    );
   }
 }

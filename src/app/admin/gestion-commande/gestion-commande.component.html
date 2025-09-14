@@ -27,8 +27,11 @@
     <!-- Recherche -->
     <div class="search">
       <i class="ri-search-line"></i>
-      <input class="search-input" placeholder="Rechercher (nom / email / id commande)" [(ngModel)]="search"
-        (keyup.enter)="chargerCommandes()" (input)="onSearchChange()" />
+      <input class="search-input"
+             placeholder="Rechercher (nom / id commande)"
+             [(ngModel)]="search"
+             (keyup.enter)="chargerCommandes()"
+             (input)="onSearchChange()" />
     </div>
 
     <!-- Actions -->
@@ -49,7 +52,7 @@
         <tr>
           <th>Date</th>
           <th>Client</th>
-          <th>Email</th>
+          <th>Membre(s)</th>
           <th>Mode</th>
           <th class="num">Total</th>
           <th>Statut</th>
@@ -60,15 +63,20 @@
         <tr *ngFor="let c of commandes; trackBy: trackByCommande">
           <td>{{ c.dateCommande | date:'dd/MM/yyyy' }}</td>
 
-<td>
-  <div>{{ c.utilisateurPrenom }} {{ c.utilisateurNom }}</div>
-  <div class="muted" *ngIf="beneficiairesLabel(c)">
-    Pour : {{ beneficiairesLabel(c) }}
-  </div>
-</td>
+          <!-- Client (parent) -->
+          <td>
+            <div>{{ c.utilisateurPrenom }} {{ c.utilisateurNom }}</div>
+          </td>
 
-
-          <td class="muted">{{ c.utilisateurEmail }}</td>
+          <!-- Membre(s) -->
+          <td class="membre-cell">
+            <div class="chips">
+              <span class="chip" *ngFor="let m of beneficiaires(c); trackBy: trackByMembre">
+                {{ m }}
+              </span>
+            </div>
+          </td>
+          
 
           <td class="cap">
             <ng-container [ngSwitch]="c.modePaiement">
@@ -88,14 +96,14 @@
               <div class="status-flow" [attr.aria-label]="'Progression statut commande ' + c.id">
                 <!-- 1 : En attente -->
                 <button class="flow-step" type="button" [class.active]="c.statut === 'en attente'" [disabled]="true"
-                  title="En attente" aria-disabled="true">1</button>
+                        title="En attente" aria-disabled="true">1</button>
 
                 <div class="flow-line"></div>
 
                 <!-- 2 : Payé -->
                 <button class="flow-step" type="button" [class.active]="c.statut === 'payé'" [disabled]="!canGoPaid(c)"
-                  [attr.aria-disabled]="!canGoPaid(c)" (click)="goPaid(c)"
-                  [attr.title]="canGoPaid(c) ? 'Passer à Payé' : 'Action indisponible'">
+                        [attr.aria-disabled]="!canGoPaid(c)" (click)="goPaid(c)"
+                        [attr.title]="canGoPaid(c) ? 'Passer à Payé' : 'Action indisponible'">
                   <i class="ri-checkbox-circle-line"></i>
                 </button>
 
@@ -103,8 +111,8 @@
 
                 <!-- 3 : Retiré -->
                 <button class="flow-step" type="button" [class.active]="c.statut === 'retiré'"
-                  [disabled]="!canGoRetired(c)" [attr.aria-disabled]="!canGoRetired(c)" (click)="goRetired(c)"
-                  [attr.title]="canGoRetired(c) ? 'Passer à Retiré' : 'Action indisponible'">
+                        [disabled]="!canGoRetired(c)" [attr.aria-disabled]="!canGoRetired(c)" (click)="goRetired(c)"
+                        [attr.title]="canGoRetired(c) ? 'Passer à Retiré' : 'Action indisponible'">
                   <i class="ri-hand-heart-line"></i>
                 </button>
               </div>
@@ -114,7 +122,7 @@
                 CB validé — marquer « Retiré » quand l’article est récupéré.
               </small>
               <small class="muted hint"
-                *ngIf="(c.modePaiement === 'club' || !c.modePaiement) && c.statut === 'en attente'">
+                     *ngIf="(c.modePaiement === 'club' || !c.modePaiement) && c.statut === 'en attente'">
                 Paiement au club : clique sur l’étape « Payé » quand le règlement est fait.
               </small>
             </div>
@@ -127,7 +135,7 @@
             </button>
 
             <button class="btn-icon danger" *ngIf="c.statut === 'en attente'" (click)="annulerCommande(c.id)"
-              title="Annuler la commande">
+                    title="Annuler la commande">
               <i class="ri-close-circle-line"></i>
             </button>
           </td>
@@ -165,7 +173,6 @@
               <div class="chips">
                 <span class="chip" *ngIf="l.taille">Taille: {{ l.taille }}</span>
                 <span class="chip" *ngIf="l.couleur">Couleur: {{ l.couleur }}</span>
-                <!-- Bénéficiaire : on affiche UNIQUEMENT si présent -->
                 <span class="chip" *ngIf="l.beneficiairePrenom || l.beneficiaireNom">
                   Pour: {{ l.beneficiairePrenom }} {{ l.beneficiaireNom }}
                 </span>
@@ -181,13 +188,13 @@
         <button class="btn subtle" (click)="fermerDetails()">Fermer</button>
 
         <button class="btn"
-          *ngIf="commandeSelectionnee!.modePaiement === 'club' && commandeSelectionnee!.statut === 'en attente'"
-          (click)="marquerPaye(commandeSelectionnee!.id)">
+                *ngIf="commandeSelectionnee!.modePaiement === 'club' && commandeSelectionnee!.statut === 'en attente'"
+                (click)="marquerPaye(commandeSelectionnee!.id)">
           <i class="ri-checkbox-circle-line"></i> Marquer payé
         </button>
 
         <button class="btn" *ngIf="commandeSelectionnee!.statut === 'payé'"
-          (click)="marquerRetiree(commandeSelectionnee!.id)">
+                (click)="marquerRetiree(commandeSelectionnee!.id)">
           <i class="ri-hand-heart-line"></i> Marquer retiré
         </button>
       </div>

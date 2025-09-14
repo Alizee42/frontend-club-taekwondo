@@ -6,8 +6,6 @@ import { ContactComponent } from './pages/contact/contact.component';
 import { ConnexionComponent } from './pages/connexion/connexion.component';
 import { DashboardAdminComponent } from './admin/dashboard-admin/dashboard-admin.component';
 import { DashboardMembreComponent } from './membre/dashboard-membre/dashboard-membre.component';
-import { AdminLayoutComponent } from './admin/layout/admin-layout/admin-layout.component';
-import { MembreLayoutComponent } from './membre/layout/membre-layout/membre-layout.component';
 import { ProfilComponent } from './pages/profil/profil.component';
 import { AuthGuard } from './guards/auth.guard';
 import { GestionHorairesComponent } from './admin/gestion-horaires/gestion-horaires.component';
@@ -28,6 +26,9 @@ import { DashboardParentComponent } from './parent/dashboard-parent/dashboard-pa
 import { ConnectedLayoutComponent } from './shared/layouts/connected-layout/connected-layout.component';
 import { PaiementParentComponent } from './parent/paiement-parent/paiement-parent.component';
 import { DocumentsParentComponent } from './parent/documents-parent/documents-parent.component';
+import { CommandesMembreComponent } from './membre/commandes-membre/commandes-membre.component';
+import { CommandesParentComponent } from './parent/commandes-parent/commandes-parent.component';
+
 
 export const routes: Routes = [
   // 🌐 Routes publiques
@@ -76,7 +77,9 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard-membre', component: DashboardMembreComponent },
       { path: 'documents', component: DocumentsComponent },
-      { path: 'paiements', component: PaiementComponent }
+      { path: 'paiements', component: PaiementComponent },
+      { path: 'commandes', component: CommandesMembreComponent },
+
     ]
   },
 
@@ -89,7 +92,8 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard-parent', component: DashboardParentComponent },
       { path: 'paiements', component: PaiementParentComponent },
-      { path: 'documents', component: DocumentsParentComponent }
+      { path: 'documents', component: DocumentsParentComponent },
+      { path: 'commandes', component: CommandesParentComponent }
     ]
   },
 

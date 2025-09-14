@@ -144,48 +144,42 @@ export class GestionCommandeComponent implements OnInit {
   }
 
   private mapApiToUi(api: ApiCommande): CommandeDTO {
-  // ❶ on part de la conversion habituelle
-  let uiStatut = this.apiStatutToUi(api.statut);
-  let uiMode   = this.apiModeToUi(api.modePaiement);
-
-  // ❷ correctif AFFICHAGE : si le back a enregistré une date de paiement,
-  //    on force l'état "payé" (quelle que soit la valeur de statut renvoyée)
-  if (api.datePaiement) {
-    uiStatut = 'payé';
-    // si le mode n'est pas précisé mais qu'il y a une date de paiement,
-    // on suppose que c'est un paiement CB (Stripe) côté UI
-    if (!uiMode) uiMode = 'cb';
+    // ❶ conversion de base
+    let uiStatut = this.apiStatutToUi(api.statut);
+    let uiMode   = this.apiModeToUi(api.modePaiement);
+  
+    // ❷ si une date de paiement existe, forcer "payé"
+    if (api.datePaiement) {
+      uiStatut = 'payé';
+      if (!uiMode) uiMode = 'cb';
+    }
+  
+    return {
+      id: api.id,
+      dateCommande: api.dateCommande ? `${api.dateCommande}T00:00:00` : '',
+      utilisateurId: api.utilisateurId,
+      utilisateurNom: api.utilisateur?.nom ?? '',
+      utilisateurPrenom: api.utilisateur?.prenom ?? '',
+      utilisateurEmail: api.utilisateur?.email ?? '',
+      montantTotal: Number(api.montantTotal ?? 0),
+      modePaiement: uiMode,
+      statut: uiStatut,
+      lignes: (api.lignesCommande || []).map((l) => ({
+        produitId: l.produitId,
+        produitNom: l.produitNom ?? `Produit #${l.produitId}`,
+        taille: l.taille ?? null,
+        couleur: l.couleur ?? null,
+        quantite: l.quantite,
+        prix: Number(l.sousTotal ?? (l.prixUnitaire * l.quantite)),
+        imageUrl: undefined,
+        // ⬇️⬇️ CORRECTIF ICI : on lit sur la ligne, pas sur api
+        beneficiaireId: l.beneficiaireId ?? null,
+        beneficiairePrenom: l.beneficiairePrenom ?? null,
+        beneficiaireNom: l.beneficiaireNom ?? null,
+      }))
+    };
   }
-
-  // (garde le fallback que tu avais déjà si tu veux)
-  // if (!uiMode && uiStatut === 'payé' && api.datePaiement) uiMode = 'cb';
-
-  return {
-    id: api.id,
-    dateCommande: api.dateCommande ? `${api.dateCommande}T00:00:00` : '',
-    utilisateurId: api.utilisateurId,
-    utilisateurNom: api.utilisateur?.nom ?? '',
-    utilisateurPrenom: api.utilisateur?.prenom ?? '',
-    utilisateurEmail: api.utilisateur?.email ?? '',
-    montantTotal: Number(api.montantTotal ?? 0),
-    modePaiement: uiMode,
-    statut: uiStatut,
-    lignes: (api.lignesCommande || []).map((l) => ({
-      produitId: l.produitId,
-      produitNom: l.produitNom ?? `Produit #${l.produitId}`,
-      taille: l.taille ?? null,
-      couleur: l.couleur ?? null,
-      quantite: l.quantite,
-      prix: Number(l.sousTotal ?? (l.prixUnitaire * l.quantite)),
-      imageUrl: undefined,
-       beneficiaireId: (api as any).beneficiaireId ?? null,
-    beneficiairePrenom: (api as any).beneficiairePrenom ?? null,
-    beneficiaireNom: (api as any).beneficiaireNom ?? null,
-    }))
-  };
-}
-
-
+  
   // =========================
   //     CHARGEMENT / FILTRES
   // =========================
@@ -314,15 +308,16 @@ export class GestionCommandeComponent implements OnInit {
   }
 // Résume "pour qui" à partir des lignes (bénéficiaire par ligne)
 // Résume "Pour : …" à partir des lignes
-beneficiairesLabel(c: { lignes?: Array<{ beneficiairePrenom?: string|null; beneficiaireNom?: string|null }> }): string {
-  const noms = Array.from(new Set(
-    (c?.lignes ?? [])
-      .map(l => `${l.beneficiairePrenom ?? ''} ${l.beneficiaireNom ?? ''}`.trim())
-      .filter(Boolean)
-  ));
-  if (!noms.length) return '';
-  return noms.length <= 2 ? noms.join(', ') : `${noms.slice(0, 2).join(', ')} (+${noms.length - 2})`;
+beneficiaires(c: { lignes?: Array<{ beneficiairePrenom?: string|null; beneficiaireNom?: string|null }> }): string[] {
+  const set = new Set<string>();
+  for (const l of (c?.lignes ?? [])) {
+    const full = `${l.beneficiairePrenom ?? ''} ${l.beneficiaireNom ?? ''}`.trim();
+    if (full) set.add(full);
+  }
+  return Array.from(set);
 }
+
+trackByMembre = (_: number, m: string) => m;
 
 
 

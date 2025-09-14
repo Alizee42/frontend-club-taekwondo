@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { DashboardStats } from '../models/dashboard-stats.model';
+import { environment } from '../../environments/environment';
 
 /** ---- Types utiles pour les appels ---- */
 export interface EcheanceInput {
@@ -45,10 +46,8 @@ export interface PaiementResponse {
 
 @Injectable({ providedIn: 'root' })
 export class PaymentAdminService {
-  /** Endpoints paiements */
-  private apiUrl = '/api/paiements';
-  /** Endpoints référentiel (utilisateurs/membres) */
-  private refUrl = '/api';
+  private readonly apiUrl = `${environment.apiUrl}/paiements`;
+  private readonly refUrl = `${environment.apiUrl}`;
 
   private dashboardStatsSubject = new BehaviorSubject<DashboardStats | null>(null);
   dashboardStats$ = this.dashboardStatsSubject.asObservable();
