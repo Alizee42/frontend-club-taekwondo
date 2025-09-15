@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class EvenementService {
-  private apiUrl = `${environment.apiUrl}/evenements`;
+  private readonly apiUrl = `${environment.apiUrl}/evenements`;
 
   constructor(private http: HttpClient) {}
 

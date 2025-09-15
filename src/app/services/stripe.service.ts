@@ -1,6 +1,6 @@
 // src/app/services/stripe.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {
   loadStripe,
   Stripe,
@@ -42,24 +42,21 @@ export class StripeService {
     return el?.content || null;
   }
 
-  /**
-   * Récupère et met en cache la clé publique Stripe.
-   * Ordre: /api/stripe/public-key -> /api/parametres-paiement (admin) -> /public -> <meta>.
-   */
+  /** Récupère et met en cache la clé publique Stripe */
   private getPublicKey(): Promise<string> {
     if (!this.publicKeyPromise) {
       this.publicKeyPromise = (async () => {
-        // 0) endpoint public clé Stripe (recommandé)
+        // 0) endpoint public clé Stripe
         try {
           const r = await firstValueFrom(this.http.get<any>(`${this.backendUrl}/public-key`));
           const k = r?.publicKey ?? r?.key ?? r?.stripePublicKey;
           if (k) return k;
-        } catch { /* 204/404/401 -> fallbacks */ }
+        } catch { /* ignore */ }
 
-        // 1) paramètres admin (peut nécessiter auth)
+        // 1) paramètres admin
         try {
           const admin = await firstValueFrom(
-            this.http.get<any>('/api/parametres-paiement', { headers: this.getAuthHeaders() })
+            this.http.get<any>(`${environment.apiUrl}/parametres-paiement`)
           );
           const k = admin?.stripePublicKey ?? admin?.clePubliqueStripe ?? admin?.publishableKey ?? admin?.stripe_pk;
           if (k) return k;
@@ -67,7 +64,7 @@ export class StripeService {
 
         // 2) paramètres publics
         try {
-          const pub = await firstValueFrom(this.http.get<any>('/api/parametres-paiement/public'));
+          const pub = await firstValueFrom(this.http.get<any>(`${environment.apiUrl}/parametres-paiement/public`));
           const k = pub?.stripePublicKey ?? pub?.clePubliqueStripe ?? pub?.publishableKey ?? pub?.stripe_pk;
           if (k) return k;
         } catch { /* ignore */ }
@@ -86,7 +83,6 @@ export class StripeService {
     return this.publicKeyPromise;
   }
 
-  /** Initialise Stripe une fois, puis réutilise l'instance */
   async ensureStripe(): Promise<Stripe> {
     if (this.stripe) return this.stripe;
     const pk = await this.getPublicKey();
@@ -96,23 +92,13 @@ export class StripeService {
     return stripe;
   }
 
-  /** Compat */
   getStripeInstance(): Promise<Stripe> {
     return this.ensureStripe();
   }
 
   // ---------- API BACKEND ----------
 
-  private getAuthHeaders(): HttpHeaders {
-    // accepte auth_token OU token (pas d’interceptor)
-    const token =
-      localStorage.getItem('auth_token') ??
-      localStorage.getItem('token') ??
-      '';
-    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
-  }
-
-  /** Crée (ou réutilise) un PaymentIntent côté backend par paiementId. */
+  /** Crée (ou réutilise) un PaymentIntent côté backend */
   async createPaymentIntent(paiementData: CreatePiPayload): Promise<CreatePiResponse> {
     if (!paiementData?.paiementId) {
       throw new Error(
@@ -122,11 +108,7 @@ export class StripeService {
     }
 
     const res = await firstValueFrom(
-      this.http.post<CreatePiResponse>(
-        `${this.backendUrl}/create-payment-intent`,
-        paiementData,
-        { headers: this.getAuthHeaders() }
-      )
+      this.http.post<CreatePiResponse>(`${this.backendUrl}/create-payment-intent`, paiementData)
     );
 
     this.clientSecret = res?.clientSecret || null;
@@ -135,14 +117,11 @@ export class StripeService {
 
   // ---------- STRIPE ELEMENTS ----------
 
-  /** Monte le Card Element dans un sélecteur (ex: '#stripe-card' ou '#modal-card-element') */
   async monterElementDans(selector: string): Promise<void> {
     const stripe = await this.ensureStripe();
 
-    // (re)crée les elements avec locale FR
     this.elements = stripe.elements({ locale: 'fr' });
 
-    // démonte l’éventuel précédent
     if (this.cardElement) {
       try { this.cardElement.unmount(); } catch {}
       this.cardElement = null;
@@ -157,7 +136,6 @@ export class StripeService {
     });
   }
 
-  /** À appeler dans ngOnDestroy du composant */
   unmount(): void {
     if (this.cardElement) {
       try { this.cardElement.unmount(); } catch {}
@@ -170,7 +148,6 @@ export class StripeService {
     this.clientSecret = clientSecret;
   }
 
-  /** Confirme le paiement avec Stripe.js */
   async confirmerPaiement(): Promise<{
     success: boolean;
     status?: string;

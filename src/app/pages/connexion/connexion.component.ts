@@ -52,6 +52,8 @@ export class ConnexionComponent {
     localStorage.setItem('token', token);
     localStorage.setItem('auth_token', token);
     localStorage.setItem('role', role);
+    console.log('Token stocké :', token);
+console.log('Rôle stocké :', role);
     if (utilisateur) {
       localStorage.setItem('utilisateur', JSON.stringify(utilisateur));
       if (utilisateur.email) localStorage.setItem('email', utilisateur.email);

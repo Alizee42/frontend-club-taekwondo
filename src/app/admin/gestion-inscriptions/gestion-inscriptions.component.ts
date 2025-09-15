@@ -1,7 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 
 type Statut = 'NOUVEAU'|'VALIDE'|'REFUSE'|string;
@@ -41,7 +41,7 @@ type SortKey = 'nom' | 'email' | 'telephone' | 'nbMembres';
 @Component({
   selector: 'app-gestion-inscriptions',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, HttpClientModule],
+  imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './gestion-inscriptions.component.html',
   styleUrls: ['./gestion-inscriptions.component.css']
 })

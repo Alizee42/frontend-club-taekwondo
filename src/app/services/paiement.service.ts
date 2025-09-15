@@ -1,3 +1,4 @@
+// src/app/services/paiement.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -31,37 +32,44 @@ export class PaiementService {
 
   constructor(private http: HttpClient) {}
 
+  /** Récupérer un paiement par ID */
   getPaiement(id: number): Observable<Paiement> {
     return this.http.get<Paiement>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
   }
 
-  payerCotisation(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${id}/payer`, {}).pipe(catchError(this.handleError));
+  /** Payer une cotisation */
+  payerCotisation(id: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${id}/payer`, {}).pipe(catchError(this.handleError));
   }
 
-  payerEcheance(id: number, nombreEcheances: number, montantTotalAPayer: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${id}/payer-echeance`, { nombreEcheances, montantTotalAPayer })
+  /** Payer une échéance */
+  payerEcheance(id: number, nombreEcheances: number, montantTotalAPayer: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${id}/payer-echeance`, { nombreEcheances, montantTotalAPayer })
       .pipe(catchError(this.handleError));
   }
 
+  /** Historique des paiements d’un utilisateur/membre */
   getHistoriquePaiements(id: number): Observable<Paiement[]> {
     return this.http.get<Paiement[]>(`${this.apiUrl}/${id}/historique`).pipe(catchError(this.handleError));
   }
 
+  /** Créer un PaymentIntent Stripe */
   createPaymentIntent(request: any): Observable<any> {
     return this.http.post(this.stripeUrl, request).pipe(catchError(this.handleError));
   }
 
-
+  /** Lister les paiements en attente */
   listEnAttente(): Observable<Paiement[]> {
     const params = new HttpParams().set('statut', this.STATUT_ATTENTE);
     return this.http.get<Paiement[]>(`${this.apiUrl}/filter`, { params }).pipe(catchError(this.handleError));
   }
 
+  /** Compter les paiements en attente */
   countEnAttente(): Observable<number> {
     return this.listEnAttente().pipe(map(list => list?.length ?? 0));
   }
 
+  /* ===== Gestion des erreurs ===== */
   private handleError(error: HttpErrorResponse) {
     const msg = error.error instanceof ErrorEvent
       ? `Erreur: ${error.error.message}`

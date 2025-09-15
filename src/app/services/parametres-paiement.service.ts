@@ -1,6 +1,6 @@
 // src/app/services/parametres-paiement.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, of } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { ParametresPaiement } from '../models/parametres-paiement';
@@ -13,7 +13,6 @@ export class ParametresPaiementService {
   private readonly adminUrl = `${this.API}/admin`;
   private readonly publicUrl = `${this.API}/public`;
   
-
   private readonly defaultParametres: ParametresPaiement = {
     montantCotisation: 300,
     virement: true,
@@ -29,42 +28,30 @@ export class ParametresPaiementService {
 
   constructor(private http: HttpClient) {}
 
-  private authHeaders(): HttpHeaders {
-    const token = (localStorage.getItem('token') || localStorage.getItem('auth_token') || '').trim();
-    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
-  }
-
   /** Charge les paramètres avec fallback silencieux */
   chargerParametres(): void {
-    const headers = this.authHeaders();
-
     const public$ = this.http.get<ParametresPaiement>(this.publicUrl).pipe(
       catchError(() => of(this.defaultParametres))
     );
 
-    // si pas de token → direct public, évite 400 bruyants
-    if (!headers.has('Authorization')) {
-      public$.pipe(tap(p => this.parametresSubject.next(p || this.defaultParametres))).subscribe();
-      return;
-    }
-
-    // tente admin, puis fallback public sans console.error
-    this.http.get<ParametresPaiement>(this.adminUrl, { headers }).pipe(
+    // 👉 L’interceptor ajoute déjà l’Authorization si le token existe
+    this.http.get<ParametresPaiement>(this.adminUrl).pipe(
       catchError(() => of(null)),
       switchMap(adminRes => adminRes ? of(adminRes) : public$),
       tap(p => this.parametresSubject.next(p || this.defaultParametres))
     ).subscribe();
   }
 
-  reload(): void { this.chargerParametres(); }
+  reload(): void {
+    this.chargerParametres();
+  }
 
   getParametres(): ParametresPaiement {
     return this.parametresSubject.value;
   }
 
   sauvegarder(parametres: ParametresPaiement) {
-    const headers = this.authHeaders();
-    return this.http.post(this.adminUrl, parametres, { headers }).pipe(
+    return this.http.post(this.adminUrl, parametres).pipe(
       tap(() => this.parametresSubject.next(parametres)),
       catchError(err => of(err))
     );

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -19,7 +19,7 @@ interface Utilisateur {
   selector: 'app-dashboard-membre',
   templateUrl: './dashboard-membre.component.html',
   styleUrls: ['./dashboard-membre.component.css'],
-  imports: [CommonModule, FormsModule, HttpClientModule, DatePipe],
+  imports: [CommonModule, FormsModule, DatePipe],
 })
 export class DashboardMembreComponent implements OnInit {
   private readonly API_BASE = '/api';

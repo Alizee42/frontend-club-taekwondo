@@ -1,7 +1,6 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { AvisService, Avis } from '../../../services/avis.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import Swiper from 'swiper/bundle';
@@ -9,7 +8,7 @@ import Swiper from 'swiper/bundle';
 @Component({
   selector: 'app-avis',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './avis.component.html',
   styleUrls: ['./avis.component.css'],
 })

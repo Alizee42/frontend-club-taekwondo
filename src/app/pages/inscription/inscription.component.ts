@@ -9,7 +9,7 @@ import {
   ValidatorFn,
   AbstractControl
 } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 interface MembrePayload {
   nom: string;
@@ -23,7 +23,7 @@ interface MembrePayload {
 @Component({
   selector: 'app-inscription',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './inscription.component.html',
   styleUrls: ['./inscription.component.css']
 })

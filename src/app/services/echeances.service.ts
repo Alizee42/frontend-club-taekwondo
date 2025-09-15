@@ -21,7 +21,7 @@ export interface Echeance {
 
 @Injectable({ providedIn: 'root' })
 export class EcheancesService {
-  private apiUrl = `${environment.apiUrl}/echeances`;
+  private readonly apiUrl = `${environment.apiUrl}/echeances`;
 
   constructor(private http: HttpClient) {}
 

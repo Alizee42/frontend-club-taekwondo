@@ -42,9 +42,9 @@ export class CommandeService {
 
   /** Récupérer un utilisateur par ID */
   getUtilisateur(utilisateurId: number): Observable<any> {
-    return this.http.get<any>(`/api/utilisateurs/${utilisateurId}`)
+    return this.http.get<any>(`${environment.apiUrl}/utilisateurs/${utilisateurId}`)
       .pipe(catchError(this.handleError));
-  }
+  }  
 
   /** Changer uniquement le statut d'une commande */
   changerStatut(id: number, statut: string): Observable<void> {

@@ -13,7 +13,7 @@ export interface Inscription {
 
 @Injectable({ providedIn: 'root' })
 export class InscriptionsService {
-  private apiUrl = `${environment.apiUrl}/inscriptions`;
+  private readonly apiUrl = `${environment.apiUrl}/inscriptions`;
 
   constructor(private http: HttpClient) {}
 

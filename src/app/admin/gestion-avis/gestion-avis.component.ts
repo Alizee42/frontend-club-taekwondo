@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../shared/toast/toast.service';
 
@@ -21,7 +21,7 @@ interface Avis {
   templateUrl: './gestion-avis.component.html',
   styleUrls: ['./gestion-avis.component.css'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, FormsModule],
 })
 export class GestionAvisComponent implements OnInit {
   avisEnAttente: Avis[] = [];

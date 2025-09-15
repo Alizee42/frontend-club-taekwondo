@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
 
@@ -97,7 +97,7 @@ function labelFor(code: string) {
   selector: 'app-documents-parent',
   templateUrl: './documents-parent.component.html',
   styleUrls: ['./documents-parent.component.css'],
-  imports: [CommonModule, FormsModule, HttpClientModule, DatePipe],
+  imports: [CommonModule, FormsModule, DatePipe],
 })
 export class DocumentsParentComponent implements OnInit {
   private readonly API_BASE = '/api';
