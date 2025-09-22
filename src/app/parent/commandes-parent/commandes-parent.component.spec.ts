@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { CommandesParentComponent } from './commandes-parent.component';
 
 describe('CommandesParentComponent', () => {
@@ -8,9 +8,11 @@ describe('CommandesParentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CommandesParentComponent]
-    })
-    .compileComponents();
+      imports: [
+        CommandesParentComponent, // ✅ standalone
+        HttpClientTestingModule   // ✅ mock HttpClient
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CommandesParentComponent);
     component = fixture.componentInstance;

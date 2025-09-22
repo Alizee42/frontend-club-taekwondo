@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { HeaderComponent } from './header.component';
 
@@ -9,8 +10,9 @@ describe('HeaderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        HeaderComponent,
-        HttpClientTestingModule
+        HeaderComponent,       // ✅ standalone
+        RouterTestingModule,   // ✅ mock ActivatedRoute
+        HttpClientTestingModule // ✅ mock HttpClient (utilisé dans AuthService)
       ]
     }).compileComponents();
 
