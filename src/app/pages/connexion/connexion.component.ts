@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { MembreService } from '../../services/membre.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { environment } from '../../../environments/environment'; // ✅ ajout
 
 @Component({
   selector: 'app-connexion',

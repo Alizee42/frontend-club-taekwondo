@@ -10,6 +10,7 @@ import {
   AbstractControl
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment'; // ✅ ajout
 
 interface MembrePayload {
   nom: string;
