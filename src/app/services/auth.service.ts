@@ -31,9 +31,10 @@ interface AuthState {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  // ✅ on construit l’URL à partir de l’environnement
   private readonly apiUrl = `${environment.apiUrl}/utilisateurs`;
 
-  // ✅ on garde une seule clé cohérente : "token"
+  // clés locales
   private readonly K_TOKEN = 'token';
   private readonly K_ROLE = 'role';
   private readonly K_USER = 'utilisateur';
@@ -106,7 +107,6 @@ export class AuthService {
       role: normalizedRole,
     };
 
-    // ✅ stockage unique dans "token"
     localStorage.setItem(this.K_TOKEN, res.token);
     if (normalizedRole) localStorage.setItem(this.K_ROLE, normalizedRole);
     localStorage.setItem(this.K_USER, JSON.stringify(utilisateur));
