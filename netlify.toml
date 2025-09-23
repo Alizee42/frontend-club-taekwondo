@@ -6,10 +6,3 @@
   from = "/*"
   to = "/index.html"
   status = 200
-
-# ⚡ Hack pour neutraliser Angular Runtime
-[[plugins]]
-  package = "@netlify/angular-runtime"
-
-  [plugins.inputs]
-  disable = true
