@@ -4,6 +4,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, forkJoin, interval, Subject } from 'rxjs';
 import { map, catchError, takeUntil, switchMap, filter } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 interface DashboardStats {
   nbMembres: number;
@@ -68,7 +69,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   // ✅ Base API root (évite les 404 sur /admin/...)
-  private readonly base = '/api'.replace(/\/+$/, '');
+  private readonly base = environment.apiUrl;
   private url = (path: string) => `${this.base}/${String(path).replace(/^\/+/, '')}`;
 
   constructor(private http: HttpClient, private router: Router) {}
