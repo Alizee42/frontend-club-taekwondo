@@ -302,23 +302,24 @@
                 </ul>
               </details>
             </div>
+               </ng-container>
+
+          <!-- Paiements uniques -->
+          <ng-container *ngIf="hasUniques(enfant.id)">
+            <ul class="list uniques">
+              <li class="item" *ngFor="let p of getPaiementsUniquesPourEnfant(enfant.id)">
+                <span class="muted">{{ (p.datePaiement || p.dateAffichable) | date:'dd/MM/yyyy' }}</span>
+                <span class="grow">{{ p.montantTotal | currency:'EUR' }}</span>
+                <span class="pill" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
+              </li>
+            </ul>
           </ng-container>
-
-          <!-- Paiements uniques -->
-          <!-- Paiements uniques -->
-<ng-container *ngIf="hasUniques(enfant.id)">
-  <ul class="list uniques">
-    <li class="item" *ngFor="let p of getPaiementsUniquesPourEnfant(enfant.id)">
-      <span class="muted">{{ (p.datePaiement || p.dateAffichable) | date:'dd/MM/yyyy' }}</span>
-      <span class="grow">{{ p.montantTotal | currency:'EUR' }}</span>
-      <span class="pill" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
-    </li>
-  </ul>
-</ng-container>
-
+        </div>
+      </ng-container>
     </div>
-  </section>
-</div>
+  </section> <!-- ✅ fermeture manquante du bloc HISTORIQUE -->
+
+</div> <!-- ✅ fe
 
 <!-- Modal paiement échéance -->
 <div class="modal" *ngIf="modalOuverte">
