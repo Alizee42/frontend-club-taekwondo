@@ -734,6 +734,10 @@ details.accordion summary {
   margin-top: 10px;
   text-align: center;
 }
+/* Historique paiements uniques */
+.list.uniques .item {
+  grid-template-columns: 120px 1fr auto;
+}
 
 @media (max-width:980px) {
   .only-mobile {
