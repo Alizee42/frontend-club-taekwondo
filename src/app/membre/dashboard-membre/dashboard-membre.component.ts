@@ -19,7 +19,7 @@ interface Utilisateur {
   selector: 'app-dashboard-membre',
   templateUrl: './dashboard-membre.component.html',
   styleUrls: ['./dashboard-membre.component.css'],
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule],
 })
 export class DashboardMembreComponent implements OnInit {
   private readonly API_BASE = '/api';

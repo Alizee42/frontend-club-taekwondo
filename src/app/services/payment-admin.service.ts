@@ -1,8 +1,7 @@
 // src/app/services/payment-admin.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { DashboardStats } from '../models/dashboard-stats.model';
 import { environment } from '../../environments/environment';
 
@@ -58,11 +57,7 @@ export class PaymentAdminService {
 
   refreshDashboardStats(): Observable<DashboardStats> {
     return this.http.get<DashboardStats>(`${this.apiUrl}/dashboard`).pipe(
-      tap(stats => this.dashboardStatsSubject.next(stats)),
-      catchError(err => {
-        console.error('[PaymentAdminService] Erreur dashboard', err);
-        return throwError(() => err);
-      })
+      tap(stats => this.dashboardStatsSubject.next(stats))
     );
   }
 
@@ -118,11 +113,11 @@ export class PaymentAdminService {
   // 💳 CREATION PAIEMENTS
   // ----------------------------------------------------------------
 
-  ajouterPaiementManuel(payload: AjoutPaiementPayload): Observable<PaiementResponse> {
+  ajouterPaiementManuel(payload: any): Observable<PaiementResponse> {
     return this.http.post<PaiementResponse>(`${this.apiUrl}/ajouter-manuel`, payload);
   }
 
-  ajouterPaiementCompletJSON(payload: AjoutPaiementPayload): Observable<PaiementResponse> {
+  ajouterPaiementCompletJSON(payload: any): Observable<PaiementResponse> {
     return this.http.post<PaiementResponse>(`${this.apiUrl}/ajouter-complet`, payload);
   }
 
@@ -144,12 +139,11 @@ export class PaymentAdminService {
   }
 
   validerPaiement(id: number): Observable<any> {
-    // ⚠️ Vérifie si ton backend attend PUT ou POST
-    return this.http.put<any>(`${this.apiUrl}/${id}/valider`, {});
+    return this.http.post<any>(`${this.apiUrl}/${id}/valider`, {});
   }
 
   payerEcheances(id: number, echeanceIds: number[]): Observable<any> {
-    // ⚠️ Vérifie ce que ton backend attend: [1,2,3] ou [{id:1}, {id:2}]
-    return this.http.post<any>(`${this.apiUrl}/${id}/payer-echeance`, echeanceIds);
+    const body = (echeanceIds || []).map(eid => ({ id: eid }));
+    return this.http.post<any>(`${this.apiUrl}/${id}/payer-echeance`, body);
   }
 }

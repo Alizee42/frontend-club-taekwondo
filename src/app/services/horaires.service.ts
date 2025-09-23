@@ -1,61 +1,37 @@
-// src/app/services/horaires.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 
-export interface Horaire {
-  jour: string;       // ex: "Lundi"
-  ouverture: string;  // ex: "09:00"
-  fermeture: string;  // ex: "18:00"
-}
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class HorairesService {
-  private readonly STORAGE_KEY = 'horaires';
-
-  /** État réactif des horaires */
-  private horairesSubject = new BehaviorSubject<Horaire[]>([]);
-  readonly horaires$ = this.horairesSubject.asObservable();
+  private horaires: any[] = [];
 
   constructor() {
-    this.loadHoraires();
+    this.loadHoraires(); // Charger les horaires depuis le localStorage au démarrage
   }
 
-  /** 🔹 Récupérer les horaires actuels */
-  getHoraires(): Horaire[] {
-    return this.horairesSubject.value;
+  getHoraires() {
+    return this.horaires;
   }
 
-  /** 🔹 Ajouter un horaire */
-  addHoraire(horaire: Horaire) {
-    const updated = [...this.horairesSubject.value, horaire];
-    this.updateHoraires(updated);
+  addHoraire(horaire: any) {
+    this.horaires.push(horaire);
+    this.saveHoraires(); // Sauvegarder les horaires après ajout
   }
 
-  /** 🔹 Supprimer un horaire par index */
   deleteHoraire(index: number) {
-    const updated = this.horairesSubject.value.filter((_, i) => i !== index);
-    this.updateHoraires(updated);
+    this.horaires.splice(index, 1);
+    this.saveHoraires(); // Sauvegarder les horaires après suppression
   }
 
-  /** 🔹 Mettre à jour le localStorage et notifier les abonnés */
-  private updateHoraires(horaires: Horaire[]) {
-    this.horairesSubject.next(horaires);
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(horaires));
-    } catch (e) {
-      console.error('❌ Erreur sauvegarde horaires dans localStorage', e);
-    }
+  private saveHoraires() {
+    localStorage.setItem('horaires', JSON.stringify(this.horaires)); // Sauvegarde dans le localStorage
   }
 
-  /** 🔹 Charger depuis le localStorage */
   private loadHoraires() {
-    try {
-      const saved = localStorage.getItem(this.STORAGE_KEY);
-      if (saved) {
-        this.horairesSubject.next(JSON.parse(saved));
-      }
-    } catch (e) {
-      console.error('❌ Erreur chargement horaires depuis localStorage', e);
+    const savedHoraires = localStorage.getItem('horaires');
+    if (savedHoraires) {
+      this.horaires = JSON.parse(savedHoraires); // Charger depuis le localStorage
     }
   }
 }

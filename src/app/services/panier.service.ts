@@ -1,4 +1,3 @@
-// src/app/services/panier.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject, map } from 'rxjs';
 
@@ -7,14 +6,14 @@ export interface Produit {
   nom: string;
   description: string;
   prixBase: number;
-  prix: number;            // prix unitaire
+  prix: number;            // prix unitaire (pas la ligne)
   imageUrl: string;
   taille?: string;
   couleur?: string;
   flocage?: string;
-  flocageActif?: boolean;
-  quantite?: number;
-  paiementId?: string;     // 🔹 passé en string → UUID
+  flocageActif?: boolean;  // ✅ nom normalisé
+  quantite?: number;       // par défaut 1
+  paiementId?: number;     // Ajout du paiementId au produit
 }
 
 type Variante = {
@@ -28,10 +27,12 @@ type Variante = {
 export class PanierService {
   private readonly LS_KEY = 'panier';
 
+  // --- État interne
   private readonly _panier$ = new BehaviorSubject<Produit[]>(this.load());
 
+  // --- Observables publics
   readonly panier$ = this._panier$.asObservable();
-  readonly items$ = this.panier$;
+  readonly items$ = this.panier$; // alias pratique (Header/Boutique)
   readonly count$ = this.panier$.pipe(
     map(items => items.reduce((n, i) => n + (i.quantite ?? 1), 0))
   );
@@ -43,8 +44,9 @@ export class PanierService {
       }, 0)
     )
   );
-  readonly cartCount$ = this.count$;
+  readonly cartCount$ = this.count$; // compat header existant
 
+  // --- Signal pour ouvrir le mini-panier depuis la Boutique
   private readonly _openCart$ = new Subject<void>();
   readonly openCart$ = this._openCart$.asObservable();
 
@@ -62,11 +64,13 @@ export class PanierService {
   // ===== Ajout / maj / suppression =====
   ajouterAuPanier(produit: Produit, quantite = 1): void {
     const items = [...this._panier$.value];
+
+    // Normalise l’item ajouté (prix unitaire, quantite mini 1, nom champ flocageActif)
     const toAdd = this.normalizeItem({ ...produit, quantite });
 
-    // PaiementId auto si absent
+    // Ajout du paiementId si non présent
     if (!toAdd.paiementId) {
-      toAdd.paiementId = this.generatePaiementId();
+      toAdd.paiementId = this.generatePaiementId(); // Assurez-vous que cette méthode existe
     }
 
     const idx = this.findIndex(toAdd.id, {
@@ -120,16 +124,17 @@ export class PanierService {
     this.persist();
   }
 
+  // --- Ouvrir le mini-panier dans le header (Boutique -> Header)
   openCart(): void {
     this._openCart$.next();
   }
 
   // ===== Stripe / backend payload =====
+  /** Renvoie un tableau simple à poster au backend (montants recalculés côté serveur). */
   toCheckoutPayload() {
     return this._panier$.value.map(i => ({
       productId: i.id,
       quantity: i.quantite ?? 1,
-      paiementId: i.paiementId, // 🔹 ajouté pour suivi backend
       meta: {
         taille: i.taille,
         couleur: i.couleur,
@@ -159,6 +164,7 @@ export class PanierService {
     localStorage.setItem(this.LS_KEY, JSON.stringify(this._panier$.value));
   }
 
+  /** Charge + normalise les éléments (quantité, prix unitaire, compat `floquageActif` -> `flocageActif`). */
   private load(): Produit[] {
     try {
       const raw = localStorage.getItem(this.LS_KEY);
@@ -169,7 +175,9 @@ export class PanierService {
     }
   }
 
+  /** Normalise un item: quantite>=1, prix unitaire valide, champ `flocageActif` cohérent (compat `floquageActif`). */
   private normalizeItem(p: Partial<Produit>): Produit {
+    // compat: si ancien champ 'floquageActif' existe, on le mappe sur 'flocageActif'
     const flocageActif =
       (p as any).flocageActif ??
       (p as any).floquageActif ?? // compat
@@ -180,21 +188,22 @@ export class PanierService {
 
     return {
       id: Number(p.id!),
-      nom: String(p.nom ?? 'Produit'),
+      nom: String(p.nom ?? ''),
       description: String(p.description ?? ''),
       prixBase: Number(p.prixBase ?? prixUnitaire ?? 0),
       prix: Number(prixUnitaire),
-      imageUrl: String(p.imageUrl ?? '/assets/img/placeholder.png'),
+      imageUrl: String(p.imageUrl ?? ''),
       taille: p.taille,
       couleur: p.couleur,
       flocage: p.flocage,
       flocageActif: !!flocageActif,
       quantite: Math.max(1, Number(p.quantite ?? 1)),
-      paiementId: p.paiementId ?? this.generatePaiementId()
+      paiementId: p.paiementId // Assurez-vous de l'ajouter ici aussi
     };
   }
 
   private keyOf(p: Partial<Produit>): string {
+    // clé logique = id + variantes (flocage seulement si activé)
     return [
       p.id,
       p.taille ?? '',
@@ -214,8 +223,8 @@ export class PanierService {
     return this._panier$.value.findIndex(p => this.keyOf(p) === targetKey);
   }
 
-  private generatePaiementId(): string {
-    // 🔹 Génère un identifiant unique (plus sûr que Date.now seul)
-    return `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+  private generatePaiementId(): number {
+    // Simple méthode pour générer un paiementId, mais vous pouvez la rendre plus sophistiquée
+    return Date.now(); // Retourne l'heure actuelle en millisecondes
   }
 }

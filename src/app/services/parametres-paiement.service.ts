@@ -1,13 +1,14 @@
 // src/app/services/parametres-paiement.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, of, Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { ParametresPaiement } from '../models/parametres-paiement';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ParametresPaiementService {
+
   private readonly API = `${environment.apiUrl}/parametres-paiement`;
   private readonly adminUrl = `${this.API}/admin`;
   private readonly publicUrl = `${this.API}/public`;
@@ -23,19 +24,17 @@ export class ParametresPaiementService {
   };
 
   private parametresSubject = new BehaviorSubject<ParametresPaiement>(this.defaultParametres);
-  readonly parametres$ = this.parametresSubject.asObservable();
+  public readonly parametres$ = this.parametresSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  /** 🔹 Charge les paramètres depuis l’API (admin sinon public) */
+  /** Charge les paramètres avec fallback silencieux */
   chargerParametres(): void {
     const public$ = this.http.get<ParametresPaiement>(this.publicUrl).pipe(
-      catchError(err => {
-        console.warn('[ParametresPaiementService] Fallback public -> default', err);
-        return of(this.defaultParametres);
-      })
+      catchError(() => of(this.defaultParametres))
     );
 
+    // 👉 L’interceptor ajoute déjà l’Authorization si le token existe
     this.http.get<ParametresPaiement>(this.adminUrl).pipe(
       catchError(() => of(null)),
       switchMap(adminRes => adminRes ? of(adminRes) : public$),
@@ -43,28 +42,18 @@ export class ParametresPaiementService {
     ).subscribe();
   }
 
-  /** 🔹 Forcer un rechargement */
   reload(): void {
     this.chargerParametres();
   }
 
-  /** 🔹 Accéder au dernier état */
   getParametres(): ParametresPaiement {
     return this.parametresSubject.value;
   }
 
-  /** 🔹 Sauvegarder côté admin */
-  sauvegarder(parametres: ParametresPaiement): Observable<ParametresPaiement | null> {
-    return this.http.post<ParametresPaiement>(this.adminUrl, parametres).pipe(
-      tap(saved => {
-        if (saved) {
-          this.parametresSubject.next(saved); // ✅ on prend la réponse backend
-        }
-      }),
-      catchError(err => {
-        console.error('[ParametresPaiementService] Erreur sauvegarde', err);
-        return of(null);
-      })
+  sauvegarder(parametres: ParametresPaiement) {
+    return this.http.post(this.adminUrl, parametres).pipe(
+      tap(() => this.parametresSubject.next(parametres)),
+      catchError(err => of(err))
     );
   }
 }

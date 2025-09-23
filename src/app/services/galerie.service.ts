@@ -1,8 +1,6 @@
-// src/app/services/galerie.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Galerie {
@@ -13,43 +11,31 @@ export interface Galerie {
   datePublication?: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class GalerieService {
   private readonly apiUrl = `${environment.apiUrl}/galerie`;
 
   constructor(private http: HttpClient) {}
 
-  /** 🔹 Récupérer toutes les galeries */
   getAll(): Observable<Galerie[]> {
-    return this.http.get<Galerie[]>(this.apiUrl).pipe(catchError(this.handleError));
+    return this.http.get<Galerie[]>(this.apiUrl);
   }
 
-  /** 🔹 Récupérer une galerie par ID */
   getById(id: string): Observable<Galerie> {
-    return this.http.get<Galerie>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
+    return this.http.get<Galerie>(`${this.apiUrl}/${id}`);
   }
 
-  /** 🔹 Créer une galerie */
-  create(galerie: Galerie | FormData): Observable<Galerie> {
-    return this.http.post<Galerie>(this.apiUrl, galerie).pipe(catchError(this.handleError));
+  create(galerie: Galerie): Observable<Galerie> {
+    return this.http.post<Galerie>(this.apiUrl, galerie);
   }
 
-  /** 🔹 Mettre à jour une galerie */
-  update(id: string, galerie: Galerie | FormData): Observable<Galerie> {
-    return this.http.put<Galerie>(`${this.apiUrl}/${id}`, galerie).pipe(catchError(this.handleError));
+  update(id: string, galerie: Galerie): Observable<Galerie> {
+    return this.http.put<Galerie>(`${this.apiUrl}/${id}`, galerie);
   }
 
-  /** 🔹 Supprimer une galerie */
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
-  }
-
-  /** 🔹 Gestion centralisée des erreurs */
-  private handleError(error: HttpErrorResponse) {
-    const msg = error.error instanceof ErrorEvent
-      ? `Erreur: ${error.error.message}`
-      : `Erreur serveur ${error.status}: ${error.message}`;
-    console.error('[GalerieService]', msg, error);
-    return throwError(() => new Error(msg));
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }
