@@ -10,17 +10,17 @@ import { environment } from '../../environments/environment';
 export class ParametresPaiementService {
 
   private readonly API = `${environment.apiUrl}/parametres-paiement`;
-  private readonly adminUrl = `${this.API}/admin`;
+  private readonly adminUrl = `${this.API}`;        // Admin GET/POST sur /api/parametres-paiement
   private readonly publicUrl = `${this.API}/public`;
   
   private readonly defaultParametres: ParametresPaiement = {
-    montantCotisation: 300,
+    montantCotisation: 100,  // ✅ Cohérent avec le backend
     virement: true,
     especes: true,
     stripe: true,
-    modePaiementParDefaut: 'virement',
-    echeancesAutorisees: 3,
-    intervalleEcheance: '1mois'
+    modePaiementParDefaut: 'stripe',
+    echeancesAutorisees: 4,        // ✅ CHANGÉ : 4 au lieu de 3
+    intervalleEcheance: 'MENSUEL'  // ✅ Format cohérent
   };
 
   private parametresSubject = new BehaviorSubject<ParametresPaiement>(this.defaultParametres);
@@ -50,10 +50,14 @@ export class ParametresPaiementService {
     return this.parametresSubject.value;
   }
 
-  sauvegarder(parametres: ParametresPaiement) {
-    return this.http.post(this.adminUrl, parametres).pipe(
+sauvegarder(parametres: ParametresPaiement) {
+    // ✅ CORRECTION : POST vers /api/parametres-paiement (pas /admin)
+    return this.http.post(this.API, parametres).pipe(
       tap(() => this.parametresSubject.next(parametres)),
-      catchError(err => of(err))
+      catchError(err => {
+        console.error('❌ Erreur sauvegarde paramètres:', err);
+        throw err;
+      })
     );
   }
 }
