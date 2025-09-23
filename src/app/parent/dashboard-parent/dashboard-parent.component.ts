@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 interface Utilisateur {
   id: number;
@@ -45,7 +46,8 @@ export class DashboardParentComponent implements OnInit {
       return;
     }
 
-    this.http.get<Utilisateur>('/api/utilisateurs/me', {
+    // ✅ CORRECTION ligne 43
+    this.http.get<Utilisateur>(`${environment.apiUrl}/utilisateurs/me`, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (utilisateur) => {
@@ -72,7 +74,8 @@ export class DashboardParentComponent implements OnInit {
   navigateToCommandes(): void {
     this.router.navigate(['/parent/commandes']);
   }
-    navigateToEvenements(): void {
+
+  navigateToEvenements(): void {
     this.router.navigate(['/parent/evenements']);
   }
 }

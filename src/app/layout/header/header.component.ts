@@ -13,6 +13,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { PanierService, Produit } from '../../services/panier.service';
 import { StripeService } from '../../services/stripe.service';
+import { environment } from '../../../environments/environment'; // ✅ AJOUT
+
 
 interface PanierItem extends Produit {
   beneficiaireId?: number | null;
@@ -28,6 +30,9 @@ interface PanierItem extends Produit {
   imports: [CommonModule, RouterModule, DecimalPipe, FormsModule],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+
+    private readonly API_BASE = environment.apiUrl;
+
   // UI state
   menuOpen = false;
   dropdownOpenClub = false;
@@ -298,9 +303,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.panierService.setPanier(copy as unknown as Produit[]);
   }
 
-  private async getEnfantsParent(): Promise<any[]> {
+    private async getEnfantsParent(): Promise<any[]> {
     try {
-      const obs = this.http.get<any[]>('/api/membres/mes-enfants', {
+      const obs = this.http.get<any[]>(`${this.API_BASE}/membres/mes-enfants`, {
         headers: this.getAuthHeaders(),
       });
       const response = await firstValueFrom(obs);
@@ -322,16 +327,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     // 2) endpoint by-utilisateur/{userId}
     try {
+      // ✅ CORRECTION ligne 308
       const dto: any = await firstValueFrom(
-        this.http.get(`/api/membres/by-utilisateur/${uid}`, { headers: this.getAuthHeaders() })
+        this.http.get(`${this.API_BASE}/membres/by-utilisateur/${uid}`, { headers: this.getAuthHeaders() })
       );
       if (dto && dto.id) return Number(dto.id);
     } catch {}
 
     // 3) endpoint via query ?utilisateurId=
     try {
+      // ✅ CORRECTION ligne 315
       const list: any[] = await firstValueFrom(
-        this.http.get<any[]>(`/api/membres?utilisateurId=${uid}`, { headers: this.getAuthHeaders() })
+        this.http.get<any[]>(`${this.API_BASE}/membres?utilisateurId=${uid}`, { headers: this.getAuthHeaders() })
       );
       if (Array.isArray(list) && list.length > 0 && list[0]?.id) return Number(list[0].id);
     } catch {}
@@ -417,7 +424,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       const requestBody: any = { membreId, modePaiement: 'stripe', items };
 
       const createResponse = await firstValueFrom(
-        this.http.post<any>('/api/paiements/from-cart', requestBody, {
+        this.http.post<any>(`${this.API_BASE}/paiements/from-cart`, requestBody, {
           headers: this.getAuthHeaders(),
         })
       );
@@ -501,9 +508,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     };
 
     // 1) Endpoint dédié /with-lignes (si mappé)
-    try {
+        try {
+      // ✅ CORRECTION ligne 442
       await firstValueFrom(
-        this.http.post('/api/commandes/with-lignes', payloadFull, { headers: this.getAuthHeaders() })
+        this.http.post(`${this.API_BASE}/commandes/with-lignes`, payloadFull, { headers: this.getAuthHeaders() })
       );
       this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
       this.showConfirmationModal = true;
@@ -516,7 +524,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // 2) Fallback : /api/commandes (même payload)
     try {
       await firstValueFrom(
-        this.http.post('/api/commandes', payloadFull, { headers: this.getAuthHeaders() })
+        this.http.post(`${this.API_BASE}/commandes`, payloadFull, { headers: this.getAuthHeaders() })
       );
       this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
       this.showConfirmationModal = true;
@@ -534,7 +542,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         lignesCommande: lignes,
       };
       await firstValueFrom(
-        this.http.post('/api/commandes', minimal, { headers: this.getAuthHeaders() })
+        this.http.post(`${this.API_BASE}/commandes`, minimal, { headers: this.getAuthHeaders() })
       );
       this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
       this.showConfirmationModal = true;

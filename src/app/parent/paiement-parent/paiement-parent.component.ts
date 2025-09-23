@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { StripeService } from '../../services/stripe.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
+import { environment } from '../../../environments/environment'; // ✅ AJOUT
 
 type TypePaiement = 'UNIQUE' | 'ECHELONNE';
 type HistoryFilter = 'AUTO' | 'ECHELONNE' | 'UNIQUE';
@@ -16,9 +17,10 @@ type MainTab = 'PAYER' | 'HISTO';
   imports: [CommonModule, FormsModule],
   templateUrl: './paiement-parent.component.html',
   styleUrls: ['./paiement-parent.component.css']
+  
 })
 export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy {
-  private readonly API = '/api';
+  private readonly API = environment.apiUrl;
 
   // Onglets
   activeTab: MainTab = 'PAYER';
@@ -113,23 +115,27 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     if (!clientSecret) return null;
     const i = clientSecret.indexOf('_secret_'); return i > 0 ? clientSecret.substring(0, i) : null;
     }
-  private buildFactureUrl(paiementId: number){ return `${this.API}/paiements/${paiementId}/facture`; }
+private buildFactureUrl(paiementId: number){ 
+    return `${this.API}/paiements/${paiementId}/facture`; 
+  }
   telechargerFacture(){ if (this.factureUrl) window.open(this.factureUrl, '_blank', 'noopener'); }
 
   // ✅ bouton “Reçu Stripe” (HTML l’utilise)
   canOpenStripeReceipt(): boolean {
     return !!this.lastPaymentIntentId;
   }
+
   openStripeReceipt(): void {
     if (!this.lastPaymentIntentId) return;
     const url = `${this.API}/stripe/receipt/${encodeURIComponent(this.lastPaymentIntentId)}`;
     window.open(url, '_blank', 'noopener');
   }
 
-  private async syncPaymentIntentOnce(): Promise<void> {
+   private async syncPaymentIntentOnce(): Promise<void> {
     if (!this.lastPaymentIntentId) return;
     try {
       this.log('sync-payment.req', this.lastPaymentIntentId);
+      // ✅ CORRECTION : syncPaymentIntentOnce utilise l'API absolue
       await firstValueFrom(this.http.post(
         `${this.API}/stripe/sync-payment`,
         { paymentIntentId: this.lastPaymentIntentId },
@@ -138,11 +144,8 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
       this.log('sync-payment.ok');
     } catch (e) {
       this.log('sync-payment.err', e);
-    } finally {
-      // on garde lastPaymentIntentId pour le bouton “reçu” (ne pas nullifier ici)
     }
   }
-
   // ===== Cycle de vie
   ngOnInit(): void {
     this.parametresService.parametres$.subscribe((p) => {
@@ -463,7 +466,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
           if (echeanceIdToPay) piPayload.echeanceId = echeanceIdToPay;
           this.log('create-payment-intent.req', piPayload);
 
-          this.http.post<any>(`${this.API}/stripe/create-payment-intent`, piPayload, { headers: this.authHeaders() })
+              this.http.post<any>(`${this.API}/stripe/create-payment-intent`, piPayload, { headers: this.authHeaders() })
             .subscribe({
               next: async (resPI) => {
                 this.log('create-payment-intent.res', resPI);
