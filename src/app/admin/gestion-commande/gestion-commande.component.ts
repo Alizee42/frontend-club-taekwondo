@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
-const API_BASE = '/api';
 
+const API_BASE = environment.apiUrl;
 // ==== Types UI (template) ====
 type StatutCommande = 'en attente' | 'payé' | 'retiré' | 'annulé';
 type ModePaiement = 'cb' | 'club';

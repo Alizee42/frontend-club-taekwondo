@@ -3,6 +3,9 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
+
+
 
 interface Utilisateur {
   id: number | string;
@@ -22,7 +25,7 @@ interface Utilisateur {
   imports: [CommonModule, FormsModule],
 })
 export class DashboardMembreComponent implements OnInit {
-  private readonly API_BASE = '/api';
+  private readonly API_BASE = environment.apiUrl;
 
   utilisateurConnecte: Utilisateur | null = null;
 

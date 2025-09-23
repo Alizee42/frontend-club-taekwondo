@@ -28,7 +28,7 @@ export class ConnexionComponent {
     if (!this.email || !this.password) { alert('Veuillez remplir tous les champs.'); return; }
     if (!this.isValidEmail(this.email)) { alert('Email invalide.'); return; }
 
-    this.http.post<any>('/api/utilisateurs/login', { email: this.email, password: this.password })
+    this.http.post<any>(`${environment.apiUrl}/utilisateurs/login`, { email: this.email, password: this.password })
       .subscribe({
         next: (response) => {
           const token = (response?.token || '').trim();

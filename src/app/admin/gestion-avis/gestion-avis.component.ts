@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../shared/toast/toast.service';
+import { environment } from '../../../environments/environment';
+
 
 interface Avis {
   id: number;
@@ -32,7 +34,7 @@ export class GestionAvisComponent implements OnInit {
   errorMsg: string | null = null;
 
   // ✅ root-absolu (passe via le proxy /api)
-  private readonly baseUrl = '/api/avis';
+  private readonly baseUrl = `${environment.apiUrl}/avis`;
 
   constructor(private http: HttpClient, private toast: ToastService) {}
 

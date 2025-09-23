@@ -3,6 +3,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
 
 type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
 
@@ -100,7 +102,7 @@ function labelFor(code: string) {
   imports: [CommonModule, FormsModule, DatePipe],
 })
 export class DocumentsParentComponent implements OnInit {
-  private readonly API_BASE = '/api';
+  private readonly API_BASE = environment.apiUrl;
 
   utilisateurConnecte: Utilisateur | null = null;
 

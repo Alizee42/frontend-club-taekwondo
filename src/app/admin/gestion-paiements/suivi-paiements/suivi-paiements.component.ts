@@ -2,6 +2,8 @@ import { Component, OnInit, TrackByFunction } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+
 
 type Statut = 'payé' | 'en attente' | 'en retard' | 'annulé';
 
@@ -55,6 +57,7 @@ interface GroupeParent {
   styleUrls: ['./suivi-paiements.component.css']
 })
 export class SuiviPaiementsComponent implements OnInit {
+  private readonly API_BASE = environment.apiUrl;
 
   // --- State général
   loading = false;
@@ -105,7 +108,7 @@ export class SuiviPaiementsComponent implements OnInit {
 
     const token = localStorage.getItem('token') || '';
 
-    this.http.get<Paiement[]>('/api/paiements', {
+    this.http.get<Paiement[]>(`${this.API_BASE}/paiements`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     }).subscribe({
       next: (res) => {
@@ -371,7 +374,7 @@ export class SuiviPaiementsComponent implements OnInit {
 
     const token = localStorage.getItem('token') || '';
 
-    this.http.post(`/api/paiements/${p.id}/valider`, {}, {
+    this.http.post(`${this.API_BASE}/paiements/${p.id}/valider`, {}, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     }).subscribe({
       next: () => {
@@ -396,7 +399,7 @@ export class SuiviPaiementsComponent implements OnInit {
     const token = localStorage.getItem('token') || '';
     const body = [{ id: e.id }];
 
-    this.http.post(`/api/paiements/${p.id}/payer-echeance`, body, {
+    this.http.post(`${this.API_BASE}/paiements/${p.id}/payer-echeance`, body, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     }).subscribe({
       next: () => {
@@ -438,7 +441,7 @@ export class SuiviPaiementsComponent implements OnInit {
       adminResponsable: this.utilisateurSelectionne?.email || 'admin'
     };
 
-    this.http.put(`/api/paiements/${this.paiementActuel.id}/annuler`, body, {
+    this.http.put(`${this.API_BASE}/paiements/${this.paiementActuel.id}/annuler`, body, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     }).subscribe({
       next: (updated: any) => {

@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgFor, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
-const API_BASE = '/api';
+
+const API_BASE = environment.apiUrl;
 const PRIMARY_URL = `${API_BASE}/commandes?scope=membre`; 
 
 type StatutCommande = 'en attente' | 'payé' | 'retiré' | 'annulé';

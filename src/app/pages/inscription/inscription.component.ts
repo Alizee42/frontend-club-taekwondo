@@ -241,7 +241,7 @@ export class InscriptionComponent implements OnInit {
       password: f.password
     };
 
-    this.http.post('/api/utilisateurs/register', utilisateurData).subscribe({
+    this.http.post(`${environment.apiUrl}/utilisateurs/register`, utilisateurData).subscribe({
       next: (utilisateur: any) => {
         const utilisateurId = utilisateur?.id;
         if (!utilisateurId) {

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 /* =========================
    Types & interfaces
@@ -91,7 +92,7 @@ function labelFor(code: string) {
   imports: [CommonModule, FormsModule]
 })
 export class DocumentsComponent implements OnInit {
-  private readonly API_BASE = '/api';
+    private readonly API_BASE = environment.apiUrl;
 
   utilisateurConnecte: Utilisateur | null = null;
 

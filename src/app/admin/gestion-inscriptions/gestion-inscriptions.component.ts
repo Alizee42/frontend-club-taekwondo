@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 type Statut = 'NOUVEAU'|'VALIDE'|'REFUSE'|string;
 
@@ -46,7 +47,7 @@ type SortKey = 'nom' | 'email' | 'telephone' | 'nbMembres';
   styleUrls: ['./gestion-inscriptions.component.css']
 })
 export class GestionInscriptionsComponent implements OnInit {
-  private readonly API_BASE = '/api';
+  private readonly API_BASE = environment.apiUrl;
 
   loading = false;
   erreurMessage = '';

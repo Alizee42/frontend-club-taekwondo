@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule, NgClass, NgFor, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { environment } from '../../../environments/environment';
+
 
 /* ========= Types ========= */
 type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
@@ -98,7 +100,7 @@ function labelFor(code: string) { return LABEL_BY_CODE[code] || code; }
   imports: [CommonModule, NgClass, NgFor, DatePipe, FormsModule],
 })
 export class GestionDocumentsComponent implements OnInit {
-  private readonly API_BASE = '/api';
+  private readonly API_BASE = environment.apiUrl;
 
   utilisateurs: UtilisateurRow[] = [];
   utilisateursFiltres: UtilisateurRow[] = [];
