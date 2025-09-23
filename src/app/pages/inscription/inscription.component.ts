@@ -282,7 +282,7 @@ export class InscriptionComponent implements OnInit {
         let erreurs = 0;
 
         for (const membre of membres) {
-          this.http.post('/api/membres', membre).subscribe({
+          this.http.post(`${environment.apiUrl}/membres`, membre).subscribe({
             next: () => {
               count++;
               if (count + erreurs === membres.length && erreurs === 0) this.finaliser();
