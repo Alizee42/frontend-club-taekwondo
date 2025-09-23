@@ -1,4 +1,4 @@
 export const environment = {
-  production: false,
-  apiUrl: '/api'
+  production: true,
+  apiUrl: 'https://backend-club-taekwondo-production.up.railway.app/api' // ✅ backend Railway
 };
