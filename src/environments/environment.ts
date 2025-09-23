@@ -1,4 +1,5 @@
+// src/environments/environment.ts
 export const environment = {
-  production: false,
-  apiUrl: '/api' // utilisera proxy.conf.json en local
+  production: true,
+  apiUrl: 'https://backend-club-taekwondo-production.up.railway.app/api'
 };
