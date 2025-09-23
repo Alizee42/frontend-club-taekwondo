@@ -31,10 +31,8 @@ interface AuthState {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  // ✅ on construit l’URL à partir de l’environnement
   private readonly apiUrl = `${environment.apiUrl}/utilisateurs`;
 
-  // clés locales
   private readonly K_TOKEN = 'token';
   private readonly K_ROLE = 'role';
   private readonly K_USER = 'utilisateur';
@@ -56,11 +54,14 @@ export class AuthService {
   }
 
   // ---- API ----
-
   login(credentials: { email: string; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(res => this.storeAuth(res))
     );
+  }
+
+  register(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, data);
   }
 
   logout(): void {
@@ -97,7 +98,6 @@ export class AuthService {
   }
 
   // ---- internes ----
-
   private storeAuth(res: LoginResponse) {
     const normalizedRole = (res.role ?? res.utilisateur?.role ?? '').toString().toUpperCase();
 

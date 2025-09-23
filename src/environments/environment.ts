@@ -1,5 +1,4 @@
-// src/environments/environment.ts
 export const environment = {
-  production: true,
-  apiUrl: 'https://backend-club-taekwondo-production.up.railway.app/api'
+  production: false,
+  apiUrl: 'http://localhost:8080/api'
 };
