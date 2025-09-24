@@ -47,10 +47,12 @@
     <!-- Actions -->
     <div class="user-actions">
       <!-- Panier -->
-      <div class="cart-icon" (click)="togglePanier()">
-        <i class="ri-shopping-cart-line"></i>
-        <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
-      </div>
+<!-- Panier (affiché seulement s’il y a au moins 1 article) -->
+<div class="cart-icon" *ngIf="cartCount > 0" (click)="togglePanier()">
+  <i class="ri-shopping-cart-line"></i>
+  <span class="badge">{{ cartCount }}</span>
+</div>
+
 
       <!-- Aperçu du panier -->
       <div class="cart-preview" *ngIf="panierOpen">

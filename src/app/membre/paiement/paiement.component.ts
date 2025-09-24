@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { StripeService } from '../../services/stripe.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
+import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 type TypePaiement = 'UNIQUE' | 'ECHELONNE';
 
@@ -16,7 +18,7 @@ type TypePaiement = 'UNIQUE' | 'ECHELONNE';
   styleUrls: ['./paiement.component.css']
 })
 export class PaiementComponent implements OnInit, AfterViewInit {
-  private readonly API = '/api';
+private readonly API = `${environment.apiUrl}`;
 
   // Wizard -> 3 étapes : 1 Mode, 2 Paiement, 3 Confirmation
   step = 1;
@@ -76,17 +78,19 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   montantPaye = 0;
   today = new Date();
 
-  constructor(
-    private http: HttpClient,
-    private stripeService: StripeService,
-    private parametresService: ParametresPaiementService
-  ) {}
+ constructor(
+  private http: HttpClient,
+  private stripeService: StripeService,
+  private parametresService: ParametresPaiementService,
+  private auth: AuthService   // injecte AuthService
+) {}
 
   // ===== Utils =====
-  private authHeaders() {
-    const token = localStorage.getItem('token') || '';
-    return { Authorization: `Bearer ${token}` };
-  }
+private authHeaders() {
+  return this.auth.getAuthHeaders();
+}
+
+
   private log(where: string, payload?: any) { console.log(`[Membre][${where}]`, payload ?? ''); }
   private isPaid(s: any) { return /pay[eé]e?/i.test(String(s ?? '')); }
   private extractPiIdFromClientSecret(clientSecret?: string | null): string | null {

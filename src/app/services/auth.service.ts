@@ -32,10 +32,11 @@ interface AuthState {
 export class AuthService {
   private readonly apiUrl = `${environment.apiUrl}/utilisateurs`;
 
-  // ✅ on garde une seule clé cohérente : "token"
   private readonly K_TOKEN = 'token';
   private readonly K_ROLE = 'role';
   private readonly K_USER = 'utilisateur';
+
+  private logoutTimer: any = null;
 
   private readonly _authState$ = new BehaviorSubject<AuthState>({
     token: null,
@@ -54,7 +55,6 @@ export class AuthService {
   }
 
   // ---- API ----
-
   login(credentials: { email: string; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(res => this.storeAuth(res))
@@ -66,6 +66,11 @@ export class AuthService {
     localStorage.removeItem(this.K_ROLE);
     localStorage.removeItem(this.K_USER);
     this._authState$.next({ token: null, role: null, user: null, isConnecte: false });
+
+    if (this.logoutTimer) {
+      clearTimeout(this.logoutTimer);
+      this.logoutTimer = null;
+    }
   }
 
   restoreSession(): void {
@@ -95,7 +100,6 @@ export class AuthService {
   }
 
   // ---- internes ----
-
   private storeAuth(res: LoginResponse) {
     const normalizedRole = (res.role ?? res.utilisateur?.role ?? '').toString().toUpperCase();
 
@@ -105,7 +109,6 @@ export class AuthService {
       role: normalizedRole,
     };
 
-    // ✅ stockage unique dans "token"
     localStorage.setItem(this.K_TOKEN, res.token);
     if (normalizedRole) localStorage.setItem(this.K_ROLE, normalizedRole);
     localStorage.setItem(this.K_USER, JSON.stringify(utilisateur));
@@ -119,7 +122,14 @@ export class AuthService {
       isConnecte: !expired,
     });
 
-    if (expired) this.logout();
+    if (expired) {
+      this.logout();
+    } else {
+      const payload = this.decodeJwt(res.token);
+      if (payload?.exp) {
+        this.startAutoLogout(payload.exp);
+      }
+    }
   }
 
   private hydrateFromStorage() {
@@ -145,6 +155,30 @@ export class AuthService {
       user,
       isConnecte: !!token && !this.isTokenExpired(token),
     });
+
+    if (token) {
+      const payload = this.decodeJwt(token);
+      if (payload?.exp) {
+        this.startAutoLogout(payload.exp);
+      }
+    }
+  }
+
+  private startAutoLogout(expiration: number) {
+    const now = Date.now();
+    const timeLeft = expiration * 1000 - now;
+
+    if (timeLeft <= 0) {
+      this.logout();
+      return;
+    }
+
+    if (this.logoutTimer) clearTimeout(this.logoutTimer);
+
+    this.logoutTimer = setTimeout(() => {
+      console.warn('[AuthService] Session expirée → déconnexion auto');
+      this.logout();
+    }, timeLeft);
   }
 
   private isTokenExpired(token: string): boolean {

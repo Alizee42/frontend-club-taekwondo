@@ -6,7 +6,6 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { routes } from './app.routes';
-// 👉 Interceptor JWT (chemin corrigé)
 import { authInterceptor } from './services/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -15,14 +14,9 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
 
     // Http + Interceptors
-    provideHttpClient(
-      withInterceptors([authInterceptor])
-    ),
+    provideHttpClient(withInterceptors([authInterceptor])),
 
     // Modules globaux
-    importProvidersFrom(
-      CommonModule,
-      FormsModule
-    )
-  ]
+    importProvidersFrom(CommonModule, FormsModule),
+  ],
 };

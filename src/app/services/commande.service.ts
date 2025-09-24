@@ -1,15 +1,34 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
-export interface Commande {
-  id?: number;
-  statut?: string;        // EN_ATTENTE, EN_ATTENTE_PROBATION, PAYEE, ANNULEE, RETIREE, ...
-  modePaiement?: string;  // CB, VIREMENT, ESPECES...
-  datePaiement?: string;
-  // ...autres champs utiles
+// ==== Types frontend ====
+export interface LigneCommandeDTO {
+  produitId: number;
+  produitNom: string;
+  quantite: number;
+  prix: number;
+  taille?: string | null;
+  couleur?: string | null;
+  flocage?: string | null;
+  beneficiaireId?: number | null;
+  beneficiairePrenom?: string | null;
+  beneficiaireNom?: string | null;
+}
+
+export interface CommandeDTO {
+  id: number;
+  dateCommande: string;
+  utilisateurId: number;
+  utilisateurNom: string;
+  utilisateurPrenom: string;
+  utilisateurEmail: string;
+  montantTotal: number;
+  modePaiement: string;
+  statut: string;
+  lignes: LigneCommandeDTO[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -17,113 +36,132 @@ export class CommandeService {
   private apiUrl = `${environment.apiUrl}/commandes`;
   private jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
-  // 👉 change ici si ton backend utilise EN_ATTENTE_PROBATION
   private readonly STATUT_ATTENTE = 'EN_ATTENTE';
-  // private readonly STATUT_ATTENTE = 'EN_ATTENTE_PROBATION';
 
   constructor(private http: HttpClient) {}
 
-  /** Créer une commande avec ses lignes */
+  /** ========================
+   *      CRÉATION
+   * ======================== */
   creerCommandeAvecLignes(commandeDTO: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/with-lignes`, commandeDTO, { headers: this.jsonHeaders })
       .pipe(catchError(this.handleError));
   }
 
-  /** Créer une commande en attente */
   creerCommandeEnAttente(commandeDTO: any): Observable<any> {
     const commandeAvecStatut = { ...commandeDTO, statut: this.STATUT_ATTENTE };
     return this.creerCommandeAvecLignes(commandeAvecStatut);
   }
 
-  /** Récupérer toutes les commandes */
-  getCommandes(): Observable<Commande[]> {
-    return this.http.get<Commande[]>(this.apiUrl).pipe(catchError(this.handleError));
+  /** ========================
+   *       LECTURE
+   * ======================== */
+  getCommandes(): Observable<CommandeDTO[]> {
+    return this.http.get<any[]>(this.apiUrl).pipe(
+      map(res => (res || []).map(api => this.mapApiToDto(api))),
+      catchError(this.handleError)
+    );
   }
 
-  /** Récupérer un utilisateur par ID */
-  getUtilisateur(utilisateurId: number): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/utilisateurs/${utilisateurId}`)
-      .pipe(catchError(this.handleError));
-  }  
+  getCommandesPaiementClub(): Observable<CommandeDTO[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/paiement-club`).pipe(
+      map(res => (res || []).map(api => this.mapApiToDto(api))),
+      catchError(this.handleError)
+    );
+  }
 
-  /** Changer uniquement le statut d'une commande */
+  /** Commandes liées à un membre (bénéficiaire) */
+  getCommandesMembre(membreId: number): Observable<CommandeDTO[]> {
+    return this.http.get<any[]>(`${this.apiUrl}?scope=membre`).pipe(
+      map(res => (res || [])
+        .filter(cmd => (cmd.lignesCommande || []).some((l: any) => l.beneficiaireId === membreId))
+        .map(api => this.mapApiToDto(api))
+      ),
+      catchError(this.handleError)
+    );
+  }
+
+  /** Commandes d’un parent (utilisateurId) */
+  getCommandesParent(parentId: number): Observable<CommandeDTO[]> {
+    return this.http.get<any[]>(`${this.apiUrl}?scope=parent`).pipe(
+      map(res => (res || [])
+        .filter(cmd => cmd.utilisateurId === parentId)
+        .map(api => this.mapApiToDto(api))
+      ),
+      catchError(this.handleError)
+    );
+  }
+
+  /** ========================
+   *       MISE À JOUR
+   * ======================== */
   changerStatut(id: number, statut: string): Observable<void> {
-    // Variante A (query param, corps vide) — fréquente côté Spring
-    return this.http.put<void>(`${this.apiUrl}/${id}/statut`, {}, {
-      headers: this.jsonHeaders,
-      params: new HttpParams().set('statut', statut)
+    return this.http.put<void>(`${this.apiUrl}/${id}/statut`, statut, {
+      headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
     }).pipe(catchError(this.handleError));
-
-    // Variante B (si ton backend attend du texte brut) :
-    // return this.http.put<void>(`${this.apiUrl}/${id}/statut`, statut, {
-    //   headers: new HttpHeaders({ 'Content-Type': 'text/plain' })
-    // }).pipe(catchError(this.handleError));
   }
 
-  /** Valider une commande (paiement confirmé) */
   validerCommande(id: number): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/valider/${id}`, null)
+    return this.http.put<void>(`${this.apiUrl}/${id}/valider`, null)
       .pipe(catchError(this.handleError));
   }
 
-  /** Mise à jour complète (statut + modePaiement) */
-  updateCommande(commandeId: number, payload: { statut: string; modePaiement: string }): Observable<void> {
+  updateCommande(commandeId: number, payload: { statut: string; modePaiement: string; datePaiement?: string }): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${commandeId}`, payload, { headers: this.jsonHeaders })
       .pipe(catchError(this.handleError));
   }
 
-  /** Upload d'un justificatif de paiement */
-  uploadJustificatif(commandeId: number, formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${commandeId}/justificatif`, formData)
-      .pipe(catchError(this.handleError));
-  }
-
-  /** Mise à jour paiement (statut, modePaiement, datePaiement) */
-  mettreAJourPaiementCommande(id: number, updateDTO: any): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, updateDTO, { headers: this.jsonHeaders })
-      .pipe(catchError(this.handleError));
-  }
-
-  /** Récupérer les commandes à payer au club */
-  getCommandesPaiementClub(): Observable<Commande[]> {
-    return this.http.get<Commande[]>(`${this.apiUrl}/paiement-club`)
-      .pipe(catchError(this.handleError));
-  }
-
-  /** Valider manuellement un paiement au club (espèces/virement) */
   validerPaiementManuel(id: number, modePaiement: string, datePaiement: string): Observable<void> {
     const body = { statut: 'PAYEE', modePaiement, datePaiement };
     return this.http.put<void>(`${this.apiUrl}/${id}/valider`, body, { headers: this.jsonHeaders })
       .pipe(catchError(this.handleError));
   }
 
-  /* =======================
-     Spécial DASHBOARD badges
-     ======================= */
-
-  /** Lister par statut (2 variantes selon ton backend) */
-  listByStatut(statut: string): Observable<Commande[]> {
-    const params = new HttpParams().set('statut', statut);
-
-    // Variante A : /filter?statut=...
-    return this.http.get<Commande[]>(`${this.apiUrl}/filter`, { params })
-      .pipe(catchError(this.handleError));
-
-    // Variante B si ton controller accepte directement /api/commandes?statut=...
-    // return this.http.get<Commande[]>(this.apiUrl, { params }).pipe(catchError(this.handleError));
+  /** ========================
+   *       FILTRES / STATS
+   * ======================== */
+  listEnAttente(): Observable<CommandeDTO[]> {
+    return this.getCommandes().pipe(
+      map(list => list.filter(c => c.statut === this.STATUT_ATTENTE))
+    );
   }
 
-  /** Seulement celles en attente/probation */
-  listEnAttente(): Observable<Commande[]> {
-    return this.listByStatut(this.STATUT_ATTENTE);
-  }
-
-  /** Compteur badge */
   countEnAttente(): Observable<number> {
     return this.listEnAttente().pipe(map(list => list?.length ?? 0));
   }
 
-  /* ===== Errors ===== */
+  /** ========================
+   *       MAPPING
+   * ======================== */
+  private mapApiToDto(api: any): CommandeDTO {
+    return {
+      id: api.id,
+      dateCommande: api.dateCommande ? `${api.dateCommande}T00:00:00` : '',
+      utilisateurId: api.utilisateurId,
+      utilisateurNom: api.utilisateur?.nom ?? '',
+      utilisateurPrenom: api.utilisateur?.prenom ?? '',
+      utilisateurEmail: api.utilisateur?.email ?? '',
+      montantTotal: Number(api.montantTotal ?? 0),
+      modePaiement: api.modePaiement || '',
+      statut: api.statut || '',
+      lignes: (api.lignesCommande || []).map((l: any) => ({
+        produitId: l.produitId,
+        produitNom: l.produitNom ?? `Produit #${l.produitId}`,
+        quantite: l.quantite,
+        prix: Number(l.sousTotal ?? (l.prixUnitaire * l.quantite)),
+        taille: l.taille ?? null,
+        couleur: l.couleur ?? null,
+        flocage: l.flocage ?? null,
+        beneficiaireId: l.beneficiaireId ?? null,
+        beneficiairePrenom: l.beneficiairePrenom ?? null,
+        beneficiaireNom: l.beneficiaireNom ?? null,
+      }))
+    };
+  }
+
+  /** ========================
+   *       ERRORS
+   * ======================== */
   private handleError(error: HttpErrorResponse) {
     const msg = error.error instanceof ErrorEvent
       ? `Erreur: ${error.error.message}`

@@ -8,13 +8,12 @@ import {
 import { Subscription, filter, firstValueFrom } from 'rxjs';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { PanierService, Produit } from '../../services/panier.service';
 import { StripeService } from '../../services/stripe.service';
-import { environment } from '../../../environments/environment'; // ✅ AJOUT
-
+import { environment } from '../../../environments/environment';
 
 interface PanierItem extends Produit {
   beneficiaireId?: number | null;
@@ -30,8 +29,7 @@ interface PanierItem extends Produit {
   imports: [CommonModule, RouterModule, DecimalPipe, FormsModule],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-
-    private readonly API_BASE = environment.apiUrl;
+  private readonly API_BASE = environment.apiUrl;
 
   // UI state
   menuOpen = false;
@@ -45,7 +43,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   showConfirmationModal = false;
   confirmationMessage = '';
 
-  // Panier (👉 typé PanierItem)
+  // Panier
   panier: PanierItem[] = [];
   cartCount = 0;
 
@@ -80,7 +78,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Etat d'auth
+    // Auth
     this.subs.push(
       this.auth.authState$.subscribe((s) => {
         this.isLoggedIn = s.isConnecte;
@@ -142,14 +140,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const role = (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
     return role === 'PARENT';
   }
+
   private isMembre(): boolean {
     const role = (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
     return role === 'MEMBRE';
   }
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('auth_token') ?? localStorage.getItem('token') ?? '';
-    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
-  }
+
   private deepest(route: ActivatedRoute): ActivatedRoute {
     let r = route;
     while (r.firstChild) r = r.firstChild;
@@ -303,11 +299,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.panierService.setPanier(copy as unknown as Produit[]);
   }
 
-    private async getEnfantsParent(): Promise<any[]> {
+  private async getEnfantsParent(): Promise<any[]> {
     try {
-      const obs = this.http.get<any[]>(`${this.API_BASE}/membres/mes-enfants`, {
-        headers: this.getAuthHeaders(),
-      });
+      const obs = this.http.get<any[]>(`${this.API_BASE}/membres/mes-enfants`);
       const response = await firstValueFrom(obs);
       return response || [];
     } catch (error) {
@@ -316,29 +310,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ======= Récup MembreId (plus de /me /moi) =======
+  // ======= Récup MembreId =======
   private async getMonMembreId(): Promise<number | null> {
-    // 1) si l'auth transporte déjà l'info
     const raw: any = this.user as any;
     if (raw?.membreId) return Number(raw.membreId);
 
     const uid = this.user?.id;
     if (!uid) return null;
 
-    // 2) endpoint by-utilisateur/{userId}
     try {
-      // ✅ CORRECTION ligne 308
       const dto: any = await firstValueFrom(
-        this.http.get(`${this.API_BASE}/membres/by-utilisateur/${uid}`, { headers: this.getAuthHeaders() })
+        this.http.get(`${this.API_BASE}/membres/by-utilisateur/${uid}`)
       );
       if (dto && dto.id) return Number(dto.id);
     } catch {}
 
-    // 3) endpoint via query ?utilisateurId=
     try {
-      // ✅ CORRECTION ligne 315
       const list: any[] = await firstValueFrom(
-        this.http.get<any[]>(`${this.API_BASE}/membres?utilisateurId=${uid}`, { headers: this.getAuthHeaders() })
+        this.http.get<any[]>(`${this.API_BASE}/membres?utilisateurId=${uid}`)
       );
       if (Array.isArray(list) && list.length > 0 && list[0]?.id) return Number(list[0].id);
     } catch {}
@@ -350,7 +339,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (this.isParent()) {
       if (!this.enfantsLoaded) await this.loadEnfants();
 
-      // Au moins un beneficiaire par les lignes ?
       const ids = Array.from(
         new Set((this.panier as any[]).map(i => (i as any).beneficiaireId).filter((x: any) => x != null))
       ) as number[];
@@ -362,12 +350,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
         alert('Sélectionne un bénéficiaire (enfant) pour au moins un article.');
         return null;
       }
-      // mélange : on prend le 1er pour satisfaire la contrainte membre_id (le back utilisera aussi les lignes)
       if (ids.length >= 1) return ids[0];
       return null;
     }
 
-    // Membre simple
     const mid = await this.getMonMembreId();
     if (!mid) {
       alert('Impossible de retrouver votre identifiant de membre.');
@@ -424,9 +410,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       const requestBody: any = { membreId, modePaiement: 'stripe', items };
 
       const createResponse = await firstValueFrom(
-        this.http.post<any>(`${this.API_BASE}/paiements/from-cart`, requestBody, {
-          headers: this.getAuthHeaders(),
-        })
+        this.http.post<any>(`${this.API_BASE}/paiements/from-cart`, requestBody)
       );
 
       const paiementId = createResponse?.paiementId;
@@ -467,7 +451,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.stripeService.unmount();
   }
 
-  // ======= Paiement au club → crée EN_ATTENTE / CLUB =======
+  // ======= Paiement au club =======
   async payerAuClub(): Promise<void> {
     if (!this.isLoggedIn) {
       this.pendingOpenCart = true;
@@ -480,7 +464,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
       await this.loadEnfants();
     }
 
-    // Prépare les lignes
     const lignes = this.panier.map((p: PanierItem) => {
       const prixUnitaire = this.unitPriceOf(p);
       const sousTotal = +(prixUnitaire * (p.quantite || 1)).toFixed(2);
@@ -492,12 +475,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
         taille: p.taille ?? null,
         couleur: p.couleur ?? null,
         flocage: (p as any).flocage ?? null,
-        // beneficiaireId: p.beneficiaireId ?? null, // décommente si supporté
       };
     });
     const montantTotal = lignes.reduce((s: number, l: any) => s + Number(l.sousTotal || 0), 0);
 
-    // DTO complet
     const payloadFull: any = {
       utilisateurId: this.user?.id ?? null,
       modePaiement: 'CLUB',
@@ -507,34 +488,30 @@ export class HeaderComponent implements OnInit, OnDestroy {
       lignesCommande: lignes,
     };
 
-    // 1) Endpoint dédié /with-lignes (si mappé)
-        try {
-      // ✅ CORRECTION ligne 442
+    try {
       await firstValueFrom(
-        this.http.post(`${this.API_BASE}/commandes/with-lignes`, payloadFull, { headers: this.getAuthHeaders() })
+        this.http.post(`${this.API_BASE}/commandes/with-lignes`, payloadFull)
       );
       this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
       this.showConfirmationModal = true;
       this.panierService.viderPanier();
       return;
     } catch (e1: any) {
-      console.warn('[Header] /api/commandes/with-lignes indisponible, on tente /api/commandes', e1);
+      console.warn('[Header] /api/commandes/with-lignes indisponible', e1);
     }
 
-    // 2) Fallback : /api/commandes (même payload)
     try {
       await firstValueFrom(
-        this.http.post(`${this.API_BASE}/commandes`, payloadFull, { headers: this.getAuthHeaders() })
+        this.http.post(`${this.API_BASE}/commandes`, payloadFull)
       );
       this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
       this.showConfirmationModal = true;
       this.panierService.viderPanier();
       return;
     } catch (e2: any) {
-      console.warn('[Header] /api/commandes KO avec payload complet, essai payload minimal', e2);
+      console.warn('[Header] /api/commandes KO', e2);
     }
 
-    // 3) Ultime fallback : payload minimal (le service calcule statut/total)
     try {
       const minimal: any = {
         utilisateurId: this.user?.id ?? null,
@@ -542,7 +519,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         lignesCommande: lignes,
       };
       await firstValueFrom(
-        this.http.post(`${this.API_BASE}/commandes`, minimal, { headers: this.getAuthHeaders() })
+        this.http.post(`${this.API_BASE}/commandes`, minimal)
       );
       this.confirmationMessage = '🧾 Commande enregistrée. Veuillez régler au club.';
       this.showConfirmationModal = true;
