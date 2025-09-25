@@ -46,7 +46,7 @@ export class BoutiqueComponent implements OnInit {
   confirmationMessage = '';
 
   selections: Record<number, Selection> = {};
-  private readonly creerCommandeUrl = '/api/paiements/commande';
+  private readonly creerCommandeUrl = '/api/paiements/from-cart';
 
   constructor(
     private panierService: PanierService,
@@ -143,30 +143,23 @@ export class BoutiqueComponent implements OnInit {
   private buildCommandePayload() {
     const panier = this.panierService.getPanier();
 
-    const lignes = panier.map((it) => {
+    const items = panier.map((it) => {
       const quantite = Math.max(1, Number(it.quantite || 1));
-      const prixUnitaire = it.prix;
-      const totalLigne = Math.round(prixUnitaire * quantite * 100) / 100;
 
       return {
         produitId: it.id,
-        nom: it.nom,
         quantite,
-        prixUnitaire,
         taille: it.taille ?? null,
         couleur: it.couleur ?? null,
         flocageActif: !!it.flocageActif,
         flocage: it.flocage ?? null,
-        totalLigne,
+        // Ne pas envoyer prixUnitaire - laisser le backend calculer automatiquement
       };
     });
 
-    const totalPanier = lignes.reduce((s: number, l: any) => s + l.totalLigne, 0);
     const payload = {
-      source: 'BOUTIQUE',
-      devise: 'EUR',
-      lignes,
-      total: totalPanier,
+      modePaiement: 'stripe', // Par défaut pour la boutique
+      items,
     };
     return payload;
   }
