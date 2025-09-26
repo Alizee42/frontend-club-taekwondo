@@ -10,7 +10,7 @@ import {
   AbstractControl
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment'; // ✅ ajout
+import { environment } from '../../../environments/environment';
 
 interface MembrePayload {
   nom: string;
@@ -35,6 +35,7 @@ export class InscriptionComponent implements OnInit {
   showConfirmationModal = false;
   erreurMessage = '';
   loading = false;
+
   togglePasswordVisibility = false;
   toggleConfirmPasswordVisibility = false;
   today: string = new Date().toISOString().split('T')[0];
@@ -43,11 +44,6 @@ export class InscriptionComponent implements OnInit {
   roleMembreSeul: boolean = false;
 
   constructor(private fb: FormBuilder, private http: HttpClient) {}
-
-  // ===== Helpers log (non obligatoire) =====
-  private log(...args: any[]) { console.log('🟦[INSCRIPTION]', ...args); }
-  private ok(...args: any[])  { console.log('🟩[INSCRIPTION]', ...args); }
-  private err(...args: any[]) { console.error('🟥[INSCRIPTION]', ...args); }
 
   ngOnInit(): void {
     this.utilisateurForm = this.fb.group(
@@ -58,7 +54,6 @@ export class InscriptionComponent implements OnInit {
         email: ['', [Validators.required, Validators.email]],
         telephone: ['', [
           Validators.required,
-          // FR: 10 chiffres, accepte espaces/.- et +33
           Validators.pattern(/^\s*(?:\+?\d{1,3}[\s.-]?)?(?:0|\(0\))?\d(?:[\s.-]?\d){8}\s*$/)
         ]],
 
@@ -70,8 +65,8 @@ export class InscriptionComponent implements OnInit {
         dateNaissance: ['', Validators.required],
         role: ['', Validators.required],
 
-        // Adresse (découpée)
-        adresse: [''], // gardé pour compat backend (string recomposée avant POST)
+        // Adresse
+        adresse: [''], // string recomposée avant POST
         adresseLigne1: ['', [Validators.required, Validators.minLength(3)]],
         adresseLigne2: [''],
         codePostal: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
@@ -85,7 +80,7 @@ export class InscriptionComponent implements OnInit {
       membres: this.fb.array([])
     });
 
-    // Uppercase ville
+    // uppercase ville
     this.utilisateurForm.get('ville')?.valueChanges.subscribe(v => {
       if (typeof v === 'string') {
         const up = v.replace(/\s+/g, ' ').trim().toUpperCase();
@@ -93,7 +88,7 @@ export class InscriptionComponent implements OnInit {
       }
     });
 
-    // Restaure brouillon local si présent (sans mdp)
+    // restauration locale
     const savedForm = localStorage.getItem('inscriptionData');
     if (savedForm) {
       try {
@@ -101,7 +96,7 @@ export class InscriptionComponent implements OnInit {
         if (data?.utilisateur) this.utilisateurForm.patchValue(data.utilisateur);
         if (Array.isArray(data?.membres)) data.membres.forEach((m: any) => this.addMembre(m));
       } catch (e) {
-        this.err('Erreur parse localStorage inscriptionData', e);
+        console.error('Erreur parse localStorage inscriptionData', e);
       }
     }
 
@@ -153,27 +148,25 @@ export class InscriptionComponent implements OnInit {
         this.utilisateurForm.markAllAsTouched();
         return;
       }
-      // MEMBRE seul -> saute l’étape 2
       this.step = this.roleMembreSeul ? 3 : 2;
       return;
     }
     if (this.step === 2) {
       if (this.membresForm.invalid || this.membres.length === 0) {
-        if (this.membres.length === 0) this.erreurMessage = 'Ajoutez au moins un membre.';
-        (this.membresForm as FormGroup).markAllAsTouched?.();
+        this.erreurMessage = this.membres.length === 0 ? 'Ajoutez au moins un membre.' : 'Vérifiez les champs des membres.';
+        this.membresForm.markAllAsTouched();
         return;
       }
       this.step = 3;
-      return;
     }
   }
 
   previousStep(): void {
     if (this.step === 3) {
       this.step = this.roleMembreSeul ? 1 : 2;
-      return;
+    } else if (this.step > 1) {
+      this.step--;
     }
-    if (this.step > 1) this.step--;
   }
 
   // ===== UI helpers =====
@@ -198,7 +191,7 @@ export class InscriptionComponent implements OnInit {
   }
   clearLocal(): void { localStorage.removeItem('inscriptionData'); }
 
-  // ===== Nettoyage payload membre (pas de '' envoyés) =====
+  // ===== Nettoyage payload membre =====
   private cleanMembre(m: any, utilisateurId: number): MembrePayload {
     const obj: MembrePayload = {
       nom: (m.nom || '').trim(),
@@ -251,15 +244,15 @@ export class InscriptionComponent implements OnInit {
           return;
         }
 
-        // MEMBRE seul : créer un Membre pour l'utilisateur
         if (this.roleMembreSeul) {
+          // créer membre adulte
           const membreSeul = this.cleanMembre({
             nom: utilisateurData.nom,
             prenom: utilisateurData.prenom,
             dateNaissance: utilisateurData.dateNaissance
           }, utilisateurId);
 
-          this.http.post('/api/membres', membreSeul).subscribe({
+          this.http.post(`${environment.apiUrl}/membres`, membreSeul).subscribe({
             next: (membre: any) => {
               if (membre?.id) localStorage.setItem('membreId', String(membre.id));
               this.finaliser();
@@ -272,7 +265,7 @@ export class InscriptionComponent implements OnInit {
           return;
         }
 
-        // Parent : créer les membres saisis
+        // parent → créer les membres
         const membres: MembrePayload[] = (this.membresForm.value.membres || [])
           .map((m: any) => this.cleanMembre(m, utilisateurId));
 
@@ -300,16 +293,9 @@ export class InscriptionComponent implements OnInit {
           });
         }
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
-        if (err?.status === 409 || err?.status === 400) {
-          const beanErrors = Array.isArray(err?.error?.errors)
-            ? err.error.errors.map((e: any) => e.defaultMessage || e.message).join(' • ')
-            : null;
-          this.erreurMessage = err.error?.message || beanErrors || 'Email déjà utilisé.';
-        } else {
-          this.erreurMessage = "Erreur lors de l'inscription.";
-        }
+        this.erreurMessage = "Erreur lors de l'inscription.";
       }
     });
   }
@@ -322,20 +308,18 @@ export class InscriptionComponent implements OnInit {
   }
 
   // ===== UI computed =====
-
-  /** % de progression (gère le cas "membre seul" où l'étape 2 est sautée) */
   get progressPercent(): number {
-    const total = this.roleMembreSeul ? 2 : 3;
-    const index = this.roleMembreSeul ? (this.step === 1 ? 1 : 2) : this.step; // 1..total
-    return Math.round(((index - 1) / (total - 1)) * 100);
+    if (this.roleMembreSeul) {
+      return this.step === 1 ? 0 : 100;
+    } else {
+      return Math.round(((this.step - 1) / 2) * 100);
+    }
   }
 
-  /** Valeur du champ password (pour *ngIf) */
   get passwordValue(): string {
     return (this.utilisateurForm.get('password')?.value || '') as string;
   }
 
-  /** Score 0..4 */
   get passwordStrength(): number {
     const v = this.passwordValue;
     if (!v) return 0;
@@ -352,13 +336,12 @@ export class InscriptionComponent implements OnInit {
     return ['Très faible', 'Faible', 'Correct', 'Bon', 'Fort'][s] || 'Très faible';
   }
 
-  /** Couleur selon la force (utilisée par la CSS var --strength-color) */
   get passwordStrengthColor(): string {
     switch (this.passwordStrength) {
-      case 1: return '#e74c3c'; // rouge
-      case 2: return '#f39c12'; // orange
-      case 3: return '#f1c40f'; // or
-      case 4: return '#2ecc71'; // vert
+      case 1: return '#e74c3c';
+      case 2: return '#f39c12';
+      case 3: return '#f1c40f';
+      case 4: return '#2ecc71';
       default: return '#e0e0e0';
     }
   }

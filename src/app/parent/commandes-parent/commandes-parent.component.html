@@ -45,11 +45,7 @@
             </td>
   
             <td class="cap">
-              <ng-container [ngSwitch]="c.modePaiement">
-                <span *ngSwitchCase="'cb'">CB</span>
-                <span *ngSwitchCase="'club'">Paiement au club</span>
-                <span *ngSwitchDefault class="muted">—</span>
-              </ng-container>
+              {{ normalizeModePaiement(c.modePaiement) }}
             </td>
   
             <td class="num">{{ c.montantTotal | currency:'EUR' }}</td>

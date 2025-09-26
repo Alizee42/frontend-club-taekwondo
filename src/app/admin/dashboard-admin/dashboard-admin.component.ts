@@ -265,7 +265,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   navigateToavis()               { this.markSectionAsSeen('avis');        this.router.navigate(['/admin/avis']); }
 
   // Sections sans badge
-  navigateToGestionEvenements()  { this.router.navigate(['/admin/gestion-evenements']); /* vérifie ton path exact */ }
+  navigateToGestionEvenements()  { this.router.navigate(['/admin/gestion-evenement']); }
   navigateToGalerie()            { this.router.navigate(['/admin/galerie']); }
   navigateToProfesseurs()        { this.router.navigate(['/admin/professeurs']); }
   navigateToHoraires()           { this.router.navigate(['/admin/horaires']); }

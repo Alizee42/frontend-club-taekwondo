@@ -41,10 +41,15 @@
           </td>
 
           <td class="cap">
-            <ng-container [ngSwitch]="c.modePaiement">
+            <ng-container [ngSwitch]="c.modePaiement.toLowerCase()">
               <span *ngSwitchCase="'cb'">CB</span>
+              <span *ngSwitchCase="'carte_bancaire'">CB</span>
               <span *ngSwitchCase="'club'">Paiement au club</span>
-              <span *ngSwitchDefault class="muted">—</span>
+              <span *ngSwitchCase="'paiement_club'">Paiement au club</span>
+              <span *ngSwitchCase="'cash'">Espèces</span>
+              <span *ngSwitchCase="'virement'">Virement</span>
+              <span *ngSwitchCase="'cheque'">Chèque</span>
+              <span *ngSwitchDefault class="muted">{{ c.modePaiement || '—' }}</span>
             </ng-container>
           </td>
 

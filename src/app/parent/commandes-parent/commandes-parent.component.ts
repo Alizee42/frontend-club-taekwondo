@@ -42,8 +42,11 @@ private getCurrentUserId(): number | null {
   const token = localStorage.getItem('auth_token') || '';
   const claims = this.decodeJwt(token) || {};
 
-  // ✅ Lecture de utilisateurId depuis le token JWT
-  const utilisateurId = Number(claims.utilisateurId);
+  console.log('[CommandesParent] Token décodé complet:', claims);
+
+  // ✅ Essaie différents champs possibles
+  let utilisateurId = Number(claims.utilisateurId || claims.userId || claims.id || claims.sub);
+  
   if (!isNaN(utilisateurId) && utilisateurId > 0) {
     console.log('[CommandesParent] utilisateurId trouvé:', utilisateurId);
     return utilisateurId;
@@ -51,7 +54,7 @@ private getCurrentUserId(): number | null {
 
   // Debug pour voir le contenu du token
   console.warn('[CommandesParent] Token décodé:', claims);
-  console.warn('[CommandesParent] utilisateurId non trouvé dans le token');
+  console.warn('[CommandesParent] Aucun utilisateurId valide trouvé');
   
   return null;
 }
@@ -127,5 +130,24 @@ private getCurrentUserId(): number | null {
     if (s.includes('retire')) return 'badge badge-secondary';
     if (s.includes('annule')) return 'badge badge-danger';
     return 'badge badge-dark';
+  }
+
+  // Méthode pour normaliser l'affichage du mode de paiement
+  normalizeModePaiement(mode: string): string {
+    if (!mode) return '—';
+    const m = mode.toUpperCase();
+    switch (m) {
+      case 'CB':
+      case 'STRIPE':
+        return 'CB';
+      case 'CLUB':
+        return 'Paiement au club';
+      case 'CHEQUE':
+        return 'Chèque';
+      case 'VIREMENT':
+        return 'Virement';
+      default:
+        return mode;
+    }
   }
 }

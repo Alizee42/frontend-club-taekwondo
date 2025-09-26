@@ -1,201 +1,212 @@
-.gestion-evenements-container {
-  padding: 2rem;
-  max-width: 1100px;
-  margin: auto;
-  font-family: 'Poppins', sans-serif;
+/* Style simple et cohérent avec l'application */
+.evenements-liste-container {
+  padding: 20px;
+  background: #f8f9fa;
+  min-height: 100vh;
 }
 
-.titre-section {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: var(--blue-main);
-}
-
-.btn-ajouter {
-  background-color: var(--blue-main);
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border: none;
+.page-header {
+  background: white;
+  padding: 20px;
   border-radius: 8px;
-  font-weight: 500;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.page-title {
+  color: #2c3e50;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.page-subtitle {
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Barre d'outils */
+.toolbar {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-filters {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
-  margin-bottom: 1.5rem;
-  transition: background-color 0.3s ease;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
-.btn-ajouter:hover {
-  background-color: var(--blue-main);
+.btn-primary {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
 }
 
-.table-evenements {
+.btn-primary:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.form-control {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+/* Tableau simple */
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-  border-radius: 10px;
-  overflow: hidden;
 }
 
-.table-evenements thead {
-  background-color: var(--blue-main);
-  color: white;
-}
-
-.table-evenements th,
-.table-evenements td {
-  padding: 0.9rem 1rem;
+.table th,
+.table td {
+  padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #eee;
 }
 
-.table-evenements tbody tr:hover {
-  background-color: #f8f8f8;
-}
-.preview img {
-  max-width: 100%; /* L'image ne dépasse pas la largeur disponible */
-  max-height: 150px; /* Limite la hauteur de l'image */
-  object-fit: cover; /* Coupe l'image pour qu'elle s'adapte sans déformation */
-  border-radius: 6px; /* Ajoute des coins arrondis */
-  margin-top: 1rem; /* Ajoute un espacement au-dessus de l'image */
-}
-
-.table-evenements img {
-  max-width: 90px; /* Limite la largeur de l'image */
-  max-height: 60px; /* Limite la hauteur de l'image */
-  object-fit: cover; /* Coupe l'image pour qu'elle s'adapte sans déformation */
-  border-radius: 6px; /* Ajoute des coins arrondis */
-}
-
-.modal {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 700px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 2rem; /* Espacement entre les sections */
-  overflow-y: auto;
-  max-height: 90vh;
-  margin-bottom: 1.5rem; /* Ajoute un espacement en bas de la modale */
-}
-.modal-overlay {
-  position: fixed; /* Position fixe pour couvrir tout l'écran */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
-  display: flex; /* Flexbox pour centrer */
-  justify-content: center; /* Centre horizontalement */
-  align-items: center; /* Centre verticalement */
-  z-index: 1000; /* Assure que la modale est au-dessus des autres éléments */
-  padding: 1rem; /* Ajoute un peu de marge autour de la modale */
-}
-.form-row {
-  display: flex;
-  gap: 1.5rem; /* Augmentation de l'espacement entre les colonnes */
-}
-
-.form-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
+.table th {
+  background: #f8f9fa;
   font-weight: 600;
-  color: #555;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.btn-valider {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  flex: 1;
-}
-
-.btn-valider:hover {
-  background-color: #388e3c;
-}
-
-.btn-annuler {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  flex: 1;
-}
-
-.btn-annuler:hover {
-  background-color: #d32f2f;
-}
-
-.btn-valider {
-  background-color: #2e7d32;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
+  color: #495057;
   cursor: pointer;
 }
 
-.btn-valider:hover {
-  background-color: #256b28;
+.table th:hover {
+  background: #e9ecef;
 }
 
-.btn-annuler {
-  background-color: #9e9e9e;
+.table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* Badges de statut */
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Boutons d'action */
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn-success {
+  background: #28a745;
   color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
+  border-color: #28a745;
 }
 
-.btn-annuler:hover {
-  background-color: #757575;
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+  border-color: #ffc107;
 }
-.btn-supprimer {
-  background-color: #d32f2f;
+
+.btn-danger {
+  background: #dc3545;
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  border-color: #dc3545;
 }
 
-.btn-supprimer:hover {
-  background-color: #b71c1c;
+/* Image dans le tableau */
+.event-image {
+  width: 60px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* Messages */
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.alert-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-filters {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .table {
+    min-width: 600px;
+  }
 }

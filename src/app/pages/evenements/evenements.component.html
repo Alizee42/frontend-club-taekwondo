@@ -1,45 +1,213 @@
 <div class="evenements-container">
-  <h2 class="titre-section">📅 Nos événements</h2>
+  <!-- En-tête -->
+  <div class="header-section">
+    <h1 class="page-title">
+      <i class="ri-calendar-event-line"></i>
+      Événements du Club
+    </h1>
+    <p class="page-subtitle">Découvrez et participez aux événements de notre club de Taekwondo</p>
+  </div>
 
-  <!-- Messages -->
-  <div *ngIf="successMessage" class="info-message success">{{ successMessage }}</div>
-  <div *ngIf="errorMessage" class="info-message error">{{ errorMessage }}</div>
-
-  <!-- Loading / Aucun événement -->
-  <div *ngIf="isLoading" class="info-message">Chargement des événements...</div>
-  <div *ngIf="!isLoading && evenements.length === 0" class="info-message">Aucun événement prévu pour le moment.</div>
-
-  <!-- Cartes d'événements -->
-  <div class="evenement-grid" *ngIf="!isLoading && evenements.length > 0">
-    <div class="evenement-card" *ngFor="let e of evenements">
-      <div class="image-wrapper" *ngIf="e.imageUrl">
-        <img [src]="e.imageUrl" alt="Image de l'événement" />
-      </div>
-      <div class="contenu">
-        <div class="header">
-          <h3>{{ e.titre }}</h3>
-          <span class="badge-date">{{ e.dateDebut | date:'dd/MM/yyyy' }}</span>
-        </div>
-        <p class="lieu">📍 {{ e.lieu }}</p>
-        <p class="description">{{ e.description }}</p>
-        <button class="btn-inscription" (click)="inscrire(e)">Je m'inscris</button>
-      </div>
+  <!-- Messages de statut -->
+  <div class="messages-container">
+    <div *ngIf="successMessage" class="alert alert-success">
+      <i class="ri-check-circle-line"></i>
+      {{ successMessage }}
     </div>
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <i class="ri-error-warning-line"></i>
+      {{ errorMessage }}
+    </div>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des événements...</p>
+  </div>
+
+  <!-- État vide -->
+  <div *ngIf="!isLoading && evenements.length === 0" class="empty-state">
+    <i class="ri-calendar-line"></i>
+    <h3>Aucun événement prévu</h3>
+    <p>Il n'y a pas d'événement programmé pour le moment.<br>
+       Revenez bientôt pour découvrir nos prochaines activités !</p>
+  </div>
+
+  <!-- Grille d'événements -->
+  <div class="evenements-grid" *ngIf="!isLoading && evenements.length > 0">
+    <article class="evenement-card" 
+             *ngFor="let evenement of evenements; trackBy: trackByEvenement"
+             [class.complet]="isEvenementComplet(evenement)"
+             [class.passe]="isEvenementPasse(evenement)"
+             [class.inscrit]="evenement.isInscrit">
+      
+      <!-- Image d'en-tête -->
+      <div class="card-image" *ngIf="evenement.imageUrl">
+        <img [src]="evenement.imageUrl" 
+             [alt]="'Image de ' + evenement.titre"
+             loading="lazy" />
+        <div class="image-overlay">
+          <span class="status-badge" *ngIf="evenement.isInscrit">
+            <i class="ri-check-line"></i> Inscrit
+          </span>
+          <span class="status-badge complet" *ngIf="isEvenementComplet(evenement) && !evenement.isInscrit">
+            <i class="ri-user-fill"></i> Complet
+          </span>
+        </div>
+      </div>
+
+      <!-- Contenu de la carte -->
+      <div class="card-content">
+        <!-- En-tête -->
+        <div class="card-header">
+          <h2 class="card-title">{{ evenement.titre }}</h2>
+          <div class="date-badge">
+            <i class="ri-calendar-line"></i>
+            {{ evenement.dateDebut | date:'dd MMM yyyy' }}
+          </div>
+        </div>
+
+        <!-- Informations -->
+        <div class="card-info">
+          <div class="info-item">
+            <i class="ri-time-line"></i>
+            <span>{{ evenement.dateDebut | date:'HH:mm' }}</span>
+            <span *ngIf="evenement.dateFin"> - {{ evenement.dateFin | date:'HH:mm' }}</span>
+          </div>
+          
+          <div class="info-item">
+            <i class="ri-map-pin-line"></i>
+            <span>{{ evenement.lieu }}</span>
+          </div>
+
+          <div class="info-item">
+            <i class="ri-group-line"></i>
+            <span>{{ evenement.nbInscrits || 0 }} / {{ evenement.capacite }} participants</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <p class="card-description">{{ evenement.description }}</p>
+
+        <!-- Barre de progression des inscriptions -->
+        <div class="progress-container" *ngIf="evenement.capacite > 0">
+          <div class="progress-bar">
+            <div class="progress-fill" 
+                 [style.width.%]="(evenement.nbInscrits || 0) / evenement.capacite * 100">
+            </div>
+          </div>
+          <span class="progress-text">
+            {{ evenement.nbInscrits || 0 }} / {{ evenement.capacite }} places
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button *ngIf="canInscribe(evenement)" 
+                  class="btn btn-primary btn-inscription"
+                  (click)="inscrire(evenement)">
+            <i class="ri-user-add-line"></i>
+            S'inscrire
+          </button>
+
+          <button *ngIf="evenement.isInscrit" 
+                  class="btn btn-outline btn-desinscription"
+                  (click)="seDesinscrire(evenement)">
+            <i class="ri-user-unfollow-line"></i>
+            Se désinscrire
+          </button>
+
+          <div *ngIf="isEvenementComplet(evenement) && !evenement.isInscrit" 
+               class="status-message complet">
+            <i class="ri-information-line"></i>
+            Événement complet
+          </div>
+
+          <div *ngIf="isEvenementPasse(evenement)" 
+               class="status-message passe">
+            <i class="ri-time-line"></i>
+            Événement terminé
+          </div>
+        </div>
+      </div>
+    </article>
   </div>
 </div>
 
-<!-- 🔵 Modale de confirmation -->
-<div class="modal-backdrop" *ngIf="modalVisible && evenementSelectionne">
-  <div class="modal-content">
-    <h2>Confirmer votre inscription</h2>
-    <p>Souhaitez-vous vous inscrire à <strong>{{ evenementSelectionne.titre }}</strong> ?</p>
-    <p class="modal-details">
-      📅 {{ evenementSelectionne.dateDebut | date:'fullDate' }} <br />
-      📍 {{ evenementSelectionne.lieu }}
-    </p>
-    <div class="modal-buttons">
-      <button class="btn-confirm" (click)="confirmerInscription()">✅ Confirmer</button>
-      <button class="btn-cancel" (click)="fermerModal()">❌ Annuler</button>
+<!-- Modal d'inscription -->
+<div class="modal-overlay" *ngIf="modalVisible" (click)="fermerModal()">
+  <div class="modal" (click)="$event.stopPropagation()" *ngIf="evenementSelectionne">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="ri-user-add-line"></i>
+        Inscription à l'événement
+      </h2>
+      <button class="btn-close" (click)="fermerModal()" aria-label="Fermer">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="event-recap">
+        <h3>{{ evenementSelectionne.titre }}</h3>
+        <div class="recap-info">
+          <div class="info-item">
+            <i class="ri-calendar-line"></i>
+            <span>{{ evenementSelectionne.dateDebut | date:'fullDate' }}</span>
+          </div>
+          <div class="info-item">
+            <i class="ri-time-line"></i>
+            <span>{{ evenementSelectionne.dateDebut | date:'HH:mm' }}</span>
+          </div>
+          <div class="info-item">
+            <i class="ri-map-pin-line"></i>
+            <span>{{ evenementSelectionne.lieu }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sélection membre (pour les parents) -->
+      <div class="form-group" *ngIf="userRole === 'PARENT' && enfants.length > 0">
+        <label for="membre-select">Inscrire :</label>
+        <select id="membre-select" 
+                [(ngModel)]="membreSelectionne" 
+                class="form-select"
+                required>
+          <option value="">-- Sélectionner un membre --</option>
+          <option *ngFor="let enfant of enfants" [ngValue]="enfant">
+            {{ enfant.prenom }} {{ enfant.nom }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Commentaire optionnel -->
+      <div class="form-group">
+        <label for="commentaire">Commentaire (optionnel) :</label>
+        <textarea id="commentaire" 
+                  [(ngModel)]="commentaire"
+                  class="form-textarea"
+                  placeholder="Ajoutez un commentaire si nécessaire..."
+                  rows="3"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" 
+              (click)="fermerModal()"
+              [disabled]="isInscriptionLoading">
+        <i class="ri-close-line"></i>
+        Annuler
+      </button>
+      
+      <button class="btn btn-primary" 
+              (click)="confirmerInscription()"
+              [disabled]="isInscriptionLoading || (userRole === 'PARENT' && !membreSelectionne)">
+        <i class="ri-loader-line spin" *ngIf="isInscriptionLoading"></i>
+        <i class="ri-check-line" *ngIf="!isInscriptionLoading"></i>
+        <span *ngIf="!isInscriptionLoading">Confirmer l'inscription</span>
+        <span *ngIf="isInscriptionLoading">Inscription en cours...</span>
+      </button>
     </div>
   </div>
 </div>

@@ -1,65 +1,44 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatButtonModule } from '@angular/material/button';
-import { EvenementService } from '../../../services/evenement.service';
-import { OverlayModule } from '@angular/cdk/overlay';
+import { EvenementService, EvenementDTO } from '../../../services/evenement.service';
 
 @Component({
   selector: 'app-evenements-liste',
   standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './evenements-liste.component.html',
-  styleUrls: ['./evenements-liste.component.css'],
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatTableModule,
-    MatIconModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatButtonModule,
-    OverlayModule,
-  ],
+  styleUrls: ['./evenements-liste.component.css']
 })
 export class EvenementsListeComponent implements OnInit {
-  evenements: any[] = [];
+  evenements: EvenementDTO[] = [];
+  filteredEvenements: EvenementDTO[] = [];
+  
+  // Modal et formulaire
   modalVisible = false;
+  isEditing = false;
+  editingEventId = 0;
+  isLoading = false;
+  errorMsg = '';
+  successMsg = '';
+  
+  // Filtres et recherche
+  searchTerm = '';
+  filterActif = 'tous'; // tous, actifs, inactifs
+  sortBy = 'dateDebut'; // dateDebut, titre, lieu
+  sortOrder = 'asc'; // asc, desc
 
-  // Colonnes affichées dans le tableau
-  displayedColumns: string[] = [
-    'titre',
-    'dateDebut',
-    'dateFin',
-    'lieu',
-    'capacite',
-    'description',
-    'image',
-    'actions',
-  ];
-
+  // Formulaire événement
   newEvent = {
     titre: '',
-    dateDebut: '',
-    heureDebut: '',
-    dateFin: '',
-    heureFin: '',
-    lieu: '',
-    capacite: 1,
     description: '',
+    dateDebut: '',
+    dateFin: '',
+    lieu: '',
+    capacite: 0,
+    actif: true,
+    imageFile: null as File | null
   };
-
-  selectedFile: File | null = null;
-  imagePreview: string | null = null;
 
   constructor(private evenementService: EvenementService) {}
 
@@ -67,122 +46,298 @@ export class EvenementsListeComponent implements OnInit {
     this.chargerEvenements();
   }
 
-  // Charge la liste des événements depuis le backend
+  // ======================== CHARGEMENT DONNÉES ========================
+
   chargerEvenements(): void {
+    this.isLoading = true;
+    this.errorMsg = '';
+    
     this.evenementService.getAllEvenements().subscribe({
-      next: (data) => (this.evenements = data),
-      error: () => alert('Erreur de chargement des événements'),
+      next: (evenements) => {
+        this.evenements = evenements;
+        this.appliquerFiltres();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des événements:', error);
+        this.errorMsg = 'Impossible de charger les événements.';
+        this.isLoading = false;
+      }
     });
   }
 
-  // Ouvre le modal pour ajouter un événement
-  ouvrirModal(): void {
-    this.modalVisible = true; // Affiche la modale
+  // ======================== FILTRES ET TRI ========================
+
+  appliquerFiltres(): void {
+    let filtered = [...this.evenements];
+
+    // Recherche textuelle
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(e => 
+        e.titre.toLowerCase().includes(term) ||
+        e.description.toLowerCase().includes(term) ||
+        e.lieu.toLowerCase().includes(term)
+      );
+    }
+
+    // Filtre par statut actif
+    if (this.filterActif !== 'tous') {
+      filtered = filtered.filter(e => 
+        this.filterActif === 'actifs' ? e.actif : !e.actif
+      );
+    }
+
+    // Tri
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (this.sortBy) {
+        case 'titre':
+          aValue = a.titre.toLowerCase();
+          bValue = b.titre.toLowerCase();
+          break;
+        case 'lieu':
+          aValue = a.lieu.toLowerCase();
+          bValue = b.lieu.toLowerCase();
+          break;
+        case 'dateDebut':
+        default:
+          aValue = new Date(a.dateDebut);
+          bValue = new Date(b.dateDebut);
+          break;
+      }
+
+      if (aValue < bValue) return this.sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return this.sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    this.filteredEvenements = filtered;
   }
 
-  // Ferme le modal et réinitialise le formulaire
+  onSearchChange(): void {
+    this.appliquerFiltres();
+  }
+
+  onFilterChange(): void {
+    this.appliquerFiltres();
+  }
+
+  changerTri(field: string): void {
+    if (this.sortBy === field) {
+      this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = field;
+      this.sortOrder = 'asc';
+    }
+    this.appliquerFiltres();
+  }
+
+  // ======================== MODAL GESTION ========================
+
+  ouvrirModal(): void {
+    this.resetFormulaire();
+    this.isEditing = false;
+    this.modalVisible = true;
+  }
+
+  ouvrirModalModification(evenement: EvenementDTO): void {
+    this.isEditing = true;
+    this.editingEventId = evenement.id;
+    this.newEvent = {
+      titre: evenement.titre,
+      description: evenement.description,
+      dateDebut: this.formatDateForInput(evenement.dateDebut),
+      dateFin: this.formatDateForInput(evenement.dateFin),
+      lieu: evenement.lieu,
+      capacite: evenement.capacite,
+      actif: evenement.actif,
+      imageFile: null
+    };
+    this.modalVisible = true;
+  }
+
   fermerModal(): void {
     this.modalVisible = false;
-    this.resetForm();
+    this.resetFormulaire();
+    this.clearMessages();
   }
 
-  // Réinitialise le formulaire et les fichiers sélectionnés
-  resetForm(): void {
+  resetFormulaire(): void {
     this.newEvent = {
       titre: '',
-      dateDebut: '',
-      heureDebut: '',
-      dateFin: '',
-      heureFin: '',
-      lieu: '',
-      capacite: 1,
       description: '',
+      dateDebut: '',
+      dateFin: '',
+      lieu: '',
+      capacite: 0,
+      actif: true,
+      imageFile: null
     };
-    this.selectedFile = null;
-    this.imagePreview = null;
+    this.editingEventId = 0;
   }
 
-  // Gère la sélection d'un fichier
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      this.selectedFile = input.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagePreview = reader.result as string;
-      };
-      reader.readAsDataURL(this.selectedFile);
+  // ======================== GESTION FICHIERS ========================
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Vérification du type de fichier
+      if (!file.type.startsWith('image/')) {
+        this.errorMsg = 'Veuillez sélectionner un fichier image valide.';
+        return;
+      }
+      
+      // Vérification de la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.errorMsg = 'L\'image ne doit pas dépasser 5MB.';
+        return;
+      }
+      
+      this.newEvent.imageFile = file;
+      this.clearMessages();
     }
   }
 
-  // Ajoute un nouvel événement
-  ajouterEvenement(): void {
-    // Vérification des champs obligatoires
-    if (
-      !this.newEvent.titre ||
-      !this.newEvent.dateDebut ||
-      !this.newEvent.heureDebut ||
-      !this.newEvent.dateFin ||
-      !this.newEvent.heureFin ||
-      !this.newEvent.lieu ||
-      !this.newEvent.capacite ||
-      !this.newEvent.description
-    ) {
-      alert('Veuillez remplir tous les champs obligatoires.');
-      return;
-    }
+  // ======================== CRUD ÉVÉNEMENTS ========================
 
-    // Vérification de la sélection d'une image
-    if (!this.selectedFile) {
-      alert('Veuillez sélectionner une image.');
-      return;
-    }
+  ajouterOuModifierEvenement(): void {
+    if (!this.validerFormulaire()) return;
 
-    // Vérification que la date de fin est après la date de début
-    const dateDebut = new Date(`${this.newEvent.dateDebut}T${this.newEvent.heureDebut}`);
-    const dateFin = new Date(`${this.newEvent.dateFin}T${this.newEvent.heureFin}`);
-    if (dateFin <= dateDebut) {
-      alert('La date de fin doit être postérieure à la date de début.');
-      return;
-    }
+    this.isLoading = true;
+    this.clearMessages();
 
-    // Création de l'objet FormData
     const formData = new FormData();
     formData.append('titre', this.newEvent.titre);
-    formData.append('dateDebut', `${this.newEvent.dateDebut}T${this.newEvent.heureDebut}`);
-    formData.append('dateFin', `${this.newEvent.dateFin}T${this.newEvent.heureFin}`);
+    formData.append('description', this.newEvent.description);
+    formData.append('dateDebut', this.newEvent.dateDebut);
+    formData.append('dateFin', this.newEvent.dateFin);
     formData.append('lieu', this.newEvent.lieu);
     formData.append('capacite', this.newEvent.capacite.toString());
-    formData.append('description', this.newEvent.description);
-    formData.append('image', this.selectedFile);
+    formData.append('actif', this.newEvent.actif.toString());
 
-    // Appel au service pour ajouter l'événement
-    this.evenementService.ajouterEvenement(formData).subscribe({
+    if (this.newEvent.imageFile) {
+      formData.append('image', this.newEvent.imageFile);
+    }
+
+    const operation$ = this.isEditing 
+      ? this.evenementService.modifierEvenement(this.editingEventId, formData)
+      : this.evenementService.ajouterEvenement(formData);
+
+    operation$.subscribe({
       next: () => {
-        alert("L'événement a été ajouté avec succès !");
-        this.fermerModal();
+        this.successMsg = `Événement ${this.isEditing ? 'modifié' : 'ajouté'} avec succès !`;
         this.chargerEvenements();
+        this.fermerModal();
+        this.isLoading = false;
+        
+        // Auto-clear success message
+        setTimeout(() => this.clearMessages(), 3000);
       },
-      error: (err) => {
-        console.error("Erreur lors de l'ajout de l'événement :", err);
-        alert("Une erreur est survenue lors de l'ajout de l'événement. Veuillez réessayer.");
-      },
+      error: (error) => {
+        console.error('Erreur lors de la sauvegarde:', error);
+        this.errorMsg = `Erreur lors de la ${this.isEditing ? 'modification' : 'création'} de l'événement.`;
+        this.isLoading = false;
+      }
     });
   }
 
-  // Supprime un événement
   supprimerEvenement(id: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
-      this.evenementService.supprimerEvenement(id).subscribe({
-        next: () => {
-          alert('Événement supprimé avec succès.');
-          this.chargerEvenements();
-        },
-        error: (err) => {
-          console.error("Erreur lors de la suppression de l'événement :", err);
-          alert('Une erreur est survenue lors de la suppression.');
-        },
-      });
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) return;
+
+    this.evenementService.supprimerEvenement(id).subscribe({
+      next: () => {
+        this.successMsg = 'Événement supprimé avec succès !';
+        this.chargerEvenements();
+        
+        // Auto-clear success message
+        setTimeout(() => this.clearMessages(), 3000);
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression:', error);
+        this.errorMsg = 'Erreur lors de la suppression de l\'événement.';
+      }
+    });
+  }
+
+  toggleActifEvenement(evenement: EvenementDTO): void {
+    // Utiliser l'API spécifique pour changer le statut (JSON au lieu de FormData)
+    this.evenementService.changerStatutEvenement(evenement.id, !evenement.actif).subscribe({
+      next: () => {
+        evenement.actif = !evenement.actif;
+        this.successMsg = `Événement ${evenement.actif ? 'activé' : 'désactivé'} !`;
+        
+        // Auto-clear success message
+        setTimeout(() => this.clearMessages(), 2000);
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de la modification du statut:', error);
+        this.errorMsg = 'Erreur lors de la modification du statut.';
+      }
+    });
+  }
+
+  // ======================== VALIDATION ET UTILITAIRES ========================
+
+  validerFormulaire(): boolean {
+    if (!this.newEvent.titre.trim()) {
+      this.errorMsg = 'Le titre est requis.';
+      return false;
     }
+    
+    if (!this.newEvent.dateDebut) {
+      this.errorMsg = 'La date de début est requise.';
+      return false;
+    }
+    
+    if (!this.newEvent.dateFin) {
+      this.errorMsg = 'La date de fin est requise.';
+      return false;
+    }
+    
+    if (new Date(this.newEvent.dateDebut) >= new Date(this.newEvent.dateFin)) {
+      this.errorMsg = 'La date de fin doit être postérieure à la date de début.';
+      return false;
+    }
+    
+    if (this.newEvent.capacite < 1) {
+      this.errorMsg = 'La capacité doit être d\'au moins 1 personne.';
+      return false;
+    }
+    
+    return true;
+  }
+
+  formatDateForInput(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  clearMessages(): void {
+    this.errorMsg = '';
+    this.successMsg = '';
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortBy !== field) return 'ri-sort-desc';
+    return this.sortOrder === 'asc' ? 'ri-sort-asc' : 'ri-sort-desc';
   }
 }

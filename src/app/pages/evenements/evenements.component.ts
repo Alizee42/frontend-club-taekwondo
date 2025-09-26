@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Ajout pour ngModel
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { EvenementService, EvenementDTO } from '../../services/evenement.service';
 
 @Component({
   selector: 'app-evenements',
@@ -11,71 +12,153 @@ import { FormsModule } from '@angular/forms'; // Ajout pour ngModel
   styleUrls: ['./evenements.component.css']
 })
 export class EvenementsComponent implements OnInit {
-  evenements: any[] = [];
+  evenements: EvenementDTO[] = [];
   isLoading = true;
   errorMessage = '';
   successMessage = '';
+  
+  // Modal d'inscription
   modalVisible = false;
-  evenementSelectionne: any = null;
+  evenementSelectionne: EvenementDTO | null = null;
   commentaire: string = '';
+  isInscriptionLoading = false;
+  
+  // Contexte utilisateur
+  userRole = '';
+  enfants: any[] = []; // Pour les parents
+  membreSelectionne: any = null; // Pour inscription d'enfant
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private evenementService: EvenementService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    this.detectUserContext();
     this.chargerEvenements();
   }
 
+  private detectUserContext(): void {
+    this.userRole = localStorage.getItem('user_role') || '';
+    // Pour l'instant, on simplifie sans charger les enfants
+  }
+
   chargerEvenements(): void {
-    this.http.get<any[]>('/api/evenements').subscribe({
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.evenementService.getEvenementsActifs().subscribe({
       next: (data) => {
-        this.evenements = data.filter(e => e.actif !== false);
+        this.evenements = data;
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
         this.errorMessage = 'Erreur lors du chargement des événements.';
         this.isLoading = false;
+        console.error('Erreur événements:', err);
       }
     });
   }
 
-  inscrire(evenement: any): void {
+  inscrire(evenement: EvenementDTO): void {
+    if (!localStorage.getItem('auth_token')) {
+      this.router.navigate(['/connexion']);
+      return;
+    }
+
     this.evenementSelectionne = evenement;
+    this.membreSelectionne = null;
+    this.commentaire = '';
     this.modalVisible = true;
+  }
+
+  confirmerInscription(): void {
+    if (!this.evenementSelectionne) return;
+
+    this.isInscriptionLoading = true;
+    this.errorMessage = '';
+
+    const evenementId = this.evenementSelectionne.id;
+
+    // Pour l'instant, inscription simple (membre)
+    this.evenementService.inscrireMembreEvenement(evenementId, this.commentaire).subscribe({
+      next: () => {
+        this.successMessage = 'Vous êtes inscrit à cet événement !';
+        this.fermerModal();
+        this.chargerEvenements();
+        this.clearMessages();
+      },
+      error: (err) => {
+        this.errorMessage = this.getErrorMessage(err);
+        this.isInscriptionLoading = false;
+      },
+      complete: () => {
+        this.isInscriptionLoading = false;
+      }
+    });
+  }
+
+  seDesinscrire(evenement: EvenementDTO): void {
+    if (!confirm('Êtes-vous sûr de vouloir vous désinscrire de cet événement ?')) {
+      return;
+    }
+
+    this.evenementService.desinscrireEvenement(evenement.id).subscribe({
+      next: () => {
+        this.successMessage = 'Désinscription effectuée avec succès !';
+        this.chargerEvenements();
+        this.clearMessages();
+      },
+      error: (err) => {
+        this.errorMessage = this.getErrorMessage(err);
+      }
+    });
   }
 
   fermerModal(): void {
     this.modalVisible = false;
     this.evenementSelectionne = null;
+    this.membreSelectionne = null;
     this.commentaire = '';
+    this.isInscriptionLoading = false;
   }
 
-  confirmerInscription(): void {
-    const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || 'null');
-    if (!utilisateur || !utilisateur.id) {
-      alert("Veuillez vous connecter pour vous inscrire.");
-      this.fermerModal();
-      return;
+  private getErrorMessage(error: any): string {
+    if (error.error?.message) {
+      return error.error.message;
     }
+    if (error.status === 409) {
+      return 'Vous êtes déjà inscrit à cet événement.';
+    }
+    if (error.status === 400) {
+      return 'Événement complet ou inscription fermée.';
+    }
+    return 'Une erreur est survenue lors de l\'inscription.';
+  }
 
-    const dto = {
-      
-      evenementId: this.evenementSelectionne.id,
-      utilisateurId: utilisateur.id,
-      commentaire: this.commentaire
-    };
-    
-    this.http.post('/api/inscriptions', dto).subscribe({
-      next: () => {
-        this.successMessage = `Inscription réussie à "${this.evenementSelectionne.titre}"`;
-        this.fermerModal();
-        setTimeout(() => this.successMessage = '', 5000);
-      },
-      error: (err) => {
-        console.error('Erreur inscription :', err);
-        this.errorMessage = `Erreur lors de l'inscription à "${this.evenementSelectionne.titre}".`;
-        this.fermerModal();
-        setTimeout(() => this.errorMessage = '', 5000);
-      }
-    });
+  // Utilitaires pour le template
+  isEvenementComplet(evenement: EvenementDTO): boolean {
+    return (evenement.nbInscrits || 0) >= evenement.capacite;
+  }
+
+  isEvenementPasse(evenement: EvenementDTO): boolean {
+    return new Date(evenement.dateDebut) < new Date();
+  }
+
+  canInscribe(evenement: EvenementDTO): boolean {
+    return !this.isEvenementComplet(evenement) && 
+           !this.isEvenementPasse(evenement) && 
+           !evenement.isInscrit;
+  }
+
+  clearMessages(): void {
+    setTimeout(() => {
+      this.successMessage = '';
+      this.errorMessage = '';
+    }, 5000);
+  }
+
+  trackByEvenement(index: number, evenement: EvenementDTO): number {
+    return evenement.id;
   }
 }

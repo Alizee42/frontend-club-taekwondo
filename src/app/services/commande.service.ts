@@ -72,22 +72,16 @@ export class CommandeService {
 
   /** Commandes liées à un membre (bénéficiaire) */
   getCommandesMembre(membreId: number): Observable<CommandeDTO[]> {
-    return this.http.get<any[]>(`${this.apiUrl}?scope=membre`).pipe(
-      map(res => (res || [])
-        .filter(cmd => (cmd.lignesCommande || []).some((l: any) => l.beneficiaireId === membreId))
-        .map(api => this.mapApiToDto(api))
-      ),
+    return this.http.get<any[]>(`${this.apiUrl}/membre/${membreId}`).pipe(
+      map(res => (res || []).map(api => this.mapApiToDto(api))),
       catchError(this.handleError)
     );
   }
 
-  /** Commandes d’un parent (utilisateurId) */
+  /** Commandes d'un parent (utilisateurId) */
   getCommandesParent(parentId: number): Observable<CommandeDTO[]> {
-    return this.http.get<any[]>(`${this.apiUrl}?scope=parent`).pipe(
-      map(res => (res || [])
-        .filter(cmd => cmd.utilisateurId === parentId)
-        .map(api => this.mapApiToDto(api))
-      ),
+    return this.http.get<any[]>(`${this.apiUrl}/parent/${parentId}`).pipe(
+      map(res => (res || []).map(api => this.mapApiToDto(api))),
       catchError(this.handleError)
     );
   }
@@ -134,6 +128,7 @@ export class CommandeService {
    *       MAPPING
    * ======================== */
   private mapApiToDto(api: any): CommandeDTO {
+    console.log('[CommandeService] Mode de paiement brut:', api.modePaiement);
     return {
       id: api.id,
       dateCommande: api.dateCommande ? `${api.dateCommande}T00:00:00` : '',

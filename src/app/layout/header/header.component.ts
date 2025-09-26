@@ -467,6 +467,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const lignes = this.panier.map((p: PanierItem) => {
       const prixUnitaire = this.unitPriceOf(p);
       const sousTotal = +(prixUnitaire * (p.quantite || 1)).toFixed(2);
+      
+      // ✅ Calcul du bénéficiaire (même logique que pour CB)
+      let benId: number | null = p.beneficiaireId ?? null;
+      if (benId == null && this.isParent() && this.enfants.length === 1) {
+        benId = this.enfants[0].id;
+      }
+      
       return {
         produitId: p.id,
         quantite: p.quantite,
@@ -475,6 +482,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         taille: p.taille ?? null,
         couleur: p.couleur ?? null,
         flocage: (p as any).flocage ?? null,
+        beneficiaireId: benId, // ✅ AJOUT du bénéficiaire manquant
       };
     });
     const montantTotal = lignes.reduce((s: number, l: any) => s + Number(l.sousTotal || 0), 0);

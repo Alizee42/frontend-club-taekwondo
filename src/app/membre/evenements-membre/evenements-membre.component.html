@@ -1,0 +1,108 @@
+<div class="evenements-container">
+  <header class="page-header">
+    <h1><i class="ri-calendar-event-line"></i> Événements du Club</h1>
+    <p>Découvrez et inscrivez-vous aux événements organisés par le club</p>
+  </header>
+
+  <!-- Loading -->
+  <div class="loader" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des événements...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-message" *ngIf="errorMsg">
+    <i class="ri-error-warning-line"></i>
+    <p>{{ errorMsg }}</p>
+    <button (click)="chargerEvenements()" class="btn-retry">
+      <i class="ri-refresh-line"></i> Réessayer
+    </button>
+  </div>
+
+  <!-- Événements -->
+  <div class="evenements-grid" *ngIf="!isLoading && !errorMsg && evenements.length > 0">
+    <div class="evenement-card" 
+         *ngFor="let evenement of evenements; trackBy: trackByEvenement"
+         [class.inscrit]="evenement.isInscrit">
+      
+      <!-- Image -->
+      <div class="evenement-image">
+        <img [src]="evenement.imageUrl || '/assets/images/default-event.jpg'" 
+             [alt]="evenement.titre"
+             (error)="onImageError($event)">
+        
+        <!-- Badge inscription -->
+        <div class="inscription-badge" *ngIf="evenement.isInscrit">
+          <i class="ri-check-line"></i> Inscrit
+        </div>
+        
+        <!-- Badge complet -->
+        <div class="complet-badge" *ngIf="isEvenementComplet(evenement)">
+          <i class="ri-close-line"></i> Complet
+        </div>
+      </div>
+
+      <!-- Contenu -->
+      <div class="evenement-content">
+        <h3>{{ evenement.titre }}</h3>
+        <p class="description">{{ evenement.description }}</p>
+        
+        <!-- Infos pratiques -->
+        <div class="evenement-infos">
+          <div class="info-item">
+            <i class="ri-calendar-line"></i>
+            <span>{{ formatDateRange(evenement.dateDebut, evenement.dateFin) }}</span>
+          </div>
+          
+          <div class="info-item">
+            <i class="ri-map-pin-line"></i>
+            <span>{{ evenement.lieu }}</span>
+          </div>
+          
+          <div class="info-item" *ngIf="evenement.capacite > 0">
+            <i class="ri-group-line"></i>
+            <span>{{ evenement.nbInscrits || 0 }} / {{ evenement.capacite }} participants</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="evenement-actions">
+          <button *ngIf="!evenement.isInscrit && !isEvenementComplet(evenement)"
+                  (click)="sInscrire(evenement)"
+                  [disabled]="isInscribing"
+                  class="btn btn-primary">
+            <i class="ri-user-add-line" *ngIf="!isInscribing"></i>
+            <i class="ri-loader-4-line spinning" *ngIf="isInscribing"></i>
+            S'inscrire
+          </button>
+
+          <button *ngIf="evenement.isInscrit"
+                  (click)="seDesinscrire(evenement)"
+                  [disabled]="isInscribing"
+                  class="btn btn-danger">
+            <i class="ri-user-unfollow-line" *ngIf="!isInscribing"></i>
+            <i class="ri-loader-4-line spinning" *ngIf="isInscribing"></i>
+            Se désinscrire
+          </button>
+
+          <button *ngIf="isEvenementComplet(evenement) && !evenement.isInscrit"
+                  class="btn btn-disabled"
+                  disabled>
+            <i class="ri-close-circle-line"></i>
+            Complet
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aucun événement -->
+  <div class="empty-state" *ngIf="!isLoading && !errorMsg && evenements.length === 0">
+    <i class="ri-calendar-line"></i>
+    <h3>Aucun événement disponible</h3>
+    <p>Il n'y a actuellement aucun événement planifié. Revenez bientôt pour découvrir nos prochaines activités !</p>
+    <button class="btn btn-primary" (click)="chargerEvenements()">
+      <i class="ri-refresh-line"></i> Actualiser
+    </button>
+  </div>
+</div>

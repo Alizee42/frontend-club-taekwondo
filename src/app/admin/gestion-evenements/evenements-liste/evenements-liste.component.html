@@ -1,111 +1,78 @@
-<div class="gestion-evenements-container">
-  <h2 class="titre-section">📋 Gestion des événements</h2>
-
-  <!-- Bouton Ajouter -->
-  <button class="btn-ajouter" (click)="ouvrirModal()">➕ Ajouter un événement</button>
-
-  <!-- Tableau des événements -->
-  <table class="table-evenements" *ngIf="evenements.length > 0">
-    <thead>
-      <tr>
-        <th>Titre</th>
-        <th>Début</th>
-        <th>Fin</th>
-        <th>Lieu</th>
-        <th>Capacité</th>
-        <th>Description</th>
-        <th>Image</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let e of evenements">
-        <td>{{ e.titre }}</td>
-        <td>{{ e.dateDebut | date: 'dd/MM/yyyy HH:mm' }}</td>
-        <td>{{ e.dateFin | date: 'dd/MM/yyyy HH:mm' }}</td>
-        <td>{{ e.lieu }}</td>
-        <td>{{ e.capacite }}</td>
-        <td>{{ e.description }}</td>
-        <td>
-          <img *ngIf="e.imageUrl" [src]="e.imageUrl" alt="Image de l'événement" width="90" height="60"
-            style="object-fit: cover; border-radius: 6px;" />
-        </td>
-        <td>
-          <button class="btn-supprimer" (click)="supprimerEvenement(e.id)">
-            <i class="fas fa-trash"></i>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- Modale Ajouter un événement -->
-  <div class="modal-overlay" *ngIf="modalVisible">
-    <div class="modal">
-      <h3>➕ Ajouter un événement</h3>
-      <form (ngSubmit)="ajouterEvenement()" #eventForm="ngForm" enctype="multipart/form-data">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="titre">Titre</label>
-            <input type="text" id="titre" [(ngModel)]="newEvent.titre" name="titre" required />
-          </div>
-
-          <div class="form-group">
-            <label for="lieu">Lieu</label>
-            <input type="text" id="lieu" [(ngModel)]="newEvent.lieu" name="lieu" required />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="dateDebut">Date de début</label>
-            <input type="date" id="dateDebut" [(ngModel)]="newEvent.dateDebut" name="dateDebut" required />
-          </div>
-
-          <div class="form-group">
-            <label for="heureDebut">Heure de début</label>
-            <input type="time" id="heureDebut" [(ngModel)]="newEvent.heureDebut" name="heureDebut" required />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="dateFin">Date de fin</label>
-            <input type="date" id="dateFin" [(ngModel)]="newEvent.dateFin" name="dateFin" required />
-          </div>
-
-          <div class="form-group">
-            <label for="heureFin">Heure de fin</label>
-            <input type="time" id="heureFin" [(ngModel)]="newEvent.heureFin" name="heureFin" required />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="capacite">Capacité</label>
-            <input type="number" id="capacite" [(ngModel)]="newEvent.capacite" name="capacite" required min="1" />
-          </div>
-
-          <div class="form-group">
-            <label for="image">Image</label>
-            <input type="file" id="image" (change)="onFileSelected($event)" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea id="description" [(ngModel)]="newEvent.description" name="description" required></textarea>
-        </div>
-
-               <div *ngIf="imagePreview" class="preview">
-          <img [src]="imagePreview" alt="Aperçu de l'image" />
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn-valider" type="submit">✅ Ajouter</button>
-          <button class="btn-annuler" type="button" (click)="fermerModal()">❌ Annuler</button>
-        </div>
-      </form>
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2>Gestion des Événements</h2>
+      
+      <!-- Messages -->
+      <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+      <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+      
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-center">
+        <p>Chargement des événements...</p>
+      </div>
+      
+      <!-- Tableau des événements -->
+      <div class="table-responsive" *ngIf="!isLoading">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Titre</th>
+              <th>Date début</th>
+              <th>Lieu</th>
+              <th>Capacité</th>
+              <th>Image</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let event of evenements">
+              <td>{{ event.titre }}</td>
+              <td>{{ event.dateDebut | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ event.lieu }}</td>
+              <td>{{ event.capacite }}</td>
+              <td>
+                <img 
+                  *ngIf="event.imageUrl" 
+                  [src]="event.imageUrl" 
+                  [alt]="event.titre"
+                  style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;"
+                />
+                <span *ngIf="!event.imageUrl">Aucune image</span>
+              </td>
+              <td>
+                <span 
+                  class="badge"
+                  [class]="event.actif ? 'badge-success' : 'badge-danger'"
+                >
+                  {{ event.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <button 
+                  class="btn btn-sm me-2"
+                  [class]="event.actif ? 'btn-secondary' : 'btn-success'"
+                  (click)="toggleActifEvenement(event)"
+                >
+                  {{ event.actif ? 'Désactiver' : 'Activer' }}
+                </button>
+                
+                <button 
+                  class="btn btn-sm btn-danger"
+                  (click)="supprimerEvenement(event.id)"
+                >
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+            
+            <tr *ngIf="evenements.length === 0">
+              <td colspan="7" class="text-center">Aucun événement trouvé</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

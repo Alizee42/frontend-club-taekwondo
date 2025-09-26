@@ -6,7 +6,7 @@
        [attr.aria-valuenow]="step">
     <div class="progress-title">
       <i class="ri-flag-2-line"></i>
-      Étape <strong>{{ step }}</strong> / <strong>{{ roleMembreSeul ? 2 : 3 }}</strong>
+      Étape <strong>{{ roleMembreSeul && step === 3 ? 2 : step }}</strong> / <strong>{{ roleMembreSeul ? 2 : 3 }}</strong>
     </div>
   </div>
 
@@ -26,7 +26,7 @@
     </div>
 
     <div class="step"
-         [class.active]="step === (roleMembreSeul ? 2 : 3)">
+         [class.active]="step === 3">
       {{ roleMembreSeul ? '2. Confirmation' : '3. Confirmation' }}
     </div>
   </div>
@@ -221,7 +221,7 @@
   </form>
 
   <!-- Étape 3 -->
-  <div *ngIf="step === (roleMembreSeul ? 2 : 3)" class="confirmation-step">
+  <div *ngIf="step === 3" class="confirmation-step">
     <fieldset class="form-section">
       <legend class="form-legend"><i class="ri-check-double-line"></i> Confirmation de l'inscription</legend>
 

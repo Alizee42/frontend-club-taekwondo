@@ -28,6 +28,8 @@ import { PaiementParentComponent } from './parent/paiement-parent/paiement-paren
 import { DocumentsParentComponent } from './parent/documents-parent/documents-parent.component';
 import { CommandesMembreComponent } from './membre/commandes-membre/commandes-membre.component';
 import { CommandesParentComponent } from './parent/commandes-parent/commandes-parent.component';
+import { EvenementsMembre } from './membre/evenements-membre/evenements-membre.component';
+import { EvenementsParent } from './parent/evenements-parent/evenements-parent.component';
 
 
 export const routes: Routes = [
@@ -79,7 +81,7 @@ export const routes: Routes = [
       { path: 'documents', component: DocumentsComponent },
       { path: 'paiements', component: PaiementComponent },
       { path: 'commandes', component: CommandesMembreComponent },
-
+      { path: 'evenements', component: EvenementsMembre }
     ]
   },
 
@@ -93,7 +95,8 @@ export const routes: Routes = [
       { path: 'dashboard-parent', component: DashboardParentComponent },
       { path: 'paiements', component: PaiementParentComponent },
       { path: 'documents', component: DocumentsParentComponent },
-      { path: 'commandes', component: CommandesParentComponent }
+      { path: 'commandes', component: CommandesParentComponent },
+      { path: 'evenements', component: EvenementsParent }
     ]
   },
 

@@ -41,16 +41,16 @@ export class CommandesMembreComponent implements OnInit {
     const token = localStorage.getItem('auth_token') || '';
     const p = this.decodeJwt(token) || {};
     
-    // D'abord essayer membreId
-    const membreId = Number(p.membreId);
+    // Pour un membre, utilisateurId correspond à membreId
+    const membreId = Number(p.membreId || p.utilisateurId);
     if (!isNaN(membreId) && membreId > 0) {
       console.log('[CommandesMembre] membreId trouvé:', membreId);
       return membreId;
     }
     
     // Debug pour voir le contenu du token
-    console.warn('[CommandesMembre] Token décodé:', p);
-    console.warn('[CommandesMembre] membreId non trouvé dans le token');
+    console.log('[CommandesMembre] Token décodé:', p);
+    console.log('[CommandesMembre] membreId non trouvé dans le token');
     
     return null;
   }
