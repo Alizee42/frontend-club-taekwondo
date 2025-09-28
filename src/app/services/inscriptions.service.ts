@@ -6,9 +6,17 @@ import { environment } from '../../environments/environment';
 
 export interface Inscription {
   id?: number;
-  statut?: string;      // EN_ATTENTE_PROBATION, VALIDE, REFUSE, etc.
+  statut?: string;       // EN_ATTENTE, VALIDE, REFUSE, etc.
   evenementId?: number;
-  // ...autres champs si besoin
+  utilisateurId?: number;
+  dateInscription?: string;
+  commentaire?: string;
+
+  // Champs supplémentaires du backend
+  utilisateurNom?: string;
+  utilisateurPrenom?: string;
+  utilisateurEmail?: string;
+  evenementTitre?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +24,22 @@ export class InscriptionsService {
   private readonly apiUrl = `${environment.apiUrl}/inscriptions`;
 
   constructor(private http: HttpClient) {}
+
+  /** 🔹 Créer une nouvelle inscription */
+  inscrireUtilisateur(evenementId: number, utilisateurId: number, commentaire?: string): Observable<Inscription> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
+      'Content-Type': 'application/json',
+    });
+
+    return this.http
+      .post<Inscription>(
+        this.apiUrl,
+        { evenementId, utilisateurId, commentaire },
+        { headers }
+      )
+      .pipe(catchError(this.handleError));
+  }
 
   /** 🔹 Récupérer les inscriptions d’un événement */
   getInscriptionsByEvenement(evenementId: number): Observable<Inscription[]> {
@@ -30,13 +54,28 @@ export class InscriptionsService {
       Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
       'Content-Type': 'application/json',
     });
-    // PATCH avec statut en query param (comme ton backend l’attend)
+
     return this.http
-      .patch<void>(`${this.apiUrl}/${id}/statut`, {}, { headers, params: new HttpParams().set('statut', statut) })
+      .patch<void>(
+        `${this.apiUrl}/${id}/statut`,
+        {},
+        { headers, params: new HttpParams().set('statut', statut) }
+      )
       .pipe(catchError(this.handleError));
   }
 
-  /** 🔹 (Optionnel) Lister par statut */
+  /** 🔹 Annuler une inscription (désinscription) */
+  annulerInscription(inscriptionId: number): Observable<void> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
+    });
+
+    return this.http
+      .delete<void>(`${this.apiUrl}/${inscriptionId}`, { headers })
+      .pipe(catchError(this.handleError));
+  }
+
+  /** 🔹 Lister par statut */
   listByStatut(statut: string): Observable<Inscription[]> {
     const params = new HttpParams().set('statut', statut);
     return this.http
@@ -44,10 +83,9 @@ export class InscriptionsService {
       .pipe(catchError(this.handleError));
   }
 
-  /** 🔹 Pour le dashboard: uniquement celles en attente/probation */
+  /** 🔹 Pour le dashboard: uniquement celles en attente */
   listEnAttente(): Observable<Inscription[]> {
-    // change la valeur si ton backend utilise "EN_ATTENTE" ou autre
-    const STATUT_ATTENTE = 'EN_ATTENTE_PROBATION';
+    const STATUT_ATTENTE = 'EN_ATTENTE'; // ✅ ton backend utilise bien EN_ATTENTE
     return this.listByStatut(STATUT_ATTENTE);
   }
 
@@ -58,9 +96,10 @@ export class InscriptionsService {
 
   /** ❗ Gestion erreurs */
   private handleError(error: HttpErrorResponse) {
-    const msg = error.error instanceof ErrorEvent
-      ? `Erreur: ${error.error.message}`
-      : `Erreur serveur ${error.status}: ${error.message}`;
+    const msg =
+      error.error instanceof ErrorEvent
+        ? `Erreur: ${error.error.message}`
+        : `Erreur serveur ${error.status}: ${error.message}`;
     console.error('[InscriptionsService]', msg, error);
     return throwError(() => new Error(msg));
   }

@@ -197,4 +197,19 @@ export class AuthService {
     const payload = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
     return JSON.parse(payload);
   }
+
+  // ---- Ajout pour récupérer l'ID utilisateur depuis le JWT ----
+  getUserIdFromToken(): number | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = this.decodeJwt(token);
+      // ⚡ Vérifie bien le nom du champ dans ton JWT (utilisateurId / sub / id)
+      return payload?.utilisateurId ?? null;
+    } catch (e) {
+      console.error('[AuthService] Erreur décodage JWT', e);
+      return null;
+    }
+  }
 }

@@ -13,7 +13,7 @@ import { EvenementService, EvenementDTO } from '../../../services/evenement.serv
 export class EvenementsListeComponent implements OnInit {
   evenements: EvenementDTO[] = [];
   filteredEvenements: EvenementDTO[] = [];
-  
+
   // Modal et formulaire
   modalVisible = false;
   isEditing = false;
@@ -21,15 +21,15 @@ export class EvenementsListeComponent implements OnInit {
   isLoading = false;
   errorMsg = '';
   successMsg = '';
-  
+
   // Filtres et recherche
   searchTerm = '';
-  filterActif = 'tous'; // tous, actifs, inactifs
-  sortBy = 'dateDebut'; // dateDebut, titre, lieu
-  sortOrder = 'asc'; // asc, desc
+  filterActif: 'tous' | 'actifs' | 'inactifs' = 'tous';
+  sortBy: 'dateDebut' | 'titre' | 'lieu' = 'dateDebut';
+  sortOrder: 'asc' | 'desc' = 'asc';
 
-  // Formulaire événement
-  newEvent = {
+  // ✅ Données du formulaire
+  nouvelEvenement = {
     titre: '',
     description: '',
     dateDebut: '',
@@ -37,7 +37,8 @@ export class EvenementsListeComponent implements OnInit {
     lieu: '',
     capacite: 0,
     actif: true,
-    imageFile: null as File | null
+    imageFile: null as File | null,
+    imageUrl: '' // utilisé pour l’aperçu et l’affichage dans le tableau
   };
 
   constructor(private evenementService: EvenementService) {}
@@ -46,12 +47,11 @@ export class EvenementsListeComponent implements OnInit {
     this.chargerEvenements();
   }
 
-  // ======================== CHARGEMENT DONNÉES ========================
-
+  // ======================== CHARGEMENT ========================
   chargerEvenements(): void {
     this.isLoading = true;
     this.errorMsg = '';
-    
+
     this.evenementService.getAllEvenements().subscribe({
       next: (evenements) => {
         this.evenements = evenements;
@@ -66,46 +66,32 @@ export class EvenementsListeComponent implements OnInit {
     });
   }
 
-  // ======================== FILTRES ET TRI ========================
-
+  // ======================== FILTRES & TRI ========================
   appliquerFiltres(): void {
     let filtered = [...this.evenements];
 
-    // Recherche textuelle
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(e => 
+      filtered = filtered.filter(e =>
         e.titre.toLowerCase().includes(term) ||
         e.description.toLowerCase().includes(term) ||
         e.lieu.toLowerCase().includes(term)
       );
     }
 
-    // Filtre par statut actif
     if (this.filterActif !== 'tous') {
-      filtered = filtered.filter(e => 
+      filtered = filtered.filter(e =>
         this.filterActif === 'actifs' ? e.actif : !e.actif
       );
     }
 
-    // Tri
     filtered.sort((a, b) => {
-      let aValue, bValue;
-      
+      let aValue: any, bValue: any;
+
       switch (this.sortBy) {
-        case 'titre':
-          aValue = a.titre.toLowerCase();
-          bValue = b.titre.toLowerCase();
-          break;
-        case 'lieu':
-          aValue = a.lieu.toLowerCase();
-          bValue = b.lieu.toLowerCase();
-          break;
-        case 'dateDebut':
-        default:
-          aValue = new Date(a.dateDebut);
-          bValue = new Date(b.dateDebut);
-          break;
+        case 'titre': aValue = a.titre.toLowerCase(); bValue = b.titre.toLowerCase(); break;
+        case 'lieu': aValue = a.lieu.toLowerCase(); bValue = b.lieu.toLowerCase(); break;
+        default: aValue = new Date(a.dateDebut).getTime(); bValue = new Date(b.dateDebut).getTime();
       }
 
       if (aValue < bValue) return this.sortOrder === 'asc' ? -1 : 1;
@@ -116,26 +102,7 @@ export class EvenementsListeComponent implements OnInit {
     this.filteredEvenements = filtered;
   }
 
-  onSearchChange(): void {
-    this.appliquerFiltres();
-  }
-
-  onFilterChange(): void {
-    this.appliquerFiltres();
-  }
-
-  changerTri(field: string): void {
-    if (this.sortBy === field) {
-      this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortBy = field;
-      this.sortOrder = 'asc';
-    }
-    this.appliquerFiltres();
-  }
-
-  // ======================== MODAL GESTION ========================
-
+  // ======================== MODAL ========================
   ouvrirModal(): void {
     this.resetFormulaire();
     this.isEditing = false;
@@ -145,7 +112,7 @@ export class EvenementsListeComponent implements OnInit {
   ouvrirModalModification(evenement: EvenementDTO): void {
     this.isEditing = true;
     this.editingEventId = evenement.id;
-    this.newEvent = {
+    this.nouvelEvenement = {
       titre: evenement.titre,
       description: evenement.description,
       dateDebut: this.formatDateForInput(evenement.dateDebut),
@@ -153,7 +120,8 @@ export class EvenementsListeComponent implements OnInit {
       lieu: evenement.lieu,
       capacite: evenement.capacite,
       actif: evenement.actif,
-      imageFile: null
+      imageFile: null,
+      imageUrl: evenement.imageUrl ?? '' // affichera l'image existante
     };
     this.modalVisible = true;
   }
@@ -165,7 +133,7 @@ export class EvenementsListeComponent implements OnInit {
   }
 
   resetFormulaire(): void {
-    this.newEvent = {
+    this.nouvelEvenement = {
       titre: '',
       description: '',
       dateDebut: '',
@@ -173,66 +141,72 @@ export class EvenementsListeComponent implements OnInit {
       lieu: '',
       capacite: 0,
       actif: true,
-      imageFile: null
+      imageFile: null,
+      imageUrl: ''
     };
     this.editingEventId = 0;
   }
 
-  // ======================== GESTION FICHIERS ========================
-
+  // ======================== FICHIERS ========================
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // Vérification du type de fichier
       if (!file.type.startsWith('image/')) {
-        this.errorMsg = 'Veuillez sélectionner un fichier image valide.';
-        return;
+        this.errorMsg = 'Veuillez sélectionner un fichier image valide.'; return;
       }
-      
-      // Vérification de la taille (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        this.errorMsg = 'L\'image ne doit pas dépasser 5MB.';
-        return;
+        this.errorMsg = 'L\'image ne doit pas dépasser 5MB.'; return;
       }
-      
-      this.newEvent.imageFile = file;
+
+      this.nouvelEvenement.imageFile = file;
+
+      // ✅ Générer un aperçu immédiat (base64)
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.nouvelEvenement.imageUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
       this.clearMessages();
     }
   }
 
-  // ======================== CRUD ÉVÉNEMENTS ========================
-
-  ajouterOuModifierEvenement(): void {
+  // ======================== CRUD ========================
+  ajouterEvenement(): void {
     if (!this.validerFormulaire()) return;
 
     this.isLoading = true;
     this.clearMessages();
 
     const formData = new FormData();
-    formData.append('titre', this.newEvent.titre);
-    formData.append('description', this.newEvent.description);
-    formData.append('dateDebut', this.newEvent.dateDebut);
-    formData.append('dateFin', this.newEvent.dateFin);
-    formData.append('lieu', this.newEvent.lieu);
-    formData.append('capacite', this.newEvent.capacite.toString());
-    formData.append('actif', this.newEvent.actif.toString());
+    formData.append('titre', this.nouvelEvenement.titre);
+    formData.append('description', this.nouvelEvenement.description);
+    formData.append('dateDebut', this.nouvelEvenement.dateDebut);
+    formData.append('dateFin', this.nouvelEvenement.dateFin);
+    formData.append('lieu', this.nouvelEvenement.lieu);
+    formData.append('capacite', this.nouvelEvenement.capacite.toString());
+    formData.append('actif', this.nouvelEvenement.actif.toString());
 
-    if (this.newEvent.imageFile) {
-      formData.append('image', this.newEvent.imageFile);
+    if (this.nouvelEvenement.imageFile) {
+      formData.append('image', this.nouvelEvenement.imageFile);
     }
 
-    const operation$ = this.isEditing 
+    const operation$ = this.isEditing
       ? this.evenementService.modifierEvenement(this.editingEventId, formData)
       : this.evenementService.ajouterEvenement(formData);
 
     operation$.subscribe({
-      next: () => {
+      next: (eventCree) => {
         this.successMsg = `Événement ${this.isEditing ? 'modifié' : 'ajouté'} avec succès !`;
+
+        // ⚡ Si le backend renvoie un chemin d'image → mettre à jour
+        if (eventCree.imageUrl) {
+          this.nouvelEvenement.imageUrl = eventCree.imageUrl;
+        }
+
         this.chargerEvenements();
         this.fermerModal();
         this.isLoading = false;
-        
-        // Auto-clear success message
         setTimeout(() => this.clearMessages(), 3000);
       },
       error: (error) => {
@@ -250,8 +224,6 @@ export class EvenementsListeComponent implements OnInit {
       next: () => {
         this.successMsg = 'Événement supprimé avec succès !';
         this.chargerEvenements();
-        
-        // Auto-clear success message
         setTimeout(() => this.clearMessages(), 3000);
       },
       error: (error) => {
@@ -262,13 +234,10 @@ export class EvenementsListeComponent implements OnInit {
   }
 
   toggleActifEvenement(evenement: EvenementDTO): void {
-    // Utiliser l'API spécifique pour changer le statut (JSON au lieu de FormData)
     this.evenementService.changerStatutEvenement(evenement.id, !evenement.actif).subscribe({
       next: () => {
         evenement.actif = !evenement.actif;
         this.successMsg = `Événement ${evenement.actif ? 'activé' : 'désactivé'} !`;
-        
-        // Auto-clear success message
         setTimeout(() => this.clearMessages(), 2000);
       },
       error: (error: any) => {
@@ -278,56 +247,32 @@ export class EvenementsListeComponent implements OnInit {
     });
   }
 
-  // ======================== VALIDATION ET UTILITAIRES ========================
-
+  // ======================== VALIDATION ========================
   validerFormulaire(): boolean {
-    if (!this.newEvent.titre.trim()) {
-      this.errorMsg = 'Le titre est requis.';
-      return false;
+    if (!this.nouvelEvenement.titre.trim()) { this.errorMsg = 'Le titre est requis.'; return false; }
+    if (!this.nouvelEvenement.dateDebut) { this.errorMsg = 'La date de début est requise.'; return false; }
+    if (!this.nouvelEvenement.dateFin) { this.errorMsg = 'La date de fin est requise.'; return false; }
+    if (new Date(this.nouvelEvenement.dateDebut) >= new Date(this.nouvelEvenement.dateFin)) {
+      this.errorMsg = 'La date de fin doit être postérieure à la date de début.'; return false;
     }
-    
-    if (!this.newEvent.dateDebut) {
-      this.errorMsg = 'La date de début est requise.';
-      return false;
-    }
-    
-    if (!this.newEvent.dateFin) {
-      this.errorMsg = 'La date de fin est requise.';
-      return false;
-    }
-    
-    if (new Date(this.newEvent.dateDebut) >= new Date(this.newEvent.dateFin)) {
-      this.errorMsg = 'La date de fin doit être postérieure à la date de début.';
-      return false;
-    }
-    
-    if (this.newEvent.capacite < 1) {
-      this.errorMsg = 'La capacité doit être d\'au moins 1 personne.';
-      return false;
-    }
-    
+    if (this.nouvelEvenement.capacite < 1) { this.errorMsg = 'La capacité doit être d\'au moins 1.'; return false; }
     return true;
   }
 
+  // ======================== UTILITAIRES ========================
   formatDateForInput(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date
+      .getDate().toString().padStart(2, '0')}T${date.getHours().toString().padStart(2, '0')}:${date
+      .getMinutes().toString().padStart(2, '0')}`;
   }
 
   formatDate(dateString: string): string {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
   }
 
@@ -336,7 +281,7 @@ export class EvenementsListeComponent implements OnInit {
     this.successMsg = '';
   }
 
-  getSortIcon(field: string): string {
+  getSortIcon(field: 'dateDebut' | 'titre' | 'lieu'): string {
     if (this.sortBy !== field) return 'ri-sort-desc';
     return this.sortOrder === 'asc' ? 'ri-sort-asc' : 'ri-sort-desc';
   }

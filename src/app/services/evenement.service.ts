@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 // ==== Types frontend ====
@@ -16,7 +16,8 @@ export interface EvenementDTO {
   imageUrl?: string;
   actif: boolean;
   nbInscrits?: number;
-  isInscrit?: boolean; // Pour savoir si l'utilisateur connecté est inscrit
+  isInscrit?: boolean;     // Pour savoir si l'utilisateur connecté est inscrit
+  inscriptionId?: number;  // <-- 🔹 Ajout pour gérer la désinscription
 }
 
 export interface InscriptionEvenementDTO {
@@ -139,7 +140,8 @@ export class EvenementService {
       imageUrl: api.imageUrl || null,
       actif: api.actif !== false,
       nbInscrits: Number(api.nbInscrits) || 0,
-      isInscrit: Boolean(api.isInscrit)
+      isInscrit: Boolean(api.isInscrit),
+      inscriptionId: api.inscriptionId ?? null  // <-- 🔹 mapping ajouté
     };
   }
 }

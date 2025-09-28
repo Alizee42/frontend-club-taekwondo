@@ -2,18 +2,63 @@
   <div class="row">
     <div class="col-12">
       <h2>Gestion des Événements</h2>
-      
+
+      <!-- ✅ Bouton ouvrir modale -->
+      <button class="btn btn-primary mb-3" (click)="ouvrirModal()">+ Ajouter un événement</button>
+
+      <!-- ✅ Modale -->
+      <div class="modal-backdrop" *ngIf="modalVisible">
+        <div class="modal">
+          <div class="modal-header">
+            <h5>{{ isEditing ? 'Modifier un événement' : 'Ajouter un événement' }}</h5>
+            <button class="close-btn" (click)="fermerModal()">✖</button>
+          </div>
+          <div class="modal-body">
+            <form (ngSubmit)="ajouterEvenement()" #eventForm="ngForm">
+              <div class="form-group">
+                <label for="titre">Titre</label>
+                <input type="text" id="titre" class="form-control" [(ngModel)]="nouvelEvenement.titre" name="titre" required>
+              </div>
+
+              <div class="form-group">
+                <label for="dateDebut">Date début</label>
+                <input type="datetime-local" id="dateDebut" class="form-control" [(ngModel)]="nouvelEvenement.dateDebut" name="dateDebut" required>
+              </div>
+
+              <div class="form-group">
+                <label for="dateFin">Date fin</label>
+                <input type="datetime-local" id="dateFin" class="form-control" [(ngModel)]="nouvelEvenement.dateFin" name="dateFin" required>
+              </div>
+
+              <div class="form-group">
+                <label for="lieu">Lieu</label>
+                <input type="text" id="lieu" class="form-control" [(ngModel)]="nouvelEvenement.lieu" name="lieu" required>
+              </div>
+
+              <div class="form-group">
+                <label for="capacite">Capacité</label>
+                <input type="number" id="capacite" class="form-control" [(ngModel)]="nouvelEvenement.capacite" name="capacite" required>
+              </div>
+
+              <div class="form-group">
+                <label for="imageFile">Image </label>
+                <input type="file" id="imageFile" (change)="onFileSelected($event)" class="form-control">
+              </div>
+
+              <button class="btn btn-success mt-3" [disabled]="eventForm.invalid">
+                {{ isEditing ? 'Modifier' : 'Ajouter' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
       <!-- Messages -->
       <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
       <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
-      
-      <!-- Loading -->
-      <div *ngIf="isLoading" class="text-center">
-        <p>Chargement des événements...</p>
-      </div>
-      
-      <!-- Tableau des événements -->
-      <div class="table-responsive" *ngIf="!isLoading">
+
+      <!-- Tableau -->
+      <div class="table-responsive mt-3">
         <table class="table table-striped">
           <thead>
             <tr>
@@ -33,40 +78,19 @@
               <td>{{ event.lieu }}</td>
               <td>{{ event.capacite }}</td>
               <td>
-                <img 
-                  *ngIf="event.imageUrl" 
-                  [src]="event.imageUrl" 
-                  [alt]="event.titre"
-                  style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;"
-                />
+                <img *ngIf="event.imageUrl" [src]="event.imageUrl" [alt]="event.titre" class="event-image"/>
                 <span *ngIf="!event.imageUrl">Aucune image</span>
               </td>
               <td>
-                <span 
-                  class="badge"
-                  [class]="event.actif ? 'badge-success' : 'badge-danger'"
-                >
+                <span class="badge" [class]="event.actif ? 'badge-success' : 'badge-danger'">
                   {{ event.actif ? 'Actif' : 'Inactif' }}
                 </span>
               </td>
               <td>
-                <button 
-                  class="btn btn-sm me-2"
-                  [class]="event.actif ? 'btn-secondary' : 'btn-success'"
-                  (click)="toggleActifEvenement(event)"
-                >
-                  {{ event.actif ? 'Désactiver' : 'Activer' }}
-                </button>
-                
-                <button 
-                  class="btn btn-sm btn-danger"
-                  (click)="supprimerEvenement(event.id)"
-                >
-                  Supprimer
-                </button>
+                <button class="btn btn-sm btn-warning me-2" (click)="ouvrirModalModification(event)">Modifier</button>
+                <button class="btn btn-sm btn-danger" (click)="supprimerEvenement(event.id)">Supprimer</button>
               </td>
             </tr>
-            
             <tr *ngIf="evenements.length === 0">
               <td colspan="7" class="text-center">Aucun événement trouvé</td>
             </tr>

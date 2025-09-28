@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Optional } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 type RoleUp = 'ADMIN' | 'MEMBRE' | 'PARENT';
@@ -19,15 +19,12 @@ export class ConnectedHeaderComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    // Si un @Input est passé, on peut éventuellement l'aligner avec le stockage
-    const stored = this.getStoredRole();
-    if (!stored && this.role) {
-      // Si rien en storage et qu'un rôle d'entrée existe, on peut le pousser
-      localStorage.setItem(this.ROLE_KEY, this.role.toUpperCase());
-    }
+    // ⚠️ On n’impose plus une redirection vers /connexion dans le header.
+    // Sinon au moindre petit souci de token/role, l’utilisateur saute.
+    // La sécurité reste gérée via tes guards Angular + backend.
   }
 
-  /** Récupère le rôle en storage, normalisé et sécurisé */
+  /** Récupère le rôle stocké */
   private getStoredRole(): RoleUp | null {
     const raw = localStorage.getItem(this.ROLE_KEY);
     if (!raw) return null;
@@ -49,15 +46,15 @@ export class ConnectedHeaderComponent implements OnInit {
         this.router.navigate(['/parent/dashboard-parent']);
         break;
       default:
-        // Rôle inconnu → on renvoie vers connexion
         this.router.navigate(['/connexion']);
         break;
     }
   }
 
   goToHome(): void {
-    // Navigation SPA (aucun reload, on conserve la session)
-    this.router.navigate(['/']);
+    // ✅ Correction : on va directement à l’accueil public
+    // sans vérifier le token ni toucher à la session
+    this.router.navigate(['/accueil']); // adapte selon ta route publique
   }
 
   goToProfil(): void {
@@ -65,13 +62,12 @@ export class ConnectedHeaderComponent implements OnInit {
   }
 
   logout(): void {
-    // Supprimer uniquement ce qui concerne l’auth (évite localStorage.clear())
+    // Nettoyage des infos d’auth seulement au logout
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.ROLE_KEY);
     localStorage.removeItem(this.USER_KEY);
-    sessionStorage.removeItem(this.TOKEN_KEY); // si tu l’avais mis en session
+    sessionStorage.removeItem(this.TOKEN_KEY);
 
-    // Redirection propre (remplace l’URL pour éviter "retour" vers une page protégée)
     this.router.navigate(['/connexion'], { replaceUrl: true });
   }
 }
