@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 // ==== Types frontend ====
 export interface EvenementDTO {
@@ -37,7 +38,16 @@ export class EvenementService {
   private readonly apiUrl = `${environment.apiUrl}/evenements`;
   private jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
+
+  // Méthode privée pour générer les headers avec authentification
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token || ''}`
+    });
+  }
 
   // ======================== ÉVÉNEMENTS ========================
 
@@ -78,37 +88,60 @@ export class EvenementService {
 
   /** Supprimer un événement */
   supprimerEvenement(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 
   /** Changer le statut actif/inactif d'un événement */
   changerStatutEvenement(id: number, actif: boolean): Observable<EvenementDTO> {
     const body = { actif };
-    return this.http.put<any>(`${this.apiUrl}/${id}/statut`, body, { headers: this.jsonHeaders }).pipe(
+    return this.http.put<any>(`${this.apiUrl}/${id}/statut`, body, { headers: this.getAuthHeaders() }).pipe(
       map(e => this.mapToEvenementDTO(e))
     );
   }
 
   // ======================== INSCRIPTIONS ========================
 
-  /** S'inscrire à un événement (membre individuel) */
+  /** S'inscrire à un événement (utilise la vraie route backend) */
   inscrireMembreEvenement(evenementId: number, commentaire?: string): Observable<InscriptionEvenementDTO> {
-    const body = { evenementId, commentaire };
-    return this.http.post<any>(`${this.apiUrl}/${evenementId}/inscription`, body, { headers: this.jsonHeaders });
+    const utilisateurId = this.getUserId();
+    const body = { 
+      evenementId, 
+      utilisateurId, 
+      commentaire
+    };
+    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body, { headers: this.getAuthHeaders() });
   }
 
-  /** Inscrire un enfant à un événement (parent) */
+  /** Inscrire un enfant à un événement - ✅ CORRIGÉ : utilise l'ID de l'enfant */
   inscrireEnfantEvenement(evenementId: number, membreId: number, commentaire?: string): Observable<InscriptionEvenementDTO> {
-    const body = { evenementId, membreId, commentaire };
-    return this.http.post<any>(`${this.apiUrl}/${evenementId}/inscription-enfant`, body, { headers: this.jsonHeaders });
+    // ✅ CORRECTION : Utilise l'ID de l'enfant pour l'inscription
+    // Cela permet d'inscrire plusieurs enfants différents au même événement
+    const commentaireAvecEnfant = `Inscription pour l'enfant (ID: ${membreId}). ${commentaire || ''}`.trim();
+    
+    const body = { 
+      evenementId, 
+      utilisateurId: membreId, // ✅ ID de l'enfant au lieu du parent
+      commentaire: commentaireAvecEnfant
+    };
+
+    console.log('🔍 Service: Inscription enfant, données envoyées:', body);
+    console.log('🔍 Service: ID enfant utilisé:', membreId);
+    
+    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body, { headers: this.getAuthHeaders() });
   }
 
   /** Se désinscrire d'un événement */
-  desinscrireEvenement(evenementId: number, membreId?: number): Observable<void> {
-    const url = membreId 
-      ? `${this.apiUrl}/${evenementId}/desinscription?membreId=${membreId}`
-      : `${this.apiUrl}/${evenementId}/desinscription`;
-    return this.http.delete<void>(url);
+  desinscrireEvenement(inscriptionId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/inscriptions/${inscriptionId}`, { headers: this.getAuthHeaders() });
+  }
+
+  // Méthode utilitaire pour récupérer l'ID utilisateur
+  private getUserId(): number {
+    const utilisateurId = this.authService.getUserIdFromToken();
+    if (!utilisateurId) {
+      throw new Error('Utilisateur non connecté');
+    }
+    return utilisateurId;
   }
 
   /** Récupérer mes inscriptions */

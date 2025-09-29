@@ -128,9 +128,19 @@ export class EvenementsParent implements OnInit {
   desinscrireEnfant(evenement: EvenementDTO): void {
     if (!this.enfantSelectionne || this.isInscribing) return;
     
+    // Trouver l'inscription de l'enfant pour cet événement
+    const inscription = this.inscriptionsEnfants.find(
+      i => i.evenementId === evenement.id && i.membreId === this.enfantSelectionne?.id
+    );
+    
+    if (!inscription) {
+      console.warn('Aucune inscription trouvée pour cet enfant et cet événement');
+      return;
+    }
+    
     this.isInscribing = true;
     
-    this.evenementService.desinscrireEvenement(evenement.id, this.enfantSelectionne.id).subscribe({
+    this.evenementService.desinscrireEvenement(inscription.id).subscribe({
       next: () => {
         // Retirer l'inscription de la liste
         this.inscriptionsEnfants = this.inscriptionsEnfants.filter(

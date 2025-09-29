@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { EvenementService, EvenementDTO } from '../../services/evenement.service';
-import { InscriptionsService } from '../../services/inscriptions.service';
 import { AuthService } from '../../services/auth.service';
+import { MembreService, Membre } from '../../services/membre.service';
 
 @Component({
   selector: 'app-evenements',
@@ -29,13 +29,13 @@ export class EvenementsComponent implements OnInit {
 
   // Contexte utilisateur
   userRole = '';
-  enfants: any[] = []; // Pour les parents
-  membreSelectionne: any = null; // Pour inscription d'enfant
+  enfants: Membre[] = []; // Pour les parents
+  membreSelectionne: Membre | null = null; // Pour inscription d'enfant
 
   constructor(
     private evenementService: EvenementService,
-    private inscriptionsService: InscriptionsService,
     private authService: AuthService,
+    private membreService: MembreService,
     private router: Router
   ) {}
 
@@ -46,7 +46,19 @@ export class EvenementsComponent implements OnInit {
 
   private detectUserContext(): void {
     this.userRole = this.authService.getRole() || '';
-    // ⚡ tu pourras ici charger les enfants si userRole === 'PARENT'
+    
+    // Charger les enfants si c'est un parent
+    if (this.userRole === 'PARENT') {
+      this.membreService.getMembresPourParentConnecte().subscribe({
+        next: (enfants) => {
+          this.enfants = enfants || [];
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement des enfants:', err);
+          this.enfants = [];
+        }
+      });
+    }
   }
 
   chargerEvenements(): void {
@@ -85,42 +97,74 @@ export class EvenementsComponent implements OnInit {
     this.errorMessage = '';
 
     const evenementId = this.evenementSelectionne.id;
-    const utilisateurId = this.authService.getUserIdFromToken();
 
-    if (!utilisateurId) {
-      this.errorMessage = "Vous devez être connecté pour vous inscrire.";
-      this.isInscriptionLoading = false;
-      return;
-    }
-
-    this.inscriptionsService
-      .inscrireUtilisateur(evenementId, utilisateurId, this.commentaire)
-      .subscribe({
-        next: () => {
-          this.successMessage = 'Vous êtes inscrit à cet événement 🎉';
-          this.fermerModal();
-          this.chargerEvenements();
-          this.clearMessages();
-        },
-        error: (err: HttpErrorResponse) => {
-          this.errorMessage = this.getErrorMessage(err);
-          this.isInscriptionLoading = false;
-        },
-        complete: () => {
-          this.isInscriptionLoading = false;
-        }
+    // Si c'est un parent qui inscrit un enfant
+    if (this.userRole === 'PARENT' && this.membreSelectionne) {
+      console.log('🔍 Inscription enfant:', {
+        evenementId,
+        membreSelectionneId: this.membreSelectionne.id,
+        userRole: this.userRole,
+        commentaire: this.commentaire
       });
+
+      this.evenementService
+        .inscrireEnfantEvenement(evenementId, this.membreSelectionne.id, this.commentaire)
+        .subscribe({
+          next: (response) => {
+            console.log('✅ Inscription réussie:', response);
+            const prenomEnfant = this.membreSelectionne?.prenom || 'L\'enfant';
+            this.successMessage = `${prenomEnfant} est inscrit(e) à cet événement 🎉`;
+            this.fermerModal();
+            this.chargerEvenements();
+            this.clearMessages();
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('❌ Erreur inscription:', err);
+            console.error('❌ Détails erreur:', {
+              status: err.status,
+              statusText: err.statusText,
+              error: err.error,
+              message: err.message
+            });
+            this.errorMessage = this.getErrorMessage(err);
+            this.isInscriptionLoading = false;
+          },
+          complete: () => {
+            this.isInscriptionLoading = false;
+          }
+        });
+    } else {
+      // Inscription directe du membre connecté
+      this.evenementService
+        .inscrireMembreEvenement(evenementId, this.commentaire)
+        .subscribe({
+          next: () => {
+            this.successMessage = 'Vous êtes inscrit à cet événement 🎉';
+            this.fermerModal();
+            this.chargerEvenements();
+            this.clearMessages();
+          },
+          error: (err: HttpErrorResponse) => {
+            this.errorMessage = this.getErrorMessage(err);
+            this.isInscriptionLoading = false;
+          },
+          complete: () => {
+            this.isInscriptionLoading = false;
+          }
+        });
+    }
   }
 
   seDesinscrire(evenement: EvenementDTO): void {
     if (!confirm('Êtes-vous sûr de vouloir vous désinscrire de cet événement ?')) return;
 
     if (!evenement.inscriptionId) {
-      this.errorMessage = "Impossible de trouver votre inscription.";
+      this.errorMessage = 'Impossible de trouver votre inscription.';
       return;
     }
-
-    this.inscriptionsService.annulerInscription(evenement.inscriptionId).subscribe({
+    
+    // Utilise l'ID d'inscription pour la suppression (selon l'API backend)
+    this.evenementService.desinscrireEvenement(evenement.inscriptionId).subscribe({
       next: () => {
         this.successMessage = 'Désinscription effectuée avec succès ✅';
         this.chargerEvenements();
@@ -171,5 +215,10 @@ export class EvenementsComponent implements OnInit {
 
   trackByEvenement(index: number, evenement: EvenementDTO): number {
     return evenement.id;
+  }
+
+  onImageError(event: any): void {
+    // Cache l'image en cas d'erreur de chargement
+    event.target.style.display = 'none';
   }
 }

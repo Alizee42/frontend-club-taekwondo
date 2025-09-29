@@ -43,10 +43,20 @@
              [class.inscrit]="evenement.isInscrit">
       
       <!-- Image d'en-tête -->
-      <div class="card-image" *ngIf="evenement.imageUrl">
-        <img [src]="evenement.imageUrl" 
+      <div class="card-image">
+        <img *ngIf="evenement.imageUrl; else noImage" 
+             [src]="evenement.imageUrl" 
              [alt]="'Image de ' + evenement.titre"
+             (error)="onImageError($event)"
              loading="lazy" />
+        
+        <ng-template #noImage>
+          <div class="image-placeholder">
+            <i class="ri-image-line"></i>
+            <span>{{ evenement.titre }}</span>
+          </div>
+        </ng-template>
+        
         <div class="image-overlay">
           <span class="status-badge" *ngIf="evenement.isInscrit">
             <i class="ri-check-line"></i> Inscrit
