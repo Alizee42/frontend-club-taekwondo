@@ -47,8 +47,15 @@ export class AppComponent implements OnInit {
       this.connectedRole = role;
     }
 
-    // Charge les paramètres globaux
-    this.parametresService.chargerParametres();
+    // ✅ Charge les paramètres globaux SEULEMENT si l'utilisateur est connecté
+    // et seulement pour les rôles qui en ont besoin (admin, paiements)
+    if (token && (role === 'admin' || role === 'membre')) {
+      try {
+        this.parametresService.chargerParametres();
+      } catch (error) {
+        console.warn('⚠️ Impossible de charger les paramètres de paiement:', error);
+      }
+    }
 
     // Gère les routes connectées
     this.router.events.subscribe((event) => {

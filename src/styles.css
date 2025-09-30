@@ -27,6 +27,27 @@
   --radius:8px;
   --border:#e5e7eb;
   --focus:#3b82f6;
+
+  /* 📱 RESPONSIVE BREAKPOINTS */
+  --mobile-max: 767px;
+  --tablet-min: 768px;
+  --tablet-max: 1023px;
+  --desktop-min: 1024px;
+  
+  /* 📱 RESPONSIVE SPACING */
+  --container-padding: 1rem;
+  --card-gap: 1rem;
+  --section-spacing: 2rem;
+}
+
+/* 📱 RESPONSIVE CONTAINER PADDING */
+@media (max-width: 767px) {
+  :root {
+    --container-padding: 0.75rem;
+    --card-gap: 0.75rem;
+    --section-spacing: 1.5rem;
+    --control-h: 44px; /* Plus grand sur mobile pour faciliter les taps */
+  }
 }
 
 /* Reset minimal */

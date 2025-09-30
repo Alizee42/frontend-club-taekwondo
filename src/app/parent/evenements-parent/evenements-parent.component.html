@@ -1,31 +1,53 @@
 <div class="evenements-container">
+  <!-- Header simple -->
   <header class="page-header">
-    <h1><i class="ri-calendar-event-line"></i> Événements du Club</h1>
-    <p>Inscrivez vos enfants aux événements organisés par le club</p>
+    <h1>Événements Parents</h1>
+    <p>Gérez les inscriptions de vos enfants aux événements du club</p>
+    
+    <!-- 📱 Bouton actualiser visible sur mobile -->
+    <button 
+      (click)="actualiserDonnees()" 
+      class="btn btn-secondary visible-mobile"
+      [disabled]="isLoading">
+      <i class="ri-refresh-line"></i>
+      Actualiser
+    </button>
   </header>
 
   <!-- Loading -->
-  <div class="loader" *ngIf="isLoading">
-    <div class="spinner"></div>
-    <p>Chargement des événements...</p>
+  <div class="empty-state" *ngIf="isLoading">
+    <i class="ri-loader-4-line spinning"></i>
+    <h3>Chargement...</h3>
+    <p>Récupération des données en cours</p>
   </div>
 
-  <!-- Error -->
+  <!-- Messages d'erreur et de succès avec classes responsive -->
   <div class="error-message" *ngIf="errorMsg">
     <i class="ri-error-warning-line"></i>
-    <p>{{ errorMsg }}</p>
-    <button (click)="chargerDonnees()" class="btn-retry">
-      <i class="ri-refresh-line"></i> Réessayer
-    </button>
+    <span>{{ errorMsg }}</span>
+  </div>
+
+  <div class="success-message" *ngIf="successMsg">
+    <i class="ri-check-line"></i>
+    <span>{{ successMsg }}</span>
   </div>
 
   <!-- Contenu principal -->
   <div class="main-content" *ngIf="!isLoading && !errorMsg">
     
-    <!-- Sidebar avec les enfants -->
-    <div class="sidebar" *ngIf="enfants.length > 0">
-      <h3><i class="ri-group-line"></i> Mes Enfants</h3>
-      <div class="enfants-liste">
+    <!-- Sidebar enfants -->
+    <div class="sidebar">
+      <h3>Mes enfants</h3>
+      
+      <!-- Message si aucun enfant -->
+      <div class="empty-state" *ngIf="enfants.length === 0">
+        <i class="ri-user-line"></i>
+        <h3>Aucun enfant</h3>
+        <p>Ajoutez un enfant pour commencer</p>
+      </div>
+
+      <!-- Liste des enfants -->
+      <div class="enfants-liste" *ngIf="enfants.length > 0">
         <div class="enfant-card" 
              *ngFor="let enfant of enfants"
              [class.selected]="enfantSelectionne?.id === enfant.id"
@@ -37,118 +59,101 @@
             <h4>{{ enfant.prenom }} {{ enfant.nom }}</h4>
             <p>{{ calculerAge(enfant.dateNaissance) }} ans</p>
           </div>
-          <i class="ri-check-line selected-icon" *ngIf="enfantSelectionne?.id === enfant.id"></i>
         </div>
-      </div>
-      
-      <div class="selection-info" *ngIf="enfantSelectionne">
-        <p><i class="ri-information-line"></i> 
-           Inscriptions pour <strong>{{ enfantSelectionne.prenom }}</strong>
-        </p>
       </div>
     </div>
 
-    <!-- Événements -->
+    <!-- Section événements -->
     <div class="evenements-section">
-      <!-- Aucun enfant -->
-      <div class="empty-state" *ngIf="enfants.length === 0">
-        <i class="ri-parent-line"></i>
-        <h3>Aucun enfant trouvé</h3>
-        <p>Vous devez d'abord ajouter des enfants à votre compte pour pouvoir les inscrire aux événements.</p>
-        <button class="btn btn-primary" (click)="allerVersEnfants()">
-          <i class="ri-add-line"></i> Ajouter un enfant
-        </button>
+      <div class="section-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 class="section-title">Événements disponibles</h2>
+          <button (click)="actualiserDonnees()" 
+                  [disabled]="isLoading"
+                  class="btn btn-secondary"
+                  style="flex: none; padding: 8px 12px; font-size: 0.8rem;">
+            <i class="ri-refresh-line" [class.spinning]="isLoading"></i>
+            Actualiser
+          </button>
+        </div>
       </div>
 
-      <!-- Sélection nécessaire -->
+      <!-- Message d'erreur spécifique aux inscriptions -->
+      <div class="error-message" *ngIf="errorMsg && enfantSelectionne">
+        <i class="ri-error-warning-line"></i>
+        <span>{{ errorMsg }}</span>
+      </div>
+
+      <!-- Message de succès -->
+      <div class="success-message" *ngIf="successMsg && enfantSelectionne">
+        <i class="ri-check-line"></i>
+        <span>{{ successMsg }}</span>
+      </div>
+
+      <!-- Message de sélection -->
       <div class="selection-required" *ngIf="enfants.length > 0 && !enfantSelectionne">
         <i class="ri-arrow-left-line"></i>
         <h3>Sélectionnez un enfant</h3>
-        <p>Choisissez l'enfant pour lequel vous souhaitez voir les événements et gérer les inscriptions.</p>
-      </div>
-
-      <!-- Liste des événements -->
-      <div class="evenements-grid" *ngIf="enfantSelectionne && evenements.length > 0">
-        <div class="evenement-card" 
-             *ngFor="let evenement of evenements; trackBy: trackByEvenement"
-             [class.inscrit]="isEnfantInscrit(evenement)">
-          
-          <!-- Image -->
-          <div class="evenement-image">
-            <img [src]="evenement.imageUrl || '/assets/images/default-event.jpg'" 
-                 [alt]="evenement.titre"
-                 (error)="onImageError($event)">
-            
-            <!-- Badge inscription -->
-            <div class="inscription-badge" *ngIf="isEnfantInscrit(evenement)">
-              <i class="ri-check-line"></i> {{ enfantSelectionne.prenom }} inscrit
-            </div>
-            
-            <!-- Badge complet -->
-            <div class="complet-badge" *ngIf="isEvenementComplet(evenement)">
-              <i class="ri-close-line"></i> Complet
-            </div>
-          </div>
-
-          <!-- Contenu -->
-          <div class="evenement-content">
-            <h3>{{ evenement.titre }}</h3>
-            <p class="description">{{ evenement.description }}</p>
-            
-            <!-- Infos pratiques -->
-            <div class="evenement-infos">
-              <div class="info-item">
-                <i class="ri-calendar-line"></i>
-                <span>{{ formatDateRange(evenement.dateDebut, evenement.dateFin) }}</span>
-              </div>
-              
-              <div class="info-item">
-                <i class="ri-map-pin-line"></i>
-                <span>{{ evenement.lieu }}</span>
-              </div>
-              
-              <div class="info-item" *ngIf="evenement.capacite > 0">
-                <i class="ri-group-line"></i>
-                <span>{{ evenement.nbInscrits || 0 }} / {{ evenement.capacite }} participants</span>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="evenement-actions">
-              <button *ngIf="!isEnfantInscrit(evenement) && !isEvenementComplet(evenement)"
-                      (click)="inscrireEnfant(evenement)"
-                      [disabled]="isInscribing"
-                      class="btn btn-primary">
-                <i class="ri-user-add-line" *ngIf="!isInscribing"></i>
-                <i class="ri-loader-4-line spinning" *ngIf="isInscribing"></i>
-                Inscrire {{ enfantSelectionne.prenom }}
-              </button>
-
-              <button *ngIf="isEnfantInscrit(evenement)"
-                      (click)="desinscrireEnfant(evenement)"
-                      [disabled]="isInscribing"
-                      class="btn btn-danger">
-                <i class="ri-user-unfollow-line" *ngIf="!isInscribing"></i>
-                <i class="ri-loader-4-line spinning" *ngIf="isInscribing"></i>
-                Désinscrire {{ enfantSelectionne.prenom }}
-              </button>
-
-              <button *ngIf="isEvenementComplet(evenement) && !isEnfantInscrit(evenement)"
-                      class="btn btn-disabled"
-                      disabled>
-                <i class="ri-close-circle-line"></i>
-                Complet
-              </button>
-            </div>
-          </div>
-        </div>
+        <p>Choisissez un enfant dans la liste pour voir les événements</p>
       </div>
 
       <!-- Aucun événement -->
       <div class="empty-state" *ngIf="enfantSelectionne && evenements.length === 0">
         <i class="ri-calendar-line"></i>
-        <h3>Aucun événement disponible</h3>
-        <p>Il n'y a actuellement aucun événement planifié. Revenez bientôt !</p>
+        <h3>Aucun événement</h3>
+        <p>Il n'y a pas d'événements disponibles pour le moment</p>
+      </div>
+
+      <!-- Grille des événements -->
+      <div class="events-grid" *ngIf="enfantSelectionne && evenements.length > 0">
+        <div class="event-card" *ngFor="let evenement of evenements">
+          
+          <!-- Image -->
+          <div class="event-image">
+            <img [src]="evenement.imageUrl || '/assets/images/default-event.jpg'" 
+                 [alt]="evenement.titre"
+                 (error)="onImageError($event)">
+          </div>
+
+          <!-- Contenu -->
+          <div class="event-content">
+            <h3 class="event-title">{{ evenement.titre }}</h3>
+            
+            <div class="event-meta">
+              <div class="event-date">
+                <i class="ri-calendar-line"></i>
+                {{ formatDateRange(evenement.dateDebut, evenement.dateFin) }}
+              </div>
+              <div class="event-location" *ngIf="evenement.lieu">
+                <i class="ri-map-pin-line"></i>
+                {{ evenement.lieu }}
+              </div>
+            </div>
+
+            <p class="event-description">{{ evenement.description }}</p>
+
+            <!-- Actions -->
+            <div class="event-actions">
+              <button *ngIf="!isEnfantInscrit(evenement)" 
+                      (click)="inscrireEnfant(evenement)"
+                      [disabled]="isInscribing"
+                      class="btn btn-primary">
+                <i class="ri-user-add-line" *ngIf="!isInscribing"></i>
+                <i class="ri-loader-4-line spinning" *ngIf="isInscribing"></i>
+                Inscrire
+              </button>
+
+              <button *ngIf="isEnfantInscrit(evenement)"
+                      (click)="desinscrireEnfant(evenement)"
+                      [disabled]="isInscribing"
+                      class="btn btn-secondary">
+                <i class="ri-user-unfollow-line" *ngIf="!isInscribing"></i>
+                <i class="ri-loader-4-line spinning" *ngIf="isInscribing"></i>
+                Désinscrire
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

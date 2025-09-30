@@ -185,10 +185,31 @@ export class EvenementsComponent implements OnInit {
   }
 
   private getErrorMessage(error: HttpErrorResponse): string {
-    if (error.error?.message) return error.error.message;
+    console.log('🔍 Analyse erreur complète:', error);
+    
+    // 🔹 Erreur du backend avec message explicite
+    if (error.error?.error) {
+      return error.error.error;
+    }
+    if (error.error?.message) {
+      return error.error.message;
+    }
+    
+    // 🔹 Codes d'erreur spécifiques
     if (error.status === 409) return 'Vous êtes déjà inscrit à cet événement.';
-    if (error.status === 400) return 'Événement complet ou inscription fermée.';
-    return 'Une erreur est survenue lors de l\'inscription.';
+    if (error.status === 400) {
+      // Plus de détails pour debug
+      console.log('🔍 Erreur 400 détaillée:', {
+        error: error.error,
+        message: error.message,
+        url: error.url
+      });
+      return 'Données d\'inscription invalides. Vérifiez les informations saisies.';
+    }
+    if (error.status === 404) return 'Événement ou membre introuvable.';
+    if (error.status === 403) return 'Vous n\'êtes pas autorisé à effectuer cette action.';
+    
+    return `Une erreur est survenue lors de l'inscription (${error.status}).`;
   }
 
   // Utilitaires pour le template

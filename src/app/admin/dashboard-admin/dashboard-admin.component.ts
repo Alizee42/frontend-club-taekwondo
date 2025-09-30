@@ -60,7 +60,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   // Badges (affichés dans l'UI)
   badge: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0 };
 
-  // Compteurs courants (ce que renvoie l’API pour chaque section)
+  // Compteurs courants (ce que renvoie l'API pour chaque section)
   private currentCounts: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0 };
 
   // Bonjour
@@ -75,12 +75,16 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
+    console.log('🚀 Initialisation Dashboard Admin');
     this.recupererUtilisateur();
     this.chargerStats();
     this.refreshBadges();
 
     // rafraîchit périodiquement
-    interval(30000).pipe(takeUntil(this.destroy$)).subscribe(() => this.refreshBadges());
+    interval(30000).pipe(takeUntil(this.destroy$)).subscribe(() => {
+      console.log('⏰ Rafraîchissement automatique des badges');
+      this.refreshBadges();
+    });
 
     // Si on arrive déjà sur une route cible → marquer comme vu
     this.applyMarkAsSeenForUrl(this.router.url);
@@ -88,7 +92,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     // À chaque navigation, marquer si on entre dans une section
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd), takeUntil(this.destroy$))
-      .subscribe((e: any) => this.applyMarkAsSeenForUrl(e?.urlAfterRedirects ?? e?.url ?? ''));
+      .subscribe((e: any) => {
+        console.log('🧭 Navigation détectée:', e?.urlAfterRedirects ?? e?.url);
+        this.applyMarkAsSeenForUrl(e?.urlAfterRedirects ?? e?.url ?? '');
+      });
   }
 
   ngOnDestroy(): void {
@@ -102,19 +109,23 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
       const raw = localStorage.getItem('user');
       const user: UserLocalStorage = raw ? JSON.parse(raw) : null;
       this.prenomUtilisateur = (user?.prenom ?? user?.nom ?? 'Admin');
+      console.log('👤 Utilisateur récupéré:', this.prenomUtilisateur);
     } catch {
       this.prenomUtilisateur = 'Admin';
+      console.warn('⚠️ Erreur récupération utilisateur, utilisation par défaut');
     }
   }
 
   /** KPIs dashboard (tes stats globales) */
   private chargerStats(): void {
+    console.log('📊 Chargement des statistiques dashboard');
     this.http.get<DashboardStats>(this.url('dashboard/admin')).subscribe({
       next: (data) => {
         this.nbMembres = data?.nbMembres ?? 0;
         this.totalPaiements = data?.totalPaiements ?? 0;
         this.paiementsAttente = data?.paiementsAttente ?? 0;
         this.evenementsAVenir = data?.evenementsAVenir ?? 0;
+        console.log('✅ Stats chargées:', data);
       },
       error: (err) => console.error('❌ Erreur chargement stats dashboard', err)
     });
@@ -122,14 +133,18 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Centralisation des compteurs pour badges */
   private refreshBadges(): void {
+    console.log('🔄 Refresh badges démarré...');
+    
     forkJoin({
-      avis: this.fetchAvis(),               // total avis non approuvés
-      paiements: this.fetchPaiements(),     // total paiements en attente
-      inscriptions: this.fetchInscriptions(), // total inscriptions en attente
-      commandes: this.fetchCommandes(),     // total commandes à traiter
-      documents: this.fetchDocuments()      // total documents (ou non traités si tu as un statut)
+      avis: this.fetchAvis(),               
+      paiements: this.fetchPaiements(),     
+      inscriptions: this.fetchInscriptions(), 
+      commandes: this.fetchCommandes(),     
+      documents: this.fetchDocuments()      
     }).subscribe({
       next: (res) => {
+        console.log('📊 Compteurs reçus de l\'API:', res);
+        
         // Mémorise les valeurs courantes renvoyées par l'API
         this.currentCounts = {
           avis: Number(res.avis || 0),
@@ -139,100 +154,201 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
           documents: Number(res.documents || 0)
         };
 
+        console.log('📈 Compteurs courants mis à jour:', this.currentCounts);
+
         // Calcule les badges = max(0, courant - dernierVu)
-        this.badge = {
+        const newBadges = {
           avis: this.computeUnread('avis', this.currentCounts.avis),
           paiements: this.computeUnread('paiements', this.currentCounts.paiements),
           inscriptions: this.computeUnread('inscriptions', this.currentCounts.inscriptions),
           commandes: this.computeUnread('commandes', this.currentCounts.commandes),
           documents: this.computeUnread('documents', this.currentCounts.documents)
         };
+
+        console.log('🔔 Nouveaux badges calculés:', newBadges);
+        
+        // Détecte les changements pour logger
+        Object.keys(newBadges).forEach(key => {
+          const sectionKey = key as SectionKey;
+          if (this.badge[sectionKey] !== newBadges[sectionKey]) {
+            console.log(`📌 Badge ${key}: ${this.badge[sectionKey]} → ${newBadges[sectionKey]}`);
+          }
+        });
+
+        this.badge = newBadges;
+        console.log('🏷️ Badges finaux mis à jour:', this.badge);
       },
-      error: () => { /* noop */ }
+      error: (err) => {
+        console.error('❌ Erreur lors du refresh des badges:', err);
+      }
     });
   }
 
   /** Calcule le non-lu pour une section */
   private computeUnread(section: SectionKey, current: number): number {
     const lastRaw = localStorage.getItem(LS_KEYS[section]);
+    console.log(`🔍 ${section} - Courant: ${current}, Dernier vu: ${lastRaw}`);
+    
     if (lastRaw === null) {
-      // 1er chargement → on considère "tout vu"
-      try { localStorage.setItem(LS_KEYS[section], String(current)); } catch {}
+      // 1er chargement → on considère "tout vu" pour éviter les faux positifs
+      console.log(`🆕 Première visite pour ${section}, marquage comme vu`);
+      try { 
+        localStorage.setItem(LS_KEYS[section], String(current)); 
+        console.log(`💾 ${section} initialisé dans localStorage: ${current}`);
+      } catch (e) {
+        console.warn('⚠️ Erreur localStorage:', e);
+      }
       return 0;
     }
+    
     const last = parseInt(lastRaw, 10) || 0;
-    return Math.max(0, current - last);
+    const unread = Math.max(0, current - last);
+    console.log(`📊 ${section} - Non lus calculés: ${unread} (${current} - ${last})`);
+    
+    return unread;
   }
 
-  /** Marque la section comme vue (badge=0 et stockage du “dernier vu”) */
+  /** Marque la section comme vue (badge=0 et stockage du "dernier vu") */
   private markSectionAsSeen(section: SectionKey): void {
-    try { localStorage.setItem(LS_KEYS[section], String(this.currentCounts[section])); } catch {}
+    const currentCount = this.currentCounts[section];
+    console.log(`✅ Marquage ${section} comme vu - Compteur: ${currentCount}`);
+    
+    try { 
+      localStorage.setItem(LS_KEYS[section], String(currentCount)); 
+      console.log(`💾 ${section} sauvegardé dans localStorage: ${currentCount}`);
+    } catch (e) {
+      console.warn(`⚠️ Erreur sauvegarde localStorage pour ${section}:`, e);
+    }
+    
+    // Reset du badge immédiatement
     this.badge = { ...this.badge, [section]: 0 };
+    console.log(`🔔 Badge ${section} remis à 0`);
   }
 
-  /** Marquage automatique en fonction de l’URL atteinte */
+  /** Marquage automatique en fonction de l'URL atteinte */
   private applyMarkAsSeenForUrl(url: string): void {
     if (!url) return;
+    console.log(`🎯 Vérification marquage automatique pour URL: ${url}`);
+    
     // Adapte ces routes si tes paths diffèrent
-    if (url.startsWith('/admin/paiements')) this.markSectionAsSeen('paiements');
-    if (url.startsWith('/admin/documents')) this.markSectionAsSeen('documents');
-    if (url.startsWith('/admin/gestion-commande')) this.markSectionAsSeen('commandes');
-    if (url.startsWith('/admin/gestion-inscription') || url.startsWith('/admin/inscriptions')) this.markSectionAsSeen('inscriptions');
-    if (url.startsWith('/admin/avis')) this.markSectionAsSeen('avis');
+    if (url.startsWith('/admin/paiements')) {
+      console.log('💳 Marquage section paiements comme vue');
+      this.markSectionAsSeen('paiements');
+    }
+    if (url.startsWith('/admin/documents')) {
+      console.log('📄 Marquage section documents comme vue');
+      this.markSectionAsSeen('documents');
+    }
+    if (url.startsWith('/admin/gestion-commande')) {
+      console.log('🛒 Marquage section commandes comme vue');
+      this.markSectionAsSeen('commandes');
+    }
+    if (url.startsWith('/admin/gestion-inscription') || url.startsWith('/admin/inscriptions')) {
+      console.log('📝 Marquage section inscriptions comme vue');
+      this.markSectionAsSeen('inscriptions');
+    }
+    if (url.startsWith('/admin/avis')) {
+      console.log('⭐ Marquage section avis comme vue');
+      this.markSectionAsSeen('avis');
+    }
   }
 
   // ===== Requêtes directes (filtrées) =====
 
   /** Avis non approuvés UNIQUEMENT */
   private fetchAvis(): Observable<number> {
+    console.log('📩 Récupération avis non approuvés');
     const params = new HttpParams().set('approuve', STATUS.AVIS_NON_APPROUVE);
     return this.http.get<any[]>(this.url('avis'), { params }).pipe(
-      map(list => Array.isArray(list) ? list.filter(a => a?.approuve === false).length : 0),
-      catchError(() => of(0))
+      map(list => {
+        const count = Array.isArray(list) ? list.filter(a => a?.approuve === false).length : 0;
+        console.log(`⭐ Avis non approuvés trouvés: ${count}`);
+        return count;
+      }),
+      catchError((err) => {
+        console.error('❌ Erreur récupération avis:', err);
+        return of(0);
+      })
     );
   }
 
   /** Paiements en attente (robuste: /filter → fallback /api/paiements) */
   private fetchPaiements(): Observable<number> {
+    console.log('💳 Récupération paiements en attente');
     const params = new HttpParams().set('statut', STATUS.PAIEMENT_EN_ATTENTE);
     const filtered$ = this.http.get<any[]>(this.url('paiements/filter'), { params });
     const all$ = this.http.get<any[]>(this.url('paiements'));
 
     return filtered$.pipe(
-      catchError(() => all$),
+      catchError(() => {
+        console.log('⚠️ Fallback vers /paiements pour filtrage manuel');
+        return all$;
+      }),
       switchMap(list => {
         const count = this.countPendingPaiements(list);
+        console.log(`💰 Paiements en attente trouvés: ${count}`);
         if (count > 0) return of(count);
-        return all$.pipe(map(all => this.countPendingPaiements(all)));
+        return all$.pipe(map(all => {
+          const fallbackCount = this.countPendingPaiements(all);
+          console.log(`💰 Paiements en attente (fallback): ${fallbackCount}`);
+          return fallbackCount;
+        }));
       }),
-      catchError(() => of(0))
+      catchError((err) => {
+        console.error('❌ Erreur récupération paiements:', err);
+        return of(0);
+      })
     );
   }
 
   /** Inscriptions en attente de probation UNIQUEMENT */
   private fetchInscriptions(): Observable<number> {
+    console.log('📝 Récupération inscriptions en attente');
     const params = new HttpParams().set('statut', STATUS.INSCRIPTION_EN_ATTENTE);
     return this.http.get<any[]>(this.url('inscriptions'), { params }).pipe(
-      map(list => Array.isArray(list) ? list.filter(i => this.norm(i?.statut) === this.norm(STATUS.INSCRIPTION_EN_ATTENTE)).length : 0),
-      catchError(() => of(0))
+      map(list => {
+        const count = Array.isArray(list) ? list.filter(i => this.norm(i?.statut) === this.norm(STATUS.INSCRIPTION_EN_ATTENTE)).length : 0;
+        console.log(`📋 Inscriptions en attente trouvées: ${count}`);
+        return count;
+      }),
+      catchError((err) => {
+        console.error('❌ Erreur récupération inscriptions:', err);
+        return of(0);
+      })
     );
   }
 
   /** Commandes à traiter UNIQUEMENT */
   private fetchCommandes(): Observable<number> {
+    console.log('🛒 Récupération commandes à traiter');
     const params = new HttpParams().set('statut', STATUS.COMMANDE_A_TRAITER);
     return this.http.get<any[]>(this.url('commandes'), { params }).pipe(
-      map(list => Array.isArray(list) ? list.filter(c => this.norm(c?.statut) === this.norm(STATUS.COMMANDE_A_TRAITER)).length : 0),
-      catchError(() => of(0))
+      map(list => {
+        const count = Array.isArray(list) ? list.filter(c => this.norm(c?.statut) === this.norm(STATUS.COMMANDE_A_TRAITER)).length : 0;
+        console.log(`🛍️ Commandes à traiter trouvées: ${count}`);
+        return count;
+      }),
+      catchError((err) => {
+        console.error('❌ Erreur récupération commandes:', err);
+        return of(0);
+      })
     );
   }
 
   /** Documents (par défaut : total). Si tu as un statut "à valider", filtre-le ici. */
   private fetchDocuments(): Observable<number> {
+    console.log('📄 Récupération documents');
     // 👉 Si tu as un statut spécifique (ex: ?statut=A_VALIDER), adapte ci-dessous.
     return this.http.get<any[]>(this.url('documents')).pipe(
-      map(list => Array.isArray(list) ? list.length : 0),
-      catchError(() => of(0))
+      map(list => {
+        const count = Array.isArray(list) ? list.length : 0;
+        console.log(`📋 Documents trouvés: ${count}`);
+        return count;
+      }),
+      catchError((err) => {
+        console.error('❌ Erreur récupération documents:', err);
+        return of(0);
+      })
     );
   }
 
@@ -258,16 +374,59 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   }
 
   // 🚀 Navigation (on marque la section comme vue AVANT de naviguer)
-  navigateToPaiement()           { this.markSectionAsSeen('paiements');   this.router.navigate(['/admin/paiements']); }
-  navigateToDocument()           { this.markSectionAsSeen('documents');   this.router.navigate(['/admin/documents']); }
-  navigateToGestionCommande()    { this.markSectionAsSeen('commandes');   this.router.navigate(['/admin/gestion-commande']); }
-  navigateToGestionInscription() { this.markSectionAsSeen('inscriptions');this.router.navigate(['/admin/gestion-inscription']); }
-  navigateToavis()               { this.markSectionAsSeen('avis');        this.router.navigate(['/admin/avis']); }
+  navigateToPaiement(): void {
+    console.log('🧭 Navigation vers Paiements');
+    this.markSectionAsSeen('paiements');
+    this.router.navigate(['/admin/paiements']);
+  }
+
+  navigateToDocument(): void {
+    console.log('🧭 Navigation vers Documents');
+    this.markSectionAsSeen('documents');
+    this.router.navigate(['/admin/documents']);
+  }
+
+  navigateToGestionCommande(): void {
+    console.log('🧭 Navigation vers Gestion Commandes');
+    this.markSectionAsSeen('commandes');
+    this.router.navigate(['/admin/gestion-commande']);
+  }
+
+  navigateToGestionInscription(): void {
+    console.log('🧭 Navigation vers Gestion Inscriptions');
+    this.markSectionAsSeen('inscriptions');
+    this.router.navigate(['/admin/gestion-inscription']);
+  }
+
+  navigateToavis(): void {
+    console.log('🧭 Navigation vers Avis');
+    this.markSectionAsSeen('avis');
+    this.router.navigate(['/admin/avis']);
+  }
 
   // Sections sans badge
-  navigateToGestionEvenements()  { this.router.navigate(['/admin/gestion-evenement']); }
-  navigateToGalerie()            { this.router.navigate(['/admin/galerie']); }
-  navigateToProfesseurs()        { this.router.navigate(['/admin/professeurs']); }
-  navigateToHoraires()           { this.router.navigate(['/admin/horaires']); }
-  navigateToActualites()         { this.router.navigate(['/admin/actualites']); }
+  navigateToGestionEvenements(): void {
+    console.log('🧭 Navigation vers Gestion Événements');
+    this.router.navigate(['/admin/gestion-evenement']);
+  }
+
+  navigateToGalerie(): void {
+    console.log('🧭 Navigation vers Galerie');
+    this.router.navigate(['/admin/galerie']);
+  }
+
+  navigateToProfesseurs(): void {
+    console.log('🧭 Navigation vers Professeurs');
+    this.router.navigate(['/admin/professeurs']);
+  }
+
+  navigateToHoraires(): void {
+    console.log('🧭 Navigation vers Horaires');
+    this.router.navigate(['/admin/horaires']);
+  }
+
+  navigateToActualites(): void {
+    console.log('🧭 Navigation vers Actualités');
+    this.router.navigate(['/admin/actualites']);
+  }
 }

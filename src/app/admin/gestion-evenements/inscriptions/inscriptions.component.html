@@ -27,9 +27,9 @@
     </thead>
     <tbody>
       <tr *ngFor="let inscrit of inscriptionsEnAttente">
-        <td>{{ inscrit.utilisateurNom || 'Nom non disponible' }}</td>
-        <td>{{ inscrit.utilisateurPrenom || 'Prénom non disponible' }}</td>
-        <td>{{ inscrit.utilisateurEmail || 'Email non disponible' }}</td>
+        <td>{{ inscrit.membreNom || 'Nom non disponible' }}</td>
+        <td>{{ inscrit.membrePrenom || 'Prénom non disponible' }}</td>
+        <td>{{ inscrit.membreEmail || 'Email non disponible' }}</td>
         <td>
           <button class="btn-valider" (click)="validerInscription(inscrit.id)">✅ Valider</button>
           <button class="btn-refuser" (click)="refuserInscription(inscrit.id)">❌ Refuser</button>
@@ -53,9 +53,9 @@
     </thead>
     <tbody>
       <tr *ngFor="let inscrit of inscriptionsValidees">
-        <td>{{ inscrit.utilisateurNom || 'Nom non disponible' }}</td>
-        <td>{{ inscrit.utilisateurPrenom || 'Prénom non disponible' }}</td>
-        <td>{{ inscrit.utilisateurEmail || 'Email non disponible' }}</td>
+        <td>{{ inscrit.membreNom || 'Nom non disponible' }}</td>
+        <td>{{ inscrit.membrePrenom || 'Prénom non disponible' }}</td>
+        <td>{{ inscrit.membreEmail || 'Email non disponible' }}</td>
       </tr>
     </tbody>
   </table>

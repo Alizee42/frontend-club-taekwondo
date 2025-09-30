@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
 
 interface Utilisateur {
   id: number;
@@ -21,7 +22,7 @@ interface Utilisateur {
 export class DashboardParentComponent implements OnInit {
   utilisateurConnecte: Utilisateur | null = null;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     console.log('[👨‍👧 DASHBOARD PARENT] Initialisation...');
@@ -39,14 +40,26 @@ export class DashboardParentComponent implements OnInit {
 
   // 🔐 Récupère les infos du parent connecté
   loadUtilisateurConnecte(): void {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Utilisateur non connecté.');
+    // 🔹 Vérifier via le service d'authentification
+    if (!this.authService.isConnecte()) {
+      console.warn('Utilisateur non connecté.');
       this.router.navigate(['/connexion']);
       return;
     }
 
-    // ✅ CORRECTION ligne 43
+    // 🔹 Récupérer l'utilisateur depuis le service d'abord
+    const user = this.authService.getUtilisateurConnecte();
+    if (user) {
+      this.utilisateurConnecte = user as Utilisateur;
+      localStorage.setItem('utilisateurId', user.id.toString());
+      console.log('Utilisateur récupéré depuis le service :', user);
+      return;
+    }
+
+    // 🔹 Si pas d'utilisateur dans le service, faire une requête API
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
     this.http.get<Utilisateur>(`${environment.apiUrl}/utilisateurs/me`, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
@@ -56,8 +69,7 @@ export class DashboardParentComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erreur lors de la récupération de l\'utilisateur connecté :', err);
-        alert('Impossible de récupérer les informations de l\'utilisateur connecté.');
-        this.router.navigate(['/connexion']);
+        // 🚫 SUPPRIMÉ: Pas de redirection manuelle, l'intercepteur s'en charge
       }
     });
   }

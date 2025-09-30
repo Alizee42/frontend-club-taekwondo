@@ -228,7 +228,16 @@ export class EvenementsListeComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur lors de la suppression:', error);
-        this.errorMsg = 'Erreur lors de la suppression de l\'événement.';
+        let errorMessage = 'Erreur lors de la suppression de l\'événement.';
+        
+        if (error.status === 400) {
+          errorMessage = 'Impossible de supprimer cet événement. Il peut avoir des inscriptions ou des contraintes.';
+        } else if (error.status === 404) {
+          errorMessage = 'Événement introuvable.';
+        }
+        
+        this.errorMsg = errorMessage;
+        setTimeout(() => this.clearMessages(), 5000);
       }
     });
   }

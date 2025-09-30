@@ -93,24 +93,17 @@
 
           <div class="info-item">
             <i class="ri-group-line"></i>
-            <span>{{ evenement.nbInscrits || 0 }} / {{ evenement.capacite }} participants</span>
+            <ng-container *ngIf="(evenement.nbInscrits || 0) >= evenement.capacite; else placesDisponibles">
+              <span class="complet">🎯 Complet ({{ evenement.capacite }} places)</span>
+            </ng-container>
+            <ng-template #placesDisponibles>
+              <span>🎫 {{ evenement.nbInscrits || 0 }} inscrits • {{ evenement.capacite - (evenement.nbInscrits || 0) }} places libres</span>
+            </ng-template>
           </div>
         </div>
 
         <!-- Description -->
         <p class="card-description">{{ evenement.description }}</p>
-
-        <!-- Barre de progression des inscriptions -->
-        <div class="progress-container" *ngIf="evenement.capacite > 0">
-          <div class="progress-bar">
-            <div class="progress-fill" 
-                 [style.width.%]="(evenement.nbInscrits || 0) / evenement.capacite * 100">
-            </div>
-          </div>
-          <span class="progress-text">
-            {{ evenement.nbInscrits || 0 }} / {{ evenement.capacite }} places
-          </span>
-        </div>
 
         <!-- Actions -->
         <div class="card-actions">

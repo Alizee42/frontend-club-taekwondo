@@ -4,6 +4,7 @@ import { HttpClient} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
 
 
 
@@ -29,33 +30,46 @@ export class DashboardMembreComponent implements OnInit {
 
   utilisateurConnecte: Utilisateur | null = null;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.loadUtilisateur();
   }
 
     private loadUtilisateur(): void {
-    const token = localStorage.getItem('token'); // Récupérer le token depuis le localStorage
-    if (!token) {
-      console.error('Token manquant. Redirection vers la page de connexion.');
-      this.router.navigate(['/connexion']); // Rediriger si le token est manquant
+    // 🔹 On vérifie juste que l'utilisateur est connecté via le service
+    // L'intercepteur gère automatiquement les erreurs 401
+    if (!this.authService.isConnecte()) {
+      console.warn('Utilisateur non connecté. Redirection vers la page de connexion.');
+      this.router.navigate(['/connexion']);
       return;
     }
-  
-    const headers = { Authorization: `Bearer ${token}` }; // Ajouter le token dans les en-têtes
-  
+
+    // 🔹 Récupérer l'utilisateur depuis le service (plus fiable)
+    const user = this.authService.getUtilisateurConnecte();
+    if (user) {
+      this.utilisateurConnecte = this.normalizeUser(user);
+      console.log('Utilisateur récupéré depuis le service :', user);
+    } else {
+      // 🔹 Si pas d'utilisateur dans le service, faire une requête
+      this.loadUserFromAPI();
+    }
+  }
+
+  private loadUserFromAPI(): void {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const headers = { Authorization: `Bearer ${token}` };
+
     this.http.get<Utilisateur>(`${this.API_BASE}/utilisateurs/me`, { headers }).subscribe({
       next: (u) => {
         console.log('Utilisateur récupéré avec succès :', u);
-        this.utilisateurConnecte = u;
+        this.utilisateurConnecte = this.normalizeUser(u);
       },
       error: (err) => {
         console.error('Erreur lors de la récupération de l\'utilisateur :', err);
-        if (err.status === 401) {
-          console.warn('Token invalide ou expiré. Redirection vers la page de connexion.');
-          this.router.navigate(['/connexion']); // Rediriger si le token est invalide
-        }
+        // 🚫 SUPPRIMÉ: Pas de redirection manuelle, l'intercepteur s'en charge
       }
     });
   }

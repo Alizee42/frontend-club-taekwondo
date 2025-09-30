@@ -185,7 +185,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   // ======= Navigation =======
-  goHome(): void { this.router.navigate(['/']); this.closeMenus(); }
+  goHome(): void { 
+    // 🏠 Navigation vers l'accueil SANS déconnexion
+    this.router.navigate(['/']); 
+    this.closeMenus(); 
+  }
   goToGalerie(): void { this.router.navigate(['/galerie']); this.closeMenus(); }
   goToInscription(): void { this.router.navigate(['/inscription']); this.closeMenus(); }
   goToBoutique(): void { this.router.navigate(['/boutique']); this.closeMenus(); }

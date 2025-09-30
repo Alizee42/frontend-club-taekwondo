@@ -61,7 +61,12 @@
           
           <div class="info-item" *ngIf="evenement.capacite > 0">
             <i class="ri-group-line"></i>
-            <span>{{ evenement.nbInscrits || 0 }} / {{ evenement.capacite }} participants</span>
+            <ng-container *ngIf="(evenement.nbInscrits || 0) >= evenement.capacite; else placesDisponibles">
+              <span class="complet">🎯 Complet ({{ evenement.capacite }} places)</span>
+            </ng-container>
+            <ng-template #placesDisponibles>
+              <span>🎫 {{ evenement.nbInscrits || 0 }} inscrits • {{ evenement.capacite - (evenement.nbInscrits || 0) }} places libres</span>
+            </ng-template>
           </div>
         </div>
 

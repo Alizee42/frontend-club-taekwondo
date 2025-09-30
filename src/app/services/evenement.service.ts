@@ -104,28 +104,43 @@ export class EvenementService {
   /** S'inscrire à un événement (utilise la vraie route backend) */
   inscrireMembreEvenement(evenementId: number, commentaire?: string): Observable<InscriptionEvenementDTO> {
     const utilisateurId = this.getUserId();
+    
+    // ✅ CORRECTION : Format attendu par le backend (même pour un seul membre)
     const body = { 
       evenementId, 
-      utilisateurId, 
-      commentaire
+      enfantsIds: [utilisateurId], // ✅ LISTE d'IDs même pour un seul membre
+      commentaire: commentaire || ''
     };
+    
+    console.log('🔍 Service: Inscription membre, données envoyées:', body);
     return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body, { headers: this.getAuthHeaders() });
   }
 
-  /** Inscrire un enfant à un événement - ✅ CORRIGÉ : utilise l'ID de l'enfant */
+  /** Inscrire un enfant à un événement - ✅ CORRIGÉ : utilise le bon format backend */
   inscrireEnfantEvenement(evenementId: number, membreId: number, commentaire?: string): Observable<InscriptionEvenementDTO> {
-    // ✅ CORRECTION : Utilise l'ID de l'enfant pour l'inscription
-    // Cela permet d'inscrire plusieurs enfants différents au même événement
-    const commentaireAvecEnfant = `Inscription pour l'enfant (ID: ${membreId}). ${commentaire || ''}`.trim();
+    // ✅ CORRECTION : Format attendu par le backend avec validation stricte
+    if (!evenementId || !membreId) {
+      throw new Error('ID événement et ID membre sont requis');
+    }
+
+    // ✅ Validation des types numériques
+    const evenementIdNum = Number(evenementId);
+    const membreIdNum = Number(membreId);
     
+    if (isNaN(evenementIdNum) || isNaN(membreIdNum)) {
+      throw new Error('Les IDs doivent être des nombres valides');
+    }
+
     const body = { 
-      evenementId, 
-      utilisateurId: membreId, // ✅ ID de l'enfant au lieu du parent
-      commentaire: commentaireAvecEnfant
+      evenementId: evenementIdNum, 
+      enfantsIds: [membreIdNum], // ✅ LISTE d'IDs comme attendu par le backend
+      commentaire: commentaire || '',
+      parentId: this.getUserId() // ✅ Ajout du parentId si nécessaire
     };
 
-    console.log('🔍 Service: Inscription enfant, données envoyées:', body);
-    console.log('🔍 Service: ID enfant utilisé:', membreId);
+    console.log('🔍 Service: Inscription enfant, données envoyées:', JSON.stringify(body, null, 2));
+    console.log('🔍 Service: URL complète:', `${environment.apiUrl}/inscriptions`);
+    console.log('🔍 Service: Headers envoyés:', this.getAuthHeaders().get('Authorization')?.substring(0, 20) + '...');
     
     return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body, { headers: this.getAuthHeaders() });
   }
@@ -151,7 +166,8 @@ export class EvenementService {
 
   /** Récupérer les inscriptions de mes enfants (parent) */
   getInscriptionsEnfants(): Observable<InscriptionEvenementDTO[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/inscriptions-enfants`);
+    const parentId = this.getUserId();
+    return this.http.get<any[]>(`${this.apiUrl}/inscriptions-enfants?parentId=${parentId}`);
   }
 
   /** Récupérer les inscrits à un événement (admin) */
