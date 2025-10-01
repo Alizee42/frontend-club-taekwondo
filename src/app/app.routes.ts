@@ -30,6 +30,8 @@ import { CommandesMembreComponent } from './membre/commandes-membre/commandes-me
 import { CommandesParentComponent } from './parent/commandes-parent/commandes-parent.component';
 import { EvenementsMembre } from './membre/evenements-membre/evenements-membre.component';
 import { EvenementsParent } from './parent/evenements-parent/evenements-parent.component';
+import { MotDePasseOublieComponent } from './pages/mot-de-passe-oublie/mot-de-passe-oublie.component';
+import { ReinitialiserMotDePasseComponent } from './pages/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe.component';
 
 
 export const routes: Routes = [
@@ -39,6 +41,8 @@ export const routes: Routes = [
   { path: 'galerie', component: GalerieComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'connexion', component: ConnexionComponent },
+  { path: 'mot-de-passe-oublie', component: MotDePasseOublieComponent },
+  { path: 'reinitialiser-mot-de-passe', component: ReinitialiserMotDePasseComponent },
   { path: 'boutique', component: BoutiqueComponent },
   { path: 'evenements', component: EvenementsComponent },
 

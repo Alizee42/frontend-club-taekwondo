@@ -16,10 +16,12 @@ export class ProfilComponent implements OnInit {
   user: any = {};
   apiUrl = '/api/utilisateurs';
   editMode: any = {};
+  activeTab = 'informations'; // Onglet actif par défaut
   showPasswordModal = false; // Contrôle l'affichage de la modale
-  passwordData = { newPassword: '', confirmPassword: '' }; // Données pour le mot de passe
+  passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' }; // Données pour le mot de passe
   passwordError = ''; // Message d'erreur pour le mot de passe
   role: string | null = null; // Stocke le rôle de l'utilisateur
+  emailNotifications = true; // Préférence pour les notifications email
 
   constructor(private http: HttpClient, private router: Router) {} // Injectez Router ici
 
@@ -38,6 +40,12 @@ export class ProfilComponent implements OnInit {
     } else {
       this.loadUserData(); // Charge les données depuis le backend si elles ne sont pas dans le localStorage
     }
+    
+    // Charger la préférence de notification depuis le localStorage
+    const savedNotificationPref = localStorage.getItem('emailNotifications');
+    if (savedNotificationPref !== null) {
+      this.emailNotifications = savedNotificationPref === 'true';
+    }
   }
 
   logout(): void {
@@ -46,6 +54,30 @@ export class ProfilComponent implements OnInit {
     localStorage.removeItem('role'); // Supprime le rôle
     this.role = null; // Réinitialise le rôle
     this.router.navigate(['/connexion']); // Redirige vers la page de connexion
+  }
+
+  // Méthode pour changer d'onglet
+  setActiveTab(tab: string): void {
+    this.activeTab = tab;
+  }
+
+  // Méthode pour activer/désactiver les notifications email
+  toggleEmailNotifications(): void {
+    this.emailNotifications = !this.emailNotifications;
+    // Sauvegarder la préférence dans le localStorage
+    localStorage.setItem('emailNotifications', this.emailNotifications.toString());
+    
+    // Optionnel: Envoyer au backend
+    this.http.put(`${this.apiUrl}/notifications`, {
+      emailNotifications: this.emailNotifications
+    }).subscribe({
+      next: () => {
+        console.log('Préférence de notification mise à jour');
+      },
+      error: (err) => {
+        console.error('Erreur lors de la mise à jour:', err);
+      }
+    });
   }
 
   loadUserData(): void {
@@ -91,7 +123,7 @@ export class ProfilComponent implements OnInit {
 
   openPasswordModal(): void {
     this.showPasswordModal = true;
-    this.passwordData = { newPassword: '', confirmPassword: '' };
+    this.passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' };
     this.passwordError = '';
   }
 

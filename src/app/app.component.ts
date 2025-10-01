@@ -6,7 +6,6 @@ import { ToastContainerComponent } from './shared/toast/toast-container/toast-co
 
 import { HeaderComponent } from './layout/header/header.component';
 import { FooterComponent } from './layout/footer/footer.component';
-import { ConnectedHeaderComponent } from './components/shared/connected-header/connected-header.component';
 
 import { ParametresPaiementService } from './services/parametres-paiement.service';
 
@@ -18,7 +17,6 @@ import { ParametresPaiementService } from './services/parametres-paiement.servic
     RouterModule,
     HeaderComponent,
     FooterComponent,
-    ConnectedHeaderComponent,
     ToastContainerComponent
   ],
   templateUrl: './app.component.html',

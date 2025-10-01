@@ -1,12 +1,49 @@
 <header class="connected-header">
-    <div class="header-content">
-      <div class="logo">Olympique Taekwondo Villeurbannais </div>
-      <nav class="connected-nav">
-        <a (click)="goToDashboard()">Dashboard</a>
-        <a (click)="goToHome()">Accueil site</a>
-        <a (click)="goToProfil()">Profil</a>
-        <button class="btn-logout" (click)="logout()">Se déconnecter</button>
-      </nav>
+  <div class="header-content">
+    <div class="logo">Olympique Taekwondo Villeurbannais</div>
+    <nav class="connected-nav">
+      <a (click)="goToDashboard()">Dashboard</a>
+      <a (click)="goToHome()">Accueil site</a>
+      <a (click)="goToProfil()">Profil</a>
+      
+      <!-- Icône de notification -->
+      <div class="notification-icon" (click)="toggleNotifications()">
+        <i class="ri-notification-line"></i>
+        <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </div>
+      
+      <button class="btn-logout" (click)="logout()">Se déconnecter</button>
+    </nav>
+    
+    <!-- Aperçu des notifications -->
+    <div class="notification-preview" *ngIf="notificationsOpen">
+      <div class="notification-header">
+        <h4>Notifications</h4>
+        <button class="mark-all-read" *ngIf="unreadCount > 0" (click)="markAllAsRead()">
+          Tout marquer comme lu
+        </button>
+      </div>
+      
+      <div *ngIf="notifications.length === 0" class="no-notifications">
+        <p>Aucune notification</p>
+      </div>
+
+      <ul *ngIf="notifications.length > 0" class="notification-list">
+        <li *ngFor="let notification of notifications" 
+            class="notification-item" 
+            [class.unread]="!notification.lu"
+            (click)="markAsRead(notification)">
+          <div class="notification-icon-item">
+            <i [class]="getNotificationIcon(notification.type)"></i>
+          </div>
+          <div class="notification-content">
+            <h5>{{ notification.titre }}</h5>
+            <p>{{ notification.message }}</p>
+            <span class="notification-time">{{ getTimeAgo(notification.date) }}</span>
+          </div>
+        </li>
+      </ul>
     </div>
-  </header>
+  </div>
+</header>
   

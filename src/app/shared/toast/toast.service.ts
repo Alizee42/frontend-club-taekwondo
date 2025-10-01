@@ -4,9 +4,9 @@ import { Toast, ToastType, ToastPosition } from './toast.model';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  private readonly defaultDuration = 4000;
+  private readonly defaultDuration = 5000; // Augmenté à 5 secondes
   private readonly defaultPosition: ToastPosition = 'top-right';
-  private readonly maxToasts = 4;
+  private readonly maxToasts = 3; // Réduit à 3 pour éviter l'encombrement
 
   private toasts: Toast[] = [];
   private toastsSub = new BehaviorSubject<Toast[]>([]);

@@ -1,0 +1,176 @@
+<div class="reset-container">
+  <div class="reset-card">
+    <!-- Vérification du token en cours -->
+    <div class="loading-section" *ngIf="loading && !tokenChecked">
+      <div class="spinner-large"></div>
+      <h2>Vérification du lien...</h2>
+      <p>Veuillez patienter</p>
+    </div>
+
+    <!-- Token invalide -->
+    <div class="error-section" *ngIf="tokenChecked && !tokenValid">
+      <div class="error-icon">
+        <i class="ri-error-warning-line"></i>
+      </div>
+      <h2>Lien invalide ou expiré</h2>
+      <p>Ce lien de réinitialisation n'est plus valide ou a déjà été utilisé.</p>
+      
+      <div class="action-buttons">
+        <button type="button" class="primary-btn" (click)="requestNewLink()">
+          <i class="ri-mail-line"></i>
+          Demander un nouveau lien
+        </button>
+        <button type="button" class="secondary-btn" (click)="goToLogin()">
+          <i class="ri-arrow-left-line"></i>
+          Retour à la connexion
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulaire de réinitialisation -->
+    <div class="form-section" *ngIf="tokenChecked && tokenValid && !isSuccess">
+      <div class="card-header">
+        <h1>Nouveau mot de passe</h1>
+        <p>Choisissez un nouveau mot de passe sécurisé pour votre compte</p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #resetForm="ngForm">
+        <!-- Nouveau mot de passe -->
+        <div class="form-group">
+          <label for="password">Nouveau mot de passe *</label>
+          <div class="password-wrapper">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              name="password"
+              [(ngModel)]="password"
+              required
+              placeholder="Minimum 8 caractères"
+              [disabled]="loading"
+              autocomplete="new-password"
+            />
+            <button 
+              type="button" 
+              class="toggle-password" 
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+            >
+              <i class="ri-eye-line" *ngIf="!showPassword"></i>
+              <i class="ri-eye-off-line" *ngIf="showPassword"></i>
+            </button>
+          </div>
+          
+          <!-- Indicateur de force -->
+          <div class="strength-meter" *ngIf="password">
+            <div class="strength-bar">
+              <div 
+                class="strength-fill" 
+                [style.width.%]="getPasswordStrength()"
+                [style.background-color]="getPasswordStrengthColor()"
+              ></div>
+            </div>
+            <span class="strength-text">
+              <ng-container [ngSwitch]="true">
+                <span *ngSwitchCase="getPasswordStrength() < 25" class="weak">Faible</span>
+                <span *ngSwitchCase="getPasswordStrength() < 50" class="medium">Moyen</span>
+                <span *ngSwitchCase="getPasswordStrength() < 75" class="good">Bon</span>
+                <span *ngSwitchDefault class="strong">Fort</span>
+              </ng-container>
+            </span>
+          </div>
+        </div>
+
+        <!-- Confirmation mot de passe -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le mot de passe *</label>
+          <div class="password-wrapper">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              id="confirmPassword"
+              name="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              required
+              placeholder="Retapez votre mot de passe"
+              [disabled]="loading"
+              autocomplete="new-password"
+            />
+            <button 
+              type="button" 
+              class="toggle-password" 
+              (click)="toggleConfirmPassword()"
+              [attr.aria-label]="showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+            >
+              <i class="ri-eye-line" *ngIf="!showConfirmPassword"></i>
+              <i class="ri-eye-off-line" *ngIf="showConfirmPassword"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Critères de mot de passe -->
+        <div class="password-requirements">
+          <p><strong>Votre mot de passe doit contenir :</strong></p>
+          <ul>
+            <li [class.valid]="hasMinLength()">
+              <i class="ri-check-line" *ngIf="hasMinLength()"></i>
+              <i class="ri-close-line" *ngIf="!hasMinLength()"></i>
+              Au moins 8 caractères
+            </li>
+            <li [class.valid]="hasUpperCase()">
+              <i class="ri-check-line" *ngIf="hasUpperCase()"></i>
+              <i class="ri-close-line" *ngIf="!hasUpperCase()"></i>
+              Une lettre majuscule
+            </li>
+            <li [class.valid]="hasLowerCase()">
+              <i class="ri-check-line" *ngIf="hasLowerCase()"></i>
+              <i class="ri-close-line" *ngIf="!hasLowerCase()"></i>
+              Une lettre minuscule
+            </li>
+            <li [class.valid]="hasNumbers()">
+              <i class="ri-check-line" *ngIf="hasNumbers()"></i>
+              <i class="ri-close-line" *ngIf="!hasNumbers()"></i>
+              Un chiffre
+            </li>
+            <li [class.valid]="hasSpecialChar()">
+              <i class="ri-check-line" *ngIf="hasSpecialChar()"></i>
+              <i class="ri-close-line" *ngIf="!hasSpecialChar()"></i>
+              Un caractère spécial (!@#$%...)
+            </li>
+          </ul>
+        </div>
+
+        <button 
+          type="submit" 
+          class="submit-btn" 
+          [disabled]="resetForm.invalid || loading || !isPasswordStrong(password) || password !== confirmPassword"
+        >
+          <span *ngIf="loading" class="spinner"></span>
+          <span *ngIf="!loading">Réinitialiser le mot de passe</span>
+          <span *ngIf="loading">Mise à jour...</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Succès compact -->
+    <div class="success-compact" *ngIf="isSuccess">
+      <i class="ri-check-circle-line success-icon"></i>
+      <div class="success-content">
+        <h3>Mot de passe mis à jour avec succès</h3>
+        <p>Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe en toute sécurité.</p>
+      </div>
+    </div>
+
+    <!-- Messages d'erreur -->
+    <div class="error-message" *ngIf="isError && message">
+      <i class="ri-error-warning-line"></i>
+      {{ message }}
+    </div>
+
+    <!-- Bouton de connexion -->
+    <div class="action-center" *ngIf="isSuccess">
+      <button type="button" class="primary-btn" (click)="goToLogin()">
+        <i class="ri-login-box-line"></i>
+        Se connecter
+      </button>
+    </div>
+  </div>
+</div>

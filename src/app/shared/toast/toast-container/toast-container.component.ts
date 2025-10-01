@@ -36,12 +36,13 @@ export class ToastContainerComponent implements OnInit {
     return 'info';
   }
 
-  getTitle(type: string): string {
+  getIcon(type: string): string {
     switch (this.normalizeType(type)) {
-      case 'success':  return 'Succès :';
-      case 'error':    return 'Erreur :';
-      case 'info':     return 'Info :';
-      case 'warning':  return 'Avertissement :';
+      case 'success':  return '✅';
+      case 'error':    return '❌';
+      case 'info':     return 'ℹ️';
+      case 'warning':  return '⚠️';
+      default:         return 'ℹ️';
     }
   }
 }

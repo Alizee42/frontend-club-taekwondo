@@ -99,7 +99,10 @@
           <i class="ri-star-line"></i> Avis
           <span class="badge" *ngIf="badge.avis > 0">{{ badge.avis }}</span>
         </li>
-        <li (click)="navigateToActualites()"><i class="ri-newspaper-line"></i> Actualités</li>
+        <li class="has-badge" (click)="navigateToActualites()">
+          <i class="ri-newspaper-line"></i> Actualités
+          <span class="badge" *ngIf="badge.actualites > 0">{{ badge.actualites }}</span>
+        </li>
       </ul>
     </div>
 

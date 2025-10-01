@@ -1,140 +1,229 @@
+/* Container général - occupe tout l'espace disponible */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 140px); /* Ajuster selon la hauteur du header */
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  padding: 2rem;
+}
 
-  /* Container général */
-  .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: var(--background-light);
-    padding: 2rem;
-  }
+/* Carte de connexion moderne */
+.login-card {
+  background: white;
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(30, 96, 145, 0.1);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  border: 1px solid rgba(30, 96, 145, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Titre élégant */
+.login-card h1 {
+  margin-bottom: 2.5rem;
+  color: #1E6091;
+  font-size: 2.25rem;
+  font-weight: 700;
+  position: relative;
+}
+
+.login-card h1::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #1E6091, #22c55e);
+  border-radius: 2px;
+}
+
+/* Formulaire moderne */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Groupes de champs repensés */
+.form-group {
+  text-align: left;
+}
+
+/* Labels stylisés */
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Inputs modernes */
+input {
+  width: 100%;
+  padding: 1.2rem 0.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  color: #374151;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+input:focus {
+  border-color: #1E6091;
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30, 96, 145, 0.1);
+  transform: translateY(-1px);
+}
+
+input:hover {
+  border-color: #94a3b8;
+}
   
-  /* Carte de connexion */
-  .login-card {
-    background: var(--card-bg);
-    padding: 2.5rem 2rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    width: 100%;
-    max-width: 600px;
-    text-align: center;
-  }
+/* Bouton de connexion moderne */
+.submit-btn {
+  margin-top: 1rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #1E6091, #283a5a);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(30, 96, 145, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, #283a5a, #1B263B);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(30, 96, 145, 0.4);
+}
+
+.submit-btn:hover::before {
+  left: 100%;
+}
+
+.submit-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Conteneur mot de passe oublié centré */
+.forgot-password-container {
+  margin-top: 2rem;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Lien mot de passe oublié stylisé */
+.forgot-password {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1E6091;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: rgba(30, 96, 145, 0.05);
+}
+
+.forgot-password:hover {
+  color: #283a5a;
+  background: rgba(30, 96, 145, 0.1);
+  transform: translateY(-1px);
+}
+
+.forgot-password i {
+  font-size: 1.1rem;
+}
   
-  /* Titre */
-  .login-card h1 {
-    margin-bottom: 2rem;
-    color: var(--blue-dark);
-    font-size: 2rem;
-  }
-  
-  /* Formulaire */
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Groupes de champs */
-  .form-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-  
-  /* Labels */
-  label {
-    display: inline-block;
-    margin-right: 1rem;
-    color: var(--text-main);
-    font-weight: 600;
-    width: 30%; /* Proportions pour aligner avec les inputs */
-  }
-  
-  /* Inputs */
-  input {
-    width: 65%;
-    padding: 0.8rem;
-    border: 1px solid var(--blue-main);
-    border-radius: 8px;
-    background-color: white;
-    color: var(--text-main);
-    font-size: 1rem;
-    transition: border-color 0.3s;
-  }
-  
-  input:focus {
-    border-color: var(--red-main);
-    outline: none;
-  }
-  
-  /* Bouton de connexion */
-  .submit-btn {
-    margin-top: 1rem;
-    padding: 0.8rem;
-    background: var(--blue-main);
-    color: white;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .submit-btn:hover {
-    background: var(--blue-hover);
-  }
-  
-  .links-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: 1rem;
-  }
-  
-  /* Liens "Mot de passe oublié" et "Inscription" */
-  .forgot-password, .sign-up {
-    color: var(--blue-main);
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  
-  .forgot-password:hover, .sign-up:hover {
-    color: var(--red-main);
-  }
-  
+/* Wrapper mot de passe moderne */
 .password-wrapper {
   position: relative;
-  width: 65%; 
+  width: 100%;
 }
 
 .password-wrapper input {
   width: 100%;
-  padding: 0.8rem 2.8rem 0.8rem 0.8rem; 
-  border: 1px solid var(--blue-main);
-  border-radius: 8px;
+padding: 0.6rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
   font-size: 1rem;
+  background-color: #f8fafc;
+  color: #374151;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.password-wrapper input:focus {
+  border-color: #1E6091;
   background-color: white;
-  color: var(--text-main);
+  box-shadow: 0 0 0 3px rgba(30, 96, 145, 0.1);
 }
 
 .toggle-password {
   position: absolute;
   top: 50%;
-  right: 0.8rem;
+  right: 1rem;
   transform: translateY(-50%);
   background: transparent;
   border: none;
   cursor: pointer;
   font-size: 1.3rem;
-  color: var(--blue-dark);
+  color: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
 
 .toggle-password:hover {
-  color: var(--red-main);
+  color: #1E6091;
+  background: rgba(30, 96, 145, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+  }
+  
+  .login-card {
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+  }
+  
+  .login-card h1 {
+    font-size: 2rem;
+  }
 }

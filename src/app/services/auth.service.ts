@@ -62,9 +62,14 @@ export class AuthService {
   }
 
   logout(): void {
+    console.log('[AuthService] Déconnexion...');
+    
+    // Nettoyer toutes les clés de token pour compatibilité
     localStorage.removeItem(this.K_TOKEN);
+    localStorage.removeItem('auth_token');
     localStorage.removeItem(this.K_ROLE);
     localStorage.removeItem(this.K_USER);
+    
     this._authState$.next({ token: null, role: null, user: null, isConnecte: false });
 
     if (this.logoutTimer) {
@@ -79,7 +84,15 @@ export class AuthService {
 
   isConnecte(): boolean {
     const s = this._authState$.value;
-    return !!s.token && !this.isTokenExpired(s.token);
+    const hasToken = !!s.token;
+    const isNotExpired = s.token ? !this.isTokenExpired(s.token) : false;
+    const isConnected = hasToken && isNotExpired;
+    
+    console.log('[AuthService] isConnecte() - Token présent:', hasToken);
+    console.log('[AuthService] isConnecte() - Token non expiré:', isNotExpired);
+    console.log('[AuthService] isConnecte() - Résultat:', isConnected);
+    
+    return isConnected;
   }
 
   getToken(): string | null {
@@ -109,9 +122,16 @@ export class AuthService {
       role: normalizedRole,
     };
 
+    // ✅ Stocker le token sous les deux clés pour compatibilité
     localStorage.setItem(this.K_TOKEN, res.token);
+    localStorage.setItem('auth_token', res.token); // Compatibilité avec d'autres composants
+    
     if (normalizedRole) localStorage.setItem(this.K_ROLE, normalizedRole);
     localStorage.setItem(this.K_USER, JSON.stringify(utilisateur));
+
+    console.log('[AuthService] Token stocké sous les clés:', this.K_TOKEN, 'et auth_token');
+    console.log('[AuthService] Rôle stocké:', normalizedRole);
+    console.log('[AuthService] Utilisateur stocké:', utilisateur);
 
     const expired = this.isTokenExpired(res.token);
 
@@ -123,42 +143,61 @@ export class AuthService {
     });
 
     if (expired) {
+      console.warn('[AuthService] Token expiré immédiatement après connexion');
       this.logout();
     } else {
       const payload = this.decodeJwt(res.token);
       if (payload?.exp) {
+        console.log('[AuthService] Auto-logout programmé pour:', new Date(payload.exp * 1000));
         this.startAutoLogout(payload.exp);
       }
     }
   }
 
   private hydrateFromStorage() {
-    const token = localStorage.getItem(this.K_TOKEN);
+    // Vérifier les deux clés de token pour compatibilité
+    const token = localStorage.getItem(this.K_TOKEN) || localStorage.getItem('auth_token');
     const role = localStorage.getItem(this.K_ROLE);
     let user: Utilisateur | null = null;
+
+    console.log('[AuthService] Hydratation - Token depuis localStorage:', token ? 'présent' : 'absent');
+    console.log('[AuthService] Hydratation - Role depuis localStorage:', role);
 
     try {
       const rawUser = localStorage.getItem(this.K_USER);
       if (rawUser) user = JSON.parse(rawUser);
-    } catch {
+    } catch (e) {
+      console.warn('[AuthService] Erreur parsing user data:', e);
       localStorage.removeItem(this.K_USER);
     }
 
-    if (token && this.isTokenExpired(token)) {
+    // Vérifier si le token est expiré
+    let isExpired = false;
+    if (token) {
+      isExpired = this.isTokenExpired(token);
+      console.log('[AuthService] Token expiré?', isExpired);
+    }
+
+    if (token && isExpired) {
+      console.warn('[AuthService] Token expiré, déconnexion...');
       this.logout();
       return;
     }
+
+    const isConnected = !!token && !isExpired;
+    console.log('[AuthService] État de connexion:', isConnected);
 
     this._authState$.next({
       token,
       role,
       user,
-      isConnecte: !!token && !this.isTokenExpired(token),
+      isConnecte: isConnected,
     });
 
-    if (token) {
+    if (token && !isExpired) {
       const payload = this.decodeJwt(token);
       if (payload?.exp) {
+        console.log('[AuthService] Auto-logout programmé depuis hydratation pour:', new Date(payload.exp * 1000));
         this.startAutoLogout(payload.exp);
       }
     }
@@ -184,18 +223,42 @@ export class AuthService {
   private isTokenExpired(token: string): boolean {
     try {
       const payload = this.decodeJwt(token);
-      if (!payload?.exp) return false;
-      return payload.exp < Math.floor(Date.now() / 1000);
-    } catch {
+      if (!payload?.exp) {
+        console.log('[AuthService] Token sans expiration, considéré comme valide');
+        return false;
+      }
+      
+      const now = Math.floor(Date.now() / 1000);
+      const isExpired = payload.exp < now;
+      console.log('[AuthService] Expiration token - exp:', payload.exp, 'now:', now, 'expiré:', isExpired);
+      
+      return isExpired;
+    } catch (e) {
+      console.error('[AuthService] Erreur décodage token:', e);
       return true;
     }
   }
 
   private decodeJwt(token: string): any {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const payload = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
-    return JSON.parse(payload);
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.error('[AuthService] Token JWT invalide - nombre de parties:', parts.length);
+        return null;
+      }
+      
+      let payload = parts[1];
+      // Ajouter padding si nécessaire
+      while (payload.length % 4) {
+        payload += '=';
+      }
+      
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch (e) {
+      console.error('[AuthService] Erreur décodage JWT:', e);
+      return null;
+    }
   }
 
   // ---- Ajout pour récupérer l'ID utilisateur depuis le JWT ----

@@ -1,4 +1,4 @@
-<div class="toast-stack bottom-right">
+<div class="toast-stack">
     <div
       *ngFor="let toast of (toasts$ | async); trackBy: trackById"
       class="message-box"
@@ -6,21 +6,12 @@
       role="status"
       aria-live="polite"
     >
-      <!-- Icône RemixIcon à gauche -->
+      <!-- Icône moderne avec émojis -->
       <div class="icon-circle" aria-hidden="true">
-        <i
-          [ngClass]="{
-            'ri-check-line':   normalizeType(toast.type) === 'success',
-            'ri-close-circle-line': normalizeType(toast.type) === 'error',
-            'ri-information-line':  normalizeType(toast.type) === 'info',
-            'ri-alert-line':   normalizeType(toast.type) === 'warning'
-          }"
-        ></i>
+        <span [innerHTML]="getIcon(toast.type)"></span>
       </div>
   
-      <span class="message-text">
-        <strong>{{ getTitle(toast.type) }}</strong> {{ toast.message }}
-      </span>
+      <span class="message-text">{{ toast.message }}</span>
   
       <button
         *ngIf="toast.dismissible"

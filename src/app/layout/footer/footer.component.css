@@ -1,11 +1,11 @@
 footer {
   background-color: var(--blue-dark);
-    color: #ffffff;
-    padding: 40px 0;
-    margin-top: 50px;
-    text-align: center;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  }
+  color: #ffffff;
+  padding: 40px 0;
+  text-align: center;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  margin-top: 0;
+}
   
   .footer-container {
     display: flex;

@@ -1,0 +1,32 @@
+/* Layout principal avec footer sticky */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Le contenu principal (router-outlet) prend tout l'espace disponible */
+::ng-deep router-outlet + * {
+  flex: 1;
+}
+
+/* Footer toujours en bas */
+app-footer {
+  margin-top: auto;
+}
+
+/* Global styles pour sticky footer */
+::ng-deep body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+::ng-deep app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  flex: 1;
+}

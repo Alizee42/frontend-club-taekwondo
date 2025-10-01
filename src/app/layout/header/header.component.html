@@ -2,30 +2,32 @@
   <div class="header-container">
     <!-- Logo -->
     <div class="logo">
-      <a [routerLink]="['/']" (click)="closeMenus()">Taekwondo Club</a>
+      <a [routerLink]="['/']" (click)="closeMenus()">Olympique Taekwondo Villeurbannais</a>
+    </div>
+
+    <!-- Burger menu -->
+    <div class="burger" [class.active]="menuOpen" (click)="toggleMenu()">
+      <span></span><span></span><span></span>
     </div>
 
     <!-- Navigation -->
-    <nav class="main-nav" [class.open]="menuOpen">
-      <ul>
+    <nav class="nav-wrapper" [class.open]="menuOpen">
+      <!-- Menu pour utilisateurs connectés -->
+      <ul class="main-nav" *ngIf="isUserLoggedIn">
+        <li><a [routerLink]="['/dashboard']" (click)="closeMenus()">Dashboard</a></li>
+        <li><a (click)="goToSpecializedDashboard()">Mon Espace</a></li>
+        <li><a [routerLink]="['/']" (click)="closeMenus()">Accueil site</a></li>
+        <li><a (click)="goToProfil(); closeMenus()">Profil</a></li>
+        
+        <!-- Menus supplémentaires selon le rôle -->
+        <li *ngIf="userRole === 'ADMIN'"><a [routerLink]="['/admin/gestion-evenement']" (click)="closeMenus()">Gestion</a></li>
+        <li *ngIf="userRole === 'PARENT' || userRole === 'MEMBRE'"><a [routerLink]="['/boutique']" (click)="closeMenus()">Boutique</a></li>
+        <li *ngIf="userRole === 'PARENT' || userRole === 'MEMBRE'"><a [routerLink]="['/evenements']" (click)="closeMenus()">Événements</a></li>
+      </ul>
+
+      <!-- Menu pour utilisateurs non connectés -->
+      <ul class="main-nav" *ngIf="!isUserLoggedIn">
         <li><a [routerLink]="['/']" (click)="closeMenus()">Accueil</a></li>
-
-        <li class="dropdown"
-            (mouseenter)="dropdownOpenClub = true"
-            (mouseleave)="dropdownOpenClub = false">
-          <a href="javascript:void(0)">Le club ▾</a>
-          <ul class="dropdown-menu"
-              *ngIf="dropdownOpenClub"
-              (mouseenter)="dropdownOpenClub = true"
-              (mouseleave)="dropdownOpenClub = false">
-            <li><a (click)="scrollToSection('about')">À propos</a></li>
-            <li><a (click)="scrollToSection('hschedule-info')">Horaires</a></li>
-            <li><a (click)="scrollToSection('enseignants')">Professeur</a></li>
-            <li><a (click)="scrollToSection('avis')">Avis</a></li>
-            <li><a (click)="scrollToSection('actualites')">Actualités</a></li>
-          </ul>
-        </li>
-
         <li><a [routerLink]="['/galerie']" (click)="closeMenus()">Galerie</a></li>
         <li><a [routerLink]="['/inscription']" (click)="closeMenus()">Inscription</a></li>
         <li><a [routerLink]="['/boutique']" (click)="closeMenus()">Boutique</a></li>
@@ -33,19 +35,72 @@
         <li><a [routerLink]="['/contact']" (click)="closeMenus()">Contact</a></li>
 
         <!-- Connexion visible quand déconnecté -->
-        <li *ngIf="!isLoggedIn">
+        <li>
           <a [routerLink]="['/connexion']" (click)="closeMenus()">Connexion</a>
         </li>
       </ul>
     </nav>
 
-    <!-- Burger menu -->
-    <div class="burger" (click)="toggleMenu()">
-      <span></span><span></span><span></span>
-    </div>
-
     <!-- Actions -->
     <div class="user-actions">
+      <!-- Dropdown utilisateur quand connecté -->
+      <div class="user-dropdown" *ngIf="isUserLoggedIn">
+        <button class="user-btn" (click)="toggleUserDropdown()">
+          <div class="avatar">{{ getUserInitials() }}</div>
+          <span class="username">{{ getUserName() }}</span>
+          <span class="arrow" [class.open]="userDropdownOpen">▼</span>
+        </button>
+        
+        <div class="dropdown" [class.show]="userDropdownOpen">
+          <button class="menu-item" (click)="goToDashboard(); closeUserDropdown()">
+            📊 Dashboard
+          </button>
+          <button class="menu-item" (click)="goToProfil(); closeUserDropdown()">
+            👤 Mon Profil
+          </button>
+          <hr class="separator">
+          <button class="menu-item logout" (click)="logout(); closeUserDropdown()">
+            🚪 Se déconnecter
+          </button>
+        </div>
+      </div>
+      
+      <!-- Notifications (si connecté) -->
+      <div class="notification-icon" *ngIf="isUserLoggedIn" (click)="toggleNotifications()">
+        <i class="ri-notification-line"></i>
+        <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </div>
+
+      <!-- Aperçu des notifications -->
+      <div class="notification-preview" *ngIf="notificationsOpen">
+        <div class="notification-header">
+          <h4>Notifications</h4>
+          <button class="mark-all-read" *ngIf="unreadCount > 0" (click)="markAllAsRead()">
+            Tout marquer comme lu
+          </button>
+        </div>
+        
+        <div *ngIf="notifications.length === 0" class="no-notifications">
+          <p>Aucune notification</p>
+        </div>
+
+        <ul *ngIf="notifications.length > 0" class="notification-list">
+          <li *ngFor="let notification of notifications" 
+              class="notification-item" 
+              [class.unread]="!notification.lu"
+              (click)="markAsRead(notification)">
+            <div class="notification-icon">
+              <i [class]="getNotificationIcon(notification.type)"></i>
+            </div>
+            <div class="notification-content">
+              <h5>{{ notification.titre }}</h5>
+              <p>{{ notification.message }}</p>
+              <span class="notification-time">{{ getTimeAgo(notification.date) }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      
       <!-- Panier -->
 <!-- Panier (affiché seulement s’il y a au moins 1 article) -->
 <div class="cart-icon" *ngIf="cartCount > 0" (click)="togglePanier()">
@@ -71,7 +126,7 @@
 
               <!-- ✅ Sélection du bénéficiaire (si parent avec enfants) -->
               <div class="beneficiaire-select"
-                   *ngIf="isLoggedIn && enfants?.length"
+                   *ngIf="isUserLoggedIn && enfants?.length"
                    aria-label="Sélection du bénéficiaire">
                 <label>Pour :</label>
                 <select
@@ -105,7 +160,7 @@
 
         <!-- Boutons de paiement -->
         <div class="payment-buttons" *ngIf="panier.length > 0">
-          <ng-container *ngIf="isLoggedIn; else inviteActions">
+          <ng-container *ngIf="isUserLoggedIn; else inviteActions">
             <button class="btn-pay" (click)="payerParCB()">Payer par CB</button>
             <button class="btn-pay" (click)="payerAuClub()">Payer au club</button>
           </ng-container>
@@ -116,25 +171,6 @@
           </ng-template>
         </div>
       </div>
-
-      <!-- Menu profil (uniquement connecté) -->
-      <ng-container *ngIf="isLoggedIn">
-        <div class="profile-menu">
-          <div class="profile-circle" (click)="toggleProfileMenu()">
-            {{ getInitials() }}
-          </div>
-          <ul class="profile-dropdown" [class.open]="profileMenuOpen">
-            <li><a (click)="goToDashboard()"><i class="ri-dashboard-line"></i> Tableau de bord</a></li>
-            <li><a (click)="goToProfil()"><i class="ri-user-line"></i> Modifier mon profil</a></li>
-            <hr class="menu-separator">
-            <li>
-              <button class="logout-btn" (click)="logout()">
-                <i class="ri-logout-box-r-line"></i> Se déconnecter
-              </button>
-            </li>
-          </ul>
-        </div>
-      </ng-container>
     </div>
   </div>
 </header>

@@ -1,62 +1,198 @@
-
-
-<div class="profile-page">
+<div class="profile-container">
   <div class="profile-card">
-    <!-- Photo et infos -->
+    <!-- Header avec bannière -->
     <div class="profile-header">
       <div class="initials-circle">
-        {{ getInitiales( user.prenom,user.nom) }}
+        {{ getInitiales(user.prenom, user.nom) }}
       </div>
-            <h2> {{ user.prenom || 'Prénom' }} {{ user.nom || 'Nom' }}</h2>
-      <p class="profile-role">{{ user.role | titlecase }}</p>
+      <h1>{{ user.prenom || 'Prénom' }} {{ user.nom || 'Nom' }}</h1>
+      <p>{{ user.role | titlecase }} • {{ user.email || 'email@example.com' }}</p>
     </div>
 
-    <!-- Formulaire de modification -->
-    <form (ngSubmit)="saveProfile()" class="profile-form">
-      <div class="form-section">
-        <div class="form-group" *ngFor="let champ of ['nom', 'prenom', 'email', 'telephone']">
-          <label [for]="champ">{{ champ | titlecase }}</label>
-          <div class="form-field">
-            <span *ngIf="!editMode[champ]">{{ user[champ] || '...' }}</span>
-            <input *ngIf="editMode[champ]"
-              [type]="champ === 'email' ? 'email' : 'text'"
-              [id]="champ"
-              [(ngModel)]="user[champ]"
-              [name]="champ"
-              required
-              class="form-control" />
-            <button type="button" class="btn-edit" (click)="toggleEdit(champ)" title="Modifier">
-              <i class="ri-edit-2-line"></i>
+    <!-- Navigation par onglets -->
+    <div class="tabs-navigation">
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'informations'"
+        (click)="setActiveTab('informations')">
+        <i class="ri-user-line"></i> Informations
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'securite'"
+        (click)="setActiveTab('securite')">
+        <i class="ri-shield-line"></i> Sécurité
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'preferences'"
+        (click)="setActiveTab('preferences')">
+        <i class="ri-settings-line"></i> Préférences
+      </button>
+    </div>
+
+    <!-- Contenu des onglets -->
+    <div class="tab-content">
+      <!-- Onglet Informations -->
+      <div *ngIf="activeTab === 'informations'" class="profile-section">
+        <h2 class="section-title">Informations personnelles</h2>
+        
+        <form (ngSubmit)="saveProfile()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="nom">Nom</label>
+              <input 
+                type="text" 
+                id="nom" 
+                name="nom"
+                [(ngModel)]="user.nom" 
+                class="form-control"
+                placeholder="Votre nom">
+            </div>
+            
+            <div class="form-group">
+              <label for="prenom">Prénom</label>
+              <input 
+                type="text" 
+                id="prenom" 
+                name="prenom"
+                [(ngModel)]="user.prenom" 
+                class="form-control"
+                placeholder="Votre prénom">
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email"
+                [(ngModel)]="user.email" 
+                class="form-control"
+                placeholder="votre@email.com">
+            </div>
+            
+            <div class="form-group">
+              <label for="telephone">Téléphone</label>
+              <input 
+                type="tel" 
+                id="telephone" 
+                name="telephone"
+                [(ngModel)]="user.telephone" 
+                class="form-control"
+                placeholder="06 12 34 56 78">
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success">
+              <i class="ri-save-line"></i> Sauvegarder les modifications
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Onglet Sécurité -->
+      <div *ngIf="activeTab === 'securite'" class="profile-section">
+        <h2 class="section-title">Sécurité du compte</h2>
+        
+        <div class="security-section">
+          <div class="security-item">
+            <div class="security-info">
+              <h4>Mot de passe</h4>
+              <p>Dernière modification il y a 30 jours</p>
+            </div>
+            <button class="btn btn-primary" (click)="openPasswordModal()">
+              <i class="ri-lock-line"></i> Modifier
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="form-actions">
-        <button type="submit" class="btn-save">💾 Sauvegarder</button>
-        <button type="button" class="btn-password" (click)="openPasswordModal()">🔐 Modifier le mot de passe</button>
+      <!-- Onglet Préférences -->
+      <div *ngIf="activeTab === 'preferences'" class="profile-section">
+        <h2 class="section-title">Préférences</h2>
+        
+        <div class="security-section">
+          <div class="security-item">
+            <div class="security-info">
+              <h4>Notifications email</h4>
+              <p>Recevoir les notifications par email (cours, paiements, événements)</p>
+            </div>
+            <button 
+              class="btn" 
+              [class.btn-success]="emailNotifications" 
+              [class.btn-secondary]="!emailNotifications"
+              (click)="toggleEmailNotifications()">
+              <i class="ri-notification-line" *ngIf="emailNotifications"></i>
+              <i class="ri-notification-off-line" *ngIf="!emailNotifications"></i>
+              {{ emailNotifications ? 'Activé' : 'Désactivé' }}
+            </button>
+          </div>
+        </div>
       </div>
-    </form>
+    </div>
   </div>
 
-  <!-- Modale de mot de passe -->
-  <div class="modal" *ngIf="showPasswordModal">
-    <div class="modal-content">
-      <h2>🔐 Changer le mot de passe</h2>
+  <!-- Modal pour changer le mot de passe -->
+  <div class="modal" *ngIf="showPasswordModal" (click)="closePasswordModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Modifier le mot de passe</h2>
+        <button class="close-button" (click)="closePasswordModal()">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      
       <form (ngSubmit)="updatePassword()">
         <div class="form-group">
-          <label for="newPassword">Nouveau mot de passe</label>
-          <input type="password" id="newPassword" [(ngModel)]="passwordData.newPassword" name="newPassword" required class="form-control" />
+          <label for="currentPassword">Mot de passe actuel</label>
+          <input 
+            type="password" 
+            id="currentPassword" 
+            name="currentPassword"
+            [(ngModel)]="passwordData.currentPassword" 
+            class="form-control"
+            placeholder="Entrez votre mot de passe actuel"
+            required>
         </div>
+        
         <div class="form-group">
-          <label for="confirmPassword">Confirmer le mot de passe</label>
-          <input type="password" id="confirmPassword" [(ngModel)]="passwordData.confirmPassword" name="confirmPassword" required class="form-control" />
+          <label for="newPassword">Nouveau mot de passe</label>
+          <input 
+            type="password" 
+            id="newPassword" 
+            name="newPassword"
+            [(ngModel)]="passwordData.newPassword" 
+            class="form-control"
+            placeholder="Entrez votre nouveau mot de passe"
+            required>
         </div>
-        <p *ngIf="passwordError" class="error">{{ passwordError }}</p>
+        
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le nouveau mot de passe</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            name="confirmPassword"
+            [(ngModel)]="passwordData.confirmPassword" 
+            class="form-control"
+            placeholder="Confirmez votre nouveau mot de passe"
+            required>
+        </div>
+        
+        <div *ngIf="passwordError" class="error-message">
+          <i class="ri-error-warning-line"></i>
+          {{ passwordError }}
+        </div>
+        
         <div class="form-actions">
-          <button type="submit" class="btn-save">Enregistrer</button>
-          <button type="button" class="btn-cancel" (click)="closePasswordModal()">Annuler</button>
+          <button type="button" class="btn btn-secondary" (click)="closePasswordModal()">
+            <i class="ri-close-line"></i> Annuler
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="ri-save-line"></i> Enregistrer
+          </button>
         </div>
       </form>
     </div>

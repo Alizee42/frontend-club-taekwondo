@@ -10,6 +10,7 @@ import {
   AbstractControl
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ToastService } from '../../shared/toast/toast.service';
 import { environment } from '../../../environments/environment';
 
 interface MembrePayload {
@@ -43,7 +44,7 @@ export class InscriptionComponent implements OnInit {
   ceinturesDisponibles = ['Blanche', 'Jaune', 'Orange', 'Verte', 'Bleue', 'Marron', 'Noire'];
   roleMembreSeul: boolean = false;
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {}
+  constructor(private fb: FormBuilder, private http: HttpClient, private toastService: ToastService) {}
 
   ngOnInit(): void {
     this.utilisateurForm = this.fb.group(
@@ -258,7 +259,7 @@ export class InscriptionComponent implements OnInit {
               this.finaliser();
             },
             error: () => {
-              this.erreurMessage = "Erreur lors de l'ajout du membre pratiquant seul.";
+              this.toastService.error('❌ Erreur lors de l\'ajout du membre');
               this.loading = false;
             }
           });
@@ -284,9 +285,9 @@ export class InscriptionComponent implements OnInit {
             error: (err) => {
               erreurs++;
               if (err.status === 409 || (err.status === 400 && err.error?.message?.includes('licence'))) {
-                this.erreurMessage = `Le numéro de licence ${membre.numeroLicence ?? ''} est déjà utilisé.`;
+                this.toastService.error(`⚠️ Numéro de licence ${membre.numeroLicence ?? ''} déjà utilisé`);
               } else {
-                this.erreurMessage = "Erreur lors de l'ajout des membres.";
+                this.toastService.error('❌ Erreur lors de l\'ajout des membres');
               }
               if (count + erreurs === membres.length) this.loading = false;
             }
@@ -295,7 +296,7 @@ export class InscriptionComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.erreurMessage = "Erreur lors de l'inscription.";
+        this.toastService.error('❌ Erreur lors de l\'inscription');
       }
     });
   }
@@ -304,6 +305,7 @@ export class InscriptionComponent implements OnInit {
     this.loading = false;
     this.clearLocal();
     this.step = 3;
+    this.toastService.success('🥋 Inscription réussie ! Bienvenue dans notre dojo !');
     this.showConfirmationModal = true;
   }
 

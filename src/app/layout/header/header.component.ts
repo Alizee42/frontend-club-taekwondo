@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import {
   Router,
   RouterModule,
@@ -34,8 +34,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // UI state
   menuOpen = false;
   dropdownOpenClub = false;
-  profileMenuOpen = false;
   panierOpen = false;
+  userDropdownOpen = false;
+  notificationsOpen = false;
 
   // Modales
   showConnexionModal = false;
@@ -62,9 +63,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   user: Utilisateur | null = null;
 
+  // Propriété calculée pour s'assurer de l'état d'authentification
+  get isUserLoggedIn(): boolean {
+    return this.isLoggedIn && !!this.user && !!this.auth.getToken();
+  }
+
   // Enfants (Parent)
   enfants: { id: number; prenom: string; nom: string }[] = [];
   private enfantsLoaded = false;
+
+  // Notifications
+  notifications: any[] = [];
+  unreadCount = 0;
 
   private subs: Subscription[] = [];
 
@@ -74,7 +84,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private panierService: PanierService,
     private stripeService: StripeService,
-    private http: HttpClient
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -83,8 +94,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.auth.authState$.subscribe((s) => {
         this.isLoggedIn = s.isConnecte;
         this.user = s.user;
+        
+        // Forcer la détection de changement pour mettre à jour le DOM
+        this.cdr.detectChanges();
+        
         if (this.isLoggedIn && this.isParent() && !this.enfantsLoaded) {
           this.loadEnfants();
+        }
+        // Charger les notifications quand connecté
+        if (this.isLoggedIn) {
+          this.loadNotifications();
+        } else {
+          this.notifications = [];
+          this.unreadCount = 0;
         }
       })
     );
@@ -146,6 +168,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return role === 'MEMBRE';
   }
 
+  private isAdmin(): boolean {
+    const role = (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
+    return role === 'ADMIN';
+  }
+
+  // Propriété publique pour utiliser dans le template
+  get userRole(): string {
+    return (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
+  }
+
   private deepest(route: ActivatedRoute): ActivatedRoute {
     let r = route;
     while (r.firstChild) r = r.firstChild;
@@ -203,11 +235,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   goToDashboard(): void {
+    // Dashboard de base simple pour tous
+    this.router.navigate(['/dashboard']);
+    this.closeMenus();
+  }
+
+  goToSpecializedDashboard(): void {
+    // Dashboard spécialisé selon le rôle
     const role = (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
     if (role === 'ADMIN') this.router.navigate(['/admin/dashboard-admin']);
     else if (role === 'MEMBRE') this.router.navigate(['/membre/dashboard-membre']);
     else if (role === 'PARENT') this.router.navigate(['/parent/dashboard-parent']);
-    else this.router.navigate(['/dashboard']);
+    else this.router.navigate(['/dashboard']); // Fallback vers dashboard de base
     this.closeMenus();
   }
 
@@ -221,23 +260,75 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // ======= Menus / toggles =======
   toggleMenu(): void { this.menuOpen = !this.menuOpen; }
-  toggleProfileMenu(): void { this.profileMenuOpen = !this.profileMenuOpen; this.panierOpen = false; }
   togglePanier(): void {
     const opening = !this.panierOpen;
     this.panierOpen = opening;
-    this.profileMenuOpen = false;
 
     if (opening && this.isLoggedIn && this.isParent() && !this.enfantsLoaded) {
       this.loadEnfants();
     }
   }
-  closeMenus(): void { this.menuOpen = false; this.profileMenuOpen = false; this.panierOpen = false; }
+  closeMenus(): void { 
+    this.menuOpen = false; 
+    this.panierOpen = false; 
+    this.userDropdownOpen = false;
+    this.notificationsOpen = false;
+  }
 
   // ======= Auth =======
   logout(): void {
-    this.auth.logout();
+    // Forcer la fermeture immédiate de tous les dropdowns
     this.closeMenus();
+    
+    // Réinitialiser l'état local immédiatement
+    this.isLoggedIn = false;
+    this.user = null;
+    this.notifications = [];
+    this.unreadCount = 0;
+    this.enfants = [];
+    this.enfantsLoaded = false;
+    
+    // Forcer la détection de changement immédiatement
+    this.cdr.detectChanges();
+    
+    // Ensuite appeler le service
+    this.auth.logout();
     this.router.navigate(['/']);
+  }
+
+  // ======= Méthode de diagnostic temporaire =======
+  debugAuthState(): void {
+    console.log('🔍 DIAGNOSTIC AUTH STATE:');
+    console.log('- this.isLoggedIn:', this.isLoggedIn);
+    console.log('- this.user:', this.user);
+    console.log('- authService getUtilisateurConnecte():', this.auth.getUtilisateurConnecte());
+    console.log('- authService isConnecte():', this.auth.isConnecte());
+    console.log('- authService getToken():', this.auth.getToken());
+    console.log('- localStorage token:', localStorage.getItem('token') || localStorage.getItem('auth_token'));
+  }
+
+  // ======= Dropdown utilisateur =======
+  getUserInitials(): string {
+    return this.getInitials();
+  }
+
+  getUserName(): string {
+    if (!this.user) return '';
+    
+    // Pour un parent, utiliser le vrai nom du parent s'il est disponible
+    if (this.isParent() && this.user['nomParent'] && this.user['prenomParent']) {
+      return `${this.user['prenomParent']} ${this.user['nomParent']}`;
+    }
+    
+    return `${this.user.prenom} ${this.user.nom}`;
+  }
+
+  toggleUserDropdown(): void {
+    this.userDropdownOpen = !this.userDropdownOpen;
+  }
+
+  closeUserDropdown(): void {
+    this.userDropdownOpen = false;
   }
 
   openConnexionModal(): void {
@@ -554,5 +645,80 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const a = (this.user?.prenom?.[0] || '').toUpperCase();
     const b = (this.user?.nom?.[0] || '').toUpperCase();
     return (a + b) || 'TU';
+  }
+
+  // ======= Notifications =======
+  toggleNotifications(): void {
+    this.notificationsOpen = !this.notificationsOpen;
+    // Fermer les autres dropdowns
+    if (this.notificationsOpen) {
+      this.userDropdownOpen = false;
+      this.panierOpen = false;
+    }
+  }
+
+  closeNotifications(): void {
+    this.notificationsOpen = false;
+  }
+
+  loadNotifications(): void {
+    // Charger les notifications depuis votre backend
+    console.log('🔔 Chargement des notifications depuis le backend...');
+    this.http.get<any[]>(`${this.API_BASE}/notifications`).subscribe({
+      next: (notifications) => {
+        console.log('✅ Notifications reçues:', notifications);
+        this.notifications = notifications;
+        this.unreadCount = notifications.filter(n => !n.lu).length;
+      },
+      error: (err) => {
+        console.error('❌ Erreur lors du chargement des notifications:', err);
+        // Pas de fallback - si pas de backend, pas de notifications
+        this.notifications = [];
+        this.unreadCount = 0;
+      }
+    });
+  }
+
+  markAsRead(notification: any): void {
+    if (!notification.lu) {
+      notification.lu = true;
+      this.unreadCount--;
+      
+      // Envoyer au backend
+      this.http.put(`${this.API_BASE}/notifications/${notification.id}/read`, {}).subscribe({
+        error: (err) => console.error('Erreur lors du marquage comme lu:', err)
+      });
+    }
+  }
+
+  markAllAsRead(): void {
+    this.notifications.forEach(n => n.lu = true);
+    this.unreadCount = 0;
+    
+    // Envoyer au backend
+    this.http.put(`${this.API_BASE}/notifications/mark-all-read`, {}).subscribe({
+      error: (err) => console.error('Erreur lors du marquage global:', err)
+    });
+  }
+
+  getNotificationIcon(type: string): string {
+    switch (type) {
+      case 'cours': return 'ri-calendar-line';
+      case 'paiement': return 'ri-money-euro-circle-line';
+      case 'examen': return 'ri-medal-line';
+      default: return 'ri-notification-line';
+    }
+  }
+
+  getTimeAgo(date: Date): string {
+    const now = new Date();
+    const diff = now.getTime() - new Date(date).getTime();
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (minutes < 60) return `Il y a ${minutes} min`;
+    if (hours < 24) return `Il y a ${hours}h`;
+    return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
   }
 }

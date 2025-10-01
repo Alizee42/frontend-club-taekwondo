@@ -19,6 +19,7 @@ type BadgeCounts = {
   inscriptions: number;
   commandes: number;
   documents: number;
+  actualites: number;
 };
 
 type UserLocalStorage = { prenom?: string; nom?: string } | null;
@@ -37,7 +38,8 @@ const LS_KEYS = {
   documents: 'last_seen_documents',
   inscriptions: 'last_seen_inscriptions',
   commandes: 'last_seen_commandes',
-  avis: 'last_seen_avis'
+  avis: 'last_seen_avis',
+  actualites: 'last_seen_actualites'
 } as const;
 
 type SectionKey = keyof typeof LS_KEYS;
@@ -58,10 +60,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   evenementsAVenir = 0;
 
   // Badges (affichés dans l'UI)
-  badge: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0 };
+  badge: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0, actualites: 0 };
 
   // Compteurs courants (ce que renvoie l'API pour chaque section)
-  private currentCounts: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0 };
+  private currentCounts: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0, actualites: 0 };
 
   // Bonjour
   prenomUtilisateur = 'Admin';
@@ -140,7 +142,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
       paiements: this.fetchPaiements(),     
       inscriptions: this.fetchInscriptions(), 
       commandes: this.fetchCommandes(),     
-      documents: this.fetchDocuments()      
+      documents: this.fetchDocuments(),
+      actualites: this.fetchActualites()      
     }).subscribe({
       next: (res) => {
         console.log('📊 Compteurs reçus de l\'API:', res);
@@ -151,7 +154,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
           paiements: Number(res.paiements || 0),
           inscriptions: Number(res.inscriptions || 0),
           commandes: Number(res.commandes || 0),
-          documents: Number(res.documents || 0)
+          documents: Number(res.documents || 0),
+          actualites: Number(res.actualites || 0)
         };
 
         console.log('📈 Compteurs courants mis à jour:', this.currentCounts);
@@ -162,7 +166,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
           paiements: this.computeUnread('paiements', this.currentCounts.paiements),
           inscriptions: this.computeUnread('inscriptions', this.currentCounts.inscriptions),
           commandes: this.computeUnread('commandes', this.currentCounts.commandes),
-          documents: this.computeUnread('documents', this.currentCounts.documents)
+          documents: this.computeUnread('documents', this.currentCounts.documents),
+          actualites: this.computeUnread('actualites', this.currentCounts.actualites)
         };
 
         console.log('🔔 Nouveaux badges calculés:', newBadges);
@@ -250,6 +255,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     if (url.startsWith('/admin/avis')) {
       console.log('⭐ Marquage section avis comme vue');
       this.markSectionAsSeen('avis');
+    }
+    if (url.startsWith('/admin/actualites')) {
+      console.log('📰 Marquage section actualites comme vue');
+      this.markSectionAsSeen('actualites');
     }
   }
 
@@ -352,6 +361,22 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     );
   }
 
+  /** Actualités (total récent). */
+  private fetchActualites(): Observable<number> {
+    console.log('📰 Récupération actualités');
+    return this.http.get<any[]>(this.url('actualites')).pipe(
+      map(list => {
+        const count = Array.isArray(list) ? list.length : 0;
+        console.log(`📰 Actualités trouvées: ${count}`);
+        return count;
+      }),
+      catchError((err) => {
+        console.error('❌ Erreur récupération actualités:', err);
+        return of(0);
+      })
+    );
+  }
+
   // —— Helpers de normalisation & comptage (paiements) ——
   private countPendingPaiements(list: any[]): number {
     if (!Array.isArray(list)) return 0;
@@ -427,6 +452,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   navigateToActualites(): void {
     console.log('🧭 Navigation vers Actualités');
+    this.markSectionAsSeen('actualites');
     this.router.navigate(['/admin/actualites']);
   }
 }
