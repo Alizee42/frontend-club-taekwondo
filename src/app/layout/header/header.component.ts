@@ -6,7 +6,7 @@ import {
   NavigationEnd,
 } from '@angular/router';
 import { Subscription, filter, firstValueFrom } from 'rxjs';
-import { CommonModule, DecimalPipe, NgIf, NgFor } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
@@ -26,7 +26,7 @@ interface PanierItem extends Produit {
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
-  imports: [CommonModule, RouterModule, DecimalPipe, FormsModule, NgIf, NgFor],
+  imports: [CommonModule, RouterModule, DecimalPipe, FormsModule],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   private readonly API_BASE = environment.apiUrl;
