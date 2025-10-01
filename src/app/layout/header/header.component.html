@@ -1,8 +1,12 @@
 <header class="main-header">
-  <div class="header-container">
+  <div class="header-container compact">
     <!-- Logo -->
     <div class="logo">
-      <a [routerLink]="['/']" (click)="closeMenus()">Olympique Taekwondo Villeurbannais</a>
+      <a [routerLink]="['/']" (click)="closeMenus()">
+        <span class="brand-strong">Olympique</span>
+        <span class="brand-mid">Taekwondo</span>
+        <span class="brand-thin">Villeurbannais</span>
+      </a>
     </div>
 
     <!-- Burger menu -->
@@ -12,222 +16,97 @@
 
     <!-- Navigation -->
     <nav class="nav-wrapper" [class.open]="menuOpen">
-      <!-- Menu pour utilisateurs connectés -->
-      <ul class="main-nav" *ngIf="isUserLoggedIn">
-        <li><a [routerLink]="['/dashboard']" (click)="closeMenus()">Dashboard</a></li>
-        <li><a (click)="goToSpecializedDashboard()">Mon Espace</a></li>
-        <li><a [routerLink]="['/']" (click)="closeMenus()">Accueil site</a></li>
-        <li><a (click)="goToProfil(); closeMenus()">Profil</a></li>
-        
-        <!-- Menus supplémentaires selon le rôle -->
-        <li *ngIf="userRole === 'ADMIN'"><a [routerLink]="['/admin/gestion-evenement']" (click)="closeMenus()">Gestion</a></li>
-        <li *ngIf="userRole === 'PARENT' || userRole === 'MEMBRE'"><a [routerLink]="['/boutique']" (click)="closeMenus()">Boutique</a></li>
-        <li *ngIf="userRole === 'PARENT' || userRole === 'MEMBRE'"><a [routerLink]="['/evenements']" (click)="closeMenus()">Événements</a></li>
-      </ul>
-
-      <!-- Menu pour utilisateurs non connectés -->
-      <ul class="main-nav" *ngIf="!isUserLoggedIn">
-        <li><a [routerLink]="['/']" (click)="closeMenus()">Accueil</a></li>
-        <li><a [routerLink]="['/galerie']" (click)="closeMenus()">Galerie</a></li>
-        <li><a [routerLink]="['/inscription']" (click)="closeMenus()">Inscription</a></li>
-        <li><a [routerLink]="['/boutique']" (click)="closeMenus()">Boutique</a></li>
-        <li><a [routerLink]="['/evenements']" (click)="closeMenus()">Événements</a></li>
-        <li><a [routerLink]="['/contact']" (click)="closeMenus()">Contact</a></li>
-
-        <!-- Connexion visible quand déconnecté -->
-        <li>
-          <a [routerLink]="['/connexion']" (click)="closeMenus()">Connexion</a>
-        </li>
+      <!-- Menu principal toujours visible (même connecté) -->
+      <ul class="main-nav">
+  <li><a routerLinkActive="active" [routerLink]="['/']" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenus()">Accueil</a></li>
+        <li><a routerLinkActive="active" [routerLink]="['/galerie']" (click)="closeMenus()">Galerie</a></li>
+        <li><a routerLinkActive="active" [routerLink]="['/inscription']" (click)="closeMenus()">Inscription</a></li>
+        <li><a routerLinkActive="active" [routerLink]="['/boutique']" (click)="closeMenus()">Boutique</a></li>
+        <li><a routerLinkActive="active" [routerLink]="['/evenements']" (click)="closeMenus()">Événements</a></li>
+        <li><a routerLinkActive="active" [routerLink]="['/contact']" (click)="closeMenus()">Contact</a></li>
+        <!-- Connexion uniquement si déconnecté -->
+        <li *ngIf="!isUserLoggedIn"><a routerLinkActive="active" [routerLink]="['/connexion']" (click)="closeMenus()">Connexion</a></li>
       </ul>
     </nav>
 
     <!-- Actions -->
-    <div class="user-actions">
-      <!-- Dropdown utilisateur quand connecté -->
-      <div class="user-dropdown" *ngIf="isUserLoggedIn">
+    <div class="user-actions" *ngIf="isUserLoggedIn">
+      <!-- Dropdown utilisateur -->
+      <div class="user-dropdown">
         <button class="user-btn" (click)="toggleUserDropdown()">
           <div class="avatar">{{ getUserInitials() }}</div>
           <span class="username">{{ getUserName() }}</span>
           <span class="arrow" [class.open]="userDropdownOpen">▼</span>
         </button>
-        
         <div class="dropdown" [class.show]="userDropdownOpen">
-          <button class="menu-item" (click)="goToDashboard(); closeUserDropdown()">
-            📊 Dashboard
-          </button>
-          <button class="menu-item" (click)="goToProfil(); closeUserDropdown()">
-            👤 Mon Profil
-          </button>
+          <button class="menu-item" (click)="goToSpecializedDashboard(); closeUserDropdown()">📊 Dashboard</button>
+          <button class="menu-item" (click)="goToProfil(); closeUserDropdown()">👤 Mon Profil</button>
           <hr class="separator">
-          <button class="menu-item logout" (click)="logout(); closeUserDropdown()">
-            🚪 Se déconnecter
-          </button>
+          <button class="menu-item logout" (click)="logout(); closeUserDropdown()">🚪 Se déconnecter</button>
         </div>
       </div>
-      
-      <!-- Notifications (si connecté) -->
-      <div class="notification-icon" *ngIf="isUserLoggedIn" (click)="toggleNotifications()">
+
+      <!-- Notifications -->
+      <div class="notification-icon" (click)="toggleNotifications()">
         <i class="ri-notification-line"></i>
         <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </div>
-
-      <!-- Aperçu des notifications -->
       <div class="notification-preview" *ngIf="notificationsOpen">
         <div class="notification-header">
           <h4>Notifications</h4>
-          <button class="mark-all-read" *ngIf="unreadCount > 0" (click)="markAllAsRead()">
-            Tout marquer comme lu
-          </button>
+          <button class="mark-all-read" *ngIf="unreadCount > 0" (click)="markAllAsRead()">Tout marquer comme lu</button>
         </div>
-        
-        <div *ngIf="notifications.length === 0" class="no-notifications">
-          <p>Aucune notification</p>
-        </div>
-
+        <div *ngIf="notifications.length === 0" class="no-notifications"><p>Aucune notification</p></div>
         <ul *ngIf="notifications.length > 0" class="notification-list">
-          <li *ngFor="let notification of notifications" 
-              class="notification-item" 
-              [class.unread]="!notification.lu"
-              (click)="markAsRead(notification)">
-            <div class="notification-icon">
-              <i [class]="getNotificationIcon(notification.type)"></i>
-            </div>
+          <li *ngFor="let n of notifications" class="notification-item" [class.unread]="!n.lu" (click)="markAsRead(n)">
+            <div class="notification-icon-item"><i [class]="getNotificationIcon(n.type)"></i></div>
             <div class="notification-content">
-              <h5>{{ notification.titre }}</h5>
-              <p>{{ notification.message }}</p>
-              <span class="notification-time">{{ getTimeAgo(notification.date) }}</span>
+              <h5>{{ n.titre }}</h5>
+              <p>{{ n.message }}</p>
+              <span class="notification-time">{{ getTimeAgo(n.date) }}</span>
             </div>
           </li>
         </ul>
       </div>
       
-      <!-- Panier -->
-<!-- Panier (affiché seulement s’il y a au moins 1 article) -->
-<div class="cart-icon" *ngIf="cartCount > 0" (click)="togglePanier()">
-  <i class="ri-shopping-cart-line"></i>
-  <span class="badge">{{ cartCount }}</span>
-</div>
-
+      <!-- Panier (toujours visible) -->
+      <div class="cart-icon" [class.empty]="cartCount === 0" (click)="togglePanier()" title="Panier">
+        <i class="ri-shopping-cart-line"></i>
+        <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+      </div>
 
       <!-- Aperçu du panier -->
       <div class="cart-preview" *ngIf="panierOpen">
-        <div *ngIf="panier.length === 0">
-          <p>Votre panier est vide.</p>
-          <button class="btn-return" [routerLink]="['/boutique']" (click)="closeMenus()">Retourner à la boutique</button>
-        </div>
-
-        <ul *ngIf="panier.length > 0">
-          <li *ngFor="let item of panier; let i = index" class="cart-item">
-            <img [src]="item.imageUrl" [alt]="item.nom" class="cart-item-image" />
-            <div class="cart-item-info">
-              <p><strong>{{ item.nom }}</strong></p>
-              <p *ngIf="item.taille">Taille : {{ item.taille }}</p>
-              <p>Quantité : {{ item.quantite }}</p>
-
-              <!-- ✅ Sélection du bénéficiaire (si parent avec enfants) -->
-              <div class="beneficiaire-select"
-                   *ngIf="isUserLoggedIn && enfants?.length"
-                   aria-label="Sélection du bénéficiaire">
-                <label>Pour :</label>
-                <select
-                  [(ngModel)]="item.beneficiaireId"
-                  [ngModelOptions]="{ standalone: true }"
-                >
-                  <option [ngValue]="null">— Moi —</option>
-                  <option *ngFor="let e of enfants" [ngValue]="e.id">
-                    {{ e.prenom }} {{ e.nom }}
-                  </option>
-                </select>
+        <ng-container *ngIf="panier && panier.length > 0; else panierVide">
+          <ul class="cart-items-list">
+            <li *ngFor="let item of panier; let i = index" class="cart-item">
+              <img [src]="item.imageUrl" [alt]="item.nom" class="cart-item-image" />
+              <div class="cart-item-info">
+                <p><strong>{{ item.nom }}</strong></p>
+                <p *ngIf="item.taille">Taille : {{ item.taille }}</p>
+                <p>Quantité : {{ item.quantite }}</p>
+                <p>Prix total : <strong>{{ item.prix | number:'1.2-2' }} €</strong></p>
               </div>
-
-              <!-- Etiquette si déjà choisi -->
-              <p class="muted" *ngIf="!enfants?.length && item.beneficiaireNom">
-                Pour : {{ item.beneficiairePrenom }} {{ item.beneficiaireNom }}
-              </p>
-
-              <!-- ✅ Prix total = item.prix (déjà totalisé) -->
-              <p>
-                Prix total :
-                <strong>{{ item.prix | number:'1.2-2' }} €</strong>
-              </p>
-            </div>
-
-            <button class="btn-delete" (click)="supprimerDuPanier(i)">
-              <i class="ri-delete-bin-line"></i>
-            </button>
-          </li>
-        </ul>
-
-        <!-- Boutons de paiement -->
-        <div class="payment-buttons" *ngIf="panier.length > 0">
-          <ng-container *ngIf="isUserLoggedIn; else inviteActions">
+              <button class="btn-delete" (click)="supprimerDuPanier(i)">
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </li>
+          </ul>
+          <div class="payment-buttons">
             <button class="btn-pay" (click)="payerParCB()">Payer par CB</button>
             <button class="btn-pay" (click)="payerAuClub()">Payer au club</button>
-          </ng-container>
-          <ng-template #inviteActions>
-            <button type="button" class="btn-return" (click)="openConnexionModal()">
-              Se connecter pour payer
-            </button>
-          </ng-template>
-        </div>
+          </div>
+        </ng-container>
+        <ng-template #panierVide>
+          <div class="cart-empty">
+            <p class="empty-text">Votre panier est vide.</p>
+            <div class="empty-actions">
+              <button class="btn-return" [routerLink]="['/boutique']" (click)="closeMenus()">Aller à la boutique</button>
+              <button class="btn-close-empty" type="button" (click)="panierOpen=false">Fermer</button>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>
 </header>
-
-<!-- Modale générique Confirmation / Paiement -->
-<div *ngIf="confirmationMessage || showPaiementModal"
-     class="modal-overlay"
-     role="dialog" aria-modal="true">
-  <div class="modal-content" [ngClass]="{'is-wide': showPaiementModal}">
-    <button class="modal-close" (click)="closeAllModals()" aria-label="Fermer">×</button>
-
-    <!-- Confirmation -->
-    <ng-container *ngIf="confirmationMessage">
-      <h2>Confirmation</h2>
-      <p class="confirmation">{{ confirmationMessage }}</p>
-      <p *ngIf="showConfirmationModal">Merci pour votre commande. Veuillez effectuer le paiement au club.</p>
-      <p *ngIf="!showConfirmationModal">Un e-mail de confirmation vous a été envoyé.</p>
-      <button class="btn-return" [routerLink]="['/boutique']" (click)="closeMenus()">Retourner à la boutique</button>
-    </ng-container>
-
-    <!-- Paiement -->
-    <ng-container *ngIf="showPaiementModal">
-      <h2>Paiement sécurisé</h2>
-      <div id="modal-card-element" style="margin: 16px 0;"></div>
-      <button (click)="validerPaiement()">Valider le paiement</button>
-      <button type="button" (click)="fermerPaiementModal()">Annuler</button>
-      <div class="paiement-securite">
-        <p>🔒 Paiement sécurisé via Stripe. Ne partagez jamais vos informations bancaires.</p>
-      </div>
-    </ng-container>
-  </div>
-</div>
-
-<!-- Modale de connexion -->
-<div *ngIf="showConnexionModal" class="modal-overlay" role="dialog" aria-modal="true">
-  <div class="modal-content">
-    <button class="modal-close" (click)="fermerConnexionModal()" aria-label="Fermer">×</button>
-    <h2>Connexion</h2>
-
-    <form (ngSubmit)="onLoginSubmit()">
-      <div class="form-group">
-        <label for="login-email">Email</label>
-        <input id="login-email" name="loginEmail" type="email"
-               [(ngModel)]="loginEmail" required autofocus />
-      </div>
-
-      <div class="form-group">
-        <label for="login-password">Mot de passe</label>
-        <input id="login-password" name="loginPassword" type="password"
-               [(ngModel)]="loginPassword" required />
-      </div>
-
-      <p class="error" *ngIf="connexionError">{{ connexionError }}</p>
-
-      <button type="submit" class="btn-pay" [disabled]="loginLoading">
-        {{ loginLoading ? 'Connexion...' : 'Se connecter' }}
-      </button>
-    </form>
-  </div>
-</div>

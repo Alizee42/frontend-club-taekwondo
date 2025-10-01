@@ -1,0 +1,9 @@
+.legal-page { max-width: 900px; margin: 2rem auto; padding: 0 1.25rem 3rem; line-height: 1.55; }
+.legal-page h1 { font-size: 2rem; margin-bottom: 1rem; }
+.legal-page h2 { margin-top: 2rem; font-size: 1.25rem; position: relative; }
+.legal-page h2::after { content: ""; display: block; width: 60px; height: 3px; background: var(--orange-main); margin-top: 6px; border-radius: 2px; }
+.legal-page p { margin: 0.75rem 0; }
+.legal-page a { color: var(--blue-main); text-decoration: underline; }
+.legal-page a:hover { text-decoration: none; }
+.legal-page .intro { font-style: italic; color: #666; }
+.legal-meta { margin-top: 2.5rem; font-size: 0.85rem; color: #888; }

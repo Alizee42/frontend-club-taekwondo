@@ -81,11 +81,14 @@ export class InscriptionComponent implements OnInit {
       membres: this.fb.array([])
     });
 
-    // uppercase ville
+    // Normalisation très légère : réduire seulement les espaces consécutifs (>1) mais conserver un espace en cours de frappe
     this.utilisateurForm.get('ville')?.valueChanges.subscribe(v => {
       if (typeof v === 'string') {
-        const up = v.replace(/\s+/g, ' ').trim().toUpperCase();
-        if (up !== v) this.utilisateurForm.get('ville')?.setValue(up, { emitEvent: false });
+        // Ne pas toucher si l'utilisateur est en train de taper deux espaces pour en insérer un
+        const cleaned = v.replace(/ {2,}/g, ' '); // remplace 2+ espaces par 1
+        if (cleaned !== v) {
+          this.utilisateurForm.get('ville')?.setValue(cleaned, { emitEvent: false });
+        }
       }
     });
 
@@ -192,6 +195,19 @@ export class InscriptionComponent implements OnInit {
   }
   clearLocal(): void { localStorage.removeItem('inscriptionData'); }
 
+  // ===== Helpers de formatage =====
+  private capitalizeVille(v: string): string {
+    const trimmed = v.trim();
+    if (!trimmed) return '';
+    // Autoriser lettres, espaces, apostrophes, tirets, accents
+    return trimmed
+      .toLowerCase()
+      .split(/\s+/)
+      .map(part => part.charAt(0).toLocaleUpperCase('fr-FR') + part.slice(1))
+      .join(' ')
+      .replace(/\b(\w)'(\w)/g, (_m, a, b) => a + "'" + b); // conserver apostrophes
+  }
+
   // ===== Nettoyage payload membre =====
   private cleanMembre(m: any, utilisateurId: number): MembrePayload {
     const obj: MembrePayload = {
@@ -219,10 +235,11 @@ export class InscriptionComponent implements OnInit {
     this.loading = true;
 
     const f = this.utilisateurForm.value;
+    const villeNormalisee = this.capitalizeVille(String(f.ville || ''));
     const adresseComposee =
       `${f.adresseLigne1}` +
       (f.adresseLigne2 ? `, ${String(f.adresseLigne2).trim()}` : '') +
-      `, ${f.codePostal} ${String(f.ville).toUpperCase()}` +
+      `, ${f.codePostal} ${villeNormalisee}` +
       `, ${f.pays}`;
 
     const utilisateurData = {

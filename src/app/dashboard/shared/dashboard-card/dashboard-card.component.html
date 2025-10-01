@@ -1,0 +1,12 @@
+<button type="button"
+        class="dashboard-card-btn"
+        (click)="onClick()"
+        [attr.aria-label]="ariaLabel || title"
+        [disabled]="disabled">
+  <span class="badge" *ngIf="badge !== null">{{ badge }}</span>
+  <div class="icon-container" aria-hidden="true">
+    <i [class]="icon"></i>
+  </div>
+  <h3 class="card-title">{{ title }}</h3>
+  <p class="card-desc">{{ description }}</p>
+</button>

@@ -1,0 +1,10 @@
+.privacy-page { max-width: 900px; margin: 2rem auto; padding: 0 1.25rem 3rem; line-height: 1.55; }
+.privacy-page h1 { font-size: 2rem; margin-bottom: 1rem; }
+.privacy-page h2 { margin-top: 2rem; font-size: 1.25rem; position: relative; }
+.privacy-page h2::after { content: ""; display: block; width: 60px; height: 3px; background: var(--blue-main); margin-top: 6px; border-radius: 2px; }
+.privacy-page p, .privacy-page ul { margin: 0.75rem 0; }
+.privacy-page ul { padding-left: 1.2rem; }
+.privacy-page a { color: var(--blue-main); text-decoration: underline; }
+.privacy-page a:hover { text-decoration: none; }
+.privacy-page .intro { font-style: italic; color: #666; }
+.privacy-meta { margin-top: 2.5rem; font-size: 0.85rem; color: #888; }

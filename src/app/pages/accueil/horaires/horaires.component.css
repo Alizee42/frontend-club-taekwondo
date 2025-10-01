@@ -1,8 +1,8 @@
 .schedule-info-section {
-    background-color: var(--gray-light);
-    padding: 60px 20px;
-    color: var(--blue-dark);
-  }
+  background: var(--surface-100);
+  padding: 60px 20px;
+  color: var(--blue-dark);
+}
   
   .section-title {
     text-align: center;
@@ -19,20 +19,19 @@
   }
   
   .schedule-card {
-    background-color: var(--white);
-    border-top: 6px solid var(--blue-main); /* Accent en haut */
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    padding: 25px 30px;
-    width: 100%;
-    max-width: 400px;
-    transition: transform 0.3s ease;
-    position: relative;
+    background:var(--surface-0);
+    border:var(--border-soft);
+    border-top:5px solid var(--blue-main);
+    border-radius:var(--radius-md);
+    box-shadow:0 4px 14px -4px rgba(0,0,0,.12);
+    padding:25px 30px;
+    width:100%;
+    max-width:400px;
+    transition:.3s ease;
+    position:relative;
   }
   
-  .schedule-card:hover {
-    transform: translateY(-5px);
-  }
+  .schedule-card:hover {transform:translateY(-4px);box-shadow:0 10px 26px -6px rgba(0,0,0,.16)}
   
   .schedule-card i {
     font-size: 2rem;
@@ -63,11 +62,11 @@
   .schedule-details p {
     font-size: 0.95rem;
     margin: 3px 0;
-    color: var(--gray-dark);
+    color: var(--text-secondary);
   }
   
   .schedule-details .time {
-    font-weight: bold;
+    font-weight: 600;
     color: var(--blue-main);
   }
   

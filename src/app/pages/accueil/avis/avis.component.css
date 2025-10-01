@@ -1,7 +1,7 @@
 .avis-section {
-  background-color: #fdfdfd;
+  background: var(--surface-0);
   padding: 60px 20px;
-  color: #1e1e1e;
+  color: var(--text-primary);
   text-align: center;
 }
 
@@ -14,25 +14,23 @@
 
 /* ==== Carte d'avis ==== */
 .avis-card {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  max-width: 100%;
-  width: 90%;
-  min-height: 250px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  text-align: left;
-  box-sizing: border-box;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background:var(--surface-0);
+  border:var(--border-soft);
+  border-radius:var(--radius-md);
+  padding:20px;
+  box-shadow:0 4px 14px -4px rgba(0,0,0,.12);
+  max-width:100%;
+  width:90%;
+  min-height:250px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  text-align:left;
+  box-sizing:border-box;
+  transition:.3s ease;
 }
 
-.avis-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
+.avis-card:hover {transform:translateY(-4px);box-shadow:0 10px 26px -6px rgba(0,0,0,.16)}
 
 .avis-text {
   font-size: 1.1em;
@@ -64,8 +62,8 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: var(--red-main);
-  color: white;
+  background: var(--red-main);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;

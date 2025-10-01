@@ -5,9 +5,12 @@
        <!-- Actualité à la une -->
     <div *ngIf="featuredNews" class="actu-featured">
       <div class="image-wrapper">
-        <img [src]="featuredNews.imageUrl || 'assets/images/default.jpg'"
-             alt="{{ featuredNews.titre }} - Image à la une"
-             (error)="onImageError($event)">
+        <img 
+          [src]="featuredNews.imageUrl || 'assets/images/default.jpg'"
+          [attr.alt]="featuredNews.titre + ' – image à la une'"
+          (error)="onImageError($event)"
+          loading="lazy" decoding="async"
+        >
         <span class="badge {{ featuredNews.typeActu | lowercase }}">{{ featuredNews.typeActu }}</span>
       </div>
       <div class="actu-content">
@@ -21,7 +24,12 @@
     <div class="actu-grid">
       <div *ngFor="let actu of filteredNews; trackBy: trackById" class="actu-card">
         <div class="image-wrapper">
-          <img [src]="actu.imageUrl || 'assets/images/default.jpg'" alt="Image actualité" (error)="onImageError($event)">
+          <img 
+            [src]="actu.imageUrl || 'assets/images/default.jpg'" 
+            [attr.alt]="'Illustration: ' + actu.titre" 
+            (error)="onImageError($event)" 
+            loading="lazy" decoding="async"
+          >
           <span class="badge {{ actu.typeActu | lowercase }}">{{ actu.typeActu }}</span>
         </div>
         <div class="actu-content">

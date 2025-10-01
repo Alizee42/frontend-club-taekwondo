@@ -11,42 +11,36 @@
     Depuis cet espace, vous pouvez gérer les paiements de vos enfants, déposer des documents et commander des tenues.
   </p>
 
-  <!-- Cartes de navigation -->
-  <section class="dashboard-grid">
-    <!-- Paiements -->
-    <article class="dashboard-card" (click)="navigateToPaiements()" aria-label="Accéder à Mes Paiements">
-      <div class="icon-container">
-        <i class="ri-wallet-3-line" aria-hidden="true"></i>
-      </div>
-      <h3>Mes Paiements</h3>
-      <p>Consultez et gérez les paiements de vos enfants.</p>
-    </article>
-
-    <!-- Documents -->
-    <article class="dashboard-card" (click)="navigateToDocuments()" aria-label="Accéder à Documents">
-      <div class="icon-container">
-        <i class="ri-folder-upload-line" aria-hidden="true"></i>
-      </div>
-      <h3>Documents</h3>
-      <p>Déposez les documents nécessaires pour vos enfants.</p>
-    </article>
-
-    <!-- Commandes -->
-    <article class="dashboard-card" (click)="navigateToCommandes()" aria-label="Accéder aux Commandes">
-      <div class="icon-container">
-        <i class="ri-shopping-bag-line" aria-hidden="true"></i>
-      </div>
-      <h3>Mes Commandes</h3>
-      <p>Consultez l'historique des commandes pour vos enfants.</p>
-    </article>
-
-        <!-- Événements -->
-    <article class="dashboard-card" (click)="navigateToEvenements()" aria-label="Accéder à Événements">
-      <div class="icon-container">
-        <i class="ri-calendar-event-line" aria-hidden="true"></i>
-      </div>
-      <h3>Événements</h3>
-      <p>Inscrivez vos enfants aux stages et événements.</p>
-    </article>
+  <!-- Cartes de navigation refactorisées -->
+  <section class="dashboard-grid" aria-labelledby="actions-parent">
+    <h2 id="actions-parent" class="visually-hidden">Actions parent</h2>
+    <app-dashboard-card
+      icon="ri-wallet-3-line"
+      title="Mes Paiements"
+      description="Gérez les paiements enfants."
+      [badge]="stats.paiementsEnRetard"
+      (action)="navigateToPaiements()">
+    </app-dashboard-card>
+    <app-dashboard-card
+      icon="ri-folder-upload-line"
+      title="Documents"
+      description="Certificat médical, autorisations."
+      [badge]="stats.documentsManquants"
+      (action)="navigateToDocuments()">
+    </app-dashboard-card>
+    <app-dashboard-card
+      icon="ri-shopping-bag-line"
+      title="Mes Commandes"
+      description="Historique & suivi."
+      [badge]="stats.commandesEnCours"
+      (action)="navigateToCommandes()">
+    </app-dashboard-card>
+    <app-dashboard-card
+      icon="ri-calendar-event-line"
+      title="Événements"
+      description="Inscriptions & stages."
+      [badge]="stats.evenementsAVenir"
+      (action)="navigateToEvenements()">
+    </app-dashboard-card>
   </section>
 </div>

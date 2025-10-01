@@ -1,39 +1,83 @@
-<div class="contact-container">
-  <div class="contact-content">
-    
-    <!-- Bloc de gauche -->
-    <div class="contact-left card">
-      <h1>Une question ?</h1>
-      <p>Remplissez le formulaire pour nous contacter. Nous sommes là pour répondre à toutes vos questions concernant nos services et votre expérience avec notre club.</p>
-      <p>Vous pouvez également nous joindre directement par téléphone ou par email aux coordonnées suivantes :</p>
-      <ul>
-        <li><strong>Téléphone :</strong> 06.63.97.89.26 / 07.65.82.67.72</li>
-        <li><strong>Email :</strong> <a href="mailto:taekwondovilleurbannais&#64;gmail.com">taekwondovilleurbannais&#64;gmail.com</a></li>
-        <li><strong>Adresse :</strong> 4 Rue De Bat Yam, 69100 Villeurbanne</li>
+<div class="page-wrapper-standard contact-page">
+  <header class="page-head">
+    <h1 class="page-title">Contact</h1>
+    <p class="page-subtitle">Questions, informations, adhésion : on vous répond vite.</p>
+  </header>
+
+  <div class="contact-layout">
+    <aside class="contact-panel card">
+      <h2 class="panel-title">Coordonnées</h2>
+      <p class="intro">Vous pouvez nous écrire via le formulaire ou utiliser un des moyens suivants :</p>
+      <ul class="info-list">
+        <li>
+          <i class="ri-phone-line"></i>
+          <div>
+            <strong>Téléphone</strong><br>
+            <span>06 63 97 89 26<br>07 65 82 67 72</span>
+          </div>
+        </li>
+        <li>
+          <i class="ri-mail-line"></i>
+          <div>
+            <strong>Email</strong><br>
+            <a href="mailto:taekwondovilleurbannais@gmail.com">taekwondovilleurbannais@gmail.com</a>
+          </div>
+        </li>
+        <li>
+          <i class="ri-map-pin-line"></i>
+          <div>
+            <strong>Adresse</strong><br>
+            <address>4 Rue De Bat Yam<br>69100 Villeurbanne</address>
+          </div>
+        </li>
+        <li>
+          <i class="ri-time-line"></i>
+          <div>
+            <strong>Horaires</strong><br>
+            <span>Réponse sous 24h ouvrées</span>
+          </div>
+        </li>
       </ul>
-    </div>
+      <div class="mini-map-placeholder" aria-hidden="true">📍 Carte prochaine version</div>
+    </aside>
 
-    <!-- Bloc de droite -->
-    <div class="contact-right card">
-      <form class="contact-form" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <label for="name">Nom</label>
-          <input type="text" id="name" placeholder="Votre nom" required />
+    <section class="contact-form-wrapper card" aria-labelledby="formTitle">
+      <h2 id="formTitle" class="panel-title">Envoyer un message</h2>
+      <form class="contact-form" (ngSubmit)="onSubmit()" #contactForm="ngForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Nom *</label>
+            <input id="name" name="name" type="text" required [(ngModel)]="form.name" #name="ngModel" [class.is-invalid]="name.invalid && (name.dirty || name.touched)" placeholder="Votre nom" autocomplete="name" />
+            <small *ngIf="name.invalid && (name.dirty || name.touched)" class="field-error">Nom requis</small>
+          </div>
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input id="email" name="email" type="email" required email [(ngModel)]="form.email" #email="ngModel" [class.is-invalid]="email.invalid && (email.dirty || email.touched)" placeholder="vous@exemple.com" autocomplete="email" />
+            <small *ngIf="email.invalid && (email.dirty || email.touched)" class="field-error">Email invalide</small>
+          </div>
         </div>
-        
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" placeholder="Votre email" required />
+        <div class="form-group full">
+          <label for="objet">Objet *</label>
+            <input id="objet" name="objet" type="text" required [(ngModel)]="form.objet" #objet="ngModel" [class.is-invalid]="objet.invalid && (objet.dirty || objet.touched)" placeholder="Sujet de votre demande" />
+            <small *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="field-error">Objet requis</small>
         </div>
-
-        <div class="form-group">
-          <label for="message">Message</label>
-          <textarea id="message" placeholder="Votre message" rows="6" required></textarea>
+        <div class="form-group full">
+          <label for="message">Message *</label>
+          <textarea id="message" name="message" rows="7" required minlength="10" [(ngModel)]="form.message" #message="ngModel" [class.is-invalid]="message.invalid && (message.dirty || message.touched)" placeholder="Expliquez votre demande..." ></textarea>
+          <small *ngIf="message.errors?.['required'] && (message.dirty || message.touched)" class="field-error">Message requis</small>
+          <small *ngIf="message.errors?.['minlength'] && (message.dirty || message.touched)" class="field-error">Minimum 10 caractères</small>
         </div>
-
-        <button type="submit" class="submit-btn">Envoyer</button>
+        <div class="form-actions">
+          <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || sending">
+            <span *ngIf="!sending">Envoyer</span>
+            <span *ngIf="sending" class="loader-inline"></span>
+          </button>
+        </div>
+        <div class="form-status" aria-live="polite">
+          <p *ngIf="successMessage" class="success-msg"><i class="ri-checkbox-circle-line"></i> {{ successMessage }}</p>
+          <p *ngIf="errorMessage" class="error-msg"><i class="ri-error-warning-line"></i> {{ errorMessage }}</p>
+        </div>
       </form>
-    </div>
-
+    </section>
   </div>
 </div>

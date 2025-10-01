@@ -8,11 +8,34 @@
   --orange-main:#F1A208;
   --accent-hover:#e4b343;
 
+  /* Neutral / surfaces */
+  --surface-0:#ffffff;
+  --surface-50:#f9fafb;
+  --surface-100:#f4f6f9;
+  --surface-200:#eef1f5;
+  --surface-alt:#F0F4F8; /* ancien F0F4F8 */
+  --surface-accent:#F8F9FA; /* ancien about-section */
+
+  /* Text scale */
+  --text-primary:#1B2533;
+  --text-secondary:#4B5A6B;
+  --text-muted:#6C7581;
+  --text-inverse:#ffffff;
+
   /* UI */
   --text-main:#1e1e1e;
   --background-light:#fdfdfd;
   --card-bg:#f4f4f4;
   --shadow:0 8px 20px rgba(0,0,0,.1);
+
+  /* Borders */
+  --border-subtle:#e2e8f0;
+  --border-strong:#cbd5e1;
+
+  /* Gradients */
+  --grad-accent:linear-gradient(90deg,var(--blue-main),var(--red-main));
+  --grad-soft:linear-gradient(135deg,#ffffff,#f6f9fc 55%,#f1f5f9);
+  --grad-hero:radial-gradient(circle at 35% 40%, rgba(255,255,255,.25), rgba(255,255,255,0) 60%), linear-gradient(120deg,#1E6091,#283a5a 60%);
 
   /* Status colors */
   --success:#2ecc71;
@@ -25,6 +48,15 @@
   /* Controls */
   --control-h:40px;
   --radius:8px;
+  --radius-sm:6px;
+  --radius-md:12px;
+  --radius-lg:18px;
+  --radius-pill:999px;
+
+  /* Border sets */
+  --border-soft:1px solid var(--border-subtle);
+  --border-strong-set:1px solid var(--border-strong);
+  --border-accent:2px solid var(--blue-main);
   --border:#e5e7eb;
   --focus:#3b82f6;
 
@@ -57,9 +89,167 @@ body{
   font-family:Roboto,"Helvetica Neue",Arial,system-ui,sans-serif;
   color:var(--text-main);
   background:var(--background-light);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  overflow-x:hidden; /* Empêche bande blanche due à scroll horizontal (100vw + scrollbar) */
+  overscroll-behavior-y: contain;
+}
+
+/* ================= UNIFORMISATION PAGES PUBLIQUES (hors Accueil) ================= */
+body.public-page-standard {
+  /* Fond légèrement nuancé pour distinguer de l'accueil si plus visuel */
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 120%);
+}
+
+/* Un wrapper utilitaire pourra être ajouté dans les pages si besoin: .page-wrapper-standard */
+
+body.public-page-standard .page-wrapper-standard {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 2.2rem clamp(1rem, 2.5vw, 2.2rem);
+  width: 100%;
+}
+
+/* ---- En-têtes de page uniformisés & centrés ---- */
+body.public-page-standard .page-head {
+  text-align:center;
+  margin:0 0 2.4rem;
+  position:relative;
+  padding-bottom:1.4rem;
+}
+body.public-page-standard .page-head::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:0;
+  width:110px;
+  height:4px;
+  border-radius:4px;
+  background:linear-gradient(90deg,var(--blue-main), var(--red-main));
+  box-shadow:0 2px 6px -2px rgba(0,0,0,.25);
+}
+body.public-page-standard .page-title {
+  font-size:clamp(2rem,4.2vw,2.7rem);
+  font-weight:700;
+  letter-spacing:-.6px;
+  margin:0 0 .65rem;
+  background:linear-gradient(90deg,var(--blue-dark),var(--blue-main));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+body.public-page-standard .page-subtitle {
+  font-size:clamp(.95rem,1.9vw,1.15rem);
+  color:#445067;
+  font-weight:400;
+  max-width:760px;
+  margin:0 auto;
+  line-height:1.5;
+}
+
+/* Accessibilité : classe pour éléments visuellement cachés */
+.visually-hidden {
+  position:absolute !important;
+  width:1px !important;
+  height:1px !important;
+  padding:0 !important;
+  margin:-1px !important;
+  overflow:hidden !important;
+  clip:rect(0 0 0 0) !important;
+  clip-path:inset(50%) !important;
+  border:0 !important;
+  white-space:nowrap !important;
+}
+
+/* Typographie et rythme vertical harmonisé */
+body.public-page-standard h1 { font-size: clamp(2rem, 4.2vw, 2.6rem); line-height:1.15; margin:0 0 1.2rem; font-weight:700; letter-spacing:-.5px; }
+body.public-page-standard h2 { font-size: clamp(1.55rem, 3vw, 2rem); line-height:1.2; margin:2.2rem 0 1rem; font-weight:600; }
+body.public-page-standard h3 { font-size: clamp(1.25rem, 2.2vw, 1.55rem); line-height:1.25; margin:1.8rem 0 .75rem; font-weight:600; }
+body.public-page-standard p { line-height:1.6; margin:0 0 1rem; }
+body.public-page-standard ul { margin:0 0 1.1rem 1.2rem; padding:0; }
+body.public-page-standard li { margin:.4rem 0; }
+
+/* Blocs / sections spacing */
+body.public-page-standard section { margin-bottom: 3rem; }
+body.public-page-standard section:last-child { margin-bottom: 0; }
+
+/* Cartes uniformes */
+body.public-page-standard .card,
+body.public-page-standard .panel,
+body.public-page-standard .bloc,
+body.public-page-standard .module-box {
+  background:#fff;
+  border:1px solid rgba(0,0,0,.06);
+  border-radius:14px;
+  padding:1.4rem 1.6rem;
+  box-shadow:0 4px 18px -4px rgba(0,0,0,.08);
+  backdrop-filter:blur(2px);
+}
+
+/* Boutons cohérents */
+body.public-page-standard .btn-primary,
+body.public-page-standard button[type=submit],
+body.public-page-standard button.primary {
+  background:var(--blue-main);
+  color:#fff;
+  border:1px solid var(--blue-main);
+  padding:.75rem 1.25rem;
+  font-size:.95rem;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  display:inline-flex; align-items:center; gap:.5rem;
+  transition: background .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+body.public-page-standard .btn-primary:hover,
+body.public-page-standard button[type=submit]:hover,
+body.public-page-standard button.primary:hover {
+  background:var(--blue-hover);
+  box-shadow:0 6px 18px -6px rgba(0,0,0,.18);
+}
+body.public-page-standard .btn-primary:active,
+body.public-page-standard button[type=submit]:active,
+body.public-page-standard button.primary:active {
+  transform:translateY(1px);
+}
+
+/* Liens d'action */
+body.public-page-standard a.action-link {
+  color:var(--blue-main);
+  font-weight:600;
+  text-decoration:none;
+  position:relative;
+}
+body.public-page-standard a.action-link::after {
+  content:""; position:absolute; left:0; bottom:-2px; height:2px; width:0; background:var(--blue-main); transition:width .25s ease;
+}
+body.public-page-standard a.action-link:hover::after { width:100%; }
+
+/* Formulaires harmonisés */
+body.public-page-standard form .form-row { display:flex; flex-wrap:wrap; gap:1.2rem; margin-bottom:1.1rem; }
+body.public-page-standard label { font-weight:600; font-size:.82rem; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:.35rem; color:#374151; }
+
+/* Tables harmonisées */
+body.public-page-standard table { width:100%; border-collapse:collapse; font-size:.92rem; }
+body.public-page-standard table thead th { text-align:left; padding:.75rem .85rem; background:#f1f5f9; font-weight:600; font-size:.75rem; letter-spacing:.5px; text-transform:uppercase; color:#475569; }
+body.public-page-standard table tbody td { padding:.7rem .85rem; border-top:1px solid #e2e8f0; }
+body.public-page-standard table tbody tr:hover { background:#f8fafc; }
+
+/* Responsive ajustements */
+@media (max-width: 900px) {
+  body.public-page-standard .page-wrapper-standard { padding:1.5rem 1rem; }
+  body.public-page-standard h1 { font-size:clamp(1.85rem,6vw,2.3rem); }
+  body.public-page-standard section { margin-bottom:2.2rem; }
+  body.public-page-standard form .form-row { gap:.9rem; }
+}
+
+@media (max-width: 600px) {
+  body.public-page-standard .page-wrapper-standard { padding:1.25rem .85rem; }
+  body.public-page-standard h1 { font-size:clamp(1.7rem,6.6vw,2rem); }
+  body.public-page-standard h2 { margin-top:1.8rem; }
+  body.public-page-standard .card { padding:1.1rem 1.15rem; }
 }
 
 /* ---------- STATUS BADGES ---------- */
@@ -86,7 +276,7 @@ body{
 /* Variants */
 .status-validé,
 .status--success{ 
-  @apply status-badge;          /* si tu n’utilises pas Tailwind, ignore */
+  /* .status-badge utilité commune déjà définie */
   background:color-mix(in srgb, var(--success) 12%, white);
   color:var(--success-ink);
   border-color:color-mix(in srgb, var(--success) 35%, white);
@@ -94,7 +284,6 @@ body{
 
 .status-en-attente,
 .status--warning{
-  @apply status-badge;
   background:color-mix(in srgb, var(--warning) 14%, white);
   color:var(--warning-ink);
   border-color:color-mix(in srgb, var(--warning) 38%, white);
@@ -102,7 +291,6 @@ body{
 
 .status-refusé,
 .status--danger{
-  @apply status-badge;
   background:color-mix(in srgb, var(--danger) 12%, white);
   color:var(--danger-ink);
   border-color:color-mix(in srgb, var(--danger) 36%, white);
@@ -167,3 +355,18 @@ select:disabled{
 .mt-3{margin-top:.75rem}
 .gap-1{gap:.25rem}
 .gap-2{gap:.5rem}
+
+/* ================== UTILITAIRES BORDURES & CARTES ACCUEIL ================== */
+.card-base{background:var(--surface-0);border:var(--border-soft);border-radius:var(--radius-md);box-shadow:0 3px 8px -2px rgba(0,0,0,.06);transition:.25s ease}
+.card-base.hoverable:hover{box-shadow:0 6px 18px -4px rgba(0,0,0,.12);transform:translateY(-3px)}
+.card-accent-top{position:relative}
+.card-accent-top::before{content:"";position:absolute;left:0;top:0;width:100%;height:4px;border-top-left-radius:inherit;border-top-right-radius:inherit;background:var(--grad-accent)}
+.card-accent-left{position:relative}
+.card-accent-left::before{content:"";position:absolute;left:0;top:0;width:5px;height:100%;border-bottom-left-radius:inherit;border-top-left-radius:inherit;background:var(--blue-main)}
+.border-soft{border:var(--border-soft)!important}
+.radius-md{border-radius:var(--radius-md)!important}
+.radius-lg{border-radius:var(--radius-lg)!important}
+.radius-sm{border-radius:var(--radius-sm)!important}
+
+/* Badges harmonisés */
+.badge{font-weight:600;letter-spacing:.5px}

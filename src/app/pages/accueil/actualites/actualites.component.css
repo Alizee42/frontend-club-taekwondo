@@ -1,6 +1,6 @@
 .section-actualites {
     padding: 60px 20px;
-    background-color: #f7f8fa;
+    background: var(--surface-100);
     font-family: 'Poppins', sans-serif;
 }
 
@@ -13,21 +13,19 @@
 
 /* Actualité à la une */
 .actu-featured {
-  display: flex;
-  flex-wrap: wrap;
-  background: linear-gradient(135deg, #ffffff, #f9f9f9); 
-  border-radius: 15px; 
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
-  margin-bottom: 50px;
-  overflow: hidden;
-  animation: fadeIn 0.5s ease-in-out;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display:flex;
+    flex-wrap:wrap;
+    background:var(--grad-soft);
+    border:var(--border-soft);
+    border-radius:var(--radius-lg);
+    box-shadow:0 8px 22px -6px rgba(0,0,0,.12);
+    margin-bottom:50px;
+    overflow:hidden;
+    animation:fadeIn .5s ease-in-out;
+    transition:.3s ease;
 }
 
-.actu-featured:hover {
-  transform: translateY(-5px); 
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); 
-}
+.actu-featured:hover {transform:translateY(-4px);box-shadow:0 14px 34px -8px rgba(0,0,0,.2)}
 
 @keyframes fadeIn {
     from {
@@ -90,15 +88,16 @@
 
 .badge {
     position: absolute;
-    top: 126px;
-    left: 185px;
+    top: .75rem;
+    right: .75rem;
     padding: 6px 14px;
     font-size: 13px;
-    font-weight: 700;
-    border-radius: 12px;
+    font-weight: 600;
+    border-radius: 999px;
     color: #fff;
     text-transform: uppercase;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+    letter-spacing: .5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.18);
     z-index: 2;
 }
 .badge.evenement { background-color: #e67e22; } 
@@ -107,11 +106,10 @@
 
 /* Badge spécifique pour l'actualité à la une */
 .actu-featured .badge {
-    top: 87%;
-    left: 82%;
+    top: 1rem;
+    right: 1rem;
     font-size: 14px;
     padding: 8px 16px;
-    border-radius: 15px;
 }
 .btn-link {
     display: inline-block;
@@ -150,18 +148,17 @@
     margin-bottom: 40px;
 }
 .actu-card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.2s ease;
-    height: 350px; /* Taille fixe pour les cartes */
+    background:var(--surface-0);
+    border:var(--border-soft);
+    border-radius:var(--radius-md);
+    box-shadow:0 4px 14px -4px rgba(0,0,0,.1);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    transition:.25s ease;
+    height:350px;
 }
-.actu-card:hover {
-    transform: translateY(-4px);
-}
+.actu-card:hover {transform:translateY(-4px);box-shadow:0 10px 26px -6px rgba(0,0,0,.16)}
 
 .actu-card .image-wrapper {
     position: relative;

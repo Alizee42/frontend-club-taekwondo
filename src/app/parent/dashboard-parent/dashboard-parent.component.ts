@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { DashboardCardComponent } from '../../dashboard/shared/dashboard-card/dashboard-card.component';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 
@@ -18,11 +19,19 @@ interface Utilisateur {
   standalone: true,
   templateUrl: './dashboard-parent.component.html',
   styleUrls: ['./dashboard-parent.component.css'],
-  imports: [CommonModule]
+  imports: [CommonModule, DashboardCardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardParentComponent implements OnInit, OnDestroy {
   utilisateurConnecte: Utilisateur | null = null;
   private authSubscription?: Subscription;
+  // Stats placeholders
+  stats = {
+    paiementsEnRetard: 0,
+    documentsManquants: 2,
+    commandesEnCours: 0,
+    evenementsAVenir: 1
+  };
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 

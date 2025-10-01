@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HttpClient} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
+import { DashboardCardComponent } from '../../dashboard/shared/dashboard-card/dashboard-card.component';
 import { AuthService } from '../../services/auth.service';
 
 
@@ -23,12 +24,25 @@ interface Utilisateur {
   selector: 'app-dashboard-membre',
   templateUrl: './dashboard-membre.component.html',
   styleUrls: ['./dashboard-membre.component.css'],
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DashboardCardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardMembreComponent implements OnInit {
   private readonly API_BASE = environment.apiUrl;
 
   utilisateurConnecte: Utilisateur | null = null;
+  // Stats placeholders (seront remplacées par un service agrégateur plus tard)
+  stats: {
+    paiementsEnRetard: number;
+    documentsManquants: number;
+    commandesEnCours: number;
+    evenementsAVenir: number;
+  } = {
+    paiementsEnRetard: 0,
+    documentsManquants: 1,
+    commandesEnCours: 0,
+    evenementsAVenir: 2
+  };
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 

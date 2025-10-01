@@ -1,8 +1,8 @@
 .about-section {
-    background-color: #F8F9FA; /* Fond clair et élégant */
-    padding: 60px 20px;
-    color: #1B263B; /* Texte principal foncé */
-  }
+  background: var(--surface-accent);
+  padding: 60px 20px;
+  color: var(--text-primary);
+}
   
   .container {
     max-width: 1200px;
@@ -29,7 +29,7 @@
   }
   
   .about-text h3 {
-    color: #1E6091;
+    color: var(--blue-main);
     font-size: 1.8rem;
     margin-bottom: 20px;
   }
@@ -58,14 +58,18 @@
   }
   
   .mv-card {
-    background-color: white;
-    border-left: 6px solid #1E6091;
-    padding: 25px;
-    flex: 1 1 30%;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    transition: transform 0.3s;
+    padding:25px;
+    flex:1 1 30%;
   }
+  .mv-card{ /* applique utilitaires */
+    background:var(--surface-0);
+    border:var(--border-soft);
+    border-left:6px solid var(--blue-main);
+    border-radius:var(--radius-md);
+    box-shadow:0 4px 14px -4px rgba(0,0,0,.12);
+    transition:.3s ease;
+  }
+  .mv-card:hover{transform:translateY(-4px);box-shadow:0 10px 26px -6px rgba(0,0,0,.16)}
   
   .mv-card:hover {
     transform: translateY(-5px);
@@ -73,21 +77,21 @@
   
   .mv-card i {
     font-size: 40px;
-    color: #E63946;
+    color: var(--red-main);
     margin-bottom: 20px;
     justify-content: center;
     display: flex;
   }
   
   .mv-card h3 {
-    color: #1E6091;
+    color: var(--blue-main);
     margin-bottom: 10px;
     font-size: 24px;
     text-align: center;
   }
   
   .mv-card p, .mv-card ul {
-    color: #6C757D;
+    color: var(--text-muted);
     font-size: 16px;
     line-height: 1.6;
   }
@@ -99,7 +103,7 @@
   
   .mv-card ul li::before {
     content: "• ";
-    color: #1E6091;
+    color: var(--blue-main);
     font-weight: bold;
   }
   

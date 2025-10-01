@@ -1,5 +1,10 @@
-<!-- Header unifié pour toutes les pages -->
-<app-header></app-header>
+<!-- Header conditionnel -->
+<ng-container *ngIf="isConnectedRoute; else publicHeader">
+	<app-connected-header></app-connected-header>
+</ng-container>
+<ng-template #publicHeader>
+	<app-header></app-header>
+</ng-template>
 
 <!-- Contenu principal -->
 <router-outlet></router-outlet>

@@ -6,7 +6,12 @@
         <div *ngFor="let professeur of professeurs" class="teacher-card">
           <div class="card-inner">
             <div class="teacher-front">
-              <img [src]="professeur.photo || 'assets/images/default-teacher.jpg'" alt="{{ professeur.nom }} {{ professeur.prenom }}">
+              <img 
+                [src]="professeur.photo || 'assets/images/default-teacher.jpg'" 
+                [attr.alt]="(professeur.nom + ' ' + professeur.prenom + ' – ' + (professeur.specialite || 'Enseignant'))" 
+                loading="lazy"
+                decoding="async"
+              >
               <h3>{{ professeur.nom }} {{ professeur.prenom }}</h3>
               <p>{{ professeur.specialite }}</p>
             </div>

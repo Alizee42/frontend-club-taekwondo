@@ -32,6 +32,8 @@ import { EvenementsMembre } from './membre/evenements-membre/evenements-membre.c
 import { EvenementsParent } from './parent/evenements-parent/evenements-parent.component';
 import { MotDePasseOublieComponent } from './pages/mot-de-passe-oublie/mot-de-passe-oublie.component';
 import { ReinitialiserMotDePasseComponent } from './pages/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe.component';
+import { MentionsLegalesComponent } from './pages/mentions-legales/mentions-legales.component';
+import { PolitiqueConfidentialiteComponent } from './pages/politique-confidentialite/politique-confidentialite.component';
 
 
 export const routes: Routes = [
@@ -45,6 +47,8 @@ export const routes: Routes = [
   { path: 'reinitialiser-mot-de-passe', component: ReinitialiserMotDePasseComponent },
   { path: 'boutique', component: BoutiqueComponent },
   { path: 'evenements', component: EvenementsComponent },
+  { path: 'mentions-legales', component: MentionsLegalesComponent },
+  { path: 'politique-confidentialite', component: PolitiqueConfidentialiteComponent },
 
   // 👤 Profil (tout utilisateur connecté)
   {

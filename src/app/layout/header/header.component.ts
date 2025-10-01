@@ -6,7 +6,7 @@ import {
   NavigationEnd,
 } from '@angular/router';
 import { Subscription, filter, firstValueFrom } from 'rxjs';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule, DecimalPipe, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
@@ -26,7 +26,7 @@ interface PanierItem extends Produit {
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
-  imports: [CommonModule, RouterModule, DecimalPipe, FormsModule],
+  imports: [CommonModule, RouterModule, DecimalPipe, FormsModule, NgIf, NgFor],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   private readonly API_BASE = environment.apiUrl;
@@ -314,13 +314,63 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   getUserName(): string {
     if (!this.user) return '';
-    
-    // Pour un parent, utiliser le vrai nom du parent s'il est disponible
-    if (this.isParent() && this.user['nomParent'] && this.user['prenomParent']) {
-      return `${this.user['prenomParent']} ${this.user['nomParent']}`;
+
+    // Si pas parent, retour simple
+    if (!this.isParent()) {
+      return `${this.user.prenom ?? ''} ${this.user.nom ?? ''}`.trim();
     }
-    
-    return `${this.user.prenom} ${this.user.nom}`;
+
+    // Ensemble des combinaisons enfants pour éviter une confusion
+    const enfantsCombinaisons = new Set(
+      (this.enfants || []).map(e => `${(e.prenom || '').trim().toLowerCase()}|${(e.nom || '').trim().toLowerCase()}`)
+    );
+
+    // Liste de candidats possibles pour le prénom du parent (différentes conventions backend possibles)
+    const candidatsPrenom: (string | undefined)[] = [
+      (this.user as any).prenomParent,
+      (this.user as any).parentPrenom,
+      (this.user as any).prenom_adulte,
+      (this.user as any).prenomAdulte,
+      (this.user as any).prenom_parent,
+      this.user.prenom,
+    ];
+
+    // Idem pour le nom
+    const candidatsNom: (string | undefined)[] = [
+      (this.user as any).nomParent,
+      (this.user as any).parentNom,
+      (this.user as any).nom_adulte,
+      (this.user as any).nomAdulte,
+      (this.user as any).nom_parent,
+      this.user.nom,
+    ];
+
+    // Normalisation + filtrage basique
+    const norm = (v?: string) => (v || '').trim();
+    const prenomsNettoyes = candidatsPrenom.filter(v => !!norm(v));
+    const nomsNettoyes = candidatsNom.filter(v => !!norm(v));
+
+    // Fonction pour trouver un couple qui ne correspond pas à un enfant
+    const trouverCoupleValide = (): { p: string; n: string } | null => {
+      for (const p of prenomsNettoyes) {
+        for (const n of nomsNettoyes) {
+          const key = `${norm(p).toLowerCase()}|${norm(n).toLowerCase()}`;
+          if (!enfantsCombinaisons.has(key)) {
+            return { p: norm(p), n: norm(n) };
+          }
+        }
+      }
+      return null;
+    };
+
+    const couple = trouverCoupleValide();
+    if (couple) {
+      return `${couple.p} ${couple.n}`.trim();
+    }
+
+    // Fallback : éviter d'afficher un prénom/nom enfant -> afficher libellé générique + email ou ID
+    const fallbackNom = this.user.email ? `Parent (${this.user.email.split('@')[0]})` : 'Parent';
+    return fallbackNom;
   }
 
   toggleUserDropdown(): void {

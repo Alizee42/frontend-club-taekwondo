@@ -1,5 +1,10 @@
-<div class="boutique-container">
-  <h2>Boutique - Dobok Taekwondo</h2>
+<div class="page-wrapper-standard">
+  <header class="page-head">
+    <h1 class="page-title">Boutique</h1>
+    <p class="page-subtitle">Equipements officiels & tenues du club</p>
+  </header>
+  <div class="boutique-container">
+  <h2 class="visually-hidden">Catalogue</h2>
 
   <div class="produit" *ngFor="let p of produits">
     <div class="produit-image-container">
@@ -63,5 +68,6 @@
 
       <p class="confirmation" *ngIf="confirmationMessage">{{ confirmationMessage }}</p>
     </div>
+  </div>
   </div>
 </div>

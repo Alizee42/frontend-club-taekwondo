@@ -7,8 +7,7 @@ import { RouterOutlet } from '@angular/router'; // ← AJOUT ICI
   standalone: true,
   imports: [
     CommonModule,
-    RouterOutlet, // ← AJOUT ICI
-
+  RouterOutlet
   ],
   templateUrl: './connected-layout.component.html',
   styleUrls: ['./connected-layout.component.css']

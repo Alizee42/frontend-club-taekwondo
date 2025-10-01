@@ -9,38 +9,36 @@
     Depuis cet espace, vous pouvez gérer les paiements, déposer des documents et commander des tenues.
   </p>
 
-  <!-- Grille d’actions commune -->
-  <section class="dashboard-grid">
-    <article class="dashboard-card" role="button" tabindex="0"
-             (click)="navigateToPaiements()" (keyup.enter)="navigateToPaiements()"
-             aria-label="Accéder à Paiements">
-      <div class="icon-container"><i class="ri-wallet-3-line" aria-hidden="true"></i></div>
-      <h3>Paiements</h3>
-      <p>Consulte tes cotisations et échéances.</p>
-    </article>
-
-    <article class="dashboard-card" role="button" tabindex="0"
-             (click)="navigateToDocuments()" (keyup.enter)="navigateToDocuments()"
-             aria-label="Accéder à Documents">
-      <div class="icon-container"><i class="ri-folder-upload-line" aria-hidden="true"></i></div>
-      <h3>Documents</h3>
-      <p>Dépose/consulte certificat médical, etc.</p>
-    </article>
-
-    <article class="dashboard-card" role="button" tabindex="0"
-             (click)="navigateToCommandes()" (keyup.enter)="navigateToCommandes()"
-             aria-label="Accéder aux Commandes">
-      <div class="icon-container"><i class="ri-shopping-bag-line" aria-hidden="true"></i></div>
-      <h3>Mes Commandes</h3>
-      <p>Suivi des achats (tenues & accessoires).</p>
-    </article>
-
-    <article class="dashboard-card" role="button" tabindex="0"
-             (click)="navigateToEvenements()" (keyup.enter)="navigateToEvenements()"
-             aria-label="Accéder à Événements">
-      <div class="icon-container"><i class="ri-calendar-event-line" aria-hidden="true"></i></div>
-      <h3>Événements</h3>
-      <p>Inscription et historique des stages.</p>
-    </article>
+  <!-- Grille d’actions commune refactorisée -->
+  <section class="dashboard-grid" aria-labelledby="actions-titre">
+    <h2 id="actions-titre" class="visually-hidden">Actions principales</h2>
+    <app-dashboard-card
+      icon="ri-wallet-3-line"
+      title="Paiements"
+      description="Consulte tes cotisations et échéances."
+      [badge]="stats.paiementsEnRetard"
+      (action)="navigateToPaiements()">
+    </app-dashboard-card>
+    <app-dashboard-card
+      icon="ri-folder-upload-line"
+      title="Documents"
+      description="Dépose / consulte certificat médical."
+      [badge]="stats.documentsManquants"
+      (action)="navigateToDocuments()">
+    </app-dashboard-card>
+    <app-dashboard-card
+      icon="ri-shopping-bag-line"
+      title="Mes Commandes"
+      description="Suivi tenues & accessoires."
+      [badge]="stats.commandesEnCours"
+      (action)="navigateToCommandes()">
+    </app-dashboard-card>
+    <app-dashboard-card
+      icon="ri-calendar-event-line"
+      title="Événements"
+      description="Inscription & historique stages."
+      [badge]="stats.evenementsAVenir"
+      (action)="navigateToEvenements()">
+    </app-dashboard-card>
   </section>
 </div>

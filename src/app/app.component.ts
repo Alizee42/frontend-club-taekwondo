@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { ToastContainerComponent } from './shared/toast/toast-container/toast-container.component'; // <-- AJOUT
 
 
 import { HeaderComponent } from './layout/header/header.component';
+import { ConnectedHeaderComponent } from './components/shared/connected-header/connected-header.component';
 import { FooterComponent } from './layout/footer/footer.component';
 
 import { ParametresPaiementService } from './services/parametres-paiement.service';
@@ -15,7 +16,8 @@ import { ParametresPaiementService } from './services/parametres-paiement.servic
   imports: [
     CommonModule,
     RouterModule,
-    HeaderComponent,
+  HeaderComponent,
+  ConnectedHeaderComponent,
     FooterComponent,
     ToastContainerComponent
   ],
@@ -30,7 +32,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private parametresService: ParametresPaiementService
+    private parametresService: ParametresPaiementService,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
@@ -67,6 +70,9 @@ export class AppComponent implements OnInit {
           '/profil'
         ].some(segment => url.includes(segment));
 
+        // Appliquer classe d'uniformisation sur pages publiques hors accueil
+        this.applyPublicPageClass(url);
+
         if (url.includes('/admin')) {
           this.connectedRole = 'admin';
         } else if (url.includes('/membre')) {
@@ -76,6 +82,18 @@ export class AppComponent implements OnInit {
         }
       }
     });
+  }
+
+  private applyPublicPageClass(url: string): void {
+    const body = document.body;
+    const isAccueil = url === '/' || url.startsWith('/?');
+    const isConnected = this.isConnectedRoute;
+    // Pages publiques standard où appliquer style : pas accueil, pas connectées
+    if (!isAccueil && !isConnected) {
+      this.renderer.addClass(body, 'public-page-standard');
+    } else {
+      this.renderer.removeClass(body, 'public-page-standard');
+    }
   }
 
   logout(): void {
