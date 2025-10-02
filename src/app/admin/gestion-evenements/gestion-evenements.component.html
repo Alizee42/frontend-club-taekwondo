@@ -1,21 +1,144 @@
-<div class="admin-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2>📅 Gestion des Événements</h2>
-      <ul class="menu">
-        <li (click)="changerVue('evenements-liste')" [class.active]="vueActive === 'evenements-liste'">📅 Événements</li>
-        <li (click)="changerVue('inscriptions')" [class.active]="vueActive === 'inscriptions'">📝 Inscriptions</li>
-      </ul>
-    </aside>
-  
-    <!-- Contenu -->
-    <main class="content">
-      <ng-container [ngSwitch]="vueActive">
-        <app-evenements-liste *ngSwitchCase="'evenements-liste'"></app-evenements-liste>
-        <app-inscriptions *ngSwitchCase="'inscriptions'"></app-inscriptions>
-        <section *ngSwitchDefault>
-          <p>Choisissez une vue dans le menu.</p>
-        </section>
-      </ng-container>
-    </main>
+
+<div class="gestion-evenements-admin">
+  <h2 class="titre-section">
+    <i class="ri-calendar-event-line"></i> Gestion des événements
+  </h2>
+
+  <!-- Bouton Créer un événement -->
+  <button class="btn btn-primary mb-3" (click)="ouvrirFormulaireCreation()">+ Créer un événement</button>
+
+  <!-- Modal création/modification -->
+  <div class="modal-backdrop" *ngIf="afficherFormulaire">
+    <div class="modal">
+      <div class="modal-header">
+        <h5>{{ isEditing ? 'Modifier un événement' : 'Créer un événement' }}</h5>
+        <button class="close-btn" (click)="fermerFormulaire()">✖</button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="soumettreEvenement()" #eventForm="ngForm">
+          <div class="form-group">
+            <label for="titre">Titre</label>
+            <input type="text" id="titre" class="form-control" [(ngModel)]="nouvelEvenement.titre" name="titre" required>
+          </div>
+          <div class="form-group">
+            <label for="dateDebut">Date début</label>
+            <input type="datetime-local" id="dateDebut" class="form-control" [(ngModel)]="nouvelEvenement.dateDebut" name="dateDebut" required>
+          </div>
+          <div class="form-group">
+            <label for="dateFin">Date fin</label>
+            <input type="datetime-local" id="dateFin" class="form-control" [(ngModel)]="nouvelEvenement.dateFin" name="dateFin" required>
+          </div>
+          <div class="form-group">
+            <label for="lieu">Lieu</label>
+            <input type="text" id="lieu" class="form-control" [(ngModel)]="nouvelEvenement.lieu" name="lieu" required>
+          </div>
+          <div class="form-group">
+            <label for="capacite">Capacité</label>
+            <input type="number" id="capacite" class="form-control" [(ngModel)]="nouvelEvenement.capacite" name="capacite" required>
+          </div>
+          <div class="form-group">
+            <label for="imageFile">Image</label>
+            <input type="file" id="imageFile" (change)="onFileSelected($event)" class="form-control">
+          </div>
+          <button class="btn btn-success mt-3" [disabled]="eventForm.invalid">
+            {{ isEditing ? 'Modifier' : 'Créer' }}
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
+
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <!-- Tableau premium des événements -->
+  <div class="card">
+    <table class="table-evenements">
+      <thead>
+        <tr>
+          <th (click)="trier('titre')">Titre <i [ngClass]="getSortIcon('titre')"></i></th>
+          <th (click)="trier('dateDebut')">Date début <i [ngClass]="getSortIcon('dateDebut')"></i></th>
+          <th>Lieu</th>
+          <th>Capacité</th>
+          <th>Image</th>
+          <th>Statut</th>
+          <th>Inscrits</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let evt of evenements" [class.selected]="evt.id === evenementSelectionne?.id">
+          <td>{{ evt.titre }}</td>
+          <td>{{ evt.dateDebut | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ evt.lieu }}</td>
+          <td>{{ evt.capacite }}</td>
+          <td>
+            <img *ngIf="evt.imageUrl" [src]="evt.imageUrl" [alt]="evt.titre" class="event-image"/>
+            <span *ngIf="!evt.imageUrl">Aucune image</span>
+          </td>
+          <td>
+            <span class="badge" [class]="evt.actif ? 'badge-success' : 'badge-danger'">
+              {{ evt.actif ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          <td>
+            <span class="badge">{{ evt.nbInscrits || 0 }}</span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-warning me-2" (click)="ouvrirEdition(evt)">Modifier</button>
+            <button class="btn btn-sm btn-danger me-2" (click)="supprimerEvenement(evt.id)">Supprimer</button>
+            <button class="btn btn-primary btn-sm" (click)="selectionnerEvenement(evt)"><i class="ri-eye-line"></i> Voir inscrits</button>
+          </td>
+        </tr>
+        <tr *ngIf="evenements.length === 0">
+          <td colspan="8" class="text-center">Aucun événement trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Liste premium des inscrits pour l'événement sélectionné -->
+  <div *ngIf="evenementSelectionne" class="card card-inscriptions">
+    <h3 class="sous-titre-section">
+      <i class="ri-user-add-line"></i> Inscriptions pour : <span class="event-name">{{ evenementSelectionne.titre }}</span>
+    </h3>
+    <table class="table-inscriptions">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Email</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inscrit of inscriptions">
+          <td>{{ inscrit.utilisateurNom || 'Nom non disponible' }}</td>
+          <td>{{ inscrit.utilisateurPrenom || 'Prénom non disponible' }}</td>
+          <td>{{ inscrit.utilisateurEmail || 'Email non disponible' }}</td>
+          <td>
+            <span [ngClass]="{
+              'badge-attente': inscrit.statut === 'EN_ATTENTE',
+              'badge-valide': inscrit.statut === 'VALIDEE',
+              'badge-refuse': inscrit.statut === 'REFUSEE'
+            }">{{ inscrit.statut }}</span>
+          </td>
+          <td>
+            <button *ngIf="inscrit.statut === 'EN_ATTENTE'" class="btn btn-success btn-sm" (click)="validerInscription(inscrit)">
+              <i class="ri-checkbox-circle-line"></i> Valider
+            </button>
+            <button *ngIf="inscrit.statut === 'EN_ATTENTE'" class="btn btn-danger btn-sm" (click)="refuserInscription(inscrit)">
+              <i class="ri-close-circle-line"></i> Refuser
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="message-info" *ngIf="inscriptions.length === 0">
+      <i class="ri-information-line"></i> Aucune inscription pour cet événement.
+    </div>
+    <button class="btn btn-secondary mt-3" (click)="fermerInscriptions()">Fermer</button>
+  </div>
+</div>

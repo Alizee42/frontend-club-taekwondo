@@ -2,19 +2,23 @@
     <div class="container">
       <h2 class="section-title">Horaires des Cours</h2>
       <div class="schedule-info-container">
-        <div *ngFor="let horaire of horaires" class="schedule-card">
-          <h3>{{ horaire.jour }}</h3>
-          <div class="schedule-details">
-            <h4>Heures</h4>
-            <ul>
+        <div class="schedule-grid">
+          <div *ngFor="let horaire of horaires" class="schedule-card premium">
+            <div class="card-header">
+              <span class="day-badge">{{ horaire.jour }}</span>
+            </div>
+            <ul class="card-hours">
               <li *ngFor="let heure of horaire.heures">
-                <span class="time">{{ heure.time }}</span> : {{ heure.groupe }}
+                <i class="fas fa-clock"></i>
+                <span class="time">{{ heure.time }}</span>
+                <span class="groupe-badge">{{ heure.groupe }}</span>
               </li>
             </ul>
-          </div>
-          <div class="schedule-details">
-            <h4>Adresse</h4>
-            <p>{{ horaire.adresse }}</p>
+            <div class="card-divider"></div>
+            <div class="card-adresse">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ horaire.adresse }}</span>
+            </div>
           </div>
         </div>
       </div>

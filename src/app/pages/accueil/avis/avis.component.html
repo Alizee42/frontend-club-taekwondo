@@ -1,6 +1,8 @@
 <section id="avis" class="avis-section">
+  <div class="section-title-wrapper">
+  <h2 class="section-title">Vos retours & témoignages</h2>
+  </div>
   <div class="container">
-    <h2 class="section-title">Ils parlent de nous</h2>
 
     <!-- Message de confirmation (aria-live pour lecteurs d'écran) -->
     <div *ngIf="messageConfirmation" class="alert alert-success" role="status" aria-live="polite">
@@ -11,14 +13,16 @@
     <div class="swiper avis-swiper" aria-label="Avis des visiteurs">
       <div class="swiper-wrapper">
         <!-- état vide -->
+
         <div *ngIf="(avisApprouves?.length || 0) === 0" class="swiper-slide">
-          <div class="avis-card">
+          <div class="avis-card single">
             <p class="avis-text">Aucun avis pour le moment.</p>
           </div>
         </div>
 
         <div *ngFor="let avis of avisApprouves; trackBy: trackByAvisId" class="swiper-slide">
-          <div class="avis-card">
+          <div class="avis-card premium" [ngClass]="{'single': avisApprouves.length === 1}">
+            <span class="badge-verified">✔ Avis vérifié</span>
             <p class="avis-text">“{{ avis.contenu }}”</p>
 
             <div class="avis-author">
@@ -55,12 +59,12 @@
         </div>
       </div>
 
-      <!-- Pagination -->
-      <div class="swiper-pagination" aria-label="Pagination des avis"></div>
+  <!-- Pagination -->
+  <div class="swiper-pagination" aria-label="Pagination des avis"></div>
 
-      <!-- Flèches -->
-      <div class="swiper-button-prev" aria-label="Avis précédent"></div>
-      <div class="swiper-button-next" aria-label="Avis suivant"></div>
+  <!-- Flèches : affichées seulement s'il y a plus d'un avis -->
+  <div *ngIf="avisApprouves.length > 1" class="swiper-button-prev" aria-label="Avis précédent"></div>
+  <div *ngIf="avisApprouves.length > 1" class="swiper-button-next" aria-label="Avis suivant"></div>
     </div>
 
     <!-- Bouton pour laisser un avis -->
@@ -79,12 +83,12 @@
     >
       <button class="modale-close" type="button" (click)="fermerModale()" aria-label="Fermer">×</button>
 
-      <h3 id="avisModalTitle">Laisser un avis</h3>
-      <p id="avisModalDesc" class="sr-only">Formulaire pour déposer un avis public.</p>
+      <h3 id="avisModalTitle" class="form-title"><i class="fas fa-comment-dots"></i> Laisser un avis</h3>
+      <p id="avisModalDesc" class="form-desc">Votre retour est précieux pour la communauté du club !</p>
 
-      <form (ngSubmit)="envoyerAvis()">
+      <form (ngSubmit)="envoyerAvis()" class="avis-form">
         <div class="form-group">
-          <label for="pseudo">Votre nom :</label>
+          <label for="pseudo"><i class="fas fa-user"></i> Votre nom</label>
           <input
             type="text"
             id="pseudo"
@@ -97,49 +101,52 @@
         </div>
 
         <div class="form-group">
-          <label for="contenu">Votre témoignage :</label>
+          <label for="contenu"><i class="fas fa-quote-left"></i> Votre témoignage</label>
           <textarea
             id="contenu"
             [(ngModel)]="nouvelAvis.contenu"
             name="contenu"
-            placeholder="Partagez votre expérience"
+            placeholder="Partagez votre expérience..."
             required
             minlength="5"
           ></textarea>
         </div>
 
-        <div class="form-group">
-          <label for="note">Votre note :</label>
-          <select id="note" [(ngModel)]="nouvelAvis.note" name="note" required>
-            <option *ngFor="let star of [1,2,3,4,5]" [value]="star">
-              {{ star }} étoile{{ star > 1 ? 's' : '' }}
-            </option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="note"><i class="fas fa-star"></i> Note</label>
+            <select id="note" [(ngModel)]="nouvelAvis.note" name="note" required>
+              <option value="" disabled selected hidden>Choisir une note</option>
+              <option *ngFor="let star of [1,2,3,4,5]" [value]="star">
+                {{ star }} étoile{{ star > 1 ? 's' : '' }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="typeAvis"><i class="fas fa-tag"></i> Sujet (optionnel)</label>
+            <select id="typeAvis" [(ngModel)]="nouvelAvis.typeAvis" name="typeAvis">
+              <option value="">Avis général</option>
+              <option value="cours">Cours</option>
+              <option value="entraineurs">Entraîneurs</option>
+              <option value="evenements">Événements</option>
+              <option value="organisation">Organisation</option>
+              <option value="competitions">Compétitions</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Sujet OPTIONNEL : aucune valeur par défaut -->
         <div class="form-group">
-          <label for="typeAvis">Sujet (optionnel) :</label>
-          <select id="typeAvis" [(ngModel)]="nouvelAvis.typeAvis" name="typeAvis">
-            <option value="">Avis général</option>
-            <option value="cours">Cours</option>
-            <option value="entraineurs">Entraîneurs</option>
-            <option value="evenements">Événements</option>
-            <option value="organisation">Organisation</option>
-            <option value="competitions">Compétitions</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="photo">Votre photo (optionnelle) :</label>
+          <label for="photo"><i class="fas fa-camera"></i> Photo (optionnelle)</label>
           <input type="file" id="photo" (change)="onPhotoSelected($event)" accept="image/*" />
           <div *ngIf="photoPreview" class="photo-preview">
             <img [src]="photoPreview" alt="Aperçu de la photo" width="100" height="100" />
           </div>
         </div>
 
-        <button type="submit" class="btn-submit">Envoyer</button>
-        <button type="button" class="btn-close" (click)="fermerModale()">Annuler</button>
+        <div class="form-actions">
+          <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Envoyer</button>
+          <button type="button" class="btn-close" (click)="fermerModale()">Annuler</button>
+        </div>
       </form>
     </div>
   </div>

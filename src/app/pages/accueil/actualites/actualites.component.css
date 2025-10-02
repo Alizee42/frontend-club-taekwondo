@@ -4,11 +4,33 @@
     font-family: 'Poppins', sans-serif;
 }
 
+.section-title-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.3rem;
+}
 .section-title {
     text-align: center;
-    font-size: 2.5em;
-    color: var(--red-main);
-    margin-bottom: 40px;
+    font-size: 2.25rem;
+    color: var(--blue-main);
+    margin-bottom: 1.3rem;
+    letter-spacing: 0.5px;
+    position: relative;
+    display: block;
+    padding-bottom: 0.18em;
+}
+.section-title::after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--blue-main) 70%, var(--orange-main) 100%);
+    border-radius: 2px;
+    margin-top: 0.22em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Actualité à la une */

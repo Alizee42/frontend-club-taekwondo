@@ -1,32 +1,32 @@
 <section id="enseignants" class="enseignants-section">
-    <div class="container">
+  <div class="container">
+    <div class="section-title-wrapper">
       <h2 class="section-title">Nos Enseignants</h2>
-      <p class="section-subtitle">Découvrez l'équipe pédagogique passionnée qui encadre nos élèves.</p>
-      <div class="teachers-grid">
-        <div *ngFor="let professeur of professeurs" class="teacher-card">
-          <div class="card-inner">
-            <div class="teacher-front">
-              <img 
-                [src]="professeur.photo || 'assets/images/default-teacher.jpg'" 
-                [attr.alt]="(professeur.nom + ' ' + professeur.prenom + ' – ' + (professeur.specialite || 'Enseignant'))" 
-                loading="lazy"
-                decoding="async"
-              >
-              <h3>{{ professeur.nom }} {{ professeur.prenom }}</h3>
-              <p>{{ professeur.specialite }}</p>
-            </div>
-            <div class="teacher-back">
-              <h3>À propos</h3>
-              <p>{{ professeur.description }}</p>
-              <div class="social-links" *ngIf="professeur.facebook || professeur.instagram || professeur.linkedin">
-                <a *ngIf="professeur.facebook" [href]="professeur.facebook" target="_blank"><i class="ri-facebook-line"></i></a>
-                <a *ngIf="professeur.instagram" [href]="professeur.instagram" target="_blank"><i class="ri-instagram-line"></i></a>
-                <a *ngIf="professeur.linkedin" [href]="professeur.linkedin" target="_blank"><i class="ri-linkedin-line"></i></a>
-              </div>
-            </div>
+    </div>
+    <p class="section-subtitle">
+      Découvrez l'équipe pédagogique passionnée qui encadre nos élèves.
+    </p>
+
+    <div class="teachers-grid">
+      <div *ngFor="let professeur of professeurs" class="teacher-card">
+        <img 
+          [src]="professeur.photo || 'assets/images/default-teacher.jpg'" 
+          [attr.alt]="(professeur.nom + ' ' + professeur.prenom + ' – ' + (professeur.specialite || 'Enseignant'))"
+          loading="lazy"
+          decoding="async"
+        >
+        <div class="teacher-info">
+          <h3>{{ professeur.nom }} {{ professeur.prenom }}</h3>
+          <p class="specialite">{{ professeur.specialite }}</p>
+          <p class="description">{{ professeur.description }}</p>
+
+          <div class="social-links" *ngIf="professeur.facebook || professeur.instagram || professeur.linkedin">
+            <a *ngIf="professeur.facebook" [href]="professeur.facebook" target="_blank"><i class="ri-facebook-line"></i></a>
+            <a *ngIf="professeur.instagram" [href]="professeur.instagram" target="_blank"><i class="ri-instagram-line"></i></a>
+            <a *ngIf="professeur.linkedin" [href]="professeur.linkedin" target="_blank"><i class="ri-linkedin-line"></i></a>
           </div>
         </div>
       </div>
     </div>
-  </section>
-    
+  </div>
+</section>
