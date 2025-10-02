@@ -34,6 +34,7 @@ import { MotDePasseOublieComponent } from './pages/mot-de-passe-oublie/mot-de-pa
 import { ReinitialiserMotDePasseComponent } from './pages/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe.component';
 import { MentionsLegalesComponent } from './pages/mentions-legales/mentions-legales.component';
 import { PolitiqueConfidentialiteComponent } from './pages/politique-confidentialite/politique-confidentialite.component';
+import { DebugParentComponent } from './debug-parent.component';
 
 
 export const routes: Routes = [
@@ -48,6 +49,7 @@ export const routes: Routes = [
   { path: 'boutique', component: BoutiqueComponent },
   { path: 'evenements', component: EvenementsComponent },
   { path: 'mentions-legales', component: MentionsLegalesComponent },
+  { path: 'debug-parent', component: DebugParentComponent }, // 🔍 Debug temporaire
   { path: 'politique-confidentialite', component: PolitiqueConfidentialiteComponent },
 
   // 👤 Profil (tout utilisateur connecté)

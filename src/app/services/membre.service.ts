@@ -29,11 +29,32 @@ export class MembreService {
   /** Enfants du parent connecté */
   getMembresPourParentConnecte(): Observable<Membre[] | null> {
     this.log('Appel → GET /mes-enfants');
+    console.log('[DEBUG] URL complète:', `${this.apiUrl}/mes-enfants`);
+    console.log('[DEBUG] Environment API URL:', environment.apiUrl);
+    
     return this.http.get<Membre[]>(`${this.apiUrl}/mes-enfants`).pipe(
       catchError(err => {
         this.log('Erreur GET /mes-enfants', err);
+        console.error('[DEBUG] Détails erreur:', {
+          status: err.status,
+          statusText: err.statusText,
+          url: err.url,
+          message: err.message,
+          error: err.error
+        });
         if (err.status === 400 || err.status === 401) return of(null);
         return of(null);
+      })
+    );
+  }
+
+  /** Endpoint de debug pour tester la récupération des enfants */
+  debugParentEnfants(): Observable<any> {
+    this.log('Appel → GET /debug/parent-enfants');
+    return this.http.get<any>(`${this.apiUrl}/debug/parent-enfants`).pipe(
+      catchError(err => {
+        this.log('Erreur GET /debug/parent-enfants', err);
+        return of({ error: err });
       })
     );
   }
