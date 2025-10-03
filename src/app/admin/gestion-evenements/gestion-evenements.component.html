@@ -1,11 +1,14 @@
-
 <div class="gestion-evenements-admin">
-  <h2 class="titre-section">
-    <i class="ri-calendar-event-line"></i> Gestion des événements
-  </h2>
+    <div class="header-evenements-admin">
+      <h2 class="titre-section">
+        <i class="ri-calendar-event-line"></i> Gestion des événements
+      </h2>
+      <button class="btn btn-primary creation-btn-header" (click)="ouvrirFormulaireCreation()">
+        <i class="ri-add-line"></i> Créer un événement
+      </button>
+    </div>
 
-  <!-- Bouton Créer un événement -->
-  <button class="btn btn-primary mb-3" (click)="ouvrirFormulaireCreation()">+ Créer un événement</button>
+  <!-- Bouton centré supprimé, seul celui à côté du titre est conservé -->
 
   <!-- Modal création/modification -->
   <div class="modal-backdrop" *ngIf="afficherFormulaire">
@@ -83,12 +86,21 @@
             </span>
           </td>
           <td>
-            <span class="badge">{{ evt.nbInscrits || 0 }}</span>
+            <span class="badge-inscrits">{{ evt.nbInscrits || 0 }}</span>
           </td>
           <td>
-            <button class="btn btn-sm btn-warning me-2" (click)="ouvrirEdition(evt)">Modifier</button>
-            <button class="btn btn-sm btn-danger me-2" (click)="supprimerEvenement(evt.id)">Supprimer</button>
-            <button class="btn btn-primary btn-sm" (click)="selectionnerEvenement(evt)"><i class="ri-eye-line"></i> Voir inscrits</button>
+            <button class="btn-action-icon" (click)="ouvrirEdition(evt)" title="Modifier">
+              <i class="ri-edit-2-line"></i>
+              <span class="visually-hidden">Modifier</span>
+            </button>
+            <button class="btn-action-icon" (click)="supprimerEvenement(evt.id)" title="Supprimer">
+              <i class="ri-delete-bin-7-line"></i>
+              <span class="visually-hidden">Supprimer</span>
+            </button>
+            <button class="btn-action-icon" (click)="selectionnerEvenement(evt)" title="Voir inscrits">
+              <i class="ri-eye-line"></i>
+              <span class="visually-hidden">Voir inscrits</span>
+            </button>
           </td>
         </tr>
         <tr *ngIf="evenements.length === 0">
@@ -98,47 +110,75 @@
     </table>
   </div>
 
-  <!-- Liste premium des inscrits pour l'événement sélectionné -->
-  <div *ngIf="evenementSelectionne" class="card card-inscriptions">
-    <h3 class="sous-titre-section">
-      <i class="ri-user-add-line"></i> Inscriptions pour : <span class="event-name">{{ evenementSelectionne.titre }}</span>
-    </h3>
-    <table class="table-inscriptions">
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Prénom</th>
-          <th>Email</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let inscrit of inscriptions">
-          <td>{{ inscrit.utilisateurNom || 'Nom non disponible' }}</td>
-          <td>{{ inscrit.utilisateurPrenom || 'Prénom non disponible' }}</td>
-          <td>{{ inscrit.utilisateurEmail || 'Email non disponible' }}</td>
-          <td>
-            <span [ngClass]="{
-              'badge-attente': inscrit.statut === 'EN_ATTENTE',
-              'badge-valide': inscrit.statut === 'VALIDEE',
-              'badge-refuse': inscrit.statut === 'REFUSEE'
-            }">{{ inscrit.statut }}</span>
-          </td>
-          <td>
-            <button *ngIf="inscrit.statut === 'EN_ATTENTE'" class="btn btn-success btn-sm" (click)="validerInscription(inscrit)">
-              <i class="ri-checkbox-circle-line"></i> Valider
-            </button>
-            <button *ngIf="inscrit.statut === 'EN_ATTENTE'" class="btn btn-danger btn-sm" (click)="refuserInscription(inscrit)">
-              <i class="ri-close-circle-line"></i> Refuser
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="message-info" *ngIf="inscriptions.length === 0">
-      <i class="ri-information-line"></i> Aucune inscription pour cet événement.
+  <!-- Partie inscription moderne et claire pour l'admin -->
+  <div *ngIf="evenementSelectionne" class="inscriptions-admin-wrapper">
+    <div class="inscriptions-admin-header">
+      <div class="inscriptions-admin-title">
+        <i class="ri-user-add-line"></i>
+        <span>Inscriptions pour :</span>
+        <span class="event-name">{{ evenementSelectionne.titre }}</span>
+      </div>
+      <button class="btn btn-secondary btn-close-inscriptions" (click)="fermerInscriptions()">
+        <i class="ri-close-line"></i>
+      </button>
     </div>
-    <button class="btn btn-secondary mt-3" (click)="fermerInscriptions()">Fermer</button>
+    <div class="inscriptions-admin-summary">
+  <span class="summary-badge total"><i class="ri-group-line"></i> {{ inscriptions.length }} total</span>
+  <span class="summary-badge attente"><i class="ri-time-line"></i> {{ nbInscritsAttente }} en attente</span>
+  <span class="summary-badge valide"><i class="ri-checkbox-circle-line"></i> {{ nbInscritsValide }} validées</span>
+  <span class="summary-badge refuse"><i class="ri-close-circle-line"></i> {{ nbInscritsRefuse }} refusées</span>
+    </div>
+    <div class="inscriptions-admin-table-wrapper">
+      <table class="table-inscriptions">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inscrit of inscriptions">
+            <td>{{ inscrit.membreNom && inscrit.membreNom.trim() ? inscrit.membreNom : inscrit.utilisateurNom && inscrit.utilisateurNom.trim() ? inscrit.utilisateurNom : 'Nom non disponible' }}</td>
+            <td>{{ inscrit.membrePrenom && inscrit.membrePrenom.trim() ? inscrit.membrePrenom : inscrit.utilisateurPrenom && inscrit.utilisateurPrenom.trim() ? inscrit.utilisateurPrenom : 'Prénom non disponible' }}</td>
+            <td>{{ inscrit.membreEmail && inscrit.membreEmail.trim() ? inscrit.membreEmail : inscrit.utilisateurEmail && inscrit.utilisateurEmail.trim() ? inscrit.utilisateurEmail : 'Email non disponible' }}</td>
+            <td>
+              <ng-container *ngIf="inscrit.statut; else statutVide">
+                <span [ngClass]="['badge',
+                  inscrit.statut === 'EN_ATTENTE' ? 'badge-attente' : '',
+                  inscrit.statut === 'VALIDEE' ? 'badge-valide' : '',
+                  inscrit.statut === 'REFUSEE' ? 'badge-refuse' : '',
+                  inscrit.statut === 'ANNULEE' ? 'badge-annulee' : ''
+                ]">
+                  <ng-container [ngSwitch]="inscrit.statut">
+                    <span *ngSwitchCase="'EN_ATTENTE'">En attente</span>
+                    <span *ngSwitchCase="'VALIDEE'">Validée</span>
+                    <span *ngSwitchCase="'REFUSEE'">Refusée</span>
+                    <span *ngSwitchCase="'ANNULEE'">Annulée</span>
+                    <span *ngSwitchDefault>{{ inscrit.statut }}</span>
+                  </ng-container>
+                </span>
+              </ng-container>
+              <ng-template #statutVide></ng-template>
+            </td>
+            <td>
+              <button *ngIf="inscrit.statut === 'EN_ATTENTE'" class="btn-action-icon" (click)="validerInscription(inscrit)" title="Valider">
+                <i class="ri-checkbox-circle-line"></i>
+                <span class="visually-hidden">Valider</span>
+              </button>
+              <button *ngIf="inscrit.statut === 'EN_ATTENTE'" class="btn-action-icon" (click)="refuserInscription(inscrit)" title="Refuser">
+                <i class="ri-close-circle-line"></i>
+                <span class="visually-hidden">Refuser</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="message-info" *ngIf="inscriptions.length === 0">
+        <i class="ri-information-line"></i> Aucune inscription pour cet événement.
+      </div>
+    </div>
   </div>
 </div>

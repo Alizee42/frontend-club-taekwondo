@@ -1,45 +1,75 @@
-<div class="gestion-professeurs-container">
-  <h1>Gestion des Professeurs</h1>
-  <button class="btn-add" (click)="openModal()">Ajouter un professeur</button>
+
+<div class="gestion-professeurs-admin">
+  <div class="header-professeurs-admin">
+    <h2 class="titre-section">
+      <i class="ri-user-star-line"></i> Gestion des professeurs
+    </h2>
+    <button class="btn btn-primary creation-btn-header" (click)="openModal()">
+      <i class="ri-add-line"></i> Ajouter un professeur
+    </button>
+  </div>
 
   <div class="professeurs-list">
-    <div *ngFor="let professeur of professeurs" class="professeur-card">
-      <h2>{{ professeur.nom }} {{ professeur.prenom }}</h2>
-      <p><strong>Spécialité :</strong> {{ professeur.specialite }}</p>
-      <p><strong>Description :</strong> {{ professeur.description }}</p>
-      <button class="btn-delete" (click)="deleteProfesseur(professeur.id)">Supprimer</button>
+    <div class="professeurs-grid">
+      <div *ngFor="let professeur of professeurs" class="professeur-card">
+        <div class="professeur-card-header">
+          <div class="professeur-photo" *ngIf="professeur.photo">
+            <img [src]="professeur.photo" alt="Photo de {{ professeur.nom }} {{ professeur.prenom }}">
+          </div>
+          <div class="professeur-nom">{{ professeur.nom }} {{ professeur.prenom }}</div>
+          <div class="professeur-specialite">
+            <i class="ri-award-line"></i>
+            <span>Spécialité :</span>
+            <span>{{ professeur.specialite }}</span>
+          </div>
+        </div>
+        <div class="professeur-card-body">
+          <div class="professeur-description-label">
+            <i class="ri-article-line"></i>
+            <span>Description</span>
+          </div>
+          <div class="professeur-description">{{ professeur.description }}</div>
+        </div>
+        <div class="professeur-card-footer">
+          <button class="btn-delete" (click)="deleteProfesseur(professeur.id)" title="Supprimer">
+            <i class="ri-delete-bin-7-line"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Modale pour ajouter un professeur -->
-  <div class="modal-overlay" *ngIf="showModal">
+  <!-- Modale moderne -->
+  <div class="modal-backdrop" *ngIf="showModal">
     <div class="modal">
-      <h2>Ajouter un professeur</h2>
-      <form>
-        <div class="form-group">
-          <label for="photo">Photo</label>
-          <input type="file" id="photo" name="photo" accept="image/*">
-        </div>
-        <div class="form-group">
-          <label for="nom">Nom</label>
-          <input type="text" id="nom" [(ngModel)]="newProfesseur.nom" name="nom" required>
-        </div>
-        <div class="form-group">
-          <label for="prenom">Prénom</label>
-          <input type="text" id="prenom" [(ngModel)]="newProfesseur.prenom" name="prenom" required>
-        </div>
-        <div class="form-group">
-          <label for="specialite">Spécialité</label>
-          <input type="text" id="specialite" [(ngModel)]="newProfesseur.specialite" name="specialite">
-        </div>
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea id="description" [(ngModel)]="newProfesseur.description" name="description"></textarea>
-        </div>
-      </form>
-      <div class="modal-actions">
-        <button class="btn-modal" (click)="closeModal()">Annuler</button>
-        <button class="btn-modal" (click)="addProfesseur()">Ajouter</button>
+      <div class="modal-header">
+        <h5>Ajouter un professeur</h5>
+        <button class="close-btn" (click)="closeModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="photo">Photo</label>
+            <input type="file" id="photo" name="photo" accept="image/*">
+          </div>
+          <div class="form-group">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" [(ngModel)]="newProfesseur.nom" name="nom" required>
+          </div>
+          <div class="form-group">
+            <label for="prenom">Prénom</label>
+            <input type="text" id="prenom" [(ngModel)]="newProfesseur.prenom" name="prenom" required>
+          </div>
+          <div class="form-group">
+            <label for="specialite"><i class="ri-award-line"></i> Spécialité</label>
+            <input type="text" id="specialite" [(ngModel)]="newProfesseur.specialite" name="specialite">
+          </div>
+          <div class="form-group">
+            <label for="description"><i class="ri-article-line"></i> Description</label>
+            <textarea id="description" [(ngModel)]="newProfesseur.description" name="description"></textarea>
+          </div>
+          <button class="btn btn-success mt-3" style="float:right;" (click)="addProfesseur()">Ajouter</button>
+        </form>
       </div>
     </div>
   </div>

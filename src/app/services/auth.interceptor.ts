@@ -12,11 +12,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('token');
 
   // 🔒 Vérifier si cette requête nécessite une authentification
+  // Seule la galerie publique (GET /galerie SANS /admin) est publique
+  const isOnAdmin = window.location.pathname.startsWith('/admin');
   const isPublicEndpoint = req.url.includes('/public/') ||
-                          req.method === 'GET' && (
-                            req.url.includes('/galerie')
-                          );
-                          
+    (req.method === 'GET' && req.url.match(/\/galerie(\?|$|\/[^a-zA-Z])/) && !isOnAdmin);
+  // Les endpoints d'admin (ex: /admin/galerie) ne sont PAS publics
+  
   // ✅ Endpoints qui peuvent échouer sans impact sur l'UX
   const isOptionalEndpoint = req.url.includes('/parametres-paiement');
 

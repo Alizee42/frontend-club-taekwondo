@@ -1,214 +1,119 @@
-<div class="admin-container">
-  <header class="admin-header">
-    <h1>📋 Inscriptions reçues</h1>
 
-    <div class="toolbar">
-      <div class="search">
-        <input
-          type="search"
-          placeholder="Rechercher (nom, email, ville…)"
-          [(ngModel)]="query"
-          (ngModelChange)="fetchUtilisateurs()"
-          aria-label="Rechercher une inscription" />
-        <button class="btn-icon" type="button" (click)="clearSearch()" [disabled]="!query" aria-label="Effacer la recherche">✕</button>
+<div class="gestion-inscriptions-admin">
+  <div class="header-evenements-admin">
+    <h2 class="titre-section">
+      <i class="ri-user-add-line"></i> Gestion des inscriptions
+    </h2>
+  </div>
+
+  <!-- Modal fiche utilisateur -->
+  <div class="modal-backdrop" *ngIf="selectedUser">
+    <div class="modal modal-card">
+      <div class="modal-header">
+        <div class="user-head">
+          <div class="avatar-xl">
+            {{ (selectedUser.prenom.charAt(0) || '') + (selectedUser.nom.charAt(0) || '') }}
+          </div>
+          <div>
+            <div class="modal-title">{{ selectedUser.prenom }} {{ selectedUser.nom }}</div>
+            <div class="role-line">
+              <span class="badge" [class.badge-parent]="selectedUser.role==='PARENT'" [class.badge-membre]="selectedUser.role==='MEMBRE'">
+                {{ selectedUser.role === 'PARENT' ? 'Parent' : 'Adulte seul' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <button class="close-btn close-x" (click)="closeModal()">✖</button>
       </div>
-
-      <select [(ngModel)]="pageSize" (change)="goToPage(1)" aria-label="Nombre par page">
-        <option [ngValue]="10">10 / page</option>
-        <option [ngValue]="25">25 / page</option>
-        <option [ngValue]="50">50 / page</option>
-      </select>
+      <div class="modal-body">
+        <div class="grid-2">
+          <ul class="kv">
+            <li><span>Email :</span> {{ selectedUser.email }}</li>
+            <li><span>Téléphone :</span> {{ selectedUser.telephone }}</li>
+            <li><span>Adresse :</span> {{ formatAddress(selectedUser) }}</li>
+            <li><span>Date de naissance :</span> {{ selectedUser.dateNaissance ? (selectedUser.dateNaissance | date:'dd/MM/yyyy') : '—' }}</li>
+          </ul>
+          <div *ngIf="selectedUser.membres.length" class="card-info membres-card">
+            <h3>Membres</h3>
+            <div class="chips-membres-flex">
+              <ng-container *ngFor="let m of selectedUser.membres">
+                <div class="chip-membre-block membre-block membre-vertical">
+                  <span class="chip chip-membre">{{ m.prenom }} {{ m.nom }}</span>
+                  <span *ngIf="m.ceinture" class="chip chip-ceinture ceinture-block">Ceinture&nbsp;: {{ m.ceinture }}</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" (click)="closeModal()">Fermer</button>
+      </div>
     </div>
-  </header>
-
-  <!-- Etat vide / loading -->
-  <div class="empty-state" *ngIf="loading">
-    <div class="empty-card"><div class="emoji">⏳</div><h3>Chargement…</h3></div>
-  </div>
-  <div class="empty-state" *ngIf="!loading && paged.length === 0">
-    <div class="empty-card">
-      <div class="emoji">🗂️</div>
-      <h3>Aucune inscription</h3>
-      <p *ngIf="!erreurMessage">Modifie la recherche pour voir des résultats.</p>
-      <p *ngIf="erreurMessage" class="error">{{ erreurMessage }}</p>
-    </div>
   </div>
 
-  <!-- Tableau -->
-  <div class="table-wrap" *ngIf="!loading && paged.length > 0">
-    <table class="table">
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert alert-danger" *ngIf="erreurMessage">{{ erreurMessage }}</div>
+
+  <!-- Tableau premium des inscriptions -->
+  <div>
+    <table class="table-inscriptions">
       <thead>
         <tr>
-          <th (click)="sortBy('nom')" [class.sorted]="sortKey==='nom'">
-            Parent / Adulte
-            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='nom'"></span>
-          </th>
-          <th (click)="sortBy('email')" [class.sorted]="sortKey==='email'">
-            Email
-            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='email'"></span>
-          </th>
-          <th (click)="sortBy('telephone')" [class.sorted]="sortKey==='telephone'">
-            Téléphone
-            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='telephone'"></span>
-          </th>
+          <th (click)="sortBy('nom')">Nom <i [ngClass]="getSortIcon('nom')"></i></th>
+          <th (click)="sortBy('prenom')">Prénom <i [ngClass]="getSortIcon('prenom')"></i></th>
+          <th (click)="sortBy('email')">Email <i [ngClass]="getSortIcon('email')"></i></th>
+          <th>Téléphone</th>
           <th>Adresse</th>
-          <th (click)="sortBy('nbMembres')" [class.sorted]="sortKey==='nbMembres'">
-            Membres
-            <span class="sort" [class.desc]="sortDir==='desc' && sortKey==='nbMembres'"></span>
-          </th>
-          <th class="th-actions">Actions</th>
+          <th>Membres</th>
+          <th>Rôle</th>
+          <th>Actions</th>
         </tr>
       </thead>
-
       <tbody>
         <tr *ngFor="let u of paged; trackBy: trackById">
-          <td data-label="Parent / Adulte">
-            <div class="who">
-              <div class="name">{{ u.prenom }} {{ u.nom }}</div>
-              <div class="role-badges">
-                <span class="badge" [class.badge-parent]="u.role==='PARENT'" [class.badge-membre]="u.role==='MEMBRE'">
-                  {{ u.role === 'PARENT' ? 'Parent' : 'Adulte seul' }}
-                </span>
-              </div>
+          <td>{{ u.nom }}</td>
+          <td>{{ u.prenom }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.telephone }}</td>
+          <td>{{ formatAddress(u) }}</td>
+          <td>
+            <button *ngIf="u.membres && u.membres.length > 0" class="btn btn-link btn-toggle-membres" (click)="toggleMembres(u)" [attr.aria-expanded]="u._expand" title="Voir les membres">
+              <i class="ri-eye-line" style="font-size:1.18em;"></i>
+              <span class="badge-inscrits" style="margin-left:0.4em;">{{ u.membres.length }}</span>
+              <i class="ri-arrow-down-s-line" *ngIf="!u._expand" style="margin-left:0.4em;"></i>
+              <i class="ri-arrow-up-s-line" *ngIf="u._expand" style="margin-left:0.4em;"></i>
+            </button>
+            <div class="chips chips-appear" *ngIf="u.membres.length && u._expand">
+              <span class="chip" *ngFor="let m of u.membres">{{ m.prenom }} {{ m.nom }}</span>
             </div>
           </td>
-
-          <td data-label="Email"><a class="link" [href]="'mailto:'+u.email">{{ u.email }}</a></td>
-          <td data-label="Téléphone"><a class="link" [href]="'tel:'+u.telephone">{{ u.telephone }}</a></td>
-
-          <td data-label="Adresse">
-            <div class="addr">
-              <div>{{ formatAddress(u) }}</div>
-            </div>
+          <td>
+            <span class="badge" [class.badge-parent]="u.role==='PARENT'" [class.badge-membre]="u.role==='MEMBRE'">
+              {{ u.role === 'PARENT' ? 'Parent' : 'Adulte seul' }}
+            </span>
           </td>
-
-          <td data-label="Membres">
-            <div class="members">
-              <span class="pill">
-                {{ u.role==='PARENT' ? (u._membersLoaded ? u.membres.length : '…') : u.membres.length }}
-              </span>
-
-              <button class="btn-link" type="button" *ngIf="u.role==='PARENT'"
-                      (click)="toggleExpand(u)"
-                      [attr.aria-expanded]="u._expand">
-                <ng-container *ngIf="!u._membersLoading">
-                  {{ u._expand ? 'Masquer' : (u._membersLoaded ? 'Voir' : 'Charger') }}
-                </ng-container>
-                <ng-container *ngIf="u._membersLoading">Chargement…</ng-container>
-              </button>
-
-              <!-- Chips prénom + nom -->
-              <div class="chips" *ngIf="u._expand" [attr.aria-label]="'Membres de ' + u.prenom + ' ' + u.nom">
-                <span class="chip" *ngFor="let m of u.membres">
-                  {{ m.prenom }} {{ m.nom }}
-                </span>
-                <span class="chip chip-muted" *ngIf="u.membres.length === 0">Aucun membre</span>
-              </div>
-            </div>
+          <td>
+            <button class="btn-action-icon" (click)="view(u)" title="Voir">
+              <i class="ri-eye-line"></i>
+              <span class="visually-hidden">Voir</span>
+            </button>
+            <button class="btn-action-icon" (click)="remove(u)" title="Supprimer">
+              <i class="ri-delete-bin-7-line"></i>
+              <span class="visually-hidden">Supprimer</span>
+            </button>
           </td>
-
-          <td data-label="Actions">
-            <div class="actions icons-only">
-              <button class="icon-btn primary" type="button" (click)="view(u)" title="Voir la fiche" aria-label="Voir la fiche">
-                <i class="ri-file-2-line"></i>
-              </button>
-              <button class="icon-btn danger" type="button" (click)="remove(u)" title="Supprimer" aria-label="Supprimer">
-                <i class="ri-delete-bin-6-line"></i>
-              </button>
-            </div>
-          </td>
+        </tr>
+        <tr *ngIf="paged.length === 0">
+          <td colspan="8" class="text-center">Aucune inscription trouvée</td>
         </tr>
       </tbody>
     </table>
-
     <div class="pagination">
       <button class="btn" type="button" (click)="prevPage()" [disabled]="page===1">‹</button>
       <span>Page <strong>{{ page }}</strong> / <strong>{{ totalPages }}</strong></span>
       <button class="btn" type="button" (click)="nextPage()" [disabled]="page===totalPages">›</button>
     </div>
-  </div>
-</div>
-
-<!-- MODALE FICHE UTILISATEUR -->
-<div class="modal-backdrop" *ngIf="selectedUser" (click)="closeModal()" aria-hidden="false">
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="userModalTitle" (click)="$event.stopPropagation()">
-
-    <header class="modal-header">
-      <div class="user-head">
-        <div class="avatar-xl">{{ (selectedUser.prenom || 'U') | slice:0:1 }}</div>
-        <div>
-          <h2 id="userModalTitle" class="modal-title">
-            {{ selectedUser.prenom }} {{ selectedUser.nom }}
-          </h2>
-          <div class="role-line">
-            <span class="badge"
-                  [class.badge-parent]="selectedUser.role==='PARENT'"
-                  [class.badge-membre]="selectedUser.role==='MEMBRE'">
-              {{ selectedUser.role === 'PARENT' ? 'Parent' : 'Adulte seul' }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <button class="icon-btn ghost close-x" type="button" (click)="closeModal()" title="Fermer" aria-label="Fermer la fiche">✕</button>
-    </header>
-
-    <div class="modal-body">
-      <section class="grid-2">
-        <div class="card-info">
-          <h3>Contact</h3>
-          <ul class="kv">
-            <li><span>Email</span><a class="link" [href]="'mailto:'+selectedUser.email">{{ selectedUser.email }}</a></li>
-            <li><span>Téléphone</span><a class="link" [href]="'tel:'+selectedUser.telephone">{{ selectedUser.telephone }}</a></li>
-            <li><span>Adresse</span><span>{{ formatAddress(selectedUser) }}</span></li>
-          </ul>
-        </div>
-
-        <div class="card-info">
-          <h3>Profil</h3>
-          <ul class="kv">
-            <li><span>Rôle</span><span>{{ selectedUser.role }}</span></li>
-            <li *ngIf="selectedUser.dateNaissance">
-              <span>Date de naissance</span>
-              <span>{{ selectedUser.dateNaissance | date:'dd/MM/yyyy' }}</span>
-            </li>
-            <li>
-              <span>Nombre de membres</span><span>{{ selectedUser.membres.length }}</span>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <section *ngIf="selectedUser.membres.length" class="card-info">
-        <h3>Enfants / Membres liés</h3>
-        <div class="subtable-wrap">
-          <table class="subtable">
-            <thead>
-              <tr>
-                <th>Prénom / Nom</th>
-                <th>Date de naissance</th>
-                <th>Ceinture</th>
-                <th>Licence</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let m of selectedUser.membres">
-                <td>{{ m.prenom }} {{ m.nom }}</td>
-                <td>{{ m.dateNaissance ? (m.dateNaissance | date:'dd/MM/yyyy') : '—' }}</td>
-                <td>{{ m.ceinture || '—' }}</td>
-                <td>{{ m.numeroLicence || '—' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-
-    <footer class="modal-footer">
-      <button class="btn" type="button" (click)="closeModal()">Fermer</button>
-      <button class="btn" type="button" style="background:var(--green)" (click)="viewInNewTab(selectedUser)">
-        Ouvrir dans un onglet
-      </button>
-    </footer>
   </div>
 </div>

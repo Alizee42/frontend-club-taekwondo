@@ -12,6 +12,19 @@ import { InscriptionsService, Inscription } from '../../services/inscriptions.se
   styleUrls: ['./gestion-evenements.component.css']
 })
 export class GestionEvenementsComponent implements OnInit {
+  // Résumés pour la section inscription admin
+  get nbInscritsAttente(): number {
+    return this.inscriptions.filter(i => i.statut === 'EN_ATTENTE').length;
+  }
+  get nbInscritsValide(): number {
+    return this.inscriptions.filter(i => i.statut === 'VALIDEE').length;
+  }
+  get nbInscritsRefuse(): number {
+    return this.inscriptions.filter(i => i.statut === 'REFUSEE').length;
+  }
+  // Dashboard synthétique
+  totalInscrits = 0;
+  prochainEvenementTitre = '-';
   evenements: EvenementDTO[] = [];
   inscriptions: Inscription[] = [];
   evenementSelectionne: EvenementDTO | null = null;
@@ -57,6 +70,17 @@ export class GestionEvenementsComponent implements OnInit {
       next: (evenements) => {
         this.evenements = evenements;
         this.trier(this.sortBy);
+        // Calcul dashboard
+        this.totalInscrits = this.evenements.reduce((acc, e) => acc + (e.nbInscrits || 0), 0);
+        // Prochain événement (dateDebut future la plus proche)
+        const now = new Date();
+        const futurs = this.evenements.filter(e => new Date(e.dateDebut) > now);
+        if (futurs.length > 0) {
+          const prochain = futurs.reduce((prev, curr) => new Date(prev.dateDebut) < new Date(curr.dateDebut) ? prev : curr);
+          this.prochainEvenementTitre = prochain.titre;
+        } else {
+          this.prochainEvenementTitre = '-';
+        }
         this.isLoading = false;
       },
       error: () => {

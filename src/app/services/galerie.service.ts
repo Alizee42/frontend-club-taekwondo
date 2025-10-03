@@ -15,7 +15,7 @@ export interface Galerie {
   providedIn: 'root',
 })
 export class GalerieService {
-  private readonly apiUrl = `${environment.apiUrl}/galerie`;
+  private readonly apiUrl = `${environment.apiUrl}/galeries`;
 
   constructor(private http: HttpClient) {}
 

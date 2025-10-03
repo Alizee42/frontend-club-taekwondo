@@ -1,3 +1,330 @@
+.kv a {
+  text-decoration: none;
+  color: var(--blue-main, #2563eb);
+  transition: color 0.18s;
+}
+.kv a:hover, .kv a:focus {
+  text-decoration: underline;
+  color: #1746a2;
+}
+.chips-membres-flex {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1.1em 1.2em;
+  align-items: flex-start;
+  margin-top: 0.5em;
+}
+.chips-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1.1em 1.2em;
+  align-items: flex-start;
+  margin-top: 0.5em;
+}
+.grid-2 {
+  display: flex;
+  flex-direction: row;
+  gap: 2.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+@media (max-width: 900px) {
+  .grid-2 {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+}
+.kv {
+  list-style: none;
+  margin: 0 0 0.5em 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.kv li {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  font-size: 1.04em;
+  line-height: 1.5;
+}
+.kv li span:first-child {
+  min-width: 140px;
+  color: var(--muted);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.membres-card {
+  margin-top: 0.2em;
+  padding: 18px 18px 14px 18px;
+}
+.chips-membres-flex {
+  margin-top: 0.7em;
+  gap: 1.5em 2em;
+  padding: 16px 18px 12px 18px;
+  margin-top: 8px;
+}
+.membre-block {
+  margin-bottom: 0.2em;
+  padding-bottom: 0.2em;
+}
+.membres-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1em 1.2em;
+  align-items: start;
+}
+.chip-membre-block {
+  height: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 600px) {
+  .membres-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.chips-membres {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7em;
+}
+.chip-membre-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.18em;
+}
+.chips-membres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1em 1.2em;
+  align-items: flex-start;
+  font-size: .95em;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+.chip-ceinture {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  padding: .13rem .65rem;
+  font-size: .89em;
+  font-weight: 600;
+  margin-top: 0.08em;
+}
+.ceinture-label {
+  display: block;
+  margin: 0.1em 0 0.7em 0.5em;
+  color: #2563eb;
+  font-size: 0.97em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.chip-badge-ceinture {
+  display: inline-block;
+  background: #fff;
+  color: #2563eb;
+  border: 1px solid #b6c3e0;
+  border-radius: 8px;
+  font-size: 0.78em;
+  font-weight: 700;
+  padding: 0.08em 0.55em;
+  margin-left: 0.5em;
+  vertical-align: middle;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgba(37,99,235,0.07);
+}
+.chip-sep {
+  margin: 0 0.35em;
+  color: #b6c3e0;
+  font-weight: bold;
+  font-size: 1.1em;
+  vertical-align: middle;
+}
+/* Bouton pour afficher/masquer les membres dans la colonne */
+.btn-toggle-membres {
+  background: var(--blue-main, #2563eb);
+  border: 2px solid var(--blue-main, #2563eb);
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.08rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.32em 1.3em 0.32em 1.1em;
+  margin-left: 0.1em;
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  box-shadow: 0 2px 12px rgba(37,99,235,0.10);
+  letter-spacing: 0.01em;
+  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
+  outline: none;
+}
+.btn-toggle-membres:hover, .btn-toggle-membres:focus {
+  background: #1746a2;
+  color: #fff;
+  border-color: #1746a2;
+  box-shadow: 0 4px 18px rgba(37,99,235,0.18);
+}
+.btn-toggle-membres:active {
+  filter: brightness(0.97);
+}
+.chips-appear {
+  animation: chipsFadeIn 0.22s cubic-bezier(.4,1.3,.6,1) both;
+}
+@keyframes chipsFadeIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Liste des membres sous forme de chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  justify-content: center;
+}
+.chip {
+  background: #e9f2ff;
+  color: #1e40af;
+  border: 1px solid #cfe2ff;
+  border-radius: 999px;
+  padding: .15rem .5rem;
+  font-size: .85rem;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.gestion-inscriptions-admin {
+  padding: 1rem 3rem;
+}
+/* Harmonisation du header avec gestion-evenements */
+.header-evenements-admin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.2rem;
+  gap: 1.2rem;
+}
+
+.header-evenements-admin .titre-section {
+  margin-bottom: 0;
+  font-size: 1.6rem;
+}
+
+.titre-section {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--blue-main, #2563eb);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.table-inscriptions {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+.table-inscriptions {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+.table-inscriptions th {
+  background: var(--blue-main, #2563eb);
+  color: #fff;
+  font-weight: 600;
+  padding: 1rem 0.7rem;
+  border-radius: 0;
+  text-align: center;
+}
+.table-inscriptions td {
+  padding: 0.9rem 0.7rem;
+  background: #f9fafe;
+  border-bottom: 1px solid #e3e8f0;
+  font-size: 1rem;
+  text-align: center;
+  vertical-align: middle;
+}
+.table-inscriptions tr.selected {
+  background: #e0eaff;
+}
+.table-inscriptions tr:hover {
+  background: #f1f5ff;
+}
+.badge-inscrits {
+  background: none !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 700;
+  box-shadow: none !important;
+}
+.btn-action-icon {
+  background: #fff;
+  border: 1.5px solid #e3e8f0;
+  color: #444;
+  padding: 0.3rem 0.5rem;
+  font-size: 1.25rem;
+  border-radius: 7px;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  box-shadow: none;
+  outline: none;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-action-icon i {
+  transition: color 0.18s;
+}
+.btn-action-icon[title="Voir"] {
+  border-color: var(--blue-main);
+}
+.btn-action-icon[title="Voir"] i {
+  color: var(--blue-main);
+}
+.btn-action-icon[title="Voir"]:hover, .btn-action-icon[title="Voir"]:focus {
+  background: var(--blue-main);
+  border-color: var(--blue-main);
+}
+.btn-action-icon[title="Voir"]:hover i, .btn-action-icon[title="Voir"]:focus i {
+  color: #fff;
+}
+.btn-action-icon[title="Supprimer"] {
+  border-color: #ef4444;
+}
+.btn-action-icon[title="Supprimer"] i {
+  color: #ef4444;
+}
+.btn-action-icon[title="Supprimer"]:hover, .btn-action-icon[title="Supprimer"]:focus {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+.btn-action-icon[title="Supprimer"]:hover i, .btn-action-icon[title="Supprimer"]:focus i {
+  color: #fff;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
 :root {
   --blue: #1E6091;
   --blue-dark: #1B263B;
@@ -246,7 +573,7 @@
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  background: var(--blue);
+  background: var(--blue-main, #2563eb);
   color: #fff;
   font-weight: 700;
   transition: transform .05s ease, filter .2s ease;

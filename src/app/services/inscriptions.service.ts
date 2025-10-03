@@ -17,6 +17,11 @@ export interface Inscription {
   utilisateurPrenom?: string;
   utilisateurEmail?: string;
   evenementTitre?: string;
+
+  // Champs pour compatibilité backend DTO
+  membreNom?: string;
+  membrePrenom?: string;
+  membreEmail?: string;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -36,13 +36,13 @@ interface Utilisateur {
   _membersLoading?: boolean;
 }
 
-/** Tri utilisable (pas de 'etat' en consultatif) */
-type SortKey = 'nom' | 'email' | 'telephone' | 'nbMembres';
+/** Tri utilisable (ajout 'prenom' pour tri moderne) */
+type SortKey = 'nom' | 'prenom' | 'email' | 'telephone' | 'nbMembres';
 
 @Component({
   selector: 'app-gestion-inscriptions',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './gestion-inscriptions.component.html',
   styleUrls: ['./gestion-inscriptions.component.css']
 })
@@ -62,6 +62,22 @@ export class GestionInscriptionsComponent implements OnInit {
   paged: Utilisateur[] = [];
 
   selectedUser: Utilisateur | null = null;
+
+  // Message de succès pour affichage UI
+  successMsg = '';
+
+  /** Ouvre le formulaire de création (placeholder, à compléter selon besoin) */
+  ouvrirFormulaireCreation(): void {
+    this.successMsg = '';
+    // À compléter : ouvrir une modale ou formulaire de création d'inscription
+    alert('Fonction de création à implémenter');
+  }
+
+  /** Retourne la classe d’icône de tri pour la colonne */
+  getSortIcon(key: SortKey): string {
+    if (this.sortKey !== key) return 'ri-arrow-up-down-line';
+    return this.sortDir === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+  }
 
   constructor(private http: HttpClient) {}
 
@@ -102,7 +118,6 @@ export class GestionInscriptionsComponent implements OnInit {
   private normalizeUser(u: any): Utilisateur {
     // L'API fournit "adresse" en une ligne : on tente de découper
     const parsed = this.splitOneLineAddress(u.adresse || undefined);
-
     return {
       id: u.id ?? u._id ?? u.uuid,
       role: String(u.role || '').toUpperCase(),
@@ -122,6 +137,12 @@ export class GestionInscriptionsComponent implements OnInit {
       _membersLoaded: false,
       _membersLoading: false
     };
+
+  }
+
+  /** Ouvre/ferme l'affichage des membres pour une ligne */
+  toggleMembres(u: Utilisateur) {
+    u._expand = !u._expand;
   }
 
   // ===== API =====
@@ -226,8 +247,10 @@ export class GestionInscriptionsComponent implements OnInit {
       switch (this.sortKey) {
         case 'email': return (u.email || '').toLowerCase();
         case 'telephone': return u.telephone || '';
-        case 'nom': return `${u.nom} ${u.prenom}`.toLowerCase();
+        case 'nom': return (u.nom || '').toLowerCase();
+        case 'prenom': return (u.prenom || '').toLowerCase();
         case 'nbMembres': return u.membres.length;
+        default: return '';
       }
     };
 

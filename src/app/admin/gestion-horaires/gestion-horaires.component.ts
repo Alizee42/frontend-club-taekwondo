@@ -16,7 +16,9 @@ export class GestionHorairesComponent implements OnInit {
     jour: '',
     heures: '',
     groupe: '',
-    adresse: ''
+    adresse: '',
+    codePostal: '',
+    ville: ''
   };
   showModal = false;
 
@@ -52,13 +54,15 @@ export class GestionHorairesComponent implements OnInit {
   }
 
   addHoraire(): void {
-    if (this.newHoraire.jour && this.newHoraire.adresse) {
+    if (this.newHoraire.jour && this.newHoraire.adresse && this.newHoraire.codePostal && this.newHoraire.ville) {
       this.horairesService.addHoraire({
         jour: this.newHoraire.jour,
         heures: [{ time: this.newHoraire.heures, groupe: this.newHoraire.groupe }],
-        adresse: this.newHoraire.adresse
+        adresse: this.newHoraire.adresse,
+        codePostal: this.newHoraire.codePostal,
+        ville: this.newHoraire.ville
       });
-      this.newHoraire = { jour: '', heures: '', groupe: '', adresse: '' };
+      this.newHoraire = { jour: '', heures: '', groupe: '', adresse: '', codePostal: '', ville: '' };
       this.closeModal();
     }
   }

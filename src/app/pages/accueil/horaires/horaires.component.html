@@ -17,7 +17,9 @@
             <div class="card-divider"></div>
             <div class="card-adresse">
               <i class="fas fa-map-marker-alt"></i>
-              <span>{{ horaire.adresse }}</span>
+              <span>
+                {{ horaire.adresse }}<span *ngIf="horaire.codePostal || horaire.ville">, {{ horaire.codePostal }}<span *ngIf="horaire.codePostal && horaire.ville"> </span>{{ horaire.ville }}</span>
+              </span>
             </div>
           </div>
         </div>

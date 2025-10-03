@@ -14,6 +14,8 @@ export class GestionGalerieComponent implements OnInit {
   images: Galerie[] = [];
   newImage: Partial<Galerie> = {};
   imageUrl: string | null = null;
+  afficherFormulaire = false;
+  errorMsg: string | null = null;
 
   constructor(private galerieService: GalerieService) {}
 
@@ -45,18 +47,22 @@ export class GestionGalerieComponent implements OnInit {
   }
 
   uploadImage(): void {
+    this.errorMsg = null;
     if (this.newImage.titre && this.newImage.description && this.newImage.imageUrl) {
       this.galerieService.create(this.newImage as Galerie).subscribe(
-        () => {
+        (res) => {
           this.loadImages();
           this.newImage = {};
           this.imageUrl = null;
+          this.afficherFormulaire = false;
         },
         (error) => {
           console.error('Erreur lors de l\'ajout de l\'image :', error);
+          this.errorMsg = "Erreur lors de l'ajout de l'image. Veuillez réessayer.";
         }
       );
     } else {
+      this.errorMsg = 'Tous les champs sont requis pour ajouter une image.';
       console.warn('Tous les champs sont requis pour ajouter une image.');
     }
   }

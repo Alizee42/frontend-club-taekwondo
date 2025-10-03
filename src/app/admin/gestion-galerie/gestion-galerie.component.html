@@ -1,70 +1,76 @@
-<div class="container">
-    <h1>Gestion de la Galerie</h1>
-  
-    <!-- Formulaire pour ajouter une nouvelle image -->
-    <form (ngSubmit)="uploadImage()" class="form">
-      <div class="form-group">
-        <label for="titre">Titre</label>
-        <input
-          type="text"
-          id="titre"
-          [(ngModel)]="newImage.titre"
-          name="titre"
-          required
-          aria-label="Titre de l'image"
-        />
-      </div>
-  
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea
-          id="description"
-          [(ngModel)]="newImage.description"
-          name="description"
-          required
-          aria-label="Description de l'image"
-        ></textarea>
-      </div>
-  
-      <div class="form-group">
-        <label for="file">Image</label>
-        <input
-          type="file"
-          id="file"
-          (change)="onFileSelected($event)"
-          aria-label="Sélectionner une image"
-        />
-        <div class="image-preview" *ngIf="imageUrl">
-          <img [src]="imageUrl" alt="Prévisualisation de l'image" />
-        </div>
-      </div>
-  
-      <button type="submit" class="btn" [disabled]="!newImage.titre || !newImage.description || !imageUrl">
-        Ajouter
-      </button>
-    </form>
-  
-    <!-- Liste des images existantes sous forme de tableau -->
-    <h2>Images existantes</h2>
-    <table class="table">
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Titre</th>
-            <th>Description</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let image of images">
-            <td><img [src]="image.imageUrl" [alt]="image.titre" class="table-image" /></td>
-            <td>{{ image.titre }}</td>
-            <td>{{ image.description }}</td>
-            <td>
-              <button class="btn edit" (click)="editImage(image)">Modifier</button>
-              <button class="btn delete" (click)="deleteImage(image.id)">Supprimer</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<div class="gestion-galerie-admin">
+  <div class="header-galerie-admin">
+    <h2 class="titre-section">
+      <i class="ri-image-line"></i> Gestion de la Galerie
+    </h2>
+    <button class="btn btn-primary creation-btn-header" (click)="afficherFormulaire = true">
+      <i class="ri-add-line"></i> Ajouter une image
+    </button>
   </div>
+
+  <!-- Modal création/modification -->
+  <div class="modal-backdrop" *ngIf="afficherFormulaire">
+    <div class="modal">
+      <div class="modal-header">
+  <h5>{{ newImage.id ? 'Modifier une image' : 'Ajouter une image' }}</h5>
+        <button class="close-btn" (click)="afficherFormulaire = false">✖</button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="errorMsg" class="alert alert-danger" style="margin-bottom: 1rem;">{{ errorMsg }}</div>
+        <form (ngSubmit)="uploadImage()" #galerieForm="ngForm">
+          <div class="form-group">
+            <label for="titre">Titre</label>
+            <input type="text" id="titre" class="form-control" [(ngModel)]="newImage.titre" name="titre" required>
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" class="form-control" [(ngModel)]="newImage.description" name="description" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="file">Image</label>
+            <input type="file" id="file" (change)="onFileSelected($event)" class="form-control">
+            <div class="image-preview" *ngIf="imageUrl">
+              <img [src]="imageUrl" alt="Prévisualisation de l'image" />
+            </div>
+          </div>
+          <button class="btn btn-success mt-3" [disabled]="galerieForm.invalid">
+            {{ newImage.id ? 'Modifier' : 'Ajouter' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <table class="table-galerie">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Titre</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let image of images">
+          <td><img [src]="image.imageUrl" [alt]="image.titre" class="table-image" /></td>
+          <td>{{ image.titre }}</td>
+          <td>{{ image.description }}</td>
+          <td>
+            <button class="btn-action-icon" (click)="editImage(image); afficherFormulaire = true" title="Modifier">
+              <i class="ri-edit-2-line"></i>
+              <span class="visually-hidden">Modifier</span>
+            </button>
+            <button class="btn-action-icon" (click)="deleteImage(image.id)" title="Supprimer">
+              <i class="ri-delete-bin-7-line"></i>
+              <span class="visually-hidden">Supprimer</span>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="images.length === 0">
+          <td colspan="4" class="text-center">Aucune image trouvée</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

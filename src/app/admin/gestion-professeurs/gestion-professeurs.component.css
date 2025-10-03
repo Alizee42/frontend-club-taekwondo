@@ -1,172 +1,558 @@
-.gestion-professeurs-container {
-  padding: 20px;
-  background-color: var(--gray-light);
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.professeur-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
-
-h1 {
+.professeur-photo {
+  margin-bottom: 0.5em;
+}
+.professeur-nom {
   text-align: center;
+  width: 100%;
+}
+.professeur-specialite {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.98em;
+  color: var(--orange-main);
+  margin-top: 0.3em;
+  justify-content: center;
+  width: 100%;
+}
+.professeur-description-label {
   color: var(--blue-main);
-  margin-bottom: 20px;
-  font-size: 1.8rem;
+  font-weight: 600;
 }
-
-.btn-add {
-  display: block;
-  margin: 0 auto 20px auto;
-  padding: 10px 20px;
-  background-color: var(--blue-main);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
+/* Centrage parfait du header de la carte professeur */
+.professeur-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
-
-.btn-add:hover {
-  background-color: var(--blue-dark);
+.professeur-photo {
+  margin-bottom: 0.5em;
 }
-
-.professeurs-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+.professeur-nom {
+  text-align: center;
+  width: 100%;
 }
-
-.professeur-card {
-  background-color: white;
-  border: 1px solid var(--gray-dark);
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.professeur-specialite {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.98em;
+  color: var(--orange-main);
+  margin-top: 0.3em;
+  justify-content: center;
+  width: 100%;
 }
-.professeur-card p {
-  font-size: 0.95rem;
-  color: var(--gray-dark);
-  margin: 5px 0;
-  overflow: hidden; /* Empêche le texte de dépasser */
-  text-overflow: ellipsis; /* Ajoute des points de suspension si le texte est trop long */
-  max-height: 50px; /* Limite la hauteur de la description */
+.btn-delete {
+  margin-left: 4rem;
 }
-.professeur-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
 }
-
-.professeur-card h2 {
-  color: var(--blue-main);
-  margin-bottom: 10px;
-  font-size: 1.2rem;
-}
-
-.professeur-card p {
-  color: var(--gray-dark);
-  font-size: 0.9rem;
-  margin: 5px 0;
-}
-
 .btn-delete {
   display: block;
-  margin-top: 15px;
+  margin-left: 7rem;
   padding: 8px 15px;
-  background-color: var(--red-main);
-  color: white;
+  background-color: var(--red-main, #e53935);
+  color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   text-align: center;
+  box-shadow: 0 1px 4px rgba(229,57,53,0.08);
+  transition: background 0.2s, color 0.2s;
 }
-
 .btn-delete:hover {
-  background-color: var(--red-dark);
+  background-color: #b71c1c;
+  color: #fff;
 }
 
-/* Styles pour la modale */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+/* Harmonisation moderne et suppression des styles conflictuels */
+.gestion-professeurs-container {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Header moderne */
+.gestion-professeurs-admin {
+  font-family: 'Poppins', sans-serif;
+  margin: 1rem 2rem;
+}
+.header-professeurs-admin {
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
+  justify-content: space-between;
+  margin-bottom: 2.2rem;
+  gap: 1.2rem;
 }
-
-.modal {
-  background-color: white;
-  padding: 20px;
+.header-professeurs-admin .titre-section {
+  margin-bottom: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--blue-main, #2563eb);
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.creation-btn-header {
+  margin-left: auto;
+  min-width: 0;
+  white-space: nowrap;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
   border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  background: var(--blue-main, #2563eb);
+  color: #fff;
+  border: none;
+  transition: background 0.2s;
+}
+.creation-btn-header:hover {
+  background: #1746a2;
 }
 
-.modal h2 {
-  margin-top: 0;
+/* Grille de cartes professeurs */
+.professeurs-list {
+  width: 100%;
+  margin-bottom: 2.5rem;
+}
+.professeurs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2rem 3.5rem;
+  width: 100%;
+}
+.professeur-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(37,99,235,0.06);
+  border: 1.5px solid #e3e8f0;
+  padding: 1.3rem 1.2rem 1.1rem 1.2rem;
+  min-width: 260px;
+  max-width: 320px;
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  position: relative;
+  transition: box-shadow 0.2s, border 0.2s;
+}
+.professeur-card:hover {
+  box-shadow: 0 4px 16px rgba(37,99,235,0.13);
+  border: 1.5px solid var(--blue-main, #2563eb);
+}
+.professeur-photo img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 0.7rem;
+  border: 2px solid var(--blue-main, #2563eb);
+}
+.professeur-infos {
+  width: 100%;
+}
+.professeur-nom {
+  text-align: center;
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--blue-main, #2563eb);
+  margin-bottom: 0.08rem;
+}
+.professeur-specialite {
+  color: var(--orange-main);
+  font-size: 1.01rem;
+  font-weight: 600;
+  margin-bottom: 0.12rem;
+
+}
+
+.professeur-description-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.98em;
   color: var(--blue-main);
-  font-size: 1.5rem;
+  margin-bottom: 0.05em;
+  margin-top: 0.10em;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+.professeur-specialite i {
+  color: var(--orange-main);
+  font-size: 1.1em;
+}
+.professeur-description {
+  color: var(--blue-main);
+  font-size: 1.04rem;
+  font-weight: 600;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 0.7em 1em;
+  margin-bottom: 0.2rem;
+  margin-top: 0.2em;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.06);
+  border: 1px solid #e3e8f0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-height: 7em;
+  overflow-y: auto;
+  line-height: 1.5;
+  transition: box-shadow 0.2s;
+}
+.professeur-description:focus,
+.professeur-description:hover {
+  box-shadow: 0 2px 8px rgba(37,99,235,0.13);
+}
+.btn-action-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 0.7rem;
+  font-size: 1.2rem;
+  color: #f44336;
+  align-self: flex-end;
+  transition: color 0.2s;
+}
+.btn-action-icon:hover {
+  color: #b71c1c;
 }
 
-.form-group {
+/* Modale moderne */
+
+/* Modale moderne harmonisée avec gestion horaires */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(30, 41, 59, 0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  backdrop-filter: blur(2px);
+}
+.modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(37,99,235,0.10), 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1.1rem 1.1rem 0.7rem 1.1rem;
+  min-width: 320px;
+  max-width: 96vw;
+  width: 480px;
+  max-height: 75vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modalPopInSobre 0.28s cubic-bezier(.4,2,.6,1) both;
+  border: 1.5px solid #e3e8f0;
+  transition: box-shadow 0.2s, border 0.2s;
+}
+@keyframes modalPopInSobre {
+  from { transform: translateY(40px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+  padding: 0.7rem 0.5rem 0.7rem 0.5rem;
+  box-shadow: none;
+  border-bottom: 1px solid #e3e8f0;
+}
+.modal-header h5 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--blue-main, #2563eb);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.7rem;
+  color: #888;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  transition: background 0.2s, color 0.2s;
+}
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #2563eb;
+}
+.modal-body form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.modal-body .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
   margin-bottom: 15px;
 }
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--gray-dark);
-  font-size: 0.9rem;
+.modal-body .form-group label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--blue-main, #2563eb);
+  margin-bottom: 0.1rem;
+  letter-spacing: 0.01em;
 }
-
-.form-group input,
-.form-group textarea {
+.form-control, .modal-body .form-group input, .modal-body .form-group select, .modal-body .form-group textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid var(--gray-dark);
-  border-radius: 4px;
-  font-size: 0.9rem;
-  box-sizing: border-box;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.btn-modal {
-  background-color: var(--blue-main);
-  color: white;
-  border: none;
-  padding: 10px 20px;
   border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  flex: 1;
-  text-align: center;
+  margin-top: 5px;
+  border: 1px solid #e3e8f0;
+  font-size: 1rem;
+  background: #f8fafc;
+  color: #222;
+  transition: border 0.2s;
+}
+.modal-body .form-group input:focus,
+.modal-body .form-group select:focus,
+.modal-body .form-group textarea:focus {
+  border: 1.5px solid var(--blue-main, #2563eb);
+  outline: none;
+}
+.modal-body .btn-success {
+  background: var(--blue-main, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.6rem 1.5rem;
+  margin-top: 0.7rem;
+  float: right;
+  transition: background 0.2s;
+}
+.modal-body .btn-success:hover {
+  background: #1746a2;
 }
 
-.btn-modal:hover {
-  background-color: var(--blue-dark);
+
+/* Header moderne */
+.gestion-professeurs-admin {
+  font-family: 'Poppins', sans-serif;
+  margin: 1rem 2rem;
+}
+.header-professeurs-admin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.2rem;
+  gap: 1.2rem;
+}
+.header-professeurs-admin .titre-section {
+  margin-bottom: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--blue-main, #2563eb);
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.creation-btn-header {
+  margin-left: auto;
+  min-width: 0;
+  white-space: nowrap;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  background: var(--blue-main, #2563eb);
+  color: #fff;
+  border: none;
+  transition: background 0.2s;
+}
+.creation-btn-header:hover {
+  background: #1746a2;
 }
 
-.btn-modal:first-child {
-  background-color: var(--red-main);
-}
-
-.btn-modal:first-child:hover {
-  background-color: var(--red-dark);
-}
-.form-group input[type="file"] {
-  padding: 5px;
-  font-size: 0.9rem;
-  border: 1px solid var(--gray-dark);
-  border-radius: 4px;
+/* Grille de cartes professeurs */
+.professeurs-list {
   width: 100%;
-  box-sizing: border-box;
+  margin-bottom: 2.5rem;
+}
+.professeurs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2rem 3.5rem;
+  width: 100%;
+}
+.professeur-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(37,99,235,0.06);
+  border: 1.5px solid #e3e8f0;
+  padding: 1.3rem 1.2rem 1.1rem 1.2rem;
+  min-width: 260px;
+  max-width: 320px;
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.1rem;
+  position: relative;
+  transition: box-shadow 0.2s, border 0.2s;
+}
+.professeur-card:hover {
+  box-shadow: 0 4px 16px rgba(37,99,235,0.13);
+  border: 1.5px solid var(--blue-main, #2563eb);
+}
+.professeur-photo img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 0.7rem;
+  border: 2px solid var(--blue-main, #2563eb);
+}
+.professeur-infos {
+  width: 100%;
+}
+.professeur-nom {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--blue-main, #2563eb);
+  margin-bottom: 0.3rem;
+}
+.professeur-specialite {
+  color: var(--orange-main);
+  font-size: 1.01rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+.professeur-specialite i {
+  color: var(--orange-main);
+  font-size: 1.1em;
+}
+.professeur-description {
+  color: #222;
+  font-size: 0.99rem;
+  margin-bottom: 0.2rem;
+}
+.btn-action-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 0.7rem;
+  font-size: 1.2rem;
+  color: #f44336;
+  align-self: flex-end;
+  transition: color 0.2s;
+}
+.btn-action-icon:hover {
+  color: #b71c1c;
+}
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(30, 41, 59, 0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  backdrop-filter: blur(2px);
+}
+.modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(37,99,235,0.10), 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1.1rem 1.1rem 0.7rem 1.1rem;
+  min-width: 320px;
+  max-width: 96vw;
+  width: 480px;
+  max-height: 75vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modalPopInSobre 0.28s cubic-bezier(.4,2,.6,1) both;
+  border: 1.5px solid #e3e8f0;
+  transition: box-shadow 0.2s, border 0.2s;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+  padding: 0.7rem 0.5rem 0.7rem 0.5rem;
+  box-shadow: none;
+  border-bottom: 1px solid #e3e8f0;
+}
+.modal-header h5 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--blue-main, #2563eb);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.7rem;
+  color: #888;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  transition: background 0.2s, color 0.2s;
+}
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #2563eb;
 }
