@@ -1,0 +1,206 @@
+
+
+
+/* --- PAGE DE SÉLECTION DE CLUB PREMIUM, SOBRE & TAEKWONDO --- */
+
+
+:root {
+  --blue-dark: #181f2a;
+  --blue-main: #1a237e;
+  --blue-light: #3f51b5;
+  --gold: #c9a94a;
+  --surface-0: #fff;
+  --surface-100: #f5f6fa;
+  --text-secondary: #3a3a3a;
+  --header-height: 72px;
+}
+
+
+body, .club-landing {
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  background: var(--surface-100);
+}
+
+.club-header {
+  width: 100vw;
+  height: var(--header-height);
+  background: linear-gradient(90deg, var(--blue-main) 60%, var(--gold) 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  box-shadow: 0 2px 12px 0 rgba(26,35,126,0.08);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+.club-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.club-header-logo svg {
+  height: 44px;
+  width: 44px;
+  display: block;
+}
+.club-header-title {
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(26,35,126,0.13);
+}
+
+
+.club-landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-linear-gradient(135deg, #e9eaf3 0 2px, transparent 2px 40px),
+    linear-gradient(120deg, var(--surface-100) 60%, #e9eaf3 100%);
+  padding: calc(32px + var(--header-height)) 12px 32px 12px;
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.club-landing-illustration {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+.club-landing-illustration svg {
+  width: 80px;
+  height: 80px;
+  display: block;
+  filter: drop-shadow(0 4px 16px rgba(26,35,126,0.10));
+}
+
+
+.club-landing-content {
+  background: var(--surface-0);
+  border-radius: 28px;
+  box-shadow: 0 12px 48px 0 rgba(26,35,126,0.15);
+  padding: 56px 38px 40px 38px;
+  max-width: 650px;
+  width: 100%;
+  text-align: center;
+  animation: popin 0.4s cubic-bezier(.4,2,.6,1) 1;
+  border: 2.5px solid var(--gold);
+}
+
+@keyframes popin {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+
+.club-title {
+  font-size: 2.1rem;
+  font-weight: 900;
+  margin-bottom: 10px;
+  letter-spacing: 1.5px;
+  color: var(--blue-main);
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(26,35,126,0.08);
+}
+.club-title small {
+  display: block;
+  font-size: 1.18rem;
+  font-weight: 400;
+  color: var(--gold);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+.club-slogan {
+  font-size: 1.08rem;
+  color: var(--blue-dark);
+  font-style: italic;
+  margin-bottom: 22px;
+  margin-top: 10px;
+  opacity: 0.85;
+}
+
+.club-subtitle {
+  font-size: 1.18rem;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.club-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.club-btn {
+  padding: 10px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid var(--blue-main);
+  background: #fff;
+  color: var(--blue-main);
+  cursor: pointer;
+  box-shadow: 0 1px 6px 0 rgba(26,35,126,0.07);
+  transition: transform 0.13s, box-shadow 0.13s, background 0.18s, border 0.18s, color 0.18s;
+  outline: none;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.club-btn:hover, .club-btn:focus {
+  background: var(--blue-main);
+  color: #fff;
+  border: 1px solid var(--gold);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 4px 16px 0 rgba(26,35,126,0.13);
+}
+.club-btn-label {
+  display: block;
+  padding: 0 12px;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .club-header {
+    height: 54px;
+    padding: 0 10px;
+  }
+  .club-header-logo svg {
+    height: 32px;
+    width: 32px;
+  }
+  .club-header-title {
+    font-size: 1rem;
+  }
+  .club-landing-content {
+    padding: 16px 2vw 12px 2vw;
+    border-radius: 12px;
+    max-width: 99vw;
+    margin-top: 18px;
+  }
+  .club-title {
+    font-size: 1.18rem;
+  }
+  .club-btn {
+    font-size: 0.98rem;
+    padding: 8px 0;
+    border-radius: 8px;
+  }
+  .club-landing-illustration svg {
+    width: 38px;
+    height: 38px;
+  }
+}

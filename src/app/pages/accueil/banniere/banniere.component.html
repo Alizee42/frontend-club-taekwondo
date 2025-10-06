@@ -5,8 +5,8 @@
             Votre navigateur ne supporte pas la vidéo.
         </video>
         <div class="overlay">
-            <h1>Rejoignez l’aventure Taekwondo à Villeurbanne</h1>
+            <h1>Rejoignez l’aventure Taekwondo<br><span *ngIf="selectedClub">{{ selectedClub.name }}</span></h1>
             <p>Sport, esprit d’équipe et progression pour tous les âges</p>
-            <a href="inscription.html" class="cta-button">Inscrivez-vous maintenant</a>
+            <a routerLink="/inscription" class="cta-button">Inscrivez-vous maintenant</a>
         </div>
     </section>

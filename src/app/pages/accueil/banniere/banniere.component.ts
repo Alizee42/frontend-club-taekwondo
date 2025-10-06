@@ -1,11 +1,13 @@
 
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ClubService, Club } from '../../../services/club.service';
 
 @Component({
   selector: 'app-banniere',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, CommonModule],
   templateUrl: './banniere.component.html',
   styleUrl: './banniere.component.css'
 })
@@ -20,8 +22,10 @@ export class BanniereComponent {
   ];
   currentSlogan: string = this.slogans[0];
   private sloganIndex = 0;
+  selectedClub: Club | null = null;
 
-  constructor() {
+  constructor(private clubService: ClubService) {
+    this.selectedClub = this.clubService.getSelectedClub();
     this.rotateSlogan();
   }
 

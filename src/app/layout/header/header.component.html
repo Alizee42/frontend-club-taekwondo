@@ -5,7 +5,8 @@
       <a [routerLink]="['/']" (click)="closeMenus()">
         <span class="brand-strong">Olympique</span>
         <span class="brand-mid">Taekwondo</span>
-        <span class="brand-thin">Villeurbannais</span>
+  <span class="brand-thin">{{ selectedClub && selectedClub.name ? (selectedClub.name.split(' ').slice(-1)[0]) : 'Villeurbannais' }}</span>
+  <button class="change-club-btn" (click)="changeClub()" title="Changer de club">Changer de club</button>
       </a>
     </div>
 

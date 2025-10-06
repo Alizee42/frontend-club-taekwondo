@@ -1,0 +1,21 @@
+<div class="club-landing">
+  <div class="club-landing-content">
+    <div class="club-title">
+      Bienvenue sur le portail olympique Taekwondo
+      <small>Clubs affiliés & espaces membres</small>
+    </div>
+    <div class="club-slogan">
+      “Maîtrise, Respect, Dépassement de soi”
+    </div>
+    <div class="club-subtitle">
+      Vous êtes sur le site olympique taekwondo.<br>
+      Ce portail regroupe tous les clubs partenaires et permet à chaque membre d’accéder à son espace personnel, suivre l’actualité, gérer ses inscriptions et profiter de services exclusifs.<br><br>
+      <b>Merci de sélectionner votre club pour continuer :</b>
+    </div>
+    <div class="club-list">
+      <button class="club-btn" *ngFor="let club of clubs" (click)="selectClub(club)">
+        <span class="club-btn-label">{{ club.name }}</span>
+      </button>
+    </div>
+  </div>
+</div>

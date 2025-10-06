@@ -14,6 +14,8 @@ import { AuthService, Utilisateur } from '../../services/auth.service';
 import { PanierService, Produit } from '../../services/panier.service';
 import { StripeService } from '../../services/stripe.service';
 import { environment } from '../../../environments/environment';
+import { ClubService, Club } from '../../services/club.service';
+import { Output, EventEmitter } from '@angular/core';
 
 interface PanierItem extends Produit {
   beneficiaireId?: number | null;
@@ -29,6 +31,8 @@ interface PanierItem extends Produit {
   imports: [CommonModule, RouterModule, DecimalPipe, FormsModule],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  selectedClub: Club | null = null;
+  @Output() demandeChangementClub = new EventEmitter<void>();
   private readonly API_BASE = environment.apiUrl;
 
   // UI state
@@ -85,8 +89,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private panierService: PanierService,
     private stripeService: StripeService,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    private clubService: ClubService
+  ) {
+    this.selectedClub = this.clubService.getSelectedClub();
+  }
+
+  changeClub() {
+    this.clubService.clearSelectedClub();
+    window.location.reload();
+  }
 
   ngOnInit(): void {
     // Auth

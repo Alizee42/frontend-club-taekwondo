@@ -1,7 +1,9 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
+import { ClubService, Club } from './services/club.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { ToastContainerComponent } from './shared/toast/toast-container/toast-container.component'; // <-- AJOUT
+import { ClubSelectComponent } from './club-select/club-select.component';
 
 
 import { HeaderComponent } from './layout/header/header.component';
@@ -16,10 +18,11 @@ import { ParametresPaiementService } from './services/parametres-paiement.servic
   imports: [
     CommonModule,
     RouterModule,
-  HeaderComponent,
-  ConnectedHeaderComponent,
+    HeaderComponent,
+    ConnectedHeaderComponent,
     FooterComponent,
-    ToastContainerComponent
+    ToastContainerComponent,
+    ClubSelectComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
@@ -29,14 +32,21 @@ export class AppComponent implements OnInit {
   userRole: 'admin' | 'membre' | 'parent' | null = null;
   connectedRole: 'admin' | 'membre' | 'parent' = 'membre'; // par défaut
   isConnectedRoute = false;
+  selectedClub: Club | null = null;
+  showClubModal = false;
 
   constructor(
     private router: Router,
     private parametresService: ParametresPaiementService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private clubService: ClubService
   ) {}
 
   ngOnInit(): void {
+    // Sélection du club obligatoire
+    this.selectedClub = this.clubService.getSelectedClub();
+    this.showClubModal = !this.selectedClub;
+
     // Vérifie la connexion
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role')?.toLowerCase();
@@ -82,6 +92,11 @@ export class AppComponent implements OnInit {
         }
       }
     });
+  }
+
+  onClubSelected(club: Club) {
+    this.selectedClub = club;
+    this.showClubModal = false;
   }
 
   private applyPublicPageClass(url: string): void {

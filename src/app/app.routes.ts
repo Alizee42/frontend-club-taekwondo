@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AccueilComponent } from './pages/accueil/accueil.component';
+import { ClubSelectComponent } from './club-select/club-select.component';
 import { InscriptionComponent } from './pages/inscription/inscription.component';
 import { GalerieComponent } from './pages/galerie/galerie.component';
 import { ContactComponent } from './pages/contact/contact.component';
@@ -39,6 +40,7 @@ import { DebugParentComponent } from './debug-parent.component';
 
 export const routes: Routes = [
   // 🌐 Routes publiques
+  { path: 'choix-club', component: ClubSelectComponent },
   { path: '', component: AccueilComponent },
   { path: 'inscription', component: InscriptionComponent },
   { path: 'galerie', component: GalerieComponent },
