@@ -12,10 +12,13 @@
       Ce portail regroupe tous les clubs partenaires et permet à chaque membre d’accéder à son espace personnel, suivre l’actualité, gérer ses inscriptions et profiter de services exclusifs.<br><br>
       <b>Merci de sélectionner votre club pour continuer :</b>
     </div>
-    <div class="club-list">
+    <div *ngIf="loading" class="club-loading">Chargement des clubs...</div>
+    <div *ngIf="error" class="club-error">{{ error }}</div>
+    <div class="club-list" *ngIf="!loading && clubs.length > 0">
       <button class="club-btn" *ngFor="let club of clubs" (click)="selectClub(club)">
-        <span class="club-btn-label">{{ club.name }}</span>
+          <span class="club-btn-label">{{ club.name }}</span>
       </button>
     </div>
+    <div *ngIf="!loading && clubs.length === 0 && !error">Aucun club disponible.</div>
   </div>
 </div>

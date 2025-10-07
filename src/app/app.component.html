@@ -11,7 +11,7 @@
 <!-- Le site complet (header, contenu, footer) n'est visible que si un club est sélectionné ET la modale fermée -->
 <ng-container *ngIf="!showClubModal && selectedClub">
 	<ng-container *ngIf="isConnectedRoute; else publicHeader">
-		<app-connected-header></app-connected-header>
+		<app-connected-header [role]="connectedRole"></app-connected-header>
 	</ng-container>
 	<ng-template #publicHeader>
 		<app-header></app-header>

@@ -31,6 +31,7 @@ interface Utilisateur {
   dateNaissance?: string;
   membres: Membre[];
   etat?: Statut; // consultatif
+  clubId?: string | number;
   _expand?: boolean;
   _membersLoaded?: boolean;
   _membersLoading?: boolean;
@@ -60,6 +61,9 @@ export class GestionInscriptionsComponent implements OnInit {
   utilisateurs: Utilisateur[] = [];
   filtered: Utilisateur[] = [];
   paged: Utilisateur[] = [];
+
+  // Ajout : ID du club sélectionné (à adapter selon ton service ou contexte)
+  selectedClubId: string | number = '';
 
   selectedUser: Utilisateur | null = null;
 
@@ -133,6 +137,7 @@ export class GestionInscriptionsComponent implements OnInit {
       dateNaissance: u.dateNaissance ?? undefined,
       membres: [], // remplis après jointure
       etat: u.etat, // consultatif
+      clubId: u.clubId ?? u.idClub ?? u.club ?? undefined,
       _expand: false,
       _membersLoaded: false,
       _membersLoading: false
@@ -235,12 +240,14 @@ export class GestionInscriptionsComponent implements OnInit {
   // ===== Filtres / tri / pagination =====
   applyFilters(): void {
     const q = this.query.trim().toLowerCase();
-
+    // Filtrage par club
     this.filtered = this.utilisateurs.filter((u: Utilisateur) => {
       const txt = [
         u.nom, u.prenom, u.email, u.telephone, u.ville, u.pays, u.adresseLigne1, u.adresseLigne2, u.codePostal
       ].filter(Boolean).join(' ').toLowerCase();
-      return q === '' || txt.includes(q);
+      // Filtre club : si selectedClubId est défini, on ne garde que les membres du club
+      const clubFiltre = this.selectedClubId ? u.clubId === this.selectedClubId : true;
+      return (q === '' || txt.includes(q)) && clubFiltre;
     });
 
     const getKey = (u: Utilisateur): string | number => {

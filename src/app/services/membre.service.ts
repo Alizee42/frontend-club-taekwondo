@@ -82,4 +82,16 @@ export class MembreService {
       })
     );
   }
+
+    /** Liste des membres filtrés par club */
+    getMembresParClub(clubId: string | number): Observable<Membre[] | null> {
+      this.log(`Appel → GET ?clubId=${clubId}`);
+      return this.http.get<Membre[]>(`${this.apiUrl}?clubId=${clubId}`).pipe(
+        catchError(err => {
+          this.log(`Erreur GET ?clubId=${clubId}`, err);
+          if (err.status === 400 || err.status === 401) return of(null);
+          return of(null);
+        })
+      );
+    }
 }

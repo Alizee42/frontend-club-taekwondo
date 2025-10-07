@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ContactService } from '../../services/contact.service';
+import { ClubService } from '../../services/club.service';
+import type { Club } from '../../services/club.service';
 
 @Component({
   selector: 'app-contact',
@@ -11,17 +13,20 @@ import { ContactService } from '../../services/contact.service';
   imports: [FormsModule, CommonModule]
 })
 export class ContactComponent {
-  form = {
+  club: Club | null = null;
+  form: { name: string; email: string; objet: string; message: string } = {
     name: '',
     email: '',
     objet: '',
     message: ''
   };
-  sending = false;
+  sending: boolean = false;
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
-  constructor(private contactService: ContactService) {}
+  constructor(private contactService: ContactService, private clubService: ClubService) {
+    this.club = this.clubService.getSelectedClub();
+  }
 
   async onSubmit() {
     if (this.sending) return;

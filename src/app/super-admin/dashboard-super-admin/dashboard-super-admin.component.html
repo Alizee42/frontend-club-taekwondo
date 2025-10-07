@@ -1,0 +1,111 @@
+
+<div class="dashboard-admin">
+  <div class="header-dashboard">
+    <h1>Bienvenue Super Admin</h1>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-container">
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-icon-wrapper gold"><i class="ri-community-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ clubsCount }}</h3>
+        <p>Clubs</p>
+      </div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-icon-wrapper"><i class="ri-user-star-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ adminsCount }}</h3>
+        <p>Admins</p>
+      </div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-icon-wrapper"><i class="ri-team-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ membresCount }}</h3>
+        <p>Membres</p>
+      </div>
+    </div>
+    <div class="kpi-card kpi-green">
+      <div class="kpi-icon-wrapper"><i class="ri-hand-coin-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ paiementsTotal | currency:'EUR' }}</h3>
+        <p>Paiements reçus</p>
+      </div>
+    </div>
+    <div class="kpi-card kpi-orange-light">
+      <div class="kpi-icon-wrapper"><i class="ri-time-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ paiementsAttente }}</h3>
+        <p>Paiements en attente</p>
+      </div>
+    </div>
+    <div class="kpi-card kpi-dark">
+      <div class="kpi-icon-wrapper"><i class="ri-shield-check-line"></i></div>
+      <div class="kpi-info">
+        <h3>{{ logsCount }}</h3>
+        <p>Logs sécurité</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sections -->
+  <div class="dashboard-grid">
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-community-line"></i></div>
+        <h2>Gestion des clubs</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToClubs()"><i class="ri-community-line"></i> Clubs</li>
+        <li (click)="navigateToAdmins()"><i class="ri-user-star-line"></i> Admins</li>
+        <li (click)="navigateToMembres()"><i class="ri-team-line"></i> Membres</li>
+        <li (click)="navigateToDocuments()"><i class="ri-file-list-3-line"></i> Documents</li>
+        <li (click)="navigateToAvis()"><i class="ri-star-line"></i> Avis</li>
+      </ul>
+      <!-- Tableau récapitulatif des clubs -->
+      <table class="table-clubs">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Adresse</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let club of clubs">
+            <td>{{ club.name }}</td>
+            <td>{{ club.email }}</td>
+            <td>{{ club.telephone }}</td>
+            <td>{{ club.adresse }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-wallet-3-line"></i></div>
+        <h2>Gestion financière</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToPaiement()"><i class="ri-money-euro-circle-line"></i> Paiements</li>
+        <li (click)="navigateToCommandes()"><i class="ri-shopping-bag-3-line"></i> Commandes</li>
+      </ul>
+    </div>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-settings-3-line"></i></div>
+        <h2>Administration globale</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToLogs()"><i class="ri-shield-check-line"></i> Logs sécurité</li>
+        <li (click)="navigateToActualites()"><i class="ri-newspaper-line"></i> Actualités</li>
+        <li (click)="navigateToUtilisateurs()"><i class="ri-user-line"></i> Utilisateurs</li>
+        <li (click)="navigateToEvenements()"><i class="ri-calendar-event-line"></i> Événements</li>
+      </ul>
+    </div>
+  </div>
+</div>
+

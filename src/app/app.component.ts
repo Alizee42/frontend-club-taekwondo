@@ -29,8 +29,8 @@ import { ParametresPaiementService } from './services/parametres-paiement.servic
 })
 export class AppComponent implements OnInit {
   isLoggedIn = false;
-  userRole: 'admin' | 'membre' | 'parent' | null = null;
-  connectedRole: 'admin' | 'membre' | 'parent' = 'membre'; // par défaut
+  userRole: 'admin' | 'membre' | 'parent' | 'super_admin' | null = null;
+  connectedRole: 'admin' | 'membre' | 'parent' | 'super_admin' = 'membre'; // par défaut
   isConnectedRoute = false;
   selectedClub: Club | null = null;
   showClubModal = false;
@@ -53,7 +53,7 @@ export class AppComponent implements OnInit {
 
     this.isLoggedIn = !!token;
 
-    if (role === 'admin' || role === 'membre' || role === 'parent') {
+    if (role === 'admin' || role === 'membre' || role === 'parent' || role === 'super_admin') {
       this.userRole = role;
       this.connectedRole = role;
     }
@@ -77,6 +77,7 @@ export class AppComponent implements OnInit {
           '/admin',
           '/membre',
           '/parent',
+          '/super-admin',
           '/profil'
         ].some(segment => url.includes(segment));
 
@@ -89,6 +90,8 @@ export class AppComponent implements OnInit {
           this.connectedRole = 'membre';
         } else if (url.includes('/parent')) {
           this.connectedRole = 'parent';
+        } else if (url.includes('/super-admin')) {
+          this.connectedRole = 'super_admin';
         }
       }
     });

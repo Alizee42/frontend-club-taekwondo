@@ -1,11 +1,6 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface Club {
-  id: string;
-  name: string;
-  logo?: string;
-}
+import { ClubService, Club } from '../services/club.service';
 
 @Component({
   selector: 'app-club-select',
@@ -16,15 +11,25 @@ export interface Club {
 })
 export class ClubSelectComponent {
   @Output() clubSelected = new EventEmitter<Club>();
-  clubs: Club[] = [
-    { id: 'villeurbanne', name: 'Olympique Taekwondo Villeurbanne' },
-    { id: 'villards', name: 'Olympique Taekwondo Villards-les-Dombes' },
-    { id: 'bourg', name: 'Olympique Taekwondo Bourg-en-Bresse' },
-    { id: 'amberieux', name: 'Olympique Taekwondo Ambérieux' }
-  ];
+  clubs: Club[] = [];
+  loading = true;
+  error: string | null = null;
+
+  constructor(private clubService: ClubService) {
+    this.clubService.getClubs().subscribe({
+      next: (clubs) => {
+        this.clubs = clubs;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Erreur lors du chargement des clubs.';
+        this.loading = false;
+      }
+    });
+  }
 
   selectClub(club: Club) {
-    localStorage.setItem('selectedClub', JSON.stringify(club));
+    this.clubService.setSelectedClub(club);
     this.clubSelected.emit(club);
   }
 }

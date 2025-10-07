@@ -60,9 +60,18 @@ export class ConnexionComponent {
 
   private redirectBasedOnRole(role: string): void {
     switch (role) {
-      case 'ADMIN':  this.router.navigate(['/admin/dashboard-admin']); break;
-      case 'MEMBRE': this.router.navigate(['/membre/dashboard-membre']); break;
-      case 'PARENT': this.router.navigate(['/parent/dashboard-parent']); break;
+      case 'ADMIN':
+        this.router.navigate(['/admin/dashboard-admin']);
+        break;
+      case 'SUPER_ADMIN':
+        this.router.navigate(['/super-admin/dashboard-super-admin']);
+        break;
+      case 'MEMBRE':
+        this.router.navigate(['/membre/dashboard-membre']);
+        break;
+      case 'PARENT':
+        this.router.navigate(['/parent/dashboard-parent']);
+        break;
       default:
         this.toastService.error('⚠️ Accès non autorisé. Contactez l\'administrateur.');
     }

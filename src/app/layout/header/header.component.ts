@@ -255,10 +255,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
   goToSpecializedDashboard(): void {
     // Dashboard spécialisé selon le rôle
     const role = (this.user?.role ?? this.auth.getRole() ?? '').toString().toUpperCase();
-    if (role === 'ADMIN') this.router.navigate(['/admin/dashboard-admin']);
-    else if (role === 'MEMBRE') this.router.navigate(['/membre/dashboard-membre']);
-    else if (role === 'PARENT') this.router.navigate(['/parent/dashboard-parent']);
-    else this.router.navigate(['/dashboard']); // Fallback vers dashboard de base
+    if (role === 'ADMIN') {
+      this.router.navigate(['/admin/dashboard-admin']);
+    } else if (role === 'SUPER_ADMIN') {
+      this.router.navigate(['/super-admin/dashboard-super-admin']);
+    } else if (role === 'MEMBRE') {
+      this.router.navigate(['/membre/dashboard-membre']);
+    } else if (role === 'PARENT') {
+      this.router.navigate(['/parent/dashboard-parent']);
+    } else {
+      this.router.navigate(['/dashboard']); // Fallback vers dashboard de base
+    }
     this.closeMenus();
   }
 

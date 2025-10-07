@@ -5,29 +5,32 @@
   </header>
 
   <div class="contact-layout">
+      <div *ngIf="club">
+        <h2>{{ club.name }}</h2>
+      </div>
     <aside class="contact-panel card">
       <h2 class="panel-title">Coordonnées</h2>
       <p class="intro">Vous pouvez nous écrire via le formulaire ou utiliser un des moyens suivants :</p>
       <ul class="info-list">
-        <li>
+        <li *ngIf="club?.telephone">
           <i class="ri-phone-line"></i>
           <div>
             <strong>Téléphone</strong><br>
-            <span>06 63 97 89 26<br>07 65 82 67 72</span>
+            <span>{{ club?.telephone }}</span>
           </div>
         </li>
-        <li>
+        <li *ngIf="club?.email">
           <i class="ri-mail-line"></i>
           <div>
             <strong>Email</strong><br>
-            <a href="mailto:taekwondovilleurbannais@gmail.com">taekwondovilleurbannais@gmail.com</a>
+            <a [href]="'mailto:' + club?.email">{{ club?.email }}</a>
           </div>
         </li>
-        <li>
+        <li *ngIf="club?.adresse">
           <i class="ri-map-pin-line"></i>
           <div>
             <strong>Adresse</strong><br>
-            <address>4 Rue De Bat Yam<br>69100 Villeurbanne</address>
+            <address>{{ club?.adresse }}</address>
           </div>
         </li>
         <li>

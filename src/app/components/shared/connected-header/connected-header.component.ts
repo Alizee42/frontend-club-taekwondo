@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService, Utilisateur } from '../../../services/auth.service';
 import { environment } from '../../../../environments/environment';
 
-type RoleUp = 'ADMIN' | 'MEMBRE' | 'PARENT';
+type RoleUp = 'ADMIN' | 'MEMBRE' | 'PARENT' | 'SUPER_ADMIN';
 
 @Component({
   selector: 'app-connected-header',
@@ -15,7 +15,7 @@ type RoleUp = 'ADMIN' | 'MEMBRE' | 'PARENT';
   styleUrls: ['./connected-header.component.css']
 })
 export class ConnectedHeaderComponent implements OnInit {
-  @Input() role: 'admin' | 'membre' | 'parent' = 'membre';
+  @Input() role: 'admin' | 'membre' | 'parent' | 'super_admin' = 'membre';
   
   // Propriétés pour le dropdown utilisateur
   userDropdownOpen = false;
@@ -61,17 +61,28 @@ export class ConnectedHeaderComponent implements OnInit {
     const raw = localStorage.getItem(this.ROLE_KEY);
     if (!raw) return null;
     const up = raw.trim().toUpperCase();
-    if (up === 'ADMIN' || up === 'MEMBRE' || up === 'PARENT') return up;
+    if (up === 'ADMIN' || up === 'MEMBRE' || up === 'PARENT' || up === 'SUPER_ADMIN') return up as RoleUp;
     return null;
   }
 
   goToDashboard(): void {
     const storedRole = this.getStoredRole();
     switch (storedRole) {
-      case 'ADMIN': this.router.navigate(['/admin/dashboard-admin']); break;
-      case 'MEMBRE': this.router.navigate(['/membre/dashboard-membre']); break;
-      case 'PARENT': this.router.navigate(['/parent/dashboard-parent']); break;
-      default: this.router.navigate(['/connexion']); break;
+      case 'ADMIN':
+        this.router.navigate(['/admin/dashboard-admin']);
+        break;
+      case 'SUPER_ADMIN':
+        this.router.navigate(['/super-admin/dashboard-super-admin']);
+        break;
+      case 'MEMBRE':
+        this.router.navigate(['/membre/dashboard-membre']);
+        break;
+      case 'PARENT':
+        this.router.navigate(['/parent/dashboard-parent']);
+        break;
+      default:
+        this.router.navigate(['/connexion']);
+        break;
     }
   }
 

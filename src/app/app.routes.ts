@@ -6,6 +6,14 @@ import { GalerieComponent } from './pages/galerie/galerie.component';
 import { ContactComponent } from './pages/contact/contact.component';
 import { ConnexionComponent } from './pages/connexion/connexion.component';
 import { DashboardAdminComponent } from './admin/dashboard-admin/dashboard-admin.component';
+import { DashboardSuperAdminComponent } from './super-admin/dashboard-super-admin/dashboard-super-admin.component';
+import { ClubsComponent } from './super-admin/clubs/clubs.component';
+import { AdminsComponent } from './super-admin/admins/admins.component';
+import { MembresComponent } from './super-admin/membres/membres.component';
+import { PaiementsComponent } from './super-admin/paiements/paiements.component';
+import { CommandesComponent } from './super-admin/commandes/commandes.component';
+import { LogsComponent } from './super-admin/logs/logs.component';
+import { ActualitesComponent } from './super-admin/actualites/actualites.component';
 import { DashboardMembreComponent } from './membre/dashboard-membre/dashboard-membre.component';
 import { ProfilComponent } from './pages/profil/profil.component';
 import { AuthGuard } from './guards/auth.guard';
@@ -112,6 +120,23 @@ export const routes: Routes = [
     ]
   },
 
+    // 🏆 Espace Super Admin
+    {
+      path: 'super-admin',
+      component: ConnectedLayoutComponent,
+      canActivateChild: [AuthGuard],
+      data: { role: 'SUPER_ADMIN' },
+      children: [
+  { path: 'dashboard-super-admin', component: DashboardSuperAdminComponent },
+  { path: 'clubs', component: ClubsComponent },
+  { path: 'admins', component: AdminsComponent },
+  { path: 'membres', component: MembresComponent },
+  { path: 'paiements', component: PaiementsComponent },
+  { path: 'commandes', component: CommandesComponent },
+  { path: 'logs', component: LogsComponent },
+  { path: 'actualites', component: ActualitesComponent }
+      ]
+    },
   // 🧭 Redirection inconnue
   { path: '**', redirectTo: '' }
 ];
