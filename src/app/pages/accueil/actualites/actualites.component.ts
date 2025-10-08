@@ -24,26 +24,45 @@ export class ActualitesComponent implements OnInit {
   constructor(private actualiteService: ActualiteService) {}
 
   ngOnInit(): void {
-    this.loadActualites();
+    this.loadActualitesClub();
   }
 
-  /** 🔄 Charge toutes les actualités depuis le service */
-  loadActualites(): void {
-    this.actualiteService.getAll().subscribe({
+  /** 🔄 Charge les actualités du club de l'utilisateur connecté */
+  loadActualitesClub(): void {
+    const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || '{}');
+    console.log('Utilisateur localStorage:', utilisateur);
+    let clubId: number | null = null;
+    if (utilisateur?.club?.id) {
+      clubId = utilisateur.club.id;
+    } else if (utilisateur?.clubId) {
+      clubId = utilisateur.clubId;
+    } else if (Array.isArray(utilisateur?.clubs) && utilisateur.clubs.length > 0 && utilisateur.clubs[0]?.id) {
+      clubId = utilisateur.clubs[0].id;
+    }
+    if (!clubId) {
+      console.error('Impossible de récupérer le club de l’utilisateur connecté. Structure utilisateur:', utilisateur);
+      return;
+    }
+    this.actualiteService.getActualitesByClub(clubId).subscribe({
       next: (data) => {
-        this.news = data;
+        this.news = Array.isArray(data) ? data : [];
         this.updateFeaturedNews();
         this.updateRegularNews();
         this.updateFilteredNews();
       },
       error: (err) => {
-        console.error('Erreur de chargement des actualités :', err);
+        this.news = [];
+        console.error('Erreur de chargement des actualités du club :', err);
       }
     });
   }
 
   /** 🌟 Met à jour l'actualité mise à la une */
   updateFeaturedNews(): void {
+    if (!Array.isArray(this.news)) {
+      this.featuredNews = null;
+      return;
+    }
     this.featuredNews = this.news.find(item => item.isFeatured) || null;
     if (this.featuredNews) {
     } else {

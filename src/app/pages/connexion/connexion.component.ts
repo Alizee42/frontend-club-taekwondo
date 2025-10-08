@@ -17,8 +17,16 @@ import { environment } from '../../../environments/environment';
   imports: [FormsModule,CommonModule],
 })
 export class ConnexionComponent {
-  email = '';
-  password = '';
+  email: string = '';
+  password: string = '';
+  clubId: number | undefined = undefined;
+  clubs: Array<{ id: number; nom: string }> = [
+    { id: 1, nom: 'Club 1' },
+    { id: 2, nom: 'Club 2' },
+    { id: 3, nom: 'Club 3' },
+    { id: 4, nom: 'Club 4' }
+  ];
+  showPassword: boolean = false;
 
   constructor(
     private router: Router,
@@ -36,26 +44,29 @@ export class ConnexionComponent {
       this.toastService.error('Adresse email invalide');
       return; 
     }
-
+      // Envoie le clubId sélectionné avec l'email et le mot de passe
+      const payload = {
+        email: this.email,
+        password: this.password,
+        clubId: this.clubId !== undefined ? this.clubId : undefined
+      };
+      this.authService.login(payload)
     console.log('[CONNEXION] Tentative de connexion avec:', this.email);
 
-    // ✅ Utiliser le AuthService au lieu de la requête HTTP directe
-    this.authService.login({ email: this.email, password: this.password })
-      .subscribe({
-        next: (response) => {
-          console.log('[CONNEXION] Connexion réussie :', response);
-          
-          this.toastService.success('🎉 Connexion réussie ! Bienvenue !');
-          
-          // ✅ Le token est déjà stocké par le AuthService, juste faire la redirection
-          const role = response.role || response.utilisateur?.role || '';
-          this.redirectBasedOnRole(role.toString().toUpperCase());
-        },
-        error: (err) => {
-          console.error('[CONNEXION] ❌ Login échoué', err);
-          this.handleError(err);
-        }
-      });
+      // Login classique : envoie uniquement l'email
+      this.authService.login({ email: this.email, password: this.password })
+        .subscribe({
+          next: (response) => {
+            console.log('[CONNEXION] Connexion réussie :', response);
+            this.toastService.success('🎉 Connexion réussie ! Bienvenue !');
+            const role = response.role || response.utilisateur?.role || '';
+            this.redirectBasedOnRole(role.toString().toUpperCase());
+          },
+          error: (err) => {
+            console.error('[CONNEXION] ❌ Login échoué', err);
+            this.handleError(err);
+          }
+        });
   }
 
   private redirectBasedOnRole(role: string): void {
@@ -89,7 +100,6 @@ export class ConnexionComponent {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  showPassword = false;
 
   
 togglePassword() { this.showPassword = !this.showPassword; }

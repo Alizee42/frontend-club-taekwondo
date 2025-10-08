@@ -69,6 +69,12 @@ export class PaiementService {
     return this.listEnAttente().pipe(map(list => list?.length ?? 0));
   }
 
+  /** Récupérer tous les paiements d’un club */
+  getPaiementsByClub(clubId: number): Observable<Paiement[]> {
+    return this.http.get<Paiement[]>(`${this.apiUrl}/club/${clubId}`)
+      .pipe(catchError(this.handleError));
+  }
+
   /* ===== Gestion des erreurs ===== */
   private handleError(error: HttpErrorResponse) {
     const msg = error.error instanceof ErrorEvent

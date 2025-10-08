@@ -15,6 +15,10 @@ export interface Galerie {
   providedIn: 'root',
 })
 export class GalerieService {
+  /** Récupère toutes les galeries d'un club */
+  getGaleriesByClub(clubId: number): Observable<Galerie[]> {
+    return this.http.get<Galerie[]>(`${this.apiUrl}/club/${clubId}`);
+  }
   private readonly apiUrl = `${environment.apiUrl}/galeries`;
 
   constructor(private http: HttpClient) {}

@@ -31,7 +31,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let actu of filteredActualites()" [class.featured-row]="actu.isFeatured">
+  <tr *ngFor="let actu of filteredActualites()" [class.featured-row]="actu.isFeatured">
           <td>{{ actu.titre }}</td>
           <td>{{ actu.typeActu }}</td>
           <td>{{ actu.datePublication | date: 'dd/MM/yyyy' }}</td>

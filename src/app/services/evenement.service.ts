@@ -99,6 +99,13 @@ export class EvenementService {
     );
   }
 
+  /** Récupérer les événements d'un club */
+  getEvenementsByClub(clubId: number): Observable<EvenementDTO[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/club/${clubId}`).pipe(
+      map(events => events.map(e => this.mapToEvenementDTO(e)))
+    );
+  }
+
   // ======================== INSCRIPTIONS ========================
 
   /** S'inscrire à un événement (utilise la vraie route backend) */

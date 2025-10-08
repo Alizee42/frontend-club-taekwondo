@@ -55,7 +55,7 @@ export class AuthService {
   }
 
   // ---- API ----
-  login(credentials: { email: string; password: string }): Observable<LoginResponse> {
+  login(credentials: { email: string; password: string; clubId?: number }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(res => this.storeAuth(res))
     );

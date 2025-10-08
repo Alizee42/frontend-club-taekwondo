@@ -86,7 +86,24 @@ export class GestionInscriptionsComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.fetchUtilisateurs();
+    this.fetchClubIdAndUtilisateurs();
+  }
+
+  /** Récupère l’ID du club de l’admin connecté puis charge les utilisateurs/membres filtrés */
+  fetchClubIdAndUtilisateurs(): void {
+    this.loading = true;
+    this.erreurMessage = '';
+    // Supposons une API /api/utilisateur/me qui retourne l’utilisateur connecté avec son club
+  this.http.get<any>(`${this.API_BASE}/utilisateurs/me`).subscribe({
+      next: (me) => {
+        this.selectedClubId = me.clubId ?? me.club?.id ?? '';
+        this.fetchUtilisateurs();
+      },
+      error: () => {
+        this.erreurMessage = 'Impossible de récupérer le club de l’admin.';
+        this.loading = false;
+      }
+    });
   }
 
   // ===== Helpers =====
@@ -155,11 +172,12 @@ export class GestionInscriptionsComponent implements OnInit {
     this.loading = true;
     this.erreurMessage = '';
 
-    // On charge utilisateurs + membres en parallèle
+    // On charge utilisateurs + membres en parallèle, filtrés par club
     const params = this.query.trim() ? new HttpParams().set('q', this.query.trim()) : new HttpParams();
+    const clubParam = this.selectedClubId ? params.set('clubId', this.selectedClubId) : params;
 
-    const reqUsers = this.http.get<any>(`${this.API_BASE}/utilisateurs`, { params });
-    const reqKids  = this.http.get<any>(`${this.API_BASE}/membres`);
+    const reqUsers = this.http.get<any>(`${this.API_BASE}/utilisateurs`, { params: clubParam });
+    const reqKids  = this.http.get<any>(`${this.API_BASE}/membres`, { params: clubParam });
 
     forkJoin([reqUsers, reqKids]).subscribe({
       next: ([usersRes, kidsRes]) => {
@@ -181,7 +199,9 @@ export class GestionInscriptionsComponent implements OnInit {
         let users = usersArr
           .map(u => this.normalizeUser(u))
           // on ne liste pas les ADMIN ici
-          .filter(u => u.role === 'PARENT' || u.role === 'MEMBRE');
+          .filter(u => u.role === 'PARENT' || u.role === 'MEMBRE')
+          // filtrage club côté front (sécurité supplémentaire)
+          .filter(u => !this.selectedClubId || u.clubId === this.selectedClubId);
 
         // 2) Groupe les enfants par utilisateurId
         const kidsByParent: Record<string, Membre[]> = {};

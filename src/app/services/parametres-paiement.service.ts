@@ -9,6 +9,36 @@ import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ParametresPaiementService {
+  /** Lecture publique des paramètres de paiement pour un club */
+  getParametresPaiementPublicByClub(clubId: number) {
+    return this.http.get<ParametresPaiement>(`${this.publicUrl}/club/${clubId}`).pipe(
+      catchError(err => {
+        console.warn('[ParametresPaiementService] Erreur public club → fallback défaut', err);
+        return of(this.defaultParametres);
+      })
+    );
+  }
+
+  /** Lecture admin des paramètres de paiement pour un club */
+  getParametresPaiementByClub(clubId: number) {
+    return this.http.get<ParametresPaiement>(`${this.adminUrl}/club/${clubId}`).pipe(
+      catchError(err => {
+        console.warn('[ParametresPaiementService] Erreur admin club → fallback public', err);
+        return this.getParametresPaiementPublicByClub(clubId);
+      })
+    );
+  }
+
+  /** Sauvegarde des paramètres de paiement pour un club (admin) */
+  sauvegarderParClub(clubId: number, parametres: ParametresPaiement) {
+    return this.http.post(`${this.adminUrl}/club/${clubId}`, parametres).pipe(
+      tap(() => this.parametresSubject.next(parametres)),
+      catchError(err => {
+        console.error('❌ Erreur sauvegarde paramètres club:', err);
+        throw err;
+      })
+    );
+  }
 
   private readonly API = `${environment.apiUrl}/parametres-paiement`;
   private readonly adminUrl = `${this.API}`;        // Admin GET/POST sur /api/parametres-paiement

@@ -51,6 +51,17 @@ export class AvisService {
     );
   }
 
+  /** Récupérer les avis d'un club */
+  getAvisByClub(clubId: number, approuve?: boolean): Observable<Avis[]> {
+    let params = new HttpParams().set('clubId', String(clubId));
+    if (typeof approuve === 'boolean') {
+      params = params.set('approuve', String(approuve));
+    }
+    return this.http.get<Avis[]>(this.apiUrl, { params }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   // (facultatif) Exemple d’approbation si tu as un endpoint dédié :
   // approuver(id: number): Observable<Avis> {
   //   return this.http.put<Avis>(`${this.apiUrl}/${id}/approuver`, {}).pipe(

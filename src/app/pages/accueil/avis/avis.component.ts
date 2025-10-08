@@ -28,7 +28,7 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(private avisService: AvisService, private toast: ToastService) {}
 
-  ngOnInit(): void { this.chargerAvis(); }
+  ngOnInit(): void { this.chargerAvisClub(); }
   ngAfterViewInit(): void {}
   ngOnDestroy(): void { if (this.swiper) { this.swiper.destroy(true, true); this.swiper = null; } }
 
@@ -43,13 +43,30 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  chargerAvis(): void {
-    this.avisService.getAvis().subscribe({
+  /** Charge les avis du club de l'utilisateur connecté */
+  chargerAvisClub(): void {
+    const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || '{}');
+    console.log('Utilisateur localStorage:', utilisateur);
+    let clubId: number | null = null;
+    if (utilisateur?.club?.id) {
+      clubId = utilisateur.club.id;
+    } else if (utilisateur?.clubId) {
+      clubId = utilisateur.clubId;
+    } else if (Array.isArray(utilisateur?.clubs) && utilisateur.clubs.length > 0 && utilisateur.clubs[0]?.id) {
+      clubId = utilisateur.clubs[0].id;
+    }
+    if (!clubId) {
+      console.error('Impossible de récupérer le club de l’utilisateur connecté. Structure utilisateur:', utilisateur);
+      return;
+    }
+    this.avisService.getAvisByClub(clubId, true).subscribe({
       next: (avis) => {
-        this.avisApprouves = (avis || []).filter(a => a.approuve);
-        setTimeout(() => this.initOrUpdateSwiper());
+        this.avisApprouves = avis;
+        this.initOrUpdateSwiper();
       },
-      error: () => this.toast.error('Impossible de charger les avis pour le moment. Veuillez réessayer plus tard.')
+      error: (err) => {
+        console.error('Erreur de chargement des avis du club :', err);
+      }
     });
   }
 
@@ -107,7 +124,7 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
         this.photoPreview = null; 
         this.photoFichier = null;
 
-        this.chargerAvis();
+        this.chargerAvisClub();
         setTimeout(() => this.messageConfirmation = null, 5000);
       },
       error: () => this.toast.error('Une erreur est survenue lors de l’envoi. Veuillez réessayer plus tard.')

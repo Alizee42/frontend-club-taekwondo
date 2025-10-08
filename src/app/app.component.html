@@ -1,22 +1,8 @@
 
-<!-- Modale de sélection du club : une seule instance, masque tout le site tant qu'aucun club n'est choisi -->
-<ng-container *ngIf="showClubModal">
-	<div class="club-modal-overlay">
-		<div class="club-modal-center">
-			<app-club-select (clubSelected)="onClubSelected($event)"></app-club-select>
-		</div>
-	</div>
-</ng-container>
 
-<!-- Le site complet (header, contenu, footer) n'est visible que si un club est sélectionné ET la modale fermée -->
-<ng-container *ngIf="!showClubModal && selectedClub">
-	<ng-container *ngIf="isConnectedRoute; else publicHeader">
-		<app-connected-header [role]="connectedRole"></app-connected-header>
-	</ng-container>
-	<ng-template #publicHeader>
-		<app-header></app-header>
-	</ng-template>
+<ng-container>
+	<app-header></app-header>
 	<router-outlet></router-outlet>
-	<app-footer *ngIf="!isConnectedRoute"></app-footer>
+	<app-footer></app-footer>
 	<app-toast-container></app-toast-container>
 </ng-container>

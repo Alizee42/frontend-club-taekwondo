@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EvenementService, EvenementDTO, InscriptionEvenementDTO } from '../../services/evenement.service';
 import { InscriptionsService, Inscription } from '../../services/inscriptions.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-gestion-evenements',
@@ -56,7 +57,8 @@ export class GestionEvenementsComponent implements OnInit {
 
   constructor(
     private evenementService: EvenementService,
-    private inscriptionsService: InscriptionsService
+    private inscriptionsService: InscriptionsService,
+    private authService: AuthService // Ajouté pour récupérer le club
   ) {}
 
   ngOnInit(): void {
@@ -66,7 +68,14 @@ export class GestionEvenementsComponent implements OnInit {
   // ======================== EVENEMENTS ========================
   chargerEvenements(): void {
     this.isLoading = true;
-    this.evenementService.getAllEvenements().subscribe({
+    const utilisateur = this.authService.getUtilisateurConnecte();
+    const clubId = utilisateur?.['club']?.id;
+    if (!clubId) {
+      this.errorMsg = 'Impossible de récupérer le club de l’utilisateur.';
+      this.isLoading = false;
+      return;
+    }
+    this.evenementService.getEvenementsByClub(clubId).subscribe({
       next: (evenements) => {
         this.evenements = evenements;
         this.trier(this.sortBy);

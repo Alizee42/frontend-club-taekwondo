@@ -48,7 +48,6 @@ import { DebugParentComponent } from './debug-parent.component';
 
 export const routes: Routes = [
   // 🌐 Routes publiques
-  { path: 'choix-club', component: ClubSelectComponent },
   { path: '', component: AccueilComponent },
   { path: 'inscription', component: InscriptionComponent },
   { path: 'galerie', component: GalerieComponent },

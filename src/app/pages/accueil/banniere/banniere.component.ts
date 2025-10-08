@@ -12,6 +12,7 @@ import { ClubService, Club } from '../../../services/club.service';
   styleUrl: './banniere.component.css'
 })
 export class BanniereComponent {
+
   slogans: string[] = [
     'Discipline',
     'Respect',
@@ -22,11 +23,13 @@ export class BanniereComponent {
   ];
   currentSlogan: string = this.slogans[0];
   private sloganIndex = 0;
-  selectedClub: Club | null = null;
 
   constructor(private clubService: ClubService) {
-    this.selectedClub = this.clubService.getSelectedClub();
     this.rotateSlogan();
+  }
+
+  get selectedClub(): Club | null {
+    return this.clubService.getSelectedClub();
   }
 
   rotateSlogan() {

@@ -107,4 +107,15 @@ export class ActualiteService {
       })
     );
   }
+
+  /** 🔹 Récupère les actualités d'un club */
+  getActualitesByClub(clubId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/club/${clubId}`).pipe(
+      tap(data => this.actualitesSubject.next(data)),
+      catchError(error => {
+        console.error('❌ Erreur lors du chargement des actualités du club :', error);
+        return throwError(() => error);
+      })
+    );
+  }
 }
