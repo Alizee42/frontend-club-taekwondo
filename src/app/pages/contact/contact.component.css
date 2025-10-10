@@ -2,14 +2,27 @@
 .contact-page { animation: fadeIn .4s ease; }
 
 .contact-layout {
-  display:grid;
-  grid-template-columns: 380px 1fr;
-  gap:2.2rem;
-  align-items:start;
+  display: grid;
+  grid-template-columns: minmax(320px, 480px) 1fr;
+  gap: 2.2rem;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
 }
 
 @media (max-width: 980px){
-  .contact-layout { grid-template-columns:1fr; }
+  .contact-layout {
+    grid-template-columns: 1fr;
+    max-width: 98vw;
+    padding: 0 0.5rem;
+  }
+  .contact-panel.card, .contact-form-wrapper.card {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 .card {
@@ -34,10 +47,26 @@
 .info-list a:hover { text-decoration:underline; }
 address { font-style:normal; }
 
-.mini-map-placeholder { margin-top:.5rem; background:#f1f5f9; border:1px dashed #cbd5e1; padding:1rem; text-align:center; font-size:.8rem; border-radius:10px; color:#475569; }
+.mini-map-placeholder {
+  margin-top: 1.2rem;
+  background: #f1f5f9;
+  border: 2px dashed #e63946;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 1.1rem;
+  border-radius: 14px;
+  color: #e63946;
+  font-weight: 600;
+}
 
 /* Formulaire */
-.contact-form-wrapper { display:flex; flex-direction:column; }
+.contact-form-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
 .contact-form { display:flex; flex-direction:column; gap:1.25rem; }
 .form-row { display:flex; gap:1.25rem; flex-wrap:wrap; }
 .form-group { flex:1 1 230px; display:flex; flex-direction:column; }
@@ -72,9 +101,9 @@ address { font-style:normal; }
 /* Mobile adaptations */
 @media (max-width:600px){
   .panel-title { font-size:1.05rem; }
-  .contact-layout { gap:1.4rem; }
-  .card { padding:1.3rem 1.1rem 1.5rem; }
-  .form-row { flex-direction:column; gap:.9rem; }
+  .contact-layout { gap:1rem; }
+  .card { padding:1rem 0.5rem 1rem; }
+  .form-row { flex-direction:column; gap:.7rem; }
   .submit-btn { width:100%; justify-content:center; }
 }
   

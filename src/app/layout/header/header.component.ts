@@ -31,7 +31,10 @@ interface PanierItem extends Produit {
   imports: [CommonModule, RouterModule, DecimalPipe, FormsModule],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  selectedClub: Club | null = null;
+  // Getter réactif pour le club sélectionné
+  get selectedClub(): Club | null {
+    return this.clubService.getSelectedClub();
+  }
   @Output() demandeChangementClub = new EventEmitter<void>();
   private readonly API_BASE = environment.apiUrl;
 
@@ -92,12 +95,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private clubService: ClubService
   ) {
-    this.selectedClub = this.clubService.getSelectedClub();
   }
 
   changeClub() {
     this.clubService.clearSelectedClub();
-    window.location.reload();
+    // Émet l'événement pour ouvrir la modal de sélection de club
+    this.demandeChangementClub.emit();
+    // Met à jour le header (détection de changement)
+    this.cdr.detectChanges();
   }
 
   ngOnInit(): void {
@@ -120,6 +125,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.notifications = [];
           this.unreadCount = 0;
         }
+        // Met à jour le club sélectionné si besoin
+        this.cdr.detectChanges();
       })
     );
 

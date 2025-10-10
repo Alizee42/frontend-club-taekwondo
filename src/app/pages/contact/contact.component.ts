@@ -14,6 +14,7 @@ import type { Club } from '../../services/club.service';
 })
 export class ContactComponent {
   club: Club | null = null;
+  private clubSub: any;
   form: { name: string; email: string; objet: string; message: string } = {
     name: '',
     email: '',
@@ -26,6 +27,12 @@ export class ContactComponent {
 
   constructor(private contactService: ContactService, private clubService: ClubService) {
     this.club = this.clubService.getSelectedClub();
+    this.clubSub = this.clubService.selectedClub$.subscribe((club: Club | null) => {
+      this.club = club;
+    });
+  }
+  ngOnDestroy() {
+    if (this.clubSub) this.clubSub.unsubscribe();
   }
 
   async onSubmit() {

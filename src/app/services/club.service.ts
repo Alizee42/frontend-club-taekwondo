@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 export interface Club {
   id: number;
@@ -13,7 +13,14 @@ export interface Club {
 
 @Injectable({ providedIn: 'root' })
 export class ClubService {
-  constructor(private http: HttpClient) {}
+  private selectedClubSubject: BehaviorSubject<Club | null>;
+  public selectedClub$: Observable<Club | null>;
+
+  constructor(private http: HttpClient) {
+    const club = this.getSelectedClub();
+    this.selectedClubSubject = new BehaviorSubject<Club | null>(club);
+    this.selectedClub$ = this.selectedClubSubject.asObservable();
+  }
 
   getClubs(): Observable<Club[]> {
     const token = localStorage.getItem('token');
@@ -29,9 +36,11 @@ export class ClubService {
 
   setSelectedClub(club: Club) {
     localStorage.setItem('selectedClub', JSON.stringify(club));
+    this.selectedClubSubject.next(club);
   }
 
   clearSelectedClub() {
     localStorage.removeItem('selectedClub');
+    this.selectedClubSubject.next(null);
   }
 }

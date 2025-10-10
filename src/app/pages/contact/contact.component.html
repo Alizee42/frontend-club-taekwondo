@@ -1,51 +1,58 @@
 <div class="page-wrapper-standard contact-page">
-  <header class="page-head">
-    <h1 class="page-title">Contact</h1>
-    <p class="page-subtitle">Questions, informations, adhésion : on vous répond vite.</p>
+  <header class="page-head" style="text-align:center; margin-bottom:2.5rem;">
+    <h1 class="page-title" style="font-size:2.5rem; font-weight:700; letter-spacing:1px; color:var(--blue-main); margin-bottom:.5rem; position:relative; display:inline-block;">
+      Contact
+  <span style="display:block; height:5px; width:60px; background:linear-gradient(90deg,#e63946 0%,#ff7b7b 100%); border-radius:3px; margin:0.5rem auto 0;"></span>
+    </h1>
+    <p class="page-subtitle" style="font-size:1.15rem; color:#334155; margin-bottom:0;">Questions, informations, adhésion : on vous répond vite.</p>
   </header>
 
   <div class="contact-layout">
-      <div *ngIf="club">
-        <h2>{{ club.name }}</h2>
-      </div>
     <aside class="contact-panel card">
-      <h2 class="panel-title">Coordonnées</h2>
-      <p class="intro">Vous pouvez nous écrire via le formulaire ou utiliser un des moyens suivants :</p>
-      <ul class="info-list">
-        <li *ngIf="club?.telephone">
-          <i class="ri-phone-line"></i>
-          <div>
-            <strong>Téléphone</strong><br>
-            <span>{{ club?.telephone }}</span>
-          </div>
-        </li>
-        <li *ngIf="club?.email">
-          <i class="ri-mail-line"></i>
-          <div>
-            <strong>Email</strong><br>
-            <a [href]="'mailto:' + club?.email">{{ club?.email }}</a>
-          </div>
-        </li>
-        <li *ngIf="club?.adresse">
-          <i class="ri-map-pin-line"></i>
-          <div>
-            <strong>Adresse</strong><br>
-            <address>{{ club?.adresse }}</address>
-          </div>
-        </li>
-        <li>
-          <i class="ri-time-line"></i>
-          <div>
-            <strong>Horaires</strong><br>
-            <span>Réponse sous 24h ouvrées</span>
-          </div>
-        </li>
-      </ul>
+      <h2 class="panel-title">Coordonnées du club</h2>
+      <ng-container *ngIf="club; else noClub">
+        <h3 class="club-title">{{ club.name }}</h3>
+        <ul class="info-list">
+          <li *ngIf="club.telephone">
+            <i class="ri-phone-line"></i>
+            <div>
+              <strong>Téléphone</strong><br>
+              <span>{{ club.telephone }}</span>
+            </div>
+          </li>
+          <li *ngIf="club.email">
+            <i class="ri-mail-line"></i>
+            <div>
+              <strong>Email</strong><br>
+              <a [href]="'mailto:' + club.email">{{ club.email }}</a>
+            </div>
+          </li>
+          <li *ngIf="club.adresse">
+            <i class="ri-map-pin-line"></i>
+            <div>
+              <strong>Adresse</strong><br>
+              <address>{{ club.adresse }}</address>
+            </div>
+          </li>
+          <li>
+            <i class="ri-time-line"></i>
+            <div>
+              <strong>Horaires</strong><br>
+              <span>Réponse sous 24h ouvrées</span>
+            </div>
+          </li>
+        </ul>
+      </ng-container>
+      <ng-template #noClub>
+        <div class="no-club-msg">
+          <i class="ri-error-warning-line"></i> Aucun club sélectionné. Veuillez choisir un club pour afficher les coordonnées.
+        </div>
+      </ng-template>
       <div class="mini-map-placeholder" aria-hidden="true">📍 Carte prochaine version</div>
     </aside>
 
     <section class="contact-form-wrapper card" aria-labelledby="formTitle">
-      <h2 id="formTitle" class="panel-title">Envoyer un message</h2>
+      <h2 id="formTitle" class="panel-title">Formulaire de contact</h2>
       <form class="contact-form" (ngSubmit)="onSubmit()" #contactForm="ngForm" novalidate>
         <div class="form-row">
           <div class="form-group">
@@ -58,29 +65,28 @@
             <input id="email" name="email" type="email" required email [(ngModel)]="form.email" #email="ngModel" [class.is-invalid]="email.invalid && (email.dirty || email.touched)" placeholder="vous@exemple.com" autocomplete="email" />
             <small *ngIf="email.invalid && (email.dirty || email.touched)" class="field-error">Email invalide</small>
           </div>
-        </div>
-        <div class="form-group full">
-          <label for="objet">Objet *</label>
+          <div class="form-group full">
+            <label for="objet">Objet *</label>
             <input id="objet" name="objet" type="text" required [(ngModel)]="form.objet" #objet="ngModel" [class.is-invalid]="objet.invalid && (objet.dirty || objet.touched)" placeholder="Sujet de votre demande" />
             <small *ngIf="objet.invalid && (objet.dirty || objet.touched)" class="field-error">Objet requis</small>
-        </div>
-        <div class="form-group full">
-          <label for="message">Message *</label>
-          <textarea id="message" name="message" rows="7" required minlength="10" [(ngModel)]="form.message" #message="ngModel" [class.is-invalid]="message.invalid && (message.dirty || message.touched)" placeholder="Expliquez votre demande..." ></textarea>
-          <small *ngIf="message.errors?.['required'] && (message.dirty || message.touched)" class="field-error">Message requis</small>
-          <small *ngIf="message.errors?.['minlength'] && (message.dirty || message.touched)" class="field-error">Minimum 10 caractères</small>
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || sending">
-            <span *ngIf="!sending">Envoyer</span>
-            <span *ngIf="sending" class="loader-inline"></span>
-          </button>
-        </div>
-        <div class="form-status" aria-live="polite">
-          <p *ngIf="successMessage" class="success-msg"><i class="ri-checkbox-circle-line"></i> {{ successMessage }}</p>
-          <p *ngIf="errorMessage" class="error-msg"><i class="ri-error-warning-line"></i> {{ errorMessage }}</p>
+          </div>
+          <div class="form-group full">
+            <label for="message">Message *</label>
+            <textarea id="message" name="message" rows="7" required minlength="10" [(ngModel)]="form.message" #message="ngModel" [class.is-invalid]="message.invalid && (message.dirty || message.touched)" placeholder="Expliquez votre demande..." ></textarea>
+            <small *ngIf="message.errors?.['required'] && (message.dirty || message.touched)" class="field-error">Message requis</small>
+            <small *ngIf="message.errors?.['minlength'] && (message.dirty || message.touched)" class="field-error">Minimum 10 caractères</small>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || sending">
+              <span *ngIf="!sending">Envoyer</span>
+              <span *ngIf="sending" class="loader-inline"></span>
+            </button>
+          </div>
+          <div class="form-status" aria-live="polite">
+            <p *ngIf="successMessage" class="success-msg"><i class="ri-checkbox-circle-line"></i> {{ successMessage }}</p>
+            <p *ngIf="errorMessage" class="error-msg"><i class="ri-error-warning-line"></i> {{ errorMessage }}</p>
+          </div>
         </div>
       </form>
     </section>
-  </div>
-</div>
+
