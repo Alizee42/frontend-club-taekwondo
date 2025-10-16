@@ -83,7 +83,7 @@ export const routes: Routes = [
       { path: 'galerie', component: GestionGalerieComponent },
       { path: 'documents', component: GestionDocumentsComponent },
       { path: 'paiements', component: GestionPaiementsComponent },
-{ path: 'gestion-commande', component: GestionCommandeComponent },
+      { path: 'gestion-commande', component: GestionCommandeComponent },
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
       { path: 'gestion-inscription', component: GestionInscriptionsComponent }
     ]
