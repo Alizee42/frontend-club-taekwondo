@@ -10,6 +10,7 @@ import {
   AbstractControl
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ClubService } from '../../services/club.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { environment } from '../../../environments/environment';
 
@@ -43,8 +44,15 @@ export class InscriptionComponent implements OnInit {
 
   ceinturesDisponibles = ['Blanche', 'Jaune', 'Orange', 'Verte', 'Bleue', 'Marron', 'Noire'];
   roleMembreSeul: boolean = false;
+  // clubs loaded from API for selection
+  clubs: any[] = [];
+  // club currently selected in header (if any)
+  selectedClub: any = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private toastService: ToastService) {}
+  constructor(private fb: FormBuilder,
+              private http: HttpClient,
+              private toastService: ToastService,
+              private clubService: ClubService) {}
 
   ngOnInit(): void {
     this.utilisateurForm = this.fb.group(
@@ -77,6 +85,9 @@ export class InscriptionComponent implements OnInit {
       { validators: this.matchPasswords }
     );
 
+    // add clubId control (optional) - will be shown when role is MEMBRE or PARENT
+    this.utilisateurForm.addControl('clubId', this.fb.control(null));
+
     this.membresForm = this.fb.group({
       membres: this.fb.array([])
     });
@@ -106,6 +117,45 @@ export class InscriptionComponent implements OnInit {
 
     this.utilisateurForm.valueChanges.subscribe(() => this.saveLocal());
     this.membresForm.valueChanges.subscribe(() => this.saveLocal());
+
+    // load clubs for selection
+    this.loadClubs();
+
+    // pick up the club currently selected in the header (stored in ClubService / localStorage)
+    this.selectedClub = this.clubService.getSelectedClub();
+    if (this.selectedClub && this.selectedClub.id) {
+      this.utilisateurForm.get('clubId')?.setValue(this.selectedClub.id);
+    }
+
+    // update when header selection changes
+    this.clubService.selectedClub$.subscribe(c => {
+      this.selectedClub = c;
+      if (c && c.id) this.utilisateurForm.get('clubId')?.setValue(c.id);
+    });
+  }
+
+  // ===== Clubs =====
+  loadClubs(): void {
+    this.http.get(`${environment.apiUrl}/clubs`).subscribe({
+      next: (res: any) => {
+        if (Array.isArray(res)) this.clubs = res;
+      },
+      error: () => {
+        // ignore silently for now
+        this.clubs = [];
+      }
+    });
+  }
+
+  getSelectedClubName(): string | null {
+    // prefer header-selected club when present
+    if (this.selectedClub && (this.selectedClub.name || this.selectedClub.nom)) {
+      return this.selectedClub.name || this.selectedClub.nom;
+    }
+    const id = this.utilisateurForm.get('clubId')?.value;
+    if (!id) return null;
+    const c = this.clubs.find(x => String(x.id) === String(id));
+    return c ? c.name || c.nom || null : null;
   }
 
   // ===== Validators =====
@@ -250,6 +300,7 @@ export class InscriptionComponent implements OnInit {
       adresse: adresseComposee,
       dateNaissance: f.dateNaissance,
       role: String(f.role || '').toUpperCase(),
+      clubId: f.clubId || null,
       password: f.password
     };
 

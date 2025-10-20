@@ -173,6 +173,18 @@
           </select>
           <small class="field-error" *ngIf="isInvalid('role')">Choisis un rôle.</small>
         </div>
+        
+        <div *ngIf="utilisateurForm.get('role')?.value === 'PARENT' || utilisateurForm.get('role')?.value === 'MEMBRE'">
+          <label *ngIf="!selectedClub">Choisissez un club *</label>
+          <select *ngIf="!selectedClub" formControlName="clubId" required [ngClass]="{'is-invalid': isInvalid('clubId')}">
+            <option value="">-- Sélectionnez un club --</option>
+            <option *ngFor="let c of clubs" [value]="c.id">{{ c.name || c.nom }}</option>
+          </select>
+          <div *ngIf="selectedClub" class="selected-club">
+            Club sélectionné : <strong>{{ selectedClub.name || selectedClub.nom }}</strong>
+          </div>
+          <small class="field-error" *ngIf="isInvalid('clubId')">Veuillez choisir un club.</small>
+        </div>
       </div>
 
       <div class="btn-group">
@@ -249,6 +261,7 @@
         <li><strong>Rôle :</strong> {{ utilisateurForm.value.role }}</li>
       </ul>
 
+        <li *ngIf="getSelectedClubName()"><strong>Club :</strong> {{ getSelectedClubName() }}</li>
       <h3 *ngIf="!roleMembreSeul">Membres :</h3>
       <ul *ngIf="!roleMembreSeul">
         <li *ngFor="let m of membresForm.value.membres">

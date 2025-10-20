@@ -1,2 +1,82 @@
-h2 { color: #388e3c; }
-p { font-size: 1.1em; }
+.admins-root {
+	max-width: 720px;
+	margin: 16px auto;
+	padding: 18px;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.admins-root h2 {
+	margin: 0 0 12px 0;
+	font-size: 1.4rem;
+}
+
+.admin-form .row {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 12px;
+}
+
+.admin-form label {
+	font-weight: 600;
+	margin-bottom: 6px;
+}
+
+.admin-form input,
+.admin-form select {
+	padding: 8px 10px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	font-size: 0.95rem;
+}
+
+.actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 8px;
+}
+
+.actions button {
+	background: #0d6efd;
+	color: white;
+	padding: 10px 14px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.actions button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.message {
+	margin-top: 12px;
+	color: #155724;
+	background: #d4edda;
+	padding: 8px 10px;
+	border-radius: 6px;
+}
+
+@media (max-width: 520px) {
+	.admins-root { padding: 12px; }
+	.actions { justify-content: stretch; }
+	.actions button { width: 100%; }
+}
+
+.header-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px }
+.primary { background:#0d6efd; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer }
+.secondary { background:#ddd; color:#333; border:none; padding:8px 12px; border-radius:6px; cursor:pointer }
+
+.admins-table { width:100%; border-collapse:collapse; margin-top:8px }
+.admins-table th, .admins-table td { padding:8px 10px; border-bottom:1px solid #eee; text-align:left }
+.admins-table thead { background:#f8f9fb }
+
+/* Modal */
+.modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:40 }
+.modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.35) }
+.modal-panel { position:relative; z-index:41; width:min(720px, 96%); background:white; padding:18px; border-radius:8px; box-shadow:0 12px 30px rgba(0,0,0,0.15) }
+.modal-panel h3 { margin-top:0 }
+
+.hint { display:block; margin-top:6px; color:#666; font-size:0.9rem }

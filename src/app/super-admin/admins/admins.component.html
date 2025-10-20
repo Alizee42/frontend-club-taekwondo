@@ -1,2 +1,76 @@
-<h2>Gestion des admins</h2>
-<p>Liste, création, modification et suppression des admins.</p>
+<div class="admins-root">
+	<div class="header-row">
+		<h2>Administrateurs de clubs</h2>
+		<button class="primary" (click)="showModal = true">Créer un admin</button>
+	</div>
+
+	<table class="admins-table" *ngIf="admins.length > 0; else noAdmins">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Nom</th>
+				<th>Prénom</th>
+				<th>Email</th>
+				<th>Club</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr *ngFor="let a of admins">
+				<td>{{ a.id }}</td>
+				<td>{{ a.nom }}</td>
+				<td>{{ a.prenom }}</td>
+				<td>{{ a.email }}</td>
+				<td>{{ a.clubId || '-' }}</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<ng-template #noAdmins>
+		<p>Aucun administrateur trouvé.</p>
+	</ng-template>
+
+	<!-- Modal -->
+	<div class="modal" *ngIf="showModal">
+		<div class="modal-backdrop" (click)="showModal = false"></div>
+		<div class="modal-panel">
+			<h3>Créer un administrateur de club</h3>
+			<form (ngSubmit)="createAdmin()" class="admin-form">
+				<div class="row">
+					<label>Nom *</label>
+					<input [(ngModel)]="newAdmin.nom" name="nom" required />
+				</div>
+
+				<div class="row">
+					<label>Prénom</label>
+					<input [(ngModel)]="newAdmin.prenom" name="prenom" />
+				</div>
+
+				<div class="row">
+					<label>Email *</label>
+					<input [(ngModel)]="newAdmin.email" name="email" type="email" required />
+				</div>
+
+				<div class="row">
+					<label>Mot de passe *</label>
+					<input [(ngModel)]="newAdmin.password" name="password" type="password" required />
+				</div>
+
+				<div class="row">
+					<label>Club *</label>
+					<select [(ngModel)]="newAdmin.clubId" name="clubId" required>
+						<option [ngValue]="null">-- Choisir un club --</option>
+						<option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.name }}</option>
+					</select>
+					<small *ngIf="clubs.length === 0" class="hint">Aucun club disponible — créez d'abord un club.</small>
+				</div>
+
+				<div class="actions">
+					<button type="button" class="secondary" (click)="showModal = false">Annuler</button>
+					<button type="submit" class="primary" [disabled]="loading">{{ loading ? 'En cours...' : 'Créer' }}</button>
+				</div>
+
+				<p class="message" *ngIf="message">{{ message }}</p>
+			</form>
+		</div>
+	</div>
+</div>

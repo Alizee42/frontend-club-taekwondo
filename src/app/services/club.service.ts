@@ -28,6 +28,12 @@ export class ClubService {
     const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
     return this.http.get<Club[]>('/api/clubs', { headers });
   }
+  
+  createClub(payload: Partial<Club>): Observable<Club> {
+    const token = localStorage.getItem('token');
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+    return this.http.post<Club>('/api/clubs', payload, { headers });
+  }
 
   getSelectedClub(): Club | null {
     const club = localStorage.getItem('selectedClub');
