@@ -1,0 +1,25 @@
+.ui-icn-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; background: transparent; cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, transform .06s ease;
+}
+.ui-icn-btn i { font-size: 16px; }
+.ui-icn-btn .spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--blue-main); border-right-color: transparent;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ui-icn-btn.v-ghost:hover { background: rgba(0,0,0,.06); }
+.ui-icn-btn.v-primary { background: var(--blue-main); color: #fff; }
+.ui-icn-btn.v-primary:hover { filter: brightness(1.05); }
+.ui-icn-btn.v-danger { background: #e43939; color: #fff; }
+.ui-icn-btn.v-danger:hover { filter: brightness(1.05); }
+
+.ui-icn-btn:disabled { opacity: .6; cursor: not-allowed; }
+.ui-icn-btn:focus-visible {
+  outline: 3px solid rgba(37,95,133,.35);
+  outline-offset: 2px;
+}

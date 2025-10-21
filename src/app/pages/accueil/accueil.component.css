@@ -1,8 +1,3 @@
-
-/* Modale club */
-
-/* Unification du style premium club modal */
-
 :root {
   --blue-main: #1E6091;
   --blue-hover: #283a5a;
@@ -13,6 +8,27 @@
   --surface-100: #f4f6f9;
   --text-secondary: #4B5A6B;
   --brand-thin: #1E6091;
+}
+/* Bouton croix bleue pour fermer la modale */
+.close-modal-btn {
+position: absolute;
+  top: 18px;
+  right: 18px;
+  color: var(--blue-main);
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 10;
+  padding: 0.2rem 0.5rem;
+  line-height: 1;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
+  transition: color 0.2s, box-shadow 0.2s, transform 0.2s;
+  font-weight: bold;
+}
+.close-modal-btn:hover {
+  color: var(--blue-hover);
 }
 
 .club-modal-premium-brand-thin {
@@ -87,7 +103,7 @@
 .club-modal-premium-title {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #1976d2;
+  color: var(--blue-main);
   margin-bottom: 6px;
   text-align: center;
   letter-spacing: 0.5px;

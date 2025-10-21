@@ -1,35 +1,43 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component } from '@angular/core';
+import { EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ClubService, Club } from '../services/club.service';
+import { UiButtonComponent } from '../shared/ui/buttons/ui-button/ui-button.component';
+import { Club, ClubService } from '../services/club.service';
 
 @Component({
   selector: 'app-club-select',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UiButtonComponent],
   templateUrl: './club-select.component.html',
   styleUrls: ['./club-select.component.css']
 })
 export class ClubSelectComponent {
-  @Output() clubSelected = new EventEmitter<Club>();
   clubs: Club[] = [];
-  loading = true;
+  loading = false;
   error: string | null = null;
 
-  constructor(private clubService: ClubService) {
+  // Ajout EventEmitter pour transmettre le club au parent
+  @Output() clubSelected = new EventEmitter<Club>();
+
+  selectClub(club: Club) {
+    this.clubSelected.emit(club);
+    console.log('Club sélectionné :', club);
+  }
+
+  // Exemple d'init – adapte selon ta logique réelle
+  constructor(private clubService: ClubService) {}
+
+  ngOnInit() {
+    this.loading = true;
     this.clubService.getClubs().subscribe({
       next: (clubs) => {
         this.clubs = clubs;
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Erreur lors du chargement des clubs.';
+        this.error = 'Erreur lors du chargement des clubs';
         this.loading = false;
       }
     });
-  }
-
-  selectClub(club: Club) {
-    this.clubService.setSelectedClub(club);
-    this.clubSelected.emit(club);
   }
 }

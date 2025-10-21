@@ -1,0 +1,131 @@
+/* Style moderne pour le bouton principal */
+.ui-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 12px 18px;
+  font-size: 1.15rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1.5px solid var(--blue-main, #255F85);
+  background: var(--blue-main, #255F85);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, color 0.18s;
+  box-shadow: 0 2px 8px rgba(37, 95, 133, 0.08);
+}
+
+.ui-btn:hover:not(:disabled):not(.loading) {
+  background: var(--blue-hover);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+}
+
+.ui-btn:active {
+  background: #155a8a;
+}
+
+.ui-btn:disabled,
+.ui-btn.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ui-btn-label {
+  flex: 1;
+  text-align: left;
+}
+/* Backdrop */
+.ui-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  z-index: 1000;
+}
+
+/* Boîte modale */
+.ui-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .18);
+  z-index: 1001;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  outline: none;
+}
+
+/* Header */
+.ui-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e9e9e9;
+  position: relative;
+}
+
+.ui-modal-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--blue-main);
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+/* Close (croix en haut à droite) */
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Body */
+.ui-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+}
+
+/* Footer (actions) */
+.ui-modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid #e9e9e9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ====== BOUTONS STANDARDS BLEUS (fond/texte) ====== */
+/* Assure-toi d’avoir défini :root { --blue-main: #255F85; } */
+.ui-btn.v-primary {
+  background: var(--blue-main);
+  color: #fff;
+  border: 1px solid var(--blue-main);
+  box-shadow: none;
+}
+
+.ui-btn.v-primary:hover:not(.is-disabled):not(.loading) {
+  filter: brightness(1.05);
+}
+
+/* Accessibilité focus */
+.ui-btn:focus-visible,
+.ui-icn-btn:focus-visible {
+  outline: 3px solid rgba(37, 95, 133, .35);
+  outline-offset: 2px;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .ui-modal {
+    width: 94vw !important;
+  }
+  .ui-modal-footer {
+    flex-direction: column-reverse;
+  }
+  .ui-btn.full { width: 100%; }
+}

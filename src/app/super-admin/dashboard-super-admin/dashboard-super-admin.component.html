@@ -52,38 +52,35 @@
 
   <!-- Sections -->
   <div class="dashboard-grid">
+    <!-- Section Gestion du club -->
     <div class="dashboard-section">
       <div class="section-header">
         <div class="section-icon"><i class="ri-community-line"></i></div>
-        <h2>Gestion des clubs</h2>
+        <h2>Gestion du club</h2>
       </div>
       <ul>
         <li (click)="navigateToClubs()"><i class="ri-community-line"></i> Clubs</li>
-        <li (click)="navigateToAdmins()"><i class="ri-user-star-line"></i> Admins</li>
-        <li (click)="navigateToMembres()"><i class="ri-team-line"></i> Membres</li>
-        <li (click)="navigateToDocuments()"><i class="ri-file-list-3-line"></i> Documents</li>
-        <li (click)="navigateToAvis()"><i class="ri-star-line"></i> Avis</li>
+        <li (click)="navigateToEvenements()"><i class="ri-calendar-event-line"></i> Événements</li>
+        <li (click)="navigateToGalerie()"><i class="ri-image-line"></i> Galerie / Médias</li>
+        <li (click)="navigateToHoraires()"><i class="ri-time-line"></i> Horaires</li>
       </ul>
-      <!-- Tableau récapitulatif des clubs -->
-      <table class="table-clubs">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Téléphone</th>
-            <th>Adresse</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let club of clubs">
-            <td>{{ club.name }}</td>
-            <td>{{ club.email }}</td>
-            <td>{{ club.telephone }}</td>
-            <td>{{ club.adresse }}</td>
-          </tr>
-        </tbody>
-      </table>
     </div>
+
+    <!-- Section Gestion des membres -->
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-user-line"></i></div>
+        <h2>Gestion des membres</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToMembres()"><i class="ri-team-line"></i> Membres</li>
+        <li (click)="navigateToGestionInscription()"><i class="ri-user-add-line"></i> Inscriptions</li>
+        <li (click)="navigateToDocuments()"><i class="ri-file-list-line"></i> Documents</li>
+        <li (click)="navigateToAdmins()"><i class="ri-user-star-line"></i> Admins</li>
+      </ul>
+    </div>
+
+    <!-- Section Gestion financière -->
     <div class="dashboard-section">
       <div class="section-header">
         <div class="section-icon"><i class="ri-wallet-3-line"></i></div>
@@ -94,18 +91,21 @@
         <li (click)="navigateToCommandes()"><i class="ri-shopping-bag-3-line"></i> Commandes</li>
       </ul>
     </div>
+
+    <!-- Section Administration -->
     <div class="dashboard-section">
       <div class="section-header">
         <div class="section-icon"><i class="ri-settings-3-line"></i></div>
-        <h2>Administration globale</h2>
+        <h2>Administration</h2>
       </div>
       <ul>
-        <li (click)="navigateToLogs()"><i class="ri-shield-check-line"></i> Logs sécurité</li>
+        <li (click)="navigateToAvis()"><i class="ri-star-line"></i> Avis</li>
         <li (click)="navigateToActualites()"><i class="ri-newspaper-line"></i> Actualités</li>
         <li (click)="navigateToUtilisateurs()"><i class="ri-user-line"></i> Utilisateurs</li>
-        <li (click)="navigateToEvenements()"><i class="ri-calendar-event-line"></i> Événements</li>
+        <li (click)="navigateToLogs()"><i class="ri-shield-check-line"></i> Logs sécurité</li>
       </ul>
     </div>
   </div>
+<!-- Nettoyage : suppression des doublons et fermeture correcte des <div> -->
 </div>
 

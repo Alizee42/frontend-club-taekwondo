@@ -1,11 +1,20 @@
-
-<div class="club-modal-premium-select">
+<div class="club-modal-premium-select" style="position:relative;">
   <div *ngIf="loading" class="club-modal-loading">Chargement des clubs...</div>
   <div *ngIf="error" class="club-modal-error">{{ error }}</div>
-  <div class="club-modal-list" *ngIf="!loading && clubs.length > 0">
-    <button class="club-modal-premium-btn" *ngFor="let club of clubs" (click)="selectClub(club)">
-      <span class="club-modal-btn-label">{{ club.name }}</span>
-    </button>
+
+
+  <div class="club-list-simple" *ngIf="!loading && clubs.length > 0">
+    <div *ngFor="let club of clubs" class="club-list-row">
+      <ui-button
+        variant="primary"
+        [label]="club.name || club.nom"
+        (clicked)="selectClub(club)"
+        style="width:100%; text-align:left; justify-content:flex-start;"
+      ></ui-button>
+    </div>
   </div>
-  <div *ngIf="!loading && clubs.length === 0 && !error" class="club-modal-empty">Aucun club disponible.</div>
+
+  <div *ngIf="!loading && clubs.length === 0 && !error" class="club-modal-empty">
+    Aucun club disponible.
+  </div>
 </div>

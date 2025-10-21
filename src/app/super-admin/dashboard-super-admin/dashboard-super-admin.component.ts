@@ -4,16 +4,30 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ClubService, Club } from '../../services/club.service';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { PaiementService, Paiement } from '../../services/paiement.service';
+import { ActualiteService } from '../../services/actualite.service';
+import { AvisService, Avis } from '../../services/avis.service';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard-super-admin',
   templateUrl: './dashboard-super-admin.component.html',
   styleUrls: ['./dashboard-super-admin.component.css'],
-  imports: [CommonModule, FormsModule, CurrencyPipe]
+  imports: [CommonModule, FormsModule]
 })
 export class DashboardSuperAdminComponent implements OnInit {
+  navigateToGalerie() {
+    this.router.navigate(['super-admin/galerie']);
+  }
+
+  navigateToHoraires() {
+    this.router.navigate(['super-admin/horaires']);
+  }
+
+  navigateToGestionInscription() {
+    this.router.navigate(['super-admin/inscriptions']);
+  }
   // KPIs globaux
   clubsCount = 0;
   membresCount = 0;
@@ -47,25 +61,66 @@ export class DashboardSuperAdminComponent implements OnInit {
   supprimerAdmin(id: number) { alert('Supprimer admin ' + id + ' (fonction à implémenter)'); }
   reinitialiserAdmin(id: number) { alert('Réinitialiser mot de passe admin ' + id + ' (fonction à implémenter)'); }
 
-  constructor(private clubService: ClubService, private router: Router) {}
+  constructor(
+    private clubService: ClubService,
+    private router: Router,
+    private paiementService: PaiementService,
+    private actualiteService: ActualiteService,
+    private avisService: AvisService
+  ) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('token');
-    this.clubService.getClubs().subscribe(clubs => {
+    // Clubs
+    this.clubService.getClubs().subscribe((clubs: Club[]) => {
       this.clubs = clubs;
       this.clubsCount = clubs.length;
-      // Simule les stats pour la démo visuelle
-      this.membresCount = 1200;
-      this.adminsCount = 18;
-      this.paiementsTotal = 45200;
-      this.paiementsAttente = 3200;
-      this.evenementsAVenir = 7;
-      this.documentsCount = 56;
-      this.actualitesCount = 12;
-      this.avisCount = 34;
-      this.utilisateursActifs = 980;
-      this.logsCount = this.logs.length;
+
+      // Agréger tous les paiements de tous les clubs
+      let paiementsTotal = 0;
+      let paiementsAttente = 0;
+      let clubsPaiementsLoaded = 0;
+      if (clubs.length === 0) {
+        this.paiementsTotal = 0;
+        this.paiementsAttente = 0;
+      }
+      clubs.forEach(club => {
+        this.paiementService.getPaiementsByClub(club.id).subscribe((paiements: Paiement[]) => {
+          paiementsTotal += paiements
+            .filter((p: Paiement) => p.statut === 'VALIDE')
+            .reduce((acc: number, p: Paiement) => acc + (p.montantTotal || 0), 0);
+          paiementsAttente += paiements
+            .filter((p: Paiement) => p.statut === 'EN_ATTENTE')
+            .reduce((acc: number, p: Paiement) => acc + (p.montantTotal || 0), 0);
+          clubsPaiementsLoaded++;
+          if (clubsPaiementsLoaded === clubs.length) {
+            this.paiementsTotal = paiementsTotal;
+            this.paiementsAttente = paiementsAttente;
+          }
+        });
+      });
     });
+
+    // Membres (à adapter pour global)
+    // Remplacer par un endpoint global si disponible
+    // Exemple : this.membreService.getAllMembres().subscribe(membres => { this.membresCount = membres.length; });
+
+    // Admins (à adapter selon structure)
+    // Exemple : this.adminService.getAllAdmins().subscribe(admins => { this.adminsCount = admins.length; });
+
+    // Paiements total
+
+    // Actualités
+    this.actualiteService.getAll().subscribe((actualites: any[]) => {
+      this.actualitesCount = actualites.length;
+    });
+
+    // Avis
+    this.avisService.getAvis().subscribe((avis: Avis[]) => {
+      this.avisCount = avis.length;
+    });
+
+    // Logs (statique ou à brancher sur un service)
+    this.logsCount = this.logs.length;
   }
 
   // Méthodes de chargement (à connecter à tes services)

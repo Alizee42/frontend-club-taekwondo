@@ -1,14 +1,93 @@
-/* Style premium glassmorphism pour la modale club */
-.club-modal-premium-backdrop {
-	position: fixed;
-	inset: 0;
-	background: rgba(25, 118, 210, 0.25);
-	backdrop-filter: blur(6px);
-	z-index: 1000;
+/* Liste simple des clubs, chaque club sur une ligne */
+.club-list-simple {
 	display: flex;
-	align-items: center;
+	flex-direction: column;
+	gap: 16px;
+	margin: 32px 0;
+}
+
+.club-list-row {
+	width: 100%;
+	display: flex;
+}
+
+.club-list-row ui-button {
+	width: 100%;
+	text-align: left;
+	justify-content: flex-start;
+	font-size: 1.15rem;
+	font-weight: 500;
+	border-radius: 8px;
+	padding: 12px 18px;
+}
+/* Bouton croix bleue pour fermer la modale */
+.close-modal-btn {
+	position: absolute;
+	top: 18px;
+	right: 18px;
+	color: #1976d2;
+	background: none;
+	border: none;
+	font-size: 2.5rem;
+	cursor: pointer;
+	z-index: 10;
+	padding: 0;
+	line-height: 1;
+}
+/* Style des cartes clubs */
+.club-modal-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 32px;
 	justify-content: center;
-	animation: fadeInBackdrop 0.5s;
+	margin-top: 24px;
+}
+
+.club-card {
+	background: #fff;
+	border-radius: 18px;
+	box-shadow: 0 4px 18px rgba(25, 118, 210, 0.13), 0 1.5px 8px rgba(0,0,0,0.08);
+	padding: 22px 18px 16px 18px;
+	min-width: 160px;
+	max-width: 220px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	cursor: pointer;
+	transition: transform 0.18s, box-shadow 0.18s;
+	border: 1.5px solid rgba(25, 118, 210, 0.10);
+	animation: fadeInClubCard 0.7s;
+}
+
+.club-card:hover {
+	transform: translateY(-6px) scale(1.04);
+	box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18), 0 1.5px 8px rgba(0,0,0,0.12);
+	border-color: #1E6091;
+}
+
+	.club-card {
+		background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+		border-radius: 14px;
+		box-shadow: 0 4px 18px rgba(25, 118, 210, 0.13), 0 1.5px 8px rgba(0,0,0,0.08);
+		padding: 18px 14px;
+		min-width: 140px;
+		max-width: 200px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		cursor: pointer;
+		transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+		border: 1.5px solid #b3c6e6;
+		animation: fadeInClubCard 0.7s;
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: #255F85;
+		letter-spacing: 0.5px;
+}
+
+@keyframes fadeInClubCard {
+	from { opacity: 0; transform: translateY(20px); }
+	to { opacity: 1; transform: translateY(0); }
 }
 
 .club-modal-premium {
@@ -17,12 +96,15 @@
 	box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18), 0 1.5px 8px rgba(0,0,0,0.08);
 	padding: 36px 28px 28px 28px;
 	min-width: 440px;
-	max-width: 98vw;
-	width: 540px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	position: relative;
+	.club-card-name {
+		font-size: 1.15rem;
+		font-weight: 700;
+		color: #255F85;
+		letter-spacing: 0.7px;
+		text-align: center;
+		padding: 8px 0;
+		width: 100%;
+	}
 	border: 1.5px solid rgba(25, 118, 210, 0.18);
 	animation: fadeInModal 0.6s;
 }

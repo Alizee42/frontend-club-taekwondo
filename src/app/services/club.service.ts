@@ -5,6 +5,8 @@ import { Observable, BehaviorSubject } from 'rxjs';
 export interface Club {
   id: number;
   name: string;
+  nom: string;
+  ville: string;
   logo?: string;
   adresse?: string;
   telephone?: string;

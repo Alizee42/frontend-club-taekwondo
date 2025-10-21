@@ -9,7 +9,8 @@ import { ProfesseursComponent } from '../accueil/professeurs/professeurs.compone
 import { ActualitesComponent } from '../accueil/actualites/actualites.component'; 
 import { BanniereComponent } from '../accueil/banniere/banniere.component';
 import { ClubSelectComponent } from '../../club-select/club-select.component';
-// import supprimé : le sélecteur de club n'est plus géré ici
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { UniversalHeaderComponent } from '../../shared/layout/universal-header/universal-header.component';
 
 @Component({
   selector: 'app-accueil',
@@ -22,26 +23,61 @@ import { ClubSelectComponent } from '../../club-select/club-select.component';
     HorairesComponent,
     ProfesseursComponent,
     ActualitesComponent,
-    ClubSelectComponent
+    ClubSelectComponent,
+  UiButtonComponent,
+  UniversalHeaderComponent
   ],
   templateUrl: './accueil.component.html',
   styleUrls: ['./accueil.component.css']
 })
 export class AccueilComponent {
-  showClubModal = false;
+  showClubModal = true;
 
-  constructor(private clubService: ClubService) {
-    const selectedClub = this.clubService.getSelectedClub();
-    const token = localStorage.getItem('token');
-    this.showClubModal = !selectedClub && !token;
-  }
+  // Pour le header universel
+  isUserLoggedIn = false; // À remplacer par la vraie logique d'authentification
+  userName: string | undefined = undefined;
+  userAvatar: string | undefined = undefined;
+  unreadNotifications = 0;
+
+  constructor(private clubService: ClubService) {}
 
   get selectedClub(): Club | null {
     return this.clubService.getSelectedClub();
   }
 
+  closeModal() {
+    this.showClubModal = false;
+  }
+
   onClubSelected(club: Club) {
     this.showClubModal = false;
     // Optionnel : recharger les actualités ou rediriger
+  }
+
+  // Méthodes pour le header universel
+  onChangeClub() {
+    this.showClubModal = true;
+  }
+  onLogout() {
+    this.isUserLoggedIn = false;
+    this.userName = undefined;
+    this.userAvatar = undefined;
+    // Ajoute ici la logique de déconnexion réelle
+  }
+  onGoToDashboard() {
+    // Ajoute ici la navigation vers le dashboard
+  }
+  onGoToProfile() {
+    // Ajoute ici la navigation vers le profil
+  }
+  onOpenNotifications() {
+    // Ajoute ici l'ouverture des notifications
+  }
+  // Simule un utilisateur connecté pour test
+  simulateLogin() {
+    this.isUserLoggedIn = true;
+    this.userName = 'Jean Dupont';
+    this.userAvatar = '/assets/images/avatar-test.png';
+    this.unreadNotifications = 3;
   }
 }

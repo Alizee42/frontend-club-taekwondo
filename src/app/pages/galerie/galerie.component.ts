@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { UniversalHeaderComponent } from '../../shared/layout/universal-header/universal-header.component';
 import { GalerieService, Galerie } from '../../services/galerie.service';
 
 @Component({
   selector: 'app-galerie',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UniversalHeaderComponent],
   templateUrl: './galerie.component.html',
   styleUrls: ['./galerie.component.css']
 })

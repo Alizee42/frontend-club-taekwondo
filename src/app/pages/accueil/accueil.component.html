@@ -1,12 +1,25 @@
-<header class="page-head" style="text-align:center; margin-bottom:2.5rem;">
+
+<universal-header
+  [clubName]="selectedClub?.nom || 'Villeurbannais'"
+  [logoUrl]="'/assets/images/logo.png'"
+  [isUserLoggedIn]="isUserLoggedIn"
+  [userName]="userName"
+  [userAvatar]="userAvatar"
+  [unreadNotifications]="unreadNotifications"
+  (changeClub)="onChangeClub()"
+  (logout)="onLogout()"
+  (goToDashboard)="onGoToDashboard()"
+  (goToProfile)="onGoToProfile()"
+  (openNotifications)="onOpenNotifications()"
+></universal-header>
+
 <!-- Modale club style premium -->
 <div class="club-modal-premium-backdrop" *ngIf="showClubModal">
 	<div class="club-modal-premium">
-		<button class="club-modal-premium-close" (click)="showClubModal = false" title="Fermer">
-			<span>&#10006;</span>
-		</button>
+				<button class="close-modal-btn" (click)="closeModal()" aria-label="Fermer">
+					&#10005;
+				</button>
 		<div class="club-modal-premium-logo-wrap">
-		<img [src]="selectedClub?.logo || 'assets/logo-taekwondo.png'" alt="Logo du club" class="club-modal-premium-logo" />
 		</div>
 		<div class="club-modal-premium-title">Bienvenue sur le portail olympique Taekwondo</div>
 		<div class="club-modal-premium-slogan">Maîtrise, Respect, Dépassement de soi</div>
@@ -25,4 +38,4 @@
 <app-horaires></app-horaires>
 <app-professeurs></app-professeurs>
 <app-avis></app-avis>
-<app-actualites></app-actualites> 
+<app-actualites></app-actualites>
