@@ -1,3 +1,52 @@
+.modale-content[_ngcontent-ng-c2971476032] {
+  background-color: #fff;
+  border-radius: 30px;
+  width: 96%;
+  max-width: 650px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  animation: _ngcontent-ng-c2971476032_slideUp 0.3s ease;
+}
+.ui-modal-header[_ngcontent-ng-c2971476032] {
+  color: #fff;
+  font-weight: bold;
+  font-size: 20px;
+}
+.ui-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+  background: var(--blue-main, #2563eb);
+  color: #fff;
+  padding: 22px 28px 16px 28px;
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.07);
+}
+.modale-content {
+  background-color: #fff;
+  border-radius: 30px;
+  width: 96%;
+  max-width: 650px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  animation: _ngcontent-ng-c2971476032_slideUp 0.3s ease;
+  padding: 0;
+}
+.ui-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #fff !important;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0.2rem 0.5rem;
+  transition: color 0.2s, box-shadow 0.2s, transform 0.2s;
+  font-weight: bold;
+}
+.ui-modal-close:hover {
+  color: #f7c873 !important;
+}
+/* Header premium pour la modale avis */
 /* ==== Formulaire premium ==== */
 .form-title {
   text-align: center;
@@ -324,11 +373,10 @@
 
 .modale-content {
   background-color: #fff;
-  padding: 25px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  width: 96%;
+  max-width: 650px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
   animation: slideUp 0.3s ease;
 }
 

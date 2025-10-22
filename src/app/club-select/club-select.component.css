@@ -6,6 +6,28 @@
 	margin: 32px 0;
 }
 
+.club-select-intro {
+	margin: 32px 0 16px 0;
+	text-align: center;
+	font-family: inherit;
+	color: #222;
+}
+.club-select-intro h2 {
+	font-size: 2rem;
+	font-weight: 700;
+	margin-bottom: 8px;
+}
+.club-select-intro-sub {
+	font-size: 1.15rem;
+	font-weight: 500;
+	color: #1976d2;
+	margin-bottom: 12px;
+}
+.club-select-intro p {
+	font-size: 1rem;
+	margin-bottom: 6px;
+}
+
 .club-list-row {
 	width: 100%;
 	display: flex;

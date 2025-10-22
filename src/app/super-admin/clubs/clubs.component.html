@@ -1,39 +1,22 @@
-<h2>Gestion des clubs</h2>
 
-<section class="clubs-list">
-	<h3>Clubs existants</h3>
-	<div *ngIf="loading">Chargement...</div>
-	<ul *ngIf="!loading">
-		<li *ngFor="let club of clubs">
-			<strong>{{ club.name }}</strong>
-			<div class="meta">{{ club.adresse || '' }} - {{ club.telephone || '' }} - {{ club.email || '' }}</div>
-		</li>
-	</ul>
-</section>
-
-<section class="clubs-create">
-	<h3>Créer un nouveau club</h3>
-	<form (ngSubmit)="createClub()">
-		<div>
-			<label>Nom</label>
-			<input [(ngModel)]="newClub.name" name="name" required />
-		</div>
-		<div>
-			<label>Adresse</label>
-			<input [(ngModel)]="newClub.adresse" name="adresse" />
-		</div>
-		<div>
-			<label>Téléphone</label>
-			<input [(ngModel)]="newClub.telephone" name="telephone" />
-		</div>
-		<div>
-			<label>Email</label>
-			<input [(ngModel)]="newClub.email" name="email" />
-		</div>
-		<div>
-			<label>Logo (URL)</label>
-			<input [(ngModel)]="newClub.logo" name="logo" />
-		</div>
-		<button type="submit">Créer le club</button>
-	</form>
+<section class="clubs-page-premium">
+  <div class="clubs-header-premium" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+    <h2 class="clubs-title" style="margin: 0;">Gestion des clubs</h2>
+  <ui-button color="primary" (clicked)="openClubModal = true" label="Créer un club" class="ui-btn"></ui-button>
+  </div>
+  <div class="clubs-table-wrapper">
+    <ui-table
+      [columns]="clubColumns"
+      [data]="clubs"
+      [actions]="clubActions"
+      (actionClick)="handleClubAction($event)">
+    </ui-table>
+  </div>
+  <ui-modal [open]="openClubModal" [title]="'Créer un nouveau club'" (closed)="closeClubModal()">
+    <ui-form
+      [fields]="clubFormFields"
+      [submitLabel]="'Créer'"
+      (submitted)="onClubFormSubmit($event)">
+    </ui-form>
+  </ui-modal>
 </section>

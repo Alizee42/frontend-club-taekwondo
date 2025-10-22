@@ -1,3 +1,5 @@
+import { UiFormComponent } from '../../../shared/ui/form/ui-form.component';
+import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button/ui-button.component';
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,11 +10,49 @@ import Swiper from 'swiper/bundle';
 @Component({
   selector: 'app-avis',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiFormComponent],
   templateUrl: './avis.component.html',
   styleUrls: ['./avis.component.css'],
 })
 export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
+  fieldsAvis = [
+    { name: 'pseudoVisiteur', label: 'Votre nom', type: 'text', placeholder: 'Entrez votre nom', required: true },
+    { name: 'contenu', label: 'Votre témoignage', type: 'textarea', placeholder: 'Partagez votre expérience...', required: true },
+    { name: 'note', label: 'Note', type: 'select', required: true, options: [
+      { value: '', label: 'Choisir une note' },
+      { value: 1, label: '1 étoile' },
+      { value: 2, label: '2 étoiles' },
+      { value: 3, label: '3 étoiles' },
+      { value: 4, label: '4 étoiles' },
+      { value: 5, label: '5 étoiles' }
+    ] },
+    { name: 'typeAvis', label: 'Sujet (optionnel)', type: 'select', required: false, options: [
+      { value: '', label: 'Avis général' },
+      { value: 'cours', label: 'Cours' },
+      { value: 'entraineurs', label: 'Entraîneurs' },
+      { value: 'evenements', label: 'Événements' },
+      { value: 'organisation', label: 'Organisation' },
+      { value: 'competitions', label: 'Compétitions' }
+    ] },
+    { name: 'photo', label: 'Photo (optionnelle)', type: 'file', required: false, onChange: (event: any) => this.onPhotoSelected(event) }
+  ];
+  loadingAvis = false;
+  formError = '';
+
+  onFormSubmit(data: any) {
+    // Ici, tu peux ajouter la logique de validation et d'envoi
+    this.envoyerAvisForm(data);
+  }
+
+  envoyerAvisForm(data: any) {
+    // Adapter la logique pour utiliser l'objet data du formulaire partagé
+    // Exemple :
+    // this.avisService.envoyerAvis(data).subscribe(...)
+    // Pour l'instant, on peut juste afficher les données
+    console.log('Avis envoyé :', data);
+  this.toast.success('Merci, votre avis a bien été envoyé !', 4000);
+    this.modaleOuverte = false;
+  }
   avisApprouves: Avis[] = [];
   modaleOuverte = false;
   messageConfirmation: string | null = null;

@@ -15,6 +15,8 @@ export class UiButtonComponent {
   @Input() variant: 'primary' | 'secondary' | 'danger' = 'primary';
   @Input() disabled: boolean = false;
   @Input() loading: boolean = false;
+  @Input() customClass: string = '';
+  @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Output() clicked = new EventEmitter<any>();
 
   onClick(event?: any): void {

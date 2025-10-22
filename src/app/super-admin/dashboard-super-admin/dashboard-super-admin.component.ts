@@ -1,6 +1,3 @@
-
-
-
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ClubService, Club } from '../../services/club.service';
@@ -9,14 +6,76 @@ import { ActualiteService } from '../../services/actualite.service';
 import { AvisService, Avis } from '../../services/avis.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
+import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 
 @Component({
   selector: 'app-dashboard-super-admin',
   templateUrl: './dashboard-super-admin.component.html',
   styleUrls: ['./dashboard-super-admin.component.css'],
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, UiTableComponent, UiFormComponent, UiModalComponent, UiButtonComponent]
 })
 export class DashboardSuperAdminComponent implements OnInit {
+  // Champs du formulaire club pour <ui-form>
+  clubFormFields = [
+    { name: 'nom', label: 'Nom du club', type: 'text', required: true, placeholder: 'Nom du club' },
+    { name: 'ville', label: 'Ville', type: 'text', required: true, placeholder: 'Ville' },
+    { name: 'email', label: 'Email', type: 'text', required: true, placeholder: 'Email' }
+  ];
+  // Pour la modale et le formulaire club
+  openClubModal = false;
+  selectedClub: Club | null = null;
+  clubColumns = [
+    { key: 'nom', label: 'Nom' },
+    { key: 'ville', label: 'Ville' },
+    { key: 'email', label: 'Email' }
+  ];
+  clubActions = [
+    { label: 'Éditer', icon: 'ri-edit-line', action: 'edit', color: '#2563eb' },
+    { label: 'Supprimer', icon: 'ri-delete-bin-line', action: 'delete', color: '#e53935' }
+  ];
+
+  handleClubAction(event: { action: string; row: Club }) {
+    if (event.action === 'edit') {
+      this.selectedClub = event.row;
+      this.openClubModal = true;
+    } else if (event.action === 'delete') {
+      this.supprimerClub(event.row.id);
+    }
+  }
+
+  onClubFormSubmit(club: Club) {
+    // Ajout ou édition selon selectedClub
+    if (this.selectedClub) {
+      // Edition
+      this.clubService.editClub(club).subscribe(() => {
+        this.openClubModal = false;
+        this.selectedClub = null;
+        this.refreshClubs();
+      });
+    } else {
+      // Création
+      this.clubService.createClub(club).subscribe(() => {
+        this.openClubModal = false;
+        this.refreshClubs();
+      });
+    }
+  }
+
+  refreshClubs() {
+    this.clubService.getClubs().subscribe((clubs: Club[]) => {
+      this.clubs = clubs;
+      this.clubsCount = clubs.length;
+    });
+  }
+
+  // Fermer la modale
+  closeClubModal() {
+    this.openClubModal = false;
+    this.selectedClub = null;
+  }
   navigateToGalerie() {
     this.router.navigate(['super-admin/galerie']);
   }

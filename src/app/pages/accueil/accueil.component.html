@@ -1,17 +1,4 @@
 
-<universal-header
-  [clubName]="selectedClub?.nom || 'Villeurbannais'"
-  [logoUrl]="'/assets/images/logo.png'"
-  [isUserLoggedIn]="isUserLoggedIn"
-  [userName]="userName"
-  [userAvatar]="userAvatar"
-  [unreadNotifications]="unreadNotifications"
-  (changeClub)="onChangeClub()"
-  (logout)="onLogout()"
-  (goToDashboard)="onGoToDashboard()"
-  (goToProfile)="onGoToProfile()"
-  (openNotifications)="onOpenNotifications()"
-></universal-header>
 
 <!-- Modale club style premium -->
 <div class="club-modal-premium-backdrop" *ngIf="showClubModal">

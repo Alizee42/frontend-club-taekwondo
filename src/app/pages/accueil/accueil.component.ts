@@ -39,7 +39,9 @@ export class AccueilComponent {
   userAvatar: string | undefined = undefined;
   unreadNotifications = 0;
 
-  constructor(private clubService: ClubService) {}
+  constructor(private clubService: ClubService) {
+    this.showClubModal = !this.clubService.getSelectedClub();
+  }
 
   get selectedClub(): Club | null {
     return this.clubService.getSelectedClub();
@@ -50,6 +52,7 @@ export class AccueilComponent {
   }
 
   onClubSelected(club: Club) {
+    this.clubService.setSelectedClub(club);
     this.showClubModal = false;
     // Optionnel : recharger les actualités ou rediriger
   }

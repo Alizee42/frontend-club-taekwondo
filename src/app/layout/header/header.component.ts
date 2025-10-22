@@ -109,12 +109,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Auth
     this.subs.push(
       this.auth.authState$.subscribe((s) => {
+        console.log('[Header] authState$ update:', s);
         this.isLoggedIn = s.isConnecte;
         this.user = s.user;
-        
         // Forcer la détection de changement pour mettre à jour le DOM
         this.cdr.detectChanges();
-        
         if (this.isLoggedIn && this.isParent() && !this.enfantsLoaded) {
           this.loadEnfants();
         }
@@ -303,23 +302,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // ======= Auth =======
   logout(): void {
-    // Forcer la fermeture immédiate de tous les dropdowns
-    this.closeMenus();
+  console.log('Déconnexion demandée depuis le header');
+  // Forcer la fermeture immédiate de tous les dropdowns
+  this.closeMenus();
     
-    // Réinitialiser l'état local immédiatement
-    this.isLoggedIn = false;
-    this.user = null;
-    this.notifications = [];
-    this.unreadCount = 0;
-    this.enfants = [];
-    this.enfantsLoaded = false;
+  // Réinitialiser l'état local immédiatement
+  this.isLoggedIn = false;
+  this.user = null;
+  this.notifications = [];
+  this.unreadCount = 0;
+  this.enfants = [];
+  this.enfantsLoaded = false;
     
-    // Forcer la détection de changement immédiatement
-    this.cdr.detectChanges();
+  // Forcer la détection de changement immédiatement
+  this.cdr.detectChanges();
     
-    // Ensuite appeler le service
-    this.auth.logout();
-    this.router.navigate(['/']);
+  // Ensuite appeler le service
+  this.auth.logout();
+  this.router.navigate(['/']);
   }
 
   // ======= Méthode de diagnostic temporaire =======

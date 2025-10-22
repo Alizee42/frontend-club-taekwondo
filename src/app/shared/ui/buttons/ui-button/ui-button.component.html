@@ -1,9 +1,9 @@
 <button
   class="ui-btn"
-  [ngClass]="variant"
+  [ngClass]="[variant, customClass]"
   [disabled]="disabled || loading"
   (click)="onClick()"
-  type="button"
+  [attr.type]="type"
 >
   <ui-icon-button *ngIf="icon" [icon]="icon" [variant]="variant" [disabled]="disabled || loading"></ui-icon-button>
   <span class="ui-btn-label">{{ label }}</span>

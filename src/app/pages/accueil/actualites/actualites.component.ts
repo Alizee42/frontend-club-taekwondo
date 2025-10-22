@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button/ui-button.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router'; 
 import { ActualiteService } from '../../../services/actualite.service';
@@ -8,7 +9,8 @@ import { ActualiteService } from '../../../services/actualite.service';
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    UiButtonComponent
   ],
   templateUrl: './actualites.component.html',
   styleUrls: ['./actualites.component.css']

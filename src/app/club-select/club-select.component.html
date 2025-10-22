@@ -1,3 +1,4 @@
+
 <div class="club-modal-premium-select" style="position:relative;">
   <div *ngIf="loading" class="club-modal-loading">Chargement des clubs...</div>
   <div *ngIf="error" class="club-modal-error">{{ error }}</div>
@@ -7,8 +8,8 @@
     <div *ngFor="let club of clubs" class="club-list-row">
       <ui-button
         variant="primary"
-        [label]="club.name || club.nom"
-        (clicked)="selectClub(club)"
+        [label]="'Olympique Taekwondo ' + (club.name || club.nom)"
+        (click)="selectClub(club)"
         style="width:100%; text-align:left; justify-content:flex-start;"
       ></ui-button>
     </div>

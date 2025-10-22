@@ -1,7 +1,33 @@
 
 
 <ng-container>
-	<app-header></app-header>
+	<universal-header
+		[clubName]="selectedClub?.name || selectedClub?.nom || ''"
+		[isUserLoggedIn]="isUserLoggedIn"
+		[userName]="userName"
+		[userAvatar]="userAvatar"
+		[unreadNotifications]="unreadNotifications"
+		[role]="role"
+		(logout)="onLogout()"
+		(changeClub)="onChangeClub()"
+	></universal-header>
+
+			<div *ngIf="showSelectClubModal">
+				<div class="club-modal-overlay" (click)="showSelectClubModal = false"></div>
+						<div class="club-modal-premium">
+							<button class="close-modal-btn" (click)="showSelectClubModal = false" title="Fermer">×</button>
+							<div class="club-modal-premium-logo-wrap"></div>
+							<div class="club-modal-premium-title">Bienvenue sur le portail olympique Taekwondo</div>
+							<div class="club-modal-premium-slogan">Maîtrise, Respect, Dépassement de soi</div>
+							<div class="club-modal-premium-desc">
+								Ce portail regroupe tous les clubs partenaires et permet à chaque membre d’accéder à son espace personnel, suivre l’actualité, gérer ses inscriptions et profiter de services exclusifs.<br><br>
+								<b>Merci de sélectionner votre club pour accéder à votre espace personnalisé et profiter pleinement de l’expérience Taekwondo !</b>
+							</div>
+							<div class="club-modal-premium-select">
+								<app-club-select (clubSelected)="onClubSelected($event)"></app-club-select>
+							</div>
+						</div>
+			</div>
 	<router-outlet></router-outlet>
 	<app-footer></app-footer>
 	<app-toast-container></app-toast-container>

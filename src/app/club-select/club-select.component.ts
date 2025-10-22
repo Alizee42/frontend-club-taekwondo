@@ -19,9 +19,17 @@ export class ClubSelectComponent {
   // Ajout EventEmitter pour transmettre le club au parent
   @Output() clubSelected = new EventEmitter<Club>();
 
+  // Ajout EventEmitter pour fermeture de la modale
+  @Output() closeModal = new EventEmitter<void>();
+
   selectClub(club: Club) {
     this.clubSelected.emit(club);
     console.log('Club sélectionné :', club);
+  }
+
+  // Méthode pour fermeture de la modale (overlay ou bouton)
+  closeModalFn() {
+    this.closeModal.emit();
   }
 
   // Exemple d'init – adapte selon ta logique réelle

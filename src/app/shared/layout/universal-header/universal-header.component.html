@@ -1,22 +1,70 @@
-<header class="universal-header">
-  <div class="logo">
-    <a routerLink="/">
-      <span class="brand-strong">Olympique</span>
-      <span class="brand-mid">Taekwondo</span>
-      <span class="brand-thin">{{ clubName }}</span>
-    </a>
-    <button *ngIf="!isUserLoggedIn" class="change-club-btn" (click)="changeClub.emit()" title="Changer de club">Changer de club</button>
+<header class="main-header">
+  <div class="header-container compact">
+    <!-- Logo -->
+    <div class="logo">
+      <a routerLink="/">
+        <span class="brand-strong">Olympique</span>
+        <span class="brand-mid">Taekwondo</span>
+        <span class="brand-thin">{{ clubName }}</span>
+      </a>
+  <button *ngIf="!isUserLoggedIn || (role && role.toUpperCase() !== 'ADMIN')" class="change-club-btn" (click)="changeClub.emit()" title="Changer de club">Changer de club</button>
+    </div>
+    <!-- Navigation -->
+    <nav class="nav-wrapper">
+      <ng-container *ngIf="isUserLoggedIn && isDashboardPage; else publicNav">
+        <ul class="main-nav dashboard-nav">
+          <li><a [routerLink]="dashboardRoute" routerLinkActive="active" (click)="goToDashboard.emit()" class="dashboard-btn">Dashboard</a></li>
+          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="home-btn" title="Retour à l'accueil">Retour Accueil</a></li>
+        </ul>
+      </ng-container>
+      <ng-template #publicNav>
+        <ul class="main-nav">
+          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a></li>
+          <li><a routerLink="/galerie" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Galerie</a></li>
+          <li><a routerLink="/inscription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inscription</a></li>
+          <li><a routerLink="/boutique" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Boutique</a></li>
+          <li><a routerLink="/evenements" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Événements</a></li>
+          <li><a routerLink="/contact" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Contact</a></li>
+          <li *ngIf="!isUserLoggedIn"><a routerLink="/connexion" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Connexion</a></li>
+        </ul>
+      </ng-template>
+    </nav>
+    <!-- Actions utilisateur à droite -->
+    <div class="user-actions" *ngIf="isUserLoggedIn">
+      <div class="actions-inline">
+        <!-- Panier (affiché seulement si commande passée) -->
+        <ng-container *ngIf="cartCount > 0">
+          <div class="cart-wrapper">
+            <a routerLink="/boutique/panier" class="cart-icon" title="Mon panier">
+              <i class="ri-shopping-cart-line"></i>
+              <span class="badge">{{ cartCount }}</span>
+            </a>
+          </div>
+        </ng-container>
+        <!-- Notifications (affiché si showNotifications) -->
+        <ng-container *ngIf="showNotifications">
+          <div class="notification-wrapper">
+            <div class="notification-icon" (click)="openNotifications.emit()">
+              <i class="ri-notification-line"></i>
+              <span class="badge" *ngIf="unreadNotifications > 0">{{ unreadNotifications }}</span>
+            </div>
+          </div>
+        </ng-container>
+        <!-- Dropdown utilisateur -->
+        <div class="user-dropdown">
+          <button class="user-btn" (click)="toggleUserDropdown()">
+            <div class="avatar">{{ getUserInitials() }}</div>
+            <span class="username">{{ getUserName() }}</span>
+            <span class="arrow" [class.open]="userDropdownOpen">▼</span>
+          </button>
+          <div class="dropdown" [class.show]="userDropdownOpen">
+            <button class="menu-item" (click)="goToSpecializedDashboard(); closeUserDropdown()">📊 Dashboard</button>
+            <button class="menu-item" (click)="goToProfil(); closeUserDropdown()">👤 Mon Profil</button>
+            <hr class="separator">
+            <button class="menu-item logout" (click)="handleLogout(); closeUserDropdown()">🚪 Se déconnecter</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <nav class="nav-wrapper">
-    <ul class="main-nav">
-  <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a></li>
-  <li><a routerLink="/galerie" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Galerie</a></li>
-  <li><a routerLink="/inscription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inscription</a></li>
-  <li><a routerLink="/boutique" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Boutique</a></li>
-  <li><a routerLink="/evenements" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Événements</a></li>
-  <li><a routerLink="/contact" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Contact</a></li>
-  <li><a routerLink="/connexion" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Connexion</a></li>
-    </ul>
-  </nav>
 </header>

@@ -7,7 +7,7 @@ import { GalerieService, Galerie } from '../../services/galerie.service';
 @Component({
   selector: 'app-galerie',
   standalone: true,
-  imports: [CommonModule, UniversalHeaderComponent],
+  imports: [CommonModule],
   templateUrl: './galerie.component.html',
   styleUrls: ['./galerie.component.css']
 })

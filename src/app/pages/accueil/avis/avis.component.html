@@ -68,7 +68,14 @@
     </div>
 
     <!-- Bouton pour laisser un avis -->
-    <button class="btn-leave-review" type="button" (click)="ouvrirModale()">Laisser un avis</button>
+    <div style="text-align:center; margin-top:1.2rem;">
+      <ui-button
+        variant="primary"
+        [label]="'Laisser un avis'"
+        (clicked)="ouvrirModale()"
+        customClass="banner-small"
+      ></ui-button>
+    </div>
   </div>
 
   <!-- Modale pour laisser un avis -->
@@ -81,73 +88,18 @@
       aria-describedby="avisModalDesc"
       (click)="$event.stopPropagation()"
     >
-      <button class="modale-close" type="button" (click)="fermerModale()" aria-label="Fermer">×</button>
-
-      <h3 id="avisModalTitle" class="form-title"><i class="fas fa-comment-dots"></i> Laisser un avis</h3>
-      <p id="avisModalDesc" class="form-desc">Votre retour est précieux pour la communauté du club !</p>
-
-      <form (ngSubmit)="envoyerAvis()" class="avis-form">
-        <div class="form-group">
-          <label for="pseudo"><i class="fas fa-user"></i> Votre nom</label>
-          <input
-            type="text"
-            id="pseudo"
-            [(ngModel)]="nouvelAvis.pseudoVisiteur"
-            name="pseudo"
-            placeholder="Entrez votre nom"
-            required
-            autocomplete="name"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="contenu"><i class="fas fa-quote-left"></i> Votre témoignage</label>
-          <textarea
-            id="contenu"
-            [(ngModel)]="nouvelAvis.contenu"
-            name="contenu"
-            placeholder="Partagez votre expérience..."
-            required
-            minlength="5"
-          ></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="note"><i class="fas fa-star"></i> Note</label>
-            <select id="note" [(ngModel)]="nouvelAvis.note" name="note" required>
-              <option value="" disabled selected hidden>Choisir une note</option>
-              <option *ngFor="let star of [1,2,3,4,5]" [value]="star">
-                {{ star }} étoile{{ star > 1 ? 's' : '' }}
-              </option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="typeAvis"><i class="fas fa-tag"></i> Sujet (optionnel)</label>
-            <select id="typeAvis" [(ngModel)]="nouvelAvis.typeAvis" name="typeAvis">
-              <option value="">Avis général</option>
-              <option value="cours">Cours</option>
-              <option value="entraineurs">Entraîneurs</option>
-              <option value="evenements">Événements</option>
-              <option value="organisation">Organisation</option>
-              <option value="competitions">Compétitions</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="photo"><i class="fas fa-camera"></i> Photo (optionnelle)</label>
-          <input type="file" id="photo" (change)="onPhotoSelected($event)" accept="image/*" />
-          <div *ngIf="photoPreview" class="photo-preview">
-            <img [src]="photoPreview" alt="Aperçu de la photo" width="100" height="100" />
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Envoyer</button>
-          <button type="button" class="btn-close" (click)="fermerModale()">Annuler</button>
-        </div>
-      </form>
+      <div class="ui-modal-header">
+        <span class="ui-modal-title">Laisser un avis</span>
+        <button class="ui-modal-close" type="button" (click)="fermerModale()" aria-label="Fermer">×</button>
+      </div>
+      <ui-form
+        [description]="'Votre retour est précieux pour la communauté du club !'"
+        [fields]="fieldsAvis"
+        [submitLabel]="'Envoyer'"
+        (submitted)="onFormSubmit($event)"
+        [loading]="loadingAvis"
+        [error]="formError"
+      ></ui-form>
     </div>
   </div>
 </section>

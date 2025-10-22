@@ -1,0 +1,80 @@
+.ui-form {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 22px;
+  box-shadow: 0 4px 18px -6px rgba(30,96,145,0.10);
+  max-width: 500px;
+  margin: 0 auto;
+}
+.ui-form-title {
+  text-align: center;
+  font-size: 1.3em;
+  font-weight: 700;
+  color: var(--blue-main);
+  margin-bottom: 0.2em;
+}
+.ui-form-desc {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 1.2em;
+  font-size: 1.05em;
+}
+.ui-form-group {
+  margin-bottom: 18px;
+  text-align: left;
+}
+.ui-form-group label {
+  font-weight: 600;
+  color: var(--blue-main);
+  margin-bottom: 0.3em;
+  display: block;
+}
+.ui-form-group input,
+.ui-form-group textarea,
+.ui-form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-subtle);
+  font-size: 1em;
+  margin-top: 0.15em;
+  margin-bottom: 0.1em;
+  transition: border-color 0.3s;
+}
+.ui-form-group input:focus,
+.ui-form-group textarea:focus,
+.ui-form-group select:focus {
+  border-color: var(--blue-main);
+  outline: none;
+}
+.ui-form-error {
+  color: var(--red-main);
+  font-size: 0.98em;
+  margin-top: 0.2em;
+}
+.ui-form-error-global {
+  color: var(--red-main);
+  text-align: center;
+  margin-bottom: 1em;
+}
+.ui-form-submit {
+  background: var(--blue-main);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 26px;
+  font-size: 1.08em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px -4px rgba(30,96,145,.10);
+  transition: background 0.2s;
+  display: block;
+  margin: 0 auto;
+}
+.ui-form-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ui-form-submit:hover:not(:disabled) {
+  background: var(--blue-hover);
+}

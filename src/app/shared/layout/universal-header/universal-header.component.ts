@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -10,6 +11,72 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./universal-header.component.css']
 })
 export class UniversalHeaderComponent {
+  userDropdownOpen = false;
+  showNotifications: boolean = true;
+
+  toggleUserDropdown() {
+    this.userDropdownOpen = !this.userDropdownOpen;
+  }
+
+  closeUserDropdown() {
+    this.userDropdownOpen = false;
+  }
+
+  getUserInitials(): string {
+    if (this.userName) {
+      const parts = this.userName.split(' ');
+      return (parts[0]?.charAt(0) ?? '') + (parts[1]?.charAt(0) ?? '');
+    }
+    return '';
+  }
+
+  getUserName(): string {
+    return this.userName ?? '';
+  }
+
+  goToSpecializedDashboard() {
+    // Navigation Angular
+    window.location.href = this.dashboardRoute;
+  }
+
+  goToProfil() {
+    window.location.href = '/profil';
+  }
+
+  handleLogout() {
+    this.logout.emit();
+  }
+  @Input() cartCount: number = 0;
+  dashboardRoute: string = '/dashboard';
+  @Input() role: string = '';
+
+  ngOnChanges() {
+    if (this.isUserLoggedIn && this.role) {
+      const role = this.role.trim().toUpperCase();
+      if (role === 'SUPER_ADMIN') {
+        this.dashboardRoute = '/super-admin/dashboard-super-admin';
+      } else if (role === 'ADMIN') {
+        this.dashboardRoute = '/admin/dashboard-admin';
+      } else if (role === 'PARENT') {
+        this.dashboardRoute = '/parent/dashboard-parent';
+      } else if (role === 'MEMBRE') {
+        this.dashboardRoute = '/membre/dashboard-membre';
+      } else {
+        this.dashboardRoute = '/dashboard';
+      }
+    } else {
+      this.dashboardRoute = '/dashboard';
+    }
+  }
+  isDashboardPage = false;
+
+  constructor(private router: Router) {
+    this.router.events.subscribe(() => {
+      const url = this.router.url;
+      this.isDashboardPage = url.includes('dashboard') || url.includes('club');
+    });
+  }
+  showDropdown = false;
   @Input() clubName: string = '';
   @Input() logoUrl: string = '';
   @Input() isUserLoggedIn: boolean = false;

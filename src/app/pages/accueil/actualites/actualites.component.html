@@ -18,7 +18,14 @@
       <div class="actu-content">
         <h3>{{ featuredNews.titre }}</h3>
         <p>{{ featuredNews.contenu | slice:0:200 }}...</p>
-        <a [routerLink]="['/actualite', featuredNews.id]" class="btn-link">En savoir plus</a>
+        <div style="text-align:center; margin-top:0.5rem;">
+          <ui-button
+            variant="primary"
+            [label]="'En savoir plus'"
+            [routerLink]="['/actualite', featuredNews.id]"
+            customClass="banner-small"
+          ></ui-button>
+        </div>
       </div>
     </div>
 
@@ -37,15 +44,33 @@
         <div class="actu-content">
           <h4>{{ actu.titre }}</h4>
           <p>{{ actu.contenu | slice:0:100 }}...</p>
-          <a [routerLink]="['/actualite', actu.id]" class="btn-link small">Lire</a>
+          <div style="text-align:center; margin-top:0.3rem;">
+            <ui-button
+              variant="secondary"
+              [label]="'Lire'"
+              [routerLink]="['/actualite', actu.id]"
+              customClass="banner-small"
+            ></ui-button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Pagination -->
     <div class="pagination-controls">
-      <button (click)="loadLess()" *ngIf="currentPage > 1">Voir moins</button>
-      <button (click)="loadMore()">Charger plus</button>
+      <ui-button
+        variant="secondary"
+        [label]="'Voir moins'"
+        (clicked)="loadLess()"
+        *ngIf="currentPage > 1"
+        customClass="banner-small"
+      ></ui-button>
+      <ui-button
+        variant="primary"
+        [label]="'Charger plus'"
+        (clicked)="loadMore()"
+        customClass="banner-small"
+      ></ui-button>
     </div>
   </div>
 </section>

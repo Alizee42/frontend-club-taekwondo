@@ -3,7 +3,7 @@
       <div class="footer-about">
         <h3>À propos de nous</h3>
         <p>
-          {{ selectedClub?.name || 'Olympique Taekwondo' }} est dédié à l'excellence en Taekwondo.
+          Olympique Taekwondo {{ selectedClub?.name || selectedClub?.nom || '' }} est dédié à l'excellence en Taekwondo.
           Rejoignez-nous pour découvrir cet art martial et développer vos compétences.
         </p>
       </div>
@@ -34,7 +34,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-  <p>&copy; {{ currentYear }} {{ selectedClub?.name || 'Olympique Taekwondo' }}. Tous droits réservés.</p>
+  <p>&copy; {{ currentYear }} Olympique Taekwondo {{ selectedClub?.name || selectedClub?.nom || '' }}. Tous droits réservés.</p>
       <ul>
         <li><a routerLink="/mentions-legales">Mentions légales</a></li>
         <li><a routerLink="/politique-confidentialite">Politique de confidentialité</a></li>

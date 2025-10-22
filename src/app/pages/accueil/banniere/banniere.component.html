@@ -7,6 +7,13 @@
         <div class="overlay">
             <h1>Rejoignez l’aventure Taekwondo<br><span *ngIf="selectedClub">{{ selectedClub.name }}</span></h1>
             <p>Sport, esprit d’équipe et progression pour tous les âges</p>
-            <a routerLink="/inscription" class="cta-button">Inscrivez-vous maintenant</a>
+                                                <div style="max-width: 300px; margin: 1.2rem auto 0 auto; text-align: center;">
+                                                    <ui-button
+                                                        variant="primary"
+                                                        [label]="'Inscrivez-vous maintenant'"
+                                                        [routerLink]="['/inscription']"
+                                                        customClass="banner-small"
+                                                    ></ui-button>
+                                                </div>
         </div>
     </section>

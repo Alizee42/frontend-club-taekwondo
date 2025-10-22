@@ -1,0 +1,11 @@
+<div class="ui-modal-backdrop" *ngIf="open">
+  <div class="ui-modal">
+    <div class="ui-modal-header">
+      <h2 class="ui-modal-title">{{ title }}</h2>
+      <button *ngIf="showClose" class="ui-modal-close" (click)="close()" aria-label="Fermer">&#10005;</button>
+    </div>
+    <div class="ui-modal-content">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

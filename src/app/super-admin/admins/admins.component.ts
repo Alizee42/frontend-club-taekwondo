@@ -3,16 +3,24 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 
 @Component({
   standalone: true,
   selector: 'app-super-admin-admins',
   templateUrl: './admins.component.html',
   styleUrls: ['./admins.component.css'],
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent]
 })
 export class AdminsComponent {
+  getClubName(clubId: any): string {
+    const club = this.clubs.find(c => c.id === clubId);
+    return club ? club.name : '-';
+  }
   apiUrl = environment.apiUrl + '/utilisateurs';
+  tableActions = [];
 
   newAdmin: any = {
     nom: '',
@@ -27,6 +35,7 @@ export class AdminsComponent {
   loading = false;
   message = '';
   admins: any[] = [];
+  adminsTable: any[] = [];
   showModal = false;
 
   constructor(private http: HttpClient) {
@@ -43,13 +52,17 @@ export class AdminsComponent {
 
   loadAdmins() {
     this.http.get<any[]>(this.apiUrl + '?role=ADMIN').subscribe({
-      next: data => this.admins = data || [],
+      next: data => {
+        this.admins = data || [];
+        this.adminsTable = this.admins.map(a => ({ ...a, clubName: this.getClubName(a.clubId) }));
+      },
       error: err => console.error('Impossible de charger les admins', err)
     });
   }
 
   createAdmin() {
-    if (!this.newAdmin.email || !this.newAdmin.password || !this.newAdmin.nom) {
+  console.log('createAdmin appelé', this.newAdmin);
+  if (!this.newAdmin.email || !this.newAdmin.password || !this.newAdmin.nom) {
       this.message = 'Nom, email et mot de passe sont requis.';
       return;
     }
@@ -66,11 +79,18 @@ export class AdminsComponent {
         this.showModal = false;
         this.loadAdmins();
       },
-      error: err => {
+      error: (err: any) => {
         console.error(err);
         this.message = err?.error?.message || 'Erreur lors de la création';
         this.loading = false;
       }
     });
   }
+
+  onTableAction(event: { action: string; row: any }): void {
+    // À compléter selon les actions souhaitées (ex : suppression, édition)
+    console.log('Action sur la ligne', event);
+  }
+
+  // ...existing code...
 }

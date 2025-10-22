@@ -1,5 +1,6 @@
 
 import { Component } from '@angular/core';
+import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button/ui-button.component';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ClubService, Club } from '../../../services/club.service';
@@ -7,7 +8,7 @@ import { ClubService, Club } from '../../../services/club.service';
 @Component({
   selector: 'app-banniere',
   standalone: true,
-  imports: [RouterModule, CommonModule],
+  imports: [RouterModule, CommonModule, UiButtonComponent],
   templateUrl: './banniere.component.html',
   styleUrl: './banniere.component.css'
 })

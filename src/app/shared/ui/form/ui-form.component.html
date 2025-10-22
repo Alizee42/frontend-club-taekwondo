@@ -1,0 +1,19 @@
+<form (ngSubmit)="onSubmit()" class="ui-form">
+  <h3 *ngIf="title" class="ui-form-title">{{ title }}</h3>
+  <p *ngIf="description" class="ui-form-desc">{{ description }}</p>
+
+  <div *ngFor="let field of fields" class="ui-form-group">
+    <label *ngIf="field.label" [for]="field.name">{{ field.label }}</label>
+    <input *ngIf="field.type === 'text'" type="text" [id]="field.name" [(ngModel)]="formData[field.name]" [name]="field.name" [placeholder]="field.placeholder" [required]="field.required" />
+    <textarea *ngIf="field.type === 'textarea'" [id]="field.name" [(ngModel)]="formData[field.name]" [name]="field.name" [placeholder]="field.placeholder" [required]="field.required"></textarea>
+    <select *ngIf="field.type === 'select'" [id]="field.name" [(ngModel)]="formData[field.name]" [name]="field.name" [required]="field.required">
+      <option *ngFor="let opt of field.options" [value]="opt.value">{{ opt.label }}</option>
+    </select>
+    <input *ngIf="field.type === 'file'" type="file" [id]="field.name" (change)="field.onChange($event)" [name]="field.name" />
+    <div *ngIf="field.error" class="ui-form-error">{{ field.error }}</div>
+  </div>
+
+  <div *ngIf="error" class="ui-form-error-global">{{ error }}</div>
+
+  <button type="submit" class="ui-form-submit" [disabled]="loading">{{ submitLabel }}</button>
+</form>

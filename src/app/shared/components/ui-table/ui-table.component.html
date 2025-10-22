@@ -1,0 +1,22 @@
+<table class="ui-table">
+  <thead>
+    <tr>
+      <th *ngFor="let col of columns">{{ col.label }}</th>
+      <th *ngIf="actions.length">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let row of data">
+      <td *ngFor="let col of columns" [ngClass]="col.cellClass">{{ row[col.key] }}</td>
+      <td *ngIf="actions.length">
+  <button *ngFor="let act of actions"
+    class="ui-table-actions-btn"
+    [ngClass]="{ 'edit': act.action === 'edit' }"
+    [ngStyle]="{ color: act.color || '#2563eb' }"
+    (click)="onAction(act.action, row)">
+    <i *ngIf="act.icon" [class]="act.icon"></i> {{ act.label }}
+  </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
