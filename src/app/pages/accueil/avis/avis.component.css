@@ -290,12 +290,6 @@
 .note-stars .fa {
   font-size: 14px;
 }
-
-/* ==== Swiper ==== */
-.swiper {
-  /* padding-bottom: 50px; */
-}
-
 .swiper-wrapper {
   display: flex;
   align-items: stretch;
