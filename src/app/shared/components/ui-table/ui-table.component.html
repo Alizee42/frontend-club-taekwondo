@@ -7,15 +7,23 @@
   </thead>
   <tbody>
     <tr *ngFor="let row of data">
-      <td *ngFor="let col of columns" [ngClass]="col.cellClass">{{ row[col.key] }}</td>
+      <td *ngFor="let col of columns" [ngClass]="col.cellClass">
+        <span *ngIf="!col.render">{{ row[col.key] }}</span>
+        <span *ngIf="col.render" [innerHTML]="col.render(row)"></span>
+      </td>
       <td *ngIf="actions.length">
-  <button *ngFor="let act of actions"
-    class="ui-table-actions-btn"
-    [ngClass]="{ 'edit': act.action === 'edit' }"
-    [ngStyle]="{ color: act.color || '#2563eb' }"
-    (click)="onAction(act.action, row)">
-    <i *ngIf="act.icon" [class]="act.icon"></i> {{ act.label }}
-  </button>
+        <div style="display: flex; gap: 8px; align-items: center; justify-content: flex-start;">
+          <button *ngFor="let act of actions"
+            class="ui-table-actions-btn"
+            [ngClass]="{ 'edit': act.action === 'edit' }"
+            [ngStyle]="{ color: act.color || '#2563eb' }"
+            (click)="onAction(act.action, row)"
+            style="padding: 0 8px; min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+            <i *ngIf="act.icon" [class]="act.icon" style="font-size: 1.3em;">
+              {{ act.iconText || '' }}
+            </i>
+          </button>
+        </div>
       </td>
     </tr>
   </tbody>

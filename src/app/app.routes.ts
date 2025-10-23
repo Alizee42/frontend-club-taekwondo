@@ -11,7 +11,6 @@ import { ClubsComponent } from './super-admin/clubs/clubs.component';
 import { AdminsComponent } from './super-admin/admins/admins.component';
 import { MembresComponent } from './super-admin/membres/membres.component';
 import { PaiementsComponent } from './super-admin/paiements/paiements.component';
-import { CommandesComponent } from './super-admin/commandes/commandes.component';
 import { LogsComponent } from './super-admin/logs/logs.component';
 import { ActualitesComponent } from './super-admin/actualites/actualites.component';
 import { DashboardMembreComponent } from './membre/dashboard-membre/dashboard-membre.component';
@@ -21,7 +20,8 @@ import { GestionHorairesComponent } from './admin/gestion-horaires/gestion-horai
 import { GestionProfesseursComponent } from './admin/gestion-professeurs/gestion-professeurs.component';
 import { GestionAvisComponent } from './admin/gestion-avis/gestion-avis.component';
 import { GestionActualitesComponent } from './admin/gestion-actualites/gestion-actualites.component';
-import { GestionGalerieComponent } from './admin/gestion-galerie/gestion-galerie.component';
+import { GalerieGestionSuperAdminComponent } from './super-admin/galerie-gestion/galerie-gestion.component';
+import{ GestionGalerieComponent } from './admin/gestion-galerie/gestion-galerie.component';
 import { DocumentsComponent } from './membre/documents/documents.component';
 import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-documents.component';
 import { PaiementComponent } from './membre/paiement/paiement.component';
@@ -32,7 +32,6 @@ import { EvenementsComponent } from './pages/evenements/evenements.component';
 import { GestionEvenementsComponent } from './admin/gestion-evenements/gestion-evenements.component';
 import { GestionInscriptionsComponent } from './admin/gestion-inscriptions/gestion-inscriptions.component';
 import { DashboardParentComponent } from './parent/dashboard-parent/dashboard-parent.component';
-import { ConnectedLayoutComponent } from './shared/layouts/connected-layout/connected-layout.component';
 import { PaiementParentComponent } from './parent/paiement-parent/paiement-parent.component';
 import { DocumentsParentComponent } from './parent/documents-parent/documents-parent.component';
 import { CommandesMembreComponent } from './membre/commandes-membre/commandes-membre.component';
@@ -43,7 +42,7 @@ import { MotDePasseOublieComponent } from './pages/mot-de-passe-oublie/mot-de-pa
 import { ReinitialiserMotDePasseComponent } from './pages/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe.component';
 import { MentionsLegalesComponent } from './pages/mentions-legales/mentions-legales.component';
 import { PolitiqueConfidentialiteComponent } from './pages/politique-confidentialite/politique-confidentialite.component';
-import { DebugParentComponent } from './debug-parent.component';
+
 
 
 export const routes: Routes = [
@@ -51,7 +50,7 @@ export const routes: Routes = [
   { path: '', component: AccueilComponent },
   { path: 'club-select', component: ClubSelectComponent },
   { path: 'inscription', component: InscriptionComponent },
-  { path: 'galerie', component: GalerieComponent },
+  { path: 'galerie', component: GalerieComponent }, // par défaut pour public et membres
   { path: 'contact', component: ContactComponent },
   { path: 'connexion', component: ConnexionComponent },
   { path: 'mot-de-passe-oublie', component: MotDePasseOublieComponent },
@@ -59,7 +58,6 @@ export const routes: Routes = [
   { path: 'boutique', component: BoutiqueComponent },
   { path: 'evenements', component: EvenementsComponent },
   { path: 'mentions-legales', component: MentionsLegalesComponent },
-  { path: 'debug-parent', component: DebugParentComponent }, // 🔍 Debug temporaire
   { path: 'politique-confidentialite', component: PolitiqueConfidentialiteComponent },
 
   // 👤 Profil (tout utilisateur connecté)
@@ -72,7 +70,6 @@ export const routes: Routes = [
   // 🔐 Espace Admin
   {
     path: 'admin',
-    component: ConnectedLayoutComponent,
     canActivateChild: [AuthGuard],
     data: { role: 'ADMIN' },
     children: [
@@ -93,7 +90,6 @@ export const routes: Routes = [
   // 👤 Espace Membre
   {
     path: 'membre',
-    component: ConnectedLayoutComponent,
     canActivateChild: [AuthGuard],
     data: { role: 'MEMBRE' },
     children: [
@@ -108,7 +104,6 @@ export const routes: Routes = [
   // 👤 Espace Parent
   {
     path: 'parent',
-    component: ConnectedLayoutComponent,
     canActivateChild: [AuthGuard],
     data: { role: 'PARENT' },
     children: [
@@ -123,19 +118,19 @@ export const routes: Routes = [
     // 🏆 Espace Super Admin
     {
       path: 'super-admin',
-      component: ConnectedLayoutComponent,
       canActivateChild: [AuthGuard],
       data: { role: 'SUPER_ADMIN' },
-      children: [
+    children: [
   { path: 'dashboard-super-admin', component: DashboardSuperAdminComponent },
   { path: 'clubs', component: ClubsComponent },
   { path: 'admins', component: AdminsComponent },
   { path: 'membres', component: MembresComponent },
   { path: 'paiements', component: PaiementsComponent },
-  { path: 'commandes', component: CommandesComponent },
   { path: 'logs', component: LogsComponent },
-  { path: 'actualites', component: ActualitesComponent }
-      ]
+  { path: 'actualites', component: ActualitesComponent },
+  { path: 'galerie', component: GalerieGestionSuperAdminComponent }, // galerie super admin
+  { path: 'galerie-gestion', component: GalerieGestionSuperAdminComponent }
+    ]
     },
   // 🧭 Redirection inconnue
   { path: '**', redirectTo: '' }

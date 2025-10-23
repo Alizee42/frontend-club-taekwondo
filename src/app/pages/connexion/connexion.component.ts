@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MembreService } from '../../services/membre.service';
 import { AuthService } from '../../services/auth.service';
+import { ClubService } from '../../services/club.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -33,12 +34,23 @@ export class ConnexionComponent {
     private http: HttpClient,
     private membreService: MembreService,
     private authService: AuthService,
-    private toastService: ToastService
-  ) {}
+    private toastService: ToastService,
+    private clubService: ClubService
+  ) {
+    // Récupère l'ID du club sélectionné au chargement
+    const selectedClub = this.clubService.getSelectedClub();
+    if (selectedClub) {
+      this.clubId = selectedClub.id;
+    }
+  }
 
   onSubmit(): void {
     if (!this.email || !this.password) { 
       return; 
+    }
+    if (this.clubId === undefined) {
+      this.toastService.error('Veuillez sélectionner un club avant de vous connecter.');
+      return;
     }
     if (!this.isValidEmail(this.email)) { 
       this.toastService.error('Adresse email invalide');
@@ -51,15 +63,19 @@ export class ConnexionComponent {
         clubId: this.clubId !== undefined ? this.clubId : undefined
       };
       this.authService.login(payload)
-    console.log('[CONNEXION] Tentative de connexion avec:', this.email);
 
       // Login classique : envoie uniquement l'email
       this.authService.login({ email: this.email, password: this.password })
         .subscribe({
           next: (response) => {
-            console.log('[CONNEXION] Connexion réussie :', response);
-            this.toastService.success('🎉 Connexion réussie ! Bienvenue !');
+            // Vérification club sauf pour SUPER_ADMIN
+            const userClubId = response.utilisateur?.['clubId'];
             const role = response.role || response.utilisateur?.role || '';
+            if (role.toString().toUpperCase() !== 'SUPER_ADMIN' && this.clubId !== undefined && userClubId !== this.clubId) {
+              this.toastService.error('❌ Ce compte n’appartient pas au club sélectionné.');
+              return;
+            }
+            this.toastService.success('🎉 Connexion réussie ! Bienvenue !');
             this.redirectBasedOnRole(role.toString().toUpperCase());
           },
           error: (err) => {

@@ -1,0 +1,46 @@
+<section class="clubs-page-premium">
+  <div class="clubs-header-premium" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+    <h2 class="clubs-title" style="margin: 0;">Gestion des galeries par club</h2>
+    <div class="club-select-bar">
+      <label for="club-select">Sélectionner un club :</label>
+      <select id="club-select" [(ngModel)]="selectedClubId" (change)="onClubChange(selectedClubId)">
+        <option *ngFor="let club of clubs" [value]="club.id">{{ club.nom || club.name }}</option>
+      </select>
+    </div>
+    <ui-button label="Ajouter une photo" variant="primary" (clicked)="openAddModal()"></ui-button>
+  </div>
+  <div class="clubs-table-wrapper">
+    <ui-table
+      [columns]="tableColumns"
+      [data]="images"
+      [actions]="tableActions"
+      (actionClick)="handleTableAction($event)"
+    ></ui-table>
+  </div>
+  <ui-modal
+    [open]="modalOpen"
+    [title]="modalTitle"
+    (closed)="closeModal()"
+  >
+    <!-- Formulaire d'ajout/édition d'image ici -->
+    <form (ngSubmit)="submitImage()" style="display: flex; flex-direction: column; gap: 18px; padding: 8px 0;">
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
+        <label for="titre">Titre</label>
+        <input id="titre" type="text" [(ngModel)]="formImage.titre" name="titre" required style="width: 100%;" />
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
+        <label for="description">Description</label>
+        <textarea id="description" [(ngModel)]="formImage.description" name="description" rows="3" style="width: 100%;"></textarea>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 400px;">
+        <label for="imageFile">Image</label>
+  <input id="imageFile" type="file" (change)="onFileSelected($event)" accept="image/*" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; font-size: 15px;" />
+        <img *ngIf="formImage.imageUrl" [src]="formImage.imageUrl" alt="Aperçu" style="max-width: 100%; max-height: 180px; margin-top: 8px; border-radius: 6px;" />
+      </div>
+      <div style="margin-top: 12px; display: flex; gap: 12px; justify-content: flex-end;">
+  <ui-button label="Enregistrer" type="submit" variant="primary" icon="material-icons" iconText="check"></ui-button>
+  <ui-button label="Annuler" variant="secondary" icon="material-icons" iconText="close" (clicked)="closeModal()"></ui-button>
+      </div>
+    </form>
+  </ui-modal>
+</section>

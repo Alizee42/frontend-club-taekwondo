@@ -20,21 +20,21 @@ export class MembreService {
   /** 🔎 Debug utilitaire */
   private log(prefix: string, data?: any) {
     if (data) {
-      console.log(`[MembreService] ${prefix}`, data);
+  // ...log supprimé...
     } else {
-      console.log(`[MembreService] ${prefix}`);
+  // ...log supprimé...
     }
   }
 
   /** Enfants du parent connecté */
   getMembresPourParentConnecte(): Observable<Membre[] | null> {
     this.log('Appel → GET /mes-enfants');
-    console.log('[DEBUG] URL complète:', `${this.apiUrl}/mes-enfants`);
-    console.log('[DEBUG] Environment API URL:', environment.apiUrl);
+  // ...log supprimé...
+  // ...log supprimé...
     
     return this.http.get<Membre[]>(`${this.apiUrl}/mes-enfants`).pipe(
       catchError(err => {
-        this.log('Erreur GET /mes-enfants', err);
+        // this.log('Erreur GET /mes-enfants', err);
         console.error('[DEBUG] Détails erreur:', {
           status: err.status,
           statusText: err.statusText,
@@ -53,7 +53,7 @@ export class MembreService {
     this.log('Appel → GET /debug/parent-enfants');
     return this.http.get<any>(`${this.apiUrl}/debug/parent-enfants`).pipe(
       catchError(err => {
-        this.log('Erreur GET /debug/parent-enfants', err);
+        // this.log('Erreur GET /debug/parent-enfants', err);
         return of({ error: err });
       })
     );
@@ -64,7 +64,7 @@ export class MembreService {
     this.log('Appel → GET /me');
     return this.http.get<Membre>(`${this.apiUrl}/me`).pipe(
       catchError(err => {
-        this.log('Erreur GET /me', err);
+        // this.log('Erreur GET /me', err);
         if (err.status === 400 || err.status === 401) return of(null);
         return of(null);
       })
@@ -76,7 +76,7 @@ export class MembreService {
     this.log(`Appel → GET ?utilisateurId=${utilisateurId}`);
     return this.http.get<Membre[]>(`${this.apiUrl}?utilisateurId=${utilisateurId}`).pipe(
       catchError(err => {
-        this.log(`Erreur GET ?utilisateurId=${utilisateurId}`, err);
+        // this.log(`Erreur GET ?utilisateurId=${utilisateurId}`, err);
         if (err.status === 400 || err.status === 401) return of(null);
         return of(null);
       })
@@ -85,10 +85,10 @@ export class MembreService {
 
     /** Liste des membres filtrés par club */
     getMembresParClub(clubId: string | number): Observable<Membre[] | null> {
-      this.log(`Appel → GET ?clubId=${clubId}`);
+      // this.log(`Appel → GET ?clubId=${clubId}`);
       return this.http.get<Membre[]>(`${this.apiUrl}?clubId=${clubId}`).pipe(
         catchError(err => {
-          this.log(`Erreur GET ?clubId=${clubId}`, err);
+          // this.log(`Erreur GET ?clubId=${clubId}`, err);
           if (err.status === 400 || err.status === 401) return of(null);
           return of(null);
         })

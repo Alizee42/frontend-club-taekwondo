@@ -31,7 +31,6 @@ export class ClubService {
 
   getClubs(): Observable<Club[]> {
     const token = localStorage.getItem('token');
-    console.log('Token utilisé pour clubs:', token);
     const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
     return this.http.get<Club[]>('/api/clubs', { headers });
   }

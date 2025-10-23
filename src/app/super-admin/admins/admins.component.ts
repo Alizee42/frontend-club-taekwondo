@@ -61,7 +61,6 @@ export class AdminsComponent {
   }
 
   createAdmin() {
-  console.log('createAdmin appelé', this.newAdmin);
   if (!this.newAdmin.email || !this.newAdmin.password || !this.newAdmin.nom) {
       this.message = 'Nom, email et mot de passe sont requis.';
       return;
@@ -89,7 +88,6 @@ export class AdminsComponent {
 
   onTableAction(event: { action: string; row: any }): void {
     // À compléter selon les actions souhaitées (ex : suppression, édition)
-    console.log('Action sur la ligne', event);
   }
 
   // ...existing code...

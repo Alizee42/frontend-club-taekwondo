@@ -11,6 +11,8 @@ import { BanniereComponent } from '../accueil/banniere/banniere.component';
 import { ClubSelectComponent } from '../../club-select/club-select.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UniversalHeaderComponent } from '../../shared/layout/universal-header/universal-header.component';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-accueil',
@@ -33,14 +35,24 @@ import { UniversalHeaderComponent } from '../../shared/layout/universal-header/u
 export class AccueilComponent {
   showClubModal = true;
 
-  // Pour le header universel
-  isUserLoggedIn = false; // À remplacer par la vraie logique d'authentification
+  isUserLoggedIn = false;
   userName: string | undefined = undefined;
   userAvatar: string | undefined = undefined;
   unreadNotifications = 0;
 
-  constructor(private clubService: ClubService) {
+  constructor(private clubService: ClubService, private authService: AuthService, private router: Router) {
     this.showClubModal = !this.clubService.getSelectedClub();
+    // Synchronise les infos utilisateur avec AuthService
+    this.authService.authState$.subscribe(state => {
+      this.isUserLoggedIn = state.isConnecte;
+      this.userName = state.user ? `${state.user['prenom'] ?? ''} ${state.user['nom'] ?? ''}`.trim() : undefined;
+      this.userAvatar = state.user ? state.user['avatarUrl'] : undefined;
+      this.unreadNotifications = state.user ? state.user['unreadNotifications'] || 0 : 0;
+    });
+  }
+
+  ouvrirModaleClub() {
+    this.showClubModal = true;
   }
 
   get selectedClub(): Club | null {
@@ -68,7 +80,29 @@ export class AccueilComponent {
     // Ajoute ici la logique de déconnexion réelle
   }
   onGoToDashboard() {
-    // Ajoute ici la navigation vers le dashboard
+    if (this.isUserLoggedIn) {
+      let role = '';
+      if (this.authService && this.authService['authState$']) {
+        const state = (this as any).authService._authState$.getValue();
+        role = state.role ? state.role.toString().toUpperCase() : '';
+      }
+      let route = '/dashboard';
+      switch (role) {
+        case 'SUPER_ADMIN':
+          route = '/super-admin/dashboard-super-admin';
+          break;
+        case 'ADMIN':
+          route = '/admin/dashboard-admin';
+          break;
+        case 'PARENT':
+          route = '/parent/dashboard-parent';
+          break;
+        case 'MEMBRE':
+          route = '/membre/dashboard-membre';
+          break;
+      }
+      this.router.navigate([route]);
+    }
   }
   onGoToProfile() {
     // Ajoute ici la navigation vers le profil

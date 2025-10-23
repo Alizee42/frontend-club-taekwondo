@@ -24,7 +24,6 @@ export class ClubSelectComponent {
 
   selectClub(club: Club) {
     this.clubSelected.emit(club);
-    console.log('Club sélectionné :', club);
   }
 
   // Méthode pour fermeture de la modale (overlay ou bouton)

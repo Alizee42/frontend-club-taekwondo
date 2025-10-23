@@ -1,3 +1,21 @@
+/* Force la taille de toutes les images dans le tableau, même générées par innerHTML */
+.ui-table td img {
+  width: 32px !important;
+  height: 32px !important;
+  object-fit: cover !important;
+  border-radius: 4px !important;
+  display: block;
+  margin: 0 auto;
+}
+/* Limite la taille des images galerie uniquement */
+.galerie-table-img {
+  max-width: 32px;
+  max-height: 32px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+}
 .ui-table {
   width: 100%;
   border-collapse: collapse;

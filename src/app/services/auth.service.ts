@@ -62,7 +62,6 @@ export class AuthService {
   }
 
   logout(): void {
-    console.log('[AuthService] Déconnexion...');
     
     // Nettoyer toutes les clés de token pour compatibilité
     localStorage.removeItem(this.K_TOKEN);
@@ -88,9 +87,6 @@ export class AuthService {
     const isNotExpired = s.token ? !this.isTokenExpired(s.token) : false;
     const isConnected = hasToken && isNotExpired;
     
-    console.log('[AuthService] isConnecte() - Token présent:', hasToken);
-    console.log('[AuthService] isConnecte() - Token non expiré:', isNotExpired);
-    console.log('[AuthService] isConnecte() - Résultat:', isConnected);
     
     return isConnected;
   }
@@ -129,9 +125,6 @@ export class AuthService {
     if (normalizedRole) localStorage.setItem(this.K_ROLE, normalizedRole);
     localStorage.setItem(this.K_USER, JSON.stringify(utilisateur));
 
-    console.log('[AuthService] Token stocké sous les clés:', this.K_TOKEN, 'et auth_token');
-    console.log('[AuthService] Rôle stocké:', normalizedRole);
-    console.log('[AuthService] Utilisateur stocké:', utilisateur);
 
     const expired = this.isTokenExpired(res.token);
 
@@ -148,7 +141,6 @@ export class AuthService {
     } else {
       const payload = this.decodeJwt(res.token);
       if (payload?.exp) {
-        console.log('[AuthService] Auto-logout programmé pour:', new Date(payload.exp * 1000));
         this.startAutoLogout(payload.exp);
       }
     }
@@ -160,8 +152,6 @@ export class AuthService {
     const role = localStorage.getItem(this.K_ROLE);
     let user: Utilisateur | null = null;
 
-    console.log('[AuthService] Hydratation - Token depuis localStorage:', token ? 'présent' : 'absent');
-    console.log('[AuthService] Hydratation - Role depuis localStorage:', role);
 
     try {
       const rawUser = localStorage.getItem(this.K_USER);
@@ -175,7 +165,6 @@ export class AuthService {
     let isExpired = false;
     if (token) {
       isExpired = this.isTokenExpired(token);
-      console.log('[AuthService] Token expiré?', isExpired);
     }
 
     if (token && isExpired) {
@@ -185,7 +174,6 @@ export class AuthService {
     }
 
     const isConnected = !!token && !isExpired;
-    console.log('[AuthService] État de connexion:', isConnected);
 
     this._authState$.next({
       token,
@@ -197,7 +185,6 @@ export class AuthService {
     if (token && !isExpired) {
       const payload = this.decodeJwt(token);
       if (payload?.exp) {
-        console.log('[AuthService] Auto-logout programmé depuis hydratation pour:', new Date(payload.exp * 1000));
         this.startAutoLogout(payload.exp);
       }
     }
@@ -224,13 +211,11 @@ export class AuthService {
     try {
       const payload = this.decodeJwt(token);
       if (!payload?.exp) {
-        console.log('[AuthService] Token sans expiration, considéré comme valide');
         return false;
       }
       
       const now = Math.floor(Date.now() / 1000);
       const isExpired = payload.exp < now;
-      console.log('[AuthService] Expiration token - exp:', payload.exp, 'now:', now, 'expiré:', isExpired);
       
       return isExpired;
     } catch (e) {

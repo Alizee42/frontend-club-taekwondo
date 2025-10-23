@@ -109,7 +109,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     const token = localStorage.getItem('token') || '';
     return { Authorization: `Bearer ${token}` };
   }
-  private log(where: string, payload?: any) { console.log(`[Parent][${where}]`, payload ?? ''); }
+  // private log supprimé
   private isPaid(s: any) { return /pay[eé]e?/i.test(String(s ?? '')); }
   private extractPiIdFromClientSecret(clientSecret?: string | null): string | null {
     if (!clientSecret) return null;
@@ -134,22 +134,22 @@ private buildFactureUrl(paiementId: number){
    private async syncPaymentIntentOnce(): Promise<void> {
     if (!this.lastPaymentIntentId) return;
     try {
-      this.log('sync-payment.req', this.lastPaymentIntentId);
+  // ...log supprimé...
       // ✅ CORRECTION : syncPaymentIntentOnce utilise l'API absolue
       await firstValueFrom(this.http.post(
         `${this.API}/stripe/sync-payment`,
         { paymentIntentId: this.lastPaymentIntentId },
         { headers: this.authHeaders() }
       ));
-      this.log('sync-payment.ok');
+  // ...log supprimé...
     } catch (e) {
-      this.log('sync-payment.err', e);
+  // ...log supprimé...
     }
   }
   // ===== Cycle de vie
   ngOnInit(): void {
     this.parametresService.parametres$.subscribe((p) => {
-      this.log('parametres$', p);
+  // ...log supprimé...
       if (p) {
         this.montantInitial = Number(p.montantCotisation || 0);
 
@@ -197,7 +197,7 @@ private buildFactureUrl(paiementId: number){
       { headers: this.authHeaders() }
     ).subscribe({
       next: (data) => {
-        this.log('enfants', data);
+  // ...log supprimé...
         this.enfants = data || [];
         if (this.enfants.length === 1) this.selectMembre(this.enfants[0]);
         this.loadPaiements();
@@ -214,7 +214,7 @@ private buildFactureUrl(paiementId: number){
       headers: this.authHeaders()
     }).subscribe({
       next: (data) => {
-        this.log('paiements.raw', data);
+  // ...log supprimé...
         const mapped = (data || []).map(p => {
           const type = String(p?.type ?? '').toUpperCase();
           const mode = String(p?.modePaiement ?? p?.mode ?? '').toUpperCase();
@@ -325,7 +325,7 @@ private buildFactureUrl(paiementId: number){
 
   // ===== Mode de paiement (Étape 2)
   setMode(mode: TypePaiement) {
-    this.log('setMode', mode);
+  // ...log supprimé...
     this.typeChoisi = mode;
 
     if (mode === 'ECHELONNE') {
@@ -352,7 +352,7 @@ private buildFactureUrl(paiementId: number){
       if (this.step === 3) {
         this.montantTotalAPayer = this.getMontantParEcheance();
         this.cartePrete = false;
-        this.log('step->3', { enfant: this.enfantSelectionneNom, type: this.typeChoisi, nEch: this.nombreEcheances });
+  // ...log supprimé...
       }
     }
   }
@@ -360,17 +360,17 @@ private buildFactureUrl(paiementId: number){
   selectMembre(membre: { id: number; nom: string; prenom: string }): void{
     this.enfantSelectionne = membre.id;
     this.enfantSelectionneNom = `${membre.prenom} ${membre.nom}`;
-    this.log('selectMembre', { id: membre.id, nom: this.enfantSelectionneNom });
+  // ...log supprimé...
   }
 
   // ===== Modale carte principale (checkout)
   ouvrirModalCarte(): void {
-    this.log('ouvrirModalCarte');
+  // ...log supprimé...
     this.modalCarteOuverte = true;
     setTimeout(() => this.mountStripeOn('card-element-main-modal'), 0);
   }
   fermerModalCarte(): void {
-    this.log('fermerModalCarte');
+  // ...log supprimé...
     this.modalCarteOuverte = false;
   }
 
@@ -381,7 +381,7 @@ private buildFactureUrl(paiementId: number){
    * - on passe à la confirmation (step 4) si OK
    */
   validerCarte(): void {
-    this.log('validerCarte.click');
+  // ...log supprimé...
     this.cartePrete = true;
     this.enCoursDePaiement = true;
     this.initierPaiement(true); // true => depuis la modale
@@ -390,11 +390,11 @@ private buildFactureUrl(paiementId: number){
   private async mountStripeOn(targetId: string): Promise<void> {
     if (this.stripeElementMounted) { this.stripeReady = true; return; }
     const container = document.getElementById(targetId);
-    if (!container) { this.log('mountStripeOn.noContainer', targetId); return; }
+  if (!container) { /* log supprimé */ return; }
 
     try {
       const stripe = await this.stripeService.getStripeInstance();
-      if (!stripe) { this.log('mountStripeOn.noStripe'); this.stripeReady = false; return; }
+  if (!stripe) { /* log supprimé */ this.stripeReady = false; return; }
 
       this.stripe = stripe;
       const elements = this.stripe.elements();
@@ -405,9 +405,9 @@ private buildFactureUrl(paiementId: number){
 
       this.stripeElementMounted = true;
       this.stripeReady = true;
-      this.log('mountStripeOn.ok', targetId);
+  // ...log supprimé...
     } catch (e) {
-      this.log('mountStripeOn.err', e);
+  // ...log supprimé...
       this.stripeReady = false;
     }
   }
@@ -415,12 +415,12 @@ private buildFactureUrl(paiementId: number){
   // ===== Création + confirmation paiement (checkout principal)
   initierPaiement(fromModal = false): void{
     if ((this.enCoursDePaiement && this.confirming) && !fromModal) return;
-    if (!this.enfantSelectionne) { this.log('initierPaiement.abort.noChild'); return; }
+  if (!this.enfantSelectionne) { /* log supprimé */ return; }
 
     if (!this.cartePrete || !this.cardElement) {
       this.paiementErreur = true;
       this.erreurMessage = 'Veuillez saisir votre carte dans la fenêtre sécurisée.';
-      this.log('initierPaiement.abort.noCard');
+  // ...log supprimé...
       return;
     }
 
@@ -436,12 +436,12 @@ private buildFactureUrl(paiementId: number){
       nombreEcheances: this.typeChoisi === 'ECHELONNE' ? this.nombreEcheances : 1,
       utilisateurId
     };
-    this.log('initierPaiement.create.req', dtoCreation);
+  // ...log supprimé...
 
     this.http.post<any>(`${this.API}/paiements/parent/ajouter`, dtoCreation, { headers: this.authHeaders() })
       .subscribe({
         next: (creationRes) => {
-          this.log('initierPaiement.create.res', creationRes);
+          // ...log supprimé...
           const paiementId = creationRes?.id ?? creationRes?.paiementId;
           if (!paiementId) { this.failPaiement('ID de paiement introuvable après création'); this.confirming = false; return; }
           this.paiementIdEnCours = Number(paiementId);
@@ -464,19 +464,19 @@ private buildFactureUrl(paiementId: number){
             customerEmail: this.customerEmail || undefined
           };
           if (echeanceIdToPay) piPayload.echeanceId = echeanceIdToPay;
-          this.log('create-payment-intent.req', piPayload);
+          // ...log supprimé...
 
               this.http.post<any>(`${this.API}/stripe/create-payment-intent`, piPayload, { headers: this.authHeaders() })
             .subscribe({
               next: async (resPI) => {
-                this.log('create-payment-intent.res', resPI);
+                // ...log supprimé...
                 const clientSecret = resPI?.clientSecret;
                 this.lastPaymentIntentId = resPI?.paymentIntentId ?? this.extractPiIdFromClientSecret(clientSecret);
                 if (!clientSecret) { this.failPaiement('Client secret Stripe manquant'); this.confirming = false; return; }
 
                 try {
                   if (!this.stripe) { this.failPaiement('Stripe non initialisé'); this.confirming = false; return; }
-                  this.log('confirmCardPayment.req', { fromModal });
+                  // ...log supprimé...
                   const result = await this.stripe.confirmCardPayment(clientSecret, { payment_method: { card: this.cardElement } });
                   if (result?.error) { this.failPaiement(result.error.message || 'Erreur de paiement'); this.confirming = false; return; }
 
@@ -489,19 +489,19 @@ private buildFactureUrl(paiementId: number){
                   this.enCoursDePaiement = false;
                   this.confirming = false;
                   this.step = 4;
-                  this.log('paiement.succes', { paiementId: this.paiementIdEnCours, factureUrl: this.factureUrl });
+                  // ...log supprimé...
 
                   // Recharge l’historique
                   this.loadPaiements();
                 } catch (e) {
-                  this.failPaiement('Exception lors de la confirmation Stripe'); this.log('confirmCardPayment.err', e);
+                  this.failPaiement('Exception lors de la confirmation Stripe'); /* log supprimé */
                   this.confirming = false;
                 }
               },
-              error: (errPI) => { this.failPaiement('Erreur création PaymentIntent Stripe'); this.log('create-payment-intent.err', errPI); this.confirming = false; }
+              error: (errPI) => { this.failPaiement('Erreur création PaymentIntent Stripe'); /* log supprimé */ this.confirming = false; }
             });
         },
-        error: (err) => { this.failPaiement('Erreur création du paiement en BDD'); this.log('initierPaiement.create.err', err); this.confirming = false; }
+  error: (err) => { this.failPaiement('Erreur création du paiement en BDD'); /* log supprimé */ this.confirming = false; }
       });
   }
 
@@ -509,7 +509,7 @@ private buildFactureUrl(paiementId: number){
     this.erreurMessage = msg;
     this.paiementErreur = true;
     this.enCoursDePaiement = false;
-    this.log('paiement.fail', msg);
+  // ...log supprimé...
   }
 
   // ===== Paiement d’échéance (historique)
@@ -532,7 +532,7 @@ private buildFactureUrl(paiementId: number){
       this.stripe = stripe; const elements = stripe.elements();
       if (this.cardElementParentModal) { try { this.cardElementParentModal.unmount(); } catch {} }
       this.cardElementParentModal = elements.create('card'); this.cardElementParentModal.mount('#card-element-parent-modal');
-      this.log('stripe.element.parentModal.mounted');
+  // ...log supprimé...
     });
   }
   payerEcheances(): void{
@@ -550,12 +550,12 @@ private buildFactureUrl(paiementId: number){
       echeanceId,
       customerEmail: this.customerEmail || undefined
     };
-    this.log('echeance.createPI.req', payload);
+  // ...log supprimé...
 
     this.http.post<any>(`${this.API}/stripe/create-payment-intent`, payload, { headers: this.authHeaders() })
       .subscribe({
         next: async (resPI) => {
-          this.log('echeance.createPI.res', resPI);
+          // ...log supprimé...
           const clientSecret = resPI?.clientSecret;
           this.lastPaymentIntentId = resPI?.paymentIntentId ?? this.extractPiIdFromClientSecret(clientSecret);
           if (!clientSecret) { this.failPaiement('Client secret Stripe manquant'); this.confirming = false; return; }
@@ -568,9 +568,9 @@ private buildFactureUrl(paiementId: number){
 
             await this.syncPaymentIntentOnce();
             this.paiementReussi = true; this.fermerModalPaiement(); this.loadPaiements(); this.confirming = false;
-          } catch (e) { this.failPaiement('Exception lors de la confirmation Stripe'); this.log('echeance.confirm.err', e); this.confirming = false; }
+          } catch (e) { this.failPaiement('Exception lors de la confirmation Stripe'); /* log supprimé */ this.confirming = false; }
         },
-        error: (err) => { this.failPaiement('Erreur création PaymentIntent Stripe'); this.log('echeance.createPI.err', err); this.confirming = false; }
+  error: (err) => { this.failPaiement('Erreur création PaymentIntent Stripe'); /* log supprimé */ this.confirming = false; }
       });
   }
 

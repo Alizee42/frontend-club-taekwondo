@@ -6,9 +6,6 @@ import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { ToastContainerComponent } from './shared/toast/toast-container/toast-container.component'; // <-- AJOUT
 
 
-
-import { HeaderComponent } from './layout/header/header.component';
-import { ConnectedHeaderComponent } from './components/shared/connected-header/connected-header.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { UniversalHeaderComponent } from './shared/layout/universal-header/universal-header.component';
 
@@ -30,6 +27,9 @@ import { ClubSelectComponent } from './club-select/club-select.component';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
+  get isAccueilRoute(): boolean {
+    return window.location.pathname === '/';
+  }
   showSelectClubModal = false;
 
   onChangeClub() {
@@ -64,11 +64,28 @@ export class AppComponent implements OnInit, OnDestroy {
   unreadNotifications = 0;
   private clubSub?: any;
   private authSub?: any;
+  private routerSub?: any;
 
-  constructor(private clubService: ClubService, public auth: AuthService) {}
+  constructor(private clubService: ClubService, public auth: AuthService, private router: Router) {}
 
   get role(): string {
     return this.auth.getRole() ?? '';
+  }
+
+  onGoToDashboard() {
+    // Navigation vers le dashboard selon le rôle
+    const role = this.role.toString().toUpperCase();
+    if (role === 'ADMIN') {
+      this.router.navigate(['/admin/dashboard-admin']);
+    } else if (role === 'SUPER_ADMIN') {
+      this.router.navigate(['/super-admin/dashboard-super-admin']);
+    } else if (role === 'MEMBRE') {
+      this.router.navigate(['/membre/dashboard-membre']);
+    } else if (role === 'PARENT') {
+      this.router.navigate(['/parent/dashboard-parent']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   ngOnInit() {
@@ -82,12 +99,10 @@ export class AppComponent implements OnInit, OnDestroy {
         this.userName = `${state.user.prenom ?? ''} ${state.user.nom ?? ''}`.trim();
         this.userAvatar = state.user['avatarUrl'] || '';
         this.unreadNotifications = state.user['unreadNotifications'] || 0;
-        // Si aucun club sélectionné, ouvrir la modale premium
         const selectedClub = this.clubService.getSelectedClub();
         if (!selectedClub) {
           this.showSelectClubModal = true;
         }
-        // Si admin connecté, forcer le club sélectionné
         if (state.role && state.role.toString().toUpperCase() === 'ADMIN') {
           if (!state.user['clubId']) {
             alert('Votre compte administrateur n’est associé à aucun club. Veuillez contacter le support.');
@@ -119,11 +134,25 @@ export class AppComponent implements OnInit, OnDestroy {
         this.unreadNotifications = 0;
       }
     });
+
+    // Ajout : souscription au router pour forcer la mise à jour du header à chaque navigation
+    this.routerSub = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        // Met à jour les inputs du header
+        this.isUserLoggedIn = this.auth.isConnecte();
+        this.currentUser = this.auth.getUtilisateurConnecte();
+        this.userName = this.currentUser ? `${this.currentUser.prenom ?? ''} ${this.currentUser.nom ?? ''}`.trim() : undefined;
+        this.userAvatar = this.currentUser ? this.currentUser['avatarUrl'] || '' : undefined;
+        this.unreadNotifications = this.currentUser ? this.currentUser['unreadNotifications'] || 0 : 0;
+        this.selectedClub = this.clubService.getSelectedClub();
+      }
+    });
   }
 
   ngOnDestroy() {
     if (this.clubSub) this.clubSub.unsubscribe();
     if (this.authSub) this.authSub.unsubscribe();
+    if (this.routerSub) this.routerSub.unsubscribe();
   }
 
 }

@@ -68,6 +68,80 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   // Bonjour
   prenomUtilisateur = 'Admin';
 
+    adminName: string = '';
+
+    /** Affiche le nom/prénom si ADMIN, sinon 'Super Admin' ou 'Utilisateur' + logs debug */
+    getUserName(): string {
+      try {
+        const rawUser = localStorage.getItem('utilisateur');
+  // ...log supprimé...
+        const user = rawUser ? JSON.parse(rawUser) : null;
+        if (user && user.role) {
+          const role = user.role.toUpperCase();
+          // ...log supprimé...
+          if (role === 'ADMIN') {
+            // ...log supprimé...
+            return user.prenom || '';
+          }
+          if (role === 'SUPER_ADMIN') {
+            // ...log supprimé...
+            return 'Super Admin';
+          }
+        }
+  // ...log supprimé...
+        return 'Utilisateur';
+      } catch (e) {
+  // ...log supprimé...
+        return 'Utilisateur';
+      }
+    }
+
+    ngOnInit(): void {
+      this.recupererUtilisateur();
+      this.chargerStats();
+      this.refreshBadges();
+      this.fetchAdminNameForSelectedClub();
+
+      interval(30000).pipe(takeUntil(this.destroy$)).subscribe(() => {
+        this.refreshBadges();
+      });
+
+      this.applyMarkAsSeenForUrl(this.router.url);
+
+      this.router.events
+        .pipe(filter(e => e instanceof NavigationEnd), takeUntil(this.destroy$))
+        .subscribe((e: any) => {
+          this.applyMarkAsSeenForUrl(e?.urlAfterRedirects ?? e?.url ?? '');
+          this.fetchAdminNameForSelectedClub();
+        });
+    }
+
+    /** Appelle l'API pour récupérer l'admin du club sélectionné */
+    fetchAdminNameForSelectedClub(): void {
+      try {
+        const rawClub = localStorage.getItem('selectedClub');
+        const club = rawClub ? JSON.parse(rawClub) : null;
+        if (club && club.id) {
+          this.http.get<any[]>(`${environment.apiUrl}/utilisateurs?role=ADMIN&clubId=${club.id}`).subscribe({
+            next: (admins) => {
+              if (admins && admins.length > 0) {
+                const admin = admins[0];
+                this.adminName = `${admin.prenom || ''} ${admin.nom || ''}`.trim();
+              } else {
+                this.adminName = 'Admin';
+              }
+            },
+            error: () => {
+              this.adminName = 'Admin';
+            }
+          });
+        } else {
+          this.adminName = 'Admin';
+        }
+      } catch {
+        this.adminName = 'Admin';
+      }
+    }
   private destroy$ = new Subject<void>();
 
   // ✅ Base API root (évite les 404 sur /admin/...)
@@ -76,29 +150,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  ngOnInit(): void {
-    console.log('🚀 Initialisation Dashboard Admin');
-    this.recupererUtilisateur();
-    this.chargerStats();
-    this.refreshBadges();
-
-    // rafraîchit périodiquement
-    interval(30000).pipe(takeUntil(this.destroy$)).subscribe(() => {
-      console.log('⏰ Rafraîchissement automatique des badges');
-      this.refreshBadges();
-    });
-
-    // Si on arrive déjà sur une route cible → marquer comme vu
-    this.applyMarkAsSeenForUrl(this.router.url);
-
-    // À chaque navigation, marquer si on entre dans une section
-    this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd), takeUntil(this.destroy$))
-      .subscribe((e: any) => {
-        console.log('🧭 Navigation détectée:', e?.urlAfterRedirects ?? e?.url);
-        this.applyMarkAsSeenForUrl(e?.urlAfterRedirects ?? e?.url ?? '');
-      });
-  }
+  // ...existing code...
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -111,23 +163,19 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
       const raw = localStorage.getItem('user');
       const user: UserLocalStorage = raw ? JSON.parse(raw) : null;
       this.prenomUtilisateur = (user?.prenom ?? user?.nom ?? 'Admin');
-      console.log('👤 Utilisateur récupéré:', this.prenomUtilisateur);
     } catch {
       this.prenomUtilisateur = 'Admin';
-      console.warn('⚠️ Erreur récupération utilisateur, utilisation par défaut');
     }
   }
 
   /** KPIs dashboard (tes stats globales) */
   private chargerStats(): void {
-    console.log('📊 Chargement des statistiques dashboard');
     this.http.get<DashboardStats>(this.url('dashboard/admin')).subscribe({
       next: (data) => {
         this.nbMembres = data?.nbMembres ?? 0;
         this.totalPaiements = data?.totalPaiements ?? 0;
         this.paiementsAttente = data?.paiementsAttente ?? 0;
         this.evenementsAVenir = data?.evenementsAVenir ?? 0;
-        console.log('✅ Stats chargées:', data);
       },
       error: (err) => console.error('❌ Erreur chargement stats dashboard', err)
     });
@@ -135,7 +183,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Centralisation des compteurs pour badges */
   private refreshBadges(): void {
-    console.log('🔄 Refresh badges démarré...');
     
     forkJoin({
       avis: this.fetchAvis(),               
@@ -146,7 +193,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
       actualites: this.fetchActualites()      
     }).subscribe({
       next: (res) => {
-        console.log('📊 Compteurs reçus de l\'API:', res);
         
         // Mémorise les valeurs courantes renvoyées par l'API
         this.currentCounts = {
@@ -158,7 +204,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
           actualites: Number(res.actualites || 0)
         };
 
-        console.log('📈 Compteurs courants mis à jour:', this.currentCounts);
 
         // Calcule les badges = max(0, courant - dernierVu)
         const newBadges = {
@@ -170,18 +215,15 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
           actualites: this.computeUnread('actualites', this.currentCounts.actualites)
         };
 
-        console.log('🔔 Nouveaux badges calculés:', newBadges);
         
         // Détecte les changements pour logger
         Object.keys(newBadges).forEach(key => {
           const sectionKey = key as SectionKey;
           if (this.badge[sectionKey] !== newBadges[sectionKey]) {
-            console.log(`📌 Badge ${key}: ${this.badge[sectionKey]} → ${newBadges[sectionKey]}`);
           }
         });
 
         this.badge = newBadges;
-        console.log('🏷️ Badges finaux mis à jour:', this.badge);
       },
       error: (err) => {
         console.error('❌ Erreur lors du refresh des badges:', err);
@@ -192,14 +234,11 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   /** Calcule le non-lu pour une section */
   private computeUnread(section: SectionKey, current: number): number {
     const lastRaw = localStorage.getItem(LS_KEYS[section]);
-    console.log(`🔍 ${section} - Courant: ${current}, Dernier vu: ${lastRaw}`);
     
     if (lastRaw === null) {
       // 1er chargement → on considère "tout vu" pour éviter les faux positifs
-      console.log(`🆕 Première visite pour ${section}, marquage comme vu`);
       try { 
         localStorage.setItem(LS_KEYS[section], String(current)); 
-        console.log(`💾 ${section} initialisé dans localStorage: ${current}`);
       } catch (e) {
         console.warn('⚠️ Erreur localStorage:', e);
       }
@@ -208,7 +247,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     
     const last = parseInt(lastRaw, 10) || 0;
     const unread = Math.max(0, current - last);
-    console.log(`📊 ${section} - Non lus calculés: ${unread} (${current} - ${last})`);
     
     return unread;
   }
@@ -216,48 +254,38 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   /** Marque la section comme vue (badge=0 et stockage du "dernier vu") */
   private markSectionAsSeen(section: SectionKey): void {
     const currentCount = this.currentCounts[section];
-    console.log(`✅ Marquage ${section} comme vu - Compteur: ${currentCount}`);
     
     try { 
       localStorage.setItem(LS_KEYS[section], String(currentCount)); 
-      console.log(`💾 ${section} sauvegardé dans localStorage: ${currentCount}`);
     } catch (e) {
       console.warn(`⚠️ Erreur sauvegarde localStorage pour ${section}:`, e);
     }
     
     // Reset du badge immédiatement
     this.badge = { ...this.badge, [section]: 0 };
-    console.log(`🔔 Badge ${section} remis à 0`);
   }
 
   /** Marquage automatique en fonction de l'URL atteinte */
   private applyMarkAsSeenForUrl(url: string): void {
     if (!url) return;
-    console.log(`🎯 Vérification marquage automatique pour URL: ${url}`);
     
     // Adapte ces routes si tes paths diffèrent
     if (url.startsWith('/admin/paiements')) {
-      console.log('💳 Marquage section paiements comme vue');
       this.markSectionAsSeen('paiements');
     }
     if (url.startsWith('/admin/documents')) {
-      console.log('📄 Marquage section documents comme vue');
       this.markSectionAsSeen('documents');
     }
     if (url.startsWith('/admin/gestion-commande')) {
-      console.log('🛒 Marquage section commandes comme vue');
       this.markSectionAsSeen('commandes');
     }
     if (url.startsWith('/admin/gestion-inscription') || url.startsWith('/admin/inscriptions')) {
-      console.log('📝 Marquage section inscriptions comme vue');
       this.markSectionAsSeen('inscriptions');
     }
     if (url.startsWith('/admin/avis')) {
-      console.log('⭐ Marquage section avis comme vue');
       this.markSectionAsSeen('avis');
     }
     if (url.startsWith('/admin/actualites')) {
-      console.log('📰 Marquage section actualites comme vue');
       this.markSectionAsSeen('actualites');
     }
   }
@@ -266,12 +294,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Avis non approuvés UNIQUEMENT */
   private fetchAvis(): Observable<number> {
-    console.log('📩 Récupération avis non approuvés');
     const params = new HttpParams().set('approuve', STATUS.AVIS_NON_APPROUVE);
     return this.http.get<any[]>(this.url('avis'), { params }).pipe(
       map(list => {
         const count = Array.isArray(list) ? list.filter(a => a?.approuve === false).length : 0;
-        console.log(`⭐ Avis non approuvés trouvés: ${count}`);
         return count;
       }),
       catchError((err) => {
@@ -283,23 +309,19 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Paiements en attente (robuste: /filter → fallback /api/paiements) */
   private fetchPaiements(): Observable<number> {
-    console.log('💳 Récupération paiements en attente');
     const params = new HttpParams().set('statut', STATUS.PAIEMENT_EN_ATTENTE);
     const filtered$ = this.http.get<any[]>(this.url('paiements/filter'), { params });
     const all$ = this.http.get<any[]>(this.url('paiements'));
 
     return filtered$.pipe(
       catchError(() => {
-        console.log('⚠️ Fallback vers /paiements pour filtrage manuel');
         return all$;
       }),
       switchMap(list => {
         const count = this.countPendingPaiements(list);
-        console.log(`💰 Paiements en attente trouvés: ${count}`);
         if (count > 0) return of(count);
         return all$.pipe(map(all => {
           const fallbackCount = this.countPendingPaiements(all);
-          console.log(`💰 Paiements en attente (fallback): ${fallbackCount}`);
           return fallbackCount;
         }));
       }),
@@ -312,12 +334,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Inscriptions en attente de probation UNIQUEMENT */
   private fetchInscriptions(): Observable<number> {
-    console.log('📝 Récupération inscriptions en attente');
     const params = new HttpParams().set('statut', STATUS.INSCRIPTION_EN_ATTENTE);
     return this.http.get<any[]>(this.url('inscriptions'), { params }).pipe(
       map(list => {
         const count = Array.isArray(list) ? list.filter(i => this.norm(i?.statut) === this.norm(STATUS.INSCRIPTION_EN_ATTENTE)).length : 0;
-        console.log(`📋 Inscriptions en attente trouvées: ${count}`);
         return count;
       }),
       catchError((err) => {
@@ -329,12 +349,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Commandes à traiter UNIQUEMENT */
   private fetchCommandes(): Observable<number> {
-    console.log('🛒 Récupération commandes à traiter');
     const params = new HttpParams().set('statut', STATUS.COMMANDE_A_TRAITER);
     return this.http.get<any[]>(this.url('commandes'), { params }).pipe(
       map(list => {
         const count = Array.isArray(list) ? list.filter(c => this.norm(c?.statut) === this.norm(STATUS.COMMANDE_A_TRAITER)).length : 0;
-        console.log(`🛍️ Commandes à traiter trouvées: ${count}`);
         return count;
       }),
       catchError((err) => {
@@ -346,12 +364,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Documents (par défaut : total). Si tu as un statut "à valider", filtre-le ici. */
   private fetchDocuments(): Observable<number> {
-    console.log('📄 Récupération documents');
     // 👉 Si tu as un statut spécifique (ex: ?statut=A_VALIDER), adapte ci-dessous.
     return this.http.get<any[]>(this.url('documents')).pipe(
       map(list => {
         const count = Array.isArray(list) ? list.length : 0;
-        console.log(`📋 Documents trouvés: ${count}`);
         return count;
       }),
       catchError((err) => {
@@ -363,11 +379,9 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Actualités (total récent). */
   private fetchActualites(): Observable<number> {
-    console.log('📰 Récupération actualités');
     return this.http.get<any[]>(this.url('actualites')).pipe(
       map(list => {
         const count = Array.isArray(list) ? list.length : 0;
-        console.log(`📰 Actualités trouvées: ${count}`);
         return count;
       }),
       catchError((err) => {
@@ -400,58 +414,48 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   // 🚀 Navigation (on marque la section comme vue AVANT de naviguer)
   navigateToPaiement(): void {
-    console.log('🧭 Navigation vers Paiements');
     this.markSectionAsSeen('paiements');
     this.router.navigate(['/admin/paiements']);
   }
 
   navigateToDocument(): void {
-    console.log('🧭 Navigation vers Documents');
     this.markSectionAsSeen('documents');
     this.router.navigate(['/admin/documents']);
   }
 
   navigateToGestionCommande(): void {
-    console.log('🧭 Navigation vers Gestion Commandes');
     this.markSectionAsSeen('commandes');
     this.router.navigate(['/admin/gestion-commande']);
   }
 
   navigateToGestionInscription(): void {
-    console.log('🧭 Navigation vers Gestion Inscriptions');
     this.markSectionAsSeen('inscriptions');
     this.router.navigate(['/admin/gestion-inscription']);
   }
 
   navigateToavis(): void {
-    console.log('🧭 Navigation vers Avis');
     this.markSectionAsSeen('avis');
     this.router.navigate(['/admin/avis']);
   }
 
   // Sections sans badge
   navigateToGestionEvenements(): void {
-    console.log('🧭 Navigation vers Gestion Événements');
     this.router.navigate(['/admin/gestion-evenement']);
   }
 
   navigateToGalerie(): void {
-    console.log('🧭 Navigation vers Galerie');
     this.router.navigate(['/admin/galerie']);
   }
 
   navigateToProfesseurs(): void {
-    console.log('🧭 Navigation vers Professeurs');
     this.router.navigate(['/admin/professeurs']);
   }
 
   navigateToHoraires(): void {
-    console.log('🧭 Navigation vers Horaires');
     this.router.navigate(['/admin/horaires']);
   }
 
   navigateToActualites(): void {
-    console.log('🧭 Navigation vers Actualités');
     this.markSectionAsSeen('actualites');
     this.router.navigate(['/admin/actualites']);
   }

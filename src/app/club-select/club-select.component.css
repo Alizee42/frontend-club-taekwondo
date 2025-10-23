@@ -1,4 +1,29 @@
 /* Liste simple des clubs, chaque club sur une ligne */
+.club-modal-premium-title[_ngcontent-ng-c3589535823] {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--blue-main);
+  margin-bottom: 6px;
+  text-align: center;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 8px rgba(25, 118, 210, 0.08);
+}
+.club-modal-premium-slogan[_ngcontent-ng-c3589535823] {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 12px;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.85;
+}
+.club-modal-premium-desc[_ngcontent-ng-c3589535823] {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
 .club-list-simple {
 	display: flex;
 	flex-direction: column;
@@ -35,6 +60,9 @@
 
 .club-list-row ui-button {
 	width: 100%;
+	min-width: 220px;
+	max-width: 100%;
+	box-sizing: border-box;
 	text-align: left;
 	justify-content: flex-start;
 	font-size: 1.15rem;

@@ -2,6 +2,7 @@
 
 <ng-container>
 	<universal-header
+		*ngIf="!isAccueilRoute"
 		[clubName]="selectedClub?.name || selectedClub?.nom || ''"
 		[isUserLoggedIn]="isUserLoggedIn"
 		[userName]="userName"
@@ -10,6 +11,7 @@
 		[role]="role"
 		(logout)="onLogout()"
 		(changeClub)="onChangeClub()"
+		(goToDashboard)="onGoToDashboard()"
 	></universal-header>
 
 			<div *ngIf="showSelectClubModal">

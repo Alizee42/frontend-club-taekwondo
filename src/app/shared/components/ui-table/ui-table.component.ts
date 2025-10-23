@@ -6,6 +6,7 @@ export interface UiTableColumn {
   label: string;
   type?: 'text' | 'number' | 'date' | 'custom';
   cellClass?: string;
+  render?: (row: any) => string;
 }
 
 @Component({
@@ -18,7 +19,7 @@ export interface UiTableColumn {
 export class UiTableComponent {
   @Input() columns: UiTableColumn[] = [];
   @Input() data: any[] = [];
-  @Input() actions: Array<{ label: string; icon?: string; action: string; color?: string }> = [];
+  @Input() actions: Array<{ label: string; icon?: string; iconText?: string; action: string; color?: string }> = [];
   @Output() actionClick = new EventEmitter<{ action: string; row: any }>();
 
   onAction(action: string, row: any) {

@@ -43,13 +43,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
     }
   }
 
-  // ✅ Debug log
-  console.log(
-    '[AuthInterceptor] URL =', req.url,
-    '| Token trouvé =', validToken ? 'OUI' : 'NON',
-    '| Public =', isPublicEndpoint,
-    '| Optional =', isOptionalEndpoint
-  );
+  // ✅ Debug log supprimé
 
   // On ajoute le token uniquement s'il existe ET si ce n'est pas une route publique
   if (validToken && !isPublicEndpoint) {
@@ -58,7 +52,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
         Authorization: `Bearer ${validToken}`,
       },
     });
-    console.log('[AuthInterceptor] Header Authorization ajouté ✅');
+  // ...log supprimé...
   }
 
   return next(req).pipe(

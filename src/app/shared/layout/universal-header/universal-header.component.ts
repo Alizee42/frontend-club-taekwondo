@@ -35,8 +35,7 @@ export class UniversalHeaderComponent {
   }
 
   goToSpecializedDashboard() {
-    // Navigation Angular
-    window.location.href = this.dashboardRoute;
+    this.goToDashboard.emit();
   }
 
   goToProfil() {
@@ -73,7 +72,8 @@ export class UniversalHeaderComponent {
   constructor(private router: Router) {
     this.router.events.subscribe(() => {
       const url = this.router.url;
-      this.isDashboardPage = url.includes('dashboard') || url.includes('club');
+      // Affiche le menu connecté uniquement sur dashboard, admin, super-admin
+      this.isDashboardPage = /\b(dashboard|admin|super-admin)\b/.test(url);
     });
   }
   showDropdown = false;

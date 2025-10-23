@@ -6,16 +6,12 @@ import { ActualiteService } from '../../services/actualite.service';
 import { AvisService, Avis } from '../../services/avis.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
-import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
-import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
-import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 
 @Component({
   selector: 'app-dashboard-super-admin',
   templateUrl: './dashboard-super-admin.component.html',
   styleUrls: ['./dashboard-super-admin.component.css'],
-  imports: [CommonModule, FormsModule, UiTableComponent, UiFormComponent, UiModalComponent, UiButtonComponent]
+  imports: [CommonModule, FormsModule]
 })
 export class DashboardSuperAdminComponent implements OnInit {
   // Champs du formulaire club pour <ui-form>

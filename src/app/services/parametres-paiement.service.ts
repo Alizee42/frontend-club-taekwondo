@@ -13,7 +13,7 @@ export class ParametresPaiementService {
   getParametresPaiementPublicByClub(clubId: number) {
     return this.http.get<ParametresPaiement>(`${this.publicUrl}/club/${clubId}`).pipe(
       catchError(err => {
-        console.warn('[ParametresPaiementService] Erreur public club → fallback défaut', err);
+          // console.warn('[ParametresPaiementService] Erreur public club → fallback défaut', err);
         return of(this.defaultParametres);
       })
     );
@@ -23,7 +23,7 @@ export class ParametresPaiementService {
   getParametresPaiementByClub(clubId: number) {
     return this.http.get<ParametresPaiement>(`${this.adminUrl}/club/${clubId}`).pipe(
       catchError(err => {
-        console.warn('[ParametresPaiementService] Erreur admin club → fallback public', err);
+          // console.warn('[ParametresPaiementService] Erreur admin club → fallback public', err);
         return this.getParametresPaiementPublicByClub(clubId);
       })
     );
@@ -34,7 +34,7 @@ export class ParametresPaiementService {
     return this.http.post(`${this.adminUrl}/club/${clubId}`, parametres).pipe(
       tap(() => this.parametresSubject.next(parametres)),
       catchError(err => {
-        console.error('❌ Erreur sauvegarde paramètres club:', err);
+          // console.error('❌ Erreur sauvegarde paramètres club:', err);
         throw err;
       })
     );
@@ -65,7 +65,7 @@ export class ParametresPaiementService {
     const isAdmin = role === 'ADMIN';
 
     const public$ = this.http.get<ParametresPaiement>(this.publicUrl).pipe(
-      tap(() => console.log('[ParametresPaiementService] Chargé (public)')),
+  tap(() => {/* ...log supprimé... */}),
       catchError(err => {
         console.warn('[ParametresPaiementService] Erreur public → fallback défaut', err);
         return of(this.defaultParametres);
@@ -80,9 +80,9 @@ export class ParametresPaiementService {
 
     // ADMIN : essayer admin puis fallback public
     this.http.get<ParametresPaiement>(this.adminUrl).pipe(
-      tap(() => console.log('[ParametresPaiementService] Chargé (admin)')),
+  tap(() => {/* ...log supprimé... */}),
       catchError(err => {
-        console.warn('[ParametresPaiementService] Échec admin → fallback public', err);
+          // console.warn('[ParametresPaiementService] Échec admin → fallback public', err);
         return of(null);
       }),
       switchMap(adminRes => adminRes ? of(adminRes) : public$),

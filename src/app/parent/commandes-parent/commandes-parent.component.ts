@@ -42,13 +42,13 @@ private getCurrentUserId(): number | null {
   const token = localStorage.getItem('auth_token') || '';
   const claims = this.decodeJwt(token) || {};
 
-  console.log('[CommandesParent] Token décodé complet:', claims);
+  // ...log supprimé...
 
   // ✅ Essaie différents champs possibles
   let utilisateurId = Number(claims.utilisateurId || claims.userId || claims.id || claims.sub);
   
   if (!isNaN(utilisateurId) && utilisateurId > 0) {
-    console.log('[CommandesParent] utilisateurId trouvé:', utilisateurId);
+  // ...log supprimé...
     return utilisateurId;
   }
 

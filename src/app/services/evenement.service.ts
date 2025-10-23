@@ -119,7 +119,7 @@ export class EvenementService {
       commentaire: commentaire || ''
     };
     
-    console.log('🔍 Service: Inscription membre, données envoyées:', body);
+  // ...log supprimé...
     return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body, { headers: this.getAuthHeaders() });
   }
 
@@ -145,9 +145,9 @@ export class EvenementService {
       parentId: this.getUserId() // ✅ Ajout du parentId si nécessaire
     };
 
-    console.log('🔍 Service: Inscription enfant, données envoyées:', JSON.stringify(body, null, 2));
-    console.log('🔍 Service: URL complète:', `${environment.apiUrl}/inscriptions`);
-    console.log('🔍 Service: Headers envoyés:', this.getAuthHeaders().get('Authorization')?.substring(0, 20) + '...');
+  // ...log supprimé...
+  // ...log supprimé...
+  // ...log supprimé...
     
     return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body, { headers: this.getAuthHeaders() });
   }

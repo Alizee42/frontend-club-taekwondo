@@ -76,7 +76,7 @@ export class ActualiteService {
   /** 🔹 Récupère une actualité par ID */
   getById(id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      tap(data => console.log('✅ Actualité récupérée :', data)),
+  tap(data => {}),
       catchError(error => {
         console.error('❌ Erreur lors de la récupération de l\'actualité :', error);
         return throwError(() => error);
@@ -100,7 +100,7 @@ export class ActualiteService {
   /** 🔹 Récupère les actualités à la une */
   getFeatured(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/featured`).pipe(
-      tap(data => console.log('✅ Actualités à la une récupérées :', data)),
+  tap(data => {}),
       catchError(error => {
         console.error('❌ Erreur lors de la récupération des actualités à la une :', error);
         return throwError(() => error);

@@ -128,7 +128,7 @@ export class CommandeService {
    *       MAPPING
    * ======================== */
   private mapApiToDto(api: any): CommandeDTO {
-    console.log('[CommandeService] Mode de paiement brut:', api.modePaiement);
+  // ...log supprimé...
     return {
       id: api.id,
       dateCommande: api.dateCommande ? `${api.dateCommande}T00:00:00` : '',
