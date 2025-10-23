@@ -178,6 +178,18 @@ font-family: "Poppins", sans-serif;
   border-collapse: collapse;
   margin-top: 20px;
 }
+.table-galerie {
+  /* Forcer un layout fixe pour éviter que les cellules s'agrandissent selon le contenu */
+  table-layout: fixed;
+}
+
+/* Spécifier la largeur de la première colonne (Image) et laisser les autres se partager le reste */
+.table-galerie th:first-child,
+.table-galerie td:first-child {
+  width: 110px; /* petite colonne pour la miniature */
+  max-width: 110px;
+  vertical-align: middle;
+}
 .table-galerie th,
 .table-galerie td {
   /* plus de border */
@@ -190,11 +202,13 @@ font-family: "Poppins", sans-serif;
   font-weight: bold;
 }
 .table-image {
-  width: 80px;
-  height: 80px;
+  width: 100px; /* augmenter légèrement la vignette pour être plus visible */
+  height: 100px;
   object-fit: cover;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  display: block;
+  margin: 0 auto;
 }
 .btn-action-icon {
   background: none;
@@ -290,6 +304,24 @@ font-family: "Poppins", sans-serif;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+  /* Uniformiser les inputs/textareas dans la modale */
+  .gestion-galerie-admin ui-modal input[type="text"],
+  .gestion-galerie-admin ui-modal textarea,
+  .gestion-galerie-admin ui-modal input[type="file"],
+  .gestion-galerie-admin .modal-body .form-control {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    font-size: 15px;
+  }
+
+  .gestion-galerie-admin ui-modal textarea {
+    resize: vertical;
+  }
+
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -320,6 +352,23 @@ font-family: "Poppins", sans-serif;
   background: #f9fafe;
   border-bottom: 1px solid #e3e8f0;
   font-size: 1rem;
+  /* Empêcher le texte long d'agrandir la colonne image : tronquer avec ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Pour permettre aux titres/descriptions d'avoir plusieurs lignes tout en limitant la largeur,
+   on ajoute des classes réutilisables et on remet le comportement normal à l'intérieur si besoin. */
+.cell-multiline {
+  white-space: normal;
+  display: -webkit-box;
+  /* propriété standard + préfixée pour compatibilité */
+  line-clamp: 2;
+  -webkit-line-clamp: 2; /* afficher au maximum 2 lignes */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .table-galerie tr.selected {
   background: #e0eaff;

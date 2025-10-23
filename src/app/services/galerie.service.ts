@@ -1,7 +1,7 @@
 import { tap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -18,6 +18,8 @@ export interface Galerie {
   providedIn: 'root',
 })
 export class GalerieService {
+  /** Emitted when galleries change (create/update/delete) so UI can refresh */
+  readonly imagesUpdated$ = new Subject<void>();
   /** Récupère toutes les galeries d'un club */
   getGaleriesByClub(clubId: number): Observable<Galerie[]> {
     return this.http.get<Galerie[]>(`${this.apiUrl}/club/${clubId}`);
@@ -61,7 +63,7 @@ export class GalerieService {
     return this.http.post<Galerie>(this.apiUrl, formData, { headers })
       .pipe(
         tap({
-          next: () => {},
+          next: () => this.imagesUpdated$.next(),
           error: (err: any) => console.error('[DEBUG][FRONT] Erreur backend:', err)
         })
       );
@@ -75,10 +77,12 @@ export class GalerieService {
       'X-User-Role': role.toString(),
       'X-User-ClubId': clubId.toString()
     });
-    return this.http.put<Galerie>(`${this.apiUrl}/${id}`, galerie, { headers });
+    return this.http.put<Galerie>(`${this.apiUrl}/${id}`, galerie, { headers })
+      .pipe(tap(() => this.imagesUpdated$.next()));
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`)
+      .pipe(tap(() => this.imagesUpdated$.next()));
   }
 }

@@ -1,16 +1,16 @@
 /* Force la taille de toutes les images dans le tableau, même générées par innerHTML */
 .ui-table td img {
-  width: 32px !important;
-  height: 32px !important;
-  object-fit: cover !important;
-  border-radius: 4px !important;
-  display: block;
-  margin: 0 auto;
+width: 56% !important;
+height: 35% !important;
+object-fit: cover !important;
+border-radius: 4px !important;
+display: block;
+margin: 0 auto;
 }
 /* Limite la taille des images galerie uniquement */
 .galerie-table-img {
-  max-width: 32px;
-  max-height: 32px;
+max-width: 170px;
+max-height: 100px;
   object-fit: cover;
   border-radius: 4px;
   display: block;
@@ -35,6 +35,7 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   font-size: 1.08rem;
+  width: 27%;
 }
 .ui-table tr:hover {
   background: #f7c87311;

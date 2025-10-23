@@ -9,7 +9,6 @@ import { ProfesseursComponent } from '../accueil/professeurs/professeurs.compone
 import { ActualitesComponent } from '../accueil/actualites/actualites.component'; 
 import { BanniereComponent } from '../accueil/banniere/banniere.component';
 import { ClubSelectComponent } from '../../club-select/club-select.component';
-import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UniversalHeaderComponent } from '../../shared/layout/universal-header/universal-header.component';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -26,7 +25,6 @@ import { Router } from '@angular/router';
     ProfesseursComponent,
     ActualitesComponent,
     ClubSelectComponent,
-  UiButtonComponent,
   UniversalHeaderComponent
   ],
   templateUrl: './accueil.component.html',

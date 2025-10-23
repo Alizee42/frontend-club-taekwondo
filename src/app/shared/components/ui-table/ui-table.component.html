@@ -8,8 +8,17 @@
   <tbody>
     <tr *ngFor="let row of data">
       <td *ngFor="let col of columns" [ngClass]="col.cellClass">
-        <span *ngIf="!col.render">{{ row[col.key] }}</span>
-        <span *ngIf="col.render" [innerHTML]="col.render(row)"></span>
+        <!-- Si la colonne est de type image, on rend un <img> sécurisé -->
+        <ng-container *ngIf="col.type === 'image'">
+          <img [src]="row[col.key]" alt="{{ row[col.key] ? 'photo' : 'Aucune image' }}" class="galerie-table-img" *ngIf="row[col.key]; else noImg" />
+          <ng-template #noImg><span style="color:#888">Aucune image</span></ng-template>
+        </ng-container>
+
+        <!-- Si la colonne est custom et que render existe, on affiche le texte renvoyé (sécurisé) -->
+        <ng-container *ngIf="col.type !== 'image'">
+          <span *ngIf="!col.render">{{ row[col.key] }}</span>
+          <span *ngIf="col.render">{{ col.render(row) }}</span>
+        </ng-container>
       </td>
       <td *ngIf="actions.length">
         <div style="display: flex; gap: 8px; align-items: center; justify-content: flex-start;">

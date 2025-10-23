@@ -7,6 +7,7 @@ import { GalerieService, Galerie } from '../../services/galerie.service';
 import { ClubService, Club } from '../../services/club.service';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-galerie-gestion-super-admin',
@@ -26,9 +27,8 @@ export class GalerieGestionSuperAdminComponent implements OnInit {
     {
       key: 'imageUrl',
       label: 'Image',
-      type: 'custom',
-      cellClass: 'image-cell',
-  render: (row: Galerie) => row.imageUrl ? `<img src='http://localhost:8080/uploads/${row.imageUrl}' alt='photo' style='width:32px;height:32px;object-fit:cover;border-radius:4px;display:block;margin:0 auto;' />` : '<span style="color:#888">Aucune image</span>'
+      type: 'image',
+      cellClass: 'image-cell'
     },
     { key: 'titre', label: 'Titre' },
     { key: 'description', label: 'Description' }
@@ -83,7 +83,20 @@ export class GalerieGestionSuperAdminComponent implements OnInit {
 
   loadImages(clubId: number): void {
     this.galerieService.getGaleriesByClub(clubId).subscribe((data) => {
-      this.images = data;
+      const apiBase = environment.apiUrl.replace(/\/api\/?$/i, '');
+      this.images = data.map(img => {
+        let raw = img.imageUrl || '';
+        if (raw.startsWith('galerie/')) raw = raw.replace(/^galerie\//, '');
+        let full = '';
+        if (!raw) {
+          full = '';
+        } else if (raw.startsWith('http') || raw.startsWith('/')) {
+          full = raw;
+        } else {
+          full = `${apiBase}/uploads/galerie/${encodeURIComponent(raw)}`;
+        }
+        return { ...img, imageUrl: full };
+      });
     });
   }
 

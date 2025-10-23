@@ -2,9 +2,13 @@
   <section class="gallery-container">
     <div class="grid-gallery">
       <div class="grid-item" *ngFor="let image of images">
-        <img [src]="image.imageUrl" [alt]="image.titre" />
-        <h3>{{ image.titre }}</h3>
-        <p>{{ image.description | slice: 0:100 }}...</p>
+        <div class="img-wrapper">
+          <img [src]="image.imageUrl" [alt]="image.titre" (error)="handleImgError($event, image)" />
+        </div>
+        <div class="card-body">
+          <h3>{{ image.titre }}</h3>
+          <p>{{ image.description | slice: 0:100 }}...</p>
+        </div>
       </div>
     </div>
   </section>

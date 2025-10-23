@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 export interface UiTableColumn {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'date' | 'custom';
+  type?: 'text' | 'number' | 'date' | 'custom' | 'image';
   cellClass?: string;
   render?: (row: any) => string;
 }

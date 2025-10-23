@@ -2,13 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { GalerieService, Galerie } from '../../services/galerie.service';
 import { FormsModule } from '@angular/forms'; // Import nécessaire pour [(ngModel)]
 import { CommonModule } from '@angular/common'; // Import pour les directives Angular de base
+import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-gestion-galerie',
   templateUrl: './gestion-galerie.component.html',
   styleUrls: ['./gestion-galerie.component.css'],
   standalone: true, // Si vous utilisez Angular 14 standalone
-  imports: [CommonModule, FormsModule], // Ajout des modules nécessaires
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiButtonComponent], // Ajout des composants réutilisables
 })
 export class GestionGalerieComponent implements OnInit {
   images: Galerie[] = [];
@@ -16,20 +21,76 @@ export class GestionGalerieComponent implements OnInit {
   imageUrl: string | null = null;
   afficherFormulaire = false;
   errorMsg: string | null = null;
+  // colonnes pour ui-table
+  tableColumns: UiTableColumn[] = [];
+  tableActions = [
+    { label: 'Modifier', action: 'edit', color: 'primary', icon: 'material-icons', iconText: 'edit' },
+    { label: 'Supprimer', action: 'delete', color: 'danger', icon: 'material-icons', iconText: 'delete' }
+  ];
 
-  constructor(private galerieService: GalerieService) {}
+  // Pour la modale (aligné avec super-admin)
+  modalOpen = false;
+  modalTitle = '';
+  formImage: Partial<Galerie> = {};
+  editMode = false;
+
+  constructor(private galerieService: GalerieService, private authService: AuthService) {}
+
 
   ngOnInit(): void {
-    this.loadImages();
+    // Initialiser les colonnes du tableau
+    this.tableColumns = [
+      {
+        key: 'imageUrl',
+        label: 'Image',
+        type: 'image',
+        cellClass: 'image-cell'
+      },
+      { key: 'titre', label: 'Titre' },
+      { key: 'description', label: 'Description' }
+    ];
+
+    // Charger les images du club de l'utilisateur connecté
+    const user = this.authService.getUtilisateurConnecte();
+    const clubId = user?.['clubId'] ?? null;
+    if (clubId) {
+      this.loadImages(clubId);
+    } else {
+      // fallback: charger aucune image ou toutes selon votre choix (ici on ne charge rien)
+      console.warn('[GestionGalerie] clubId utilisateur introuvable — aucune galerie chargée');
+      this.images = [];
+    }
   }
 
-  loadImages(): void {
-    this.galerieService.getAll().subscribe(
+  loadImages(clubId: number): void {
+    this.galerieService.getGaleriesByClub(clubId).subscribe(
       (data) => {
-        this.images = data;
+        // Normaliser l'URL des images : construire une URL complète vers le dossier uploads du backend.
+        // backend static files sont souvent servis sur la racine /uploads (ex: http://localhost:8080/uploads/...).
+        const apiBase = environment.apiUrl.replace(/\/api\/?$/i, '');
+        this.images = data.map(img => {
+          let raw = img.imageUrl || '';
+          // Retirer un éventuel préfixe 'galerie/' renvoyé par l'API
+          if (raw.startsWith('galerie/')) raw = raw.replace(/^galerie\//, '');
+          let full = '';
+          if (!raw) {
+            full = '';
+          } else if (raw.startsWith('http') || raw.startsWith('/')) {
+            // déjà une URL absolue ou commençant par / : on l'utilise telle quelle
+            full = raw;
+          } else {
+            // essayer upload spécifique galerie, puis fallback /uploads/
+            full = `${apiBase}/uploads/galerie/${encodeURIComponent(raw)}`;
+            // Note: impossible de tester l'existence ici — si ça ne marche pas, on peut basculer sur `${apiBase}/uploads/${raw}`
+            // pour compatibilité avec les chemins qui ne sont pas dans /galerie
+            // Préparer aussi une variante fallback dans l'objet si nécessaire
+            // (ici on choisit la variante /uploads/galerie/ par défaut)
+          }
+          return { ...img, imageUrl: full };
+        });
       },
       (error) => {
-        console.error('Erreur lors du chargement des images :', error);
+        console.error('Erreur lors du chargement des images par club :', error);
       }
     );
   }
@@ -46,12 +107,70 @@ export class GestionGalerieComponent implements OnInit {
     }
   }
 
+  openAddModal() {
+    this.editMode = false;
+    const user = this.authService.getUtilisateurConnecte();
+    this.formImage = { titre: '', imageUrl: '', description: '', clubId: user?.['clubId'] ?? null };
+    this.modalTitle = 'Ajouter une photo';
+    this.modalOpen = true;
+  }
+
+  openEditModal(image: Galerie) {
+    this.editMode = true;
+    this.formImage = { ...image };
+    this.modalTitle = 'Modifier la photo';
+    this.modalOpen = true;
+  }
+
+  closeModal() {
+    this.modalOpen = false;
+    this.formImage = {};
+  }
+
+  isSubmitting = false;
+
+  submitImage() {
+    if (!this.formImage.titre || !this.formImage.imageUrl || this.isSubmitting) return;
+    this.isSubmitting = true;
+    this.formImage.clubId = this.formImage.clubId ?? this.authService.getUtilisateurConnecte()?.['clubId'];
+    const payload: any = {
+      titre: this.formImage.titre,
+      description: this.formImage.description,
+      clubId: this.formImage.clubId,
+      _file: (this.formImage as any)._file
+    };
+    if (this.editMode && this.formImage.id) {
+      this.galerieService.update(this.formImage.id, this.formImage as any).subscribe(() => {
+        this.loadImages(this.formImage.clubId as number);
+        this.closeModal();
+        this.isSubmitting = false;
+      });
+    } else {
+      this.galerieService.create(payload).subscribe(() => {
+        this.loadImages(this.formImage.clubId as number);
+        this.closeModal();
+        this.isSubmitting = false;
+      }, (err) => {
+        console.error('[DEBUG][FRONT] Erreur backend:', err);
+        this.isSubmitting = false;
+      });
+    }
+  }
+
   uploadImage(): void {
     this.errorMsg = null;
     if (this.newImage.titre && this.newImage.description && this.newImage.imageUrl) {
       this.galerieService.create(this.newImage as Galerie).subscribe(
         (res) => {
-          this.loadImages();
+          // Recharger les images pour le club courant (priorité : newImage.clubId sinon clubId de l'utilisateur)
+          const clubIdFromForm = (this.newImage as any).clubId ?? null;
+          const userAfter = this.authService.getUtilisateurConnecte();
+          const clubIdToLoad = clubIdFromForm ?? userAfter?.['clubId'] ?? null;
+          if (clubIdToLoad) {
+            this.loadImages(clubIdToLoad);
+          } else {
+            console.warn('[GestionGalerie] clubId introuvable après création — aucune recharge effectuée');
+          }
           this.newImage = {};
           this.imageUrl = null;
           this.afficherFormulaire = false;
@@ -75,7 +194,9 @@ export class GestionGalerieComponent implements OnInit {
   
     this.galerieService.delete(id).subscribe(
       () => {
-        this.loadImages();
+        const user = this.authService.getUtilisateurConnecte();
+        const clubId = user?.['clubId'] ?? null;
+        if (clubId) this.loadImages(clubId);
       },
       (error) => {
         console.error('Erreur lors de la suppression de l\'image :', error);
@@ -86,5 +207,17 @@ export class GestionGalerieComponent implements OnInit {
     // Pré-remplir le formulaire avec les données de l'image à modifier
     this.newImage = { ...image };
     this.imageUrl = image.imageUrl;
+  }
+
+  // Gestion des actions du tableau réutilisable
+  handleTableAction(event: { action: string; row: Galerie }) {
+    if (event.action === 'edit') {
+      this.editImage(event.row);
+      this.afficherFormulaire = true;
+    } else if (event.action === 'delete') {
+      if (confirm('Supprimer cette image ?')) {
+        this.deleteImage(event.row.id);
+      }
+    }
   }
 }
