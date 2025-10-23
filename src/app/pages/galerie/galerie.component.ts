@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgForOf } from '@angular/common';
 import { GalerieService, Galerie } from '../../services/galerie.service';
 import { AuthService } from '../../services/auth.service';
 import { ClubService, Club } from '../../services/club.service';
@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-galerie',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgForOf],
   templateUrl: './galerie.component.html',
   styleUrls: ['./galerie.component.css']
 })
