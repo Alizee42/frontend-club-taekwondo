@@ -1,37 +1,36 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HorairesService {
-  private horaires: any[] = [];
+  // Mettre à jour un horaire
+  updateHoraire(horaireId: number, horaire: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${horaireId}`, horaire);
+  }
+  private apiUrl = '/api/horaires';
 
-  constructor() {
-    this.loadHoraires(); // Charger les horaires depuis le localStorage au démarrage
+  constructor(private http: HttpClient) {}
+
+  // Récupérer tous les horaires (super admin)
+  getAllHoraires(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/all`);
   }
 
-  getHoraires() {
-    return this.horaires;
+  // Récupérer les horaires d'un club
+  getHorairesByClub(clubId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/club/${clubId}`);
   }
 
-  addHoraire(horaire: any) {
-    this.horaires.push(horaire);
-    this.saveHoraires(); // Sauvegarder les horaires après ajout
+  // Ajouter un horaire à un club
+  addHoraireToClub(clubId: number, horaire: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/club/${clubId}`, horaire);
   }
 
-  deleteHoraire(index: number) {
-    this.horaires.splice(index, 1);
-    this.saveHoraires(); // Sauvegarder les horaires après suppression
-  }
-
-  private saveHoraires() {
-    localStorage.setItem('horaires', JSON.stringify(this.horaires)); // Sauvegarde dans le localStorage
-  }
-
-  private loadHoraires() {
-    const savedHoraires = localStorage.getItem('horaires');
-    if (savedHoraires) {
-      this.horaires = JSON.parse(savedHoraires); // Charger depuis le localStorage
-    }
+  // Supprimer un horaire
+  deleteHoraire(horaireId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${horaireId}`);
   }
 }

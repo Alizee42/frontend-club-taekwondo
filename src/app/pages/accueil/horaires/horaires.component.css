@@ -1,3 +1,108 @@
+.modern-horaire-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1.5px solid #e3e6ed;
+  box-shadow: 0 2px 8px -4px rgba(30,96,145,.06);
+  padding: 1.1rem 1.1rem 0.7rem 1.1rem;
+  width: 295px;
+  min-width: 180px;
+  max-width: 340px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  transition: box-shadow .18s, transform .18s;
+  overflow: hidden;
+}
+
+.modern-horaire-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.7rem;
+}
+.modern-day-badge {
+  background: #eaf1fa;
+  color: #1e3455;
+  font-weight: 700;
+  font-size: 1em;
+  border-radius: 8px;
+  padding: 0.18em 1.1em;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  border: 1px solid #e3e6ed;
+}
+
+.modern-horaire-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin-bottom: 0.7rem;
+  gap: 0.7em;
+}
+.modern-horaire-time {
+  font-size: 1.13em;
+  font-weight: 700;
+  color: #1e3455;
+  margin-right: 0.7em;
+}
+.modern-horaire-groupe-badge {
+  background: #f5f6fa;
+  color: #d32f2f;
+  border-radius: 6px;
+  padding: 0.08em 0.7em;
+  font-size: 1em;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  display: inline-block;
+  border: 1px solid #e3e6ed;
+  margin-left: auto;
+}
+
+.modern-horaire-divider {
+  width: 100%;
+  height: 1px;
+  background: #e3e6ed;
+  border-radius: 2px;
+  margin: 0.5em 0 0.5em 0;
+}
+
+.modern-horaire-footer {
+  width: 100%;
+  padding: 0.3em 0 0.2em 0;
+  display: flex;
+  align-items: center;
+  color: #888;
+  font-size: 0.98em;
+  min-height: 2.2em;
+  border-top: none;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+}
+.modern-horaire-adresse-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+  min-width: 0;
+}
+.modern-horaire-adresse {
+  color: #888;
+  font-size: 0.98em;
+  font-weight: 400;
+  word-break: break-word;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+.modern-horaire-ville {
+  color: #888;
+  font-size: 0.98em;
+  font-weight: 400;
+  margin-left: 0.3em;
+  word-break: break-word;
+}
 body .horaires-section, .horaires-section {
   background: linear-gradient(135deg, #fafdff 60%, #eaf3ff 100%);
 }
@@ -25,22 +130,21 @@ body .horaires-section, .horaires-section {
 .schedule-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
-  gap: 2rem 5rem;
+  gap: 1.2rem 2rem;
   width: 100%;
   margin-bottom: 2.5rem;
 }
 .schedule-card.premium {
   background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 18px -6px rgba(30,96,145,.11);
-  border: 1.5px solid var(--border-subtle);
-  box-shadow: 0 4px 24px -8px rgba(30,96,145,.08);
-  padding: 1.5rem 0.8rem 0.8rem 0.7rem;
-  width: 100%;
-  min-width: 220px;
-  max-width: 420px;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px -4px rgba(30,96,145,.10);
+  border: 1px solid var(--border-subtle);
+  padding: 1rem 0.7rem 0.7rem 0.7rem;
+  width: 260px;
+  min-width: 180px;
+  max-width: 260px;
   margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
@@ -74,6 +178,7 @@ body .horaires-section, .horaires-section {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: flex-start;
 }
 .card-hours li {
   display: flex;
@@ -95,6 +200,7 @@ body .horaires-section, .horaires-section {
 .card-hours .time {
   color: var(--blue-main);
   font-weight: 700;
+  text-align: left;
 }
 .groupe-badge {
   background: var(--orange-main);
@@ -107,6 +213,7 @@ body .horaires-section, .horaires-section {
   letter-spacing: 0.2px;
   box-shadow: 0 1px 4px rgba(255,140,0,.10);
   display: inline-block;
+  text-align: left;
 }
 .card-divider {
   width: 100%;

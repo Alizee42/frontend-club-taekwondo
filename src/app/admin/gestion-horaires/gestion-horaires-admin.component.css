@@ -1,0 +1,234 @@
+/* Empêche le débordement du tableau hors de la card */
+.horaire-card-body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+  padding: 0.5em 0.5em 1em 0.5em;
+}
+
+.ui-table {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Actions (éditer, supprimer) dans chaque fieldset horaire */
+.horaire-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7em;
+}
+
+.edit-horaire-btn {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2.2em;
+  height: 2.2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.edit-horaire-btn:hover {
+  background: #0d174e;
+}
+.edit-horaire-btn i {
+  font-size: 1.25em;
+  color: white;
+}
+.horaires-global {
+  padding: 1%;
+}
+.horaire-fieldset {
+  border: 2px solid var(--blue-main);
+  border-radius: 10px;
+  padding: 0.7em 1.2em;
+  margin-bottom: 1em;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5em;
+  background: #f7f9fc;
+}
+
+.horaire-card {
+  background: #fff;
+  border: 2px solid #e3eafc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #e3eafc;
+  margin-bottom: 2em;
+  padding: 1.2em 1.5em 1.2em 1.5em;
+  min-width: 320px;
+  max-width: 100%;
+  width: 100%;
+  transition: box-shadow 0.2s;
+}
+
+.delete-horaire-btn:hover {
+  background: #b71c1c !important;
+  box-shadow: 0 4px 16px rgba(229,57,53,0.32);
+}
+.delete-horaire-btn i {
+  font-size: 1.45em;
+  color: white;
+}
+/* Bordure bleue autour de chaque card jour */
+.horaire-card {
+  border: 2px solid var(--blue-main);
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(26,35,126,0.07);
+  padding: 1.2em 1.5em;
+  margin-bottom: 2em;
+  background: #fff;
+}
+.ui-modal-content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.horaire-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5em;
+  width: 100%;
+}
+.horaire-ligne {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  max-width: 95%;
+  flex-wrap: wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.icon-horaire {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3em;
+  height: 1.3em;
+  margin-right: 0.1em;
+}
+/* Disposition verticale pour le formulaire modal d'ajout d'horaire */
+.ajout-horaire-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.ajout-horaire-vertical label {
+  font-weight: 600;
+  margin-bottom: 0.2em;
+}
+.ajout-horaire-vertical input,
+.ajout-horaire-vertical select {
+  padding: 0.5em;
+  border-radius: 4px;
+  border: 1px solid #bdbdbd;
+  margin-bottom: 0.5em;
+}
+.ajout-horaire-vertical ui-button {
+  align-self: flex-end;
+  margin-top: 1em;
+}
+/* Styles harmonisés pour les cards horaires sur la vue admin */
+.horaires-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: flex-start;
+  margin-top: 2rem;
+}
+
+.horaire-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px 0 rgba(0,0,0,0.08), 0 1.5px 4px 0 rgba(0,0,0,0.04);
+  padding: 1.5rem 2rem 1.2rem 2rem;
+  min-width: 320px;
+max-width: 1000px;  
+flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+  transition: box-shadow 0.2s;
+}
+.horaire-card:hover {
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.13), 0 2px 8px 0 rgba(0,0,0,0.07);
+}
+
+.horaire-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+.horaire-jour {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a237e;
+  letter-spacing: 0.5px;
+}
+.club-indication {
+  font-size: 1rem;
+  color: #607d8b;
+  margin-left: 1.2rem;
+  font-weight: 500;
+}
+
+.delete-horaire-btn:hover {
+  background: #fbe9e7;
+}
+
+.horaire-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.horaire-plage {
+  font-size: 1.08rem;
+  color: #263238;
+  margin-bottom: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+.horaire-groupe {
+  background: linear-gradient(135deg, #f8fafc 80%, #e3f0ff 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 18px 0 rgba(37,99,235,0.08), 0 1.5px 4px 0 rgba(0,0,0,0.04);
+  border: 1.5px solid #e3eafc;
+  padding: 2rem 2.2rem 1.5rem 2.2rem;
+  min-width: 320px;
+  max-width: 370px;
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+  transition: box-shadow 0.2s;
+}
+
+
+.no-horaires {
+  color: #b71c1c;
+  font-size: 1.1rem;
+  margin: 2rem 0 0 1rem;
+}
+
+@media (max-width: 900px) {
+  .horaires-cards-container {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .horaire-card {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    padding: 1.2rem 1rem 1rem 1rem;
+  }
+}

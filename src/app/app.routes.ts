@@ -16,12 +16,13 @@ import { ActualitesComponent } from './super-admin/actualites/actualites.compone
 import { DashboardMembreComponent } from './membre/dashboard-membre/dashboard-membre.component';
 import { ProfilComponent } from './pages/profil/profil.component';
 import { AuthGuard } from './guards/auth.guard';
-import { GestionHorairesComponent } from './admin/gestion-horaires/gestion-horaires.component';
+import { GestionHorairesAdminComponent } from './admin/gestion-horaires/gestion-horaires-admin.component';
 import { GestionProfesseursComponent } from './admin/gestion-professeurs/gestion-professeurs.component';
 import { GestionAvisComponent } from './admin/gestion-avis/gestion-avis.component';
 import { GestionActualitesComponent } from './admin/gestion-actualites/gestion-actualites.component';
 import { GalerieGestionSuperAdminComponent } from './super-admin/galerie-gestion/galerie-gestion.component';
 import{ GestionGalerieComponent } from './admin/gestion-galerie/gestion-galerie.component';
+import { GestionHorairesSuperAdminComponent } from './super-admin/gestion-horaires/gestion-horaires-super-admin.component';
 import { DocumentsComponent } from './membre/documents/documents.component';
 import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-documents.component';
 import { PaiementComponent } from './membre/paiement/paiement.component';
@@ -74,7 +75,7 @@ export const routes: Routes = [
     data: { role: 'ADMIN' },
     children: [
       { path: 'dashboard-admin', component: DashboardAdminComponent },
-      { path: 'horaires', component: GestionHorairesComponent },
+  { path: 'horaires', component: GestionHorairesAdminComponent },
       { path: 'professeurs', component: GestionProfesseursComponent },
       { path: 'avis', component: GestionAvisComponent },
       { path: 'actualites', component: GestionActualitesComponent },
@@ -130,6 +131,7 @@ export const routes: Routes = [
   { path: 'actualites', component: ActualitesComponent },
   { path: 'galerie', component: GalerieGestionSuperAdminComponent }, // galerie super admin
   { path: 'galerie-gestion', component: GalerieGestionSuperAdminComponent }
+  ,{ path: 'horaires', component: GestionHorairesSuperAdminComponent }
     ]
     },
   // 🧭 Redirection inconnue

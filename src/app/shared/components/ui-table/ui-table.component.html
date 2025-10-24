@@ -2,37 +2,44 @@
   <thead>
     <tr>
       <th *ngFor="let col of columns">{{ col.label }}</th>
-      <th *ngIf="actions.length">Actions</th>
+  <th *ngIf="actions.length" style="width:56px;min-width:56px;padding:0 6px;text-align:center;">Actions</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let row of data">
       <td *ngFor="let col of columns" [ngClass]="col.cellClass">
-        <!-- Si la colonne est de type image, on rend un <img> sécurisé -->
         <ng-container *ngIf="col.type === 'image'">
           <img [src]="row[col.key]" alt="{{ row[col.key] ? 'photo' : 'Aucune image' }}" class="galerie-table-img" *ngIf="row[col.key]; else noImg" />
           <ng-template #noImg><span style="color:#888">Aucune image</span></ng-template>
         </ng-container>
 
-        <!-- Si la colonne est custom et que render existe, on affiche le texte renvoyé (sécurisé) -->
-        <ng-container *ngIf="col.type !== 'image'">
+        <!-- Edition individuelle : si la cellule est en édition -->
+        <ng-container *ngIf="isEditing(row, col.key); else viewCell">
+          <input [(ngModel)]="editValue" style="width:110px;max-width:110px;padding:2px 6px;font-size:0.98em;display:inline-block;vertical-align:middle;" />
+          <button (click)="saveEdit(row, col.key)" style="background:none;border:none;color:#388e3c;margin-left:4px;cursor:pointer;">
+            <i class="ri-check-line"></i>
+          </button>
+          <button (click)="cancelEdit()" style="background:none;border:none;color:#d32f2f;margin-left:2px;cursor:pointer;">
+            <i class="ri-close-line"></i>
+          </button>
+        </ng-container>
+        <ng-template #viewCell>
           <span *ngIf="!col.render">{{ row[col.key] }}</span>
           <span *ngIf="col.render">{{ col.render(row) }}</span>
-        </ng-container>
-      </td>
-      <td *ngIf="actions.length">
-        <div style="display: flex; gap: 8px; align-items: center; justify-content: flex-start;">
-          <button *ngFor="let act of actions"
-            class="ui-table-actions-btn"
-            [ngClass]="{ 'edit': act.action === 'edit' }"
-            [ngStyle]="{ color: act.color || '#2563eb' }"
-            (click)="onAction(act.action, row)"
-            style="padding: 0 8px; min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-            <i *ngIf="act.icon" [class]="act.icon" style="font-size: 1.3em;">
-              {{ act.iconText || '' }}
-            </i>
+          <button (click)="startEdit(row, col.key)" style="background:none;border:none;color:#1976d2;margin-left:6px;cursor:pointer;vertical-align:middle;">
+            <i class="ri-pencil-line" style="font-size:1.1em;"></i>
           </button>
-        </div>
+        </ng-template>
+      </td>
+      <td *ngIf="actions.length" style="width:56px;min-width:56px;padding:0 6px;text-align:center;">
+        <button *ngFor="let act of actions"
+          class="ui-table-actions-btn"
+          [ngClass]="{ 'edit': act.action === 'edit' }"
+          [ngStyle]="{ color: act.color || '#2563eb', padding: '0', minWidth: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }"
+          (click)="onAction(act.action, row)"
+          style="padding:0;min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">
+          <i *ngIf="act.icon" [class]="act.icon" style="font-size:1.3em;"></i>
+        </button>
       </td>
     </tr>
   </tbody>
