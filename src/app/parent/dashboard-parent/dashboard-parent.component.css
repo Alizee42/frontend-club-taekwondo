@@ -1,3 +1,12 @@
+.page-title {
+  color: var(--blue-main);
+  font-size: 2.2rem;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  margin-bottom: 1.2rem;
+  margin-top: 0.2rem;
+  text-align: center;
+}
 /* Conteneur principal */
 .dashboard-container {
   padding: 2rem;
@@ -20,6 +29,19 @@
   position: relative;
 }
 
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.dashboard-header h1 {
+  color: var(--blue-main);
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
 .dashboard-header h1::after {
   content: '';
   display: block;
@@ -29,28 +51,15 @@
   margin: 0.5rem auto 0;
   border-radius: 2px;
 }
-
-/* Message de bienvenue */
 .welcome-message {
   font-size: 1.2rem;
   color: var(--text-main);
   font-weight: 500;
 }
-
 .welcome-message .highlight {
-  color: var(--red-main);
+  color: var(--blue-main);
   font-weight: bold;
 }
-
-/* Texte d'introduction */
-.intro {
-  text-align: center;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
-  font-style: italic;
-}
-
 /* Grille des sections */
 .dashboard-grid {
   display: grid;

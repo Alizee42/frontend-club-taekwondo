@@ -3,6 +3,7 @@ import { EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UiButtonComponent } from '../shared/ui/buttons/ui-button/ui-button.component';
 import { Club, ClubService } from '../services/club.service';
+import { ClubSelectionService } from '../services/club-selection.service';
 
 @Component({
   selector: 'app-club-select',
@@ -24,6 +25,7 @@ export class ClubSelectComponent {
 
   selectClub(club: Club) {
     this.clubSelected.emit(club);
+    this.clubSelectionService.setSelectedClubId(club.id ?? null);
   }
 
   // Méthode pour fermeture de la modale (overlay ou bouton)
@@ -32,7 +34,7 @@ export class ClubSelectComponent {
   }
 
   // Exemple d'init – adapte selon ta logique réelle
-  constructor(private clubService: ClubService) {}
+  constructor(private clubService: ClubService, private clubSelectionService: ClubSelectionService) {}
 
   ngOnInit() {
     this.loading = true;

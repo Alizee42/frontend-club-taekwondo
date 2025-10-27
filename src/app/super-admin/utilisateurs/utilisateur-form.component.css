@@ -1,0 +1,49 @@
+.utilisateur-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #e3eafc;
+  padding: 2em 2em 1.5em 2em;
+  max-width: 400px;
+  margin: 0 auto;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+.form-group label {
+  font-weight: 600;
+  color: #1976d2;
+}
+.form-group input, .form-group select {
+  padding: 0.6em 1em;
+  border-radius: 6px;
+  border: 1.5px solid #e3eafc;
+  font-size: 1em;
+}
+.form-actions {
+  display: flex;
+  gap: 1em;
+  justify-content: flex-end;
+}
+.form-actions button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1em;
+  padding: 0.7em 1.5em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.form-actions button[type="button"] {
+  background: #e53935;
+}
+.form-actions button:disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}

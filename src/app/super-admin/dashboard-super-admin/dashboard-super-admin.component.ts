@@ -77,12 +77,9 @@ export class DashboardSuperAdminComponent implements OnInit {
   }
 
   navigateToHoraires() {
-    this.router.navigate(['super-admin/horaires']);
+    this.router.navigate(['super-admin/gestion-horaires']);
   }
 
-  navigateToGestionInscription() {
-    this.router.navigate(['super-admin/inscriptions']);
-  }
   // KPIs globaux
   clubsCount = 0;
   membresCount = 0;

@@ -1,11 +1,14 @@
+
 <div class="horaires-global">
-  <div class="header-bar-horaires" style="display:flex;align-items:center;justify-content:space-between;gap:2em;">
-    <h2 class="titre-section" style="font-size:2.1rem;font-weight:800;color:#1a237e;letter-spacing:0.5px;margin:0;">Gestion des horaires des clubs</h2>
-  <ui-button label="Ajouter des horaires" variant="primary" (clicked)="showAjoutModal = true" style="color:#1976d2;font-weight:700;background:none;border:none;box-shadow:none;margin-left:auto;margin-top:0.1em;"></ui-button>
+  <div class="header-bar-horaires">
+  <ui-title text="Gestion des horaires du club" [level]="2"></ui-title>
+    <div class="ajout-horaires-btn-container">
+      <ui-button label="Ajouter des horaires" variant="primary" (clicked)="showAjoutModal = true" customClass="ajout-horaires-btn"></ui-button>
+    </div>
     <ui-modal [open]="showAjoutModal" title="Ajouter un horaire" (closed)="showAjoutModal = false">
-      <form class="ajout-horaire ajout-horaire-vertical" (ngSubmit)="ajoutFormValid && addHoraire()" #ajoutForm="ngForm" style="display:flex;flex-direction:column;gap:1em;">
+      <form class="ajout-horaire ajout-horaire-vertical" (ngSubmit)="ajoutFormValid && addHoraire()" #ajoutForm="ngForm">
         <label for="jour">Jour :</label>
-  <select id="jour" required [(ngModel)]="ajoutJour" name="jour" (change)="onJourChange()" style="margin-bottom:0.5em;">
+        <select id="jour" required [(ngModel)]="ajoutJour" name="jour" (change)="openedPlageIndex = 0" class="select-jour">
           <option value="">-- Sélectionner --</option>
           <option value="Lundi">Lundi</option>
           <option value="Mardi">Mardi</option>
@@ -15,29 +18,110 @@
           <option value="Samedi">Samedi</option>
           <option value="Dimanche">Dimanche</option>
         </select>
-  <div *ngIf="ajoutJour && ajoutPlages.length > 0" [ngStyle]="{ 'max-height': ajoutPlages.length > 1 ? '600px' : 'none', 'overflow-y': ajoutPlages.length > 1 ? 'auto' : 'visible' }">
-    <ng-container *ngFor="let plage of ajoutPlages; let i = index">
-      <fieldset class="bloc-plage-ajout" [ngStyle]="{ 'margin-bottom': '1em', 'border': '1.5px solid #e3eafc', 'border-radius': '10px', 'padding': '0', 'position': 'relative', 'background': openedPlageIndex !== i ? '#f7f9fc' : 'white', 'box-shadow': openedPlageIndex !== i ? '0 1px 4px #e3eafc' : 'none' }">
-        <legend style="font-weight:700;color:#1976d2;font-size:1.08em;padding:0.7em 0.7em;display:flex;align-items:center;justify-content:space-between;min-height:2.5em;">
-          <span (click)="openedPlageIndex = (openedPlageIndex === i ? -1 : i)" style="flex:1;cursor:pointer;display:flex;align-items:center;">
-            Horaire n°{{i+1}}
-            <span *ngIf="openedPlageIndex !== i" style="font-weight:400;color:#37474f;font-size:0.98em;margin-left:1em;">
-              <span *ngIf="plage.plage">{{ plage.plage }}</span>
-              <span *ngIf="plage.groupe"> | {{ plage.groupe }}</span>
-              <span *ngIf="plage.adresse || plage.codePostal || plage.ville"> | {{ plage.adresse }}<span *ngIf="plage.codePostal"> {{ plage.codePostal }}</span><span *ngIf="plage.ville"> {{ plage.ville }}</span></span>
-            </span>
-          </span>
-          <button type="button" (click)="$event.stopPropagation(); deletePlageWithConfirm(i)" class="delete-horaire-btn" title="Supprimer cette plage" style="background:#d32f2f;color:white;border:none;border-radius:50%;width:2em;height:2em;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:1em;">
-            <i class="ri-delete-bin-6-line" style="font-size:1.3em;color:white;"></i>
+        <div *ngIf="ajoutJour && ajoutPlages.length > 0" class="plages-scrollable" [class.scrollable]="ajoutPlages.length > 1">
+          <ng-container *ngFor="let plage of ajoutPlages; let i = index">
+            <fieldset class="bloc-plage-ajout" [class.closed]="openedPlageIndex !== i">
+              <legend class="legend-plage-ajout">
+                <span (click)="openedPlageIndex = (openedPlageIndex === i ? -1 : i)" class="toggle-plage">
+                  Horaire n°{{i+1}}
+                  <span *ngIf="openedPlageIndex !== i" style="font-weight:400;color:#37474f;font-size:0.98em;margin-left:1em;">
+                    <span *ngIf="plage.plage">{{ plage.plage }}</span>
+                    <span *ngIf="plage.groupe"> | {{ plage.groupe }}</span>
+                    <span *ngIf="plage.adresse || plage.codePostal || plage.ville"> | {{ plage.adresse }}<span *ngIf="plage.codePostal"> {{ plage.codePostal }}</span><span *ngIf="plage.ville"> {{ plage.ville }}</span></span>
+                  </span>
+                </span>
+                <button type="button" (click)="$event.stopPropagation(); removePlageForm(i)" class="delete-horaire-btn modal" title="Supprimer cette plage">
+                  <i class="ri-delete-bin-6-line" style="font-size:1.3em;color:white;"></i>
+                </button>
+                <span class="icon-toggle">
+                  <svg *ngIf="openedPlageIndex === i" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#1976d2" stroke-width="2" stroke-linecap="round"/></svg>
+                  <svg *ngIf="openedPlageIndex !== i" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke="#1976d2" stroke-width="2" stroke-linecap="round"/></svg>
+                </span>
+              </legend>
+              <div *ngIf="openedPlageIndex === i" class="plage-ajout-fields">
+                <label class="label-field">Plage horaire :</label>
+                <select required [(ngModel)]="plage.plage" name="plage{{i}}" class="select-plage">
+                  <option value="">-- Sélectionner --</option>
+                  <option value="8h - 9h">8h - 9h</option>
+                  <option value="9h - 10h">9h - 10h</option>
+                  <option value="10h - 11h">10h - 11h</option>
+                  <option value="11h - 12h">11h - 12h</option>
+                  <option value="14h - 15h">14h - 15h</option>
+                  <option value="15h - 16h">15h - 16h</option>
+                  <option value="16h - 17h">16h - 17h</option>
+                  <option value="17h - 18h">17h - 18h</option>
+                  <option value="18h - 19h">18h - 19h</option>
+                  <option value="19h - 20h">19h - 20h</option>
+                  <option value="20h - 21h">20h - 21h</option>
+                </select>
+                <label class="label-field">Groupe concerné :</label>
+                <input type="text" [(ngModel)]="plage.groupe" name="groupe{{i}}" placeholder="Ex : Enfants, Adultes..." class="input-field">
+                <div *ngIf="i > 0" class="meme-adresse-checkbox">
+                  <input type="checkbox" [(ngModel)]="plage.memeAdresse" name="memeAdresse{{i}}" (change)="onMemeAdresseChange(plage, ajoutPlages)">
+                  <label class="label-checkbox">Même adresse que le premier horaire</label>
+                </div>
+                <label class="label-field">Adresse :</label>
+                <input type="text" [(ngModel)]="plage.adresse" name="adresse{{i}}" placeholder="Adresse du cours" class="input-field">
+                <label class="label-field">Code postal :</label>
+                <input type="text" [(ngModel)]="plage.codePostal" name="codePostal{{i}}" placeholder="Code postal" class="input-field">
+                <label class="label-field">Ville :</label>
+                <input type="text" [(ngModel)]="plage.ville" name="ville{{i}}" placeholder="Ville" class="input-field">
+                <button type="button" (click)="removePlageForm(i)" class="delete-horaire-btn absolute" title="Supprimer cette plage">
+                  <i class="ri-delete-bin-6-line" style="font-size:1.3em;color:white;"></i>
+                </button>
+              </div>
+            </fieldset>
+          </ng-container>
+          <div class="ajout-plage-actions">
+            <ui-button label="Ajouter une plage horaire" variant="primary" (clicked)="addPlageForm()" customClass="ajout-plage-btn"></ui-button>
+            <ui-button type="submit" label="Valider" variant="primary" [disabled]="!ajoutFormValid" customClass="valider-btn"></ui-button>
+          </div>
+          <div *ngIf="!ajoutFormValid" class="ajout-form-error">
+            Veuillez remplir tous les champs pour chaque plage horaire.
+          </div>
+        </div>
+      </form>
+    </ui-modal>
+  </div>
+
+  <div class="horaires-cards-container">
+    <div *ngIf="horairesParJour.length === 0" class="no-horaires">Aucun horaire pour ce club.</div>
+    <div class="accordion-horaires">
+      <div *ngFor="let jourBlock of horairesParJour; let i = index" class="accordion-item">
+        <div class="accordion-header" (click)="openedPlageIndex = (openedPlageIndex === i ? -1 : i)" [ngClass]="{ 'open': openedPlageIndex === i }">
+          <span class="accordion-jour">{{ jourBlock.jour }}</span>
+          <button class="ajout-plage-jour-btn" (click)="$event.stopPropagation(); openAjoutPlageModal(jourBlock.jour)">
+            Ajouter plage horaire
           </button>
-          <span style="margin-left:0.5em;">
+          <span class="icon-toggle">
             <svg *ngIf="openedPlageIndex === i" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#1976d2" stroke-width="2" stroke-linecap="round"/></svg>
             <svg *ngIf="openedPlageIndex !== i" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke="#1976d2" stroke-width="2" stroke-linecap="round"/></svg>
           </span>
-        </legend>
-        <div *ngIf="openedPlageIndex === i" style="padding:1.2em 1.2em 0.7em 1.2em;display:flex;flex-direction:column;gap:1em;">
-          <label style="font-weight:600;margin-bottom:0.2em;">Plage horaire :</label>
-          <select required [(ngModel)]="plage.plage" name="plage{{i}}" style="margin-bottom:0.5em;">
+        </div>
+        <div class="accordion-body" *ngIf="openedPlageIndex === i">
+          <ui-table
+            [columns]="[
+              { key: 'heureDebut', label: 'Début' },
+              { key: 'heureFin', label: 'Fin' },
+              { key: 'groupe', label: 'Groupe' },
+              { key: 'adresse', label: 'Adresse' }
+            ]"
+            [data]="jourBlock.horaires"
+            [actions]="[
+              { label: 'Éditer', icon: 'ri-edit-2-line', action: 'edit', color: '#1976d2' },
+              { label: 'Supprimer', icon: 'ri-delete-bin-6-line', action: 'delete', color: '#e53935' }
+            ]"
+            (actionClick)="onTableAction($event, jourBlock)"
+          ></ui-table>
+        </div>
+      </div>
+
+      <!-- Modale d'ajout de plage pour un jour donné -->
+      <ui-modal [open]="showAjoutPlageModal" title="Ajouter une plage horaire" (closed)="closeAjoutPlageModal()">
+        <form (ngSubmit)="submitAjoutPlageModal()" #ajoutPlageForm="ngForm" class="ajout-plage-form">
+          <div class="ajout-plage-jour">Jour : {{ jourAjoutPlage }}</div>
+          <label>Plage horaire :</label>
+          <select required [(ngModel)]="ajoutPlageData.plage" name="plage" class="select-plage">
             <option value="">-- Sélectionner --</option>
             <option value="8h - 9h">8h - 9h</option>
             <option value="9h - 10h">9h - 10h</option>
@@ -51,108 +135,20 @@
             <option value="19h - 20h">19h - 20h</option>
             <option value="20h - 21h">20h - 21h</option>
           </select>
-          <label style="font-weight:600;margin-bottom:0.2em;">Groupe concerné :</label>
-          <input type="text" [(ngModel)]="plage.groupe" name="groupe{{i}}" placeholder="Ex : Enfants, Adultes..." style="margin-bottom:0.5em;">
-          <div *ngIf="i > 0" style="display:flex;align-items:center;gap:0.7em;">
-            <input type="checkbox" [(ngModel)]="plage.memeAdresse" name="memeAdresse{{i}}" (change)="onMemeAdresseChange(plage, ajoutPlages)">
-            <label style="margin-bottom:0;">Même adresse que le premier horaire</label>
+          <label>Groupe :</label>
+          <input type="text" [(ngModel)]="ajoutPlageData.groupe" name="groupe" placeholder="Groupe" required class="input-field">
+          <label>Adresse :</label>
+          <input type="text" [(ngModel)]="ajoutPlageData.adresse" name="adresse" placeholder="Adresse" required class="input-field">
+          <label>Code postal :</label>
+          <input type="text" [(ngModel)]="ajoutPlageData.codePostal" name="codePostal" placeholder="Code postal" required class="input-field">
+          <label>Ville :</label>
+          <input type="text" [(ngModel)]="ajoutPlageData.ville" name="ville" placeholder="Ville" required class="input-field">
+          <div class="ajout-plage-modal-actions">
+            <ui-button type="submit" label="Ajouter" variant="primary" [disabled]="!ajoutPlageForm.form.valid"></ui-button>
+            <ui-button type="button" label="Annuler" variant="danger" (clicked)="closeAjoutPlageModal()"></ui-button>
           </div>
-          <label style="font-weight:600;margin-bottom:0.2em;">Adresse :</label>
-          <input type="text" [(ngModel)]="plage.adresse" name="adresse{{i}}" placeholder="Adresse du cours" style="margin-bottom:0.5em;">
-          <label style="font-weight:600;margin-bottom:0.2em;">Code postal :</label>
-          <input type="text" [(ngModel)]="plage.codePostal" name="codePostal{{i}}" placeholder="Code postal" style="margin-bottom:0.5em;">
-          <label style="font-weight:600;margin-bottom:0.2em;">Ville :</label>
-          <input type="text" [(ngModel)]="plage.ville" name="ville{{i}}" placeholder="Ville" style="margin-bottom:0.5em;">
-          <button type="button" (click)="removePlageForm(i)" class="delete-horaire-btn" title="Supprimer cette plage" style="position:absolute;top:7px;right:7px;">
-            <i class="ri-delete-bin-6-line" style="font-size:1.3em;color:white;"></i>
-          </button>
-        </div>
-      </fieldset>
-    </ng-container>
-          <div style="display:flex;justify-content:center;align-items:center;gap:1.5em;margin-bottom:1em;">
-            <ui-button label="Ajouter une plage" variant="primary" (clicked)="addPlageForm()" style="font-weight:600;min-width:140px;height:44px;font-size:1.08em;"></ui-button>
-            <ui-button type="submit" label="Valider" variant="primary" [disabled]="!ajoutFormValid" style="font-weight:600;min-width:140px;height:44px;font-size:1.08em;"></ui-button>
-          </div>
-          <div *ngIf="!ajoutFormValid" style="color:#d32f2f;text-align:center;font-size:1em;margin-bottom:0.7em;">
-            Veuillez remplir tous les champs pour chaque plage horaire.
-          </div>
-          <!-- Bouton Valider déplacé dans le bloc ci-dessus -->
-        </div>
-      </form>
-    </ui-modal>
-  </div>
-
-  <div class="horaires-cards-container">
-    <div *ngIf="horairesParJour.length === 0" class="no-horaires">Aucun horaire pour ce club.</div>
-    <div *ngFor="let jourBlock of horairesParJour" class="horaire-card">
-      <div class="horaire-card-header" style="display:flex;align-items:center;justify-content:space-between;">
-        <span class="horaire-jour">{{ jourBlock.jour }}</span>
-          <div style="display:flex;align-items:center;gap:0.7em;">
-            <button class="add-horaire-btn" title="Ajouter une tranche horaire" (click)="jourBlock.newPlage = ''; jourBlock.showAddForm = true" style="background:#388e3c;color:white;border:none;border-radius:50%;width:2.3em;height:2.3em;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-              <i class="ri-add-line" style="font-size:1.5em;color:white;"></i>
-            </button>
-            <button class="delete-horaire-btn" title="Supprimer toute la card" (click)="deleteJour(jourBlock.jour)" style="background:#d32f2f;color:white;border:none;border-radius:50%;width:2.3em;height:2.3em;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-              <i class="ri-delete-bin-6-line" style="font-size:1.5em;color:white;"></i>
-            </button>
-          </div>
-      </div>
-      <div class="horaire-card-body">
-        <ui-table
-          [columns]="[
-          { key: 'plage', label: 'Tranche horaire', render: formatTrancheHoraire },
-          { key: 'groupe', label: 'Groupe' },
-          { key: 'adresse', label: 'Adresse', render: formatAdresse }
-            ]"
-          [data]="jourBlock.horaires"
-          [actions]="[
-            { label: 'Supprimer', icon: 'ri-delete-bin-6-line', action: 'delete', color: '#e53935' }
-         ]"
-          (actionClick)="onTableAction($event, jourBlock)"
-        ></ui-table>
-    <!-- Les icônes stylo pour édition individuelle seront gérées dans le composant ui-table via la propriété editable sur chaque colonne. -->
-        <div *ngIf="jourBlock.showAddForm" class="ajout-horaire-inline" style="margin-top:1em;padding:1em 1.2em 1.2em 1.2em;border:1px solid #e0e0e0;border-radius:7px;background:#f5f5f5;max-width:100%;">
-          <div style="width:100%;text-align:center;margin-bottom:0.7em;font-weight:700;font-size:1.15em;color:#1976d2;">Ajouter une tranche horaire</div>
-          <form (ngSubmit)="addHoraireInline(jourBlock)" #ajoutInlineForm="ngForm" style="display:flex;flex-direction:column;gap:0.7em;align-items:flex-start;">
-            <div style="display:flex;flex-wrap:wrap;gap:0.7em;width:100%;align-items:center;">
-              <select required [(ngModel)]="jourBlock.newPlage" name="inlinePlage" style="min-width:120px;max-width:140px;">
-                <option value="">Plage horaire</option>
-                <option value="8h - 9h">8h - 9h</option>
-                <option value="9h - 10h">9h - 10h</option>
-                <option value="10h - 11h">10h - 11h</option>
-                <option value="11h - 12h">11h - 12h</option>
-                <option value="14h - 15h">14h - 15h</option>
-                <option value="15h - 16h">15h - 16h</option>
-                <option value="16h - 17h">16h - 17h</option>
-                <option value="17h - 18h">17h - 18h</option>
-                <option value="18h - 19h">18h - 19h</option>
-                <option value="19h - 20h">19h - 20h</option>
-                <option value="20h - 21h">20h - 21h</option>
-              </select>
-              <input type="text" [(ngModel)]="jourBlock.newGroupe" name="inlineGroupe" placeholder="Groupe" style="width:150px;max-width:300px;">
-              <input type="text" [(ngModel)]="jourBlock.newAdresse" name="inlineAdresse" placeholder="Adresse" style="width:200px;max-width:300px;">
-              <input type="text" [(ngModel)]="jourBlock.newCodePostal" name="inlineCodePostal" placeholder="Code postal" style="width:120px;max-width:150px;">
-              <input type="text" [(ngModel)]="jourBlock.newVille" name="inlineVille" placeholder="Ville" style="width:150px;max-width:200px;">
-            </div>
-            <div style="display:flex;justify-content:center;align-items:center;gap:1.2em;width:100%;margin-top:0.7em;">
-              <ui-button 
-                type="submit"
-                label="Ajouter"
-                variant="primary"
-                style="font-weight:600;min-width:140px;height:44px;font-size:1.08em;display:flex;align-items:center;gap:0.5em;">
-                <i class="ri-add-line" style="font-size:1.2em;color:#fff;margin-right:0.5em;"></i>
-              </ui-button>
-              <ui-button 
-                type="button"
-                label="Annuler"
-                variant="danger"
-                (clicked)="jourBlock.showAddForm = false"
-                style="font-weight:600;min-width:140px;height:44px;font-size:1.08em;display:flex;align-items:center;gap:0.5em;">
-                <i class="ri-close-line" style="font-size:1.2em;color:#fff;margin-right:0.5em;"></i>
-              </ui-button>
-            </div>
-          </form>
-        </div>
-      </div>
+        </form>
+      </ui-modal>
     </div>
   </div>
 </div>

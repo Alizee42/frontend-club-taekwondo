@@ -1,126 +1,123 @@
-import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
-import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { Component, OnInit } from '@angular/core';
-import { GroupByPipe } from '../../pipes/group-by.pipe';
-import { HorairesService } from '../../services/horaires.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
+import { HorairesService } from '../../services/horaires.service';
 
 @Component({
   selector: 'app-gestion-horaires-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, GroupByPipe],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent],
   templateUrl: './gestion-horaires-super-admin.component.html',
   styleUrls: ['./gestion-horaires-super-admin.component.css']
 })
 export class GestionHorairesSuperAdminComponent implements OnInit {
   clubs: any[] = [];
   horairesParJour: any[] = [];
-  selectedClubId: number|string = 'ALL';
-
+  horaires: any[] = [];
+  selectedClubId: number|null = null;
   showAjoutModal = false;
   ajoutJour: string = '';
-  ajoutPlages: any[] = [];
+  ajoutPlages: Array<{
+    plage: string;
+    groupe: string;
+    adresse: string;
+    codePostal: string;
+    ville: string;
+    memeAdresse?: boolean;
+  }> = [
+    { plage: '', groupe: '', adresse: '', codePostal: '', ville: '', memeAdresse: false }
+  ];
   openedPlageIndex: number = 0;
 
-  // Pour compatibilité avec l'ancien formulaire simple
-  ajoutPlage: string = '';
-  ajoutGroupe: string = '';
-  ajoutAdresse: string = '';
-  ajoutCodePostal: string = '';
-  ajoutVille: string = '';
-  // Méthode appelée lors du changement de jour dans la modale
-  onJourChange() {
-    if (this.ajoutJour) {
-      if (this.ajoutPlages.length === 0) {
-        this.ajoutPlages = [this.createEmptyPlage()];
-        this.openedPlageIndex = 0;
-      }
-    } else {
-      this.ajoutPlages = [];
-    }
-  }
+  // Pour la modale d'ajout de plage par jour
+  showAjoutPlageModal: boolean = false;
+  jourAjoutPlage: string = '';
+  ajoutPlageData: { plage: string; groupe: string; adresse: string; codePostal: string; ville: string } = { plage: '', groupe: '', adresse: '', codePostal: '', ville: '' };
 
-  createEmptyPlage() {
-    return {
-      plage: '',
-      groupe: '',
-      adresse: '',
-      codePostal: '',
-      ville: '',
-      memeAdresse: false
-    };
-  }
-
-  addPlageForm() {
-    this.ajoutPlages.push(this.createEmptyPlage());
-    this.openedPlageIndex = this.ajoutPlages.length - 1;
-  }
-
-  removePlageForm(i: number) {
-    this.ajoutPlages.splice(i, 1);
-    if (this.openedPlageIndex >= this.ajoutPlages.length) {
-      this.openedPlageIndex = this.ajoutPlages.length - 1;
-    }
-  }
-
-  deletePlageWithConfirm(i: number) {
-    if (confirm('Supprimer cette plage horaire ?')) {
-      this.removePlageForm(i);
-    }
-  }
-
-  onMemeAdresseChange(plage: any, plages: any[]) {
-    if (plage.memeAdresse && plages.length > 0) {
-      plage.adresse = plages[0].adresse;
-      plage.codePostal = plages[0].codePostal;
-      plage.ville = plages[0].ville;
-    }
-  }
+  // Index de la plage en cours d'édition (modale multi-plages)
+  editingPlageIndex: number|null = null;
 
   constructor(private horairesService: HorairesService) {}
 
-  get ajoutFormValid() {
-  if (!this.ajoutJour || this.ajoutPlages.length === 0) return false;
-  return this.ajoutPlages.every(plage => plage.plage && plage.groupe && plage.adresse && plage.codePostal && plage.ville);
-  }
-
-  get selectedClubName(): string {
-    const club = this.clubs.find(c => c.id === this.selectedClubId);
-    return club ? club.name : '';
-  }
-
-  getClubName(clubOrId: any): string {
-    // Accepte soit un id, soit un objet club, soit undefined
-    let id: number | undefined;
-    if (clubOrId && typeof clubOrId === 'object' && 'id' in clubOrId) {
-      id = Number(clubOrId.id);
-    } else if (clubOrId !== undefined && clubOrId !== null) {
-      id = Number(clubOrId);
-    }
-    if (id !== undefined && !isNaN(id)) {
-      const club = this.clubs.find((c: any) => Number(c.id) === id);
-      return club ? club.name : `Club #${id}`;
-    }
-    return 'Club inconnu';
-  }
-
   ngOnInit(): void {
-    // Charger la liste des clubs (à adapter si tu as une API clubs)
+    // Charger la liste des clubs (à adapter à ton service réel)
     this.clubs = [
       { id: 1, name: 'Villeurbanne' },
-      { id: 2, name: 'Bourg-en-Bresse' },
-      // Ajoute ici tous les clubs connus de la base, exemple :
-      // { id: 3, name: 'Autre Club' }
+      { id: 2, name: 'Bourg-en-Bresse' }
     ];
-    // Par défaut, afficher tous les horaires de tous les clubs
-    this.selectedClubId = 'ALL';
-    this.loadHoraires('ALL');
+    this.selectedClubId = this.clubs[0]?.id || null;
+    this.loadHoraires();
   }
 
-  loadHoraires(clubId: number|string) {
-    if (clubId === 'ALL') {
-      this.horairesService.getAllHoraires().subscribe(horaires => {
+  // Action sur les boutons du tableau (éditer/supprimer)
+  onTableAction(event: { action: string, row: any }) {
+    if (event.action === 'delete') {
+      this.deleteHoraire(event.row.id);
+    } else if (event.action === 'edit') {
+      // Ouvre la modale d'ajout pré-remplie pour édition
+      this.jourAjoutPlage = event.row.jour;
+      this.ajoutPlageData = {
+        plage: event.row.plage,
+        groupe: event.row.groupe,
+        adresse: event.row.adresse,
+        codePostal: event.row.codePostal,
+        ville: event.row.ville
+      };
+      this.showAjoutPlageModal = true;
+    }
+  }
+
+  openAjoutPlageModal(jour: string) {
+    this.jourAjoutPlage = jour;
+    this.ajoutPlageData = { plage: '', groupe: '', adresse: '', codePostal: '', ville: '' };
+    this.showAjoutPlageModal = true;
+  }
+
+  closeAjoutPlageModal() {
+    this.showAjoutPlageModal = false;
+    this.jourAjoutPlage = '';
+  }
+
+  submitAjoutPlageModal() {
+    if (!this.selectedClubId) return;
+    const { plage, groupe, adresse, codePostal, ville } = this.ajoutPlageData;
+    if (!plage || !groupe || !adresse || !codePostal || !ville) return;
+    let heureDebut = '';
+    let heureFin = '';
+    if (plage.includes('-')) {
+      const parts = plage.split('-');
+      heureDebut = parts[0].trim();
+      heureFin = parts[1].trim();
+    }
+    const horaire = {
+      jour: this.jourAjoutPlage,
+      plage,
+      heureDebut,
+      heureFin,
+      groupe,
+      adresse,
+      codePostal,
+      ville,
+      clubId: this.selectedClubId
+    };
+    this.horairesService.addHoraireToClub(this.selectedClubId, horaire).subscribe({
+      next: () => {
+        this.loadHoraires();
+        this.closeAjoutPlageModal();
+      },
+      error: (err) => {
+        console.error('Erreur ajout plage modale:', err);
+      }
+    });
+  }
+
+  loadHoraires() {
+    if (this.selectedClubId) {
+      this.horairesService.getHorairesByClub(this.selectedClubId).subscribe(horaires => {
+        this.horaires = horaires;
         // Regrouper par jour
         const map = new Map<string, any[]>();
         horaires.forEach(h => {
@@ -132,70 +129,137 @@ export class GestionHorairesSuperAdminComponent implements OnInit {
           horaires: items
         }));
       });
-    } else {
-      this.horairesService.getHorairesByClub(Number(clubId)).subscribe(horaires => {
-        const map = new Map<string, any[]>();
-        horaires.forEach(h => {
-          if (!map.has(h.jour)) map.set(h.jour, []);
-          map.get(h.jour)!.push(h);
-        });
-        this.horairesParJour = Array.from(map.entries()).map(([jour, items]) => ({
-          jour,
-          horaires: items
-        }));
-      });
     }
   }
 
-  selectClub(clubId: number|string) {
-    this.selectedClubId = clubId;
-    this.loadHoraires(clubId);
+  onClubChange() {
+    this.loadHoraires();
   }
 
+  get ajoutFormValid() {
+    if (!this.ajoutJour) return false;
+    return this.ajoutPlages.every(p => p.plage && p.groupe && p.adresse && p.codePostal && p.ville);
+  }
+
+  addPlageForm() {
+    this.ajoutPlages.push({ plage: '', groupe: '', adresse: '', codePostal: '', ville: '', memeAdresse: false });
+    this.openedPlageIndex = this.ajoutPlages.length - 1;
+  }
+
+  removePlageForm(index: number) {
+    if (this.ajoutPlages.length > 1) {
+      this.ajoutPlages.splice(index, 1);
+      if (this.editingPlageIndex === index) {
+        this.editingPlageIndex = null;
+      }
+    }
+  }
+
+  onMemeAdresseChange(plage: any, ajoutPlages: any[]) {
+    if (plage.memeAdresse) {
+      plage.adresse = ajoutPlages[0]?.adresse || '';
+      plage.codePostal = ajoutPlages[0]?.codePostal || '';
+      plage.ville = ajoutPlages[0]?.ville || '';
+    } else {
+      plage.adresse = '';
+      plage.codePostal = '';
+      plage.ville = '';
+    }
+  }
+
+  // --- LOGIQUE EDITION PLAGE ---
+  editPlageForm(index: number) {
+    this.openedPlageIndex = index;
+    this.editingPlageIndex = index;
+  }
+
+  saveEditPlageForm() {
+    this.editingPlageIndex = null;
+    // Les modifications sont déjà prises en compte via ngModel
+  }
+  // --- FIN LOGIQUE EDITION PLAGE ---
+
   addHoraire() {
-    if (this.selectedClubId !== null && this.selectedClubId !== 'ALL' && this.ajoutFormValid) {
-      const clubId = Number(this.selectedClubId);
-      const horairesToSend = this.ajoutPlages.map(plage => {
+    if (this.ajoutFormValid && this.selectedClubId) {
+      const requests = this.ajoutPlages.map(plageObj => {
         let heureDebut = '';
         let heureFin = '';
-        if (plage.plage && plage.plage.includes('-')) {
-          const parts = plage.plage.split('-');
+        if (plageObj.plage && plageObj.plage.includes('-')) {
+          const parts = plageObj.plage.split('-');
           heureDebut = parts[0].trim();
           heureFin = parts[1].trim();
         }
-        return {
+        const horaire = {
           jour: this.ajoutJour,
+          plage: plageObj.plage,
           heureDebut,
           heureFin,
-          groupe: plage.groupe,
-          adresse: plage.adresse,
-          codePostal: plage.codePostal,
-          ville: plage.ville,
-          clubId
+          groupe: plageObj.groupe,
+          adresse: plageObj.adresse,
+          codePostal: plageObj.codePostal,
+          ville: plageObj.ville,
+          clubId: this.selectedClubId
         };
+        return this.horairesService.addHoraireToClub(this.selectedClubId as number, horaire);
       });
-      // Envoi en batch ou un par un selon l'API
-      Promise.all(horairesToSend.map(horaire =>
-        this.horairesService.addHoraireToClub(clubId, horaire).toPromise()
-      )).then(() => {
-        this.loadHoraires(this.selectedClubId!);
-        this.resetAjoutForm();
+      Promise.all(requests.map(obs => obs.toPromise())).then(() => {
+        this.loadHoraires();
         this.showAjoutModal = false;
+        this.ajoutJour = '';
+        this.ajoutPlages = [{ plage: '', groupe: '', adresse: '', codePostal: '', ville: '' }];
       });
     }
   }
 
+  addHoraireInline(jourBlock: any) {
+    const plage = jourBlock.newPlage || '';
+    const groupe = jourBlock.newGroupe || '';
+    const adresse = jourBlock.newAdresse || '';
+    const codePostal = jourBlock.newCodePostal || '';
+    const ville = jourBlock.newVille || '';
+    if (!plage || !groupe || !adresse || !codePostal || !ville) return;
+    let heureDebut = '';
+    let heureFin = '';
+    if (plage.includes('-')) {
+      const parts = plage.split('-');
+      heureDebut = parts[0].trim();
+      heureFin = parts[1].trim();
+    }
+    const horaire = {
+      jour: jourBlock.jour,
+      plage,
+      heureDebut,
+      heureFin,
+      groupe,
+      adresse,
+      codePostal,
+      ville,
+      clubId: this.selectedClubId
+    };
+    this.horairesService.addHoraireToClub(this.selectedClubId as number, horaire).subscribe({
+      next: (res) => {
+        this.loadHoraires();
+        jourBlock.showAddForm = false;
+        jourBlock.newPlage = '';
+        jourBlock.newGroupe = '';
+        jourBlock.newAdresse = '';
+        jourBlock.newCodePostal = '';
+        jourBlock.newVille = '';
+      },
+      error: (err) => {
+        console.error('Erreur ajout horaire inline:', err);
+      }
+    });
+  }
+
   resetAjoutForm() {
-  this.ajoutJour = '';
-  this.ajoutPlages = [];
-  this.openedPlageIndex = 0;
+    this.ajoutJour = '';
+    this.ajoutPlages = [{ plage: '', groupe: '', adresse: '', codePostal: '', ville: '' }];
   }
 
   deleteHoraire(horaireId: number) {
     this.horairesService.deleteHoraire(horaireId).subscribe(() => {
-      if (this.selectedClubId !== null) {
-        this.loadHoraires(this.selectedClubId!);
-      }
+      this.loadHoraires();
     });
   }
 }

@@ -1,8 +1,9 @@
 <div class="dashboard-admin">
 
-  <div class="header-dashboard">
-    <h1>Bienvenue, {{ getUserName() }}</h1>
-  </div>
+  <header class="dashboard-header">
+  <ui-title text="Tableau de bord Admin" [level]="1" align="center"></ui-title>
+    <div class="welcome-message">Bienvenue, <span class="highlight">{{ getUserName() }}</span></div>
+  </header>
 
   <!-- KPI -->
   <div class="kpi-container">
@@ -89,6 +90,8 @@
       </ul>
     </div>
 
+
+
     <div class="dashboard-section">
       <div class="section-header">
         <div class="section-icon"><i class="ri-settings-3-line"></i></div>
@@ -103,6 +106,9 @@
           <i class="ri-newspaper-line"></i> Actualités
           <span class="badge" *ngIf="badge.actualites > 0">{{ badge.actualites }}</span>
         </li>
+          <li (click)="navigateToGestionUtilisateurs()">
+            <i class="ri-user-3-line"></i> Utilisateurs du club
+          </li>
       </ul>
     </div>
 

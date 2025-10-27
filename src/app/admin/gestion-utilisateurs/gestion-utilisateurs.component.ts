@@ -1,0 +1,79 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-gestion-utilisateurs',
+  standalone: true,
+  imports: [CommonModule, UiTableComponent, UiModalComponent, FormsModule],
+  templateUrl: './gestion-utilisateurs.component.html',
+  styleUrls: ['./gestion-utilisateurs.component.css']
+})
+export class GestionUtilisateursComponent implements OnInit {
+  utilisateurs: any[] = [];
+  clubId: number | null = null;
+  columns: UiTableColumn[] = [
+    { key: 'prenom', label: 'Prénom' },
+    { key: 'nom', label: 'Nom' },
+    { key: 'email', label: 'Email' },
+    { key: 'role', label: 'Rôle' }
+  ];
+  actions = [
+    { label: 'Éditer', icon: 'ri-edit-2-line', action: 'edit', color: '#1976d2' },
+    { label: 'Supprimer', icon: 'ri-delete-bin-6-line', action: 'delete', color: '#d32f2f' }
+  ];
+
+  modalOpen = false;
+  modalTitle = '';
+  utilisateurEdit: any = null;
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.clubId = this.getClubIdFromLocalStorage();
+    this.chargerUtilisateursClub();
+  }
+
+  getClubIdFromLocalStorage(): number | null {
+    const rawClub = localStorage.getItem('selectedClub');
+    if (rawClub) {
+      const club = JSON.parse(rawClub);
+      return club.id || null;
+    }
+    return null;
+  }
+
+  chargerUtilisateursClub(): void {
+    if (this.clubId) {
+      this.http.get<any[]>(`${environment.apiUrl}/utilisateurs?clubId=${this.clubId}`).subscribe({
+        next: (data) => this.utilisateurs = data,
+        error: () => this.utilisateurs = []
+      });
+    }
+  }
+  onActionClick(event: { action: string; row: any }) {
+    if (event.action === 'edit') {
+      this.modalTitle = 'Modifier l’utilisateur';
+      this.utilisateurEdit = { ...event.row };
+      this.modalOpen = true;
+    }
+    if (event.action === 'delete') {
+      // ouvrir confirmation suppression
+    }
+  }
+
+  openAddModal() {
+    this.modalTitle = 'Ajouter un utilisateur';
+    this.utilisateurEdit = { prenom: '', nom: '', email: '', role: '' };
+    this.modalOpen = true;
+  }
+
+  closeModal() {
+    this.modalOpen = false;
+    this.utilisateurEdit = null;
+  }
+}

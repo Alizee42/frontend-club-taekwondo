@@ -4,6 +4,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AvisService, Avis } from '../../../services/avis.service';
+import { ClubSelectionService } from '../../../services/club-selection.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import Swiper from 'swiper/bundle';
 
@@ -66,11 +67,25 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
   // Liste blanche des sujets autorisés
   private readonly allowedTypes = ['cours', 'entraineurs', 'evenements', 'organisation', 'competitions'] as const;
 
-  constructor(private avisService: AvisService, private toast: ToastService) {}
+  private clubIdSubscription: any;
+  constructor(
+    private avisService: AvisService,
+    private toast: ToastService,
+    private clubSelectionService: ClubSelectionService
+  ) {}
 
-  ngOnInit(): void { this.chargerAvisClub(); }
+  ngOnInit(): void {
+    this.clubIdSubscription = this.clubSelectionService.selectedClubId$.subscribe(clubId => {
+      if (clubId) {
+        this.chargerAvisClub(clubId);
+      }
+    });
+  }
   ngAfterViewInit(): void {}
-  ngOnDestroy(): void { if (this.swiper) { this.swiper.destroy(true, true); this.swiper = null; } }
+  ngOnDestroy(): void {
+    if (this.swiper) { this.swiper.destroy(true, true); this.swiper = null; }
+    if (this.clubIdSubscription) { this.clubIdSubscription.unsubscribe(); }
+  }
 
   private initOrUpdateSwiper(): void {
     if (this.swiper) { this.swiper.update(); return; }
@@ -83,22 +98,8 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  /** Charge les avis du club de l'utilisateur connecté */
-  chargerAvisClub(): void {
-    const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || '{}');
-    console.log('Utilisateur localStorage:', utilisateur);
-    let clubId: number | null = null;
-    if (utilisateur?.club?.id) {
-      clubId = utilisateur.club.id;
-    } else if (utilisateur?.clubId) {
-      clubId = utilisateur.clubId;
-    } else if (Array.isArray(utilisateur?.clubs) && utilisateur.clubs.length > 0 && utilisateur.clubs[0]?.id) {
-      clubId = utilisateur.clubs[0].id;
-    }
-    if (!clubId) {
-      console.error('Impossible de récupérer le club de l’utilisateur connecté. Structure utilisateur:', utilisateur);
-      return;
-    }
+  /** Charge les avis du club sélectionné */
+  chargerAvisClub(clubId: number): void {
     this.avisService.getAvisByClub(clubId, true).subscribe({
       next: (avis) => {
         this.avisApprouves = avis;
@@ -164,7 +165,10 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
         this.photoPreview = null; 
         this.photoFichier = null;
 
-        this.chargerAvisClub();
+        const clubId = this.clubSelectionService.getSelectedClubId();
+        if (clubId) {
+          this.chargerAvisClub(clubId);
+        }
         setTimeout(() => this.messageConfirmation = null, 5000);
       },
       error: () => this.toast.error('Une erreur est survenue lors de l’envoi. Veuillez réessayer plus tard.')

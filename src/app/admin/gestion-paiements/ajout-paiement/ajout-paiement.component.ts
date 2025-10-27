@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { UiTitleComponent } from '../../../ui/ui-title/ui-title.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentAdminService } from '../../../services/payment-admin.service';
@@ -18,7 +19,7 @@ interface EcheanceInput {
 @Component({
   selector: 'app-ajout-paiement',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiTitleComponent],
   templateUrl: './ajout-paiement.component.html',
   styleUrls: ['./ajout-paiement.component.css']
 })

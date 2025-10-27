@@ -1,102 +1,274 @@
-/* Styles harmonisés pour les cards horaires sur la vue super-admin */
-.horaires-cards-container {
+.page-title {
+  color: var(--blue-main);
+  font-size: 2.1rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  margin-top: 0.2rem;
+  text-align: left;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+  background: linear-gradient(90deg, var(--blue-main) 60%, #e0e7ef 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+/* Container flex pour header */
+.header-bar-horaires {
   display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: flex-start;
-  margin-top: 2rem;
+  align-items: center;
+  gap: 2em;
 }
-
-.horaire-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 18px 0 rgba(0,0,0,0.08), 0 1.5px 4px 0 rgba(0,0,0,0.04);
-  padding: 1.5rem 2rem 1.2rem 2rem;
-  min-width: 320px;
-  max-width: 370px;
-  flex: 1 1 320px;
+.ajout-horaires-btn-container {
+  margin-left: auto;
+}
+/* Aligne le label et le select club sur la même ligne */
+.club-select-row {
   display: flex;
-  flex-direction: column;
-  margin-bottom: 0.5rem;
-  transition: box-shadow 0.2s;
+  align-items: center;
+  gap: 0.7em;
+  flex: 1;
+  justify-content: center;
 }
-.horaire-card:hover {
-  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.13), 0 2px 8px 0 rgba(0,0,0,0.07);
+/* Bouton éditer à côté de la poubelle (fieldset ouvert) */
+.edit-horaire-btn.absolute {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 7px;
+  right: 45px;
+  margin-right: 0.5em;
 }
-
-.horaire-card-header {
+/* Bouton éditer à côté de la poubelle */
+.edit-horaire-btn.modal {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5em;
+}
+/* Header bar */
+.header-bar-horaires {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.7rem;
+  gap: 2em;
 }
-.horaire-jour {
-  font-size: 1.25rem;
-  font-weight: 600;
+.titre-section {
+  font-size: 2.1rem;
+  font-weight: 800;
   color: #1a237e;
   letter-spacing: 0.5px;
+  margin: 0;
 }
-.club-indication {
-  font-size: 1rem;
-  color: #607d8b;
-  margin-left: 1.2rem;
-  font-weight: 500;
+.label-club-select {
+  font-weight: 600;
+  margin-right: 1em;
 }
-.delete-horaire-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.2rem 0.4rem;
+.club-select {
+  min-width: 180px;
+  padding: 0.4em 1em;
   border-radius: 6px;
-  transition: background 0.15s;
+  border: 1.5px solid #1976d2;
+  font-weight: 600;
 }
-.delete-horaire-btn:hover {
-  background: #fbe9e7;
+.ajout-horaires-btn {
+  margin-left: auto;
+  margin-top: 0.1em;
 }
 
-.horaire-card-body {
+/* Formulaire ajout horaire */
+.ajout-horaire-vertical {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1em;
 }
-.horaire-plage {
-  font-size: 1.08rem;
-  color: #263238;
-  margin-bottom: 0.1rem;
+.select-jour {
+  margin-bottom: 0.5em;
+}
+.plages-scrollable.scrollable {
+  max-height: 600px;
+  overflow-y: auto;
+}
+.bloc-plage-ajout {
+  margin-bottom: 1em;
+  border: 1.5px solid #e3eafc;
+  border-radius: 10px;
+  padding: 0;
+  position: relative;
+  background: white;
+}
+.bloc-plage-ajout.closed {
+  background: #f7f9fc;
+  box-shadow: 0 1px 4px #e3eafc;
+}
+.legend-plage-ajout {
+  font-weight: 700;
+  color: #1976d2;
+  font-size: 1.08em;
+  padding: 0.7em 0.7em;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  min-height: 2.5em;
 }
-.horaire-groupe {
-  font-size: 0.98rem;
-  color: #607d8b;
-  margin-left: 0.5rem;
+.toggle-plage {
+  flex: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 }
-.horaire-adresse {
-  font-size: 0.98rem;
-  color: #37474f;
-  margin-top: 0.5rem;
+.delete-horaire-btn.modal {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1em;
 }
-.horaire-ville {
-  margin-left: 0.5rem;
-  color: #607d8b;
+.delete-horaire-btn.absolute {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+}
+.icon-toggle {
+  margin-left: 0.5em;
+}
+.plage-ajout-fields {
+  padding: 1.2em 1.2em 0.7em 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+.label-field {
+  font-weight: 600;
+  margin-bottom: 0.2em;
+}
+.select-plage {
+  margin-bottom: 0.5em;
+}
+.input-field {
+  margin-bottom: 0.5em;
+}
+.meme-adresse-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+}
+.label-checkbox {
+  margin-bottom: 0;
+}
+.ajout-plage-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5em;
+  margin-bottom: 1em;
+}
+.valider-btn {
+  font-weight: 600;
+  min-width: 140px;
+  height: 44px;
+  font-size: 1.08em;
+}
+.ajout-form-error {
+  color: #d32f2f;
+  text-align: center;
+  font-size: 1em;
+  margin-bottom: 0.7em;
 }
 
+/* Accordion */
+.accordion-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1em 1.2em;
+  background: #f7f9fc;
+  border-radius: 8px 8px 0 0;
+  border: 1.5px solid #e3eafc;
+  margin-bottom: 0.2em;
+}
+.accordion-jour {
+  font-weight: 700;
+  font-size: 1.15em;
+  color: var(--blue-main);
+}
+.ajout-plage-jour-btn {
+  margin-left: 1em;
+  padding: 0.6em 1.2em;
+  background: var(--blue-main);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1em;
+  box-shadow: 0 1px 4px #e3eafc;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.accordion-body {
+  border: 1.5px solid #e3eafc;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 1.2em 1.2em 1.2em 1.2em;
+  background: white;
+}
+
+/* Modale ajout plage */
+.ajout-plage-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+.ajout-plage-jour {
+  font-weight: 700;
+  color: #1976d2;
+  font-size: 1.1em;
+}
+.ajout-plage-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.5em;
+  margin-top: 1em;
+}
+/* Style spécifique pour le bouton 'Ajouter une plage horaire' */
+.ajout-plage-btn {
+  min-width: 140px;
+  height: 44px;
+  font-size: 1.08em;
+}
+.horaires-global {
+  padding: 2em 1em;
+}
+.header-bar-horaires {
+  margin-bottom: 2em;
+}
+.horaires-cards-container {
+  margin-top: 2em;
+}
 .no-horaires {
-  color: #b71c1c;
-  font-size: 1.1rem;
-  margin: 2rem 0 0 1rem;
-}
-
-@media (max-width: 900px) {
-  .horaires-cards-container {
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-  .horaire-card {
-    min-width: 0;
-    max-width: 100%;
-    width: 100%;
-    padding: 1.2rem 1rem 1rem 1rem;
-  }
+  color: #d32f2f;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 2em;
 }

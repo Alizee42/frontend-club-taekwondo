@@ -19,6 +19,7 @@ interface LoginResponse {
   role: Role | string;
   email: string;
   utilisateur: Utilisateur;
+  passwordTemporaire?: boolean;
 }
 
 interface AuthState {

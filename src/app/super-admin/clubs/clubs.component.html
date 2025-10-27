@@ -12,10 +12,11 @@
       (actionClick)="handleClubAction($event)">
     </ui-table>
   </div>
-  <ui-modal [open]="openClubModal" [title]="'Créer un nouveau club'" (closed)="closeClubModal()">
+  <ui-modal [open]="openClubModal" [title]="selectedClub ? 'Modifier le club' : 'Créer un nouveau club'" (closed)="closeClubModal()">
     <ui-form
       [fields]="clubFormFields"
-      [submitLabel]="'Créer'"
+      [model]="selectedClub || newClub"
+      [submitLabel]="selectedClub ? 'Enregistrer' : 'Créer'"
       (submitted)="onClubFormSubmit($event)">
     </ui-form>
   </ui-modal>

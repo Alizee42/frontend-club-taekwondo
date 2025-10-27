@@ -34,8 +34,8 @@ export class GalerieGestionSuperAdminComponent implements OnInit {
     { key: 'description', label: 'Description' }
   ];
   tableActions = [
-    { label: 'Modifier', action: 'edit', color: 'primary', icon: 'material-icons', iconText: 'edit' },
-    { label: 'Supprimer', action: 'delete', color: 'danger', icon: 'material-icons', iconText: 'delete' }
+    { label: '', icon: 'ri-edit-line', action: 'edit', color: '#2563eb' },
+    { label: '', icon: 'ri-delete-bin-line', action: 'delete', color: '#e53935' }
   ];
 
   // Pour la modale

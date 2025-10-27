@@ -3,6 +3,7 @@ import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button/ui-butto
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router'; 
 import { ActualiteService } from '../../../services/actualite.service';
+import { ClubSelectionService } from '../../../services/club-selection.service';
 
 @Component({
   selector: 'app-actualites',
@@ -23,28 +24,22 @@ export class ActualitesComponent implements OnInit {
   currentPage: number = 1;    // Page courante pour la pagination
   pageSize: number = 3;       // Nombre d'actualités par page
 
-  constructor(private actualiteService: ActualiteService) {}
+  private clubIdSubscription: any;
+  constructor(
+    private actualiteService: ActualiteService,
+    private clubSelectionService: ClubSelectionService
+  ) {}
 
   ngOnInit(): void {
-    this.loadActualitesClub();
+    this.clubIdSubscription = this.clubSelectionService.selectedClubId$.subscribe(clubId => {
+      if (clubId) {
+        this.loadActualitesClub(clubId);
+      }
+    });
   }
 
-  /** 🔄 Charge les actualités du club de l'utilisateur connecté */
-  loadActualitesClub(): void {
-    const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || '{}');
-    console.log('Utilisateur localStorage:', utilisateur);
-    let clubId: number | null = null;
-    if (utilisateur?.club?.id) {
-      clubId = utilisateur.club.id;
-    } else if (utilisateur?.clubId) {
-      clubId = utilisateur.clubId;
-    } else if (Array.isArray(utilisateur?.clubs) && utilisateur.clubs.length > 0 && utilisateur.clubs[0]?.id) {
-      clubId = utilisateur.clubs[0].id;
-    }
-    if (!clubId) {
-      console.error('Impossible de récupérer le club de l’utilisateur connecté. Structure utilisateur:', utilisateur);
-      return;
-    }
+  /** 🔄 Charge les actualités du club sélectionné */
+  loadActualitesClub(clubId: number): void {
     this.actualiteService.getActualitesByClub(clubId).subscribe({
       next: (data) => {
         this.news = Array.isArray(data) ? data : [];
@@ -57,6 +52,9 @@ export class ActualitesComponent implements OnInit {
         console.error('Erreur de chargement des actualités du club :', err);
       }
     });
+  }
+  ngOnDestroy(): void {
+    if (this.clubIdSubscription) { this.clubIdSubscription.unsubscribe(); }
   }
 
   /** 🌟 Met à jour l'actualité mise à la une */

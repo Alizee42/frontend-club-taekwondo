@@ -1,9 +1,7 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
-    <h1>Tableau de bord</h1>
-       <p class="welcome-message" *ngIf="utilisateurConnecte">
-      Bienvenue, <span class="highlight">{{ utilisateurConnecte.prenom }} {{ utilisateurConnecte.nom }}</span>
-    </p>
+  <h1 class="page-title">Tableau de bord Membre</h1>
+    <div class="welcome-message" *ngIf="utilisateurConnecte">Bienvenue, <span class="highlight">{{ utilisateurConnecte.prenom }} {{ utilisateurConnecte.nom }}</span></div>
   </header>
   <p class="intro">
     Depuis cet espace, vous pouvez gérer les paiements, déposer des documents et commander des tenues.

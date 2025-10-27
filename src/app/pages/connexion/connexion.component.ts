@@ -68,11 +68,16 @@ export class ConnexionComponent {
       this.authService.login({ email: this.email, password: this.password })
         .subscribe({
           next: (response) => {
-            // Vérification club sauf pour SUPER_ADMIN
             const userClubId = response.utilisateur?.['clubId'];
             const role = response.role || response.utilisateur?.role || '';
             if (role.toString().toUpperCase() !== 'SUPER_ADMIN' && this.clubId !== undefined && userClubId !== this.clubId) {
               this.toastService.error('❌ Ce compte n’appartient pas au club sélectionné.');
+              return;
+            }
+            // Vérification du mot de passe temporaire
+            if (response.passwordTemporaire) {
+              this.toastService.info('Votre mot de passe est temporaire. Veuillez le changer pour accéder à votre espace.');
+              this.router.navigate(['/reinitialiser-mot-de-passe']);
               return;
             }
             this.toastService.success('🎉 Connexion réussie ! Bienvenue !');

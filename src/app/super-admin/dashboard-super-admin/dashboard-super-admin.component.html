@@ -1,8 +1,9 @@
 
 <div class="dashboard-admin">
-  <div class="header-dashboard">
-    <h1>Bienvenue Super Admin</h1>
-  </div>
+  <header class="dashboard-header">
+  <h1 class="page-title">Tableau de bord Super Admin</h1>
+    <div class="welcome-message">Bienvenue, <span class="highlight">Super Admin</span></div>
+  </header>
 
   <!-- KPI -->
   <div class="kpi-container">
@@ -74,7 +75,6 @@
       </div>
       <ul>
         <li (click)="navigateToMembres()"><i class="ri-team-line"></i> Membres</li>
-        <li (click)="navigateToGestionInscription()"><i class="ri-user-add-line"></i> Inscriptions</li>
         <li (click)="navigateToDocuments()"><i class="ri-file-list-line"></i> Documents</li>
         <li (click)="navigateToAdmins()"><i class="ri-user-star-line"></i> Admins</li>
       </ul>

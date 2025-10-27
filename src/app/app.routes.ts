@@ -1,3 +1,6 @@
+import { GestionHorairesSuperAdminComponent } from './super-admin/gestion-horaires/gestion-horaires-super-admin.component';
+import { UtilisateursSuperAdminComponent } from './super-admin/utilisateurs/utilisateurs-super-admin.component';
+import { GestionUtilisateursComponent } from './admin/gestion-utilisateurs/gestion-utilisateurs.component';
 import { Routes } from '@angular/router';
 import { AccueilComponent } from './pages/accueil/accueil.component';
 import { ClubSelectComponent } from './club-select/club-select.component';
@@ -22,7 +25,6 @@ import { GestionAvisComponent } from './admin/gestion-avis/gestion-avis.componen
 import { GestionActualitesComponent } from './admin/gestion-actualites/gestion-actualites.component';
 import { GalerieGestionSuperAdminComponent } from './super-admin/galerie-gestion/galerie-gestion.component';
 import{ GestionGalerieComponent } from './admin/gestion-galerie/gestion-galerie.component';
-import { GestionHorairesSuperAdminComponent } from './super-admin/gestion-horaires/gestion-horaires-super-admin.component';
 import { DocumentsComponent } from './membre/documents/documents.component';
 import { GestionDocumentsComponent } from './admin/gestion-documents/gestion-documents.component';
 import { PaiementComponent } from './membre/paiement/paiement.component';
@@ -85,6 +87,7 @@ export const routes: Routes = [
       { path: 'gestion-commande', component: GestionCommandeComponent },
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
       { path: 'gestion-inscription', component: GestionInscriptionsComponent }
+    ,{ path: 'gestion-utilisateurs', component: GestionUtilisateursComponent }
     ]
   },
 
@@ -130,8 +133,10 @@ export const routes: Routes = [
   { path: 'logs', component: LogsComponent },
   { path: 'actualites', component: ActualitesComponent },
   { path: 'galerie', component: GalerieGestionSuperAdminComponent }, // galerie super admin
-  { path: 'galerie-gestion', component: GalerieGestionSuperAdminComponent }
-  ,{ path: 'horaires', component: GestionHorairesSuperAdminComponent }
+  { path: 'galerie-gestion', component: GalerieGestionSuperAdminComponent },
+  { path: 'gestion-horaires', component: GestionHorairesSuperAdminComponent },
+  { path: 'utilisateurs', component: UtilisateursSuperAdminComponent },
+ 
     ]
     },
   // 🧭 Redirection inconnue

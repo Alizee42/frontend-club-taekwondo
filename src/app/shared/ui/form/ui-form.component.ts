@@ -16,6 +16,9 @@ export class UiFormComponent {
   @Input() submitLabel: string = 'Envoyer';
   @Input() loading: boolean = false;
   @Input() error: string = '';
+  @Input() set model(value: any) {
+    this.formData = value ? { ...value } : {};
+  }
   @Output() submitted = new EventEmitter<any>();
 
   formData: any = {};

@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -47,7 +48,7 @@ type SectionKey = keyof typeof LS_KEYS;
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UiTitleComponent],
   templateUrl: './dashboard-admin.component.html',
   styleUrls: ['./dashboard-admin.component.css']
 })
@@ -459,4 +460,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     this.markSectionAsSeen('actualites');
     this.router.navigate(['/admin/actualites']);
   }
+
+    navigateToGestionUtilisateurs(): void {
+      this.router.navigate(['/admin/gestion-utilisateurs']);
+    }
 }

@@ -1,0 +1,22 @@
+<div class="utilisateurs-global">
+  <div class="header-bar-utilisateurs">
+    <h2 class="titre-section">Gestion des utilisateurs</h2>
+    <ui-button icon="ri-user-add-line" label="Ajouter un utilisateur" (clicked)="onAddUtilisateur()" variant="primary"></ui-button>
+  </div>
+  <ui-table
+    [columns]="columns"
+    [data]="utilisateurs"
+    [actions]="actions"
+    (actionClick)="onTableAction($event)"
+  ></ui-table>
+
+  <ui-modal [open]="showModal" [title]="mode === 'ajout' ? 'Ajouter un utilisateur' : 'Modifier l\'utilisateur'" (closed)="onCancelForm()">
+    <app-utilisateur-form
+      [utilisateur]="utilisateurEnCours"
+      [mode]="mode"
+      [clubs]="clubs"
+      (submitForm)="onSubmitForm($event)"
+      (cancel)="onCancelForm()"
+    ></app-utilisateur-form>
+  </ui-modal>
+</div>

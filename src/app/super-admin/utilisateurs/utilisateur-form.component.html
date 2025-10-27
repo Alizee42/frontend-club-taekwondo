@@ -1,0 +1,42 @@
+<form (ngSubmit)="onSubmit()" #form="ngForm" class="utilisateur-form">
+  <h3 *ngIf="mode === 'ajout'">Ajouter un utilisateur</h3>
+  <h3 *ngIf="mode === 'edition'">Modifier l'utilisateur</h3>
+  <div class="form-group">
+    <label>Nom</label>
+    <input type="text" [(ngModel)]="utilisateur.nom" name="nom" required />
+  </div>
+
+  <div class="form-group">
+    <label>Prénom</label>
+    <input type="text" [(ngModel)]="utilisateur.prenom" name="prenom" required />
+  </div>
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" [(ngModel)]="utilisateur.email" name="email" required />
+  </div>
+  <div class="form-group">
+    <label>Rôle</label>
+    <select [(ngModel)]="utilisateur.role" name="role" required [disabled]="mode === 'edition'">
+      <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+    </select>
+    <span *ngIf="mode === 'edition'" style="font-size: 0.9em; color: #888;">Le rôle ne peut pas être modifié.</span>
+  </div>
+  <div class="form-group">
+    <label>Club</label>
+    <select [(ngModel)]="utilisateur.clubId" name="clubId" required>
+      <option value="">Sélectionner un club</option>
+      <option *ngFor="let c of clubs" [value]="c.id">{{ c.nom || c.name }}</option>
+    </select>
+    <button type="button" (click)="refreshClubs()" style="margin-left:8px;">Rafraîchir la liste des clubs</button>
+  </div>
+
+  <div *ngIf="mode === 'ajout'" class="form-group">
+    <label>Mot de passe temporaire</label>
+    <input type="password" [(ngModel)]="utilisateur.password" name="password" required minlength="6" />
+    <span style="font-size: 0.9em; color: #888;">Ce mot de passe devra être changé par l'utilisateur lors de sa première connexion.</span>
+  </div>
+  <div class="form-actions">
+    <button type="submit" [disabled]="form.invalid">Valider</button>
+    <button type="button" (click)="cancel.emit()">Annuler</button>
+  </div>
+</form>
