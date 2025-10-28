@@ -48,6 +48,8 @@ export class InscriptionComponent implements OnInit {
   clubs: any[] = [];
   // club currently selected in header (if any)
   selectedClub: any = null;
+  // email utilisé pour l'inscription (affiché dans la modale de confirmation)
+  lastRegisteredEmail: string | null = null;
 
   constructor(private fb: FormBuilder,
               private http: HttpClient,
@@ -231,7 +233,16 @@ export class InscriptionComponent implements OnInit {
     const control = this.utilisateurForm.get(field);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
-  redirectToLogin(): void { window.location.href = '/connexion'; }
+  redirectToLogin(): void {
+    // pré-remplir l'email si disponible
+    const email = this.lastRegisteredEmail ? `?email=${encodeURIComponent(this.lastRegisteredEmail)}` : '';
+    window.location.href = `/connexion${email}`;
+  }
+
+  goToSite(): void {
+    // redirige vers la page d'accueil du frontend
+    window.location.href = '/';
+  }
 
   // ===== Local draft (sans mdp) =====
   saveLocal(): void {
@@ -313,6 +324,9 @@ export class InscriptionComponent implements OnInit {
           return;
         }
 
+        // conserver l'email renvoyé (ou celui du formulaire) pour affichage dans la modale
+        this.lastRegisteredEmail = utilisateur?.email || utilisateurData.email;
+
         if (this.roleMembreSeul) {
           // créer membre adulte
           const membreSeul = this.cleanMembre({
@@ -320,6 +334,12 @@ export class InscriptionComponent implements OnInit {
             prenom: utilisateurData.prenom,
             dateNaissance: utilisateurData.dateNaissance
           }, utilisateurId);
+
+          // s'assurer que le DTO indique qu'il s'agit bien d'un adulte
+          // (sinon le backend le considèrera comme enfant et rattachera un parent)
+          (membreSeul as any).estAdulte = true;
+          // rattacher le club si présent
+          if (utilisateurData.clubId) (membreSeul as any).clubId = utilisateurData.clubId;
 
           this.http.post(`${environment.apiUrl}/membres`, membreSeul).subscribe({
             next: (membre: any) => {
@@ -337,6 +357,12 @@ export class InscriptionComponent implements OnInit {
         // parent → créer les membres
         const membres: MembrePayload[] = (this.membresForm.value.membres || [])
           .map((m: any) => this.cleanMembre(m, utilisateurId));
+
+        // pour les inscriptions faites par un parent, ces membres sont des enfants (estAdulte=false)
+        for (const m of membres) {
+          (m as any).estAdulte = false;
+          if (utilisateurData.clubId) (m as any).clubId = utilisateurData.clubId;
+        }
 
         if (!membres.length) { this.finaliser(); return; }
 

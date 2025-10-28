@@ -1,4 +1,8 @@
 <div class="page-wrapper-standard">
+  <div class="club-banner" *ngIf="getSelectedClubName()">
+    <span>Vous inscrivez un ou plusieurs membres pour le club&nbsp;:</span>
+    <strong>{{ getSelectedClubName() }}</strong>
+  </div>
   <header class="page-head" style="width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
     <h1 class="page-title" style="font-size:2.5rem; font-weight:700; letter-spacing:1px; color:var(--blue-main); margin-bottom:.5rem; position:relative; display:inline-block; text-align:center;">
       Inscription
@@ -44,14 +48,27 @@
   <div *ngIf="erreurMessage" class="error-message-global">{{ erreurMessage }}</div>
 
   <!-- Modale succès -->
-  <div class="modal-overlay" *ngIf="showConfirmationModal">
-    <div class="modal-box">
-      <i class="ri-checkbox-circle-line modal-icon"></i>
-      <h2>Inscription réussie</h2>
-      <p>Merci ! Votre compte a bien été créé.</p>
-      <button class="modal-button" (click)="redirectToLogin()">
-        <i class="ri-login-circle-line"></i> Aller à la connexion
-      </button>
+  <div class="modal-overlay" *ngIf="showConfirmationModal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box modal-success" role="document">
+      <div class="modal-content modal-content-sober">
+        <div class="modal-badge" aria-hidden="true">✓</div>
+        <h2 id="modal-title" class="modal-title">Inscription réussie</h2>
+        <p class="modal-text">Votre compte a été créé avec succès.</p>
+        <p *ngIf="lastRegisteredEmail" class="modal-text modal-email">Un email de confirmation a été envoyé à <strong>{{ lastRegisteredEmail }}</strong>.</p>
+        <p class="modal-note">Si vous ne voyez rien, vérifiez votre dossier Courrier indésirable. Vous pouvez vous connecter dès maintenant.</p>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" (click)="goToSite()">
+            Aller au site
+          </button>
+          <button class="btn btn-secondary" (click)="redirectToLogin()">
+            Se connecter
+          </button>
+          <button class="btn btn-secondary" (click)="closeModal()">
+            Fermer
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -168,8 +185,8 @@
           <label>Rôle *</label>
           <select formControlName="role" required (change)="onRoleChange()" [ngClass]="{'is-invalid': isInvalid('role')}">
             <option value="">-- Qui êtes-vous ? --</option>
+            <option value="MEMBRE">Je suis membre (je m'inscris seul)</option>
             <option value="PARENT">Je suis un parent (j’inscris un ou plusieurs enfants)</option>
-            <option value="MEMBRE">Je suis un adulte qui s’inscrit seul</option>
           </select>
           <small class="field-error" *ngIf="isInvalid('role')">Choisis un rôle.</small>
         </div>
@@ -242,38 +259,50 @@
 
   <!-- Étape 3 -->
   <div *ngIf="step === 3" class="confirmation-step">
-    <fieldset class="form-section">
-      <legend class="form-legend"><i class="ri-check-double-line"></i> Confirmation de l'inscription</legend>
+    <section class="recap-card">
+      <header class="recap-header">
+        <h2>Récapitulatif de l'inscription</h2>
+        <p class="recap-sub">Vérifiez les informations avant de finaliser</p>
+      </header>
 
-      <h3>Adulte :</h3>
-      <ul>
-        <li><strong>Nom :</strong> {{ utilisateurForm.value.nom }}</li>
-        <li><strong>Prénom :</strong> {{ utilisateurForm.value.prenom }}</li>
-        <li><strong>Email :</strong> {{ utilisateurForm.value.email }}</li>
-        <li><strong>Téléphone :</strong> {{ utilisateurForm.value.telephone }}</li>
-        <li><strong>Adresse :</strong>
-          {{ utilisateurForm.value.adresseLigne1 }}
-          <ng-container *ngIf="utilisateurForm.value.adresseLigne2">, {{ utilisateurForm.value.adresseLigne2 }}</ng-container>,
-          {{ utilisateurForm.value.codePostal }} {{ utilisateurForm.value.ville }},
-          {{ utilisateurForm.value.pays }}
-        </li>
-        <li><strong>Date de naissance :</strong> {{ utilisateurForm.value.dateNaissance | date:'dd/MM/yyyy' }}</li>
-        <li><strong>Rôle :</strong> {{ utilisateurForm.value.role }}</li>
-      </ul>
+      <div class="recap-grid">
+        <div class="recap-column">
+          <h3 class="recap-title">Adulte</h3>
+          <div class="recap-row"><div class="recap-label">Nom</div><div class="recap-value">{{ utilisateurForm.value.nom }}</div></div>
+          <div class="recap-row"><div class="recap-label">Prénom</div><div class="recap-value">{{ utilisateurForm.value.prenom }}</div></div>
+          <div class="recap-row"><div class="recap-label">Email</div><div class="recap-value">{{ utilisateurForm.value.email }}</div></div>
+          <div class="recap-row"><div class="recap-label">Téléphone</div><div class="recap-value">{{ utilisateurForm.value.telephone }}</div></div>
+          <div class="recap-row"><div class="recap-label">Date de naissance</div><div class="recap-value">{{ utilisateurForm.value.dateNaissance | date:'dd/MM/yyyy' }}</div></div>
+          <div class="recap-row"><div class="recap-label">Adresse</div><div class="recap-value">{{ utilisateurForm.value.adresseLigne1 }}<ng-container *ngIf="utilisateurForm.value.adresseLigne2">, {{ utilisateurForm.value.adresseLigne2 }}</ng-container>, {{ utilisateurForm.value.codePostal }} {{ utilisateurForm.value.ville }}, {{ utilisateurForm.value.pays }}</div></div>
+        </div>
 
-        <li *ngIf="getSelectedClubName()"><strong>Club :</strong> {{ getSelectedClubName() }}</li>
-      <h3 *ngIf="!roleMembreSeul">Membres :</h3>
-      <ul *ngIf="!roleMembreSeul">
-        <li *ngFor="let m of membresForm.value.membres">
-          {{ m.prenom }} {{ m.nom }} – {{ m.dateNaissance | date:'dd/MM/yyyy' }}
-        </li>
-      </ul>
+        <div class="recap-column">
+          <h3 class="recap-title">Informations</h3>
+          <div class="recap-row"><div class="recap-label">Rôle</div><div class="recap-value"><span class="badge">{{ utilisateurForm.value.role }}</span></div></div>
+          <div class="recap-row" *ngIf="getSelectedClubName()"><div class="recap-label">Club</div><div class="recap-value"><span class="badge">{{ getSelectedClubName() }}</span></div></div>
 
-      <div class="btn-group">
-        <button type="button" (click)="previousStep()"><i class="ri-arrow-left-line"></i> Retour</button>
-        <button type="button" (click)="onSubmit()"><i class="ri-send-plane-2-line"></i> Finaliser l'inscription</button>
+          <ng-container *ngIf="!roleMembreSeul">
+            <h4 class="recap-subtitle">Membres inscrits</h4>
+            <div *ngIf="(membresForm.value.membres || []).length === 0" class="recap-note">Aucun membre ajouté</div>
+            <ul class="recap-members">
+              <li *ngFor="let m of membresForm.value.membres" class="recap-member">
+                <div class="member-avatar">{{ (m.prenom && m.nom) ? ( (m.prenom.charAt(0) + m.nom.charAt(0)).toUpperCase() ) : (m.prenom?.charAt(0)?.toUpperCase() || '') }}</div>
+                <div class="member-info">
+                  <div class="member-name">{{ m.prenom }} {{ m.nom }}</div>
+                  <div class="member-sub">Né le {{ m.dateNaissance | date:'dd/MM/yyyy' }}</div>
+                </div>
+              </li>
+            </ul>
+          </ng-container>
+        </div>
       </div>
-    </fieldset>
+
+      <footer class="recap-actions">
+        <button class="btn btn-secondary" type="button" (click)="previousStep()"><i class="ri-arrow-left-line"></i> Retour</button>
+        <button class="btn btn-primary" type="button" (click)="onSubmit()"><i class="ri-send-plane-2-line"></i> Finaliser l'inscription</button>
+      </footer>
+    </section>
   </div>
   </div>
+
 </div>

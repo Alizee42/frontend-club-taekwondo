@@ -380,6 +380,69 @@ input:focus, select:focus {
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* =====================
+   MODALE SUCCESS (plus propre)
+   ===================== */
+.modal-box.modal-success {
+  /* kept for backward compatibility if used elsewhere, but make subtle by default */
+  max-width: 680px;
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 1rem;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  border: 1px solid var(--border-subtle);
+}
+.modal-illustration {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.modal-content { text-align: center; padding-right: 0; }
+.modal-content-sober .modal-title { color: var(--blue-dark); font-size: 1.05rem; margin: 0 0 0.25rem 0; font-weight:700; }
+.modal-text { color: #273142; margin: 0 0 0.35rem 0; font-size: 0.95rem; }
+.modal-email { font-size: 0.95rem; color: var(--text-primary); }
+.modal-note { color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.2rem; }
+.modal-actions { display: flex; gap: 0.65rem; margin-top: 0.85rem; justify-content: center; }
+
+/* boutons pour la modale sobre */
+.modal-box .btn { padding: 0.55rem 0.95rem; font-size: 0.95rem; }
+.btn-primary { background: var(--blue-main); color: #fff; border-color: var(--blue-main); }
+.btn-primary:hover { background: var(--blue-hover); }
+.btn-secondary { background: transparent; color: var(--text-primary); border: 1px solid var(--border-subtle); }
+.btn-secondary:hover { background: rgba(15,23,42,0.03); }
+
+/* responsive : empiler la modale en mobile */
+@media (max-width: 640px) {
+  .modal-box.modal-success { flex-direction: column; max-width: 94%; padding: 0.9rem; }
+  .modal-illustration { width: 56px; height: 56px; }
+  .modal-content { text-align: center; }
+  .modal-actions { justify-content: center; }
+}
+
+/* minimal badge centered above title */
+.modal-badge {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ecfdf5; /* soft green */
+  color: #065f46; /* dark green */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin: 0 auto 0.6rem auto;
+  border: 1px solid rgba(6,95,70,0.08);
+}
+
+@media (max-width: 640px) {
+  .modal-badge { width: 44px; height: 44px; margin-bottom: 0.5rem; }
+}
+
 /* 📱 Responsive */
 @media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }
@@ -393,4 +456,151 @@ input:focus, select:focus {
   }
   .step.active { border-left-color: var(--blue-main); }
   .step.active::after { display: none; }
+}
+
+/* 🏷️ Bannière club */
+.club-banner {
+  background: #f4f7fe;
+  /* plus de border-left */
+  box-shadow: 0 1px 4px rgba(30, 41, 59, 0.04);
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  font-size: 1.08rem;
+  color: #1e293b;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+.club-banner strong {
+  color: #2563eb;
+  font-size: 1.08em;
+  margin-left: 0.2em;
+  letter-spacing: 0.2px;
+}
+
+/* 📋 Récapitulatif d'inscription (étape 3) */
+.recap-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.recap-legend {
+  font-size: 1.2rem;
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+.recap-block {
+  margin-bottom: 1.5rem;
+}
+.recap-block h3 {
+  color: #222;
+  font-size: 1.08rem;
+  margin-bottom: 0.7rem;
+  font-weight: 600;
+}
+.recap-block ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.recap-block li {
+  margin-bottom: 0.5rem;
+  font-size: 1.03rem;
+}
+.recap-block li span {
+  color: #555;
+  font-weight: 500;
+  margin-right: 0.3em;
+}
+.recap-block li strong {
+  color: #111;
+}
+
+/* Nouvelle mise en forme professionnelle pour la carte récapitulative */
+.recap-card {
+  background: var(--surface-0);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 6px 18px rgba(22, 28, 36, 0.04);
+  margin-bottom: 1.75rem;
+}
+.recap-header h2 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.15rem;
+  color: #111827;
+  font-weight: 700;
+}
+.recap-sub {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.94rem;
+}
+.recap-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem 2rem;
+  margin-top: 1rem;
+}
+.recap-column { padding: 0.25rem 0; }
+.recap-title { margin: 0 0 0.5rem 0; font-size: 1rem; color: #111827; font-weight: 600; }
+.recap-row { display: flex; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-subtle); align-items: center; }
+.recap-label { width: 38%; color: var(--text-secondary); font-weight: 600; background: var(--surface-50); padding: 0.45rem 0.6rem; border-radius: 6px; }
+.recap-value { flex: 1; color: var(--text-primary); font-weight: 500; padding: 0.35rem 0.6rem; }
+.recap-subtitle { margin-top: 0.6rem; margin-bottom: 0.4rem; font-size: 0.98rem; color: #0f172a; font-weight: 600; }
+.recap-note { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0.6rem; }
+.recap-members { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.recap-member { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid rgba(15,23,42,0.04); }
+.member-avatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  background: var(--surface-50);
+  color: var(--blue-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  border: 1px solid var(--border-subtle);
+  margin-right: 0.9rem;
+}
+.member-info { display: flex; flex-direction: column; justify-content: center; }
+.member-name { color: var(--text-primary); font-weight: 700; }
+.member-sub { color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.15rem; }
+.recap-member { display: flex; gap: 0.8rem; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(15,23,42,0.04); }
+.recap-member:hover { background: var(--surface-50); border-radius: 8px; }
+
+.recap-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; }
+.btn { padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; border: 1px solid transparent; cursor: pointer; }
+.btn-primary { background: var(--blue-main); color: var(--text-inverse); border-color: var(--blue-main); }
+.btn-primary:hover { background: var(--blue-hover); }
+.btn-secondary { background: transparent; color: var(--text-primary); border-color: var(--border-subtle); }
+.btn-secondary:hover { background: var(--surface-50); }
+
+@media (min-width: 820px) {
+  .recap-grid { grid-template-columns: 1fr 1fr; }
+  .recap-label { width: 40%; }
+  /* add subtle vertical separation between the two recap columns */
+  .recap-column:first-child { padding-right: 1.25rem; border-right: 1px solid #eef2f7; }
+}
+
+/* remove bottom border on last rows to make cleaner */
+.recap-row:last-child, .recap-member:last-child { border-bottom: none; }
+
+/* badge style used for role / club */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background: var(--surface-50);
+  color: var(--blue-main);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: 1px solid var(--border-subtle);
 }
