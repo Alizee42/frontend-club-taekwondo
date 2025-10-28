@@ -8,11 +8,12 @@ import { ClubService, Club } from '../../services/club.service';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 
 @Component({
   selector: 'app-galerie-gestion-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiButtonComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiButtonComponent, UiTitleComponent],
   templateUrl: './galerie-gestion.component.html',
   styleUrls: ['./galerie-gestion.component.css']
 })

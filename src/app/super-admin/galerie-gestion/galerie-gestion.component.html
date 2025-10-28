@@ -1,13 +1,17 @@
 <section class="clubs-page-premium">
-  <div class="clubs-header-premium" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
-    <h2 class="clubs-title" style="margin: 0;">Gestion des galeries par club</h2>
-    <div class="club-select-bar">
+  <div class="header-galerie">
+    <div class="header-top">
+      <ui-title [level]="1" text="Gestion des galeries par club"></ui-title>
+      <div class="ajout-photo-btn-container">
+        <ui-button label="Ajouter une photo" variant="primary" (clicked)="openAddModal()"></ui-button>
+      </div>
+    </div>
+    <div class="header-controls">
       <label for="club-select">Sélectionner un club :</label>
       <select id="club-select" [(ngModel)]="selectedClubId" (change)="onClubChange(selectedClubId)">
         <option *ngFor="let club of clubs" [value]="club.id">{{ club.nom || club.name }}</option>
       </select>
     </div>
-    <ui-button label="Ajouter une photo" variant="primary" (clicked)="openAddModal()"></ui-button>
   </div>
   <div class="clubs-table-wrapper">
     <ui-table

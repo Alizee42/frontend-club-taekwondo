@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { DashboardCardComponent } from '../../dashboard/shared/dashboard-card/dashboard-card.component';
 import { AuthService } from '../../services/auth.service';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 
 
 
@@ -24,7 +25,7 @@ interface Utilisateur {
   selector: 'app-dashboard-membre',
   templateUrl: './dashboard-membre.component.html',
   styleUrls: ['./dashboard-membre.component.css'],
-  imports: [CommonModule, FormsModule, DashboardCardComponent],
+  imports: [CommonModule, FormsModule, DashboardCardComponent, UiTitleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardMembreComponent implements OnInit {

@@ -4,11 +4,12 @@
 }
 .header-bar-utilisateurs {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* remonte le bouton au niveau du haut */
   justify-content: space-between;
   gap: 2em;
   margin-bottom: 2em;
 }
+.header-bar-utilisateurs .ui-title { margin: 0; }
 .titre-section {
   font-size: 2.1rem;
   font-weight: 800;

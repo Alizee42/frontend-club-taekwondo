@@ -1,7 +1,7 @@
 <div class="admin-container">
   <!-- Sidebar -->
   <aside class="sidebar">
-  <h2 class="page-title">Paiements Admin</h2>
+  <ui-title [level]="2" text="Paiements Admin"></ui-title>
     <ul class="menu">
       <li (click)="changerVue('dashboard')" [class.active]="vueActive === 'dashboard'">🏠 Tableau de bord</li>
       <li (click)="changerVue('paiements')" [class.active]="vueActive === 'paiements'">💰 Paiements</li>

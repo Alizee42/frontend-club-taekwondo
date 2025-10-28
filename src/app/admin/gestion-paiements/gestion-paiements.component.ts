@@ -7,6 +7,7 @@ import { SuiviPaiementsComponent } from './suivi-paiements/suivi-paiements.compo
 import { EcheancesComponent } from './echeances/echeances.component';
 import { AjoutPaiementComponent } from './ajout-paiement/ajout-paiement.component';
 import { ParametresPaiementComponent } from './parametres-paiement/parametres-paiement.component';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 
 @Component({
   selector: 'app-gestion-paiements',
@@ -17,7 +18,8 @@ import { ParametresPaiementComponent } from './parametres-paiement/parametres-pa
     SuiviPaiementsComponent,
     EcheancesComponent,
     AjoutPaiementComponent,
-    ParametresPaiementComponent
+    ParametresPaiementComponent,
+    UiTitleComponent
   ],
   templateUrl: './gestion-paiements.component.html',
   styleUrls: ['./gestion-paiements.component.css']

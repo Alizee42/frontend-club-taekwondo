@@ -16,10 +16,12 @@
 }
 .clubs-header-premium {
 	display: flex;
-	align-items: center;
-	gap: 1.5rem;
+	align-items: flex-start; /* remonte le bouton en haut */
+	justify-content: space-between;
+	gap: 18px;
 	margin-bottom: 18px;
 }
+.clubs-header-premium .ui-title { margin: 0; }
 .clubs-header-premium h3 {
 	font-size: 1.25rem;
 	font-weight: 600;

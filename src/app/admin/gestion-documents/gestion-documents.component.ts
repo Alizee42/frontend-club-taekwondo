@@ -4,6 +4,7 @@
   import { FormsModule } from '@angular/forms';
   import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   import { environment } from '../../../environments/environment';
+  import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
   
   /* ========= Types ========= */
   type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
@@ -97,7 +98,7 @@
     templateUrl: './gestion-documents.component.html',
     styleUrls: ['./gestion-documents.component.css'],
     standalone: true,
-    imports: [CommonModule, NgClass, NgFor, DatePipe, FormsModule],
+    imports: [CommonModule, NgClass, NgFor, DatePipe, FormsModule, UiTitleComponent],
   })
   export class GestionDocumentsComponent implements OnInit {
   // labelFor accessible dans le template

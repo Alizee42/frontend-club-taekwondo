@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 import { environment } from '../../../environments/environment';
 
 type Statut = 'NOUVEAU'|'VALIDE'|'REFUSE'|string;
@@ -43,7 +44,7 @@ type SortKey = 'nom' | 'prenom' | 'email' | 'telephone' | 'nbMembres';
 @Component({
   selector: 'app-gestion-inscriptions',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiTitleComponent],
   templateUrl: './gestion-inscriptions.component.html',
   styleUrls: ['./gestion-inscriptions.component.css']
 })

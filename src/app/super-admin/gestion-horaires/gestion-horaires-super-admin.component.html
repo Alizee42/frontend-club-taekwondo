@@ -1,16 +1,21 @@
 <div class="horaires-global">
-  <div class="header-bar-horaires">
-  <h2 class="page-title">Gestion des horaires des clubs</h2>
-    <div class="club-select-row">
+  <div class="header-horaires">
+    <div class="header-top">
+      <ui-title [level]="1" text="Gestion des horaires des clubs"></ui-title>
+      <div class="ajout-horaires-btn-container">
+        <ui-button label="Ajouter des horaires" variant="primary" (clicked)="showAjoutModal = true" customClass="ajout-horaires-btn"></ui-button>
+      </div>
+    </div>
+    <div class="header-controls">
       <label for="club-select" class="label-club-select">Club :</label>
       <select id="club-select" [(ngModel)]="selectedClubId" (change)="onClubChange()" class="club-select">
         <option *ngFor="let club of clubs" [value]="club.id">{{ club.name }}</option>
       </select>
     </div>
-    <div class="ajout-horaires-btn-container">
-      <ui-button label="Ajouter des horaires" variant="primary" (clicked)="showAjoutModal = true" customClass="ajout-horaires-btn"></ui-button>
-    </div>
-    <ui-modal [open]="showAjoutModal" title="Ajouter un horaire" (closed)="showAjoutModal = false">
+  </div>
+
+  <!-- Modale déplacée en dehors du header pour ne pas casser l'alignement -->
+  <ui-modal [open]="showAjoutModal" title="Ajouter un horaire" (closed)="showAjoutModal = false">
   <form class="ajout-horaire ajout-horaire-vertical" (ngSubmit)="ajoutFormValid && addHoraire()" #ajoutForm="ngForm">
         <label for="jour">Jour :</label>
   <select id="jour" required [(ngModel)]="ajoutJour" name="jour" (change)="openedPlageIndex = 0" class="select-jour">
@@ -93,7 +98,7 @@
         </div>
       </form>
     </ui-modal>
-  </div>
+  
 
   <div class="horaires-cards-container">
     <div *ngIf="horaires.length === 0" class="no-horaires">Aucun horaire pour ce club.</div>

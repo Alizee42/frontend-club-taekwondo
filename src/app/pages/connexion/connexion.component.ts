@@ -56,16 +56,13 @@ export class ConnexionComponent {
       this.toastService.error('Adresse email invalide');
       return; 
     }
-      // Envoie le clubId sélectionné avec l'email et le mot de passe
+      // Envoie le clubId sélectionné avec l'email et le mot de passe (un seul appel)
       const payload = {
         email: this.email,
         password: this.password,
         clubId: this.clubId !== undefined ? this.clubId : undefined
       };
       this.authService.login(payload)
-
-      // Login classique : envoie uniquement l'email
-      this.authService.login({ email: this.email, password: this.password })
         .subscribe({
           next: (response) => {
             const userClubId = response.utilisateur?.['clubId'];

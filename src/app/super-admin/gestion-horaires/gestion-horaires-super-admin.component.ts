@@ -5,11 +5,12 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { HorairesService } from '../../services/horaires.service';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 
 @Component({
   selector: 'app-gestion-horaires-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiTitleComponent],
   templateUrl: './gestion-horaires-super-admin.component.html',
   styleUrls: ['./gestion-horaires-super-admin.component.css']
 })

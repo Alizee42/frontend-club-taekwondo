@@ -1,3 +1,45 @@
+.header-horaires {
+  margin-bottom: 1.5rem;
+}
+
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 2em;
+}
+
+.header-top .ui-title {
+  margin: 0;
+}
+
+.header-top .ui-title::after {
+  display: none; /* titre compact dans la barre */
+}
+
+.header-top .ajout-horaires-btn-container {
+  margin-left: auto; /* pousse le bouton complètement à droite */
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .header-top {
+    flex-wrap: wrap;
+    gap: 1em;
+  }
+  .header-controls {
+    flex-wrap: wrap;
+  }
+  .header-controls .club-select {
+    width: 100%;
+    max-width: 360px;
+  }
+}
 .page-title {
   color: var(--blue-main);
   font-size: 2.1rem;
@@ -15,7 +57,7 @@
 /* Container flex pour header */
 .header-bar-horaires {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 2em;
 }
 .ajout-horaires-btn-container {
@@ -63,9 +105,36 @@
 /* Header bar */
 .header-bar-horaires {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 2em;
+}
+/* Titre compact dans la barre d'entête */
+.header-bar-horaires .ui-title {
+  margin: 0;
+}
+.header-bar-horaires .ui-title::after {
+  display: none;
+}
+/* Le sélecteur s'étire et centre son contenu */
+.header-bar-horaires .club-select-row {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+/* Le bouton reste poussé à droite */
+.header-bar-horaires .ajout-horaires-btn-container {
+  margin-left: auto;
+}
+
+/* Responsive: passe en colonne sur petits écrans */
+@media (max-width: 768px) {
+  .header-bar-horaires {
+    flex-wrap: wrap;
+    gap: 1em;
+  }
+  .header-bar-horaires .ajout-horaires-btn-container {
+    margin-left: 0;
+  }
 }
 .titre-section {
   font-size: 2.1rem;

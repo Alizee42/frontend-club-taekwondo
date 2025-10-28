@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
 import { DashboardCardComponent } from '../../dashboard/shared/dashboard-card/dashboard-card.component';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 
@@ -19,7 +20,7 @@ interface Utilisateur {
   standalone: true,
   templateUrl: './dashboard-parent.component.html',
   styleUrls: ['./dashboard-parent.component.css'],
-  imports: [CommonModule, DashboardCardComponent],
+  imports: [CommonModule, DashboardCardComponent, UiTitleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardParentComponent implements OnInit, OnDestroy {

@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 
 
 const API_BASE = environment.apiUrl;
@@ -77,7 +78,7 @@ interface ApiCommande {
 @Component({
   selector: 'app-gestion-commande',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiTitleComponent],
   templateUrl: './gestion-commande.component.html',
   styleUrls: ['./gestion-commande.component.css']
 })

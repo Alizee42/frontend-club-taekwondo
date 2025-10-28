@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { EvenementService, EvenementDTO, InscriptionEvenementDTO } from '../../services/evenement.service';
 import { InscriptionsService, Inscription } from '../../services/inscriptions.service';
 import { AuthService } from '../../services/auth.service';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 
 @Component({
   selector: 'app-gestion-evenements',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiTitleComponent],
   templateUrl: './gestion-evenements.component.html',
   styleUrls: ['./gestion-evenements.component.css']
 })
