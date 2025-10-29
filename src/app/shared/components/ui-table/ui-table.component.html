@@ -31,15 +31,17 @@
       </td>
       <td *ngIf="actions.length" style="min-width:80px;padding:0 6px;text-align:center;">
         <div style="display:flex;gap:6px;justify-content:center;align-items:center;">
-          <button *ngFor="let act of actions"
-            class="ui-table-actions-btn"
-            [ngClass]="{ 'edit': act.action === 'edit' }"
-            [ngStyle]="{ color: act.color || '#2563eb', padding: '0', minWidth: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }"
-            (click)="onAction(act.action, row)"
-            style="padding:0;min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">
-            <i *ngIf="act.icon && act.icon !== 'material-icons'" [class]="act.icon" style="font-size:1.3em;"></i>
-            <i *ngIf="act.icon === 'material-icons'" class="material-icons" style="font-size:1.3em;">{{ act.iconText }}</i>
-          </button>
+          <ng-container *ngFor="let act of actions">
+            <ng-container *ngIf="(act.show ? act.show(row) : true)">
+              <ui-icon-button
+                [icon]="act.icon ?? ''"
+                [variant]="act.variant ?? 'ghost'"
+                [disabled]="act.disabled ?? false"
+                [customColor]="act.variant ? undefined : (act.color ?? undefined)"
+                (clicked)="onAction(act.action, row)">
+              </ui-icon-button>
+            </ng-container>
+          </ng-container>
         </div>
       </td>
     </tr>

@@ -1,0 +1,36 @@
+<section class="membres-section">
+  <div class="header-flex">
+    <ui-title [level]="2" text="Gestion des membres"></ui-title>
+    <div class="add-btn">
+      <ui-button label="Ajouter un membre" (clicked)="openAjoutModal()" variant="primary" [disabled]="!selectedClubId"></ui-button>
+    </div>
+  </div>
+  <div class="club-select club-select-below">
+    <label>Club :
+      <select [(ngModel)]="selectedClubId" (ngModelChange)="onSelectClub($event)">
+        <option [ngValue]="null">-- Choisir --</option>
+        <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
+      </select>
+    </label>
+  </div>
+  <div *ngIf="loading">Chargement...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <div *ngIf="!clubs || clubs.length === 0" class="info">Aucun club disponible.</div>
+  <!-- Table des membres -->
+  <ui-table
+    *ngIf="selectedClubId"
+    [columns]="columns"
+    [data]="membres"
+    [actions]="actions"
+    (actionClick)="onTableAction($event)"
+  ></ui-table>
+  <div *ngIf="selectedClubId && (!membres || membres.length === 0)">Aucun membre pour ce club.</div>
+  <!-- Modale d'ajout/édition -->
+  <ui-modal [open]="showModal" [title]="modalMode === 'ajout' ? 'Ajouter un membre' : 'Modifier le membre'" (closed)="closeModal()">
+    <app-membres-super-admin-form
+      [membre]="membreEnCours"
+      (submitForm)="onSubmitForm($event)"
+      (cancel)="closeModal()"
+    ></app-membres-super-admin-form>
+  </ui-modal>
+</section>

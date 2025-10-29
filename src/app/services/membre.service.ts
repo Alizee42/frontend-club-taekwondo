@@ -1,4 +1,3 @@
-// src/app/services/membre.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
@@ -16,6 +15,22 @@ export class MembreService {
   private readonly apiUrl = `${environment.apiUrl}/membres`;
 
   constructor(private http: HttpClient) {}
+
+  /** Ajout d'un membre à un club (super-admin) */
+  addMembreToClub(clubId: number, membre: Partial<Membre>) {
+    return this.http.post<Membre>(`${this.apiUrl}?clubId=${clubId}`, membre);
+  }
+
+  /** Modification d'un membre (super-admin) */
+  updateMembre(membre: Partial<Membre>) {
+    if (!membre.id) throw new Error('ID membre requis');
+    return this.http.put<Membre>(`${this.apiUrl}/${membre.id}`, membre);
+  }
+
+  /** Suppression d'un membre (super-admin) */
+  deleteMembre(membreId: number) {
+    return this.http.delete(`${this.apiUrl}/${membreId}`);
+  }
 
   /** 🔎 Debug utilitaire */
   private log(prefix: string, data?: any) {

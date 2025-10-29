@@ -12,7 +12,7 @@ import { DashboardAdminComponent } from './admin/dashboard-admin/dashboard-admin
 import { DashboardSuperAdminComponent } from './super-admin/dashboard-super-admin/dashboard-super-admin.component';
 import { ClubsComponent } from './super-admin/clubs/clubs.component';
 import { AdminsComponent } from './super-admin/admins/admins.component';
-import { MembresComponent } from './super-admin/membres/membres.component';
+import { MembresSuperAdminComponent } from './super-admin/membres-super-admin/membres-super-admin.component';
 import { PaiementsComponent } from './super-admin/paiements/paiements.component';
 import { LogsComponent } from './super-admin/logs/logs.component';
 import { ActualitesComponent } from './super-admin/actualites/actualites.component';
@@ -86,8 +86,9 @@ export const routes: Routes = [
       { path: 'paiements', component: GestionPaiementsComponent },
       { path: 'gestion-commande', component: GestionCommandeComponent },
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
-      { path: 'gestion-inscription', component: GestionInscriptionsComponent }
-    ,{ path: 'gestion-utilisateurs', component: GestionUtilisateursComponent }
+      { path: 'gestion-inscription', component: GestionInscriptionsComponent },
+      { path: 'membres', loadComponent: () => import('./admin/membres-admin/membres-admin.component').then(m => m.MembresAdminComponent) },
+      { path: 'gestion-utilisateurs', component: GestionUtilisateursComponent }
     ]
   },
 
@@ -128,7 +129,7 @@ export const routes: Routes = [
   { path: 'dashboard-super-admin', component: DashboardSuperAdminComponent },
   { path: 'clubs', component: ClubsComponent },
   { path: 'admins', component: AdminsComponent },
-  { path: 'membres', component: MembresComponent },
+  { path: 'membres', component: MembresSuperAdminComponent },
   { path: 'paiements', component: PaiementsComponent },
   { path: 'logs', component: LogsComponent },
   { path: 'actualites', component: ActualitesComponent },
@@ -136,6 +137,7 @@ export const routes: Routes = [
   { path: 'galerie-gestion', component: GalerieGestionSuperAdminComponent },
   { path: 'gestion-horaires', component: GestionHorairesSuperAdminComponent },
   { path: 'utilisateurs', component: UtilisateursSuperAdminComponent },
+  { path: 'avis', loadComponent: () => import('./super-admin/avis-super-admin/avis-super-admin.component').then(m => m.AvisSuperAdminComponent) },
  
     ]
     },

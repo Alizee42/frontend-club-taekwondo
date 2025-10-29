@@ -1,116 +1,13 @@
-<div class="gestion-avis-container">
-  <ui-title [level]="1" text="Gestion des Avis"></ui-title>
-
-  <!-- Avis en attente -->
-  <section class="section-liste">
-    <h2>En attente d'approbation</h2>
-    <div *ngIf="avisEnAttente.length === 0" class="empty-message">
-      Aucun avis en attente.
-    </div>
-
-    <div *ngFor="let avis of avisEnAttente; trackBy: trackByAvisId" class="avis-card">
-      <div class="avis-infos">
-        <div class="photo-container">
-          <img
-            *ngIf="avis.photo"
-            [src]="getPhotoUrl(avis.photo)"
-            alt="Photo de {{ avis.pseudoVisiteur || avis.auteur || 'Anonyme' }}"
-            class="photo"
-            loading="lazy"
-            width="60" height="60"
-          />
-          <div *ngIf="!avis.photo" class="initials"
-               [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || avis.auteur || 'Anonyme')">
-            {{ getInitials(avis.pseudoVisiteur || avis.auteur || 'Anonyme') }}
-          </div>
-        </div>
-
-        <p>
-          <strong>{{ avis.pseudoVisiteur || avis.auteur || 'Anonyme' }}</strong> –
-          {{ (avis.typeAvis || 'Avis') | titlecase }} – {{ avis.datePub | date:'dd/MM/yyyy' }}
-        </p>
-        <p>{{ avis.contenu }}</p>
-
-        <div class="note-stars" aria-label="Note">
-          <span *ngFor="let star of [1, 2, 3, 4, 5]">
-            <i class="ri-star-fill" *ngIf="star <= (avis.note || 0)" aria-hidden="true"></i>
-            <i class="ri-star-line" *ngIf="star > (avis.note || 0)" aria-hidden="true"></i>
-          </span>
-        </div>
-      </div>
-
-      <div class="avis-actions">
-        <button
-          class="btn-approve"
-          (click)="approuverAvis(avis.id)"
-          [disabled]="loadingIds.has(avis.id)"
-          aria-label="Approuver l'avis"
-          title="Approuver"
-        >
-          ✔
-        </button>
-        <button
-          class="btn-delete"
-          (click)="supprimerAvis(avis.id)"
-          [disabled]="loadingIds.has(avis.id)"
-          aria-label="Supprimer l'avis"
-          title="Supprimer"
-        >
-          ✖
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Avis approuvés -->
-  <section class="section-liste">
-    <h2>Avis approuvés</h2>
-    <div *ngIf="avisApprouves.length === 0" class="empty-message">
-      Aucun avis approuvé.
-    </div>
-
-    <div *ngFor="let avis of avisApprouves; trackBy: trackByAvisId" class="avis-card">
-      <div class="avis-infos">
-        <div class="photo-container">
-          <img
-            *ngIf="avis.photo"
-            [src]="getPhotoUrl(avis.photo)"
-            alt="Photo de {{ avis.pseudoVisiteur || avis.auteur || 'Anonyme' }}"
-            class="photo"
-            loading="lazy"
-            width="60" height="60"
-          />
-          <div *ngIf="!avis.photo" class="initials"
-               [attr.aria-label]="'Initiales de ' + (avis.pseudoVisiteur || avis.auteur || 'Anonyme')">
-            {{ getInitials(avis.pseudoVisiteur || avis.auteur || 'Anonyme') }}
-          </div>
-        </div>
-
-        <p>
-          <strong>{{ avis.pseudoVisiteur || avis.auteur || 'Anonyme' }}</strong> –
-          {{ (avis.typeAvis || 'Avis') | titlecase }} – {{ avis.datePub | date:'dd/MM/yyyy' }}
-        </p>
-        <p>{{ avis.contenu }}</p>
-
-        <div class="note-stars" aria-label="Note">
-          <span *ngFor="let star of [1, 2, 3, 4, 5]">
-            <i class="ri-star-fill" *ngIf="star <= (avis.note || 0)" aria-hidden="true"></i>
-            <i class="ri-star-line" *ngIf="star > (avis.note || 0)" aria-hidden="true"></i>
-          </span>
-        </div>
-      </div>
-
-      <div class="avis-actions">
-        <button
-          class="btn-delete"
-          (click)="supprimerAvis(avis.id)"
-          [disabled]="loadingIds.has(avis.id)"
-          aria-label="Supprimer l'avis"
-          title="Supprimer"
-        >
-          ✖
-        </button>
-      </div>
-    </div>
-  </section>
-</div>
+<section class="avis-section">
+  <div class="header-flex">
+    <ui-title [level]="2" text="Gestion des avis"></ui-title>
+  </div>
+  <!-- Table des avis -->
+  <ui-table
+    [columns]="columns"
+    [data]="avis"
+    [actions]="actions"
+    (actionClick)="onTableAction($event)"
+  ></ui-table>
+  <div *ngIf="!avis || avis.length === 0">Aucun avis pour le moment.</div>
+</section>

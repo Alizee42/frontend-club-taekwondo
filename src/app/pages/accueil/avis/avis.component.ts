@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { AvisService, Avis } from '../../../services/avis.service';
 import { ClubSelectionService } from '../../../services/club-selection.service';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { AuthService } from '../../../services/auth.service';
 import Swiper from 'swiper/bundle';
 
 @Component({
@@ -16,6 +17,8 @@ import Swiper from 'swiper/bundle';
   styleUrls: ['./avis.component.css'],
 })
 export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
+  avis: Avis[] = [];
+  error: string | null = null;
   fieldsAvis = [
     { name: 'pseudoVisiteur', label: 'Votre nom', type: 'text', placeholder: 'Entrez votre nom', required: true },
     { name: 'contenu', label: 'Votre témoignage', type: 'textarea', placeholder: 'Partagez votre expérience...', required: true },
@@ -42,17 +45,83 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onFormSubmit(data: any) {
     // Ici, tu peux ajouter la logique de validation et d'envoi
+    // Ajout du clubId à la soumission
+    data.clubId = this.clubSelectionService.getSelectedClubId();
     this.envoyerAvisForm(data);
   }
 
   envoyerAvisForm(data: any) {
-    // Adapter la logique pour utiliser l'objet data du formulaire partagé
-    // Exemple :
-    // this.avisService.envoyerAvis(data).subscribe(...)
-    // Pour l'instant, on peut juste afficher les données
-    console.log('Avis envoyé :', data);
-  this.toast.success('Merci, votre avis a bien été envoyé !', 4000);
-    this.modaleOuverte = false;
+    // Récupérer le clubId depuis plusieurs sources (service, clubService/localStorage)
+    let clubId = this.clubSelectionService.getSelectedClubId();
+    if (clubId === null || clubId === undefined) {
+      // Essayer via ClubService (stockage localStorage)
+      try {
+        const sel = (window as any)?.clubServiceSelectedClub ?? null;
+      } catch (e) {
+        // ignore
+      }
+      try {
+        // Utiliser la méthode publique si disponible
+        // (on récupère directement depuis localStorage pour être sûr)
+        const raw = localStorage.getItem('selectedClub');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.id) clubId = parsed.id;
+        }
+      } catch (e) {
+        console.warn('[Avis] Impossible de lire selectedClub dans localStorage', e);
+      }
+    }
+    if (clubId === null || clubId === undefined) {
+      this.toast.warning("Veuillez sélectionner un club avant d'envoyer votre avis.");
+      return;
+    }
+
+    // Construction du FormData pour l'envoi au backend
+    // DEBUG: log des données reçues pour vérifier typeAvis
+    console.debug('[Avis] données formulaire avant envoi:', data);
+    const formData = new FormData();
+    formData.append('pseudoVisiteur', data.pseudoVisiteur || '');
+    formData.append('contenu', data.contenu || '');
+    formData.append('note', String(data.note || 5));
+    // N'ajoute typeAvis que s'il est renseigné
+    const typeAvisValue = (data.typeAvis === undefined || data.typeAvis === null || data.typeAvis === '') ? null : String(data.typeAvis);
+    if (typeAvisValue !== null) {
+      formData.append('typeAvis', typeAvisValue);
+    }
+    // Ajout du clubId
+    formData.append('clubId', String(clubId));
+
+    if (data.photo instanceof File) {
+      formData.append('photo', data.photo);
+    }
+
+    // Ajout utilisateurId si connecté
+    const utilisateur = this.authService.getUtilisateurConnecte();
+    if (utilisateur && utilisateur.id) {
+      formData.append('utilisateurId', String(utilisateur.id));
+    }
+
+    // DEBUG: log FormData entries
+    try {
+      for (const pair of (formData as any).entries()) {
+        console.debug('[Avis] formData', pair[0], pair[1]);
+      }
+    } catch (e) {
+      // certains navigateurs/stack ne permettent pas l'itération, ignorer
+    }
+
+    this.avisService.ajouterAvis(formData).subscribe({
+      next: () => {
+        this.toast.success('Merci, votre avis a bien été envoyé !', 4000);
+        this.modaleOuverte = false;
+        this.messageConfirmation = 'Merci ! Votre avis sera publié après validation.';
+      },
+      error: (err) => {
+        this.toast.error("Erreur lors de l'envoi de l'avis.");
+        console.error(err);
+      }
+    });
   }
   avisApprouves: Avis[] = [];
   modaleOuverte = false;
@@ -71,7 +140,8 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private avisService: AvisService,
     private toast: ToastService,
-    private clubSelectionService: ClubSelectionService
+    private clubSelectionService: ClubSelectionService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -98,14 +168,17 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  /** Charge les avis du club sélectionné */
+  /** Charge TOUS les avis du club sélectionné (approuvés ou non) pour debug */
   chargerAvisClub(clubId: number): void {
-    this.avisService.getAvisByClub(clubId, true).subscribe({
-      next: (avis) => {
-        this.avisApprouves = avis;
+    // On ne filtre plus sur approuve pour debug
+    this.avisService.getAvisParClub(clubId).subscribe({
+      next: (avis: Avis[]) => {
+        this.avisApprouves = avis || [];
+        console.log('[Avis] chargés (TOUS) depuis API, count =', this.avisApprouves.length, 'pour clubId=', clubId);
+        console.log('[Avis] payload complet:', this.avisApprouves);
         this.initOrUpdateSwiper();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erreur de chargement des avis du club :', err);
       }
     });

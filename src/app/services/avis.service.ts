@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface Avis {
@@ -52,14 +52,70 @@ export class AvisService {
   }
 
   /** Récupérer les avis d'un club */
-  getAvisByClub(clubId: number, approuve?: boolean): Observable<Avis[]> {
-    let params = new HttpParams().set('clubId', String(clubId));
+  getAvisParClub(clubId: number|string, approuve?: boolean): Observable<Avis[]> {
+    // If caller requests only approved avis, some backend versions may not support
+    // filtering by 'approuve' on the /club/{id} endpoint. In that case we call the
+    // global endpoint with approuve=true and filter by clubId client-side.
+    if (approuve === true) {
+      return this.getAvis(true).pipe(
+        tap(list => console.log('[AvisService] getAvis(true) returned', (list || []).length, 'items')),
+        // log a small JSON sample to inspect shape
+        tap(list => console.log('[AvisService] payload sample', JSON.stringify((list || []).slice(0,5)))),
+        map(list => (list || []).filter(a => {
+          const anyA = a as any;
+          const candidate = anyA?.clubId ?? anyA?.club?.id ?? anyA?.club ?? anyA?.club_id ?? anyA?.clubID ?? null;
+          // Compare numerically to avoid string/number mismatches
+          const cid = candidate == null ? null : Number(candidate);
+          return cid != null && !Number.isNaN(cid) && Number(cid) === Number(clubId);
+        })),
+        tap(filtered => console.log('[AvisService] filtered by clubId', clubId, '->', (filtered || []).length, 'items')),
+        catchError(this.handleError)
+      );
+    }
+
+    // Otherwise call the dedicated club endpoint (backend may support additional filtering)
+    const url = `${this.apiUrl}/club/${clubId}`;
+    let params = new HttpParams();
     if (typeof approuve === 'boolean') {
       params = params.set('approuve', String(approuve));
     }
-    return this.http.get<Avis[]>(this.apiUrl, { params }).pipe(
+    return this.http.get<Avis[]>(url, { params }).pipe(
       catchError(this.handleError)
     );
+  }
+
+  /** Ajouter un avis à un club (super-admin) */
+  addAvisToClub(clubId: number|string, avis: Partial<Avis>) {
+    return this.http.post<Avis>(`${this.apiUrl}?clubId=${clubId}`, avis).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /** Modifier un avis */
+  updateAvis(avis: Partial<Avis>) {
+    if (!avis.id) throw new Error('ID avis requis');
+    return this.http.put<Avis>(`${this.apiUrl}/${avis.id}`, avis).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /** Supprimer un avis */
+  deleteAvis(avisId: number) {
+    return this.http.delete(`${this.apiUrl}/${avisId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /** Approuver un avis (endpoint dédié) */
+  approuverAvis(id: number) {
+    return this.http.put<Avis>(`${this.apiUrl}/${id}/approuver`, {}).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /** Refuser / annuler un avis (suppression) */
+  refuserAvis(id: number) {
+    return this.deleteAvis(id);
   }
 
   // (facultatif) Exemple d’approbation si tu as un endpoint dédié :

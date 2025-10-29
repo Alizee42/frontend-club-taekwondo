@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UiIconButtonComponent } from '../../ui/buttons/ui-icon-button/ui-icon-button.component';
 
 export interface UiTableColumn {
   key: string;
@@ -13,14 +14,14 @@ export interface UiTableColumn {
 @Component({
   selector: 'ui-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiIconButtonComponent],
   templateUrl: './ui-table.component.html',
   styleUrls: ['./ui-table.component.css']
 })
 export class UiTableComponent {
   @Input() columns: UiTableColumn[] = [];
   @Input() data: any[] = [];
-  @Input() actions: Array<{ label: string; icon?: string; iconText?: string; action: string; color?: string }> = [];
+  @Input() actions: Array<{ label: string; icon?: string; iconText?: string; action: string; color?: string; variant?: 'primary'|'secondary'|'danger'|'ghost'; disabled?: boolean; customClass?: string; show?: (row: any) => boolean }> = [];
   @Output() actionClick = new EventEmitter<{ action: string; row: any }>();
   @Output() editCell = new EventEmitter<{ row: any; key: string; value: any }>();
 

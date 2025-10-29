@@ -5,6 +5,7 @@
   [attr.aria-label]="ariaLabel || icon"
   [attr.title]="title || ariaLabel || icon"
   (click)="onClick($event)"
+  [ngStyle]="customColor ? { 'background-color': customColor, 'border-color': customColor, 'color': '#fff' } : null"
 >
   <span class="spinner" *ngIf="loading" aria-hidden="true"></span>
   <i *ngIf="!loading" [class]="icon" aria-hidden="true"></i>

@@ -1,5 +1,5 @@
 .ui-icn-btn {
-  width: 34px; height: 34px; border-radius: 50%;
+  width: 34px; height: 34px; border-radius: 8px; /* carré avec coins arrondis */
   display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid transparent; background: transparent; cursor: pointer;
   transition: background .2s ease, border-color .2s ease, transform .06s ease;

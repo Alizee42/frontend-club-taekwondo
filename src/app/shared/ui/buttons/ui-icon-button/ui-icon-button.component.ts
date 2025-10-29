@@ -17,6 +17,8 @@ export class UiIconButtonComponent {
   @Input() loading = false;
   @Input() ariaLabel?: string;
   @Input() title?: string;
+  /** Couleur personnalisée du fond (utilisée si fournie). Permet de garder les anciennes actions qui fournissent `color`. */
+  @Input() customColor?: string;
 
   @Output() clicked = new EventEmitter<MouseEvent>();
 

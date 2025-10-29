@@ -1,5 +1,6 @@
 import { Component, OnInit, Renderer2, OnDestroy } from '@angular/core';
 import { ClubService, Club } from './services/club.service';
+import { ClubSelectionService } from './services/club-selection.service';
 import { AuthService } from './services/auth.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
@@ -69,7 +70,8 @@ export class AppComponent implements OnInit, OnDestroy {
   private authSub?: any;
   private routerSub?: any;
 
-  constructor(private clubService: ClubService, public auth: AuthService, private router: Router) {}
+  constructor(private clubService: ClubService, public auth: AuthService, private router: Router,
+              private clubSelectionService: ClubSelectionService) {}
 
   get role(): string {
     return this.auth.getRole() ?? '';
@@ -94,6 +96,15 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.clubSub = this.clubService.selectedClub$.subscribe(club => {
       this.selectedClub = club;
+    });
+    // Propager la sélection du ClubService vers ClubSelectionService (pour les components qui
+    // écoutent uniquement l'ID via ClubSelectionService)
+    const initial = this.clubService.getSelectedClub();
+    if (initial && initial.id) {
+      this.clubSelectionService.setSelectedClubId(initial.id);
+    }
+    this.clubService.selectedClub$.subscribe(c => {
+      this.clubSelectionService.setSelectedClubId(c?.id ?? null);
     });
     this.authSub = this.auth.authState$.subscribe(state => {
       this.isUserLoggedIn = state.isConnecte;

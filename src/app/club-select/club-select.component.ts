@@ -26,6 +26,13 @@ export class ClubSelectComponent {
   selectClub(club: Club) {
     this.clubSelected.emit(club);
     this.clubSelectionService.setSelectedClubId(club.id ?? null);
+    // Également stocker le club complet dans le localStorage via ClubService
+    try {
+      this.clubService.setSelectedClub(club);
+    } catch (e) {
+      // Ne pas planter l'UI si l'opération de stockage échoue
+      console.warn('[ClubSelect] Impossible de stocker le club dans ClubService', e);
+    }
   }
 
   // Méthode pour fermeture de la modale (overlay ou bouton)

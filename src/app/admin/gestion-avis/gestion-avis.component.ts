@@ -1,117 +1,59 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { ToastService } from '../../shared/toast/toast.service';
-import { environment } from '../../../environments/environment';
+import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
-
-
-interface Avis {
-  id: number;
-  contenu: string;
-  auteur: string;
-  approuve: boolean;
-  note?: number;
-  pseudoVisiteur?: string;
-  typeAvis?: string;
-  datePub?: Date;
-  photo?: string;
-}
+import { AvisService, Avis } from '../../services/avis.service';
+import { ClubService, Club } from '../../services/club.service';
 
 @Component({
   selector: 'app-gestion-avis',
   templateUrl: './gestion-avis.component.html',
   styleUrls: ['./gestion-avis.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTitleComponent],
+  imports: [CommonModule, UiTableComponent, UiTitleComponent],
 })
 export class GestionAvisComponent implements OnInit {
-  avisEnAttente: Avis[] = [];
-  avisApprouves: Avis[] = [];
-  nouvelAvis: Partial<Avis> = { contenu: '', auteur: '', note: 5 };
-
-  loadingIds = new Set<number>();
-  errorMsg: string | null = null;
-
-  // ✅ root-absolu (passe via le proxy /api)
-  private readonly baseUrl = `${environment.apiUrl}/avis`;
-
-  constructor(private http: HttpClient, private toast: ToastService) {}
-
-  ngOnInit(): void { this.chargerAvis(); }
-
-  trackByAvisId = (_: number, a: { id?: number }) => a?.id ?? _;
-
-  chargerAvis(): void {
-    this.errorMsg = null;
-    this.http.get<Avis[]>(this.baseUrl).subscribe({
-      next: (data) => {
-        this.avisEnAttente = (data || []).filter(a => !a.approuve);
-        this.avisApprouves = (data || []).filter(a => a.approuve);
-      },
-      error: () => {
-        this.errorMsg = 'Impossible de charger les avis.';
-        this.toast.error('Impossible de charger les avis. Réessayez dans un instant.');
+  avis: Avis[] = [];
+  columns = [
+    { key: 'pseudoVisiteur', label: 'Nom' },
+    { key: 'contenu', label: 'Contenu' },
+    { key: 'note', label: 'Note' },
+    { key: 'typeAvis', label: 'Sujet' },
+    { key: 'approuve', label: 'Approuvé', render: (row: any) => {
+        if (row == null || row.approuve == null) return 'En attente';
+        return row.approuve ? 'Oui' : 'Non';
       }
-    });
-  }
-
-  approuverAvis(id: number): void {
-    if (!id) return;
-    if (!confirm('Confirmer l’approbation de cet avis ?')) return;
-
-    this.loadingIds.add(id);
-    this.http.put(`${this.baseUrl}/${id}/approuver`, {}).subscribe({
-      next: () => { 
-        this.toast.success('Votre avis a été approuvé.'); 
-        this.chargerAvis(); 
-      },
-      error: () => this.toast.error('Impossible d’approuver cet avis. Veuillez réessayer.'),
-      complete: () => this.loadingIds.delete(id)
-    });
-  }
-
-  supprimerAvis(id: number): void {
-    if (!id) return;
-    if (!confirm('Supprimer cet avis ?')) return;
-
-    this.loadingIds.add(id);
-    this.http.delete(`${this.baseUrl}/${id}`).subscribe({
-      next: () => { 
-        this.toast.info('Votre avis a été supprimé.'); 
-        this.chargerAvis(); 
-      },
-      error: () => this.toast.error('Impossible de supprimer cet avis. Veuillez réessayer.'),
-      complete: () => this.loadingIds.delete(id)
-    });
-  }
-
-  ajouterAvis(): void {
-    if (!this.nouvelAvis.contenu?.trim() || !this.nouvelAvis.auteur?.trim()) {
-      this.toast.warning('Veuillez renseigner le contenu et l’auteur.');
-      return;
     }
-    if (this.nouvelAvis.note != null) this.nouvelAvis.note = +this.nouvelAvis.note;
+  ];
+  actions = [
+    { label: 'Approuver', icon: 'ri-check-line', action: 'approve', color: '#16a34a', variant: "primary" as const, show: (r: any) => !r?.approuve },
+    { label: 'Refuser', icon: 'ri-close-line', action: 'refuse', color: '#d32f2f', variant: "danger" as const }
+  ];
+  selectedClub: Club | null = null;
 
-    this.http.post(this.baseUrl, this.nouvelAvis).subscribe({
-      next: () => { 
-        this.toast.success('Votre avis a été ajouté.'); 
-        this.nouvelAvis = { contenu: '', auteur: '', note: 5 }; 
-        this.chargerAvis(); 
-      },
-      error: () => this.toast.error('Impossible d’ajouter l’avis. Veuillez réessayer.')
-    });
+  constructor(private avisService: AvisService, private clubService: ClubService) {}
+
+  ngOnInit(): void {
+    this.selectedClub = this.clubService.getSelectedClub();
+    if (this.selectedClub && this.selectedClub.id) {
+      this.avisService.getAvisParClub(this.selectedClub.id).subscribe(data => {
+        this.avis = data || [];
+      });
+    } else {
+      this.avis = [];
+    }
   }
 
-  getInitials(nom: string): string {
-    if (!nom) return '';
-    const p = nom.trim().split(/\s+/);
-    if (p.length === 1) return p[0][0]?.toUpperCase() ?? '';
-    return (p[0][0] + p[1][0]).toUpperCase();
+  onTableAction(event: { action: string, row: Avis }) {
+    const id = Number(event.row.id);
+    if (event.action === 'approve' && !isNaN(id)) {
+      this.avisService.approuverAvis(id).subscribe(() => {
+        this.avis = this.avis.map(a => a.id === id ? { ...a, approuve: true } : a);
+      });
+    } else if (event.action === 'refuse' && !isNaN(id)) {
+      this.avisService.deleteAvis(id).subscribe(() => {
+        this.avis = this.avis.filter(a => a.id !== id);
+      });
+    }
   }
-
-  getPhotoUrl(photo: string | null | undefined): string {
-    return photo ? `/api/uploads/avis/${encodeURIComponent(photo)}` : '';
-  }  
 }

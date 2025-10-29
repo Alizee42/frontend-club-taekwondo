@@ -464,4 +464,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     navigateToGestionUtilisateurs(): void {
       this.router.navigate(['/admin/gestion-utilisateurs']);
     }
+
+    navigateToMembresAdmin() {
+      this.router.navigate(['/admin/membres']);
+    }
 }
