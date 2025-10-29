@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { MembreService } from '../../services/membre.service';
 import { AuthService } from '../../services/auth.service';
 import { ClubService } from '../../services/club.service';
+import { ClubSelectionService } from '../../services/club-selection.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -35,7 +36,8 @@ export class ConnexionComponent {
     private membreService: MembreService,
     private authService: AuthService,
     private toastService: ToastService,
-    private clubService: ClubService
+    private clubService: ClubService,
+    private clubSelectionService: ClubSelectionService
   ) {
     // Récupère l'ID du club sélectionné au chargement
     const selectedClub = this.clubService.getSelectedClub();
@@ -48,10 +50,9 @@ export class ConnexionComponent {
     if (!this.email || !this.password) { 
       return; 
     }
-    if (this.clubId === undefined) {
-      this.toastService.error('Veuillez sélectionner un club avant de vous connecter.');
-      return;
-    }
+    // NOTE: La sélection de club est volontairement facultative ici.
+    // Le rôle SUPER_ADMIN doit pouvoir se connecter même si aucun club
+    // n'est sélectionné (c'est le super-admin qui crée les clubs).
     if (!this.isValidEmail(this.email)) { 
       this.toastService.error('Adresse email invalide');
       return; 
@@ -66,10 +67,28 @@ export class ConnexionComponent {
         .subscribe({
           next: (response) => {
             const userClubId = response.utilisateur?.['clubId'];
-            const role = response.role || response.utilisateur?.role || '';
-            if (role.toString().toUpperCase() !== 'SUPER_ADMIN' && this.clubId !== undefined && userClubId !== this.clubId) {
-              this.toastService.error('❌ Ce compte n’appartient pas au club sélectionné.');
-              return;
+            const role = (response.role || response.utilisateur?.role || '').toString().toUpperCase();
+
+            // Si l'utilisateur n'est pas SUPER_ADMIN, on doit s'assurer qu'un club est défini.
+            if (role !== 'SUPER_ADMIN') {
+              // Si l'utilisateur n'a pas sélectionné de club avant login
+              if (this.clubId === undefined) {
+                if (userClubId !== undefined && userClubId !== null) {
+                  // On applique automatiquement le club associé au compte
+                  this.clubSelectionService.setSelectedClubId(userClubId);
+                  this.clubId = userClubId;
+                } else {
+                  // Pas de club disponible → demander la sélection
+                  this.toastService.error('Veuillez sélectionner un club avant de vous connecter.');
+                  return;
+                }
+              } else {
+                // Si un club a été sélectionné, vérifier l'appartenance
+                if (userClubId !== undefined && userClubId !== null && userClubId !== this.clubId) {
+                  this.toastService.error('❌ Ce compte n’appartient pas au club sélectionné.');
+                  return;
+                }
+              }
             }
             // Vérification du mot de passe temporaire
             if (response.passwordTemporaire) {

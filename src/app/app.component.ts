@@ -33,6 +33,9 @@ export class AppComponent implements OnInit, OnDestroy {
   showSelectClubModal = false;
 
   onChangeClub() {
+    // N'ouvre pas la modale si l'utilisateur est SUPER_ADMIN
+    const role = this.role ? this.role.toString().toUpperCase() : '';
+    if (role === 'SUPER_ADMIN') return;
     this.showSelectClubModal = true;
   }
 
@@ -100,7 +103,9 @@ export class AppComponent implements OnInit, OnDestroy {
         this.userAvatar = state.user['avatarUrl'] || '';
         this.unreadNotifications = state.user['unreadNotifications'] || 0;
         const selectedClub = this.clubService.getSelectedClub();
-        if (!selectedClub) {
+        const userRole = state.role ? state.role.toString().toUpperCase() : '';
+        // Affiche la modale seulement si aucun club sélectionné ET si l'utilisateur n'est pas SUPER_ADMIN
+        if (!selectedClub && userRole !== 'SUPER_ADMIN') {
           this.showSelectClubModal = true;
         }
         if (state.role && state.role.toString().toUpperCase() === 'ADMIN') {

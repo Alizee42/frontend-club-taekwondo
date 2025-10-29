@@ -39,13 +39,21 @@ export class AccueilComponent {
   unreadNotifications = 0;
 
   constructor(private clubService: ClubService, private authService: AuthService, private router: Router) {
-    this.showClubModal = !this.clubService.getSelectedClub();
+    const selectedClub = this.clubService.getSelectedClub();
+    const currentRole = this.authService.getRole ? (this.authService.getRole()?.toString().toUpperCase() ?? '') : '';
+    // Ne pas afficher la modale si un club est déjà sélectionné
+    // ou si l'utilisateur connecté est SUPER_ADMIN (il n'a pas besoin de sélectionner un club)
+    this.showClubModal = !selectedClub && currentRole !== 'SUPER_ADMIN';
     // Synchronise les infos utilisateur avec AuthService
     this.authService.authState$.subscribe(state => {
       this.isUserLoggedIn = state.isConnecte;
       this.userName = state.user ? `${state.user['prenom'] ?? ''} ${state.user['nom'] ?? ''}`.trim() : undefined;
       this.userAvatar = state.user ? state.user['avatarUrl'] : undefined;
       this.unreadNotifications = state.user ? state.user['unreadNotifications'] || 0 : 0;
+      // Si l'utilisateur se connecte/déconnecte, recalculer l'affichage de la modale
+      const selClub = this.clubService.getSelectedClub();
+      const role = state.role ? state.role.toString().toUpperCase() : '';
+      this.showClubModal = !selClub && role !== 'SUPER_ADMIN';
     });
   }
 
