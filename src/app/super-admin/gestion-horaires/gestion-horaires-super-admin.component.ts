@@ -5,6 +5,7 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { HorairesService } from '../../services/horaires.service';
+import { ClubService, Club } from '../../services/club.service';
 import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
 
 @Component({
@@ -41,16 +42,26 @@ export class GestionHorairesSuperAdminComponent implements OnInit {
   // Index de la plage en cours d'édition (modale multi-plages)
   editingPlageIndex: number|null = null;
 
-  constructor(private horairesService: HorairesService) {}
+  constructor(private horairesService: HorairesService, private clubService: ClubService) {}
 
   ngOnInit(): void {
-    // Charger la liste des clubs (à adapter à ton service réel)
-    this.clubs = [
-      { id: 1, name: 'Villeurbanne' },
-      { id: 2, name: 'Bourg-en-Bresse' }
-    ];
-    this.selectedClubId = this.clubs[0]?.id || null;
-    this.loadHoraires();
+    // Charger la liste des clubs depuis l'API
+    this.clubService.getClubs().subscribe({
+      next: (clubs: Club[]) => {
+        this.clubs = clubs || [];
+        // si un club est déjà sélectionné (localStorage), l'utiliser ; sinon prendre le premier
+        const sel = this.clubService.getSelectedClub();
+        this.selectedClubId = sel?.id ?? this.clubs[0]?.id ?? null;
+        // charger les horaires pour le club sélectionné (ou aucun si null)
+        this.loadHoraires();
+      },
+      error: (err) => {
+        console.error('Impossible de charger la liste des clubs :', err);
+        // garder clubs vide et tenter de charger les horaires (rien ne sera chargé si selectedClubId null)
+        this.selectedClubId = this.clubService.getSelectedClub()?.id ?? null;
+        this.loadHoraires();
+      }
+    });
   }
 
   // Action sur les boutons du tableau (éditer/supprimer)
