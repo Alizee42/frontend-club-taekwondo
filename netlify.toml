@@ -5,7 +5,7 @@
 # Redirection des APIs vers Railway
 [[redirects]]
   from = "/api/*"
-  to = "https://backend-club-taekwondo-production.up.railway.app/api/:splat"
+  to = "https://backend-club-taekwondo.onrender.com/api/:splat"
   status = 200
   force = true
   headers = {X-From = "Netlify"}
