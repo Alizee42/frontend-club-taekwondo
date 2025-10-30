@@ -1,18 +1,17 @@
 
 
 <ng-container>
-	<universal-header
-		*ngIf="!isAccueilRoute"
-		[clubName]="selectedClub?.name || selectedClub?.nom || ''"
-		[isUserLoggedIn]="isUserLoggedIn"
-		[userName]="userName"
-		[userAvatar]="userAvatar"
-		[unreadNotifications]="unreadNotifications"
-		[role]="role"
-		(logout)="onLogout()"
-		(changeClub)="onChangeClub()"
-		(goToDashboard)="onGoToDashboard()"
-	></universal-header>
+		<universal-header
+			[clubName]="selectedClub?.name || selectedClub?.nom || ''"
+			[isUserLoggedIn]="isUserLoggedIn"
+			[userName]="userName"
+			[userAvatar]="userAvatar"
+			[unreadNotifications]="unreadNotifications"
+			[role]="role"
+			(logout)="onLogout()"
+			(changeClub)="onChangeClub()"
+			(goToDashboard)="onGoToDashboard()"
+		></universal-header>
 
 			<div *ngIf="showSelectClubModal">
 				<div class="club-modal-overlay" (click)="showSelectClubModal = false"></div>

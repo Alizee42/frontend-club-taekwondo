@@ -1,3 +1,35 @@
+.header-bar-avis {
+  display: flex;
+  align-items: center;
+  gap: 2em;
+  margin-bottom: 0.5em;
+}
+h2.ui-title {
+  margin-bottom: 0;
+  text-align: left;
+}
+h2.ui-title::after {
+  content: '';
+  display: block;
+  margin: 0.5em 0 0 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue-main) 60%, #e0e7ef 100%);
+  border-radius: 2px;
+}
+h2.ui-title, h1.ui-title {
+  position: relative;
+  display: inline-block;
+}
+h2.ui-title::after, h1.ui-title::after {
+  content: '';
+  display: block;
+  margin: 0.5em 0 0 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue-main) 60%, #e0e7ef 100%);
+  border-radius: 2px;
+}
 .page-title {
   color: var(--blue-main);
   font-size: 2.1rem;
@@ -12,14 +44,13 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.gestion-avis-container {
-  padding: 40px 20px;
-  max-width: 1200px;
-  margin: auto;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-  font-family: 'Poppins', sans-serif;
+.avis-section {
+max-width: 97%;
+margin: 0 auto;
+padding: 18px 8px 24px 8px;
+background: #f8fafc;
+border-radius: 14px;
+box-shadow: 0 2px 12px rgba(37, 99, 235, 0.05);
 }
 
 h1, h2 {

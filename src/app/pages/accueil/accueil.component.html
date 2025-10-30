@@ -20,15 +20,6 @@
 	</div>
 </div>
 
-<universal-header
-	[clubName]="selectedClub?.name || selectedClub?.nom || ''"
-	[isUserLoggedIn]="isUserLoggedIn"
-	[userName]="userName"
-	[userAvatar]="userAvatar"
-	[unreadNotifications]="unreadNotifications"
-	(changeClub)="ouvrirModaleClub()"
-	(goToDashboard)="onGoToDashboard()"
-></universal-header>
 
 <app-banniere></app-banniere>
 <app-a-propos></app-a-propos>
