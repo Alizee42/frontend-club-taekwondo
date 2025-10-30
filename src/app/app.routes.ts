@@ -15,7 +15,7 @@ import { AdminsComponent } from './super-admin/admins/admins.component';
 import { MembresSuperAdminComponent } from './super-admin/membres-super-admin/membres-super-admin.component';
 import { PaiementsComponent } from './super-admin/paiements/paiements.component';
 import { LogsComponent } from './super-admin/logs/logs.component';
-import { ActualitesComponent } from './super-admin/actualites/actualites.component';
+import { ActualitesSuperAdminComponent } from './super-admin/actualites/actualites-super-admin.component';
 import { DashboardMembreComponent } from './membre/dashboard-membre/dashboard-membre.component';
 import { ProfilComponent } from './pages/profil/profil.component';
 import { AuthGuard } from './guards/auth.guard';
@@ -132,7 +132,7 @@ export const routes: Routes = [
   { path: 'membres', component: MembresSuperAdminComponent },
   { path: 'paiements', component: PaiementsComponent },
   { path: 'logs', component: LogsComponent },
-  { path: 'actualites', component: ActualitesComponent },
+  { path: 'actualites', component: ActualitesSuperAdminComponent },
   { path: 'galerie', component: GalerieGestionSuperAdminComponent }, // galerie super admin
   { path: 'galerie-gestion', component: GalerieGestionSuperAdminComponent },
   { path: 'gestion-horaires', component: GestionHorairesSuperAdminComponent },

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AvisService, Avis } from '../../services/avis.service';
 import { ClubService, Club } from '../../services/club.service';
-import { ClubSelectionService } from '../../services/club-selection.service';
 import { Subscription } from 'rxjs';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
@@ -54,7 +53,7 @@ export class AvisSuperAdminComponent implements OnInit {
   clubSelectModel: { club: number | null } = { club: null };
   private subs: Subscription[] = [];
 
-  constructor(private avisService: AvisService, private clubService: ClubService, private clubSelectionService: ClubSelectionService) {}
+  constructor(private avisService: AvisService, private clubService: ClubService) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -187,8 +186,6 @@ export class AvisSuperAdminComponent implements OnInit {
       next: (res) => {
         console.debug('[AvisSuperAdmin] approuverAvis success', res);
         if (this.selectedClubId) this.loadAvisForClub(this.selectedClubId);
-        // notifier d'autres composants (ex: page d'accueil) pour recharger les avis approuvés
-        try { this.clubSelectionService.setSelectedClubId(this.selectedClubId ?? null); } catch(e) { /* ignore */ }
       },
       error: (err) => {
         console.error('[AvisSuperAdmin] approuverAvis error', err);

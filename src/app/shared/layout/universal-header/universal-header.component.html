@@ -7,7 +7,7 @@
         <span class="brand-mid">Taekwondo</span>
         <span class="brand-thin">{{ clubName }}</span>
       </a>
-  <button *ngIf="!isUserLoggedIn || (role && role.toUpperCase() !== 'ADMIN')" class="change-club-btn" (click)="changeClub.emit()" title="Changer de club">Changer de club</button>
+  <button class="change-club-btn" (click)="changeClub.emit()" title="Changer de club">Changer de club</button>
     </div>
     <!-- Navigation -->
     <nav class="nav-wrapper">

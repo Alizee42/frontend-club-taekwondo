@@ -9,6 +9,8 @@ export interface UiTableColumn {
   type?: 'text' | 'number' | 'date' | 'custom' | 'image';
   cellClass?: string;
   render?: (row: any) => string;
+  width?: string;
+  headerClass?: string;
 }
 
 @Component({
@@ -21,7 +23,7 @@ export interface UiTableColumn {
 export class UiTableComponent {
   @Input() columns: UiTableColumn[] = [];
   @Input() data: any[] = [];
-  @Input() actions: Array<{ label: string; icon?: string; iconText?: string; action: string; color?: string; variant?: 'primary'|'secondary'|'danger'|'ghost'; disabled?: boolean; customClass?: string; show?: (row: any) => boolean }> = [];
+  @Input() actions: Array<{ label: string; icon?: string; iconText?: string; action: string; color?: string; variant?: 'primary'|'secondary'|'danger'|'ghost'; disabled?: boolean; customClass?: string; show?: (row: any) => boolean; title?: string }> = [];
   @Output() actionClick = new EventEmitter<{ action: string; row: any }>();
   @Output() editCell = new EventEmitter<{ row: any; key: string; value: any }>();
 

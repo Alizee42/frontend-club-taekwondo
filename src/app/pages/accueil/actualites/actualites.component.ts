@@ -11,7 +11,7 @@ import { ClubSelectionService } from '../../../services/club-selection.service';
   imports: [
     CommonModule,
     RouterModule,
-    UiButtonComponent
+    UiButtonComponent,
   ],
   templateUrl: './actualites.component.html',
   styleUrls: ['./actualites.component.css']
@@ -42,7 +42,25 @@ export class ActualitesComponent implements OnInit {
   loadActualitesClub(clubId: number): void {
     this.actualiteService.getActualitesByClub(clubId).subscribe({
       next: (data) => {
-        this.news = Array.isArray(data) ? data : [];
+        console.log('[DEBUG] clubId', clubId, 'actualites reçues', data);
+        const apiUrl = (window as any).environment?.apiUrl || '';
+        const apiBase = apiUrl.replace(/\/api\/?$/, '');
+        this.news = (Array.isArray(data) ? data : []).map((actu, idx) => {
+          let raw = actu.imageUrl || actu.image || '';
+          if (raw.startsWith('actualites/')) raw = raw.replace(/^actualites\//, '');
+          let full = '';
+          if (!raw) {
+            full = '';
+          } else if (raw.startsWith('http')) {
+            full = raw;
+          } else if (raw.startsWith('data:image')) {
+            full = raw;
+          } else {
+            full = `${apiBase}/uploads/actualites/${encodeURIComponent(raw)}`;
+          }
+          console.log(`[DEBUG] Actu[${idx}]`, actu, 'raw:', raw, 'final imageUrl:', full);
+          return { ...actu, imageUrl: full };
+        });
         this.updateFeaturedNews();
         this.updateRegularNews();
         this.updateFilteredNews();
@@ -108,6 +126,6 @@ export class ActualitesComponent implements OnInit {
   /** 🖼️ Gestion des erreurs d'image */
   onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
-    target.src = 'assets/images/default.jpg';
+    target.src = 'assets/images/dobok.jpg';
   }
 }

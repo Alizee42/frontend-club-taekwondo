@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
@@ -114,6 +115,32 @@ export class ActualiteService {
       tap(data => this.actualitesSubject.next(data)),
       catchError(error => {
         console.error('❌ Erreur lors du chargement des actualités du club :', error);
+        return throwError(() => error);
+      })
+    );
+  }
+    // ...imports et code existant...
+  /** 🔹 Crée une actualité avec image (multipart) */
+  createMultipart(formData: FormData): Observable<any> {
+    return this.http.post<any>(this.apiUrl + '/with-image', formData).pipe(
+      tap(() => {
+        this.reloadActualites();
+      }),
+      catchError(error => {
+        console.error('❌ Erreur lors de la création (multipart) :', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /** 🔹 Met à jour une actualité avec image (multipart) */
+  updateMultipart(id: string, formData: FormData): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, formData).pipe(
+      tap(() => {
+        this.reloadActualites();
+      }),
+      catchError(error => {
+        console.error('❌ Erreur lors de la mise à jour (multipart) :', error);
         return throwError(() => error);
       })
     );

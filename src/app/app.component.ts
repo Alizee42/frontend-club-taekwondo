@@ -34,10 +34,7 @@ export class AppComponent implements OnInit, OnDestroy {
   showSelectClubModal = false;
 
   onChangeClub() {
-    // N'ouvre pas la modale si l'utilisateur est SUPER_ADMIN
-    const role = this.role ? this.role.toString().toUpperCase() : '';
-    if (role === 'SUPER_ADMIN') return;
-    this.showSelectClubModal = true;
+  this.showSelectClubModal = true;
   }
 
   currentUser: any = null;
