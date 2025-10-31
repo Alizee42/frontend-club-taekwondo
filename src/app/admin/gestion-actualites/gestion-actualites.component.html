@@ -1,124 +1,36 @@
-<div class="gestion-actualites-container">
-
-  <!-- Bandeau titre -->
-  <div class="page-header">
-  <h2 class="page-title">Gestion des Actualités</h2>
-    <button class="btn-add" (click)="openModal()">
-      <i class="ri-add-line"></i> Nouvelle actualité
-    </button>
+<section class="actualites-section">
+  <div class="header-flex" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+    <ui-title [level]="2" text="Gestion des actualités"></ui-title>
+    <ui-button label="Ajouter une actualité" (clicked)="openModal()" variant="primary"></ui-button>
   </div>
-
-  <!-- Barre outils tableau -->
-  <div class="table-toolbar">
-    <h2><i class="ri-list-check"></i> Liste des Actualités</h2>
-    <div class="search-box">
-      <i class="ri-search-line"></i>
-      <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" name="searchTerm" />
+  <div class="search-box">
+    <i class="ri-search-line"></i>
+    <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" name="searchTerm" />
+  </div>
+  <style>
+    ui-table .col-img      { width: 90px !important; min-width: 90px !important; max-width: 90px !important; }
+    ui-table .col-titre    { width: 320px !important; min-width: 320px !important; max-width: 320px !important; }
+    ui-table .col-type     { width: 70px !important; min-width: 70px !important; max-width: 70px !important; }
+    ui-table .col-date     { width: 80px !important; min-width: 80px !important; max-width: 80px !important; }
+    ui-table .col-featured { width: 130px !important; min-width: 130px !important; max-width: 130px !important; }
+  </style>
+  <ui-table
+    [columns]="columns"
+    [data]="filteredActualites()"
+    [actions]="actions"
+    (actionClick)="onTableAction($event)"
+  ></ui-table>
+  <div *ngIf="filteredActualites().length === 0">Aucune actualité pour le moment.</div>
+  <ui-modal [open]="isModalOpen" [title]="actualite.id ? 'Modifier une actualité' : 'Nouvelle actualité'" (closed)="closeModal()">
+    <ui-form
+      [fields]="fields"
+      [model]="actualite"
+      (submitted)="onSubmit()"
+      (cancel)="closeModal()"
+      [submitLabel]="actualite.id ? 'Mettre à jour' : 'Ajouter'"
+    ></ui-form>
+    <div *ngIf="imageUrl" style="margin-top: 12px; text-align: center;">
+      <img [src]="imageUrl" alt="Aperçu de l'image" style="max-width: 100%; max-height: 180px; border-radius: 8px; box-shadow: 0 2px 8px #0001;" />
     </div>
-  </div>
-
-  <!-- Tableau -->
-  <div class="table-wrapper">
-    <table class="actualites-table">
-      <thead>
-        <tr>
-          <th>Titre</th>
-          <th>Type</th>
-          <th>Date</th>
-          <th>Image</th>
-          <th>À la une</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-  <tr *ngFor="let actu of filteredActualites()" [class.featured-row]="actu.isFeatured">
-          <td>{{ actu.titre }}</td>
-          <td>{{ actu.typeActu }}</td>
-          <td>{{ actu.datePublication | date: 'dd/MM/yyyy' }}</td>
-          <td>
-            <img *ngIf="actu.imageUrl" [src]="actu.imageUrl" class="thumbnail" />
-          </td>
-          <td>
-            <span *ngIf="actu.isFeatured" class="badge-featured-admin">🌟 À la une</span>
-            <button *ngIf="!actu.isFeatured" (click)="setFeatured(actu)" class="btn-feature-admin">
-              🌟 Mettre à la une
-            </button>
-          </td>
-          <td>
-            <button (click)="editActualite(actu)" class="btn-edit">
-              <i class="ri-edit-line"></i>
-            </button>
-            <button (click)="deleteActualite(actu.id!)" class="btn-delete">
-              <i class="ri-delete-bin-line"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Modale formulaire -->
-  <div class="modal-overlay" *ngIf="isModalOpen">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h2>
-          <i class="ri-file-edit-line"></i>
-          {{ actualite.id ? 'Modifier' : 'Nouvelle' }} actualité
-        </h2>
-        <button class="modal-close" (click)="closeModal()">
-          <i class="ri-close-line"></i>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <form (ngSubmit)="onSubmit()" #actualiteForm="ngForm" class="modal-form">
-          <div class="form-group">
-            <label for="titre">Titre</label>
-            <input type="text" id="titre" [(ngModel)]="actualite.titre" name="titre" required />
-          </div>
-
-          <div class="form-group">
-            <label for="typeActu">Type</label>
-            <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
-              <option value="evenement">Événement</option>
-              <option value="competition">Compétition</option>
-              <option value="annonce">Annonce</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="contenu">Contenu</label>
-            <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="image">Image</label>
-            <input type="file" id="image" (change)="onImageSelected($event)" />
-            <div class="image-preview" *ngIf="imageUrl">
-              <img [src]="imageUrl" alt="Prévisualisation" />
-            </div>
-          </div>
-
-          <div class="form-featured">
-            <label class="switch">
-              <input type="checkbox" [(ngModel)]="actualite.isFeatured" name="isFeatured" />
-              <span class="slider round"></span>
-            </label>
-            <div>
-              <strong>Mettre cette actualité à la une</strong>
-              <p>Elle sera affichée en première position sur le site.</p>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <div class="modal-actions">
-        <button type="submit" class="btn-submit" (click)="onSubmit()">
-          {{ actualite.id ? 'Mettre à jour' : 'Ajouter' }}
-        </button>
-        <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
-      </div>
-    </div>
-  </div>
-
-</div>
+  </ui-modal>
+</section>
