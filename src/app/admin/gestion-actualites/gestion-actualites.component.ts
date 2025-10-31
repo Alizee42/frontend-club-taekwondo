@@ -2,11 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActualiteService } from '../../services/actualite.service';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
-import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
-import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
-import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
-import { UiSearchFilterComponent } from '../../shared/ui/ui-search-filter/ui-search-filter.component';
 
 interface Actualite {
   id?: string;
@@ -24,29 +19,14 @@ interface Actualite {
   standalone: true,
   templateUrl: './gestion-actualites.component.html',
   styleUrls: ['./gestion-actualites.component.css'],
-  imports: [CommonModule, FormsModule, UiTitleComponent, UiButtonComponent, UiModalComponent, UiTableComponent, UiSearchFilterComponent]
+  imports: [CommonModule, FormsModule]
 })
 export class GestionActualitesComponent implements OnInit {
+
+  // Ajout des propriétés nécessaires pour la compilation et les filtres
+  clubIdSelectionne: number | null = null;
   typeFilter: string = '';
   featuredOnly: boolean = false;
-  columns: any[] = [
-    { key: 'titre', label: 'Titre' },
-    { key: 'typeActu', label: 'Type' },
-    { key: 'datePublication', label: 'Date', type: 'date' },
-    { key: 'imageUrl', label: 'Image', type: 'image' },
-    { key: 'isFeatured', label: 'À la une', type: 'custom', render: (row: any) => row.isFeatured ? '🌟 À la une' : '' }
-  ];
-  actions: Array<{ label: string; icon?: string; iconText?: string; action: string; color?: string; variant?: 'primary'|'secondary'|'danger'|'ghost'; disabled?: boolean; customClass?: string; show?: (row: any) => boolean; title?: string }> = [
-    { label: 'Mettre à la une', icon: 'ri-star-line', action: 'feature', show: (row: any) => !row.isFeatured },
-    { label: 'Modifier', icon: 'ri-edit-line', action: 'edit' },
-    { label: 'Supprimer', icon: 'ri-delete-bin-line', action: 'delete', variant: 'danger' }
-  ];
-
-  onTableAction(event: { action: string, row: any }) {
-    if (event.action === 'feature') this.setFeatured(event.row);
-    else if (event.action === 'edit') this.editActualite(event.row);
-    else if (event.action === 'delete') this.deleteActualite(event.row.id);
-  }
 
   actualites: Actualite[] = [];
   featuredNews: Actualite | null = null;
@@ -54,22 +34,50 @@ export class GestionActualitesComponent implements OnInit {
   imageError: string = '';
   searchTerm: string = '';
   isModalOpen = false;
-  clubIdSelectionne: number | null = null;
-  clubs: Array<{ id: number; nom: string }> = [
-    { id: 1, nom: 'Club 1' },
-    { id: 2, nom: 'Club 2' },
-    { id: 3, nom: 'Club 3' },
-    { id: 4, nom: 'Club 4' }
+  actualite: Actualite;
+
+  columns = [
+    { key: 'titre', label: 'Titre', class: 'col-titre' },
+    { key: 'typeActu', label: 'Type', class: 'col-type' },
+    { key: 'datePublication', label: 'Date', class: 'col-date', format: (row: Actualite) => row.datePublication ? new Date(row.datePublication).toLocaleDateString('fr-FR') : '' },
+    { key: 'imageUrl', label: 'Image', class: 'col-img', format: (row: Actualite) => row.imageUrl ? `<img src='${row.imageUrl}' style='max-width:70px;max-height:50px;border-radius:6px;'/>` : '' },
+    { key: 'isFeatured', label: 'À la une', class: 'col-featured', format: (row: Actualite) => row.isFeatured ? '🌟 À la une' : '' },
   ];
-  actualite: Actualite = {
-    titre: '',
-    contenu: '',
-    typeActu: '',
-    datePublication: new Date().toISOString(),
-    isFeatured: false,
-    imageUrl: '',
-    clubId: undefined
-  };
+
+  actions = [
+    { action: 'edit', label: 'Éditer', icon: 'ri-edit-line', color: 'primary' },
+    { action: 'delete', label: 'Supprimer', icon: 'ri-delete-bin-line', color: 'danger' },
+    { action: 'feature', label: 'Mettre à la une', icon: 'ri-star-line', color: 'warning', show: (row: Actualite) => !row.isFeatured }
+  ];
+
+  fields = [
+    { name: 'titre', label: 'Titre', type: 'text', required: true, placeholder: 'Titre de l\'actualité' },
+    { name: 'typeActu', label: 'Type', type: 'select', required: true, options: [
+      { value: 'evenement', label: 'Événement' },
+      { value: 'competition', label: 'Compétition' },
+      { value: 'annonce', label: 'Annonce' }
+    ] },
+    { name: 'contenu', label: 'Contenu', type: 'textarea', required: true, placeholder: 'Contenu de l\'actualité' },
+    { name: 'image', label: 'Image', type: 'file', required: false, onChange: this.onImageSelected.bind(this) }
+  ];
+
+  onTableAction(event: { action: string, row: Actualite }) {
+    if (event.action === 'edit') {
+      this.editActualite(event.row);
+    } else if (event.action === 'delete') {
+      this.deleteActualite(event.row.id!);
+    } else if (event.action === 'feature') {
+      this.setFeatured(event.row);
+    }
+  }
+
+  constructor(private actualiteService: ActualiteService) {
+    this.actualite = this.getEmptyActualite();
+  }
+
+  ngOnInit(): void {
+    this.loadActualites();
+  }
 
   /** Récupère le clubId de l'utilisateur connecté */
   private getClubId(): number | null {
@@ -84,53 +92,6 @@ export class GestionActualitesComponent implements OnInit {
     return null;
   }
 
-  constructor(private actualiteService: ActualiteService) {}
-
-  ngOnInit(): void {
-  // Initialisation club sélectionné à celui de l'utilisateur connecté
-  this.clubIdSelectionne = this.getClubId();
-  this.loadActualitesClub();
-  }
-
-  loadActualites(): void {
-  // Ancienne méthode, non utilisée
-  // this.actualiteService.getAll().subscribe({ ... });
-  }
-
-  /** Charge les actualités du club sélectionné */
-  loadActualitesClub(): void {
-    if (!this.clubIdSelectionne) return;
-    this.actualiteService.getActualitesByClub(this.clubIdSelectionne).subscribe({
-      next: (data: Actualite[]) => {
-        this.actualites = Array.isArray(data) ? data : [];
-        this.updateFeaturedNews();
-      },
-      error: (err) => {
-        this.actualites = [];
-        console.error('❌ Erreur lors du chargement des actualités du club :', err);
-        alert('Impossible de charger les actualités du club.');
-      }
-    });
-  }
-
-  /** Changement de club dans le select */
-  onClubChange(): void {
-    this.loadActualitesClub();
-  }
-
-  /** 🌟 Met à jour l'actualité mise à la une */
-  updateFeaturedNews(): void {
-    if (!Array.isArray(this.actualites)) {
-      this.featuredNews = null;
-      return;
-    }
-    this.featuredNews = this.actualites.find((item: Actualite) => item.isFeatured === true) || null;
-    if (this.featuredNews) {
-    } else {
-    }
-  }
-
-  /** 🆕 Retourne une actualité vide */
   private getEmptyActualite(): Actualite {
     const clubId = this.getClubId();
     return {
@@ -143,28 +104,29 @@ export class GestionActualitesComponent implements OnInit {
       clubId: clubId ?? undefined
     };
   }
-  /** Crée une actualité en ajoutant le clubId automatiquement */
-  createActualite(): void {
-    // Utilise le club sélectionné
-    if (!this.clubIdSelectionne) {
-      alert('Veuillez sélectionner un club.');
-      return;
-    }
-    const actualiteToCreate = { ...this.actualite, clubId: this.clubIdSelectionne };
-    this.actualiteService.create(actualiteToCreate).subscribe({
-      next: () => {
-        this.loadActualitesClub();
-        this.actualite = this.getEmptyActualite();
-        alert('Actualité créée avec succès !');
+
+  loadActualites() {
+    const clubId = this.getClubId();
+    if (!clubId) return;
+    this.actualiteService.getActualitesByClub(clubId).subscribe({
+      next: (data: Actualite[]) => {
+        this.actualites = data;
+        this.updateFeaturedNews();
       },
-      error: (err) => {
-        console.error('Erreur lors de la création de l’actualité :', err);
-        alert('Impossible de créer l’actualité.');
+      error: () => {
+        this.actualites = [];
       }
     });
   }
 
-  /** 🪟 Ouvre la modale (édition ou création) */
+  updateFeaturedNews(): void {
+    if (!Array.isArray(this.actualites)) {
+      this.featuredNews = null;
+      return;
+    }
+    this.featuredNews = this.actualites.find((item: Actualite) => item.isFeatured === true) || null;
+  }
+
   openModal(actu?: Actualite): void {
     this.actualite = actu ? { ...actu } : this.getEmptyActualite();
     this.imageUrl = actu?.imageUrl || null;
@@ -172,41 +134,31 @@ export class GestionActualitesComponent implements OnInit {
     this.isModalOpen = true;
   }
 
-  /** ❌ Ferme la modale */
   closeModal(): void {
     this.isModalOpen = false;
     this.resetForm();
   }
 
-  /** 🧼 Réinitialise le formulaire */
   resetForm(): void {
     this.actualite = this.getEmptyActualite();
     this.imageUrl = null;
     this.imageError = '';
   }
 
-  /** 💾 Soumet le formulaire (création ou mise à jour) */
   onSubmit(): void {
     this.actualite.datePublication = new Date().toISOString();
-    // Toujours inclure le club sélectionné lors de la création
     if (!this.actualite.id) {
-      if (!this.clubIdSelectionne) {
-        alert('Veuillez sélectionner un club.');
-        return;
-      }
-      this.actualite.clubId = this.clubIdSelectionne;
+      this.actualite.clubId = this.getClubId() ?? undefined;
     }
     const request$ = this.actualite.id
       ? this.actualiteService.update(this.actualite.id, this.actualite)
       : this.actualiteService.create(this.actualite);
-
     request$.subscribe(() => {
-      this.loadActualitesClub();
+      this.loadActualites();
       this.closeModal();
     });
   }
 
-  /** 🖼️ Gestion de l'image sélectionnée */
   onImageSelected(event: any): void {
     const file = event.target.files[0];
     if (!file || !file.type.startsWith('image/')) {
@@ -214,7 +166,6 @@ export class GestionActualitesComponent implements OnInit {
       this.imageUrl = null;
       return;
     }
-
     const reader = new FileReader();
     reader.onload = () => {
       this.imageUrl = reader.result;
@@ -224,25 +175,22 @@ export class GestionActualitesComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  /** 🗑️ Supprime une actualité */
   deleteActualite(id: string): void {
     if (confirm('Voulez-vous vraiment supprimer cette actualité ?')) {
       this.actualiteService.delete(id).subscribe(() => {
-        this.loadActualitesClub();
+        this.loadActualites();
       });
     }
   }
 
-  /** 🌟 Définit une actualité comme "À la une" */
   setFeatured(actu: Actualite): void {
     if (this.featuredNews && this.featuredNews.id === actu.id) {
       alert('Cette actualité est déjà mise à la une.');
       return;
     }
-  
     this.actualiteService.setFeatured(actu).subscribe({
       next: () => {
-        this.loadActualitesClub(); // Recharge les actualités après la mise à jour
+        this.loadActualites();
       },
       error: (err) => {
         console.error('❌ Erreur lors de la mise à la une :', err);
@@ -251,11 +199,11 @@ export class GestionActualitesComponent implements OnInit {
     });
   }
 
-  /** 🔍 Filtrage */
   filteredActualites(): Actualite[] {
     const term = this.searchTerm.trim().toLowerCase();
+    // Filtre d'abord par club sélectionné (comparaison en string)
     let filtered = this.actualites.filter(actu => String(actu.clubId) === String(this.clubIdSelectionne));
-    // Filtre texte
+    // Puis filtre par recherche texte
     if (term) {
       filtered = filtered.filter(actu =>
         actu.titre.toLowerCase().includes(term) ||
@@ -274,8 +222,7 @@ export class GestionActualitesComponent implements OnInit {
     return filtered;
   }
 
-  /** ✏️ Remplit le formulaire pour édition */
   editActualite(actu: Actualite): void {
-  this.openModal(actu);
+    this.openModal(actu);
   }
 }
