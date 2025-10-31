@@ -8,9 +8,15 @@
   text-align: center;
 }
 /* Conteneur principal */
-.dashboard-container {
-  padding: 2rem;
-  background-color: var(--background-light);
+
+.dashboard-admin {
+  padding: 20px;
+  margin: 15px;
+  font-family: 'Poppins', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 /* En-tête du tableau de bord */
@@ -63,8 +69,115 @@
 /* Grille des sections */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-section {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.07);
+  padding: 1.4rem 1.2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 170px;
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+.dashboard-section:hover {
+  box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+  transform: translateY(-4px);
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+.section-icon {
+  font-size: 1.7rem;
+  color: var(--red-main, #dc2626);
+  background: #f3f4f6;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dashboard-section h2 {
+  font-size: 1.1rem;
+  color: var(--blue-main);
+  font-weight: 700;
+  margin: 0;
+}
+.dashboard-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+.dashboard-section li {
+  padding: 0.6rem 0.2rem;
+  font-size: 1rem;
+  color: var(--text-main);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background .18s, color .18s;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.dashboard-section li:hover {
+  background: #f1f5f9;
+  color: var(--blue-main);
+}
+/* Notifications */
+.notifications-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.notif-card {
+  background: #fff7ed;
+  color: #b45309;
+  border: 1px solid #fdba74;
+  border-radius: 8px;
+  padding: 0.7rem 1.1rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 2px 8px rgba(253,186,116,0.08);
+}
+.notif-card i { font-size: 1.2rem; }
+
+/* Support */
+.support-block {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+.btn-support {
+  background: linear-gradient(90deg, var(--blue-main), var(--red-main));
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  transition: background .2s, box-shadow .2s;
+}
+.btn-support:hover {
+  background: linear-gradient(90deg, var(--red-main), var(--blue-main));
+  box-shadow: 0 4px 16px rgba(220,38,38,0.13);
 }
   
 .dashboard-card {
@@ -124,20 +237,44 @@
 
 /* Résumé parent (mêmes styles que membre) */
 .profile-summary {
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 0.8rem 1rem;
-  margin: 0 0 1rem 0;
-  box-shadow: 0 2px 6px rgba(2,6,23,.06);
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.2rem 1.5rem;
+  margin: 0 0 1.5rem 0;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.07);
+  transition: box-shadow 0.18s;
+}
+.profile-summary:hover {
+  box-shadow: 0 8px 32px rgba(37,99,235,0.13);
 }
 .profile-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-  gap: .6rem 1rem;
+  display: flex;
+  flex-direction: row;
+  gap: 2.5rem;
   color: var(--text-main);
-  font-size: .95rem;
+  font-size: 1.15rem;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-start;
 }
-.profile-row i { margin-right: .45rem; opacity: .75; }
+.profile-row i {
+  margin-right: .7rem;
+  opacity: 0.85;
+  color: var(--red-main);
+  font-size: 1.5rem;
+  vertical-align: middle;
+}
+ .profile-row > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 1.2rem 0.2rem 0;
+  border-right: 1px solid #f1f5f9;
+  font-weight: 500;
+ }
+ .profile-row > div:last-child {
+  border-right: none;
+ }
 
 /* Bloc enfants */
 .kids-block { margin: .5rem 0 1.5rem; }

@@ -1,0 +1,1 @@
+Ce dossier et ses fichiers peuvent être supprimés car la gestion des inscriptions n'est plus utile (remplacée par membres et utilisateurs).

@@ -1,11 +1,27 @@
-<button
-  class="ui-btn"
-  [ngClass]="[variant, customClass]"
-  [disabled]="disabled || loading"
-  (click)="onClick()"
-  [attr.type]="type"
->
-  <ui-icon-button *ngIf="icon" [icon]="icon" [variant]="variant" [disabled]="disabled || loading"></ui-icon-button>
-  <span class="ui-btn-label">{{ label }}</span>
-  <span *ngIf="loading" class="spinner"></span>
-</button>
+<ng-container *ngIf="routerLink; else normalButton">
+  <a
+    class="ui-btn"
+    [ngClass]="[variant, customClass]"
+    [routerLink]="routerLink"
+    [attr.tabindex]="disabled || loading ? -1 : 0"
+    [attr.aria-disabled]="disabled || loading ? 'true' : null"
+    (click)="onClick($event)"
+    >
+    <ui-icon-button *ngIf="icon" [icon]="icon" [variant]="variant" [disabled]="disabled || loading"></ui-icon-button>
+    <span class="ui-btn-label">{{ label }}</span>
+    <span *ngIf="loading" class="spinner"></span>
+  </a>
+</ng-container>
+<ng-template #normalButton>
+  <button
+    class="ui-btn"
+    [ngClass]="[variant, customClass]"
+    [disabled]="disabled || loading"
+    (click)="onClick()"
+    [attr.type]="type"
+  >
+    <ui-icon-button *ngIf="icon" [icon]="icon" [variant]="variant" [disabled]="disabled || loading"></ui-icon-button>
+    <span class="ui-btn-label">{{ label }}</span>
+    <span *ngIf="loading" class="spinner"></span>
+  </button>
+</ng-template>

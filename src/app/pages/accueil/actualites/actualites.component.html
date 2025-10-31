@@ -48,10 +48,14 @@
           <div class="slider-card-content">
             <h4>{{ actu.titre }}</h4>
             <p>{{ actu.contenu | slice:0:100 }}...</p>
+            <div *ngIf="actu.complement" class="complement-card">
+              <span class="complement-label">Complément :</span>
+              <span class="complement-value">{{ actu.complement }}</span>
+            </div>
             <div class="card-btn-wrapper">
               <ui-button
                 variant="secondary"
-                [label]="'Lire'"
+                [label]="'En savoir plus'"
                 [routerLink]="['/actualite', actu.id]"
                 customClass="banner-small"
               ></ui-button>

@@ -14,10 +14,17 @@
 }
 /* ==== Container ==== */
 .gestion-actualites-container {
-  max-width: 1200px;
   margin: auto;
   padding: 15px 20px;
   font-family: 'Poppins', sans-serif;
+}
+
+.header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 /* ==== Bandeau titre (plus léger) ==== */

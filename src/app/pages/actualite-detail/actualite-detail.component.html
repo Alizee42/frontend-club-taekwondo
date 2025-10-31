@@ -1,0 +1,19 @@
+<section class="actualite-detail" *ngIf="!loading && actualite">
+  <div class="detail-image-wrapper">
+    <img [src]="imageUrl" [alt]="actualite.titre" class="detail-image" />
+    <div class="detail-title-overlay">
+      <h2>{{ actualite.titre }}</h2>
+    </div>
+  </div>
+  <div class="infos">
+    <div class="type">Type : {{ actualite.typeActu }}</div>
+    <div class="date">Publié le {{ actualite.datePublication | date:'medium' }}</div>
+  </div>
+  <div class="contenu">{{ actualite.contenu }}</div>
+  <div *ngIf="actualite.complement" class="complement">
+    <strong>Complément :</strong> {{ actualite.complement }}
+  </div>
+  <button type="button" class="btn-retour" (click)="retourActualites()">← Retour aux actualités</button>
+</section>
+<div *ngIf="loading">Chargement...</div>
+<div *ngIf="error">{{ error }}</div>

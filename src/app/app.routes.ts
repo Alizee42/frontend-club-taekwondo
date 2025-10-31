@@ -2,6 +2,7 @@ import { GestionHorairesSuperAdminComponent } from './super-admin/gestion-horair
 import { UtilisateursSuperAdminComponent } from './super-admin/utilisateurs/utilisateurs-super-admin.component';
 import { GestionUtilisateursComponent } from './admin/gestion-utilisateurs/gestion-utilisateurs.component';
 import { Routes } from '@angular/router';
+import { ActualiteDetailComponent } from './pages/actualite-detail/actualite-detail.component';
 import { AccueilComponent } from './pages/accueil/accueil.component';
 import { ClubSelectComponent } from './club-select/club-select.component';
 import { InscriptionComponent } from './pages/inscription/inscription.component';
@@ -51,6 +52,7 @@ import { PolitiqueConfidentialiteComponent } from './pages/politique-confidentia
 export const routes: Routes = [
   // 🌐 Routes publiques
   { path: '', component: AccueilComponent },
+  { path: 'actualite/:id', component: ActualiteDetailComponent },
   { path: 'club-select', component: ClubSelectComponent },
   { path: 'inscription', component: InscriptionComponent },
   { path: 'galerie', component: GalerieComponent }, // par défaut pour public et membres

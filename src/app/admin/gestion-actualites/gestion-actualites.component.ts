@@ -2,6 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActualiteService } from '../../services/actualite.service';
+import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
+import { UiSearchFilterComponent } from '../../shared/ui/ui-search-filter/ui-search-filter.component';
 
 interface Actualite {
   id?: string;
@@ -19,9 +24,29 @@ interface Actualite {
   standalone: true,
   templateUrl: './gestion-actualites.component.html',
   styleUrls: ['./gestion-actualites.component.css'],
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, UiTitleComponent, UiButtonComponent, UiModalComponent, UiTableComponent, UiSearchFilterComponent]
 })
 export class GestionActualitesComponent implements OnInit {
+  typeFilter: string = '';
+  featuredOnly: boolean = false;
+  columns: any[] = [
+    { key: 'titre', label: 'Titre' },
+    { key: 'typeActu', label: 'Type' },
+    { key: 'datePublication', label: 'Date', type: 'date' },
+    { key: 'imageUrl', label: 'Image', type: 'image' },
+    { key: 'isFeatured', label: 'À la une', type: 'custom', render: (row: any) => row.isFeatured ? '🌟 À la une' : '' }
+  ];
+  actions: Array<{ label: string; icon?: string; iconText?: string; action: string; color?: string; variant?: 'primary'|'secondary'|'danger'|'ghost'; disabled?: boolean; customClass?: string; show?: (row: any) => boolean; title?: string }> = [
+    { label: 'Mettre à la une', icon: 'ri-star-line', action: 'feature', show: (row: any) => !row.isFeatured },
+    { label: 'Modifier', icon: 'ri-edit-line', action: 'edit' },
+    { label: 'Supprimer', icon: 'ri-delete-bin-line', action: 'delete', variant: 'danger' }
+  ];
+
+  onTableAction(event: { action: string, row: any }) {
+    if (event.action === 'feature') this.setFeatured(event.row);
+    else if (event.action === 'edit') this.editActualite(event.row);
+    else if (event.action === 'delete') this.deleteActualite(event.row.id);
+  }
 
   actualites: Actualite[] = [];
   featuredNews: Actualite | null = null;
@@ -229,14 +254,22 @@ export class GestionActualitesComponent implements OnInit {
   /** 🔍 Filtrage */
   filteredActualites(): Actualite[] {
     const term = this.searchTerm.trim().toLowerCase();
-    // Filtre d'abord par club sélectionné (comparaison en string)
     let filtered = this.actualites.filter(actu => String(actu.clubId) === String(this.clubIdSelectionne));
-    // Puis filtre par recherche texte
+    // Filtre texte
     if (term) {
       filtered = filtered.filter(actu =>
         actu.titre.toLowerCase().includes(term) ||
-        actu.typeActu.toLowerCase().includes(term)
+        actu.typeActu.toLowerCase().includes(term) ||
+        actu.contenu.toLowerCase().includes(term)
       );
+    }
+    // Filtre type
+    if (this.typeFilter) {
+      filtered = filtered.filter(actu => actu.typeActu === this.typeFilter);
+    }
+    // Filtre "à la une"
+    if (this.featuredOnly) {
+      filtered = filtered.filter(actu => actu.isFeatured === true);
     }
     return filtered;
   }

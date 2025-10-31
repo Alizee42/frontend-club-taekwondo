@@ -1,44 +1,90 @@
-<div class="dashboard-container">
-  <!-- En-tête -->
+<div class="dashboard-admin">
   <header class="dashboard-header">
-  <ui-title text="Tableau de bord Parent" [level]="1" align="center"></ui-title>
+    <ui-title text="Espace Parent" [level]="1" align="center"></ui-title>
     <div class="welcome-message">Bienvenue, <span class="highlight">{{ utilisateurConnecte?.prenom }} {{ utilisateurConnecte?.nom }}</span></div>
   </header>
 
-  <p class="intro">
-    Depuis cet espace, vous pouvez gérer les paiements de vos enfants, déposer des documents et commander des tenues.
-  </p>
+  <!-- Résumé parent -->
+  <div class="profile-summary">
+    <div class="profile-row">
+      <div><i class="ri-user-3-line"></i> <b>Nom :</b> {{ utilisateurConnecte?.prenom }} {{ utilisateurConnecte?.nom }}</div>
+      <div><i class="ri-mail-line"></i> <b>Email :</b> {{ utilisateurConnecte?.email }}</div>
+    </div>
+  </div>
 
-  <!-- Cartes de navigation refactorisées -->
-  <section class="dashboard-grid" aria-labelledby="actions-parent">
-    <h2 id="actions-parent" class="visually-hidden">Actions parent</h2>
-    <app-dashboard-card
-      icon="ri-wallet-3-line"
-      title="Mes Paiements"
-      description="Gérez les paiements enfants."
-      [badge]="stats.paiementsEnRetard"
-      (action)="navigateToPaiements()">
-    </app-dashboard-card>
-    <app-dashboard-card
-      icon="ri-folder-upload-line"
-      title="Documents"
-      description="Certificat médical, autorisations."
-      [badge]="stats.documentsManquants"
-      (action)="navigateToDocuments()">
-    </app-dashboard-card>
-    <app-dashboard-card
-      icon="ri-shopping-bag-line"
-      title="Mes Commandes"
-      description="Historique & suivi."
-      [badge]="stats.commandesEnCours"
-      (action)="navigateToCommandes()">
-    </app-dashboard-card>
-    <app-dashboard-card
-      icon="ri-calendar-event-line"
-      title="Événements"
-      description="Inscriptions & stages."
-      [badge]="stats.evenementsAVenir"
-      (action)="navigateToEvenements()">
-    </app-dashboard-card>
-  </section>
+  <!-- Bloc enfants -->
+  <div class="kids-block">
+    <div class="kids-title"><i class="ri-team-line"></i> Mes enfants</div>
+    <div class="chips">
+      <span class="chip" *ngFor="let enfant of enfants">{{ enfant.prenom }} {{ enfant.nom }}<span class="chip-meta" *ngIf="enfant.dateNaissance">({{ enfant.dateNaissance | date:'yyyy' }})</span></span>
+      <span *ngIf="!enfants || enfants.length === 0" class="muted">Aucun enfant rattaché</span>
+    </div>
+  </div>
+
+  <!-- Notifications -->
+  <div class="notifications-block" *ngIf="stats.paiementsEnRetard || stats.documentsManquants || stats.evenementsAVenir">
+    <div class="notif-card" *ngIf="stats.paiementsEnRetard">
+      <i class="ri-error-warning-line"></i> <b>Paiement en retard :</b> {{ stats.paiementsEnRetard }} à régulariser
+    </div>
+    <div class="notif-card" *ngIf="stats.documentsManquants">
+      <i class="ri-folder-warning-line"></i> <b>Document manquant :</b> {{ stats.documentsManquants }} à fournir
+    </div>
+    <div class="notif-card" *ngIf="stats.evenementsAVenir">
+      <i class="ri-calendar-event-line"></i> <b>Événement à venir :</b> {{ stats.evenementsAVenir }} à ne pas manquer
+    </div>
+  </div>
+
+  <!-- Grille d'accès rapide -->
+  <div class="dashboard-grid">
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-wallet-3-line"></i></div>
+        <h2>Paiements</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToPaiements()"><i class="ri-bank-card-line"></i> Mes paiements</li>
+      </ul>
+    </div>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-folder-upload-line"></i></div>
+        <h2>Documents</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToDocuments()"><i class="ri-folder-upload-line"></i> Mes documents</li>
+      </ul>
+    </div>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-shopping-bag-line"></i></div>
+        <h2>Commandes</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToCommandes()"><i class="ri-shopping-bag-line"></i> Mes commandes</li>
+      </ul>
+    </div>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-calendar-event-line"></i></div>
+        <h2>Événements</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToEvenements()"><i class="ri-calendar-event-line"></i> Mes événements</li>
+      </ul>
+    </div>
+    <div class="dashboard-section">
+      <div class="section-header">
+        <div class="section-icon"><i class="ri-user-3-line"></i></div>
+        <h2>Profil</h2>
+      </div>
+      <ul>
+        <li (click)="navigateToProfil()"><i class="ri-user-settings-line"></i> Mon profil</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Support -->
+  <div class="support-block">
+    <button class="btn-support" (click)="navigateToSupport()"><i class="ri-customer-service-2-line"></i> Besoin d'aide ?</button>
+  </div>
 </div>

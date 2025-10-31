@@ -62,25 +62,7 @@
     line-height: 1.5;
     font-weight: 400;
 }
-.badge-slider-featured {
-    position: absolute;
-    top: 0.3rem;
-    left: 0.3rem;
-    font-size: 0.72rem !important;
-    padding: 2px 8px !important;
-    font-weight: 700;
-    border-radius: 0.9rem !important;
-    box-shadow: 0 2px 8px 0 rgba(31,38,135,0.10);
-    letter-spacing: 0.1px;
-    text-transform: uppercase;
-    z-index: 2;
-    opacity: 0.98;
-    border: none;
-    background: #222;
-    color: #fff;
-    backdrop-filter: none;
-    transition: box-shadow 0.2s, background 0.2s;
-}
+
 
 .actu-slider-wrapper {
     width: 100%;
@@ -133,53 +115,35 @@
 .actu-slider-card:hover .slider-card-image img {
     transform: scale(1.06);
 }
-.badge-slider {
-    position: absolute;
-    top: 0.3rem;
-    left: 0.3rem;
-    font-size: 0.72rem !important;
-    padding: 2px 8px !important;
-    font-weight: 700;
-    border-radius: 0.9rem !important;
-    box-shadow: 0 2px 8px 0 rgba(31,38,135,0.10);
-    letter-spacing: 0.1px;
-    text-transform: uppercase;
-    z-index: 2;
-    opacity: 0.98;
-    border: none;
-    background: #222;
-    color: #fff;
-    backdrop-filter: none;
-    transition: box-shadow 0.2s, background 0.2s;
-}
+
 
 /* Couleurs par type d'actualité */
 .badge-annonce {
-    background: #1b5e20;
+    background: #43a047;
     color: #fff;
 }
 .badge-competition {
-    background: #283593;
+    background: #1976d2;
     color: #fff;
 }
 .badge-evenement, .badge-event {
-    background: #b35400;
+    background: #ff9800;
     color: #fff;
 }
 .badge-alert {
-    background: #b71c1c;
+    background: #e53935;
     color: #fff;
 }
 .badge-sport {
-    background: #006064;
+    background: #00bcd4;
     color: #fff;
 }
 .badge-info {
-    background: #1565c0;
+    background: #29b6f6;
     color: #fff;
 }
 .badge-default {
-    background: #222;
+    background: #757575;
     color: #fff;
 }
 .slider-card-content {

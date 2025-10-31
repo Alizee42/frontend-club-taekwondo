@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
@@ -51,6 +50,7 @@ export class ActualitesSuperAdminComponent implements OnInit {
       { value: 'annonce', label: 'Annonce' }
     ] },
     { name: 'contenu', label: 'Contenu', type: 'textarea', required: true, placeholder: 'Contenu de l\'actualité' },
+    { name: 'complement', label: 'Complément (lien, info, PDF...)', type: 'text', required: false, placeholder: 'Lien, info ou document complémentaire' },
     { name: 'image', label: 'Image', type: 'file', required: false, onChange: this.onImageChange.bind(this) },
     { name: 'isFeatured', label: 'À la une', type: 'checkbox', required: false }
   ];
@@ -78,6 +78,7 @@ export class ActualitesSuperAdminComponent implements OnInit {
   { key: 'imageUrl', label: 'Image', type: 'image' as const, cellClass: 'col-img', width: '90px' },
   { key: 'titre', label: 'Titre', type: 'text' as const, cellClass: 'col-titre', width: '320px' },
   { key: 'typeActu', label: 'Type', type: 'text' as const, cellClass: 'col-type', width: '70px' },
+  { key: 'complement', label: 'Complément', type: 'text' as const, cellClass: 'col-complement', width: '120px' },
   { key: 'datePublication', label: 'Date', type: 'date' as const, cellClass: 'col-date', width: '80px', render: (row: any) => new Date(row.datePublication).toLocaleDateString() },
   { key: 'isFeatured', label: 'À la une', type: 'text' as const, cellClass: 'col-featured td-center', width: '80px', render: (row: any) => row.isFeatured ? '🌟 Oui' : 'Non', headerClass: 'th-featured-center' }
   ];
@@ -136,10 +137,8 @@ export class ActualitesSuperAdminComponent implements OnInit {
             .then(json => console.log('[DEBUG] Payload HTTP brut:', json));
         } catch (e) { console.warn('fetch debug error', e); }
         console.log('[DEBUG] clubIdSelectionne:', this.clubIdSelectionne);
-        // Utilise l'URL du backend depuis l'env Angular (local ou prod)
-        // Retire /api à la fin si présent
-  const apiUrl = environment.apiUrl;
-  const apiBase = apiUrl.replace(/\/api\/?$/, '');
+        const apiUrl = environment.apiUrl;
+        const apiBase = apiUrl.replace(/\/api\/?$/, '');
         this.actualites = (Array.isArray(data) ? data : []).map(actu => {
           let raw = actu.imageUrl || '';
           if (raw.startsWith('actualites/')) raw = raw.replace(/^actualites\//, '');
@@ -153,6 +152,7 @@ export class ActualitesSuperAdminComponent implements OnInit {
           } else {
             full = `${apiBase}/uploads/actualites/${encodeURIComponent(raw)}`;
           }
+          console.log('[DEBUG] Mapping actu:', actu);
           return { ...actu, imageUrl: full };
         });
         this.loading = false;
@@ -206,39 +206,39 @@ export class ActualitesSuperAdminComponent implements OnInit {
 
   onSubmitForm(formValue: any): void {
   formValue.clubId = String(this.clubIdSelectionne);
-    formValue.datePublication = new Date().toISOString();
-    let request$;
-    if (this.imageFile) {
-      const formData = new FormData();
-      Object.keys(formValue).forEach(key => {
-        formData.append(key, formValue[key]);
-      });
-      formData.append('image', this.imageFile);
-      // Ajout explicite du clubId (sécurité)
-      formData.set('clubId', String(this.clubIdSelectionne));
-      request$ = formValue.id
-        ? this.actualiteService.updateMultipart(formValue.id, formData)
-        : this.actualiteService.createMultipart(formData);
-    } else {
-      request$ = formValue.id
-        ? this.actualiteService.update(formValue.id, formValue)
-        : this.actualiteService.create(formValue);
-    }
-    request$.subscribe({
-      next: (res) => {
-        console.log('[DEBUG] Création actualité - payload envoyé :', formValue);
-        if (this.imageFile) {
-          console.log('[DEBUG] Fichier image envoyé :', this.imageFile);
-        }
-        console.log('[DEBUG] Réponse backend :', res);
-        this.loadActualitesClub();
-        this.closeModal();
-      },
-      error: (err) => {
-        console.error('[DEBUG] Erreur lors de la création de l\'actualité :', err);
-        alert('Erreur lors de la création de l\'actualité. Voir console pour détails.');
-      }
+  formValue.datePublication = new Date().toISOString();
+  console.log('[DEBUG] Valeur du champ complément AVANT envoi :', formValue.complement);
+  let request$;
+  if (this.imageFile) {
+    const formData = new FormData();
+    Object.keys(formValue).forEach(key => {
+      formData.append(key, formValue[key]);
     });
+    formData.append('image', this.imageFile);
+    formData.set('clubId', String(this.clubIdSelectionne));
+    request$ = formValue.id
+      ? this.actualiteService.updateMultipart(formValue.id, formData)
+      : this.actualiteService.createMultipart(formData);
+  } else {
+    request$ = formValue.id
+      ? this.actualiteService.update(formValue.id, formValue)
+      : this.actualiteService.create(formValue);
+  }
+  request$.subscribe({
+    next: (res) => {
+      console.log('[DEBUG] Création actualité - payload envoyé :', formValue);
+      if (this.imageFile) {
+        console.log('[DEBUG] Fichier image envoyé :', this.imageFile);
+      }
+      console.log('[DEBUG] Réponse backend :', res);
+      this.loadActualitesClub();
+      this.closeModal();
+    },
+    error: (err) => {
+      console.error('[DEBUG] Erreur lors de la création de l\'actualité :', err);
+      alert('Erreur lors de la création de l\'actualité. Voir console pour détails.');
+    }
+  });
   }
 
   deleteActualite(id: string): void {
