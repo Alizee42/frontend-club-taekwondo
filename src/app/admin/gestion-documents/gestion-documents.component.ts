@@ -5,6 +5,7 @@
   import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   import { environment } from '../../../environments/environment';
   import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+  import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
   
   /* ========= Types ========= */
   type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
@@ -61,35 +62,6 @@
     enfants?: ChildItem[];
   }
   
-  /* ===== Catalogue & helpers libellés ===== */
-  const DOC_CATALOG: Array<{ code: string; label: string; aliases?: string[] }> = [
-    { code: 'CERTIFICAT_MEDICAL', label: 'Certificat médical (< 1 an)', aliases: ['CERTIF_MEDICAL','CERTIFICAT','MEDICAL'] },
-    { code: 'PHOTO_IDENTITE',     label: "Photo d'identité",             aliases: ["PHOTO D'IDENTITE","PHOTO IDENTITE","PHOTO","PHOTOGRAPHIE","PHOTO D'IDENTITÉ"] },
-    { code: 'DOCUMENT_IDENTITE',  label: "Document d'identité",          aliases: ['PIECE_IDENTITE',"PIÈCE D'IDENTITÉ",'CARTE_IDENTITE',"CARTE D'IDENTITÉ",'CNI','PASSEPORT','JUSTIFICATIF IDENTITE','JUSTIFICATIF_IDENTITE'] }
-  ];
-  
-  const LABEL_BY_CODE: Record<string, string> =
-    DOC_CATALOG.reduce((acc, t) => { acc[t.code] = t.label; return acc; }, {} as Record<string, string>);
-  
-  function unifyType(input: any): string {
-    const raw = String(input || '').trim();
-    if (!raw) return raw;
-    if (DOC_CATALOG.some(t => t.code === raw)) return raw;
-  
-    const norm = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                   .toLowerCase().replace(/[\s'’_-]+/g, '');
-  
-    for (const t of DOC_CATALOG) {
-      const candidates = [t.code, t.label, ...(t.aliases || [])];
-      if (candidates.some(c =>
-        String(c).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-               .toLowerCase().replace(/[\s'’_-]+/g, '') === norm)) {
-        return t.code;
-      }
-    }
-    return raw;
-  }
-
 // labelFor devient une méthode d'instance
   
   /* ========= Composant ========= */
@@ -101,8 +73,8 @@
     imports: [CommonModule, NgClass, NgFor, DatePipe, FormsModule, UiTitleComponent],
   })
   export class GestionDocumentsComponent implements OnInit {
-  // labelFor accessible dans le template
-  labelFor(code: string) { return LABEL_BY_CODE[code] || code; }
+  // labelFor accessible dans le template (via util partagé)
+  labelFor(code: string) { return docLabelFor(code); }
 
   // Méthode pour l'accordéon
   toggleAccordion(utilisateur: UtilisateurRow) {
@@ -116,9 +88,14 @@
       .forEach(d => this.validerDocument(d));
   }
 
-  // Méthode pour valider un document
+  // Méthode pour valider un document (appel backend)
   validerDocument(document: DocumentItem) {
-    document.status = 'validé';
+    const headers = this.getAuthHeaders();
+    this.http.put(`${this.API_BASE}/documents/${document.id}/valider`, null, { headers, observe: 'response' })
+      .subscribe({
+        next: () => { document.status = 'validé'; },
+        error: (err) => { console.error('Erreur validation document', err); }
+      });
   }
     private readonly API_BASE = environment.apiUrl;
   
@@ -244,13 +221,7 @@
     }
   
     /* ===== Normalisation statut ===== */
-    private normalizeStatus(s: any): StatutDoc {
-      const v = String(s || '').toLowerCase();
-      if (['valide','validé','validee','validée','approved'].includes(v)) return 'validé';
-      if (['pending','en_attente','en attente','attente'].includes(v)) return 'en_attente';
-      if (['refuse','refusé','refusee','refusée','rejected'].includes(v)) return 'refusé';
-      return 'en_attente';
-    }
+    private normalizeStatus(s: any): StatutDoc { return normalizeStatus(s); }
   
     /* ===== Chargement & groupage ===== */
     loadDocuments() {
@@ -438,12 +409,14 @@
       return this.encodeLastSegment(p);
     }
   
-    /**
-     * Stub temporaire pour refuserDocument (corrige l'erreur de compilation)
-     */
+    /** Refus d'un document (appel backend) */
     refuserDocument(doc: DocumentItem): void {
-      // TODO: implémenter la logique métier réelle ici
-      doc.status = 'refusé';
+      const headers = this.getAuthHeaders();
+      this.http.put(`${this.API_BASE}/documents/${doc.id}/refuser`, null, { headers, observe: 'response' })
+        .subscribe({
+          next: () => { doc.status = 'refusé'; },
+          error: (err) => { console.error('Erreur refus document', err); }
+        });
     }
   
     /** URL pour les balises sécurisées (iframe/object/img) */

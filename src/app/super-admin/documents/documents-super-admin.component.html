@@ -1,0 +1,34 @@
+<div class="sa-docs">
+  <div class="header-bar">
+    <ui-title text="Documents" [level]="2" align="left"></ui-title>
+    <ui-button label="Rafraîchir" (clicked)="loadDocs()"></ui-button>
+  </div>
+
+  <div class="filters">
+    <label>Club
+      <select [(ngModel)]="selectedClubId" (change)="onSelectClub()">
+        <option [ngValue]="null">Tous les clubs</option>
+        <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
+      </select>
+    </label>
+
+    <label>Statut
+      <select [(ngModel)]="statut" (change)="onStatutChange()">
+        <option value="">Tous</option>
+        <option value="en_attente">En attente</option>
+        <option value="validé">Validé</option>
+        <option value="refusé">Refusé</option>
+      </select>
+    </label>
+
+    <input type="text" placeholder="Rechercher (nom, email, club, type)" [(ngModel)]="search" (input)="onSearchChange()" />
+  </div>
+
+  <ui-table
+    [columns]="columns"
+    [data]="filtered"
+    [actions]="actions"
+    (actionClick)="handleAction($event)">
+  </ui-table>
+</div>
+

@@ -18,6 +18,7 @@ interface Utilisateur {
   telephone?: string;        // <-- ajouté
   dateNaissance?: string;    // <-- ajouté (ISO yyyy-MM-dd)
   role?: string;
+  avatar?: string;           // <-- ajouté pour l'avatar
 }
 
 @Component({
@@ -25,30 +26,103 @@ interface Utilisateur {
   selector: 'app-dashboard-membre',
   templateUrl: './dashboard-membre.component.html',
   styleUrls: ['./dashboard-membre.component.css'],
-  imports: [CommonModule, FormsModule, DashboardCardComponent, UiTitleComponent],
+  imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardMembreComponent implements OnInit {
   private readonly API_BASE = environment.apiUrl;
 
+  navigateToProfil(): void {
+    this.router.navigate(['/profil']);
+  }
+
+  navigateToSupport(): void {
+    this.router.navigate(['/contact']);
+  }
+
   utilisateurConnecte: Utilisateur | null = null;
-  // Stats placeholders (seront remplacées par un service agrégateur plus tard)
-  stats: {
-    paiementsEnRetard: number;
-    documentsManquants: number;
-    commandesEnCours: number;
-    evenementsAVenir: number;
-  } = {
+
+  // Documents obligatoires (même référentiel que DocumentsComponent)
+  requiredDocuments: Array<{ type: string; label: string; uploaded: boolean; etat: string }> = [
+    { type: 'CERTIFICAT_MEDICAL', label: 'Certificat médical (< 1 an)', uploaded: false, etat: 'non_envoyé' },
+    { type: 'PHOTO_IDENTITE',     label: "Photo d'identité",            uploaded: false, etat: 'non_envoyé' },
+    { type: 'DOCUMENT_IDENTITE',  label: "Document d'identité",         uploaded: false, etat: 'non_envoyé' }
+  ];
+  documents: any[] = [];
+
+  stats = {
     paiementsEnRetard: 0,
-    documentsManquants: 1,
+    documentsManquants: 0,
     commandesEnCours: 0,
     evenementsAVenir: 2
   };
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 
+
   ngOnInit(): void {
     this.loadUtilisateur();
+    this.loadDocuments();
+  }
+  // --- Documents manquants ---
+  private getAuthHeaders(): any {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  loadDocuments(): void {
+    const utilisateurId = this.utilisateurConnecte?.id || localStorage.getItem('utilisateurId');
+    if (!utilisateurId) return;
+    this.http.get<any[]>(`${this.API_BASE}/documents/utilisateur/${utilisateurId}`, { headers: this.getAuthHeaders() }).subscribe({
+      next: (documents) => {
+        this.documents = Array.isArray(documents) ? documents : [];
+        this.updateRequiredDocumentsStatus();
+      },
+      error: (err) => {
+        this.documents = [];
+        this.updateRequiredDocumentsStatus();
+      }
+    });
+  }
+
+  updateRequiredDocumentsStatus(): void {
+    this.requiredDocuments = this.requiredDocuments.map(req => {
+      const code = req.type;
+      const docsOfType = this.documents.filter(d => this.unifyType(d.typeDocument) === code);
+      if (docsOfType.length === 0) {
+        return { ...req, uploaded: false, etat: 'non_envoyé' };
+      }
+      if (docsOfType.some(d => this.normalizeStatus(d.status) === 'validé')) {
+        return { ...req, uploaded: true, etat: 'validé' };
+      }
+      if (docsOfType.some(d => this.normalizeStatus(d.status) === 'refusé')) {
+        return { ...req, uploaded: false, etat: 'refusé' };
+      }
+      return { ...req, uploaded: true, etat: 'en_attente' };
+    });
+    // Met à jour le nombre réel de documents manquants
+    this.stats.documentsManquants = this.requiredDocuments.filter(doc => doc.etat === 'non_envoyé' || doc.etat === 'refusé').length;
+  }
+
+  unifyType(input: any): string {
+    const raw = String(input || '').trim();
+    if (!raw) return raw;
+    const norm = raw.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[\s'’_-]+/g, '');
+    for (const t of this.requiredDocuments) {
+      const candidates = [t.type, t.label];
+      if (candidates.some(c => String(c).normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[\s'’_-]+/g, '') === norm)) {
+        return t.type;
+      }
+    }
+    return raw;
+  }
+
+  private normalizeStatus(s: any): string {
+    const v = String(s || '').toLowerCase();
+    if (["valide", "validé", "validee", "validée", "approved"].includes(v)) return "validé";
+    if (["pending", "en_attente", "en attente", "attente"].includes(v)) return "en_attente";
+    if (["refuse", "refusé", "refusee", "refusée", "rejected"].includes(v)) return "refusé";
+    return "en_attente";
   }
 
     private loadUtilisateur(): void {

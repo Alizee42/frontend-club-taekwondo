@@ -7,24 +7,36 @@
       <p>Veuillez patienter</p>
     </div>
 
-    <!-- Token invalide -->
+    <!-- Token manquant ou invalide -->
     <div class="error-section" *ngIf="tokenChecked && !tokenValid">
       <div class="error-icon">
         <i class="ri-error-warning-line"></i>
       </div>
-      <h2>Lien invalide ou expiré</h2>
-      <p>Ce lien de réinitialisation n'est plus valide ou a déjà été utilisé.</p>
-      
-      <div class="action-buttons">
-        <button type="button" class="primary-btn" (click)="requestNewLink()">
-          <i class="ri-mail-line"></i>
-          Demander un nouveau lien
-        </button>
-        <button type="button" class="secondary-btn" (click)="goToLogin()">
-          <i class="ri-arrow-left-line"></i>
-          Retour à la connexion
-        </button>
-      </div>
+      <ng-container *ngIf="token; else missingToken">
+        <h2>Lien invalide ou expiré</h2>
+        <p>Ce lien de réinitialisation n'est plus valide ou a déjà été utilisé.</p>
+        <div class="action-buttons">
+          <button type="button" class="primary-btn" (click)="requestNewLink()">
+            <i class="ri-mail-line"></i>
+            Demander un nouveau lien
+          </button>
+          <button type="button" class="secondary-btn" (click)="goToLogin()">
+            <i class="ri-arrow-left-line"></i>
+            Retour à la connexion
+          </button>
+        </div>
+      </ng-container>
+      <ng-template #missingToken>
+        <h2>Accès non autorisé</h2>
+        <p>Vous avez accédé à la page de réinitialisation sans lien valide.<br>
+        Veuillez utiliser le lien reçu par email ou retourner à la connexion.</p>
+        <div class="action-buttons">
+          <button type="button" class="secondary-btn" (click)="goToLogin()">
+            <i class="ri-arrow-left-line"></i>
+            Retour à la connexion
+          </button>
+        </div>
+      </ng-template>
     </div>
 
     <!-- Formulaire de réinitialisation -->

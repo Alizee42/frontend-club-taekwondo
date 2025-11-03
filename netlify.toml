@@ -2,6 +2,11 @@
   command = "ng build --configuration production"
   publish = "dist/club-taekwondo/browser"
 
+# Functions (serverless) config
+[functions]
+  node_bundler = "esbuild"
+  directory = "netlify/functions"
+
 # Redirection des APIs vers Railway
 [[redirects]]
   from = "/api/*"

@@ -38,6 +38,8 @@ import { GestionInscriptionsComponent } from './admin/gestion-inscriptions/gesti
 import { DashboardParentComponent } from './parent/dashboard-parent/dashboard-parent.component';
 import { PaiementParentComponent } from './parent/paiement-parent/paiement-parent.component';
 import { DocumentsParentComponent } from './parent/documents-parent/documents-parent.component';
+import { DocumentsRequisSuperAdminComponent } from './super-admin/documents-requis/documents-requis.component';
+import { DocumentsSuperAdminComponent } from './super-admin/documents/documents-super-admin.component';
 import { CommandesMembreComponent } from './membre/commandes-membre/commandes-membre.component';
 import { CommandesParentComponent } from './parent/commandes-parent/commandes-parent.component';
 import { EvenementsMembre } from './membre/evenements-membre/evenements-membre.component';
@@ -139,7 +141,10 @@ export const routes: Routes = [
   { path: 'galerie-gestion', component: GalerieGestionSuperAdminComponent },
   { path: 'gestion-horaires', component: GestionHorairesSuperAdminComponent },
   { path: 'utilisateurs', component: UtilisateursSuperAdminComponent },
+  { path: 'documents', component: DocumentsSuperAdminComponent },
+  { path: 'documents-requis', component: DocumentsRequisSuperAdminComponent },
   { path: 'avis', loadComponent: () => import('./super-admin/avis-super-admin/avis-super-admin.component').then(m => m.AvisSuperAdminComponent) },
+  { path: 'enseignants', loadComponent: () => import('./super-admin/enseignants/enseignants-super-admin.component').then(m => m.EnseignantsSuperAdminComponent) },
  
     ]
     },

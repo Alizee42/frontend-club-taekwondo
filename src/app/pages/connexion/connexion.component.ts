@@ -93,7 +93,12 @@ export class ConnexionComponent {
             // Vérification du mot de passe temporaire
             if (response.passwordTemporaire) {
               this.toastService.info('Votre mot de passe est temporaire. Veuillez le changer pour accéder à votre espace.');
-              this.router.navigate(['/reinitialiser-mot-de-passe']);
+              const resetToken = (response as any).resetToken;
+              if (resetToken) {
+                this.router.navigate(['/reinitialiser-mot-de-passe'], { queryParams: { token: resetToken } });
+              } else {
+                this.router.navigate(['/reinitialiser-mot-de-passe']);
+              }
               return;
             }
             this.toastService.success('🎉 Connexion réussie ! Bienvenue !');

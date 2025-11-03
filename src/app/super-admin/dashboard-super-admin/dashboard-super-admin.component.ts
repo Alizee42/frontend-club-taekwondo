@@ -210,6 +210,7 @@ export class DashboardSuperAdminComponent implements OnInit {
   navigateToDocuments() {
     this.router.navigate(['super-admin/documents']);
   }
+  // navigateToDocumentsRequis supprimé (demande: retirer du dashboard)
   navigateToAvis() {
     this.router.navigate(['super-admin/avis']);
   }
@@ -218,5 +219,8 @@ export class DashboardSuperAdminComponent implements OnInit {
   }
   navigateToEvenements() {
     this.router.navigate(['super-admin/evenements']);
+  }
+  navigateToEnseignants() {
+    this.router.navigate(['super-admin/enseignants']);
   }
 }

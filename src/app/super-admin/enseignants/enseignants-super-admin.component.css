@@ -1,0 +1,45 @@
+.container { padding: 16px; }
+.header-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 12px;
+}
+.controls-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 12px 0 20px;
+}
+.form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #ddd; padding: 8px; }
+th { background: #f3f4f6; text-align: left; }
+button { padding: 6px 12px; cursor: pointer; }
+button.danger { background: #e53935; color: white; border: none; }
+
+/* Contenu de modale scrollable quand formulaire long */
+.modal-scroll {
+	max-height: calc(80vh - 20px);
+	overflow: auto;
+}
+
+.photo-preview {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+.photo-preview img {
+	width: 140px;
+	height: 140px;
+	object-fit: cover;
+	border-radius: 10px;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.photo-preview .uploading {
+	font-size: 0.9rem;
+	color: #2563eb;
+}

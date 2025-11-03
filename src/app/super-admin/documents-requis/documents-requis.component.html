@@ -1,0 +1,59 @@
+<div class="doc-req">
+  <h2>Documents requis par club</h2>
+
+  <div class="toolbar">
+    <label>Club
+      <select [(ngModel)]="selectedClubId" (change)="onSelectClub()">
+        <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom }}</option>
+      </select>
+    </label>
+  </div>
+
+  <div *ngIf="!selectedClubId" class="hint">Sélectionnez un club.</div>
+
+  <div *ngIf="selectedClubId">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Ordre</th>
+          <th>Code</th>
+          <th>Libellé</th>
+          <th>Requis</th>
+          <th>Actif</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of docs">
+          <td><input type="number" [(ngModel)]="d.orderIndex" (change)="saveRow(d)" min="0"></td>
+          <td>
+            <select [(ngModel)]="d.code" (change)="d.label = labelFor(d.code); saveRow(d)">
+              <option *ngFor="let code of codes" [ngValue]="code">{{ code }}</option>
+            </select>
+          </td>
+          <td><input type="text" [(ngModel)]="d.label" (blur)="saveRow(d)"/></td>
+          <td><input type="checkbox" [(ngModel)]="d.required" (change)="saveRow(d)"/></td>
+          <td><input type="checkbox" [(ngModel)]="d.active" (change)="saveRow(d)"/></td>
+          <td>
+            <button class="btn danger" (click)="deleteRow(d)">Supprimer</button>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="number" [(ngModel)]="newOrder" min="0"></td>
+          <td>
+            <select [(ngModel)]="newCode" (change)="newLabel = labelFor(newCode)">
+              <option [ngValue]="''" disabled>— Choisir —</option>
+              <option *ngFor="let code of codes" [ngValue]="code">{{ code }}</option>
+            </select>
+          </td>
+          <td><input type="text" [(ngModel)]="newLabel" placeholder="Libellé"/></td>
+          <td><input type="checkbox" [(ngModel)]="newRequired"/></td>
+          <td><input type="checkbox" [(ngModel)]="newActive"/></td>
+          <td>
+            <button class="btn primary" (click)="addDoc()" [disabled]="!newCode">Ajouter</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

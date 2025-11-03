@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
+import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
 
 
 type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
@@ -14,6 +16,7 @@ interface Utilisateur {
   prenom: string;
   email?: string;
   role?: string;
+  clubId?: number;
 }
 
 interface Enfant {
@@ -42,57 +45,8 @@ interface RequiredDoc {
 }
 
 /* =========================
-   Catalogue & helpers types
+   Catalogue & helpers (shared)
    ========================= */
-const DOC_CATALOG: Array<{ code: string; label: string; aliases?: string[] }> = [
-  {
-    code: 'CERTIFICAT_MEDICAL',
-    label: 'Certificat médical (< 1 an)',
-    aliases: ['CERTIF_MEDICAL', 'CERTIFICAT', 'MEDICAL']
-  },
-  {
-    code: 'PHOTO_IDENTITE',
-    label: "Photo d'identité",
-    aliases: ["PHOTO D'IDENTITE", 'PHOTO_IDENTITÉ', 'PHOTO', 'PHOTOGRAPHIE', "PHOTO D'IDENTITÉ"]
-  },
-  {
-    code: 'DOCUMENT_IDENTITE',
-    label: "Document d'identité",
-    aliases: [
-      'PIECE_IDENTITE', "PIÈCE D'IDENTITÉ", 'CARTE_IDENTITE', "CARTE D'IDENTITÉ",
-      'CNI', 'PASSEPORT', 'JUSTIFICATIF_IDENTITE', 'JUSTIFICATIF IDENTITE'
-    ]
-  }
-];
-
-const LABEL_BY_CODE: Record<string, string> =
-  DOC_CATALOG.reduce((acc, t) => (acc[t.code] = t.label, acc), {} as Record<string, string>);
-
-function unifyType(input: any): string {
-  const raw = String(input || '').trim();
-  if (!raw) return raw;
-  if (DOC_CATALOG.some(t => t.code === raw)) return raw;
-
-  const norm = raw
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().replace(/[\s'’_-]+/g, '');
-
-  for (const t of DOC_CATALOG) {
-    const candidates = [t.code, t.label, ...(t.aliases || [])];
-    if (candidates.some(c =>
-      String(c)
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase().replace(/[\s'’_-]+/g, '') === norm
-    )) {
-      return t.code;
-    }
-  }
-  return raw;
-}
-
-function labelFor(code: string) {
-  return LABEL_BY_CODE[code] || code;
-}
 
 @Component({
   standalone: true,
@@ -127,12 +81,13 @@ export class DocumentsParentComponent implements OnInit {
   // Aperçu
   previewing: DocumentItem | null = null;
 
-  // Expose helper au template
-  labelFor = labelFor;
+  // Expose helper au template (depuis util partagé)
+  labelFor = docLabelFor;
 
   constructor(
     private http: HttpClient,
     private sanitizer: DomSanitizer,
+    private requiredSvc: RequiredDocsService,
   ) {}
 
   ngOnInit(): void {
@@ -149,7 +104,12 @@ export class DocumentsParentComponent implements OnInit {
           prenom: (u?.prenom ?? '').trim(),
           email: u?.email ?? '',
           role: String(u?.role ?? '').toUpperCase(),
+          clubId: u?.clubId ?? u?.club?.id ?? undefined,
         };
+
+        // Charger la configuration des documents requis du club si disponible
+        const clubId = this.utilisateurConnecte.clubId as number | undefined;
+        this.loadRequiredConfig(clubId ?? null);
 
         if (this.utilisateurConnecte.role !== 'PARENT') {
           this.enfants = [];
@@ -203,6 +163,33 @@ export class DocumentsParentComponent implements OnInit {
     });
   }
 
+  private loadRequiredConfig(clubId: number | null) {
+    if (clubId && clubId > 0) {
+      this.requiredSvc.getByClub(clubId).subscribe({
+        next: (list) => {
+          const items = Array.isArray(list) ? list.filter(d => d.active !== false) : [];
+          if (items.length > 0) {
+            this.requiredDocuments = items
+              .sort((a,b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+              .map(it => ({ type: it.code, label: it.label, uploaded: false }));
+            this.refreshRequiredUploaded();
+            return;
+          }
+          // fallback sur référentiel par défaut
+          this.requiredDocuments = DOC_CATALOG.map(t => ({ type: t.code, label: t.label, uploaded: false }));
+          this.refreshRequiredUploaded();
+        },
+        error: () => {
+          this.requiredDocuments = DOC_CATALOG.map(t => ({ type: t.code, label: t.label, uploaded: false }));
+          this.refreshRequiredUploaded();
+        }
+      });
+    } else {
+      this.requiredDocuments = DOC_CATALOG.map(t => ({ type: t.code, label: t.label, uploaded: false }));
+      this.refreshRequiredUploaded();
+    }
+  }
+
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     let headers = new HttpHeaders();
@@ -254,13 +241,7 @@ export class DocumentsParentComponent implements OnInit {
     };
   };
 
-  private normalizeStatus(s: any): StatutDoc {
-    const v = String(s || '').toLowerCase();
-    if (['valide', 'validé', 'validee', 'validée', 'approved'].includes(v)) return 'validé';
-    if (['pending', 'en_attente', 'en attente', 'attente'].includes(v)) return 'en_attente';
-    if (['refuse', 'refusé', 'refusee', 'refusée', 'rejected'].includes(v)) return 'refusé';
-    return 'en_attente';
-  }
+  private normalizeStatus(s: any): StatutDoc { return normalizeStatus(s); }
 
   private refreshRequiredUploaded(): void {
     const set = new Set(this.documents.map(d => unifyType(d.typeDocument)));

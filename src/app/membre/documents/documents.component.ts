@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
+import { DOC_CATALOG } from '../../shared/documents/doc-utils';
 
 /* =========================
    Types & interfaces
@@ -14,6 +16,7 @@ interface Utilisateur {
   nom: string;
   prenom: string;
   email: string;
+  clubId?: number;
 }
 
 interface DocumentItem {
@@ -30,30 +33,6 @@ interface RequiredDoc {
   uploaded: boolean;
   etat: 'validé' | 'en_attente' | 'refusé' | 'non_envoyé';
 }
-
-/* =========================
-   Catalogue & helpers types
-   ========================= */
-const DOC_CATALOG: Array<{ code: string; label: string; aliases?: string[] }> = [
-  {
-    code: 'CERTIFICAT_MEDICAL',
-    label: 'Certificat médical (< 1 an)',
-    aliases: ['CERTIF_MEDICAL', 'CERTIFICAT', 'MEDICAL']
-  },
-  {
-    code: 'PHOTO_IDENTITE',
-    label: "Photo d'identité",
-    aliases: ["PHOTO D'IDENTITE", 'PHOTO_IDENTITÉ', 'PHOTO', 'PHOTOGRAPHIE', "PHOTO D'IDENTITÉ"]
-  },
-  {
-    code: 'DOCUMENT_IDENTITE',
-    label: "Document d'identité",
-    aliases: [
-      'PIECE_IDENTITE', "PIÈCE D'IDENTITÉ", 'CARTE_IDENTITE', "CARTE D'IDENTITÉ",
-      'CNI', 'PASSEPORT', 'JUSTIFICATIF_IDENTITE', 'JUSTIFICATIF IDENTITE'
-    ]
-  }
-];
 
 const LABEL_BY_CODE: Record<string, string> =
   DOC_CATALOG.reduce((acc, t) => (acc[t.code] = t.label, acc), {} as Record<string, string>);
@@ -109,7 +88,7 @@ export class DocumentsComponent implements OnInit {
     { type: 'DOCUMENT_IDENTITE',  label: "Document d'identité",         uploaded: false, etat: 'non_envoyé' }
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private requiredSvc: RequiredDocsService) {}
 
   ngOnInit(): void {
     this.loadUtilisateurConnecte();
@@ -138,6 +117,9 @@ export class DocumentsComponent implements OnInit {
       next: (utilisateur) => {
         this.utilisateurConnecte = utilisateur;
         localStorage.setItem('utilisateurId', utilisateur.id.toString());
+        // Charger la config "documents requis" par club (si dispo)
+        const clubId = (utilisateur as any).clubId ?? this.utilisateurConnecte?.clubId ?? null;
+        this.loadRequiredConfig(clubId as number | null);
         this.loadDocuments();
       },
       error: (err) => {
@@ -145,6 +127,33 @@ export class DocumentsComponent implements OnInit {
         alert('Impossible de récupérer les informations de l’utilisateur connecté.');
       }
     });
+  }
+
+  private loadRequiredConfig(clubId: number | null) {
+    if (clubId && clubId > 0) {
+      this.requiredSvc.getByClub(clubId).subscribe({
+        next: (list) => {
+          const items = Array.isArray(list) ? list.filter(d => d.active !== false) : [];
+          if (items.length > 0) {
+            this.requiredDocuments = items
+              .sort((a,b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+              .map(it => ({ type: it.code, label: it.label, uploaded: false, etat: 'non_envoyé' }));
+            this.updateRequiredDocumentsStatus();
+            return;
+          }
+          // fallback
+          this.requiredDocuments = DOC_CATALOG.map(t => ({ type: t.code, label: t.label, uploaded: false, etat: 'non_envoyé' }));
+          this.updateRequiredDocumentsStatus();
+        },
+        error: () => {
+          this.requiredDocuments = DOC_CATALOG.map(t => ({ type: t.code, label: t.label, uploaded: false, etat: 'non_envoyé' }));
+          this.updateRequiredDocumentsStatus();
+        }
+      });
+    } else {
+      this.requiredDocuments = DOC_CATALOG.map(t => ({ type: t.code, label: t.label, uploaded: false, etat: 'non_envoyé' }));
+      this.updateRequiredDocumentsStatus();
+    }
   }
 
   loadDocuments(): void {

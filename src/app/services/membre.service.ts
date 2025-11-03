@@ -8,6 +8,9 @@ export interface Membre {
   id: number;
   nom: string;
   prenom: string;
+  avatar?: string;
+  dateNaissance?: string;
+  ceinture?: string;
 }
 
 @Injectable({ providedIn: 'root' })
