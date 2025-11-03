@@ -1,12 +1,11 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { UiIconButtonComponent } from '../ui-icon-button/ui-icon-button.component';
 
 @Component({
   selector: 'ui-button',
   standalone: true,
-  imports: [CommonModule, RouterModule, UiIconButtonComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './ui-button.component.html',
   styleUrls: ['./ui-button.component.css']
 })

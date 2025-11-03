@@ -7,7 +7,7 @@
     [attr.aria-disabled]="disabled || loading ? 'true' : null"
     (click)="onClick($event)"
     >
-    <ui-icon-button *ngIf="icon" [icon]="icon" [variant]="variant" [disabled]="disabled || loading"></ui-icon-button>
+    <i *ngIf="icon" [class]="icon" class="ui-btn-icon" aria-hidden="true"></i>
     <span class="ui-btn-label">{{ label }}</span>
     <span *ngIf="loading" class="spinner"></span>
   </a>
@@ -17,10 +17,10 @@
     class="ui-btn"
     [ngClass]="[variant, customClass]"
     [disabled]="disabled || loading"
-    (click)="onClick()"
+    (click)="onClick($event)"
     [attr.type]="type"
   >
-    <ui-icon-button *ngIf="icon" [icon]="icon" [variant]="variant" [disabled]="disabled || loading"></ui-icon-button>
+    <i *ngIf="icon" [class]="icon" class="ui-btn-icon" aria-hidden="true"></i>
     <span class="ui-btn-label">{{ label }}</span>
     <span *ngIf="loading" class="spinner"></span>
   </button>

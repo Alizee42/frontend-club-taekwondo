@@ -32,8 +32,9 @@
 				<input [(ngModel)]="newAdmin.email" name="email" type="email" required />
 			</div>
 			<div class="row">
-				<label>Mot de passe *</label>
-				<input [(ngModel)]="newAdmin.password" name="password" type="password" required />
+				<!-- Le mot de passe n'est plus saisi ici : un email de définition sera envoyé automatiquement -->
+				<label>Mot de passe</label>
+				<input [(ngModel)]="newAdmin.password" name="password" type="password" placeholder="(optionnel) sera défini par email" />
 			</div>
 			<div class="row">
 				<label>Club *</label>
@@ -44,8 +45,9 @@
 				<small *ngIf="clubs.length === 0" class="hint">Aucun club disponible — créez d'abord un club.</small>
 			</div>
 
-			<div class="actions" style="display: flex; justify-content: center;">
+			<div class="actions" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
 				<ui-button [type]="'submit'" [disabled]="loading" [label]="loading ? 'En cours...' : 'Créer'" color="primary" class="ui-form-submit"></ui-button>
+				<small class="hint" style="color:#6b7280;">Un email sera envoyé au nouvel administrateur pour définir son mot de passe avant sa première connexion.</small>
 			</div>
 
 			<p class="message" *ngIf="message">{{ message }}</p>

@@ -47,6 +47,33 @@
   flex: 1;
   text-align: center;
 }
+
+/* Icône inline du UiButton */
+.ui-btn-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+.ui-btn:not(.btn-icon-only) .ui-btn-icon {
+  margin-right: 8px;
+}
+
+/* Usage icon-only (ex: dans les cellules de tableau) */
+.ui-btn.btn-icon-only {
+  width: 34px;
+  height: 34px;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 8px;
+  background: var(--blue-main, #255F85);
+  border: 1px solid var(--blue-main, #255F85);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(37, 95, 133, 0.15);
+}
+.ui-btn.btn-icon-only:hover:not(:disabled) { filter: brightness(1.05); }
+.ui-btn.btn-icon-only .ui-btn-label { display: none; }
 /* Backdrop */
 .ui-modal-backdrop {
   position: fixed;

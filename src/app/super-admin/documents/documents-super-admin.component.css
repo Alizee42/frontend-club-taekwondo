@@ -1,17 +1,57 @@
 .sa-docs { padding: 16px; }
 .header-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
 .filters { display: flex; gap: 12px; margin: 12px 0; }
-.user-header { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; }
-.user-main { display: grid; grid-template-columns: 180px 1fr 1fr; gap: 12px; align-items: center; }
-.table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 14px; }
-.table th, .table td { border-bottom: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; vertical-align: middle; }
-.table thead th { position: sticky; top: 0; background: #f9fafb; z-index: 1; box-shadow: inset 0 -1px 0 #e5e7eb; }
-.table-striped tbody tr:nth-child(odd) { background: #fafafa; }
-.table-hover tbody tr:hover { background: #f3f4f6; }
+/* En-tête groupe plus lisible (fond blanc, bord + ombre légère) */
+.user-header { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.04); transition: background .2s, border-color .2s; margin-bottom: .5rem; }
+.user-main { display: grid; grid-template-columns: 220px 1fr 1fr; gap: 12px; align-items: center; }
+/* Nom + badge rôle + chips enfants (colonne 1) */
+.user-ident { display: flex; flex-direction: column; gap: 6px; }
+.user-ident strong { display: inline-flex; align-items: center; gap: 8px; }
+.role-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.role-badge.role-parent { background: #e0f7e9; color: #166534; border: 1px solid #a7e7bf; }
+.role-badge.role-membre { background: #e0efff; color: #1e3a8a; border: 1px solid #b9d2ff; }
+.child-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.child-chip { background: rgba(0,0,0,.04); border: 1px solid rgba(0,0,0,.08); padding: 2px 8px; border-radius: 999px; line-height: 1.2; font-size: 12px; }
+/* Accents couleur selon le statut du groupe */
+.user-header.status-success { border-left: 6px solid #16a34a; background: #f0fdf4; }
+.user-header.status-warn { border-left: 6px solid #f59e0b; background: #fffbeb; }
+.user-header.status-danger { border-left: 6px solid #e11d48; background: #fef2f2; }
+
+/* Pilules de statut */
+.status-pills { display: flex; gap: 8px; align-items: center; }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.pill-success { background: #dcfce7; color: #166534; }
+.pill-warn { background: #fef9c3; color: #92400e; }
+.pill-danger { background: #fee2e2; color: #991b1b; }
+
+/* Table plus contrastée */
+.table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 14px; background: #fff; }
+.table th, .table td { border-bottom: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; vertical-align: middle; color: var(--text-main, #1f2937); }
+.table thead th { position: sticky; top: 0; background: var(--surface-0, #ffffff); z-index: 1; box-shadow: inset 0 -1px 0 #e5e7eb; }
+.table-striped tbody tr:nth-child(odd) { background: #ffffff; }
+.table-striped tbody tr:nth-child(even) { background: #f8fbff; }
+.table-hover tbody tr:hover { background: #eef6ff; }
 .table-compact th, .table-compact td { padding: 6px 8px; }
-.table td a { color: #1E6091; text-decoration: none; }
+.table td a { color: var(--blue-main, #1E6091); text-decoration: none; font-weight: 600; }
 .table td a:hover { text-decoration: underline; }
+
+/* Lien + bouton Voir alignés */
+.file-cell { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Badges statut */
 .badge { padding: 2px 8px; border-radius: 999px; font-size: 12px; }
 .status-validé { background: #dcfce7; color: #166534; }
 .status-refusé { background: #fee2e2; color: #991b1b; }
 .status-en-attente { background: #fef9c3; color: #92400e; }
+
+/* Boutons d'actions groupées (positionnement aligné à droite) */
+.bulk-actions { margin-bottom: 1rem; display: flex; gap: 1rem; justify-content: flex-end; }
+
+@media (max-width: 640px) {
+	.bulk-actions { justify-content: stretch; }
+}
+
+/* Aperçu modal */
+.preview-wrapper { max-width: 82vw; max-height: 76vh; display: flex; align-items: center; justify-content: center; }
+.preview-image { max-width: 80vw; max-height: 70vh; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+.preview-frame { width: 80vw; height: 70vh; border: none; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }

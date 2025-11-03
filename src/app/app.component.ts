@@ -55,8 +55,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.userName = undefined;
     this.userAvatar = undefined;
     this.unreadNotifications = 0;
-    // Redirection vers l'accueil
-    window.location.href = '/';
+    // Redirection rapide vers l'accueil sans recharger tout le bundle
+    this.router.navigate(['/']);
   }
   selectedClub: Club | null = null;
   isUserLoggedIn = false;

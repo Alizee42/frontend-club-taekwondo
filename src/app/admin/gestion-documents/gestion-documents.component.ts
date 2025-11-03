@@ -1,10 +1,12 @@
   import { Component, OnInit } from '@angular/core';
   import { HttpClient, HttpHeaders } from '@angular/common/http';
-  import { CommonModule, NgClass, NgFor, DatePipe } from '@angular/common';
+  import { CommonModule, NgClass, NgFor } from '@angular/common';
   import { FormsModule } from '@angular/forms';
   import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   import { environment } from '../../../environments/environment';
-  import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+  import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+  import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+  import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
   import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
   
   /* ========= Types ========= */
@@ -70,7 +72,7 @@
     templateUrl: './gestion-documents.component.html',
     styleUrls: ['./gestion-documents.component.css'],
     standalone: true,
-    imports: [CommonModule, NgClass, NgFor, DatePipe, FormsModule, UiTitleComponent],
+  imports: [CommonModule, NgClass, NgFor, FormsModule, UiTitleComponent, UiButtonComponent, UiTableComponent],
   })
   export class GestionDocumentsComponent implements OnInit {
   // labelFor accessible dans le template (via util partagé)
@@ -99,8 +101,19 @@
   }
     private readonly API_BASE = environment.apiUrl;
   
-    utilisateurs: UtilisateurRow[] = [];
-    utilisateursFiltres: UtilisateurRow[] = [];
+  utilisateurs: UtilisateurRow[] = [];
+  utilisateursFiltres: UtilisateurRow[] = [];
+  // Vue: groupée ou tableau plat
+  groupByUser: boolean = true;
+    // Vue tableau: colonnes, actions et données à plat
+  tableColumns: UiTableColumn[] = [];
+  groupedTableColumns: UiTableColumn[] = [];
+    tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [
+      { label: 'Valider', icon: 'ri-check-line', action: 'approve', color: '#16a34a', show: (row: any) => (row?.statut ?? '') !== 'validé', title: 'Valider' },
+      { label: 'Refuser', icon: 'ri-close-line', action: 'reject', color: '#dc2626', show: (row: any) => (row?.statut ?? '') !== 'refusé', title: 'Refuser' },
+      { label: 'Télécharger', icon: 'ri-download-line', action: 'download', color: 'var(--blue-main)', show: (row: any) => (row?.statut ?? '') === 'validé', title: 'Télécharger' }
+    ];
+  flatRows: Array<any> = [];
   
     searchTerm: string = '';
     filtreStatut: '' | 'validé' | 'refusé' | 'en_attente' = '';
@@ -221,7 +234,7 @@
     }
   
     /* ===== Normalisation statut ===== */
-    private normalizeStatus(s: any): StatutDoc { return normalizeStatus(s); }
+    normalizeStatus(s: any): StatutDoc { return normalizeStatus(s); }
   
     /* ===== Chargement & groupage ===== */
     loadDocuments() {
@@ -298,6 +311,7 @@
             .sort((a, b) => `${a.nom} ${a.prenom}`.localeCompare(`${b.nom} ${b.prenom}`, 'fr', { sensitivity: 'base' }));
   
           this.utilisateursFiltres = [...this.utilisateurs];
+          this.computeFlatRows();
         },
         error: (err) => {
           console.error('Erreur lors du chargement des documents :', err);
@@ -373,6 +387,7 @@
         const matchStat = !stat || u.documents.some(d => this.normalizeStatus(d.status) === stat);
         return matchText && matchStat;
       });
+      this.computeFlatRows();
     }
   
     /* ===== Aperçu ===== */
@@ -444,5 +459,115 @@
       if (!path) return false;
       const p = String(path).split('?')[0]; // enlève les query params
       return /\.(png|jpe?g|gif|bmp|webp)$/i.test(p);
+    }
+
+    /* ===== Vue tableau: préparation colonnes + données ===== */
+    private initTableColumnsOnce() {
+      if (this.tableColumns.length) return;
+      this.tableColumns = [
+        { key: 'utilisateurNom', label: 'Utilisateur' },
+        { key: 'utilisateurEmail', label: 'Email' },
+        { key: 'enfantNom', label: 'Enfant' },
+        { key: 'typeLabel', label: 'Type' },
+        {
+          key: 'voir',
+          label: 'Voir',
+          type: 'button',
+          buttonLabel: '',
+          buttonIcon: 'ri-eye-line',
+          buttonVariant: 'primary',
+          buttonCustomClass: 'btn-icon-only',
+          buttonDisabled: (row: any) => !this.rawUrl(row.cheminFichier),
+          buttonOnClick: (row: any) => this.ouvrirApercu(row.__doc)
+        },
+        {
+          key: 'dateDepot',
+          label: 'Date',
+          type: 'date',
+          display: (row: any) => row?.dateDepot ? new Date(row.dateDepot).toLocaleDateString('fr-FR') : ''
+        },
+        {
+          key: 'statut',
+          label: 'Statut',
+          type: 'text',
+          display: (row: any) => {
+            const s = this.normalizeStatus(row.statut);
+            return s === 'en_attente' ? 'en attente' : s;
+          },
+          textClass: (row: any) => {
+            const s = this.normalizeStatus(row.statut);
+            if (s === 'validé') return 'badge-pill badge-success';
+            if (s === 'refusé') return 'badge-pill badge-danger';
+            return 'badge-pill badge-warn';
+          }
+        }
+      ];
+      // Colonnes pour la vue groupée (on masque Utilisateur / Email redondants)
+      this.groupedTableColumns = this.tableColumns.filter(c => c.key !== 'utilisateurNom' && c.key !== 'utilisateurEmail');
+    }
+
+    computeFlatRows() {
+      this.initTableColumnsOnce();
+      const rows: any[] = [];
+      for (const u of this.utilisateursFiltres) {
+        const docs = this.filteredDocs(u);
+        for (const d of docs) {
+          const enfantNom = this.isParentRow(u) ? this.enfantLabelFor(d, u) : '—';
+          rows.push({
+            __doc: d,
+            utilisateurNom: `${u.prenom} ${u.nom}`.trim(),
+            utilisateurEmail: u.email,
+            enfantNom,
+            typeLabel: this.labelFor(d.typeDocument),
+            statut: this.normalizeStatus(d.status),
+            dateDepot: d.dateDepot,
+            cheminFichier: d.cheminFichier
+          });
+        }
+      }
+      this.flatRows = rows;
+    }
+
+    /* ===== Vue groupée: données par utilisateur pour ui-table ===== */
+    groupRows(u: UtilisateurRow): Array<any> {
+      const docs = this.filteredDocs(u);
+      return docs.map(d => ({
+        __doc: d,
+        utilisateurNom: `${u.prenom} ${u.nom}`.trim(),
+        utilisateurEmail: u.email,
+        enfantNom: this.isParentRow(u) ? this.enfantLabelFor(d, u) : '—',
+        typeLabel: this.labelFor(d.typeDocument),
+        statut: this.normalizeStatus(d.status),
+        dateDepot: d.dateDepot,
+        cheminFichier: d.cheminFichier
+      }));
+    }
+
+    /* ===== Styles d'entête groupée et compteurs ===== */
+    getGroupClass(docs: DocumentItem[]): string {
+      if (!docs || !docs.length) return '';
+      const hasWaiting = docs.some(d => this.normalizeStatus(d.status) === 'en_attente');
+      const hasRefused = docs.some(d => this.normalizeStatus(d.status) === 'refusé');
+      if (hasWaiting) return 'status-warn';
+      if (hasRefused) return 'status-danger';
+      return 'status-success';
+    }
+
+    countStatus(docs: DocumentItem[], s: StatutDoc): number {
+      return (docs || []).filter(d => this.normalizeStatus(d.status) === s).length;
+    }
+
+    /* ===== Actions vue tableau ===== */
+    onActionTable(event: { action: string; row: any }) {
+      const { action, row } = event;
+      const doc: DocumentItem = row?.__doc;
+      if (!doc) return;
+      if (action === 'approve') { this.validerDocument(doc); return; }
+      if (action === 'reject') { this.refuserDocument(doc); return; }
+      if (action === 'download') {
+        if (this.normalizeStatus(doc.status) !== 'validé') return;
+        const url = this.rawUrl(doc.cheminFichier);
+        if (url) window.open(url, '_blank');
+      }
     }
   }

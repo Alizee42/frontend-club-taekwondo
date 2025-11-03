@@ -2,9 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
 import { DOC_CATALOG } from '../../shared/documents/doc-utils';
+import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 
 /* =========================
    Types & interfaces
@@ -25,6 +29,7 @@ interface DocumentItem {
   nomDocument: string;
   status: StatutDoc;
   dateDepot: string;
+  cheminFichier?: string;
 }
 
 interface RequiredDoc {
@@ -68,7 +73,7 @@ function labelFor(code: string) {
   standalone: true,
   templateUrl: './documents.component.html',
   styleUrls: ['./documents.component.css'],
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, UiTitleComponent, UiTableComponent, UiModalComponent]
 })
 export class DocumentsComponent implements OnInit {
     private readonly API_BASE = environment.apiUrl;
@@ -80,6 +85,10 @@ export class DocumentsComponent implements OnInit {
   selectedFile: File | null = null;
 
   documents: DocumentItem[] = [];
+  // ui-table configuration
+  tableColumns: UiTableColumn[] = [];
+  tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [];
+  rows: any[] = [];
 
   // “Documents obligatoires” uniformisés (même référentiel que Parent)
   requiredDocuments: RequiredDoc[] = [
@@ -88,9 +97,51 @@ export class DocumentsComponent implements OnInit {
     { type: 'DOCUMENT_IDENTITE',  label: "Document d'identité",         uploaded: false, etat: 'non_envoyé' }
   ];
 
-  constructor(private http: HttpClient, private requiredSvc: RequiredDocsService) {}
+  constructor(private http: HttpClient, private requiredSvc: RequiredDocsService, private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
+    // Prépare la table tôt pour afficher la colonne Actions immédiatement
+    this.tableColumns = [
+      { key: 'typeLabel', label: 'Type' },
+      {
+        key: 'voir',
+        label: 'Voir',
+        type: 'button',
+        buttonLabel: '',
+        buttonIcon: 'ri-eye-line',
+        buttonVariant: 'primary',
+        buttonCustomClass: 'btn-icon-only',
+        buttonDisabled: (row: any) => !row.cheminFichier,
+        buttonOnClick: (row: any) => this.onPreview(row.__doc)
+      },
+      {
+        key: 'statut',
+        label: 'Statut',
+        type: 'text',
+        display: (row: any) => {
+          const s = this.normalizeStatus(row.statut);
+          return s === 'en_attente' ? 'en attente' : s;
+        },
+        textClass: (row: any) => {
+          const s = this.normalizeStatus(row.statut);
+          if (s === 'validé') return 'badge-pill badge-success';
+          if (s === 'refusé') return 'badge-pill badge-danger';
+          return 'badge-pill badge-warn';
+        }
+      },
+      {
+        key: 'dateDepot',
+        label: 'Date',
+        type: 'date',
+        display: (row: any) => row?.dateDepot ? new Date(row.dateDepot).toLocaleDateString('fr-FR') : ''
+      }
+    ];
+
+    this.tableActions = [
+      { label: 'Modifier', icon: 'ri-pencil-line', action: 'edit', color: '#334155', show: (row: any) => this.normalizeStatus(row.statut) !== 'validé', title: 'Modifier' },
+      { label: 'Supprimer', icon: 'ri-delete-bin-line', action: 'delete', color: '#dc2626', show: (row: any) => this.normalizeStatus(row.statut) !== 'validé', title: 'Supprimer' }
+    ];
+
     this.loadUtilisateurConnecte();
   }
 
@@ -170,14 +221,17 @@ export class DocumentsComponent implements OnInit {
         this.documents = arr.map(d => ({
           ...d,
           typeDocument: unifyType(d.typeDocument),
-          status: this.normalizeStatus(d.status)
+          status: this.normalizeStatus(d.status),
+          cheminFichier: (d as any).cheminFichier || (d as any).path || (d as any).fichier || null
         }));
+        this.computeRows();
         this.updateRequiredDocumentsStatus();
       },
       error: (err) => {
         console.error('Erreur chargement documents :', err);
         alert('Erreur lors du chargement des documents.');
         this.documents = [];
+        this.rows = [];
         this.updateRequiredDocumentsStatus();
       }
     });
@@ -364,4 +418,66 @@ export class DocumentsComponent implements OnInit {
      Utils pour le template
      ========================= */
   labelFor(code: string) { return labelFor(code); }
+
+  // =========================
+  // ui-table wiring
+  // =========================
+
+  private computeRows() {
+    this.rows = (this.documents || []).map(d => ({
+      __doc: d,
+      typeLabel: labelFor(d.typeDocument),
+      nomDocument: d.nomDocument,
+      statut: d.status,
+      dateDepot: (d as any).dateDepot ?? (d as any).date,
+      cheminFichier: d.cheminFichier
+    }));
+  }
+
+  onActionTable(ev: { action: string; row: any }) {
+    const { action, row } = ev;
+    const doc: DocumentItem = row?.__doc;
+    if (!doc) return;
+    if (action === 'edit') { this.onEditDocument(doc); return; }
+    if (action === 'delete') { this.onDeleteDocument(doc); return; }
+  }
+
+  // =========================
+  // Aperçu (UiModal)
+  // =========================
+  previewing: DocumentItem | null = null;
+  onPreview(doc: DocumentItem) {
+    this.previewing = doc;
+  }
+  closePreview() {
+    this.previewing = null;
+  }
+
+  /** Nettoie et construit l’URL absolue du fichier côté API */
+  private encodeLastSegment(path: string): string {
+    if (!path) return '';
+    const parts = path.split('/');
+    const last = encodeURIComponent(parts.pop() || '');
+    return [...parts, last].join('/');
+  }
+  private buildUrl(path?: string): string {
+    if (!path) return '';
+    let p = String(path);
+    // normalisations usuelles
+    if (p.startsWith('documents/')) p = `uploads/${p}`;
+    if (!p.startsWith('uploads/')) p = `uploads/documents/${p}`;
+    if (!p.startsWith('/')) p = `/${p}`;
+    if (!p.startsWith('/api/')) p = `/api${p}`;
+    return this.encodeLastSegment(p);
+  }
+  getSafeUrl(path: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.buildUrl(path));
+  }
+  rawUrl(path?: string): string {
+    return this.buildUrl(path);
+  }
+  isPdf(path?: string): boolean {
+    if (!path) return false;
+    return /\.pdf($|\?)/i.test(path);
+  }
 }

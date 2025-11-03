@@ -12,10 +12,17 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
 .gestion-documents-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 16px;
+}
+
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
 }
 
 h1 {
@@ -32,12 +39,11 @@ h1 {
 }
 
 /* 🔍 Barre de filtre */
-.filter-bar {
+.filters {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+  align-items: center;
 }
 
 .filter-bar input,
@@ -50,37 +56,126 @@ h1 {
 }
 
 /* 📦 Accordéon */
-.accordion { margin-top: 1rem; }
-
-.accordion-item {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+.accordion {
+  margin-top: 1rem;
 }
 
-.accordion-header {
-  background-color: var(--blue-main);
-  color: #fff;
-  padding: 1rem;
-  cursor: pointer;
+.accordion-item {
+  border: none;
+  border-radius: 0;
+  margin-bottom: 1.5rem;
+  overflow: visible;
+  box-shadow: none;
+}
+
+/* En-tête groupée (style harmonisé Super Admin) */
+.user-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+  transition: background .2s, border-color .2s;
+  margin-bottom: .5rem;
 }
 
-.accordion-header h3 { margin: 0; }
-.accordion-header p { margin: 0; font-size: 0.9rem; }
+.user-main {
+  display: grid;
+  grid-template-columns: 220px 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+}
 
-.accordion-toggle {
-  background-color: transparent;
-  border: none;
-  color: #fff;
-  font-size: 0.9rem;
-  cursor: pointer;
+/* Nom + badge rôle + chips enfants (colonne 1) */
+.user-ident {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-ident strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.role-badge.role-parent {
+  background: #e0f7e9;
+  color: #166534;
+  border: 1px solid #a7e7bf;
+}
+
+.role-badge.role-membre {
+  background: #e0efff;
+  color: #1e3a8a;
+  border: 1px solid #b9d2ff;
+}
+
+.child-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+/* Réutilise .child-chip existant */
+/* Accents couleur selon le statut du groupe */
+.user-header.status-success {
+  border-left: 6px solid #16a34a;
+  background: #f0fdf4;
+}
+
+.user-header.status-warn {
+  border-left: 6px solid #f59e0b;
+  background: #fffbeb;
+}
+
+.user-header.status-danger {
+  border-left: 6px solid #e11d48;
+  background: #fef2f2;
+}
+
+/* Pilules de statut */
+.status-pills {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pill-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.pill-warn {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.pill-danger {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 /* 🟢 Badge (statut global) */
@@ -94,12 +189,25 @@ h1 {
   display: inline-flex;
   align-items: center;
 }
-.badge.validé     { background-color: #28a745; }
-.badge.refusé     { background-color: #dc3545; }
-.badge.en_attente { background-color: #ffc107; color: #333; }
+
+.badge.validé {
+  background-color: #28a745;
+}
+
+.badge.refusé {
+  background-color: #dc3545;
+}
+
+.badge.en_attente {
+  background-color: #ffc107;
+  color: #333;
+}
 
 /* 📃 Table de documents */
-.accordion-body { background-color: #f9f9f9; padding: 1rem; }
+.accordion-body {
+  background-color: #f9f9f9;
+  padding: 1rem;
+}
 
 .accordion-body table {
   width: 100%;
@@ -125,9 +233,17 @@ h1 {
 }
 
 /* 🎯 Lignes colorées (status ligne = 'validé' / 'refusé' / 'en_attente') */
-.validé     { background-color: #e6ffee; }
-.refusé     { background-color: #ffe6e6; }
-.en_attente { background-color: #fffbe6; }
+.validé {
+  background-color: #e6ffee;
+}
+
+.refusé {
+  background-color: #ffe6e6;
+}
+
+.en_attente {
+  background-color: #fffbe6;
+}
 
 /* 🎯 Badge de statut par document */
 .status-validé,
@@ -138,9 +254,19 @@ h1 {
   align-items: center;
 }
 
-.status-validé { color: #28a745; }
-.status-refusé { color: #dc3545; }
-.status-en-attente { color: #b45309; } /* orange soutenu pour lisibilité */
+.status-validé {
+  color: #28a745;
+}
+
+.status-refusé {
+  color: #dc3545;
+}
+
+.status-en-attente {
+  color: #b45309;
+}
+
+/* orange soutenu pour lisibilité */
 
 .status-icon {
   margin-right: 0.5rem;
@@ -152,7 +278,8 @@ h1 {
   margin-bottom: 1rem;
   display: flex;
   gap: 1rem;
-  justify-content: flex-end; /* ✅ plus de float */
+  justify-content: flex-end;
+  /* ✅ plus de float */
 }
 
 .bulk-actions button {
@@ -165,10 +292,16 @@ h1 {
   color: #fff;
   transition: background-color 0.2s ease;
 }
-.bulk-actions button:hover { background-color: #0056b3; }
+
+.bulk-actions button:hover {
+  background-color: #0056b3;
+}
 
 /* ✅ Boutons d'action */
-.actions-buttons { display: flex; gap: 1rem; }
+.actions-buttons {
+  display: flex;
+  gap: 1rem;
+}
 
 .btn-validate,
 .btn-refuse {
@@ -181,11 +314,21 @@ h1 {
   transition: background-color 0.2s ease;
 }
 
-.btn-validate { background-color: #28a745; }
-.btn-validate:hover { background-color: #218838; }
+.btn-validate {
+  background-color: #28a745;
+}
 
-.btn-refuse { background-color: #dc3545; }
-.btn-refuse:hover { background-color: #c82333; }
+.btn-validate:hover {
+  background-color: #218838;
+}
+
+.btn-refuse {
+  background-color: #dc3545;
+}
+
+.btn-refuse:hover {
+  background-color: #c82333;
+}
 
 /* États focus pour accessibilité */
 button:focus-visible,
@@ -219,8 +362,10 @@ button:disabled {
   padding: 2rem;
   width: 80%;
   max-width: 800px;
-  max-height: 90vh;          /* ✅ scrollable si trop grand */
-  overflow: auto;            /* ✅ */
+  max-height: 90vh;
+  /* ✅ scrollable si trop grand */
+  overflow: auto;
+  /* ✅ */
   border-radius: 10px;
   position: relative;
 }
@@ -245,12 +390,16 @@ button:disabled {
   text-decoration: underline;
   font: inherit;
 }
-.btn-link:hover { color: #0056b3; }
+
+.btn-link:hover {
+  color: #0056b3;
+}
 
 .btn-apercu {
   background: none;
   border: none;
-  color: var(--blue-def, #0d6efd); /* ✅ fallback si variable absente */
+  color: var(--blue-def, #0d6efd);
+  /* ✅ fallback si variable absente */
   cursor: pointer;
   text-align: left;
   font-weight: 500;
@@ -260,13 +409,25 @@ button:disabled {
   padding: 0;
   font-size: 14px;
 }
-.btn-apercu:hover { text-decoration: underline; }
+
+.btn-apercu:hover {
+  text-decoration: underline;
+}
 
 /* 📱 Responsive léger */
 @media (max-width: 640px) {
-  .accordion-header { align-items: flex-start; }
-  .bulk-actions { justify-content: stretch; }
-  .accordion-body table { display: block; overflow-x: auto; }
+  .accordion-header {
+    align-items: flex-start;
+  }
+
+  .bulk-actions {
+    justify-content: stretch;
+  }
+
+  .accordion-body table {
+    display: block;
+    overflow-x: auto;
+  }
 }
 
 /* ========================= */
@@ -280,6 +441,7 @@ button:disabled {
   gap: .5rem;
   margin: .75rem 0 1rem;
 }
+
 .filter-by-child select {
   padding: .35rem .6rem;
   border: 1px solid #ccc;
@@ -298,10 +460,11 @@ button:disabled {
   color: #fff;
   opacity: .95;
 }
+
 .child-chip {
-  background: rgba(255,255,255,.15);
+  background: rgba(255, 255, 255, .15);
   color: #fff;
-  border: 1px solid rgba(255,255,255,.25);
+  border: 1px solid rgba(255, 255, 255, .25);
   padding: 2px 8px;
   border-radius: 999px;
   display: inline-flex;
@@ -309,7 +472,10 @@ button:disabled {
   line-height: 1.2;
 }
 
-.col-apercu { width: 120px; text-align: left; }
+.col-apercu {
+  width: 120px;
+  text-align: left;
+}
 
 .cell-apercu {
   display: flex;
@@ -330,7 +496,10 @@ button:disabled {
   text-decoration: none;
   font-size: 18px;
 }
-.icon-btn:hover { background: #f9fafb; }
+
+.icon-btn:hover {
+  background: #f9fafb;
+}
 
 .modal-top-actions {
   display: flex;
@@ -340,7 +509,14 @@ button:disabled {
   margin-bottom: .5rem;
 }
 
-.preview-image { max-width: 100%; max-height: 70vh; object-fit: contain; }
-.preview-frame  { width: 100%; height: 70vh; border: none; }
+.preview-image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
 
-
+.preview-frame {
+  width: 100%;
+  height: 70vh;
+  border: none;
+}

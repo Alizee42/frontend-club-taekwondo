@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
+import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 
 
 type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
@@ -53,7 +56,7 @@ interface RequiredDoc {
   selector: 'app-documents-parent',
   templateUrl: './documents-parent.component.html',
   styleUrls: ['./documents-parent.component.css'],
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule, UiTitleComponent, UiTableComponent, UiModalComponent],
 })
 export class DocumentsParentComponent implements OnInit {
   private readonly API_BASE = environment.apiUrl;
@@ -77,6 +80,10 @@ export class DocumentsParentComponent implements OnInit {
 
   // Liste des documents de l’enfant sélectionné
   documents: DocumentItem[] = [];
+  // Données ui-table
+  tableColumns: UiTableColumn[] = [];
+  tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [];
+  rows: any[] = [];
 
   // Aperçu
   previewing: DocumentItem | null = null;
@@ -91,6 +98,50 @@ export class DocumentsParentComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Initialise colonnes/actions tôt pour que la colonne Actions soit présente immédiatement
+    this.tableColumns = [
+      { key: 'typeLabel', label: 'Type' },
+      {
+        key: 'voir',
+        label: 'Voir',
+        type: 'button',
+        buttonLabel: '',
+        buttonIcon: 'ri-eye-line',
+        buttonVariant: 'primary',
+        buttonCustomClass: 'btn-icon-only',
+        buttonDisabled: (row: any) => !row.cheminFichier,
+        buttonOnClick: (row: any) => this.onPreview(row.__doc)
+      },
+      {
+        key: 'statut',
+        label: 'Statut',
+        type: 'text',
+        display: (row: any) => {
+          const s = this.normalizeStatus(row.statut);
+          return s === 'en_attente' ? 'en attente' : s;
+        },
+        textClass: (row: any) => {
+          const s = this.normalizeStatus(row.statut);
+          if (s === 'validé') return 'badge-pill badge-success';
+          if (s === 'refusé') return 'badge-pill badge-danger';
+          return 'badge-pill badge-warn';
+        }
+      },
+      {
+        key: 'dateDepot',
+        label: 'Date',
+        type: 'date',
+        display: (row: any) => row?.dateDepot ? new Date(row.dateDepot).toLocaleDateString('fr-FR') : ''
+      }
+    ];
+
+    this.tableActions = [
+      // Modifier: visible uniquement si non validé (refusé ou en attente)
+      { label: 'Modifier', icon: 'ri-pencil-line', action: 'edit', color: '#334155', title: 'Modifier', show: (row: any) => this.normalizeStatus(row.statut) !== 'validé' },
+      // Supprimer: on masque aussi si validé pour cohérence UX
+      { label: 'Supprimer', icon: 'ri-delete-bin-line', action: 'delete', color: '#dc2626', title: 'Supprimer', show: (row: any) => this.normalizeStatus(row.statut) !== 'validé' }
+    ];
+
     this.loadParentAndKids();
   }
 
@@ -218,10 +269,12 @@ export class DocumentsParentComponent implements OnInit {
           : Array.isArray(res?.documents) ? res.documents
           : [];
         this.documents = arr.map(this.mapDoc);
+        this.computeRows();
         this.refreshRequiredUploaded();
       },
       error: () => {
         this.documents = [];
+        this.rows = [];
         this.refreshRequiredUploaded();
       }
     });
@@ -286,6 +339,7 @@ export class DocumentsParentComponent implements OnInit {
         this.documents = [doc, ...this.documents];
         this.documentType = null;
         this.selectedFile = null;
+        this.computeRows();
         this.refreshRequiredUploaded();
       },
       error: () => {}
@@ -294,7 +348,11 @@ export class DocumentsParentComponent implements OnInit {
 
   // =================== EDIT / DELETE ===================
   onEditDocument(doc: DocumentItem): void {
-    if (!doc || this.normalizeStatus(doc.status) === 'validé') return;
+    if (!doc) return;
+    if (this.normalizeStatus(doc.status) === 'validé') {
+      alert('Document validé, non modifiable.');
+      return;
+    }
 
     const input = document.createElement('input');
     input.type = 'file';
@@ -310,6 +368,7 @@ export class DocumentsParentComponent implements OnInit {
         next: (updated: any) => {
           const mapped = this.mapDoc(updated);
           this.documents = this.documents.map(d => d.id === doc.id ? mapped : d);
+          this.computeRows();
           this.refreshRequiredUploaded();
         },
         error: () => {}
@@ -320,17 +379,23 @@ export class DocumentsParentComponent implements OnInit {
 
   onDeleteDocument(doc: DocumentItem): void {
     if (!doc) return;
+    if (this.normalizeStatus(doc.status) === 'validé') {
+      alert('Document validé, non supprimable.');
+      return;
+    }
     const ok = confirm(`Supprimer le document "${doc.nomDocument}" ?`);
     if (!ok) return;
 
     this.http.delete(`${this.API_BASE}/documents/${doc.id}`, { observe: 'response', headers: this.getAuthHeaders() }).subscribe({
       next: () => {
         this.documents = this.documents.filter(d => d.id !== doc.id);
+        this.computeRows();
         this.refreshRequiredUploaded();
       },
       error: () => {
         // on retire quand même en cas d'erreur côté affichage
         this.documents = this.documents.filter(d => d.id !== doc.id);
+        this.computeRows();
         this.refreshRequiredUploaded();
       }
     });
@@ -414,6 +479,26 @@ export class DocumentsParentComponent implements OnInit {
     if (!p.startsWith('/api/')) p = `/api${p}`;
 
     return this.encodeLastSegment(p);
+  }
+
+  // =================== UI-TABLE (parent) ===================
+
+  private computeRows() {
+    this.rows = (this.documents || []).map(d => ({
+      __doc: d,
+      typeLabel: this.labelFor(d.typeDocument),
+      statut: this.normalizeStatus(d.status),
+      dateDepot: d.dateDepot,
+      cheminFichier: d.cheminFichier
+    }));
+  }
+
+  onActionTable(ev: { action: string; row: any }) {
+    const { action, row } = ev;
+    const doc: DocumentItem = row?.__doc;
+    if (!doc) return;
+    if (action === 'edit') { this.onEditDocument(doc); return; }
+    if (action === 'delete') { this.onDeleteDocument(doc); return; }
   }
 
   /** URL pour les balises sécurisées (iframe/object/img) */

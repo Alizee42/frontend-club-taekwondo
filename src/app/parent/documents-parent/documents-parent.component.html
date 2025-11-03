@@ -1,17 +1,6 @@
 <div class="documents-container">
-  <div class="documents-header">
-    <h1>Documents – Parent</h1>
-
-    <div class="user-info-card" *ngIf="utilisateurConnecte">
-      <div class="user-info-item">
-        <i class="ri-user-3-line" aria-hidden="true"></i>
-        <span>{{ utilisateurConnecte.nom }} {{ utilisateurConnecte.prenom }}</span>
-      </div>
-      <div class="user-info-item">
-        <i class="ri-mail-line" aria-hidden="true"></i>
-        <span>{{ utilisateurConnecte.email }}</span>
-      </div>
-    </div>
+  <div class="header-bar">
+    <ui-title [level]="2" text="Gestion des documents" align="left"></ui-title>
   </div>
 
   <!-- Sélecteur enfant -->
@@ -27,7 +16,6 @@
   </div>
 
   <p class="intro" *ngIf="!enfants?.length">Aucun enfant lié à ce compte.</p>
-  <p class="intro" *ngIf="enfants?.length">Ajoutez les documents obligatoires pour l’enfant sélectionné.</p>
 
   <div class="documents-grid" *ngIf="selectedKidId">
     <!-- Documents requis -->
@@ -83,102 +71,30 @@
       </form>
     </div>
 
-    <!-- Liste des documents -->
+    <!-- Liste des documents (ui-table) -->
     <div class="documents-list">
       <h2>Documents de l’enfant</h2>
-      <table class="full-width-table">
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th style="width:120px;">Aperçu</th>
-            <th>Statut</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      <ui-table
+        [columns]="tableColumns"
+        [data]="rows"
+        [actions]="tableActions"
+        (actionClick)="onActionTable($event)">
+      </ui-table>
 
-        <tbody>
-          <tr *ngFor="let document of documents">
-            <td>{{ labelFor(document.typeDocument) }}</td>
-
-            <!-- APERÇU = 2 icônes (voir + télécharger), pas de nom de fichier -->
-            <td>
-              <button class="btn-apercu" type="button" title="Aperçu" aria-label="Aperçu" (click)="onPreview(document)">
-                <i class="ri-eye-line" aria-hidden="true"></i>
-              </button>
-
-              <a class="btn-apercu" title="Télécharger" aria-label="Télécharger"
-                [attr.href]="document?.cheminFichier ? rawUrl(document.cheminFichier) : null" [attr.download]="''"
-                rel="noopener">
-                <i class="ri-download-2-line" aria-hidden="true"></i>
-              </a>
-            </td>
-
-            <td>
-              <span class="badge" [ngClass]="{
-                      'badge-valid': document.status === 'validé',
-                      'badge-pending': document.status === 'en_attente',
-                      'badge-refused': document.status === 'refusé'
-                    }">
-                {{ getStatusText(document.status) }}
-              </span>
-            </td>
-
-            <td>{{ document.dateDepot | date:'dd/MM/yyyy' }}</td>
-
-            <td>
-              <button class="btn-action btn-edit" type="button" title="Modifier" aria-label="Modifier"
-                (click)="onEditDocument(document)" [disabled]="document.status==='validé'">
-                Modifier
-              </button>
-              <button class="btn-action btn-delete" type="button" title="Supprimer" aria-label="Supprimer"
-                (click)="onDeleteDocument(document)" [disabled]="document.status==='validé'">
-                Supprimer
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Modale d'aperçu : image/PDF + actions Ouvrir / Télécharger -->
-      <!-- Modale d'aperçu : image/PDF + actions Ouvrir / Télécharger -->
-      <div class="modal-overlay" *ngIf="previewing" (click)="closePreview()">
-        <div class="modal-content" role="dialog" aria-modal="true" aria-label="Aperçu du document"
-          (click)="$event.stopPropagation()">
-          <button class="close-button" type="button" (click)="closePreview()">×</button>
-
-          <!-- IMAGE -->
-          <ng-container *ngIf="isImage(previewing.nomDocument); else pdfBlock">
-            <img [attr.src]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" alt="Aperçu image"
-              style="max-height:70vh;width:100%;object-fit:contain;">
-          </ng-container>
-
-          <!-- PDF -->
-          <ng-template #pdfBlock>
-            <object [data]="getSafeUrl(previewing.cheminFichier)" type="application/pdf" width="100%" height="600">
-              <p>
-                Impossible d’afficher le PDF.
-                <a [attr.href]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" target="_blank"
-                  rel="noopener">Ouvrir dans un onglet</a>.
-              </p>
-            </object>
-          </ng-template>
-
-          <!-- Actions modale -->
-          <div class="modal-actions" style="margin-top:.75rem; display:flex; gap:.5rem; justify-content:flex-end;">
-            <a class="btn-action btn-edit"
-              [attr.href]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" target="_blank"
-              rel="noopener">
-              Ouvrir dans un onglet
-            </a>
-            <a class="btn-action btn-edit"
-              [attr.href]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" [attr.download]="''"
-              rel="noopener">
-              Télécharger
-            </a>
-          </div>
-        </div>
-      </div>
+      <!-- Modale d'aperçu via UiModal (sans actions Ouvrir/Télécharger) -->
+      <ui-modal [open]="!!previewing" (closed)="closePreview()" [title]="previewing?.nomDocument || 'Aperçu'">
+        <!-- IMAGE -->
+        <ng-container *ngIf="previewing && isImage(previewing.nomDocument); else pdfBlock2">
+          <img [attr.src]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" alt="Aperçu image"
+               style="max-height:70vh;width:100%;object-fit:contain;" />
+        </ng-container>
+        <!-- PDF -->
+        <ng-template #pdfBlock2>
+          <object *ngIf="previewing" [data]="getSafeUrl(previewing.cheminFichier)" type="application/pdf" width="100%" height="600">
+            <p>Impossible d’afficher le PDF.</p>
+          </object>
+        </ng-template>
+      </ui-modal>
     </div>
   </div>
 </div>

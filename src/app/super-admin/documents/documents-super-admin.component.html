@@ -1,6 +1,6 @@
 <div class="sa-docs">
   <div class="header-bar">
-    <ui-title text="Documents" [level]="2" align="left"></ui-title>
+    <ui-title text="Gestion des documents" [level]="2" align="left"></ui-title>
     <ui-button label="Rafraîchir" (clicked)="loadDocs()"></ui-button>
   </div>
 
@@ -22,13 +22,70 @@
     </label>
 
     <input type="text" placeholder="Rechercher (nom, email, club, type)" [(ngModel)]="search" (input)="onSearchChange()" />
+
+    <label style="margin-left:auto; display:flex; align-items:center; gap:6px;">
+      <input type="checkbox" [(ngModel)]="groupByUser" /> Vue groupée par utilisateur
+    </label>
   </div>
 
-  <ui-table
-    [columns]="columns"
-    [data]="filtered"
-    [actions]="actions"
-    (actionClick)="handleAction($event)">
-  </ui-table>
+  <ng-container *ngIf="groupByUser; else flatView">
+    <div *ngFor="let g of userGroups" class="user-block">
+      <div class="user-header" [ngClass]="getGroupClass(g.docs)" (click)="toggleGroup(g.key)">
+        <div class="user-main">
+          <div class="user-ident">
+            <strong>{{ g.utilisateurNom || '—' }}</strong>
+            <span class="role-badge role-parent" *ngIf="isParentGroup(g.docs)">Parent</span>
+            <span class="role-badge role-membre" *ngIf="!isParentGroup(g.docs)">Membre</span>
+            <div class="child-chips" *ngIf="hasKidsGroup(g.docs)">
+              <span class="child-chip" *ngFor="let name of groupChildNames(g.docs)">{{ name }}</span>
+            </div>
+          </div>
+          <span>{{ g.utilisateurEmail || '—' }}</span>
+          <span>{{ g.docs.length }} document(s)</span>
+          <div class="status-pills">
+            <span class="pill pill-warn" *ngIf="countStatus(g.docs, 'en_attente') > 0">{{ countStatus(g.docs, 'en_attente') }} en attente</span>
+            <span class="pill pill-success" *ngIf="countStatus(g.docs, 'validé') > 0">{{ countStatus(g.docs, 'validé') }} validé(s)</span>
+            <span class="pill pill-danger" *ngIf="countStatus(g.docs, 'refusé') > 0">{{ countStatus(g.docs, 'refusé') }} refusé(s)</span>
+          </div>
+        </div>
+        <i class="ri-arrow-down-s-line" [style.transform]="g.isOpen ? 'rotate(180deg)' : 'none'"></i>
+      </div>
+      <div *ngIf="g.isOpen">
+        <div class="bulk-actions">
+          <ui-button label="Tout valider" variant="primary" (clicked)="validerTous(g.docs)"></ui-button>
+          <ui-button label="Tout refuser" variant="danger" (clicked)="refuserTous(g.docs)"></ui-button>
+        </div>
+        <ui-table
+          [columns]="groupedTableColumns"
+          [data]="g.docs"
+          [actions]="tableActions"
+          (actionClick)="handleAction($event)">
+        </ui-table>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #flatView>
+    <ui-table
+      [columns]="tableColumns"
+      [data]="filtered"
+      [actions]="tableActions"
+      (actionClick)="handleAction($event)">
+    </ui-table>
+  </ng-template>
+
+  <!-- Aperçu modal -->
+  <ui-modal [open]="previewOpen" (closed)="closePreview()" [title]="previewName || 'Aperçu'">
+    <div class="preview-wrapper">
+      <ng-container [ngSwitch]="previewType">
+        <img *ngSwitchCase="'image'" [src]="previewUrl" alt="aperçu" class="preview-image" />
+        <iframe *ngSwitchCase="'pdf'" [src]="previewUrl" class="preview-frame" title="aperçu PDF"></iframe>
+        <div *ngSwitchDefault>
+          <p>Prévisualisation non disponible pour ce type de fichier.</p>
+          <a [href]="previewUrl" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+        </div>
+      </ng-container>
+    </div>
+  </ui-modal>
 </div>
 

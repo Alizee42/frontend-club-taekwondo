@@ -2,21 +2,35 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UiIconButtonComponent } from '../../ui/buttons/ui-icon-button/ui-icon-button.component';
+import { UiButtonComponent } from '../../ui/buttons/ui-button/ui-button.component';
 
 export interface UiTableColumn {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'date' | 'custom' | 'image';
+  type?: 'text' | 'number' | 'date' | 'custom' | 'image' | 'button';
+  // Classe(s) appliquées sur la cellule (td) elle-même
   cellClass?: string;
+  // Fournit une valeur d'affichage alternative au lieu de row[key]
+  display?: (row: any) => string | number | Date;
+  // Classe(s) appliquées sur le span intérieur qui entoure le contenu texte
+  textClass?: string | ((row: any) => string | string[]);
   render?: (row: any) => string;
   width?: string;
   headerClass?: string;
+  // Configuration optionnelle pour un bouton dans la cellule
+  buttonLabel?: string;
+  buttonIcon?: string;
+  buttonVariant?: 'primary' | 'secondary' | 'danger';
+  buttonCustomClass?: string;
+  buttonDisabled?: (row: any) => boolean;
+  buttonLink?: (row: any) => string | null | undefined;
+  buttonOnClick?: (row: any) => void;
 }
 
 @Component({
   selector: 'ui-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiIconButtonComponent],
+  imports: [CommonModule, FormsModule, UiIconButtonComponent, UiButtonComponent],
   templateUrl: './ui-table.component.html',
   styleUrls: ['./ui-table.component.css']
 })
@@ -53,5 +67,22 @@ export class UiTableComponent {
   cancelEdit() {
     this.editing = null;
     this.editValue = '';
+  }
+
+  getTextClass(col: UiTableColumn, row: any): string | string[] | undefined {
+    if (!col) return undefined;
+    const tc = col.textClass as any;
+    if (!tc) return undefined;
+    return typeof tc === 'function' ? tc(row) : tc;
+  }
+
+  onCellButtonClick(col: UiTableColumn, row: any, evt?: Event) {
+    if (evt) { try { evt.preventDefault(); evt.stopPropagation(); } catch {} }
+    if (col.buttonOnClick) {
+      try { col.buttonOnClick(row); } catch {}
+      return;
+    }
+    const link = col.buttonLink ? col.buttonLink(row) : null;
+    if (link) window.open(String(link), '_blank');
   }
 }

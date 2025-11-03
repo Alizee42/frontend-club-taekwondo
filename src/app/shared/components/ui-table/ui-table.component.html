@@ -6,7 +6,7 @@
           [ngClass]="col.headerClass">
         {{ col.label }}
       </th>
-  <th *ngIf="actions.length" style="width:56px;min-width:56px;padding:0 6px;text-align:center;">Actions</th>
+  <th *ngIf="actions.length" style="width:80px;min-width:80px;padding:0 6px;text-align:center;">Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -29,8 +29,24 @@
           </button>
         </ng-container>
         <ng-template #viewCell>
-          <span *ngIf="!col.render && col.type !== 'image'">{{ row[col.key] }}</span>
-          <span *ngIf="col.render">{{ col.render(row) }}</span>
+          <ng-container [ngSwitch]="col.type">
+            <ng-container *ngSwitchCase="'button'">
+              <ui-button
+                [label]="col.buttonLabel || ''"
+                [icon]="col.buttonIcon || ''"
+                [variant]="col.buttonVariant || 'primary'"
+                [customClass]="col.buttonCustomClass || ''"
+                [disabled]="col.buttonDisabled ? col.buttonDisabled(row) : false"
+                (clicked)="onCellButtonClick(col, row, $event)"
+              ></ui-button>
+            </ng-container>
+            <ng-container *ngSwitchDefault>
+              <span *ngIf="!col.render && col.type !== 'image'" [ngClass]="getTextClass(col, row)">
+                {{ col.display ? col.display(row) : row[col.key] }}
+              </span>
+              <span *ngIf="col.render" [innerHTML]="col.render(row)"></span>
+            </ng-container>
+          </ng-container>
           <!-- Bouton édition supprimé hors colonne Actions -->
         </ng-template>
       </td>

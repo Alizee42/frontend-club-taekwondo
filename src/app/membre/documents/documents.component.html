@@ -1,16 +1,6 @@
 <div class="documents-container">
-  <div class="documents-header">
-    <h1>Gestion des Documents</h1>
-    <div class="user-info-card">
-      <div class="user-info-item">
-        <i class="fas fa-user"></i>
-        <span>{{ utilisateurConnecte?.nom }} {{ utilisateurConnecte?.prenom }}</span>
-      </div>
-      <div class="user-info-item">
-        <i class="fas fa-envelope"></i>
-        <span>{{ utilisateurConnecte?.email }}</span>
-      </div>
-    </div>
+  <div class="header-bar">
+    <ui-title [level]="2" text="Gestion des documents" align="left"></ui-title>
   </div>
 
   <p class="intro">Ajoutez vos documents obligatoires pour compléter votre inscription.</p>
@@ -67,52 +57,34 @@
     <!-- 📂 Liste des documents -->
     <div class="documents-list">
       <h2>Vos documents</h2>
-      <table class="full-width-table">
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Nom du fichier</th>
-            <th>Statut</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let document of documents">
-            <!-- libellé humain -->
-            <td>{{ labelFor(document.typeDocument) }}</td>
-            <td>{{ document.nomDocument }}</td>
-            <td>
-              <span class="badge" [ngClass]="{
-                    'badge-valid': document.status === 'validé',
-                    'badge-pending': document.status === 'en_attente',
-                    'badge-refused': document.status === 'refusé'
-                  }">
-                {{ document.status === 'validé' ? '✔' :
-                   document.status === 'en_attente' ? '⏳' : '❌' }}
-                {{ getStatusText(document.status) }}
-              </span>
-            </td>
-            <td>{{ document.dateDepot | date: 'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn-action btn-edit"
-                      [disabled]="document.status === 'validé'"
-                      (click)="onEditDocument(document)"
-                      title="Modifier le document"
-                      aria-label="Modifier le document">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btn-action btn-delete"
-                      [disabled]="document.status === 'validé'"
-                      (click)="onDeleteDocument(document)"
-                      title="Supprimer le document"
-                      aria-label="Supprimer le document">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <ui-table
+        [columns]="tableColumns"
+        [data]="rows"
+        [actions]="tableActions"
+        (actionClick)="onActionTable($event)">
+      </ui-table>
     </div>
   </div>
+
+  <!-- Aperçu modal -->
+  <ui-modal
+    [open]="!!previewing"
+    (closed)="closePreview()"
+    [title]="previewing?.nomDocument || 'Aperçu'">
+    <ng-container *ngIf="previewing as d">
+      <div class="preview-content">
+        <ng-container *ngIf="d.cheminFichier as p">
+          <ng-container *ngIf="isPdf(p); else imagePreview">
+            <object [data]="getSafeUrl(p)" type="application/pdf" width="100%" height="600px">
+              <p>Impossible d’afficher le PDF. <a [href]="rawUrl(p)" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>.</p>
+            </object>
+          </ng-container>
+          <ng-template #imagePreview>
+            <img [src]="rawUrl(p)" alt="aperçu document" style="max-width:100%; max-height:600px; display:block; margin:0 auto;" />
+          </ng-template>
+        </ng-container>
+        <div *ngIf="!d.cheminFichier" class="muted">Aucun fichier à prévisualiser.</div>
+      </div>
+    </ng-container>
+  </ui-modal>
 </div>

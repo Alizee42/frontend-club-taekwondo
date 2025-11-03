@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
 import { Router } from "@angular/router";
+import { environment } from '../../../environments/environment';
+import { AuthService, Utilisateur } from '../../services/auth.service';
 
 @Component({
   selector: 'app-profil',
@@ -13,47 +14,50 @@ import { Router } from "@angular/router";
   imports: [FormsModule, CommonModule] // Supprimez Router des imports
 })
 export class ProfilComponent implements OnInit {
-  user: any = {};
-  apiUrl = '/api/utilisateurs';
+  user: Utilisateur | any = {};
+  apiUrl = `${environment.apiUrl}/utilisateurs`;
   editMode: any = {};
   activeTab = 'informations'; // Onglet actif par défaut
   showPasswordModal = false; // Contrôle l'affichage de la modale
   passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' }; // Données pour le mot de passe
   passwordError = ''; // Message d'erreur pour le mot de passe
   role: string | null = null; // Stocke le rôle de l'utilisateur
-  emailNotifications = true; // Préférence pour les notifications email
+  // Feedback UI
+  saveSuccess = '';
+  saveError = '';
+  pwdSuccess = '';
+  pwdError = '';
+  // Edition
+  isEditing = false;
+  private originalUser: Utilisateur | any = null;
+  // Sécurité - affichage
+  lastPwdAgo = '';
+  lastPwdExact = '';
 
-  constructor(private http: HttpClient, private router: Router) {} // Injectez Router ici
+  constructor(private http: HttpClient, private router: Router, private auth: AuthService) {}
 
   ngOnInit(): void {
-    const storedUser = localStorage.getItem('user');
-    this.role = localStorage.getItem('role'); // Récupère le rôle de l'utilisateur depuis le localStorage
-  
-    if (!this.role) {
-      console.error('Rôle non défini. Redirection vers la page de connexion.');
-      this.logout(); // Déconnecte l'utilisateur si le rôle est absent
+    // Rôle courant via AuthService
+    this.role = this.auth.getRole() ? String(this.auth.getRole()) : null;
+    if (!this.auth.isConnecte()) {
+      this.logout();
       return;
     }
-  
-    if (storedUser) {
-      this.user = JSON.parse(storedUser); // Recharge les informations utilisateur depuis le localStorage
-    } else {
-      this.loadUserData(); // Charge les données depuis le backend si elles ne sont pas dans le localStorage
+
+    // Pré-charger depuis état courant si dispo
+    const authUser = this.auth.getUtilisateurConnecte();
+    if (authUser) {
+      this.user = { ...authUser };
     }
+    // Toujours rafraîchir depuis le backend pour avoir les derniers champs (nom/prenom parent, etc.)
+    this.loadUserData();
     
-    // Charger la préférence de notification depuis le localStorage
-    const savedNotificationPref = localStorage.getItem('emailNotifications');
-    if (savedNotificationPref !== null) {
-      this.emailNotifications = savedNotificationPref === 'true';
-    }
   }
 
   logout(): void {
-    localStorage.removeItem('token'); // Supprime le token
-    localStorage.removeItem('user'); // Supprime les informations utilisateur
-    localStorage.removeItem('role'); // Supprime le rôle
-    this.role = null; // Réinitialise le rôle
-    this.router.navigate(['/connexion']); // Redirige vers la page de connexion
+    this.auth.logout();
+    this.role = null;
+    this.router.navigate(['/connexion']);
   }
 
   // Méthode pour changer d'onglet
@@ -62,37 +66,19 @@ export class ProfilComponent implements OnInit {
   }
 
   // Méthode pour activer/désactiver les notifications email
-  toggleEmailNotifications(): void {
-    this.emailNotifications = !this.emailNotifications;
-    // Sauvegarder la préférence dans le localStorage
-    localStorage.setItem('emailNotifications', this.emailNotifications.toString());
-    
-    // Optionnel: Envoyer au backend
-    this.http.put(`${this.apiUrl}/notifications`, {
-      emailNotifications: this.emailNotifications
-    }).subscribe({
-      next: () => {
-        console.log('Préférence de notification mise à jour');
-      },
-      error: (err) => {
-        console.error('Erreur lors de la mise à jour:', err);
-      }
-    });
-  }
+  // (préférences/notifications email supprimées)
 
   loadUserData(): void {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('Utilisateur non authentifié.');
-      return;
-    }
-  
-    this.http.get<any>(`${this.apiUrl}/me`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    const headers = this.auth.getAuthHeaders();
+    this.http.get<any>(`${this.apiUrl}/me`, { headers }).subscribe({
       next: (response) => {
         this.user = response;
-        localStorage.setItem('user', JSON.stringify(this.user)); // Stocke les informations utilisateur
+        // Mettez à jour les deux clés pour compatibilité
+        try {
+          localStorage.setItem('utilisateur', JSON.stringify(this.user));
+          localStorage.setItem('user', JSON.stringify(this.user));
+        } catch {}
+        this.updateLastPwdAgo();
       },
       error: (err) => {
         console.error('Erreur lors de la récupération des données utilisateur :', err);
@@ -101,22 +87,44 @@ export class ProfilComponent implements OnInit {
   }
 
   saveProfile(): void {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('Utilisateur non authentifié.');
+    this.saveSuccess = '';
+    this.saveError = '';
+    const current = this.user as any;
+    const id = current?.id;
+    if (!id) {
+      this.saveError = 'Impossible de mettre à jour: identifiant manquant.';
       return;
     }
+    // Construire un DTO complet pour éviter d’écraser avec des null
+    const dto: any = {
+      id,
+      nom: current.nom ?? '',
+      prenom: current.prenom ?? '',
+      email: current.email ?? '',
+      telephone: current.telephone ?? current.tel ?? '',
+      adresse: current.adresse ?? '',
+      dateNaissance: current.dateNaissance ?? null,
+      role: current.role ?? null,
+      clubId: current.clubId ?? null
+    };
 
-    this.http.put<any>(`${this.apiUrl}/me`, this.user, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: () => {
-        alert('Profil mis à jour avec succès.');
+    const headers = this.auth.getAuthHeaders();
+    this.http.put<any>(`${this.apiUrl}/${id}`, dto, { headers }).subscribe({
+      next: (updated) => {
+        this.user = updated || dto;
+        try {
+          localStorage.setItem('utilisateur', JSON.stringify(this.user));
+          localStorage.setItem('user', JSON.stringify(this.user));
+        } catch {}
         this.editMode = {};
+        this.saveSuccess = 'Profil mis à jour avec succès.';
+        this.isEditing = false;
+        this.originalUser = null;
+        this.updateLastPwdAgo();
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du profil :', err);
-        alert('Une erreur est survenue lors de la mise à jour du profil.');
+        this.saveError = "Une erreur est survenue lors de la mise à jour du profil.";
       }
     });
   }
@@ -125,6 +133,8 @@ export class ProfilComponent implements OnInit {
     this.showPasswordModal = true;
     this.passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' };
     this.passwordError = '';
+    this.pwdSuccess = '';
+    this.pwdError = '';
   }
 
   closePasswordModal(): void {
@@ -133,35 +143,58 @@ export class ProfilComponent implements OnInit {
 
   updatePassword(): void {
     const { newPassword, confirmPassword } = this.passwordData;
-  
-    // Validation des mots de passe
+
+    this.pwdSuccess = '';
+    this.pwdError = '';
+
     if (newPassword !== confirmPassword) {
       this.passwordError = 'Les mots de passe ne correspondent pas.';
       return;
     }
-  
+
     if (!this.validatePassword(newPassword)) {
       this.passwordError =
         'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.';
       return;
     }
-  
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('Utilisateur non authentifié.');
+
+    const id = (this.user as any)?.id;
+    if (!id) {
+      this.pwdError = 'Impossible de mettre à jour le mot de passe: identifiant manquant.';
       return;
     }
-  
-    this.http.put<any>(`${this.apiUrl}/me/password`, { password: newPassword }, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: () => {
-        alert('Mot de passe mis à jour avec succès.');
+
+    // On envoie un DTO complet + password (service encodera et mettra passwordTemporaire=false)
+    const current = this.user as any;
+    const dto: any = {
+      id,
+      nom: current.nom ?? '',
+      prenom: current.prenom ?? '',
+      email: current.email ?? '',
+      telephone: current.telephone ?? current.tel ?? '',
+      adresse: current.adresse ?? '',
+      dateNaissance: current.dateNaissance ?? null,
+      role: current.role ?? null,
+      clubId: current.clubId ?? null,
+      password: newPassword
+    };
+
+    const headers = this.auth.getAuthHeaders();
+    this.http.put<any>(`${this.apiUrl}/${id}`, dto, { headers }).subscribe({
+      next: (updated) => {
+        this.user = updated || dto;
+        try {
+          localStorage.setItem('utilisateur', JSON.stringify(this.user));
+          localStorage.setItem('user', JSON.stringify(this.user));
+        } catch {}
+        this.pwdSuccess = 'Mot de passe mis à jour avec succès.';
+        this.passwordError = '';
         this.closePasswordModal();
+        this.updateLastPwdAgo();
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du mot de passe :', err);
-        alert('Une erreur est survenue lors de la mise à jour du mot de passe.');
+        this.pwdError = 'Une erreur est survenue lors de la mise à jour du mot de passe.';
       }
     });
   }
@@ -173,6 +206,51 @@ export class ProfilComponent implements OnInit {
 
   toggleEdit(field: string): void {
     this.editMode[field] = !this.editMode[field];
+  }
+  startEdit(): void {
+    // Deep clone simple
+    this.originalUser = JSON.parse(JSON.stringify(this.user || {}));
+    this.isEditing = true;
+    this.saveSuccess = '';
+    this.saveError = '';
+  }
+
+  private updateLastPwdAgo(): void {
+    const ts: any = (this.user as any)?.passwordUpdatedAt;
+    if (!ts) {
+      this.lastPwdAgo = '';
+      this.lastPwdExact = '';
+      return;
+    }
+    try {
+      const d = new Date(ts);
+      const now = new Date();
+      this.lastPwdExact = d.toLocaleString();
+      const diffMs = now.getTime() - d.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays >= 1) {
+        this.lastPwdAgo = `il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+      } else {
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        if (diffHours >= 1) {
+          this.lastPwdAgo = `il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+        } else {
+          const diffMin = Math.floor(diffMs / (1000 * 60));
+          this.lastPwdAgo = diffMin <= 1 ? "à l'instant" : `il y a ${diffMin} minutes`;
+        }
+      }
+    } catch {
+      this.lastPwdAgo = '';
+    }
+  }
+
+  cancelEdit(): void {
+    if (this.originalUser) {
+      this.user = JSON.parse(JSON.stringify(this.originalUser));
+    }
+    this.isEditing = false;
+    this.originalUser = null;
+    this.saveError = '';
   }
   getInitiales(nom: string, prenom: string): string {
     const initialeNom = nom ? nom.charAt(0) : '';

@@ -26,6 +26,7 @@ export class AdminsComponent {
     nom: '',
     prenom: '',
     email: '',
+    // Le mot de passe n'est plus requis côté UI : un lien de définition sera envoyé par email
     password: '',
     role: 'ADMIN',
     clubId: null
@@ -61,8 +62,8 @@ export class AdminsComponent {
   }
 
   createAdmin() {
-  if (!this.newAdmin.email || !this.newAdmin.password || !this.newAdmin.nom) {
-      this.message = 'Nom, email et mot de passe sont requis.';
+  if (!this.newAdmin.email || !this.newAdmin.nom) {
+      this.message = 'Nom et email sont requis.';
       return;
     }
     this.loading = true;
@@ -70,9 +71,10 @@ export class AdminsComponent {
 
     const payload = { ...this.newAdmin };
 
-    this.http.post(this.apiUrl + '/register', payload).subscribe({
+    // Création via endpoint admin: mot de passe temporaire et email de réinitialisation envoyés automatiquement
+    this.http.post(this.apiUrl, payload).subscribe({
       next: (res: any) => {
-        this.message = 'Admin créé avec succès.';
+        this.message = res?.message || 'Admin créé avec succès. Un email de définition du mot de passe a été envoyé.';
         this.loading = false;
         this.newAdmin = { nom: '', prenom: '', email: '', password: '', role: 'ADMIN', clubId: null };
         this.showModal = false;

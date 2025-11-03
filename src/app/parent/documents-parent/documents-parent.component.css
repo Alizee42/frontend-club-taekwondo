@@ -13,50 +13,18 @@
 /* ================== Layout global ================== */
 .documents-container{
   padding:2rem;
-  max-width:1200px;
   margin:0 auto;
 }
 
 /* ================== Header (titre centré + carte user) ================== */
-.documents-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  position:relative;
-  margin-bottom:1.5rem;
-  text-align:center;
-}
-.documents-header h1{
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  margin:0;
-  font-size:1.8rem;
-  color:var(--blue-main);
-}
+/* Header standard */
+.header-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px; }
 
-/* Carte utilisateur à droite */
-.user-info-card{
-  background:#f2f4f8;
-  border:1px solid var(--border);
-  padding:1rem;
-  border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,.06);
-  font-size:.9rem;
-  display:flex;
-  flex-direction:column;
-  gap:.5rem;
-  max-width:260px;
-}
-.user-info-item{ display:flex; align-items:center; gap:.5rem; }
-.user-info-item i{ font-size:1.2rem; color:var(--blue-main); }
-.user-info-item span{ font-size:.9rem; color:var(--text-main); }
+/* (user-info-card retiré) */
 
 /* Titre et header en mobile */
 @media (max-width: 720px){
-  .documents-header{ display:block; }
-  .documents-header h1{ position:static; transform:none; margin-bottom:.75rem; }
-  .user-info-card{ margin:0 auto; }
+  .header-bar{ flex-wrap:wrap; }
 }
 
 /* ================== Intro ================== */
@@ -71,7 +39,7 @@ h1{ color:var(--blue-main); text-align:center; }
   display:flex;
   align-items:flex-end;
   gap:12px;
-  margin:0 auto 1.25rem auto;
+  margin-bottom: 40px;
   max-width:520px;
 }
 .kid-picker label{

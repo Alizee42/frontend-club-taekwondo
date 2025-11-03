@@ -54,6 +54,16 @@
   font-weight: 700;
 }
 
+.role-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.5rem;
+}
+
 .profile-header p {
   margin: 0;
   opacity: 0.9;
@@ -107,10 +117,43 @@
   padding-bottom: 0.5rem;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Feedback banners */
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+.info-banner.success {
+  background: #eafaf1;
+  color: #1e7e34;
+  border: 1px solid #c6f0d5;
+}
+.info-banner.error {
+  background: #fff1f1;
+  color: #b00020;
+  border: 1px solid #ffd6d6;
+}
+
 /* Formulaire */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /* 2 colonnes fixes pour garder la même largeur des champs */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -129,11 +172,24 @@
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  height: 44px; /* hauteur uniforme pour tous les inputs */
 }
 
 .form-control:focus {
   outline: none;
   border-color: var(--blue-main);
+}
+
+/* Validation simple */
+.form-control.ng-invalid.ng-touched {
+  border-color: var(--red-main);
+}
+.field-error {
+  color: var(--red-main);
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+  display: block;
 }
 
 /* Boutons */
@@ -305,7 +361,7 @@
   }
   
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* une colonne en mobile */
   }
   
   .form-actions {

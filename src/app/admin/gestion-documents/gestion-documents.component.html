@@ -1,9 +1,11 @@
 <div class="gestion-documents-container">
-  <ui-title [level]="1" text="Gestion des Documents"></ui-title>
-  <p class="intro">Validez ou refusez les documents soumis par les membres.</p>
+  <div class="header-bar">
+    <ui-title [level]="2" text="Gestion des documents" align="left"></ui-title>
+    <ui-button label="Rafraîchir" (clicked)="loadDocuments()"></ui-button>
+  </div>
 
   <!-- 🔍 Recherche & filtre -->
-  <div class="filter-bar">
+  <div class="filters">
     <input type="text"
            [(ngModel)]="searchTerm"
            placeholder="Rechercher un membre..."
@@ -17,29 +19,40 @@
       <option value="refusé">Refusé</option>
       <option value="en_attente">En attente</option>
     </select>
+    <label style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+      <input type="checkbox" [(ngModel)]="groupByUser" (change)="computeFlatRows()" /> Vue groupée par utilisateur
+    </label>
   </div>
 
+
+  <ng-container *ngIf="groupByUser; else flatView">
   <div class="accordion">
     <div class="accordion-item" *ngFor="let utilisateur of utilisateursFiltres">
-      <div class="accordion-header" (click)="toggleAccordion(utilisateur)">
-        <div>
-          <h3>{{ utilisateur.nom }} {{ utilisateur.prenom }}</h3>
-          <p>{{ utilisateur.email }} — {{ utilisateur.telephone || '—' }}</p>
+      <div class="user-header" [ngClass]="getGroupClass(filteredDocs(utilisateur))" (click)="toggleAccordion(utilisateur)">
+        <div class="user-main">
+          <div class="user-ident">
+            <strong>{{ utilisateur.prenom }} {{ utilisateur.nom }}</strong>
+            <span class="role-badge role-parent" *ngIf="isParentRow(utilisateur)">Parent</span>
+            <span class="role-badge role-membre" *ngIf="isMembreSeulRow(utilisateur)">Membre</span>
+            <div class="child-chips" *ngIf="isParentRow(utilisateur) && hasKids(utilisateur)">
+              <span class="child-chip" *ngFor="let kid of utilisateur.enfants">{{ childName(kid, utilisateur) }}</span>
+            </div>
+          </div>
+          <span>{{ utilisateur.email || '—' }}</span>
+          <span>{{ filteredDocs(utilisateur).length }} document(s)</span>
+          <div class="status-pills">
+            <span class="pill pill-warn" *ngIf="countStatus(filteredDocs(utilisateur), 'en_attente') > 0">{{ countStatus(filteredDocs(utilisateur), 'en_attente') }} en attente</span>
+            <span class="pill pill-success" *ngIf="countStatus(filteredDocs(utilisateur), 'validé') > 0">{{ countStatus(filteredDocs(utilisateur), 'validé') }} validé(s)</span>
+            <span class="pill pill-danger" *ngIf="countStatus(filteredDocs(utilisateur), 'refusé') > 0">{{ countStatus(filteredDocs(utilisateur), 'refusé') }} refusé(s)</span>
+          </div>
         </div>
-
-        <span class="badge" [ngClass]="getGlobalStatus(utilisateur.documents)">
-          {{ getGlobalStatusText(utilisateur.documents) }}
-        </span>
-
-        <button class="accordion-toggle" type="button">
-          {{ utilisateur.isOpen ? 'Réduire' : 'Afficher' }}
-        </button>
+        <i class="ri-arrow-down-s-line" [style.transform]="utilisateur.isOpen ? 'rotate(180deg)' : 'none'"></i>
       </div>
 
       <div class="accordion-body" *ngIf="utilisateur.isOpen">
         <div class="bulk-actions">
-          <button type="button" (click)="validerTous(utilisateur)">Tout valider</button>
-          <button type="button" (click)="refuserTous(utilisateur)">Tout refuser</button>
+          <ui-button label="Tout valider" variant="primary" (clicked)="validerTous(utilisateur)"></ui-button>
+          <ui-button label="Tout refuser" variant="danger" (clicked)="refuserTous(utilisateur)"></ui-button>
         </div>
 
         <!-- 👶 Filtrer par enfant (parent avec enfants) -->
@@ -55,83 +68,26 @@
           </select>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th *ngIf="isParentRow(utilisateur)">Enfant</th>
-              <th>Type</th>
-              <th class="col-apercu">Aperçu</th>
-              <th>Date</th>
-              <th>Statut</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr *ngFor="let document of filteredDocs(utilisateur)" [ngClass]="document.status">
-              <!-- Enfant -->
-              <td *ngIf="isParentRow(utilisateur)">
-                {{ enfantLabelFor(document, utilisateur) }}
-              </td>
-
-              <!-- Type (libellé humain) -->
-              <td>{{ labelFor(document.typeDocument) }}</td>
-
-              <!-- APERÇU = 2 icônes : voir + télécharger -->
-              <td class="cell-apercu">
-                <button type="button"
-                        class="icon-btn"
-                        title="Aperçu"
-                        aria-label="Aperçu"
-                        (click)="ouvrirApercu(document)">
-                  <i class="ri-eye-line" aria-hidden="true"></i>
-                </button>
-
-                <a class="icon-btn"
-                   title="Télécharger"
-                   aria-label="Télécharger"
-                   [href]="rawUrl(document.cheminFichier)"
-                   [attr.download]="''"
-                   rel="noopener">
-                  <i class="ri-download-2-line" aria-hidden="true"></i>
-                </a>
-              </td>
-
-              <!-- Date -->
-              <td>{{ document.dateDepot | date:'dd/MM/yyyy' }}</td>
-
-              <!-- Statut -->
-              <td>
-                <span [ngClass]="getStatusClass(document.status)">
-                  <i class="status-icon" [ngClass]="getStatusIcon(document.status)"></i>
-                  {{ getStatusText(document.status) }}
-                </span>
-              </td>
-
-              <!-- Actions (valider / refuser) -->
-              <td>
-                <div class="actions-buttons">
-                  <button class="btn-validate"
-                          type="button"
-                          (click)="validerDocument(document)"
-                          [disabled]="estFinalise(document)">
-                    Valider
-                  </button>
-                  <button class="btn-refuse"
-                          type="button"
-                          (click)="refuserDocument(document)"
-                          [disabled]="estFinalise(document)">
-                    Refuser
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <ui-table
+          [columns]="groupedTableColumns"
+          [data]="groupRows(utilisateur)"
+          [actions]="tableActions"
+          (actionClick)="onActionTable($event)"
+        ></ui-table>
 
       </div>
     </div>
   </div>
+  </ng-container>
+
+  <ng-template #flatView>
+    <ui-table
+      [columns]="tableColumns"
+      [data]="flatRows"
+      [actions]="tableActions"
+      (actionClick)="onActionTable($event)"
+    ></ui-table>
+  </ng-template>
 
   <!-- 📄 MODALE APERÇU (minimaliste, actions en haut à droite) -->
   <div class="modal-overlay" *ngIf="documentEnApercu as doc" (click)="fermerApercu()">

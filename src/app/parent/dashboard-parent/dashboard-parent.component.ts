@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { AgePipe } from '../../pipes/age.pipe';
 import { AuthService } from '../../services/auth.service';
 import { ActualiteService } from '../../services/actualite.service';
@@ -35,6 +35,7 @@ export class DashboardParentComponent implements OnInit, OnDestroy {
   utilisateurConnecte: Utilisateur | null = null;
   enfants: Membre[] = [];
   actualitesClub: any[] = [];
+  alertsReady = false;
   stats = {
     paiementsEnRetard: 0,
     documentsManquants: 0, // À brancher sur l'API réelle
@@ -90,9 +91,12 @@ export class DashboardParentComponent implements OnInit, OnDestroy {
 
   /** Récupère le nombre réel de documents manquants pour tous les enfants */
   loadDocumentsManquants(): void {
+    this.alertsReady = false;
     if (!this.enfants || this.enfants.length === 0) {
       console.log('[DOCS] Aucun enfant trouvé, aucun document manquant.');
       this.stats.documentsManquants = 0;
+      this.alertsReady = true;
+      this.cdr.detectChanges();
       return;
     }
     let totalManquants = 0;
@@ -101,12 +105,17 @@ export class DashboardParentComponent implements OnInit, OnDestroy {
       console.log(`[DOCS] Vérification des documents pour l'enfant #${enfant.id} (${enfant.prenom} ${enfant.nom})`);
       this.http.get<any[]>(`${this.API_BASE}/documents/membre/${enfant.id}`, { headers: this.getAuthHeaders() }).subscribe({
         next: (docsRaw) => {
-          const docs = Array.isArray(docsRaw) ? docsRaw : [];
-          if (!docs || docs.length === 0) {
+          const arr: any[] = Array.isArray(docsRaw) ? docsRaw
+            : Array.isArray((docsRaw as any)?.items) ? (docsRaw as any).items
+            : Array.isArray((docsRaw as any)?.data) ? (docsRaw as any).data
+            : Array.isArray((docsRaw as any)?.results) ? (docsRaw as any).results
+            : Array.isArray((docsRaw as any)?.documents) ? (docsRaw as any).documents
+            : [];
+          if (!arr || arr.length === 0) {
             console.log(`[DOCS] Aucun document transmis pour l'enfant #${enfant.id} → ${this.DOC_CATALOG.length} manquants.`);
             totalManquants += this.DOC_CATALOG.length;
           } else {
-            const typesPossedes = new Set((docs || []).map(d => this.unifyType(d.typeDocument)));
+            const typesPossedes = new Set((arr || []).map(d => this.unifyType((d as any)?.typeDocument ?? (d as any)?.type ?? (d as any)?.code ?? (d as any)?.label)));
             const manquants = this.DOC_CATALOG.filter(t => !typesPossedes.has(t.code));
             console.log(`[DOCS] Documents transmis pour l'enfant #${enfant.id}:`, Array.from(typesPossedes));
             console.log(`[DOCS] Documents manquants pour l'enfant #${enfant.id}:`, manquants.map(m => m.code));
@@ -122,6 +131,7 @@ export class DashboardParentComponent implements OnInit, OnDestroy {
           if (processed === this.enfants.length) {
             console.log(`[DOCS] Total global de documents manquants pour tous les enfants : ${totalManquants}`);
             this.stats.documentsManquants = totalManquants;
+            this.alertsReady = true;
             this.cdr.detectChanges();
           }
         }
@@ -190,8 +200,7 @@ export class DashboardParentComponent implements OnInit, OnDestroy {
         });
   // Charger les événements à venir (réel)
   setTimeout(() => this.loadEvenementsAVenir(), 0);
-  // Charger les documents manquants (réel)
-  setTimeout(() => this.loadDocumentsManquants(), 0);
+  // Ne pas relancer loadDocumentsManquants ici pour éviter un état "0" avant le chargement des enfants
       } else if (authState.isConnecte === false) {
         console.log('[👨‍👧 DASHBOARD PARENT] Utilisateur non connecté depuis authState');
         // Ne pas rediriger immédiatement, essayer de charger d'abord

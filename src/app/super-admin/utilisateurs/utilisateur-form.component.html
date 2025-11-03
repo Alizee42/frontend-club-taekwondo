@@ -31,9 +31,9 @@
   </div>
 
   <div *ngIf="mode === 'ajout'" class="form-group">
-    <label>Mot de passe temporaire</label>
-    <input type="password" [(ngModel)]="utilisateur.password" name="password" required minlength="6" />
-    <span style="font-size: 0.9em; color: #888;">Ce mot de passe devra être changé par l'utilisateur lors de sa première connexion.</span>
+    <label>Mot de passe (optionnel)</label>
+    <input type="password" [(ngModel)]="utilisateur.password" name="password" minlength="6" placeholder="Laisser vide pour envoyer un email de définition" />
+    <span style="font-size: 0.9em; color: #888;">Si laissé vide, l'utilisateur recevra un email pour définir son mot de passe avant sa première connexion.</span>
   </div>
   <div class="form-actions">
     <button type="submit" [disabled]="form.invalid">Valider</button>

@@ -11,8 +11,9 @@
     </div>
     <!-- Navigation -->
     <nav class="nav-wrapper">
-      <ng-container *ngIf="isUserLoggedIn && isDashboardPage; else publicNav">
-        <ul class="main-nav dashboard-nav">
+      <ng-container *ngIf="isUserLoggedIn; else publicNav">
+        <!-- Pour ADMIN / SUPER_ADMIN sur leurs dashboards ET pour toute la zone Parent/Membre et la page Profil: menu minimal -->
+        <ul class="main-nav dashboard-nav" *ngIf="isDashboardPage || isParentArea || isMembreArea || isProfilePage; else publicNav">
           <li><a [routerLink]="dashboardRoute" routerLinkActive="active" (click)="goToDashboard.emit()" class="dashboard-btn">Dashboard</a></li>
           <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="home-btn" title="Retour à l'accueil">Retour Accueil</a></li>
         </ul>

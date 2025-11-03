@@ -18,6 +18,12 @@ export class UiBadgeComponent {
 
   get badgeClass(): string {
     switch (this.type) {
+      case 'success':
+        return 'badge-success';
+      case 'danger':
+        return 'badge-danger';
+      case 'warn':
+        return 'badge-warn';
       case 'competition':
         return 'badge-competition';
       case 'annonce':

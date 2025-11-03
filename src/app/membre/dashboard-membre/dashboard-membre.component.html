@@ -64,7 +64,7 @@
           <i class="ri-shopping-bag-3-line"></i> Commandes en cours ({{ stats.commandesEnCours }})
         </div>
         <div
-          *ngIf="stats.paiementsEnRetard === 0
+          *ngIf="alertsReady && stats.paiementsEnRetard === 0
               && stats.documentsManquants === 0
               && stats.commandesEnCours === 0"
           class="pill ok"

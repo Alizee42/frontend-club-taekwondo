@@ -13,6 +13,11 @@ import { RouterModule } from '@angular/router';
 export class UniversalHeaderComponent {
   userDropdownOpen = false;
   showNotifications: boolean = true;
+  // Zone courante (déduite de l'URL)
+  isDashboardPage = false;
+  isParentArea = false;
+  isMembreArea = false;
+  isProfilePage = false;
 
   toggleUserDropdown() {
     this.userDropdownOpen = !this.userDropdownOpen;
@@ -39,7 +44,7 @@ export class UniversalHeaderComponent {
   }
 
   goToProfil() {
-    window.location.href = '/profil';
+    this.router.navigate(['/profil']);
   }
 
   handleLogout() {
@@ -67,13 +72,17 @@ export class UniversalHeaderComponent {
       this.dashboardRoute = '/dashboard';
     }
   }
-  isDashboardPage = false;
-
   constructor(private router: Router) {
     this.router.events.subscribe(() => {
-      const url = this.router.url;
-      // Affiche le menu connecté uniquement sur dashboard, admin, super-admin
-      this.isDashboardPage = /\b(dashboard|admin|super-admin)\b/.test(url);
+      const url = this.router.url || '';
+      // Pages tableau de bord (tous rôles)
+      this.isDashboardPage = /\b(dashboard|dashboard-admin|dashboard-super-admin|dashboard-parent|dashboard-membre)\b/.test(url);
+      // Zone Parent: toutes les routes qui commencent par /parent
+      this.isParentArea = url.startsWith('/parent');
+      // Zone Membre: toutes les routes qui commencent par /membre
+      this.isMembreArea = url.startsWith('/membre');
+      // Page Profil
+      this.isProfilePage = url.startsWith('/profil');
     });
   }
   showDropdown = false;

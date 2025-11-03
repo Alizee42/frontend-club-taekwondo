@@ -225,6 +225,19 @@
   color: var(--red-main);
 }
 
+/* Présentation "Mes informations" identique Parent */
+.profile-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--text-main, #64748b);
+  font-size: 1rem;
+}
+.profile-rows i {
+  color: var(--red-main);
+  margin-right: 0.4rem;
+}
+
 /* Alertes */
 .alerts {
   display: flex;
