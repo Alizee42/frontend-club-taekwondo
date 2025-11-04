@@ -28,6 +28,7 @@ private readonly API = `${environment.apiUrl}`;
   membreId: number | null = null;
   membreNom = 'Vous';
   userEmail: string | null = null;
+  envoyerRecuEmail = true; // préférence utilisateur
 
   // Historique
   paiements: any[] = [];
@@ -327,6 +328,7 @@ private authHeaders() {
   fermerModalCarte(): void {
     this.log('fermerModalCarte');
     this.modalCarteOuverte = false;
+    this.resetStripeMainElement();
   }
   validerCarte(): void {
     this.log('validerCarte.click');
@@ -407,9 +409,9 @@ private authHeaders() {
             echeanceIdToPay = firstUnpaid?.id;
           }
 
-          const piPayload: any = { paiementId: this.paiementIdEnCours };
+          const piPayload: any = { paiementId: this.paiementIdEnCours, sendReceiptEmail: this.envoyerRecuEmail };
           if (echeanceIdToPay) piPayload.echeanceId = echeanceIdToPay;
-          if (this.userEmail) piPayload.customerEmail = this.userEmail; // ✅ reçu Stripe
+          if (this.envoyerRecuEmail && this.userEmail) piPayload.customerEmail = this.userEmail; // ✅ reçu Stripe si coché
           this.log('createPI.req', piPayload);
 
           this.http.post<any>(`${this.API}/stripe/create-payment-intent`, piPayload, { headers: this.authHeaders() })
@@ -431,6 +433,9 @@ private authHeaders() {
                   if (fromModal) this.modalCarteOuverte = false;
                   this.paiementReussi = true; this.enCoursDePaiement = false; this.confirming = false;
                   this.step = 3; // ✅ confirmation (3ème étape)
+
+                  // Préparer un nouveau cycle propre (le Payment Element sera remonté au prochain paiement)
+                  this.resetStripeMainElement();
 
                   this.loadPaiements();
                   this.ensureInHistory(createdSnapshot); // filet optimiste
@@ -483,8 +488,8 @@ private authHeaders() {
 
     const paiementId = Number(this.paiementActuel?.id || this.paiementActuel?.paiementId);
     const echeanceId = Number(this.echeanceEnCours?.id);
-    const payload: any = { paiementId, echeanceId };
-    if (this.userEmail) payload.customerEmail = this.userEmail; // ✅ reçu Stripe
+  const payload: any = { paiementId, echeanceId, sendReceiptEmail: this.envoyerRecuEmail };
+  if (this.envoyerRecuEmail && this.userEmail) payload.customerEmail = this.userEmail; // ✅ reçu Stripe si coché
     this.log('echeance.createPI.req', payload);
 
     this.http.post<any>(`${this.API}/stripe/create-payment-intent`, payload, { headers: this.authHeaders() })
@@ -516,6 +521,28 @@ private authHeaders() {
     let url = `${this.API}/stripe/receipt/${pid}`;
     if (echeanceId) url += `?echeanceId=${echeanceId}`;
     window.open(url, '_blank', 'noopener');
+  }
+
+  /** Réinitialise l'élément Stripe de la modale principale pour un nouveau paiement */
+  private resetStripeMainElement(): void {
+    try { if (this.cardElement) { this.cardElement.unmount(); } } catch {}
+    this.cardElement = null;
+    this.stripeElementMounted = false;
+    this.stripeReady = false;
+  }
+
+  /** Lancer un nouveau paiement depuis l'écran de confirmation */
+  nouveauPaiement(): void {
+    // Réinitialise l'état du wizard et du composant
+    this.step = 1;
+    this.paiementReussi = false;
+    this.paiementErreur = false;
+    this.enCoursDePaiement = false;
+    this.erreurMessage = '';
+    this.paymentDate = null;
+    // Ne pas effacer paiementIdEnCours tout de suite pour permettre d'ouvrir le reçu après coup si besoin
+    // (il sera remplacé à la prochaine création)
+    this.resetStripeMainElement();
   }
 
   // ===== Aides montant =====

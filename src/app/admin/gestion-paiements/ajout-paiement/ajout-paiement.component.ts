@@ -26,6 +26,7 @@ interface EcheanceInput {
 export class AjoutPaiementComponent implements OnInit {
   @Output() saved = new EventEmitter<void>();
   @Output() changementVue = new EventEmitter<string>();
+  @Output() paiementAjoute = new EventEmitter<void>();
 
   // Stepper
   currentStep = 0;
@@ -272,6 +273,7 @@ export class AjoutPaiementComponent implements OnInit {
           this.loading = false;
           this.successMsg = 'Paiement ajouté avec succès.';
           this.saved.emit();
+          this.paiementAjoute.emit();
           this.changementVue.emit('paiements');
         },
         error: (err: any) => {
@@ -308,6 +310,7 @@ export class AjoutPaiementComponent implements OnInit {
         this.loading = false;
         this.successMsg = 'Paiement ajouté avec succès.';
         this.saved.emit();
+        this.paiementAjoute.emit();
         this.changementVue.emit('paiements');
       },
       error: (err: any) => {

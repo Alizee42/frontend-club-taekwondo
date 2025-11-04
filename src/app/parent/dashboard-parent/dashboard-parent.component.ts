@@ -89,6 +89,14 @@ export class DashboardParentComponent implements OnInit, OnDestroy {
     return headers;
   }
 
+  /** Génère les initiales à partir du prénom et nom */
+  getInitials(prenom?: string, nom?: string): string {
+    const p = (prenom || '').trim();
+    const n = (nom || '').trim();
+    if (!p && !n) return '?';
+    return `${p[0] || ''}${n[0] || ''}`.toUpperCase();
+  }
+
   /** Récupère le nombre réel de documents manquants pour tous les enfants */
   loadDocumentsManquants(): void {
     this.alertsReady = false;

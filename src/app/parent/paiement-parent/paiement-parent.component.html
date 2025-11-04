@@ -141,11 +141,27 @@
           </div>
         </div>
 
+        <!-- Préférence de reçu par email (mise en avant, parité Membre) -->
+        <div class="receipt-optin">
+          <label class="optin-line">
+            <input type="checkbox" [(ngModel)]="envoyerRecuEmail">
+            <span>
+              Recevoir un reçu par email
+              <span class="muted" *ngIf="!envoyerRecuEmail">(optionnel)</span>
+            </span>
+          </label>
+          <div class="optin-email" *ngIf="envoyerRecuEmail">
+            <label for="emailRecuParent" class="label">Adresse email</label>
+            <input id="emailRecuParent" type="email" [(ngModel)]="userEmail" placeholder="prenom.nom@email.com">
+            <p class="muted small">Vous recevrez un email de reçu Stripe après la validation.</p>
+          </div>
+        </div>
+
         <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
 
         <div class="actions">
           <button class="btn link" (click)="previousStep()" [disabled]="enCoursDePaiement">← Retour</button>
-          <button class="btn primary" (click)="ouvrirModalCarte()" [disabled]="enCoursDePaiement">Payer maintenant</button>
+          <button class="btn primary" (click)="ouvrirModalCarte()" [disabled]="enCoursDePaiement || (envoyerRecuEmail && (!userEmail || !userEmail.includes('@')))">Payer maintenant</button>
         </div>
       </div>
 
@@ -161,24 +177,19 @@
           </p>
 
           <div class="doc-box">
-            <p class="muted">Vous pouvez récupérer vos justificatifs :</p>
+            <p class="muted">Reçu de paiement:</p>
             <div class="actions center" style="gap:8px; flex-wrap: wrap;">
               <a class="btn primary"
                  *ngIf="factureUrl"
                  [href]="factureUrl"
                  target="_blank"
-                 rel="noopener"
-                 download>
-                Télécharger la facture (PDF)
+                 rel="noopener">
+                Ouvrir le reçu
               </a>
-
-              <!-- ✅ Reçu Stripe natif (ouvre l’URL sécurisée Stripe) -->
-              <button class="btn ghost"
-                      *ngIf="canOpenStripeReceipt()"
-                      (click)="openStripeReceipt()">
-                Voir le reçu carte (Stripe)
-              </button>
             </div>
+            <p class="muted small" *ngIf="envoyerRecuEmail && userEmail">
+              Reçu envoyé à <strong>{{ userEmail }}</strong>
+            </p>
           </div>
 
           <div class="actions center" style="margin-top: 8px">
@@ -326,6 +337,9 @@
   <div class="modal-content">
     <h3>Payer une échéance</h3>
     <p>Montant : <strong>{{ montantTotalAPayer | currency:'EUR' }}</strong></p>
+    <p class="muted small" *ngIf="userEmail && envoyerRecuEmail">
+      Un reçu Stripe sera envoyé à <strong>{{ userEmail }}</strong>.
+    </p>
     <div id="card-element-parent-modal" class="stripe-card" aria-label="Saisie de carte pour l’échéance"></div>
     <div class="actions">
       <button class="btn primary" (click)="payerEcheances()" [disabled]="enCoursDePaiement">Payer</button>
@@ -340,6 +354,9 @@
   <div class="modal-content">
     <h3>Coordonnées bancaires</h3>
     <p class="muted small">Saisie sécurisée via Stripe.</p>
+    <p class="muted small" *ngIf="userEmail && envoyerRecuEmail">
+      Un reçu Stripe sera envoyé à <strong>{{ userEmail }}</strong>.
+    </p>
     <div id="card-element-main-modal" class="stripe-card" aria-label="Saisie de la carte"></div>
     <div class="actions">
       <button class="btn primary"

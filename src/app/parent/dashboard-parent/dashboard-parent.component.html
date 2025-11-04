@@ -78,7 +78,7 @@
         <h2 class="section-title"><i class="ri-team-line"></i> Mes enfants</h2>
         <div class="kids-grid">
           <div class="kid" *ngFor="let enfant of enfants">
-            <img [src]="enfant?.avatar || 'assets/images/avatar-default.png'" alt="Avatar enfant" />
+            <div class="kid-avatar">{{ getInitials(enfant?.prenom, enfant?.nom) }}</div>
             <div class="kid-info">
               <h3>{{ enfant?.prenom }} {{ enfant?.nom }}</h3>
               <p *ngIf="enfant?.dateNaissance">{{ enfant?.dateNaissance | age }} ans</p>

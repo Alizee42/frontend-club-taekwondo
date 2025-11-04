@@ -90,8 +90,9 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   paymentDate: Date | null = null;
   montantPaye = 0;
 
-  // Email client pour reçu Stripe
-  private customerEmail: string = (localStorage.getItem('userEmail')
+  // Email client pour reçu Stripe (opt-in visible comme côté Membre)
+  envoyerRecuEmail: boolean = false;
+  userEmail: string = (localStorage.getItem('userEmail')
     || localStorage.getItem('email')
     || '').trim();
 
@@ -372,6 +373,7 @@ private buildFactureUrl(paiementId: number){
   fermerModalCarte(): void {
   // ...log supprimé...
     this.modalCarteOuverte = false;
+    this.resetStripeMainElement();
   }
 
   /**
@@ -410,6 +412,14 @@ private buildFactureUrl(paiementId: number){
   // ...log supprimé...
       this.stripeReady = false;
     }
+  }
+
+  /** Démonte l’élément Stripe principal pour un nouveau cycle propre */
+  private resetStripeMainElement(): void {
+    try { if (this.cardElement) this.cardElement.unmount(); } catch {}
+    this.cardElement = null;
+    this.stripeElementMounted = false;
+    this.stripeReady = false;
   }
 
   // ===== Création + confirmation paiement (checkout principal)
@@ -461,8 +471,9 @@ private buildFactureUrl(paiementId: number){
 
           const piPayload: any = {
             paiementId: this.paiementIdEnCours,
-            customerEmail: this.customerEmail || undefined
+            sendReceiptEmail: this.envoyerRecuEmail
           };
+          if (this.envoyerRecuEmail && this.userEmail) piPayload.customerEmail = this.userEmail;
           if (echeanceIdToPay) piPayload.echeanceId = echeanceIdToPay;
           // ...log supprimé...
 
@@ -493,6 +504,8 @@ private buildFactureUrl(paiementId: number){
 
                   // Recharge l’historique
                   this.loadPaiements();
+                  // Préparer un nouveau cycle de paiement
+                  this.resetStripeMainElement();
                 } catch (e) {
                   this.failPaiement('Exception lors de la confirmation Stripe'); /* log supprimé */
                   this.confirming = false;
@@ -548,8 +561,9 @@ private buildFactureUrl(paiementId: number){
     const payload: any = {
       paiementId,
       echeanceId,
-      customerEmail: this.customerEmail || undefined
+      sendReceiptEmail: this.envoyerRecuEmail
     };
+    if (this.envoyerRecuEmail && this.userEmail) payload.customerEmail = this.userEmail;
   // ...log supprimé...
 
     this.http.post<any>(`${this.API}/stripe/create-payment-intent`, payload, { headers: this.authHeaders() })
