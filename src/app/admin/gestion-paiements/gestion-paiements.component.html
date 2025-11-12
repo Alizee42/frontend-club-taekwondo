@@ -1,7 +1,7 @@
 <div class="gestion-paiements-modern">
   <!-- Header avec titre -->
   <header class="page-header">
-    <ui-title [level]="2" text="💰 Gestion des Paiements"></ui-title>
+    <ui-title [level]="2" text="Gestion des Paiements"></ui-title>
   </header>
 
   <!-- Stats KPI (compactes) -->
@@ -55,13 +55,20 @@
   <!-- Contenu des onglets -->
   <section class="tab-content">
     <app-suivi-paiements *ngIf="ongletActif === 'paiements'"></app-suivi-paiements>
-    <app-echeances *ngIf="ongletActif === 'echeances'"></app-echeances>
+    <div *ngIf="ongletActif === 'echeances'" class="suivi">
+      <h2 class="page-title"><i class="ri-calendar-check-line"></i> Échéances</h2>
+      <div class="table-wrapper" *ngIf="paiements.length">
+        <ui-table
+          [columns]="echeancesColumns"
+          [data]="paiements"
+          [actions]="echeancesActions"
+          (actionClick)="onEcheanceAction($event)"
+        ></ui-table>
+      </div>
+      <div class="empty" *ngIf="!paiements.length">Aucun paiement trouvé.</div>
+    </div>
   </section>
 
-  <!-- Bouton flottant pour ajouter un paiement -->
-  <button class="fab-button" (click)="ouvrirModalAjout()" title="Ajouter un paiement">
-    <i class="ri-add-line"></i>
-  </button>
 
   <!-- Modal d'ajout (si visible) -->
   <div class="modal-overlay" *ngIf="modalAjoutVisible" (click)="fermerModalAjout()">

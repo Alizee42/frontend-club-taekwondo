@@ -1,3 +1,13 @@
+.ui-title::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 4px;
+  margin: 0.5rem auto 0 auto;
+  background: linear-gradient(90deg, #1E6091 60%, #A9D6E5 100%);
+  border-radius: 2px;
+  opacity: 0.85;
+}
 .ui-table img {
   width: 37%;
 }

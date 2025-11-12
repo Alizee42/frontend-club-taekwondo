@@ -390,26 +390,46 @@ private buildFactureUrl(paiementId: number){
   }
 
   private async mountStripeOn(targetId: string): Promise<void> {
-    if (this.stripeElementMounted) { this.stripeReady = true; return; }
+    if (this.stripeElementMounted) {
+      console.log('[Stripe][parent] mountStripeOn.alreadyMounted', targetId);
+      this.stripeReady = true;
+      return;
+    }
     const container = document.getElementById(targetId);
-  if (!container) { /* log supprimé */ return; }
-
+    if (!container) {
+      console.error('[Stripe][parent] Container introuvable pour', targetId);
+      return;
+    }
     try {
+      console.log('[Stripe][parent] mountStripeOn.start', targetId);
       const stripe = await this.stripeService.getStripeInstance();
-  if (!stripe) { /* log supprimé */ this.stripeReady = false; return; }
-
+      if (!stripe) {
+        console.error('[Stripe][parent] Stripe non initialisé');
+        this.stripeReady = false;
+        return;
+      }
       this.stripe = stripe;
       const elements = this.stripe.elements();
-
-      if (this.cardElement) { try { this.cardElement.unmount(); } catch {} }
+      if (this.cardElement) {
+        try {
+          this.cardElement.unmount();
+          console.log('[Stripe][parent] mountStripeOn.unmountOld');
+        } catch (err) {
+          console.log('[Stripe][parent] mountStripeOn.unmountOld.err', err);
+        }
+      }
       this.cardElement = elements.create('card');
+      console.log('[Stripe][parent] mountStripeOn.createCardElement', this.cardElement);
       this.cardElement.mount(`#${targetId}`);
-
+      console.log('[Stripe][parent] mountStripeOn.mounted', targetId);
       this.stripeElementMounted = true;
       this.stripeReady = true;
-  // ...log supprimé...
+      this.cardElement.on('change', (event: any) => {
+        console.log('[Stripe][parent] mountStripeOn.cardChange', event);
+        if (event.error) console.error('[Stripe][parent] Erreur saisie:', event.error.message);
+      });
     } catch (e) {
-  // ...log supprimé...
+      console.error('[Stripe][parent] Erreur lors du montage Stripe:', e);
       this.stripeReady = false;
     }
   }

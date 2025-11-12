@@ -337,21 +337,51 @@ private authHeaders() {
   }
 
   private async mountStripeOn(targetId: string): Promise<void> {
-    if (this.stripeElementMounted) { this.stripeReady = true; return; }
+    if (this.stripeElementMounted) {
+      this.log('mountStripeOn.alreadyMounted', targetId);
+      this.stripeReady = true;
+      return;
+    }
     const container = document.getElementById(targetId);
-    if (!container) { this.log('mountStripeOn.noContainer', targetId); return; }
+    if (!container) {
+      this.log('mountStripeOn.noContainer', targetId);
+      console.error('[Stripe] Container introuvable pour', targetId);
+      return;
+    }
     try {
+      this.log('mountStripeOn.start', targetId);
       const stripe = await this.stripeService.getStripeInstance();
-      if (!stripe) { this.log('mountStripeOn.noStripe'); this.stripeReady = false; return; }
+      if (!stripe) {
+        this.log('mountStripeOn.noStripe');
+        console.error('[Stripe] Stripe non initialisé');
+        this.stripeReady = false;
+        return;
+      }
       this.stripe = stripe;
       const elements = this.stripe.elements();
-      if (this.cardElement) { try { this.cardElement.unmount(); } catch {} }
+      if (this.cardElement) {
+        try {
+          this.cardElement.unmount();
+          this.log('mountStripeOn.unmountOld');
+        } catch (err) {
+          this.log('mountStripeOn.unmountOld.err', err);
+        }
+      }
       this.cardElement = elements.create('card');
+      this.log('mountStripeOn.createCardElement', this.cardElement);
       this.cardElement.mount(`#${targetId}`);
+      this.log('mountStripeOn.mounted', targetId);
       this.stripeElementMounted = true;
       this.stripeReady = true;
-      this.log('mountStripeOn.ok', targetId);
-    } catch (e) { this.log('mountStripeOn.err', e); this.stripeReady = false; }
+      this.cardElement.on('change', (event: any) => {
+        this.log('mountStripeOn.cardChange', event);
+        if (event.error) console.error('[Stripe] Erreur saisie:', event.error.message);
+      });
+    } catch (e) {
+      this.log('mountStripeOn.err', e);
+      console.error('[Stripe] Erreur lors du montage Stripe:', e);
+      this.stripeReady = false;
+    }
   }
 
   // ===== Création + paiement =====

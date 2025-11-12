@@ -46,38 +46,14 @@ export class StripeService {
   private getPublicKey(): Promise<string> {
     if (!this.publicKeyPromise) {
       this.publicKeyPromise = (async () => {
-        // 0) endpoint public clé Stripe
+        // Utiliser uniquement l'endpoint public clé Stripe
         try {
           const r = await firstValueFrom(this.http.get<any>(`${this.backendUrl}/public-key`));
           const k = r?.publicKey ?? r?.key ?? r?.stripePublicKey;
           if (k) return k;
         } catch { /* ignore */ }
 
-        // 1) paramètres admin
-        try {
-          const admin = await firstValueFrom(
-            this.http.get<any>(`${environment.apiUrl}/parametres-paiement`)
-          );
-          const k = admin?.stripePublicKey ?? admin?.clePubliqueStripe ?? admin?.publishableKey ?? admin?.stripe_pk;
-          if (k) return k;
-        } catch { /* ignore */ }
-
-        // 2) paramètres publics
-        try {
-          const pub = await firstValueFrom(this.http.get<any>(`${environment.apiUrl}/parametres-paiement/public`));
-          const k = pub?.stripePublicKey ?? pub?.clePubliqueStripe ?? pub?.publishableKey ?? pub?.stripe_pk;
-          if (k) return k;
-        } catch { /* ignore */ }
-
-        // 3) meta fallback (dev)
-        const metaKey =
-          this.getMeta('stripe-public-key') ||
-          this.getMeta('stripePublicKey')   ||
-          this.getMeta('stripe-pk')         ||
-          this.getMeta('stripe_pk');
-        if (metaKey) return metaKey;
-
-        throw new Error('Clé publique Stripe introuvable (public-key / paramètres / meta).');
+        throw new Error('Clé publique Stripe introuvable (public-key).');
       })();
     }
     return this.publicKeyPromise;

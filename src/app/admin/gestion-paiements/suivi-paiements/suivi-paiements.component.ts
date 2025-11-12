@@ -1,6 +1,7 @@
 import { Component, OnInit, TrackByFunction } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AjoutPaiementComponent } from '../ajout-paiement/ajout-paiement.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
@@ -52,7 +53,7 @@ interface GroupeParent {
 @Component({
   selector: 'app-suivi-paiements',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AjoutPaiementComponent],
   templateUrl: './suivi-paiements.component.html',
   styleUrls: ['./suivi-paiements.component.css']
 })
@@ -81,11 +82,29 @@ export class SuiviPaiementsComponent implements OnInit {
   filtres = { q: '', statut: '', type: '', mode: '' };
   searchUsers = '';
 
+
   // Modales (paiement)
   modalEcheancesVisible = false;
   modalAnnulationVisible = false;
   paiementActuel: Paiement | null = null;
   motifAnnulation = '';
+
+  // Modale ajout paiement
+  modalAjoutPaiementVisible = false;
+
+  ouvrirAjoutPaiement(): void {
+    this.modalAjoutPaiementVisible = true;
+  }
+
+  fermerAjoutPaiement(): void {
+    this.modalAjoutPaiementVisible = false;
+  }
+
+  /** Callback quand un paiement est ajouté via la modale */
+  onPaiementCree(event?: any): void {
+    this.fermerAjoutPaiement();
+    this.refresh();
+  }
 
   // Modales (utilisateur)
   modalUserStatsVisible = false;

@@ -14,7 +14,6 @@ import { DashboardSuperAdminComponent } from './super-admin/dashboard-super-admi
 import { ClubsComponent } from './super-admin/clubs/clubs.component';
 import { AdminsComponent } from './super-admin/admins/admins.component';
 import { MembresSuperAdminComponent } from './super-admin/membres-super-admin/membres-super-admin.component';
-import { PaiementsComponent } from './super-admin/paiements/paiements.component';
 import { LogsComponent } from './super-admin/logs/logs.component';
 import { ActualitesSuperAdminComponent } from './super-admin/actualites/actualites-super-admin.component';
 import { DashboardMembreComponent } from './membre/dashboard-membre/dashboard-membre.component';
@@ -133,7 +132,7 @@ export const routes: Routes = [
   { path: 'clubs', component: ClubsComponent },
   { path: 'admins', component: AdminsComponent },
   { path: 'membres', component: MembresSuperAdminComponent },
-  { path: 'paiements', component: PaiementsComponent },
+  { path: 'gestion-paiements', loadComponent: () => import('./super-admin/gestion-paiements-super-admin/gestion-paiements-super-admin.component').then(m => m.GestionPaiementsSuperAdminComponent) },
   { path: 'logs', component: LogsComponent },
   { path: 'actualites', component: ActualitesSuperAdminComponent },
   { path: 'galerie', component: GalerieGestionSuperAdminComponent }, // galerie super admin

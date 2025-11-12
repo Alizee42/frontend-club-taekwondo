@@ -196,7 +196,7 @@ export class DashboardSuperAdminComponent implements OnInit {
     this.router.navigate(['super-admin/membres']);
   }
   navigateToPaiement() {
-    this.router.navigate(['super-admin/paiements']);
+    this.router.navigate(['super-admin/gestion-paiements']);
   }
   navigateToCommandes() {
     this.router.navigate(['super-admin/commandes']);

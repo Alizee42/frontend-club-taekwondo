@@ -4,9 +4,10 @@ import { Subscription } from 'rxjs';
 import { Chart, ArcElement, Tooltip, Legend, DoughnutController } from 'chart.js';
 
 import { SuiviPaiementsComponent } from './suivi-paiements/suivi-paiements.component';
-import { EcheancesComponent } from './echeances/echeances.component';
 import { AjoutPaiementComponent } from './ajout-paiement/ajout-paiement.component';
 import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
+import type { UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { PaymentAdminService } from '../../services/payment-admin.service';
 import { DashboardStats } from '../../models/dashboard-stats.model';
 import { DaySum } from '../../models/day-sum';
@@ -20,17 +21,49 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
   imports: [
     CommonModule,
     SuiviPaiementsComponent,
-    EcheancesComponent,
     AjoutPaiementComponent,
-    UiTitleComponent
-  ],
-  templateUrl: './gestion-paiements.component.html',
-  styleUrls: ['./gestion-paiements.component.css']
-})
+    UiTitleComponent,
+    UiTableComponent,
+    ],
+    templateUrl: './gestion-paiements.component.html',
+    styleUrls: ['./gestion-paiements.component.css']
+  })
 export class GestionPaiementsComponent implements OnInit, OnDestroy {
+  constructor(private paymentService: PaymentAdminService) {}
+  echeancesColumns = [
+    { key: 'datePaiement', label: 'Date', type: 'date' as const, cellClass: undefined, display: (row: any) => this.formatDate(row && row.datePaiement) },
+    { key: 'utilisateur', label: 'Payé par', type: 'text' as const, cellClass: undefined, display: (row: any) => `${row && row.utilisateurPrenom ? row.utilisateurPrenom : ''} ${row && row.utilisateurNom ? row.utilisateurNom : ''}` },
+    { key: 'membre', label: 'Pour', type: 'text' as const, cellClass: undefined, display: (row: any) => `${row && row.membrePrenom ? row.membrePrenom : ''} ${row && row.membreNom ? row.membreNom : ''}` },
+    { key: 'type', label: 'Type de paiement', type: 'text' as const, cellClass: undefined, display: (row: any) => `${row && row.type ? row.type : ''} – ${row && row.modePaiement ? row.modePaiement : ''}` },
+    { key: 'montantTotal', label: 'Total', type: 'number' as const, cellClass: 'num', display: (row: any) => this.formatCurrency(row && row.montantTotal) },
+    { key: 'montantPaye', label: 'Payé', type: 'number' as const, cellClass: 'num', display: (row: any) => this.formatCurrency(row && (row.montantPaye != null ? row.montantPaye : row.montantTotal)) },
+    { key: 'montantRestant', label: 'Restant', type: 'number' as const, cellClass: 'num', display: (row: any) => this.formatCurrency(row && (row.montantRestant != null ? row.montantRestant : ((row.montantTotal || 0) - (row.montantPaye || 0)))) },
+    { key: 'statut', label: 'Statut', type: 'text' as const, cellClass: undefined }
+  ];
+  echeancesActions = [
+    // Exemple d'action, à adapter selon besoins
+    // { label: 'Voir', icon: 'ri-eye-line', action: 'voir', variant: 'secondary' },
+    // { label: 'Relancer', icon: 'ri-mail-send-line', action: 'relancer', variant: 'primary', show: (row: any) => row.statut === 'En attente' }
+  ];
+
+  onEcheanceAction(event: { action: string, row: any }) {
+    // À compléter selon les actions souhaitées
+    console.log('Action sur échéance', event);
+  }
+
+  formatDate(date: string | Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toLocaleDateString('fr-FR');
+  }
+
+  formatCurrency(val: number): string {
+    if (val == null) return '';
+    return val.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+  }
   ongletActif: 'paiements' | 'echeances' = 'paiements';
   modalAjoutVisible = false;
-  
+
   stats: DashboardStats & {
     courbe: DaySum[];
     membresEnRetard: MembreRetard[];
@@ -43,9 +76,9 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
     membresEnRetard: []
   };
 
+  paiements: any[] = [];
   private statsSubscription?: Subscription;
 
-  constructor(private paymentService: PaymentAdminService) {}
 
   ngOnInit(): void {
     this.statsSubscription = this.paymentService.dashboardStats$.subscribe(data => {
@@ -60,8 +93,19 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
         };
       }
     });
-
     this.refreshStats();
+    this.loadPaiements();
+  }
+
+  loadPaiements(): void {
+    this.paymentService.getAllPaiements().subscribe({
+      next: (res) => {
+        this.paiements = Array.isArray(res) ? res : [];
+      },
+      error: (err) => {
+        this.paiements = [];
+      }
+    });
   }
 
   refreshStats(): void {
@@ -76,6 +120,9 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
 
   changerOnglet(onglet: 'paiements' | 'echeances'): void {
     this.ongletActif = onglet;
+    if (onglet === 'echeances') {
+      this.loadPaiements();
+    }
   }
 
   ouvrirModalAjout(): void {
@@ -89,6 +136,7 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
   onPaiementAjoute(): void {
     this.fermerModalAjout();
     this.refreshStats();
+    this.loadPaiements();
   }
 
   ngOnDestroy(): void {

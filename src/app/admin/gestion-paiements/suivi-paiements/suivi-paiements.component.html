@@ -35,6 +35,19 @@
       <button class="btn refresh" (click)="refresh()">
         <i class="ri-refresh-line"></i> Rafraîchir
       </button>
+      <button class="btn primary" (click)="ouvrirAjoutPaiement()">
+        <i class="ri-add-line"></i> Ajouter un paiement
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal ajout paiement -->
+  <div class="modal" *ngIf="modalAjoutPaiementVisible">
+    <div class="modal-content">
+      <span class="close" (click)="fermerAjoutPaiement()">&times;</span>
+      <h3>Ajouter un paiement</h3>
+      <!-- Place ici ton formulaire d'ajout manuel (ou <app-ajout-paiement> si tu as déjà un composant dédié) -->
+  <app-ajout-paiement (paiementAjoute)="onPaiementCree($event)" (annuler)="fermerAjoutPaiement()"></app-ajout-paiement>
     </div>
   </div>
 

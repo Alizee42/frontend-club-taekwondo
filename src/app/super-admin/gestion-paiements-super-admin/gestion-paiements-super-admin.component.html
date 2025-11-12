@@ -1,0 +1,139 @@
+
+<div class="gestion-paiements-modern">
+  <!-- Header avec titre -->
+  <header class="page-header">
+    <h2 class="page-title"><i class="ri-list-check-2"></i> Gestion des paiements clubs</h2>
+  </header>
+
+  <!-- KPI / Statistiques (kpi-card) -->
+  <section class="kpi-section">
+    <div class="kpi-card success">
+      <i class="ri-wallet-3-line"></i>
+      <div class="kpi-content">
+        <span class="kpi-label">Total encaissé</span>
+        <span class="kpi-value">{{ stats.total | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+    <div class="kpi-card info">
+      <i class="ri-bar-chart-2-line"></i>
+      <div class="kpi-content">
+        <span class="kpi-label">Nombre de paiements</span>
+        <span class="kpi-value">{{ stats.count }}</span>
+      </div>
+    </div>
+    <div class="kpi-card warning">
+      <i class="ri-time-line"></i>
+      <div class="kpi-content">
+        <span class="kpi-label">En attente</span>
+        <span class="kpi-value">{{ stats.enAttente }}</span>
+      </div>
+    </div>
+    <div class="kpi-card neutral">
+      <i class="ri-refund-2-line"></i>
+      <div class="kpi-content">
+        <span class="kpi-label">Remboursés</span>
+        <span class="kpi-value">{{ stats.rembourses }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Onglets -->
+  <nav class="tabs-nav">
+    <button 
+      class="tab-button" 
+      [class.active]="ongletActif === 'paiements'"
+      (click)="changerOnglet('paiements')">
+      <i class="ri-money-euro-circle-line"></i> Paiements
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="ongletActif === 'echeances'"
+      (click)="changerOnglet('echeances')">
+      <i class="ri-calendar-check-line"></i> Échéances
+    </button>
+  </nav>
+
+  <!-- TOOLBAR (filtre club, recherche, actions) -->
+  <div class="toolbar">
+    <div class="segmented" role="tablist" aria-label="Vue">
+      <label for="club-select" style="margin-right:8px; font-weight:600; color:#415a77;">Club :</label>
+      <select id="club-select" class="pill-select" [(ngModel)]="selectedClubId" (change)="onClubChange()">
+        <option value="all">Tous les clubs</option>
+        <option *ngFor="let club of clubs" [value]="club.id">{{ club.nom }}</option>
+      </select>
+    </div>
+    <div class="search">
+      <i class="ri-search-line"></i>
+      <input class="search-input" placeholder="Rechercher (parent / enfant / email)" [(ngModel)]="filter.q" (input)="applyFilters()" />
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn refresh" (click)="applyFilters()">
+        <i class="ri-refresh-line"></i> Rafraîchir
+      </button>
+      <button class="btn success" (click)="ouvrirAjoutPaiement()">
+        <i class="ri-add-line"></i> Ajouter un paiement
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtres avancés -->
+  <div class="filters compact">
+    <label>Date début : <input type="date" [(ngModel)]="filter.dateDebut" (change)="applyFilters()"></label>
+    <label>Date fin : <input type="date" [(ngModel)]="filter.dateFin" (change)="applyFilters()"></label>
+    <select class="pill-select" [(ngModel)]="filter.statut" (change)="applyFilters()">
+      <option value="all">Statut</option>
+      <option *ngFor="let s of statutOptions" [value]="s.value">{{ s.label }}</option>
+    </select>
+    <select class="pill-select" [(ngModel)]="filter.type" (change)="applyFilters()">
+      <option value="all">Type</option>
+      <option *ngFor="let t of typeOptions" [value]="t.value">{{ t.label }}</option>
+    </select>
+    <button class="btn ghost sm" (click)="filter = {q:'', dateDebut:'', dateFin:'', statut:'all', type:'all'}; applyFilters();">
+      <i class="ri-eraser-line"></i><span>Réinitialiser</span>
+    </button>
+  </div>
+
+  <!-- Contenu des onglets -->
+  <section class="tab-content">
+    <div *ngIf="ongletActif === 'paiements'">
+      <div class="empty" *ngIf="!filteredPaiements.length">Aucun paiement trouvé.</div>
+      <div class="table-wrapper" *ngIf="filteredPaiements.length">
+        <ui-table
+          [columns]="tableColumns"
+          [data]="filteredPaiements"
+          [actions]="tableActions"
+          (actionClick)="onAction($event)"
+        ></ui-table>
+      </div>
+  <!-- Modal d'ajout paiement -->
+  <div class="modal-overlay" *ngIf="modalAjoutVisible" (click)="fermerModalAjout()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="fermerModalAjout()">
+        <i class="ri-close-line"></i>
+      </button>
+      <app-ajout-paiement (paiementAjoute)="onPaiementAjoute()"></app-ajout-paiement>
+    </div>
+  </div>
+    </div>
+    <div *ngIf="ongletActif === 'echeances'">
+      <div class="empty">Aucune échéance à afficher (fonctionnalité à venir).</div>
+    </div>
+  </section>
+
+  <!-- Modal détail paiement -->
+  <div class="modal" *ngIf="modalPaiementVisible">
+    <div class="modal-content">
+      <span class="close" (click)="fermerModalPaiement()">&times;</span>
+      <h3>Détail du paiement</h3>
+      <div class="paiement-details">
+        <div><strong>Club :</strong> {{ paiementSelectionne?.club }}</div>
+        <div><strong>Date :</strong> {{ formatDate(paiementSelectionne?.datePaiement) }}</div>
+        <div><strong>Payé par :</strong> {{ paiementSelectionne?.utilisateurPrenom }} {{ paiementSelectionne?.utilisateurNom }}</div>
+        <div><strong>Pour :</strong> {{ paiementSelectionne?.membrePrenom }} {{ paiementSelectionne?.membreNom }}</div>
+        <div><strong>Type :</strong> {{ paiementSelectionne?.type }} – {{ paiementSelectionne?.modePaiement }}</div>
+        <div><strong>Montant :</strong> {{ formatCurrency(paiementSelectionne?.montantTotal) }}</div>
+        <div><strong>Statut :</strong> <span [innerHTML]="getBadge(paiementSelectionne?.statut)"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
