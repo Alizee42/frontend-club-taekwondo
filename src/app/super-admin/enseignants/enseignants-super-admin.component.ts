@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Club, ClubService } from '../../services/club.service';
 import { Enseignant, EnseignantService } from '../../services/enseignant.service';
 import { environment } from '../../../environments/environment';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
@@ -37,6 +37,8 @@ export class EnseignantsSuperAdminComponent implements OnInit {
   selected: Enseignant | null = null;
   photoPreviewUrl: string | null = null;
   uploadingPhoto = false;
+  // logo du club actuellement sélectionné (URL complète ou undefined)
+  currentClubLogo?: string;
 
   // Table config
   columns: UiTableColumn[] = [
@@ -73,6 +75,7 @@ export class EnseignantsSuperAdminComponent implements OnInit {
         this.clubs = clubs;
         if (clubs.length > 0) {
           this.selectedClubId = clubs[0].id;
+          this.currentClubLogo = this.getClubLogoUrl(clubs[0]);
           this.loadEnseignants();
         }
       }
@@ -81,6 +84,8 @@ export class EnseignantsSuperAdminComponent implements OnInit {
 
   onClubChange() {
     this.loadEnseignants();
+    const club = this.clubs.find(c => c.id === this.selectedClubId);
+    this.currentClubLogo = this.getClubLogoUrl(club);
   }
 
   loadEnseignants() {
@@ -190,5 +195,15 @@ export class EnseignantsSuperAdminComponent implements OnInit {
     // si le chemin commence déjà par 'enseignants/' => /uploads/<raw>
     if (raw.startsWith('enseignants/')) return `${apiBase}/uploads/${encodeURIComponent(raw)}`;
     return `${apiBase}/uploads/enseignants/${encodeURIComponent(raw)}`;
+  }
+
+  // Retourne l'URL complète du logo d'un club si disponible
+  getClubLogoUrl(club?: { logo?: string } | null): string | undefined {
+    if (!club || !club.logo) return undefined;
+    const raw = club.logo;
+    const apiBase = environment.apiUrl.replace(/\/api\/?$/i, '');
+    if (raw.startsWith('http') || raw.startsWith('/')) return raw;
+    if (raw.startsWith('clubs/')) return `${apiBase}/uploads/${encodeURIComponent(raw)}`;
+    return `${apiBase}/uploads/clubs/${encodeURIComponent(raw)}`;
   }
 }

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';

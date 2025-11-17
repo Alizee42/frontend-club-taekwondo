@@ -8,7 +8,7 @@ import { ClubService, Club } from '../../services/club.service';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 
 @Component({
   selector: 'app-galerie-gestion-super-admin',

@@ -6,7 +6,7 @@ import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { HorairesService } from '../../services/horaires.service';
 import { ClubService, Club } from '../../services/club.service';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 
 @Component({
   selector: 'app-gestion-horaires-super-admin',

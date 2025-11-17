@@ -1,7 +1,10 @@
 <div class="utilisateurs-global">
   <div class="header-bar-utilisateurs">
-    <ui-title [level]="1" text="Gestion des utilisateurs"></ui-title>
-    <ui-button icon="ri-user-add-line" label="Ajouter un utilisateur" (clicked)="onAddUtilisateur()" variant="primary"></ui-button>
+    <ui-title [level]="1" text="Gestion des utilisateurs" subtitle="Créer et gérer les comptes utilisateurs" icon="ri-user-line">
+      <div title-actions>
+        <ui-button icon="ri-user-add-line" label="Ajouter un utilisateur" (clicked)="onAddUtilisateur()" variant="primary"></ui-button>
+      </div>
+    </ui-title>
   </div>
   <ui-table
     [columns]="columns"

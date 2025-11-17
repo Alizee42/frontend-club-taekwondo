@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
-import { UiTitleComponent } from '../../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../../shared/ui/title/ui-title.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentAdminService } from '../../../services/payment-admin.service';

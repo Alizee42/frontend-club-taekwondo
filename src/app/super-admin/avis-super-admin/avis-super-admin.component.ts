@@ -8,7 +8,7 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 
 @Component({
   selector: 'app-avis-super-admin',

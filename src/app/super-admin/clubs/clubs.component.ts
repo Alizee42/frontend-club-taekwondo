@@ -6,7 +6,7 @@ import { UiTableComponent } from '../../shared/components/ui-table/ui-table.comp
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 
 @Component({
   selector: 'app-super-admin-clubs',

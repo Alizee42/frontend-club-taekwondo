@@ -35,7 +35,9 @@
 
 /* Container principal */
 .container {
-  max-width: 1200px;
+  /* Container pleine largeur : on supprime la contrainte de max-width pour laisser
+     le contenu utiliser toute la largeur disponible. */
+  max-width: none;
   margin: 0 auto;
   padding: 0 var(--container-padding);
   width: 100%;

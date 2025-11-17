@@ -1,9 +1,10 @@
 <section class="membres-section">
   <div class="header-flex">
-    <ui-title [level]="2" text="Gestion des membres"></ui-title>
-    <div class="add-btn">
-      <ui-button label="Ajouter un membre" (clicked)="openAjoutModal()" variant="primary" [disabled]="!selectedClubId"></ui-button>
-    </div>
+    <ui-title [level]="2" text="Gestion des membres" subtitle="Gère les membres du club sélectionné" icon="ri-group-line">
+      <div title-actions>
+        <ui-button label="Ajouter un membre" (clicked)="openAjoutModal()" variant="primary" [disabled]="!selectedClubId"></ui-button>
+      </div>
+    </ui-title>
   </div>
   <div class="club-select club-select-below">
     <label>Club :

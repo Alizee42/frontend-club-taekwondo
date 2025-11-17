@@ -6,7 +6,7 @@ import { AuthService, Utilisateur } from '../../services/auth.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
 
 @Component({

@@ -133,7 +133,8 @@ body.public-page-standard {
 /* Un wrapper utilitaire pourra être ajouté dans les pages si besoin: .page-wrapper-standard */
 
 body.public-page-standard .page-wrapper-standard {
-  max-width: 1240px;
+  /* Utiliser toute la largeur disponible : pas de max-width */
+  max-width: none;
   margin: 0 auto;
   padding: 2.2rem clamp(1rem, 2.5vw, 2.2rem);
   width: 100%;
@@ -387,6 +388,22 @@ body.public-page-standard table tbody tr:hover {
   body.public-page-standard .card {
     padding: 1.1rem 1.15rem;
   }
+}
+
+/* Override global pour forcer les conteneurs à pleine largeur
+   (utilisé quand l'intention est d'avoir des vues qui s'étendent sur toute la page) */
+.container,
+.container-fluid,
+.page-wrapper-standard,
+.container-lg,
+.container-md,
+.container-sm {
+  max-width: none !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: var(--container-padding) !important;
+  padding-right: var(--container-padding) !important;
 }
 
 /* ---------- STATUS BADGES ---------- */

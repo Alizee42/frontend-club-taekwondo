@@ -3,7 +3,8 @@
   color: #1E6091;
   font-size: 2.25rem;
   font-weight: 700;
-  margin-top: 0.2rem;
+  /* espace vertical augmenté pour descendre visuellement le titre */
+  margin-top: 0.8rem;
   letter-spacing: 2.5px;
   line-height: 1.15;
   text-align: left;
@@ -13,12 +14,80 @@
 }
 
 .ui-title::after {
-  content: '';
-  display: block;
-  width: 48px;
-  height: 4px;
-  margin: 0.5rem 0 0 0;
-  background: linear-gradient(90deg, #1E6091 60%, #A9D6E5 100%);
-  border-radius: 2px;
-  opacity: 0.85;
+  /* disabled to avoid double underline when using the card underline */
+  display: none;
+}
+
+/* New layout for title with subtitle and actions */
+.ui-title-wrapper {
+  margin-bottom: 1rem;
+}
+.ui-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.ui-title-main {
+  flex: 1 1 auto;
+}
+.ui-subtitle {
+  margin: 0.25rem 0 0 0;
+  color: #6b7280; /* gray-600 */
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.ui-title-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.ui-title-underline {
+  /* more visible full-width underline */
+  height: 2px;
+  width: 100%;
+  margin-top: 8px;
+  border-radius: 0;
+  background: rgba(30,96,145,0.18); /* solid subtle brand color */
+  box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset;
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .ui-title-row { flex-direction: column; align-items: flex-start; }
+  .ui-title-actions { width: 100%; margin-top: 0.5rem; }
+}
+
+/* Ajustement vertical spécifique mobile pour éviter un espacement excessif */
+@media (max-width: 640px) {
+  .ui-title { margin-top: 0.4rem; }
+}
+
+/* Strong card-style variant */
+.ui-title-card {
+  /* simplified flat variant (no heavy card) */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  border-radius: 6px;
+  padding: 0;
+  box-shadow: none;
+  border: none;
+}
+.ui-title-left { display:flex; align-items:center; gap:12px; }
+.ui-avatar { width:48px; height:48px; border-radius:8px; object-fit:cover; border:1px solid rgba(0,0,0,0.06); }
+.ui-title-icon { font-size: 28px; color: var(--blue-main); margin-right: 8px; vertical-align: middle; }
+.ui-title-main h1, .ui-title-main h2 { margin:0; font-weight:800; letter-spacing:0.2px; }
+.ui-title-main h1 { font-size:1.6rem; }
+.ui-title-main h2 { font-size:1.4rem; }
+.ui-subtitle { color:#64748b; margin-top:4px; font-size:0.95rem; }
+.ui-title-actions ::ng-deep .btn { border-radius:999px; padding:8px 12px; }
+
+@media (max-width: 640px) {
+  .ui-title-card { padding:10px; border-radius:8px; }
+  .ui-avatar { width:40px; height:40px; }
+  .ui-title-main h1 { font-size:1.25rem; }
 }

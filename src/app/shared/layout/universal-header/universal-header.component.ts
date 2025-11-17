@@ -76,7 +76,8 @@ export class UniversalHeaderComponent {
     this.router.events.subscribe(() => {
       const url = this.router.url || '';
       // Pages tableau de bord (tous rôles)
-      this.isDashboardPage = /\b(dashboard|dashboard-admin|dashboard-super-admin|dashboard-parent|dashboard-membre)\b/.test(url);
+      // Garder l'affichage 'dashboard' pour les routes qui commencent par les préfixes admin/super-admin
+      this.isDashboardPage = url.startsWith('/super-admin') || url.startsWith('/admin') || /\b(dashboard|dashboard-admin|dashboard-super-admin|dashboard-parent|dashboard-membre)\b/.test(url);
       // Zone Parent: toutes les routes qui commencent par /parent
       this.isParentArea = url.startsWith('/parent');
       // Zone Membre: toutes les routes qui commencent par /membre

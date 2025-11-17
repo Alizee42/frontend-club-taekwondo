@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { AvisService, Avis } from '../../services/avis.service';
 import { ClubService, Club } from '../../services/club.service';
 

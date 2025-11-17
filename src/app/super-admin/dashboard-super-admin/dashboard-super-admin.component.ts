@@ -6,7 +6,7 @@ import { ActualiteService } from '../../services/actualite.service';
 import { AvisService, Avis } from '../../services/avis.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UiTitleComponent } from '../../ui/ui-title/ui-title.component';
+import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 
 @Component({
   selector: 'app-dashboard-super-admin',
