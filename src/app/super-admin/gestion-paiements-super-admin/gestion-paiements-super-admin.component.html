@@ -2,8 +2,19 @@
 <div class="gestion-paiements-modern">
   <!-- Header avec titre -->
   <header class="page-header">
-    <h2 class="page-title"><i class="ri-list-check-2"></i> Gestion des paiements clubs</h2>
+  <ui-title [level]="2" text="Suivi des paiements" icon="ri-wallet-3-line"></ui-title>
   </header>
+
+  <!-- Sélecteur de club (compact) -->
+  <div class="club-filter-compact">
+    <label class="club-filter-label">Club&nbsp;:</label>
+    <select class="pill-select" [(ngModel)]="selectedClubId" (change)="onClubChange()">
+      <option [ngValue]="'all'">Tous les clubs</option>
+      <option *ngFor="let club of clubs" [ngValue]="club.id">{{ club.nom || club.name }}</option>
+    </select>
+  </div>
+
+  <!-- toolbar déplacée pour apparaître sous le H2 de l'onglet Paiements -->
 
   <!-- KPI / Statistiques (kpi-card) -->
   <section class="kpi-section">
@@ -52,71 +63,114 @@
       <i class="ri-calendar-check-line"></i> Échéances
     </button>
   </nav>
-
-  <!-- TOOLBAR (filtre club, recherche, actions) -->
-  <div class="toolbar">
-    <div class="segmented" role="tablist" aria-label="Vue">
-      <label for="club-select" style="margin-right:8px; font-weight:600; color:#415a77;">Club :</label>
-      <select id="club-select" class="pill-select" [(ngModel)]="selectedClubId" (change)="onClubChange()">
-        <option value="all">Tous les clubs</option>
-        <option *ngFor="let club of clubs" [value]="club.id">{{ club.nom }}</option>
-      </select>
-    </div>
-    <div class="search">
-      <i class="ri-search-line"></i>
-      <input class="search-input" placeholder="Rechercher (parent / enfant / email)" [(ngModel)]="filter.q" (input)="applyFilters()" />
-    </div>
-    <div class="toolbar-actions">
-      <button class="btn refresh" (click)="applyFilters()">
-        <i class="ri-refresh-line"></i> Rafraîchir
-      </button>
-      <button class="btn success" (click)="ouvrirAjoutPaiement()">
-        <i class="ri-add-line"></i> Ajouter un paiement
-      </button>
-    </div>
-  </div>
-
-  <!-- Filtres avancés -->
-  <div class="filters compact">
-    <label>Date début : <input type="date" [(ngModel)]="filter.dateDebut" (change)="applyFilters()"></label>
-    <label>Date fin : <input type="date" [(ngModel)]="filter.dateFin" (change)="applyFilters()"></label>
-    <select class="pill-select" [(ngModel)]="filter.statut" (change)="applyFilters()">
-      <option value="all">Statut</option>
-      <option *ngFor="let s of statutOptions" [value]="s.value">{{ s.label }}</option>
-    </select>
-    <select class="pill-select" [(ngModel)]="filter.type" (change)="applyFilters()">
-      <option value="all">Type</option>
-      <option *ngFor="let t of typeOptions" [value]="t.value">{{ t.label }}</option>
-    </select>
-    <button class="btn ghost sm" (click)="filter = {q:'', dateDebut:'', dateFin:'', statut:'all', type:'all'}; applyFilters();">
-      <i class="ri-eraser-line"></i><span>Réinitialiser</span>
-    </button>
-  </div>
+  <!-- toolbar & filtres enlevés volontairement pour version super-admin (utilise app-suivi-paiements) -->
 
   <!-- Contenu des onglets -->
   <section class="tab-content">
     <div *ngIf="ongletActif === 'paiements'">
-      <div class="empty" *ngIf="!filteredPaiements.length">Aucun paiement trouvé.</div>
-      <div class="table-wrapper" *ngIf="filteredPaiements.length">
-        <ui-table
-          [columns]="tableColumns"
-          [data]="filteredPaiements"
-          [actions]="tableActions"
-          (actionClick)="onAction($event)"
-        ></ui-table>
+      <div class="suivi">
+        <!-- Titre 'Paiements' supprimé à la demande -->
+
+        <app-suivi-paiements [paiementsData]="filteredPaiements" [clubFilter]="selectedClubId" [clubs]="clubs"></app-suivi-paiements>
       </div>
-  <!-- Modal d'ajout paiement -->
-  <div class="modal-overlay" *ngIf="modalAjoutVisible" (click)="fermerModalAjout()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
-      <button class="modal-close" (click)="fermerModalAjout()">
-        <i class="ri-close-line"></i>
-      </button>
-      <app-ajout-paiement (paiementAjoute)="onPaiementAjoute()"></app-ajout-paiement>
-    </div>
-  </div>
     </div>
     <div *ngIf="ongletActif === 'echeances'">
-      <div class="empty">Aucune échéance à afficher (fonctionnalité à venir).</div>
+      <div class="suivi">
+        <h2 class="page-title"><i class="ri-calendar-check-line"></i> Échéances</h2>
+
+        <!-- Toolbar placé sous le H2 et au-dessus de filters-row (même style que Suivi) -->
+        <div class="toolbar">
+          <!-- Onglets -->
+          <div class="segmented" role="tablist" aria-label="Vue">
+            <button role="tab" class="seg-btn" [class.active]="viewMode==='paiements'"
+                    [attr.aria-selected]="viewMode==='paiements' ? 'true' : 'false'"
+                    (click)="viewMode='paiements'">
+              <i class="ri-money-euro-circle-line"></i>
+              <span>Par paiement</span>
+            </button>
+            <button role="tab" class="seg-btn" [class.active]="viewMode==='utilisateurs'"
+                    [attr.aria-selected]="viewMode==='utilisateurs' ? 'true' : 'false'"
+                    (click)="viewMode='utilisateurs'">
+              <i class="ri-user-3-line"></i>
+              <span>Par utilisateur</span>
+            </button>
+          </div>
+
+          <!-- Recherche -->
+          <div class="search">
+            <i class="ri-search-line"></i>
+            <input *ngIf="viewMode==='paiements'" class="search-input"
+                   placeholder="Rechercher (parent / enfant / email)"
+                   [(ngModel)]="filter.q" (input)="applyFilters()" />
+            <input *ngIf="viewMode==='utilisateurs'" class="search-input"
+                   placeholder="Rechercher (nom / email / enfant)"
+                   [(ngModel)]="searchUsers" (input)="filtrerUtilisateurs()" />
+          </div>
+
+          <!-- Actions -->
+          <div class="toolbar-actions">
+            <button class="btn refresh" (click)="refresh()">
+              <i class="ri-refresh-line"></i> Rafraîchir
+            </button>
+            <button class="btn primary" (click)="ouvrirAjoutPaiement()">
+              <i class="ri-add-line"></i> Ajouter un paiement
+            </button>
+          </div>
+        </div>
+
+        <!-- Toolbar inséré ; filters-row suit en dessous -->
+        <div class="filters-row">
+          <label>
+            Statut
+            <select [(ngModel)]="filter.statut" (change)="applyFilters()">
+              <option value="all">Tous</option>
+              <option value="payé">Payé</option>
+              <option value="en attente">En attente</option>
+              <option value="en retard">En retard</option>
+              <option value="annulé">Annulé</option>
+            </select>
+          </label>
+
+          <label>
+            Type
+            <select [(ngModel)]="filter.type" (change)="applyFilters()">
+              <option value="all">Tous</option>
+              <option value="cotisation">Cotisation</option>
+              <option value="licence">Licence</option>
+              <option value="autre">Autre</option>
+            </select>
+          </label>
+
+          <label>
+            Mode
+            <select [(ngModel)]="filter.mode" (change)="applyFilters()">
+              <option value="all">Tous</option>
+              <option value="stripe">Stripe</option>
+              <option value="virement">Virement</option>
+              <option value="espèces">Espèces</option>
+            </select>
+          </label>
+
+          <label>
+            Recherche
+            <input type="text" [(ngModel)]="filter.q" (input)="applyFilters()" />
+          </label>
+
+          <div style="margin-left:auto; display:flex; gap:8px;">
+            <button class="btn ghost sm" (click)="resetFilters()"><i class="ri-eraser-line"></i> Réinitialiser</button>
+            <button class="btn refresh" (click)="refresh()"><i class="ri-refresh-line"></i> Rafraîchir</button>
+          </div>
+        </div>
+        <div class="table-wrapper" *ngIf="filteredPaiements?.length">
+          <ui-table
+            [columns]="echeancesColumns"
+            [data]="filteredPaiements"
+            [actions]="echeancesActions"
+            (actionClick)="onEcheanceAction($event)"
+          ></ui-table>
+        </div>
+        <div class="empty" *ngIf="!filteredPaiements?.length">Aucune échéance à afficher.</div>
+      </div>
     </div>
   </section>
 

@@ -101,6 +101,24 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
     this.paymentService.getAllPaiements().subscribe({
       next: (res) => {
         this.paiements = Array.isArray(res) ? res : [];
+        // Debug + robustification : calculer localement montantPaye / montantRestant
+        try {
+          this.paiements.forEach((p: any) => {
+            // montant payé = somme des échéances payées si présentes
+            if (Array.isArray(p.echeances) && p.echeances.length) {
+              p.montantPaye = p.echeances.reduce((s: number, e: any) => {
+                const st = (e && e.statut || '').toString().toLowerCase();
+                return st === 'payé' || st === 'paye' ? s + (Number(e.montant) || 0) : s;
+              }, 0);
+            } else {
+              p.montantPaye = (p.statut || '').toString().toLowerCase().includes('pay') || (p.statut || '').toString().toLowerCase().includes('payé') ? (Number(p.montantTotal) || 0) : 0;
+            }
+            p.montantRestant = Math.max(0, (Number(p.montantTotal) || 0) - (Number(p.montantPaye) || 0));
+          });
+        } catch (err) {
+          console.warn('[GestionPaiements] erreur lors du calcul local des montants', err);
+        }
+        console.log('[GestionPaiements] paiements chargés:', this.paiements.length, this.paiements.slice ? this.paiements.slice(0,3) : this.paiements);
       },
       error: (err) => {
         this.paiements = [];
@@ -121,6 +139,7 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
   changerOnglet(onglet: 'paiements' | 'echeances'): void {
     this.ongletActif = onglet;
     if (onglet === 'echeances') {
+      console.log('[GestionPaiements] bascule onglet echeances - paiements current length=', this.paiements.length);
       this.loadPaiements();
     }
   }

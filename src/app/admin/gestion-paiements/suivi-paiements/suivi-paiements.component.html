@@ -100,6 +100,7 @@
       <table class="user-table">
         <thead>
           <tr>
+            <th>Club</th>
             <th>Date</th>
             <th>Payé par</th>
             <th>Pour</th>
@@ -113,6 +114,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let p of paiementsFiltres; trackBy: trackByPaiement">
+            <td>{{ getClubName(p) }}</td>
             <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
             <td>{{ p.utilisateurPrenom }} {{ p.utilisateurNom }}</td>
             <td><span class="chip">{{ p.membrePrenom }} {{ p.membreNom }}</span></td>

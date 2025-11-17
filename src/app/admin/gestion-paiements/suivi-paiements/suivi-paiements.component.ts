@@ -1,4 +1,5 @@
-import { Component, OnInit, TrackByFunction } from '@angular/core';
+import { Component, OnInit, TrackByFunction, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Club } from '../../../services/club.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AjoutPaiementComponent } from '../ajout-paiement/ajout-paiement.component';
@@ -24,6 +25,12 @@ export interface Paiement {
   utilisateurNom?: string;
   utilisateurPrenom?: string;
   utilisateurEmail?: string;
+
+  // Club info (optionnelle selon shape API)
+  clubId?: number;
+  club?: string;
+  clubNom?: string;
+  clubName?: string;
 
   membreNom?: string;
   membrePrenom?: string;
@@ -57,7 +64,15 @@ interface GroupeParent {
   templateUrl: './suivi-paiements.component.html',
   styleUrls: ['./suivi-paiements.component.css']
 })
-export class SuiviPaiementsComponent implements OnInit {
+export class SuiviPaiementsComponent implements OnInit, OnChanges {
+  /** Optionnel : filtre par club (passé depuis un parent) */
+  @Input() clubFilter: number | 'all' = 'all';
+  /** Optionnel : jeu de paiements fourni par le parent — permet d'aligner KPI + tableau */
+  @Input() paiementsData?: Paiement[];
+  @Input() clubs?: Club[];
+  /** Optionnel : contrôle de vue depuis parent (paiements | utilisateurs) */
+  @Input() viewMode?: 'paiements' | 'utilisateurs';
+
   private readonly API_BASE = environment.apiUrl;
 
   // --- State général
@@ -114,7 +129,35 @@ export class SuiviPaiementsComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.refresh();
+    // If parent provided data, use it; otherwise fetch from API
+    if (Array.isArray(this.paiementsData) && this.paiementsData.length) {
+      this.paiements = this.paiementsData;
+      console.log('[SuiviPaiements] ngOnInit - using paiementsData from parent, count=', this.paiements.length);
+      this.applyFilters();
+    } else {
+      console.log('[SuiviPaiements] ngOnInit - no paiementsData, will refresh from API');
+      this.refresh();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // When parent updates paiementsData or clubFilter, refresh local view
+    console.log('[SuiviPaiements] ngOnChanges', { clubFilter: this.clubFilter, hasPaiementsData: Array.isArray(this.paiementsData) ? this.paiementsData.length : 0, changesKeys: Object.keys(changes) });
+    if (changes['paiementsData'] && Array.isArray(this.paiementsData)) {
+      this.paiements = this.paiementsData;
+      console.log('[SuiviPaiements] ngOnChanges - received paiementsData length=', this.paiements.length);
+      this.applyFilters();
+    }
+    if (changes['clubFilter'] && !changes['paiementsData']) {
+      // clubFilter changed: reapply filters on current data
+      console.log('[SuiviPaiements] ngOnChanges - clubFilter changed to', this.clubFilter);
+      this.applyFilters();
+    }
+    if (changes['viewMode'] && this.viewMode) {
+      // parent asked to change view mode
+      this.mode = this.viewMode as any;
+      console.log('[SuiviPaiements] ngOnChanges - viewMode set to', this.mode);
+    }
   }
 
   /* =======================
@@ -132,6 +175,7 @@ export class SuiviPaiementsComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.paiements = Array.isArray(res) ? res : [];
+        console.log('[SuiviPaiements] refresh - paiements from API length=', this.paiements.length, this.paiements.slice ? this.paiements.slice(0,5) : this.paiements);
 
         // Normaliser les dates
         this.paiements.forEach(p => {
@@ -141,7 +185,7 @@ export class SuiviPaiementsComponent implements OnInit {
           });
         });
 
-        this.applyFilters(); // fera aussi buildGroups() + buildUsersView()
+  this.applyFilters(); // fera aussi buildGroups() + buildUsersView()
         this.loading = false;
       },
       error: (err) => {
@@ -239,7 +283,23 @@ export class SuiviPaiementsComponent implements OnInit {
     const typeF = this.sansAccents(this.filtres.type); // 'unique' | 'echelon'
     const modeF = this.sansAccents(this.filtres.mode); // 'stripe' | 'virement' | 'especes' | 'cheque'
 
-    this.paiementsFiltres = this.paiements.filter(p => {
+    let base = this.paiements;
+    // Si un filtre de club est fourni depuis un parent, l'appliquer
+    if (this.clubFilter !== undefined && this.clubFilter !== 'all') {
+      const filterVal = this.clubFilter;
+      base = base.filter((p: any) => {
+        // Normaliser les comparaisons : utiliser clubId numérique si possible
+        if (typeof filterVal === 'number') {
+          return Number(p.clubId) === Number(filterVal);
+        }
+        // fallback : comparer aux noms
+        const clubName = (p.club || p.clubNom || p.clubName || '').toString().toLowerCase();
+        return clubName.includes(String(filterVal).toLowerCase());
+      });
+    }
+
+  console.log('[SuiviPaiements] applyFilters - base length=', base.length, 'clubFilter=', this.clubFilter);
+  this.paiementsFiltres = base.filter(p => {
       const hay = `${p.utilisateurNom || ''} ${p.utilisateurPrenom || ''} ${p.utilisateurEmail || ''} ${p.membreNom || ''} ${p.membrePrenom || ''}`.toLowerCase();
 
       // Canoniser via libellés robustes
@@ -267,9 +327,22 @@ export class SuiviPaiementsComponent implements OnInit {
       return (b.id || 0) - (a.id || 0);
     });
 
+    console.log('[SuiviPaiements] applyFilters - filtered length=', this.paiementsFiltres.length, this.paiementsFiltres.slice ? this.paiementsFiltres.slice(0,3) : this.paiementsFiltres);
     // Recalcule la vue groupée & utilisateurs après filtrage
     this.buildGroups();
     this.buildUsersView();
+  }
+
+  /** Retourne le nom du club pour un paiement, en utilisant la liste `clubs` si fournie */
+  getClubName(p: Paiement): string {
+    if (!p) return '';
+    // Prefer numeric clubId lookup
+    if (p.clubId != null && Array.isArray(this.clubs)) {
+      const found = this.clubs.find(c => Number(c.id) === Number(p.clubId));
+      if (found) return (found as any).nom || (found as any).name || String(found.id);
+    }
+    // Fallback to fields on the paiement
+    return (p.club || p.clubNom || p.clubName || (p.clubId != null ? String(p.clubId) : '')) as string;
   }
 
   resetFilters(): void {
