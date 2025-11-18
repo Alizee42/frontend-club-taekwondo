@@ -1,0 +1,88 @@
+<!-- Inline table mode (page) -->
+<div *ngIf="inline">
+  <h3>Échéances</h3>
+  <div *ngIf="!echeances || !echeances.length" class="empty">Aucune échéance.</div>
+
+  <div *ngIf="groupedEcheances?.length">
+    <div class="paiement-block" *ngFor="let g of groupedEcheances">
+      <div class="paiement-head">
+        <div class="paiement-title">Paiement #{{ g.paiementId }}</div>
+        <div class="paiement-meta">{{ g.parentPrenom }} {{ g.parentNom }} · {{ g.membrePrenom }} {{ g.membreNom }} · {{ g.club || '—' }}</div>
+        <div class="paiement-date">{{ g.paiementDate ? (g.paiementDate | date:'dd/MM/yyyy') : '—' }}</div>
+      </div>
+      <table class="table small">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th class="num">Montant</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of g.echeances">
+            <td>#{{ e.numero }}</td>
+            <td>{{ e.dateEcheance ? (e.dateEcheance | date:'dd/MM/yyyy') : '—' }}</td>
+            <td class="num">{{ e.montant | number:'1.2-2' }}</td>
+            <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
+            <td>
+              <ui-button *ngIf="e.statut !== 'payé'" icon="ri-check-line" customClass="btn-vert btn-icon-only" (clicked)="onPayer(e)"></ui-button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-actions">
+    <ui-button label="Fermer" variant="secondary" (clicked)="close()"></ui-button>
+    <ui-button *ngIf="paiement" label="Marquer tout payé" variant="primary" (clicked)="onMarquerTout()"></ui-button>
+  </div>
+</div>
+
+<!-- Modal mode -->
+<div class="modal" *ngIf="showModal && !inline">
+  <div class="modal-content echeances-modal">
+    <button class="close" (click)="close()">&times;</button>
+    <h3>Échéances</h3>
+
+    <!-- Summary: total for this payment -->
+    <div class="modal-summary" *ngIf="paiement">
+      <div class="summary-card small">
+        <div class="summary-title">Total</div>
+        <div class="summary-value">{{ (paiement?.montantTotal || paiement?.montant) | currency:'EUR' }}</div>
+      </div>
+    </div>
+
+    <div *ngIf="!echeances || !echeances.length" class="empty">Aucune échéance.</div>
+
+    <table *ngIf="echeances?.length" class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Montant</th>
+          <th>Statut</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of echeances">
+          <td>{{ e.numero }}</td>
+          <td>{{ e.dateEcheance ? (e.dateEcheance | date:'shortDate') : '—' }}</td>
+          <td>{{ e.montant | number:'1.2-2' }}</td>
+          <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
+          <td>
+            <ui-button *ngIf="e.statut !== 'payé'" icon="ri-check-line" customClass="btn-vert btn-icon-only" (clicked)="onPayer(e)"></ui-button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="modal-actions">
+      <ui-button label="Fermer" variant="secondary" customClass="btn-inline" (clicked)="close()"></ui-button>
+      <ui-button *ngIf="paiement" label="Marquer tout payé" customClass="btn-inline success" (clicked)="onMarquerTout()"></ui-button>
+    </div>
+  </div>
+</div>

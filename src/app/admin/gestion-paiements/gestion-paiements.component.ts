@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { Chart, ArcElement, Tooltip, Legend, DoughnutController } from 'chart.js';
 
-import { SuiviPaiementsComponent } from './suivi-paiements/suivi-paiements.component';
+import { SuiviPaiementsComponent } from '../../shared/components/suivi-paiements/suivi-paiements.component';
+import { EcheanceComponent } from '../../shared/components/echeance/echeance.component';
 import { AjoutPaiementComponent } from './ajout-paiement/ajout-paiement.component';
 import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
-import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import type { UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { PaymentAdminService } from '../../services/payment-admin.service';
 import { DashboardStats } from '../../models/dashboard-stats.model';
@@ -23,7 +23,7 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
     SuiviPaiementsComponent,
     AjoutPaiementComponent,
     UiTitleComponent,
-    UiTableComponent,
+    EcheanceComponent,
     ],
     templateUrl: './gestion-paiements.component.html',
     styleUrls: ['./gestion-paiements.component.css']
@@ -95,6 +95,32 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
     });
     this.refreshStats();
     this.loadPaiements();
+  }
+
+  /** Retourne toutes les échéances présentes dans la liste de paiements (plat) */
+  getAllEcheances(): any[] {
+    try {
+      if (!Array.isArray(this.paiements)) return [];
+      return this.paiements.reduce((acc: any[], p: any) => {
+        const ech = Array.isArray(p.echeances) ? p.echeances.map((e: any) => ({
+          ...e,
+          paiementId: p.id,
+          paiementDate: p.datePaiement,
+          parentPrenom: p.utilisateurPrenom,
+          parentNom: p.utilisateurNom,
+          membrePrenom: p.membrePrenom,
+          membreNom: p.membreNom,
+          club: p.club || p.clubNom || p.clubName,
+          montantTotal: p.montantTotal,
+          montantPaye: p.montantPaye,
+          montantRestant: p.montantRestant
+        })) : [];
+        return acc.concat(ech);
+      }, []);
+    } catch (err) {
+      console.warn('[GestionPaiements] getAllEcheances error', err);
+      return [];
+    }
   }
 
   loadPaiements(): void {

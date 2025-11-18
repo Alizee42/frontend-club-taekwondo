@@ -1,21 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
-import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
-import { SuiviPaiementsComponent } from '../../admin/gestion-paiements/suivi-paiements/suivi-paiements.component';
+import { SuiviPaiementsComponent } from '../../shared/components/suivi-paiements/suivi-paiements.component';
 import { SuperAdminPaiementService } from '../../services/super-admin-paiement.service';
 import { ClubService, Club } from '../../services/club.service';
 
 @Component({
   selector: 'app-gestion-paiements-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTitleComponent, SuiviPaiementsComponent, UiTableComponent],
+  imports: [CommonModule, FormsModule, UiTitleComponent, SuiviPaiementsComponent],
   templateUrl: './gestion-paiements-super-admin.component.html',
   styleUrls: ['./gestion-paiements-super-admin.component.css']
 })
 export class GestionPaiementsSuperAdminComponent implements OnInit {
+  @ViewChild('suivi') suivi?: SuiviPaiementsComponent;
   clubs: Club[] = [];
   selectedClubId: number | 'all' = 'all';
   paiements: any[] = [];
@@ -31,6 +31,7 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
     dateDebut: '',
     dateFin: '',
     statut: 'all',
+    // keep 'type' property for compatibility but toolbar no longer uses it
     type: 'all',
     mode: 'all'
   };
@@ -38,7 +39,7 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
   viewMode: 'paiements' | 'utilisateurs' = 'paiements';
   // Recherche pour la vue 'utilisateurs' (utilisée par la toolbar)
   searchUsers: string = '';
-  ongletActif: 'paiements' | 'echeances' = 'paiements';
+  groupByParentLocal: boolean = false;
   modalPaiementVisible = false;
   paiementSelectionne: any = null;
   statutOptions = [
@@ -65,20 +66,6 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
   ];
   tableActions = [
     { label: 'Voir', icon: 'ri-eye-line', action: 'details', variant: 'ghost' as const, title: 'Détail paiement' }
-  ];
-  // Colonnes/actions pour l'onglet Échéances (réutilisé depuis la version admin)
-  echeancesColumns: UiTableColumn[] = [
-    { key: 'datePaiement', label: 'Date', type: 'date', display: (row: any) => this.formatDate(row.datePaiement) },
-    { key: 'utilisateur', label: 'Payé par', type: 'text', display: (row: any) => `${row.utilisateurPrenom || ''} ${row.utilisateurNom || ''}` },
-    { key: 'membre', label: 'Pour', type: 'text', display: (row: any) => `${row.membrePrenom || ''} ${row.membreNom || ''}` },
-    { key: 'type', label: 'Type de paiement', type: 'text', display: (row: any) => `${row.type || ''} – ${row.modePaiement || ''}` },
-    { key: 'montantTotal', label: 'Total', type: 'number', cellClass: 'num', display: (row: any) => this.formatCurrency(row.montantTotal) },
-    { key: 'montantPaye', label: 'Payé', type: 'number', cellClass: 'num', display: (row: any) => this.formatCurrency(row.montantPaye != null ? row.montantPaye : row.montantTotal) },
-    { key: 'montantRestant', label: 'Restant', type: 'number', cellClass: 'num', display: (row: any) => this.formatCurrency(row.montantRestant != null ? row.montantRestant : ((row.montantTotal || 0) - (row.montantPaye || 0))) },
-    { key: 'statut', label: 'Statut', type: 'text' }
-  ];
-  echeancesActions = [
-    { label: 'Voir', icon: 'ri-eye-line', action: 'details', variant: 'ghost' as const }
   ];
   // TrackBy pour ui-table (optionnel)
   trackByPaiement(index: number, p: any) {
@@ -148,6 +135,7 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
       this.applyFilters();
     });
   }
+
   
   /** Recompute montantPaye / montantRestant for a list of paiements */
   private computeLocalMontants(list: any[]): void {
@@ -170,6 +158,27 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
     }
   }
 
+  /** Normalise et renvoie un libellé de type cohérent */
+  libelleType(t?: string, ech?: { id?: number }[] | undefined): string {
+    const v = this.sansAccents ? this.sansAccents(t || '') : (t || '').toLowerCase();
+    if (v.includes('echel') || v.includes('echeanc') || v.includes('echean')) return 'Échelonné';
+    if (v.includes('unique') || v.includes('cotis') || v.includes('cotisation')) return 'Unique';
+    if (Array.isArray(ech) && ech.length > 0) return 'Échelonné';
+    return 'Unique';
+  }
+
+  /** Normalise et renvoie un libellé de mode de paiement cohérent */
+  libelleMode(m?: string): string {
+    const v = this.sansAccents ? this.sansAccents(m || '') : (m || '').toLowerCase();
+    if (!v) return '—';
+    if (v.includes('cb') || v.includes('carte') || v.includes('stripe') || v.includes('card')) return 'CB';
+    if (v.includes('virement') || v.includes('vir')) return 'Virement';
+    if (v.includes('espec') || v.includes('espace') || v.includes('espece') || v.includes('espèces')) return 'Espèces';
+    if (v.includes('cheque') || v.includes('chequ') || v.includes('cheq')) return 'Chèque';
+    if (v.includes('paypal')) return 'PayPal';
+    return 'Autre';
+  }
+
   /** Manual refresh triggered by toolbar */
   refresh(): void {
     console.log('[SuperAdmin][Paiements] manual refresh');
@@ -190,6 +199,20 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
     this.applyFilters();
   }
 
+  /** Clear a single filter field and reapply filters */
+  clearFilter(key: 'q' | 'statut' | 'type' | 'mode') {
+    if (key === 'q') {
+      this.filter.q = '';
+    } else if (key === 'statut') {
+      this.filter.statut = 'all';
+    } else if (key === 'type') {
+      this.filter.type = 'all';
+    } else if (key === 'mode') {
+      this.filter.mode = 'all';
+    }
+    this.applyFilters();
+  }
+
   /** Filtre minimal pour la recherche 'Par utilisateur' du toolbar (évite erreur template) */
   filtrerUtilisateurs(): void {
     // Pour l'instant on se contente de logguer; si on veut filtrer une liste d'utilisateurs
@@ -201,9 +224,7 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
     console.log('[SuperAdmin][Paiements] onClubChange selectedClubId=', this.selectedClubId);
     this.applyFilters();
   }
-  changerOnglet(onglet: 'paiements' | 'echeances') {
-    this.ongletActif = onglet;
-  }
+  // onglet navigation removed — no-op
   applyFilters() {
     console.log('[SuperAdmin][Paiements] applyFilters start - total paiements=', this.paiements?.length, 'selectedClubId=', this.selectedClubId);
     let data = this.paiements;
@@ -259,6 +280,8 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
     if (s.includes('annul')) return '<span class="badge status-refusé">Annulé</span>';
     return '<span class="badge">' + statut + '</span>';
   }
+  
+  private sansAccents(s?: string): string { return (s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase(); }
   formatDate(date: string | Date): string {
     if (!date) return '';
     const d = new Date(date);

@@ -54,18 +54,10 @@
 
   <!-- Contenu des onglets -->
   <section class="tab-content">
-    <app-suivi-paiements *ngIf="ongletActif === 'paiements'"></app-suivi-paiements>
-    <div *ngIf="ongletActif === 'echeances'" class="suivi">
-      <h2 class="page-title"><i class="ri-calendar-check-line"></i> Échéances</h2>
-      <div class="table-wrapper" *ngIf="paiements.length">
-        <ui-table
-          [columns]="echeancesColumns"
-          [data]="paiements"
-          [actions]="echeancesActions"
-          (actionClick)="onEcheanceAction($event)"
-        ></ui-table>
-      </div>
-      <div class="empty" *ngIf="!paiements.length">Aucun paiement trouvé.</div>
+    <app-suivi-paiements *ngIf="ongletActif === 'paiements'" [paiementsData]="paiements" [viewMode]="'paiements'"></app-suivi-paiements>
+    <div *ngIf="ongletActif === 'echeances'">
+      <!-- Use Echeance component in inline mode to show all échéances on the page -->
+      <app-echeance [echeances]="getAllEcheances()" [inline]="true"></app-echeance>
     </div>
   </section>
 

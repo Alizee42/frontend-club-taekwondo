@@ -1,3 +1,21 @@
+/* Force tous les boutons .btn-soft-primary à fond bleu pâle et texte bleu foncé, même si d'autres classes (success/danger) sont présentes */
+.ui-btn.btn-soft-primary,
+.ui-btn.btn-soft-primary.success,
+.ui-btn.btn-soft-primary.danger,
+.ui-btn.btn-soft-primary[ng-reflect-custom-class~="btn-soft-primary"] {
+  background: #e6f0fa !important;
+  color: #185fa4 !important;
+  border: 1px solid #b6d4f7 !important;
+  box-shadow: 0 4px 14px rgba(24,95,164,0.08);
+  transition: background 0.18s, color 0.18s;
+}
+.ui-btn.btn-soft-primary:hover,
+.ui-btn.btn-soft-primary:focus,
+.ui-btn.btn-soft-primary.success:hover,
+.ui-btn.btn-soft-primary.danger:hover {
+  background: #cbe3fa !important;
+  color: #185fa4 !important;
+}
 /* Variante plus petite pour la bannière */
 .ui-btn.banner-small {
   padding: 7px 16px;
@@ -10,38 +28,26 @@
 }
 /* Style moderne pour le bouton principal */
 .ui-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   min-width: 0;
-  padding: 10px 8px;
-  font-size: 0.92rem;
-  font-weight: 500;
-  border-radius: 7px;
-  border: 1.5px solid var(--blue-main, #255F85);
-  background: var(--blue-main, #255F85);
+  padding: 10px 12px;
+  font-size: 0.94rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--blue-main);
   color: #fff;
   cursor: pointer;
-  transition: background 0.18s, box-shadow 0.18s, color 0.18s;
-  box-shadow: 0 2px 8px rgba(37, 95, 133, 0.08);
+  transition: background 0.16s, box-shadow 0.16s, color 0.12s, transform 0.12s ease, filter 0.12s ease;
+  box-shadow: 0 2px 8px rgba(14,56,80,0.06);
 }
 
-.ui-btn:hover:not(:disabled):not(.loading) {
-  background: var(--blue-hover);
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
-}
-
-.ui-btn:active {
-  background: #155a8a;
-}
-
-.ui-btn:disabled,
-.ui-btn.is-disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.ui-btn:hover:not(:disabled):not(.loading) { filter: brightness(1.03); transform: translateY(-1px); }
+.ui-btn:active { transform: translateY(0); }
+.ui-btn:disabled, .ui-btn.is-disabled { opacity: 0.6; cursor: not-allowed; }
 
 .ui-btn-label {
   flex: 1;
@@ -59,27 +65,80 @@
 
 /* Usage icon-only (ex: dans les cellules de tableau) */
 .ui-btn.btn-icon-only {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   min-width: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border-radius: 8px;
-  background: var(--blue-main, #255F85);
-  border: 1px solid var(--blue-main, #255F85);
+  border-radius: 9px;
+  background: transparent;
+  border: 1px solid transparent;
   color: #fff;
-  box-shadow: 0 1px 4px rgba(37, 95, 133, 0.15);
+  background-color: var(--blue-main);
+  box-shadow: none;
 }
-.ui-btn.btn-icon-only:hover:not(:disabled) { filter: brightness(1.05); }
+.ui-btn.btn-icon-only:hover:not(:disabled) { transform: translateY(-1px); }
 .ui-btn.btn-icon-only .ui-btn-label { display: none; }
+.ui-btn.success:hover:not(:disabled) { filter: brightness(1.03); transform: translateY(-1px); box-shadow: 0 8px 22px rgba(16,120,60,0.12); }
+.ui-btn.danger:hover:not(:disabled) { filter: brightness(1.03); transform: translateY(-1px); box-shadow: 0 8px 22px rgba(176,42,55,0.12); }
+
+/* Colored variants for icon-only buttons: validate = success (green), delete = danger (red) */
+/* Option B: soft-filled blue for 'success' actions (lighter, less saturated) */
+.ui-btn.btn-icon-only.success {
+  /* Fond solide bleu (plus soutenu) avec icône blanche */
+  background: linear-gradient(180deg, var(--blue-main), color-mix(in srgb,var(--blue-main) 85%, black));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(14,56,80,0.16);
+}
+.ui-btn.btn-icon-only.success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(14,56,80,0.2); }
+
+.ui-btn.btn-icon-only.danger {
+  background: linear-gradient(180deg, var(--red-main, var(--danger)), color-mix(in srgb,var(--red-main, var(--danger)) 82%, black));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(176,42,55,0.16);
+}
+.ui-btn.btn-icon-only.danger:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(176,42,55,0.22); }
+
+/* Also support full-size variants if templates use .success/.danger on normal buttons */
+.ui-btn.success {
+  /* Bouton plein success -> fond solide plus profond */
+  background: linear-gradient(180deg, var(--blue-main), color-mix(in srgb,var(--blue-main) 85%, black));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(14,56,80,0.18);
+}
+.ui-btn.success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 34px rgba(14,56,80,0.22); }
+.ui-btn.danger {
+  background: linear-gradient(180deg, var(--red-main, var(--danger)), color-mix(in srgb,var(--red-main, var(--danger)) 82%, black));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(176,42,55,0.18);
+}
+.ui-btn.danger:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 34px rgba(176,42,55,0.22); }
 /* Backdrop */
-.ui-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .45);
-  z-index: 1000;
+.ui-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; }
+
+/* Force hover background color for success/danger to override generic blue hover */
+.ui-btn.success:hover:not(:disabled),
+.ui-btn.btn-icon-only.success:hover:not(:disabled) {
+  /* Hover keeps the soft-blue intent but slightly deeper */
+  background: color-mix(in srgb, var(--blue-main) 24%, white) !important;
+  border-color: color-mix(in srgb, var(--blue-main) 40%, white) !important;
+  filter: brightness(1.01) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 22px rgba(14,56,80,0.10) !important;
+}
+.ui-btn.danger:hover:not(:disabled),
+.ui-btn.btn-icon-only.danger:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--danger, #dc3545), #b02a37) !important;
+  border-color: transparent !important;
+  filter: brightness(1.03) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 22px rgba(176,42,55,0.12) !important;
 }
 
 /* Boîte modale */
@@ -136,6 +195,24 @@
   justify-content: flex-end;
   gap: 12px;
 }
+
+/* Inline variant for modal actions and compact controls */
+.ui-btn.btn-inline { width: auto !important; padding: 8px 12px !important; min-width: 0 !important; border-radius: 8px !important; }
+
+/* Nouveau: bouton vert avec icône */
+.ui-btn.btn-vert {
+  background: linear-gradient(180deg, #28a745 0%, #1e7e34 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 22px rgba(40,167,69,0.16);
+}
+.ui-btn.btn-vert:hover:not(:disabled) {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(40,167,69,0.20);
+}
+.ui-btn.btn-vert .ui-btn-icon { color: #fff; }
+.ui-btn.btn-vert.btn-icon-only { background: #28a745; }
 
 /* ====== BOUTONS STANDARDS BLEUS (fond/texte) ====== */
 /* Assure-toi d’avoir défini :root { --blue-main: #255F85; } */

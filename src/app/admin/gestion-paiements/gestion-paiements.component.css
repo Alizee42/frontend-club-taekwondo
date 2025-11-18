@@ -44,12 +44,16 @@
 }
 
 .page-title {
-font-size: 24px;
-  color: var(--blue-dark);
-  margin: 0 0 .8rem;
-  display: flex;
-  align-items: center;
-  gap: .5rem;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--blue-main);
+  background: linear-gradient(90deg, var(--blue-main) 60%, #e0e7ef 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .page-title i {
