@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { FooterComponent } from './footer.component';
 
 describe('FooterComponent', () => {
@@ -11,7 +12,8 @@ describe('FooterComponent', () => {
       imports: [
         FooterComponent,
         HttpClientTestingModule
-      ]
+      ],
+      providers: [provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(FooterComponent);

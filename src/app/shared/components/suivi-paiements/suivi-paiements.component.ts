@@ -157,8 +157,7 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
 
   refresh(): void {
     this.loading = true; this.error = '';
-    const token = localStorage.getItem('token') || '';
-    this.http.get<Paiement[]>(`${this.API_BASE}/paiements`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }).subscribe({
+    this.http.get<Paiement[]>(`${this.API_BASE}/paiements`).subscribe({
       next: (res) => {
         this.paiements = Array.isArray(res) ? res : [];
         this.paiements.forEach(p => { p.datePaiement = p.datePaiement ? new Date(p.datePaiement) : undefined; (p.echeances || []).forEach(e => e.dateEcheance = e.dateEcheance ? new Date(e.dateEcheance) : undefined); });
@@ -264,23 +263,20 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
 
   estPayable(p: Paiement): boolean { const s = this.sansAccents(p.statut); return s !== 'annule' && s !== 'paye' && this.montantRestant(p) > 0; }
 
-  marquerPaiementPaye(p: Paiement): void { if (!p?.id) return; if (!confirm('Confirmer : marquer ce paiement comme entièrement payé ?')) return; const token = localStorage.getItem('token') || '';
-    try { const payload = token ? JSON.parse(atob(token.split('.')[1])) : null; const roles = payload ? (payload.roles || payload.authorities || payload.role || payload.roleNames || '') : ''; console.debug('[Suivi] marquerPaiementPaye - token?', !!token, 'roles:', roles); } catch (err) { console.debug('[Suivi] marquerPaiementPaye - impossible de décoder le token'); }
-    this.http.post(`${this.API_BASE}/paiements/${p.id}/valider`, {}, { headers: token ? { Authorization: `Bearer ${token}` } : {} }).subscribe({ next: () => { p.statut = 'payé'; if (Array.isArray(p.echeances)) p.echeances = p.echeances.map(e => ({ ...e, statut: 'payé' as Statut })); this.applyFilters(); this.modalEcheancesVisible = false; }, error: (err) => { console.error('[Suivi] marquerPaiementPaye error', err); const serverMsg = err?.error?.message || err?.message || `Erreur ${err?.status || 'inconnue'}`; alert('Impossible de marquer le paiement comme payé.\n' + serverMsg); } }); }
+  marquerPaiementPaye(p: Paiement): void { if (!p?.id) return; if (!confirm('Confirmer : marquer ce paiement comme entièrement payé ?')) return;
+    this.http.post(`${this.API_BASE}/paiements/${p.id}/valider`, {}).subscribe({ next: () => { p.statut = 'payé'; if (Array.isArray(p.echeances)) p.echeances = p.echeances.map(e => ({ ...e, statut: 'payé' as Statut })); this.applyFilters(); this.modalEcheancesVisible = false; }, error: (err) => { console.error('[Suivi] marquerPaiementPaye error', err); const serverMsg = err?.error?.message || err?.message || `Erreur ${err?.status || 'inconnue'}`; alert('Impossible de marquer le paiement comme payé.\n' + serverMsg); } }); }
 
-  marquerEcheancePayee(p: Paiement, e: Echeance): void { if (!p?.id || !e?.id) return; const token = localStorage.getItem('token') || ''; const body = [{ id: e.id }];
-    try { const payload = token ? JSON.parse(atob(token.split('.')[1])) : null; const roles = payload ? (payload.roles || payload.authorities || payload.role || payload.roleNames || '') : ''; console.debug('[Suivi] marquerEcheancePayee - token?', !!token, 'roles:', roles); } catch (err) { console.debug('[Suivi] marquerEcheancePayee - impossible de décoder le token'); }
-    this.http.post(`${this.API_BASE}/paiements/${p.id}/payer-echeance`, body, { headers: token ? { Authorization: `Bearer ${token}` } : {} }).subscribe({ next: () => { e.statut = 'payé'; const restant = this.montantRestant(p); if (restant <= 0) { p.statut = 'payé'; } else { const aDuRetard = (p.echeances || []).some(x => { const st = this.sansAccents(x.statut); return st !== 'paye' && x.dateEcheance && new Date(x.dateEcheance) < new Date(); }); p.statut = aDuRetard ? 'en retard' : 'en attente'; } this.applyFilters(); }, error: (err) => { console.error('[Suivi] marquerEcheancePayee error', err); const serverMsg = err?.error?.message || err?.error || err?.message || `Erreur ${err?.status || 'inconnue'}`; alert('Impossible de marquer l’échéance comme payée.\n' + serverMsg); } }); }
+  marquerEcheancePayee(p: Paiement, e: Echeance): void { if (!p?.id || !e?.id) return; const body = [{ id: e.id }];
+    this.http.post(`${this.API_BASE}/paiements/${p.id}/payer-echeance`, body).subscribe({ next: () => { e.statut = 'payé'; const restant = this.montantRestant(p); if (restant <= 0) { p.statut = 'payé'; } else { const aDuRetard = (p.echeances || []).some(x => { const st = this.sansAccents(x.statut); return st !== 'paye' && x.dateEcheance && new Date(x.dateEcheance) < new Date(); }); p.statut = aDuRetard ? 'en retard' : 'en attente'; } this.applyFilters(); }, error: (err) => { console.error('[Suivi] marquerEcheancePayee error', err); const serverMsg = err?.error?.message || err?.error || err?.message || `Erreur ${err?.status || 'inconnue'}`; alert('Impossible de marquer l’échéance comme payée.\n' + serverMsg); } }); }
 
   
   confirmerAnnulation(): void {
     if (!this.paiementActuel?.id) return;
     this.annulationError = '';
     this.annulationLoading = true;
-    const token = localStorage.getItem('token') || '';
     const isoLocal = new Date().toISOString().slice(0, 19);
     const body = { motif: this.motifAnnulation || 'Annulation par admin', dateAnnulation: isoLocal, adminResponsable: this.utilisateurSelectionne?.email || 'admin' };
-    this.http.put(`${this.API_BASE}/paiements/${this.paiementActuel.id}/annuler`, body, { headers: token ? { Authorization: `Bearer ${token}` } : {} }).subscribe({
+    this.http.put(`${this.API_BASE}/paiements/${this.paiementActuel.id}/annuler`, body).subscribe({
       next: (updated: any) => {
         this.annulationLoading = false;
         if (updated?.id) {

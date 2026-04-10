@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ClubService, Club } from '../../services/club.service';
 import { labelFor as docLabelFor, normalizeStatus, unifyType } from '../../shared/documents/doc-utils';
@@ -135,13 +135,6 @@ export class DocumentsSuperAdminComponent implements OnInit {
 
   // no AfterViewInit needed
 
-  private headers(): HttpHeaders {
-    const t = localStorage.getItem('token');
-    let h = new HttpHeaders();
-    if (t && t !== 'null' && t !== 'undefined') h = h.set('Authorization', `Bearer ${t}`);
-    return h;
-  }
-
   private loadClubs() {
     this.clubService.getClubs().subscribe({
       next: (clubs) => { this.clubs = clubs || []; this.loadDocs(); },
@@ -153,7 +146,7 @@ export class DocumentsSuperAdminComponent implements OnInit {
 
   loadDocs() {
     const qp = this.selectedClubId ? `?clubId=${this.selectedClubId}` : '';
-    this.http.get<DocumentDTO[]>(`${this.API_BASE}/documents/all${qp}`, { headers: this.headers() }).subscribe({
+    this.http.get<DocumentDTO[]>(`${this.API_BASE}/documents/all${qp}`).subscribe({
       next: (docs) => {
         const mapClubName = (id?: number | null) => {
           if (!id) return '—';
@@ -270,7 +263,7 @@ export class DocumentsSuperAdminComponent implements OnInit {
 
   // ====== Validation / Refus ======
   approve(row: Row) {
-    this.http.put(`${this.API_BASE}/documents/${row.id}/valider`, null, { headers: this.headers(), observe: 'response' })
+    this.http.put(`${this.API_BASE}/documents/${row.id}/valider`, null, { observe: 'response' })
       .subscribe({
         next: () => {
           row.statut = 'validé';
@@ -283,7 +276,7 @@ export class DocumentsSuperAdminComponent implements OnInit {
   }
 
   reject(row: Row) {
-    this.http.put(`${this.API_BASE}/documents/${row.id}/refuser`, null, { headers: this.headers(), observe: 'response' })
+    this.http.put(`${this.API_BASE}/documents/${row.id}/refuser`, null, { observe: 'response' })
       .subscribe({
         next: () => {
           row.statut = 'refusé';

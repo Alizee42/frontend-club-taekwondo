@@ -74,22 +74,16 @@ export class DashboardMembreComponent implements OnInit {
   ngOnInit(): void {
     this.loadUtilisateur();
   }
-  // --- Documents manquants ---
-  private getAuthHeaders(): any {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  }
-
   loadDocuments(): void {
     this.alertsReady = false;
     this.docsLoaded = false;
-    const utilisateurId = this.utilisateurConnecte?.id || localStorage.getItem('utilisateurId');
+    const utilisateurId = this.utilisateurConnecte?.id || this.authService.getUserIdFromToken();
     if (!utilisateurId) {
       console.warn('[MEMBRE][DOCS] Aucun utilisateurId trouvé, abandon du chargement des documents.');
       return;
     }
     console.log('[MEMBRE][DOCS] Chargement des documents pour utilisateurId =', utilisateurId);
-    this.http.get<any>(`${this.API_BASE}/documents/utilisateur/${utilisateurId}`, { headers: this.getAuthHeaders() }).subscribe({
+    this.http.get<any>(`${this.API_BASE}/documents/utilisateur/${utilisateurId}`).subscribe({
       next: (documents) => {
         const arr: any[] = Array.isArray(documents) ? documents
           : Array.isArray(documents?.items) ? documents.items
@@ -144,14 +138,14 @@ export class DashboardMembreComponent implements OnInit {
 
     const norm = raw
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase().replace(/[\s'’_-]+/g, '');
+      .toLowerCase().replace(/[\s''_-]+/g, '');
 
     for (const t of DOC_CATALOG) {
       const candidates = [t.code, t.label, ...(t.aliases || [])];
       if (candidates.some(c =>
         String(c)
           .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase().replace(/[\s'’_-]+/g, '') === norm
+          .toLowerCase().replace(/[\s''_-]+/g, '') === norm
       )) {
         return t.code;
       }
@@ -182,11 +176,8 @@ export class DashboardMembreComponent implements OnInit {
       this.utilisateurConnecte = this.normalizeUser(user);
       console.log('Utilisateur récupéré depuis le service :', user);
       // stocke l'id utilisateur pour réutilisation éventuelle
-      if (this.utilisateurConnecte?.id) {
-        localStorage.setItem('utilisateurId', String(this.utilisateurConnecte.id));
-      }
       // Charger la config des documents requis par club si disponible, puis les documents
-  const clubId = (user as any)?.clubId ?? (Number(localStorage.getItem('clubId')) || null);
+      const clubId = (user as any)?.clubId ?? null;
       this.loadRequiredConfig(clubId);
       this.loadDocuments();
     } else {
@@ -196,20 +187,14 @@ export class DashboardMembreComponent implements OnInit {
   }
 
   private loadUserFromAPI(): void {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!this.authService.isConnecte()) return;
 
-    const headers = { Authorization: `Bearer ${token}` };
-
-    this.http.get<Utilisateur>(`${this.API_BASE}/utilisateurs/me`, { headers }).subscribe({
+    this.http.get<Utilisateur>(`${this.API_BASE}/utilisateurs/me`).subscribe({
       next: (u) => {
         console.log('Utilisateur récupéré avec succès :', u);
         this.utilisateurConnecte = this.normalizeUser(u);
-        if (this.utilisateurConnecte?.id) {
-          localStorage.setItem('utilisateurId', String(this.utilisateurConnecte.id));
-        }
         // Charger la config des documents requis par club si disponible, puis les documents
-  const clubId = (u as any)?.clubId ?? (Number(localStorage.getItem('clubId')) || null);
+        const clubId = (u as any)?.clubId ?? null;
         this.loadRequiredConfig(clubId);
         this.loadDocuments();
       },

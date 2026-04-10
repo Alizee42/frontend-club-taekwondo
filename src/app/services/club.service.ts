@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 export interface Club {
@@ -16,9 +16,7 @@ export interface Club {
 @Injectable({ providedIn: 'root' })
 export class ClubService {
   deleteClub(id: number): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
-    return this.http.delete(`/api/clubs/${id}`, { headers });
+    return this.http.delete(`/api/clubs/${id}`);
   }
   private selectedClubSubject: BehaviorSubject<Club | null>;
   public selectedClub$: Observable<Club | null>;
@@ -30,21 +28,15 @@ export class ClubService {
   }
 
   getClubs(): Observable<Club[]> {
-    const token = localStorage.getItem('token');
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
-    return this.http.get<Club[]>('/api/clubs', { headers });
+    return this.http.get<Club[]>('/api/clubs');
   }
-  
+
   createClub(payload: Partial<Club>): Observable<Club> {
-    const token = localStorage.getItem('token');
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
-    return this.http.post<Club>('/api/clubs', payload, { headers });
+    return this.http.post<Club>('/api/clubs', payload);
   }
 
   editClub(club: Club): Observable<Club> {
-    const token = localStorage.getItem('token');
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
-    return this.http.put<Club>(`/api/clubs/${club.id}`, club, { headers });
+    return this.http.put<Club>(`/api/clubs/${club.id}`, club);
   }
 
   getSelectedClub(): Club | null {

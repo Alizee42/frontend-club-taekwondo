@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommandeService, CommandeDTO } from '../../services/commande.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-commandes-parent',
@@ -17,48 +18,30 @@ export class CommandesParentComponent implements OnInit {
   errorMsg = '';
   search = '';
 
-  constructor(private commandeService: CommandeService) {}
+  constructor(
+    private commandeService: CommandeService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.chargerCommandes();
   }
 
   /** =========================
-   *   JWT & ID utilisateur
+   *   ID utilisateur
    * ========================= */
-  private decodeJwt(token?: string): any {
-    try {
-      if (!token) return null;
-      const part = token.split('.')[1];
-      if (!part) return null;
-      const base64 = part.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(part.length / 4) * 4, '=');
-      return JSON.parse(atob(base64));
-    } catch {
-      return null;
+  private getCurrentUserId(): number | null {
+    const utilisateurId =
+      this.authService.getUtilisateurConnecte()?.id ??
+      this.authService.getUserIdFromToken();
+
+    if (utilisateurId && utilisateurId > 0) {
+      return utilisateurId;
     }
+
+    console.warn('[CommandesParent] Aucun utilisateurId valide trouve');
+    return null;
   }
-
-private getCurrentUserId(): number | null {
-  const token = localStorage.getItem('auth_token') || '';
-  const claims = this.decodeJwt(token) || {};
-
-  // ...log supprimé...
-
-  // ✅ Essaie différents champs possibles
-  let utilisateurId = Number(claims.utilisateurId || claims.userId || claims.id || claims.sub);
-  
-  if (!isNaN(utilisateurId) && utilisateurId > 0) {
-  // ...log supprimé...
-    return utilisateurId;
-  }
-
-  // Debug pour voir le contenu du token
-  console.warn('[CommandesParent] Token décodé:', claims);
-  console.warn('[CommandesParent] Aucun utilisateurId valide trouvé');
-  
-  return null;
-}
-
 
   /** =========================
    *   Chargement des commandes
@@ -69,7 +52,7 @@ private getCurrentUserId(): number | null {
 
     const parentId = this.getCurrentUserId();
     if (!parentId) {
-      this.errorMsg = 'Utilisateur non identifié.';
+      this.errorMsg = 'Utilisateur non identifie.';
       this.isLoading = false;
       return;
     }
@@ -104,18 +87,18 @@ private getCurrentUserId(): number | null {
 
   articlesResume(c: CommandeDTO): string {
     const lignes = c?.lignes ?? [];
-    if (!lignes.length) return '—';
+    if (!lignes.length) return '-';
     const count = lignes.reduce((sum, l) => sum + (Number(l.quantite) || 0), 0);
     const noms = Array.from(new Set(lignes.map(l => l.produitNom || 'Produit').filter(Boolean)));
     const preview = noms.slice(0, 2).join(', ');
     const more = noms.length > 2 ? ` (+${noms.length - 2})` : '';
-    return `${count} article${count > 1 ? 's' : ''} • ${preview}${more}`;
+    return `${count} article${count > 1 ? 's' : ''} - ${preview}${more}`;
   }
 
   trackByCommande = (_: number, c: CommandeDTO) => c.id;
   trackByMembre = (_: number, m: string) => m;
 
-  // Détails
+  // Details
   commandeSelectionnee: CommandeDTO | null = null;
   voirDetails(c: CommandeDTO) { this.commandeSelectionnee = c; }
   fermerDetails() { this.commandeSelectionnee = null; }
@@ -132,9 +115,9 @@ private getCurrentUserId(): number | null {
     return 'badge badge-dark';
   }
 
-  // Méthode pour normaliser l'affichage du mode de paiement
+  // Methode pour normaliser l'affichage du mode de paiement
   normalizeModePaiement(mode: string): string {
-    if (!mode) return '—';
+    if (!mode) return '-';
     const m = mode.toUpperCase();
     switch (m) {
       case 'CB':
@@ -143,7 +126,7 @@ private getCurrentUserId(): number | null {
       case 'CLUB':
         return 'Paiement au club';
       case 'CHEQUE':
-        return 'Chèque';
+        return 'Cheque';
       case 'VIREMENT':
         return 'Virement';
       default:

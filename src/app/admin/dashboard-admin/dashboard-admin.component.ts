@@ -6,6 +6,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, forkJoin, interval, Subject } from 'rxjs';
 import { map, catchError, takeUntil, switchMap, filter } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
 
 interface DashboardStats {
   nbMembres: number;
@@ -23,7 +24,6 @@ type BadgeCounts = {
   actualites: number;
 };
 
-type UserLocalStorage = { prenom?: string; nom?: string } | null;
 
 // 🔖 centralise ici les statuts (adapte si besoin pour coller à ton backend)
 const STATUS = {
@@ -74,11 +74,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     /** Affiche le nom/prénom si ADMIN, sinon 'Super Admin' ou 'Utilisateur' + logs debug */
     getUserName(): string {
       try {
-        const rawUser = localStorage.getItem('utilisateur');
+        const user = this.authService.getUtilisateurConnecte();
   // ...log supprimé...
-        const user = rawUser ? JSON.parse(rawUser) : null;
         if (user && user.role) {
-          const role = user.role.toUpperCase();
+          const role = (user.role ?? this.authService.getRole() ?? '').toString().toUpperCase();
           // ...log supprimé...
           if (role === 'ADMIN') {
             // ...log supprimé...
@@ -149,7 +148,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   private readonly base = environment.apiUrl;
   private url = (path: string) => `${this.base}/${String(path).replace(/^\/+/, '')}`;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 
   // ...existing code...
 
@@ -161,8 +160,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   /** Utilisateur connecté (depuis localStorage ici) */
   private recupererUtilisateur(): void {
     try {
-      const raw = localStorage.getItem('user');
-      const user: UserLocalStorage = raw ? JSON.parse(raw) : null;
+      const user = this.authService.getUtilisateurConnecte();
       this.prenomUtilisateur = (user?.prenom ?? user?.nom ?? 'Admin');
     } catch {
       this.prenomUtilisateur = 'Admin';

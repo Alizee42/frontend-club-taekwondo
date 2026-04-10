@@ -75,8 +75,7 @@ export class ProfilComponent implements OnInit {
         this.user = response;
         // Mettez à jour les deux clés pour compatibilité
         try {
-          localStorage.setItem('utilisateur', JSON.stringify(this.user));
-          localStorage.setItem('user', JSON.stringify(this.user));
+          this.auth.updateUtilisateurConnecte(this.user);
         } catch {}
         this.updateLastPwdAgo();
       },
@@ -113,8 +112,7 @@ export class ProfilComponent implements OnInit {
       next: (updated) => {
         this.user = updated || dto;
         try {
-          localStorage.setItem('utilisateur', JSON.stringify(this.user));
-          localStorage.setItem('user', JSON.stringify(this.user));
+          this.auth.updateUtilisateurConnecte(this.user);
         } catch {}
         this.editMode = {};
         this.saveSuccess = 'Profil mis à jour avec succès.';
@@ -184,8 +182,7 @@ export class ProfilComponent implements OnInit {
       next: (updated) => {
         this.user = updated || dto;
         try {
-          localStorage.setItem('utilisateur', JSON.stringify(this.user));
-          localStorage.setItem('user', JSON.stringify(this.user));
+          this.auth.updateUtilisateurConnecte(this.user);
         } catch {}
         this.pwdSuccess = 'Mot de passe mis à jour avec succès.';
         this.passwordError = '';

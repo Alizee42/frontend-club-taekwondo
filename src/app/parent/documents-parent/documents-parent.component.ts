@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
 import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
@@ -147,7 +147,7 @@ export class DocumentsParentComponent implements OnInit {
 
   // =================== LOAD ===================
   private loadParentAndKids(): void {
-    this.http.get<any>(`${this.API_BASE}/utilisateurs/me`, { headers: this.getAuthHeaders() }).subscribe({
+    this.http.get<any>(`${this.API_BASE}/utilisateurs/me`, {}).subscribe({
       next: (u: any) => {
         this.utilisateurConnecte = {
           id: u?.id ?? u?._id ?? u?.uuid,
@@ -171,7 +171,7 @@ export class DocumentsParentComponent implements OnInit {
         }
 
         // Enfants du parent connecté
-        this.http.get<any>(`${this.API_BASE}/membres/mes-enfants`, { headers: this.getAuthHeaders() }).subscribe({
+        this.http.get<any>(`${this.API_BASE}/membres/mes-enfants`, {}).subscribe({
           next: (res: any) => {
             const arr: any[] = Array.isArray(res) ? res
               : Array.isArray(res?.items) ? res.items
@@ -241,15 +241,6 @@ export class DocumentsParentComponent implements OnInit {
     }
   }
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    let headers = new HttpHeaders();
-    if (token && token !== 'null' && token !== 'undefined') {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-    return headers;
-  }
-
   onSelectKid(): void {
     if (this.selectedKidId == null) {
       this.documents = [];
@@ -260,7 +251,7 @@ export class DocumentsParentComponent implements OnInit {
   }
 
   private loadDocumentsForKid(kidId: string): void {
-    this.http.get<any>(`${this.API_BASE}/documents/membre/${kidId}`, { headers: this.getAuthHeaders() }).subscribe({
+    this.http.get<any>(`${this.API_BASE}/documents/membre/${kidId}`, {}).subscribe({
       next: (res: any) => {
         const arr: any[] = Array.isArray(res) ? res
           : Array.isArray(res?.items) ? res.items
@@ -328,7 +319,7 @@ export class DocumentsParentComponent implements OnInit {
     fd.append('utilisateurId', String(this.utilisateurConnecte.id));
     fd.append('membreId', String(this.selectedKidId));
 
-    this.http.post<any>(`${this.API_BASE}/documents`, fd, { headers: this.getAuthHeaders() }).subscribe({
+    this.http.post<any>(`${this.API_BASE}/documents`, fd, {}).subscribe({
       next: (created: any) => {
         const doc = this.mapDoc(created);
         if (!doc.id) {
@@ -364,7 +355,7 @@ export class DocumentsParentComponent implements OnInit {
       const fd = new FormData();
       fd.append('file', file);
 
-      this.http.put<any>(`${this.API_BASE}/documents/${doc.id}/file`, fd, { headers: this.getAuthHeaders() }).subscribe({
+      this.http.put<any>(`${this.API_BASE}/documents/${doc.id}/file`, fd, {}).subscribe({
         next: (updated: any) => {
           const mapped = this.mapDoc(updated);
           this.documents = this.documents.map(d => d.id === doc.id ? mapped : d);
@@ -386,7 +377,7 @@ export class DocumentsParentComponent implements OnInit {
     const ok = confirm(`Supprimer le document "${doc.nomDocument}" ?`);
     if (!ok) return;
 
-    this.http.delete(`${this.API_BASE}/documents/${doc.id}`, { observe: 'response', headers: this.getAuthHeaders() }).subscribe({
+    this.http.delete(`${this.API_BASE}/documents/${doc.id}`, { observe: 'response' }).subscribe({
       next: () => {
         this.documents = this.documents.filter(d => d.id !== doc.id);
         this.computeRows();

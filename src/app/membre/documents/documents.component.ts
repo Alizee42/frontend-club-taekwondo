@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -9,6 +9,7 @@ import { DOC_CATALOG } from '../../shared/documents/doc-utils';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { AuthService } from '../../services/auth.service';
 
 /* =========================
    Types & interfaces
@@ -49,14 +50,14 @@ function unifyType(input: any): string {
 
   const norm = raw
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().replace(/[\s'’_-]+/g, '');
+    .toLowerCase().replace(/[\s''_-]+/g, '');
 
   for (const t of DOC_CATALOG) {
     const candidates = [t.code, t.label, ...(t.aliases || [])];
     if (candidates.some(c =>
       String(c)
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase().replace(/[\s'’_-]+/g, '') === norm
+        .toLowerCase().replace(/[\s''_-]+/g, '') === norm
     )) {
       return t.code;
     }
@@ -90,14 +91,14 @@ export class DocumentsComponent implements OnInit {
   tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [];
   rows: any[] = [];
 
-  // “Documents obligatoires” uniformisés (même référentiel que Parent)
+  // "Documents obligatoires" uniformisés (même référentiel que Parent)
   requiredDocuments: RequiredDoc[] = [
     { type: 'CERTIFICAT_MEDICAL', label: 'Certificat médical (< 1 an)', uploaded: false, etat: 'non_envoyé' },
     { type: 'PHOTO_IDENTITE',     label: "Photo d'identité",            uploaded: false, etat: 'non_envoyé' },
     { type: 'DOCUMENT_IDENTITE',  label: "Document d'identité",         uploaded: false, etat: 'non_envoyé' }
   ];
 
-  constructor(private http: HttpClient, private requiredSvc: RequiredDocsService, private sanitizer: DomSanitizer) {}
+  constructor(private http: HttpClient, private requiredSvc: RequiredDocsService, private sanitizer: DomSanitizer, private authService: AuthService) {}
 
   ngOnInit(): void {
     // Prépare la table tôt pour afficher la colonne Actions immédiatement
@@ -148,26 +149,15 @@ export class DocumentsComponent implements OnInit {
   /* =========================
      LOAD
      ========================= */
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    let headers = new HttpHeaders();
-    if (token && token !== 'null' && token !== 'undefined') {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-    return headers;
-  }
-
   loadUtilisateurConnecte(): void {
-    const headers = this.getAuthHeaders();
-    if (!headers.has('Authorization')) {
+    if (!this.authService.isConnecte()) {
       alert('Utilisateur non connecté.');
       return;
     }
 
-    this.http.get<Utilisateur>(`${this.API_BASE}/utilisateurs/me`, { headers }).subscribe({
+    this.http.get<Utilisateur>(`${this.API_BASE}/utilisateurs/me`).subscribe({
       next: (utilisateur) => {
         this.utilisateurConnecte = utilisateur;
-        localStorage.setItem('utilisateurId', utilisateur.id.toString());
         // Charger la config "documents requis" par club (si dispo)
         const clubId = (utilisateur as any).clubId ?? this.utilisateurConnecte?.clubId ?? null;
         this.loadRequiredConfig(clubId as number | null);
@@ -175,7 +165,7 @@ export class DocumentsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erreur utilisateur :', err);
-        alert('Impossible de récupérer les informations de l’utilisateur connecté.');
+        alert("Impossible de récupérer les informations de l'utilisateur connecté.");
       }
     });
   }
@@ -208,13 +198,13 @@ export class DocumentsComponent implements OnInit {
   }
 
   loadDocuments(): void {
-    const utilisateurId = localStorage.getItem('utilisateurId');
+    const utilisateurId = this.utilisateurConnecte?.id ?? this.authService.getUserIdFromToken();
     if (!utilisateurId) {
       alert('Utilisateur non connecté.');
       return;
     }
 
-    this.http.get<DocumentItem[]>(`${this.API_BASE}/documents/utilisateur/${utilisateurId}`, { headers: this.getAuthHeaders() }).subscribe({
+    this.http.get<DocumentItem[]>(`${this.API_BASE}/documents/utilisateur/${utilisateurId}`).subscribe({
       next: (documents) => {
         const arr = Array.isArray(documents) ? documents : [];
         // normalise les types et statuts
@@ -305,7 +295,7 @@ export class DocumentsComponent implements OnInit {
     }
     if (hasPending) return { state: 'en_attente', text: 'En attente' };
 
-    // Aucun document fourni -> “Non transmis” (état rouge côté style)
+    // Aucun document fourni -> "Non transmis" (état rouge côté style)
     return { state: 'refusé', text: 'Non transmis' };
   }
 
@@ -335,7 +325,7 @@ export class DocumentsComponent implements OnInit {
       return;
     }
 
-    const utilisateurId = localStorage.getItem('utilisateurId');
+    const utilisateurId = this.utilisateurConnecte?.id ?? this.authService.getUserIdFromToken();
     if (!utilisateurId) {
       alert('Utilisateur non connecté.');
       return;
@@ -345,9 +335,9 @@ export class DocumentsComponent implements OnInit {
     // ⚠️ clés backend attendues : file / typeDocument / utilisateurId
     formData.append('file', this.selectedFile);
     formData.append('typeDocument', this.documentType);   // ex: "DOCUMENT_IDENTITE"
-    formData.append('utilisateurId', utilisateurId);
+    formData.append('utilisateurId', String(utilisateurId ?? ''));
 
-    this.http.post(`${this.API_BASE}/documents`, formData, { headers: this.getAuthHeaders() }).subscribe({
+    this.http.post(`${this.API_BASE}/documents`, formData).subscribe({
       next: () => {
         alert('Document téléversé avec succès.');
         this.selectedFile = null;
@@ -360,7 +350,7 @@ export class DocumentsComponent implements OnInit {
     });
   }
 
-  // ✅ Ne pas ombrer l’objet global "document"
+  // ✅ Ne pas ombrer l'objet global "document"
   onEditDocument(doc: DocumentItem): void {
     if (this.normalizeStatus(doc.status) === 'validé') {
       alert('Document validé, non modifiable.');
@@ -378,7 +368,7 @@ export class DocumentsComponent implements OnInit {
       const fd = new FormData();
       fd.append('file', file);
 
-      this.http.put(`${this.API_BASE}/documents/${doc.id}/file`, fd, { headers: this.getAuthHeaders() })
+      this.http.put(`${this.API_BASE}/documents/${doc.id}/file`, fd)
         .subscribe({
           next: () => {
             alert('Document remplacé.');
@@ -401,7 +391,7 @@ export class DocumentsComponent implements OnInit {
     }
 
     if (confirm(`Supprimer le document : ${doc.nomDocument} ?`)) {
-      this.http.delete(`${this.API_BASE}/documents/${doc.id}`, { headers: this.getAuthHeaders() }).subscribe({
+      this.http.delete(`${this.API_BASE}/documents/${doc.id}`).subscribe({
         next: () => {
           alert('Document supprimé.');
           this.loadDocuments();
@@ -453,7 +443,7 @@ export class DocumentsComponent implements OnInit {
     this.previewing = null;
   }
 
-  /** Nettoie et construit l’URL absolue du fichier côté API */
+  /** Nettoie et construit l'URL absolue du fichier côté API */
   private encodeLastSegment(path: string): string {
     if (!path) return '';
     const parts = path.split('/');

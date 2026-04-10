@@ -40,15 +40,6 @@ export class EvenementService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  // Méthode privée pour générer les headers avec authentification
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token || ''}`
-    });
-  }
-
   // ======================== ÉVÉNEMENTS ========================
 
   /** Récupérer tous les événements */
@@ -88,13 +79,13 @@ export class EvenementService {
 
   /** Supprimer un événement */
   supprimerEvenement(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   /** Changer le statut actif/inactif d'un événement */
   changerStatutEvenement(id: number, actif: boolean): Observable<EvenementDTO> {
     const body = { actif };
-    return this.http.put<any>(`${this.apiUrl}/${id}/statut`, body, { headers: this.getAuthHeaders() }).pipe(
+    return this.http.put<any>(`${this.apiUrl}/${id}/statut`, body).pipe(
       map(e => this.mapToEvenementDTO(e))
     );
   }
@@ -120,7 +111,7 @@ export class EvenementService {
     };
     
   // ...log supprimé...
-    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body, { headers: this.getAuthHeaders() });
+    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body);
   }
 
   /** Inscrire un enfant à un événement - ✅ CORRIGÉ : utilise le bon format backend */
@@ -149,12 +140,12 @@ export class EvenementService {
   // ...log supprimé...
   // ...log supprimé...
     
-    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body, { headers: this.getAuthHeaders() });
+    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body);
   }
 
   /** Se désinscrire d'un événement */
   desinscrireEvenement(inscriptionId: number): Observable<void> {
-    return this.http.delete<void>(`${environment.apiUrl}/inscriptions/${inscriptionId}`, { headers: this.getAuthHeaders() });
+    return this.http.delete<void>(`${environment.apiUrl}/inscriptions/${inscriptionId}`);
   }
 
   // Méthode utilitaire pour récupérer l'ID utilisateur

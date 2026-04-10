@@ -36,6 +36,7 @@ export class AuthService {
   private readonly K_TOKEN = 'token';
   private readonly K_ROLE = 'role';
   private readonly K_USER = 'utilisateur';
+  private readonly K_USER_LEGACY = 'user';
 
   private logoutTimer: any = null;
 
@@ -69,6 +70,7 @@ export class AuthService {
     localStorage.removeItem('auth_token');
     localStorage.removeItem(this.K_ROLE);
     localStorage.removeItem(this.K_USER);
+    localStorage.removeItem(this.K_USER_LEGACY);
     
     this._authState$.next({ token: null, role: null, user: null, isConnecte: false });
 
@@ -104,6 +106,33 @@ export class AuthService {
     return this._authState$.value.user;
   }
 
+  updateUtilisateurConnecte(user: Utilisateur | null): void {
+    const current = this._authState$.value;
+    const resolvedRole = (user?.role ?? current.role ?? '').toString().toUpperCase();
+
+    const nextUser: Utilisateur | null = user
+      ? {
+          ...(current.user ?? {}),
+          ...user,
+          ...(resolvedRole ? { role: resolvedRole } : {}),
+        }
+      : null;
+
+    this.persistUser(nextUser);
+
+    if (resolvedRole) {
+      localStorage.setItem(this.K_ROLE, resolvedRole);
+    } else {
+      localStorage.removeItem(this.K_ROLE);
+    }
+
+    this._authState$.next({
+      ...current,
+      role: resolvedRole || null,
+      user: nextUser,
+    });
+  }
+
   getAuthHeaders(): HttpHeaders {
     const t = this.getToken();
     return t ? new HttpHeaders({ Authorization: `Bearer ${t}` }) : new HttpHeaders();
@@ -124,7 +153,7 @@ export class AuthService {
     localStorage.setItem('auth_token', res.token); // Compatibilité avec d'autres composants
     
     if (normalizedRole) localStorage.setItem(this.K_ROLE, normalizedRole);
-    localStorage.setItem(this.K_USER, JSON.stringify(utilisateur));
+    this.persistUser(utilisateur);
 
 
     const expired = this.isTokenExpired(res.token);
@@ -155,11 +184,12 @@ export class AuthService {
 
 
     try {
-      const rawUser = localStorage.getItem(this.K_USER);
+      const rawUser = localStorage.getItem(this.K_USER) || localStorage.getItem(this.K_USER_LEGACY);
       if (rawUser) user = JSON.parse(rawUser);
     } catch (e) {
       console.warn('[AuthService] Erreur parsing user data:', e);
       localStorage.removeItem(this.K_USER);
+      localStorage.removeItem(this.K_USER_LEGACY);
     }
 
     // Vérifier si le token est expiré
@@ -247,18 +277,39 @@ export class AuthService {
     }
   }
 
-  // ---- Ajout pour récupérer l'ID utilisateur depuis le JWT ----
   getUserIdFromToken(): number | null {
     const token = this.getToken();
     if (!token) return null;
-
     try {
       const payload = this.decodeJwt(token);
-      // ⚡ Vérifie bien le nom du champ dans ton JWT (utilisateurId / sub / id)
       return payload?.utilisateurId ?? null;
     } catch (e) {
       console.error('[AuthService] Erreur décodage JWT', e);
       return null;
     }
+  }
+
+  getMembreIdFromToken(): number | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = this.decodeJwt(token);
+      return payload?.membreId ?? null;
+    } catch (e) {
+      console.error('[AuthService] Erreur décodage JWT', e);
+      return null;
+    }
+  }
+
+  private persistUser(user: Utilisateur | null): void {
+    if (!user) {
+      localStorage.removeItem(this.K_USER);
+      localStorage.removeItem(this.K_USER_LEGACY);
+      return;
+    }
+
+    const serialized = JSON.stringify(user);
+    localStorage.setItem(this.K_USER, serialized);
+    localStorage.setItem(this.K_USER_LEGACY, serialized);
   }
 }

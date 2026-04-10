@@ -11,7 +11,8 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   const router = inject(Router);
   const toastService = inject(ToastService);
 
-  const token = localStorage.getItem('token');
+  // Récupère le token via AuthService (source unique de vérité)
+  const validToken = auth.isConnecte() ? auth.getToken() : null;
 
   // 🔒 Vérifier si cette requête nécessite une authentification
   // Seule la galerie publique (GET /galerie SANS /admin) est publique
@@ -23,28 +24,6 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
 
   // ✅ Endpoints qui peuvent échouer sans impact sur l'UX
   const isOptionalEndpoint = req.url.includes('/parametres-paiement');
-
-  // ✅ Validation du token avant de l'envoyer
-  let validToken = token;
-  if (token) {
-    try {
-      // Vérifier si le token n'est pas expiré (basique)
-      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Math.floor(Date.now() / 1000);
-
-      if (tokenPayload.exp && tokenPayload.exp < currentTime) {
-        console.warn('[AuthInterceptor] Token expiré, suppression');
-        localStorage.removeItem('token');
-        validToken = null;
-      }
-    } catch (error) {
-      console.warn('[AuthInterceptor] Token invalide, suppression');
-      localStorage.removeItem('token');
-      validToken = null;
-    }
-  }
-
-  // ✅ Debug log supprimé
 
   // On ajoute le token uniquement s'il existe ET si ce n'est pas une route publique
   if (validToken && !isPublicEndpoint) {
@@ -70,9 +49,9 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
         } else if (error.status === 401) {
           toastService.error('❌ Identifiants incorrects ou session expirée.');
         } else if (error.status === 403) {
-          toastService.error('⛔ Accès interdit. Vous n’avez pas les droits.');
+          toastService.error("⛔ Accès interdit. Vous n'avez pas les droits.");
         } else if (error.status === 500) {
-          toastService.error('Erreur serveur. Veuillez réessayer plus tard ou contacter l’administrateur.');
+          toastService.error("Erreur serveur. Veuillez réessayer plus tard ou contacter l'administrateur.");
         }
       } else {
         console.warn('[AuthInterceptor] Erreur ignorée sur endpoint optionnel:', req.url);

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -32,51 +32,33 @@ export class InscriptionsService {
 
   /** 🔹 Créer une nouvelle inscription */
   inscrireUtilisateur(evenementId: number, utilisateurId: number, commentaire?: string): Observable<Inscription> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
-      'Content-Type': 'application/json',
-    });
-
     return this.http
-      .post<Inscription>(
-        this.apiUrl,
-        { evenementId, utilisateurId, commentaire },
-        { headers }
-      )
+      .post<Inscription>(this.apiUrl, { evenementId, utilisateurId, commentaire })
       .pipe(catchError(this.handleError));
   }
 
-  /** 🔹 Récupérer les inscriptions d’un événement */
+  /** 🔹 Récupérer les inscriptions d'un événement */
   getInscriptionsByEvenement(evenementId: number): Observable<Inscription[]> {
     return this.http
       .get<Inscription[]>(`${this.apiUrl}/evenement/${evenementId}`)
       .pipe(catchError(this.handleError));
   }
 
-  /** 🔹 Mettre à jour le statut d’une inscription */
+  /** 🔹 Mettre à jour le statut d'une inscription */
   updateStatut(id: number, statut: string): Observable<void> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
-      'Content-Type': 'application/json',
-    });
-
     return this.http
       .patch<void>(
         `${this.apiUrl}/${id}/statut`,
         {},
-        { headers, params: new HttpParams().set('statut', statut) }
+        { params: new HttpParams().set('statut', statut) }
       )
       .pipe(catchError(this.handleError));
   }
 
   /** 🔹 Annuler une inscription (désinscription) */
   annulerInscription(inscriptionId: number): Observable<void> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
-    });
-
     return this.http
-      .delete<void>(`${this.apiUrl}/${inscriptionId}`, { headers })
+      .delete<void>(`${this.apiUrl}/${inscriptionId}`)
       .pipe(catchError(this.handleError));
   }
 

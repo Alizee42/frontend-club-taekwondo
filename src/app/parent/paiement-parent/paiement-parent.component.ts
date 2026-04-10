@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { StripeService } from '../../services/stripe.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
+import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment'; // ✅ AJOUT
 
 type TypePaiement = 'UNIQUE' | 'ECHELONNE';
@@ -92,9 +93,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
 
   // Email client pour reçu Stripe (opt-in visible comme côté Membre)
   envoyerRecuEmail: boolean = false;
-  userEmail: string = (localStorage.getItem('userEmail')
-    || localStorage.getItem('email')
-    || '').trim();
+  userEmail = '';
 
   // Utilisé par le template
   today: Date = new Date();
@@ -102,13 +101,19 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   constructor(
     private http: HttpClient,
     private stripeService: StripeService,
-    private parametresService: ParametresPaiementService
+    private parametresService: ParametresPaiementService,
+    private authService: AuthService
   ) {}
 
   // ===== Utils
   private authHeaders() {
-    const token = localStorage.getItem('token') || '';
-    return { Authorization: `Bearer ${token}` };
+    return this.authService.getAuthHeaders();
+  }
+  private getCurrentUserId(): number | undefined {
+    return this.authService.getUtilisateurConnecte()?.id ?? this.authService.getUserIdFromToken() ?? undefined;
+  }
+  private refreshUserEmail(): void {
+    this.userEmail = (this.authService.getUtilisateurConnecte()?.email ?? '').trim();
   }
   // private log supprimé
   private isPaid(s: any) { return /pay[eé]e?/i.test(String(s ?? '')); }
@@ -149,6 +154,7 @@ private buildFactureUrl(paiementId: number){
   }
   // ===== Cycle de vie
   ngOnInit(): void {
+    this.refreshUserEmail();
     this.parametresService.parametres$.subscribe((p) => {
   // ...log supprimé...
       if (p) {
@@ -190,8 +196,7 @@ private buildFactureUrl(paiementId: number){
 
   // ===== Chargements
   loadEnfants(): void {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!this.authService.getToken()) return;
 
     this.http.get<{ id: number; nom: string; prenom: string }[]>(
       `${this.API}/membres/mes-enfants`,
@@ -208,8 +213,7 @@ private buildFactureUrl(paiementId: number){
   }
 
   loadPaiements(): void {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!this.authService.getToken()) return;
 
     this.http.get<any[]>(`${this.API}/paiements/parent/mes-paiements`, {
       headers: this.authHeaders()
@@ -457,7 +461,7 @@ private buildFactureUrl(paiementId: number){
     this.enCoursDePaiement = true; this.confirming = true;
     this.paiementErreur = false; this.erreurMessage = ''; // on garde lastPaymentIntentId pour le reçu
 
-    const utilisateurId = Number(localStorage.getItem('utilisateurId')) || undefined;
+    const utilisateurId = this.getCurrentUserId();
     const dtoCreation = {
       membreId: this.enfantSelectionne,
       type: this.typeChoisi,

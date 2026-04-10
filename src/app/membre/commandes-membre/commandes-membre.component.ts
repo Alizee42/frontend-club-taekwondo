@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgFor, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommandeService, CommandeDTO } from '../../services/commande.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-commandes-membre',
@@ -22,37 +23,11 @@ export class CommandesMembreComponent implements OnInit {
   errorMsg = '';
   search = '';
 
-  constructor(private commandeService: CommandeService) {}
-
-  /** =========================
-   *   JWT → membreId
-   * ========================= */
-  private decodeJwt(token?: string): any {
-    try {
-      if (!token) return null;
-      const payload = token.split('.')[1];
-      return JSON.parse(atob(payload));
-    } catch {
-      return null;
-    }
-  }
+  constructor(private commandeService: CommandeService, private authService: AuthService) {}
 
   private getCurrentMembreId(): number | null {
-    const token = localStorage.getItem('auth_token') || '';
-    const p = this.decodeJwt(token) || {};
-    
-    // Pour un membre, utilisateurId correspond à membreId
-    const membreId = Number(p.membreId || p.utilisateurId);
-    if (!isNaN(membreId) && membreId > 0) {
-      console.log('[CommandesMembre] membreId trouvé:', membreId);
-      return membreId;
-    }
-    
-    // Debug pour voir le contenu du token
-    console.log('[CommandesMembre] Token décodé:', p);
-    console.log('[CommandesMembre] membreId non trouvé dans le token');
-    
-    return null;
+    const membreId = this.authService.getMembreIdFromToken() ?? this.authService.getUserIdFromToken();
+    return membreId && membreId > 0 ? membreId : null;
   }
 
   /** =========================

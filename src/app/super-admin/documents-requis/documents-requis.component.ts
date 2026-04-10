@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
 import { DOC_CATALOG, labelFor as docLabelFor } from '../../shared/documents/doc-utils';
@@ -39,15 +39,8 @@ export class DocumentsRequisSuperAdminComponent implements OnInit {
     this.loadClubs();
   }
 
-  private authHeaders(): HttpHeaders {
-    const t = localStorage.getItem('token');
-    let h = new HttpHeaders();
-    if (t && t !== 'null' && t !== 'undefined') h = h.set('Authorization', `Bearer ${t}`);
-    return h;
-  }
-
   loadClubs() {
-    this.http.get<any[]>(`${this.API_BASE}/clubs`, { headers: this.authHeaders() }).subscribe({
+    this.http.get<any[]>(`${this.API_BASE}/clubs`).subscribe({
       next: (arr) => {
         this.clubs = (arr || []).map((c: any) => ({ id: c.id, nom: c.nom }));
         if (!this.selectedClubId && this.clubs.length) {

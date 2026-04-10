@@ -1,5 +1,5 @@
   import { Component, OnInit } from '@angular/core';
-  import { HttpClient, HttpHeaders } from '@angular/common/http';
+  import { HttpClient } from '@angular/common/http';
   import { CommonModule, NgClass, NgFor } from '@angular/common';
   import { FormsModule } from '@angular/forms';
   import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -92,8 +92,7 @@
 
   // Méthode pour valider un document (appel backend)
   validerDocument(document: DocumentItem) {
-    const headers = this.getAuthHeaders();
-    this.http.put(`${this.API_BASE}/documents/${document.id}/valider`, null, { headers, observe: 'response' })
+    this.http.put(`${this.API_BASE}/documents/${document.id}/valider`, null, { observe: 'response' })
       .subscribe({
         next: () => { document.status = 'validé'; },
         error: (err) => { console.error('Erreur validation document', err); }
@@ -127,16 +126,6 @@
   
     ngOnInit() {
       this.loadDocuments();
-    }
-  
-    /* ===== Helpers HTTP (Bearer) ===== */
-    private getAuthHeaders(): HttpHeaders {
-      const token = localStorage.getItem('token');
-      let headers = new HttpHeaders();
-      if (token && token !== 'null' && token !== 'undefined') {
-        headers = headers.set('Authorization', `Bearer ${token}`);
-      }
-      return headers;
     }
   
     /* ===== Helpers rôle & enfants (par utilisateur) ===== */
@@ -238,7 +227,7 @@
   
     /* ===== Chargement & groupage ===== */
     loadDocuments() {
-      this.http.get<any[]>(`${this.API_BASE}/documents`, { headers: this.getAuthHeaders() }).subscribe({
+      this.http.get<any[]>(`${this.API_BASE}/documents`).subscribe({
         next: (docsRaw) => {
           const utilisateursMap = new Map<string | number, UtilisateurRow>();
           const enfantsByUser = new Map<string | number, Map<string, ChildItem>>();
@@ -395,7 +384,7 @@
     fermerApercu() { this.documentEnApercu = null; }
   
     /* ================= Preview / URL robustes ================= */
-    /** Encode seulement le dernier segment du chemin (le nom de fichier), en tentant de décoder d’abord. */
+    /** Encode seulement le dernier segment du chemin (le nom de fichier), en tentant de décoder d'abord. */
     private encodeLastSegment(p: string): string {
       const parts = p.split('/');
       const last = parts.pop() || '';
@@ -426,8 +415,7 @@
   
     /** Refus d'un document (appel backend) */
     refuserDocument(doc: DocumentItem): void {
-      const headers = this.getAuthHeaders();
-      this.http.put(`${this.API_BASE}/documents/${doc.id}/refuser`, null, { headers, observe: 'response' })
+      this.http.put(`${this.API_BASE}/documents/${doc.id}/refuser`, null, { observe: 'response' })
         .subscribe({
           next: () => { doc.status = 'refusé'; },
           error: (err) => { console.error('Erreur refus document', err); }

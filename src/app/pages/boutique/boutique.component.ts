@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';     // [(ngModel)]
 import { PanierService } from '../../services/panier.service';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 interface Produit {
   id: number;
@@ -51,7 +51,8 @@ export class BoutiqueComponent implements OnInit {
   constructor(
     private panierService: PanierService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -165,15 +166,12 @@ export class BoutiqueComponent implements OnInit {
   }
 
   private getAuthHeaders(): HttpHeaders {
-    const token =
-      localStorage.getItem('auth_token') ??
-      localStorage.getItem('token') ??
-      '';
+    const token = this.authService.getToken() ?? '';
     if (token) {
     } else {
       console.warn('[Boutique] Aucun token trouvé pour la création de commande');
     }
-    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+    return this.authService.getAuthHeaders();
   }
 
   private async createCommandeOnServer(): Promise<number> {

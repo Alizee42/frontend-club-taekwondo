@@ -100,7 +100,7 @@ private authHeaders() {
   }
   private buildFactureUrl(paiementId: number){ return `${this.API}/paiements/${paiementId}/facture`; }
   telechargerFacture(){ if (this.factureUrl) window.open(this.factureUrl, '_blank', 'noopener'); }
-  private myUserId(): number { return Number(localStorage.getItem('utilisateurId') || 0); }
+  private myUserId(): number { return this.auth.getUtilisateurConnecte()?.id ?? this.auth.getUserIdFromToken() ?? 0; }
 
   /** mapping + normalisation pour l’historique */
   private mapPaiementFromApi(p: any) {
@@ -193,23 +193,24 @@ private authHeaders() {
     this.http.get<any>(`${this.API}/membres/me`, { headers: this.authHeaders() })
       .subscribe({
         next: (me) => {
+          const authUser = this.auth.getUtilisateurConnecte();
           this.membreId = Number(me?.id ?? me?.membreId ?? me?.userId ?? 0) || null;
-          const prenom = me?.prenom || me?.firstName || (localStorage.getItem('userPrenom') || '');
-          const nom = me?.nom || me?.lastName || (localStorage.getItem('userNom') || '');
-          this.userEmail = me?.email || me?.utilisateur?.email || localStorage.getItem('userEmail') || null;
+          const prenom = me?.prenom || me?.firstName || authUser?.prenom || '';
+          const nom = me?.nom || me?.lastName || authUser?.nom || '';
+          this.userEmail = me?.email || me?.utilisateur?.email || authUser?.email || null;
           this.membreNom = (prenom || 'Vous') + (nom ? ` ${nom}` : '');
           this.log('me', { id: this.membreId, nom: this.membreNom, email: this.userEmail });
           this.loadPaiements();
         },
         error: _ => {
-          // Fallback local
-          const localId = Number(localStorage.getItem('membreId') || localStorage.getItem('utilisateurId') || 0);
+          const authUser = this.auth.getUtilisateurConnecte();
+          const localId = this.auth.getMembreIdFromToken() ?? this.myUserId();
           if (localId) this.membreId = localId;
-          const localNom = localStorage.getItem('userNom') || '';
-          const localPrenom = localStorage.getItem('userPrenom') || '';
-          this.userEmail = localStorage.getItem('userEmail') || null;
+          const localNom = authUser?.nom || '';
+          const localPrenom = authUser?.prenom || '';
+          this.userEmail = authUser?.email || null;
           this.membreNom = (localPrenom || 'Vous') + (localNom ? ` ${localNom}` : '');
-          this.log('me.fallback.localStorage', { id: this.membreId, nom: this.membreNom, email: this.userEmail });
+          this.log('me.fallback.auth', { id: this.membreId, nom: this.membreNom, email: this.userEmail });
           this.loadPaiements();
         }
       });
@@ -397,7 +398,7 @@ private authHeaders() {
     this.enCoursDePaiement = true; this.confirming = true;
     this.paiementErreur = false; this.erreurMessage = ''; this.lastPaymentIntentId = null;
 
-    const utilisateurId = Number(localStorage.getItem('utilisateurId')) || undefined;
+    const utilisateurId = this.myUserId() || undefined;
     const dtoCreation = {
       membreId: this.membreId,
       type: this.typeChoisi,

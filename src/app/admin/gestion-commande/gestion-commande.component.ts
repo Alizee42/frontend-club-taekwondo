@@ -19,7 +19,7 @@ export interface LigneCommandeDTO {
   quantite: number;
   prix: number; // total de la ligne
   imageUrl?: string;
-  // Bénéficiaire (optionnel — s’affiche juste dans la modale si présent)
+  // Bénéficiaire (optionnel — s'affiche juste dans la modale si présent)
   beneficiaireId?: number | null;
   beneficiairePrenom?: string | null;
   beneficiaireNom?: string | null;
@@ -98,15 +98,8 @@ export class GestionCommandeComponent implements OnInit {
   isLoading = false;
   errorMsg = '';
 
-  // 🎫 Auth (si token admin)
-  private get headers(): HttpHeaders {
-    const token = localStorage.getItem('auth_token') || '';
-    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
-  }
   // Corps texte brut pour /statut
-  private get textHeaders(): HttpHeaders {
-    return this.headers.set('Content-Type', 'text/plain; charset=utf-8');
-  }
+  private readonly textHeaders = new HttpHeaders({ 'Content-Type': 'text/plain; charset=utf-8' });
 
   constructor(private http: HttpClient) {}
 
@@ -205,7 +198,7 @@ export class GestionCommandeComponent implements OnInit {
     if (q) params = params.set('q', q);
     params = this.mapFiltersToApiParams(params);
 
-    this.http.get<ApiCommande[]>(`${API_BASE}/commandes`, { params, headers: this.headers })
+    this.http.get<ApiCommande[]>(`${API_BASE}/commandes`, { params})
       .subscribe({
         next: (res) => {
           const list = Array.isArray(res) ? res : [];
@@ -230,11 +223,11 @@ export class GestionCommandeComponent implements OnInit {
   //          ACTIONS
   // =========================
   private ensureModeClubIfMissing(c: CommandeDTO): Promise<void> {
-    // Si mode manquant pour une commande “au club”, on force côté back avant de valider.
+    // Si mode manquant pour une commande "au club", on force côté back avant de valider.
     if (c.modePaiement === 'club') return Promise.resolve();
     return new Promise((resolve, reject) => {
       const body = { modePaiement: 'CLUB' };
-      this.http.put<void>(`${API_BASE}/commandes/${c.id}`, body, { headers: this.headers })
+      this.http.put<void>(`${API_BASE}/commandes/${c.id}`, body)
         .subscribe({
           next: () => { c.modePaiement = 'club'; resolve(); },
           error: (e) => {
@@ -251,7 +244,7 @@ export class GestionCommandeComponent implements OnInit {
     if (!c) return;
     if (!confirm('Confirmer le marquage en PAYÉ ?')) return;
 
-    // Uniquement pour “club” (les CB sont payées automatiquement par Stripe)
+    // Uniquement pour "club" (les CB sont payées automatiquement par Stripe)
     this.ensureModeClubIfMissing(c)
       .then(() => {
         const payload = {
@@ -259,7 +252,7 @@ export class GestionCommandeComponent implements OnInit {
           modePaiement: 'CLUB',
           datePaiement: new Date().toISOString().slice(0, 10) // YYYY-MM-DD
         };
-        this.http.put<void>(`${API_BASE}/commandes/${id}/valider`, payload, { headers: this.headers })
+        this.http.put<void>(`${API_BASE}/commandes/${id}/valider`, payload)
           .subscribe({
             next: () => { c.statut = 'payé'; },
             error: (err) => {
@@ -337,7 +330,7 @@ trackByMembre = (_: number, m: string) => m;
   private nStatut(c: CommandeDTO): string { return this.normalize(c.statut as string); }
   private nMode(c: CommandeDTO): string { return this.normalize(c.modePaiement as string); }
 
-  // “Payé” cliquable uniquement pour les paiements au club
+  // "Payé" cliquable uniquement pour les paiements au club
   canGoPaid(c: CommandeDTO): boolean {
     const s = this.nStatut(c);
     const m = this.nMode(c);

@@ -27,11 +27,6 @@ export class ConnectedHeaderComponent implements OnInit {
   
   private readonly API_BASE = environment.apiUrl;
 
-  // Clés de stockage
-  private readonly ROLE_KEY = 'role';
-  private readonly TOKEN_KEY = 'token';
-  private readonly USER_KEY = 'user'; // si tu stockes un user JSON
-  
   // Auth
   user: Utilisateur | null = null;
   enfants: { prenom: string; nom: string }[] = [];
@@ -40,11 +35,6 @@ export class ConnectedHeaderComponent implements OnInit {
   constructor(private router: Router, private http: HttpClient, private auth: AuthService) {}
 
   ngOnInit(): void {
-    console.log('🔍 Connected-header ngOnInit');
-    console.log('🔍 Token:', localStorage.getItem('token') || localStorage.getItem('auth_token'));
-    console.log('🔍 Role:', localStorage.getItem('role'));
-    console.log('🔍 User:', localStorage.getItem('utilisateur'));
-    
     // Suivi de l'état d'auth
     this.auth.authState$.subscribe((state) => {
       this.user = state.user;
@@ -56,9 +46,9 @@ export class ConnectedHeaderComponent implements OnInit {
     this.loadNotifications();
   }
 
-  /** Récupère le rôle stocké */
+  /** Récupère le rôle depuis AuthService */
   private getStoredRole(): RoleUp | null {
-    const raw = localStorage.getItem(this.ROLE_KEY);
+    const raw = this.auth.getRole();
     if (!raw) return null;
     const up = raw.trim().toUpperCase();
     if (up === 'ADMIN' || up === 'MEMBRE' || up === 'PARENT' || up === 'SUPER_ADMIN') return up as RoleUp;

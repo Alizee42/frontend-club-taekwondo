@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActualiteService } from '../../services/actualite.service';
+import { AuthService } from '../../services/auth.service';
 
 interface Actualite {
   id?: string;
@@ -71,7 +72,7 @@ export class GestionActualitesComponent implements OnInit {
     }
   }
 
-  constructor(private actualiteService: ActualiteService) {
+  constructor(private actualiteService: ActualiteService, private authService: AuthService) {
     this.actualite = this.getEmptyActualite();
   }
 
@@ -81,15 +82,10 @@ export class GestionActualitesComponent implements OnInit {
 
   /** Récupère le clubId de l'utilisateur connecté */
   private getClubId(): number | null {
-    const utilisateur = JSON.parse(localStorage.getItem('utilisateur') || '{}');
-    if (utilisateur?.club?.id) {
-      return utilisateur.club.id;
-    } else if (utilisateur?.clubId) {
-      return utilisateur.clubId;
-    } else if (Array.isArray(utilisateur?.clubs) && utilisateur.clubs.length > 0 && utilisateur.clubs[0]?.id) {
-      return utilisateur.clubs[0].id;
-    }
-    return null;
+    const utilisateur = this.authService.getUtilisateurConnecte() as any;
+    if (!utilisateur) return null;
+    return utilisateur?.club?.id ?? utilisateur?.clubId
+      ?? (Array.isArray(utilisateur?.clubs) && utilisateur.clubs[0]?.id ? utilisateur.clubs[0].id : null);
   }
 
   private getEmptyActualite(): Actualite {

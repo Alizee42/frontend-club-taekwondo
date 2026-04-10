@@ -342,8 +342,7 @@ export class InscriptionComponent implements OnInit {
           if (utilisateurData.clubId) (membreSeul as any).clubId = utilisateurData.clubId;
 
           this.http.post(`${environment.apiUrl}/membres`, membreSeul).subscribe({
-            next: (membre: any) => {
-              if (membre?.id) localStorage.setItem('membreId', String(membre.id));
+            next: () => {
               this.finaliser();
             },
             error: () => {
