@@ -121,20 +121,26 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     if (!clientSecret) return null;
     const i = clientSecret.indexOf('_secret_'); return i > 0 ? clientSecret.substring(0, i) : null;
     }
-private buildFactureUrl(paiementId: number){ 
-    return `${this.API}/paiements/${paiementId}/facture`; 
+  private buildFactureUrl(paiementId: number){
+    return `${this.API}/paiements/${paiementId}/facture`;
   }
-  telechargerFacture(){ if (this.factureUrl) window.open(this.factureUrl, '_blank', 'noopener'); }
+  telechargerFacture(): void {
+    const pid = this.paiementIdEnCours;
+    if (!pid) return;
+    this.http.get<{receiptUrl: string}>(`${this.API}/paiements/${pid}/facture`, { headers: this.authHeaders() })
+      .subscribe({ next: r => { if (r?.receiptUrl) window.open(r.receiptUrl, '_blank', 'noopener'); }, error: () => {} });
+  }
 
-  // ✅ bouton “Reçu Stripe” (HTML l’utilise)
+  // ✅ bouton “Reçu Stripe” (HTML l'utilise)
   canOpenStripeReceipt(): boolean {
-    return !!this.lastPaymentIntentId;
+    return !!this.paiementIdEnCours;
   }
 
   openStripeReceipt(): void {
-    if (!this.lastPaymentIntentId) return;
-    const url = `${this.API}/stripe/receipt/${encodeURIComponent(this.lastPaymentIntentId)}`;
-    window.open(url, '_blank', 'noopener');
+    const pid = this.paiementIdEnCours;
+    if (!pid) return;
+    this.http.get<{receiptUrl: string}>(`${this.API}/stripe/receipt/${pid}`, { headers: this.authHeaders() })
+      .subscribe({ next: r => { if (r?.receiptUrl) window.open(r.receiptUrl, '_blank', 'noopener'); }, error: () => {} });
   }
 
    private async syncPaymentIntentOnce(): Promise<void> {
@@ -438,7 +444,7 @@ private buildFactureUrl(paiementId: number){
     }
   }
 
-  /** Démonte l’élément Stripe principal pour un nouveau cycle propre */
+  /** Démonte l'élément Stripe principal pour un nouveau cycle propre */
   private resetStripeMainElement(): void {
     try { if (this.cardElement) this.cardElement.unmount(); } catch {}
     this.cardElement = null;
@@ -526,7 +532,7 @@ private buildFactureUrl(paiementId: number){
                   this.step = 4;
                   // ...log supprimé...
 
-                  // Recharge l’historique
+                  // Recharge l'historique
                   this.loadPaiements();
                   // Préparer un nouveau cycle de paiement
                   this.resetStripeMainElement();
@@ -549,7 +555,7 @@ private buildFactureUrl(paiementId: number){
   // ...log supprimé...
   }
 
-  // ===== Paiement d’échéance (historique)
+  // ===== Paiement d'échéance (historique)
   ouvrirModalPaiement(paiement: any, echeance: any): void{
     if (!paiement || !echeance) return;
     if ((echeance?.statutCss || '') === 'badge-payé') return;

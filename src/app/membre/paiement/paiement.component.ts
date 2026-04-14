@@ -99,10 +99,15 @@ private authHeaders() {
     const i = clientSecret.indexOf('_secret_'); return i > 0 ? clientSecret.substring(0, i) : null;
   }
   private buildFactureUrl(paiementId: number){ return `${this.API}/paiements/${paiementId}/facture`; }
-  telechargerFacture(){ if (this.factureUrl) window.open(this.factureUrl, '_blank', 'noopener'); }
+  telechargerFacture(): void {
+    const pid = this.paiementIdEnCours;
+    if (!pid) return;
+    this.http.get<{receiptUrl: string}>(`${this.API}/paiements/${pid}/facture`, { headers: this.authHeaders() })
+      .subscribe({ next: r => { if (r?.receiptUrl) window.open(r.receiptUrl, '_blank', 'noopener'); }, error: () => {} });
+  }
   private myUserId(): number { return this.auth.getUtilisateurConnecte()?.id ?? this.auth.getUserIdFromToken() ?? 0; }
 
-  /** mapping + normalisation pour l’historique */
+  /** mapping + normalisation pour l'historique */
   private mapPaiementFromApi(p: any) {
     const type = String(p?.type ?? '').toUpperCase();
     const mode = String(p?.modePaiement ?? p?.mode ?? '').toUpperCase();
@@ -124,7 +129,7 @@ private authHeaders() {
     return { ...p, membreId, type, modePaiement: mode, statutDisplay, statutCss, echeances };
   }
 
-  /** appartient bien à l’utilisateur courant (membreId ou utilisateurId) */
+  /** appartient bien à l'utilisateur courant (membreId ou utilisateurId) */
   private isMine(p: any): boolean {
     const mid = Number(p?.membreId ?? p?.membre?.id ?? p?.beneficiaireId ?? p?.enfantId ?? NaN);
     const uid = Number(p?.utilisateurId ?? p?.userId ?? p?.utilisateur?.id ?? NaN);
@@ -133,7 +138,7 @@ private authHeaders() {
     return !!(meMidOk || meUidOk);
   }
 
-  /** si l’API n’a pas encore le paiement créé, on l’ajoute localement */
+  /** si l'API n'a pas encore le paiement créé, on l'ajoute localement */
   private ensureInHistory(created: any) {
     if (!created) return;
     const id = Number(created?.id ?? created?.paiementId);
@@ -487,7 +492,7 @@ private authHeaders() {
     this.log('paiement.fail', msg);
   }
 
-  // ===== Paiement d’échéance (historique) =====
+  // ===== Paiement d'échéance (historique) =====
   ouvrirModalPaiement(paiement: any, echeance: any): void{
     if (!paiement || !echeance) return;
     if ((echeance?.statutCss || '') === 'badge-payé') return;
@@ -549,9 +554,8 @@ private authHeaders() {
   ouvrirRecuStripe(paiementId?: number, echeanceId?: number): void {
     const pid = paiementId ?? this.paiementIdEnCours;
     if (!pid) { this.log('receipt.abort.noPid'); return; }
-    let url = `${this.API}/stripe/receipt/${pid}`;
-    if (echeanceId) url += `?echeanceId=${echeanceId}`;
-    window.open(url, '_blank', 'noopener');
+    this.http.get<{receiptUrl: string}>(`${this.API}/stripe/receipt/${pid}`, { headers: this.authHeaders() })
+      .subscribe({ next: r => { if (r?.receiptUrl) window.open(r.receiptUrl, '_blank', 'noopener'); }, error: () => {} });
   }
 
   /** Réinitialise l'élément Stripe de la modale principale pour un nouveau paiement */
