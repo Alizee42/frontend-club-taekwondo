@@ -1,6 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
+
+export type UiButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'danger'
+  | 'success'
+  | 'warning'
+  | 'ghost';
 
 @Component({
   selector: 'ui-button',
@@ -10,19 +18,57 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./ui-button.component.css']
 })
 export class UiButtonComponent {
-  @Input() label: string = '';
-  @Input() icon: string = '';
-  @Input() variant: 'primary' | 'secondary' | 'danger' = 'primary';
-  @Input() disabled: boolean = false;
-  @Input() loading: boolean = false;
-  @Input() customClass: string = '';
+  @Input() label = '';
+  @Input() icon = '';
+  @Input() variant: UiButtonVariant = 'primary';
+  @Input() color?: UiButtonVariant;
+  @Input() disabled = false;
+  @Input() loading = false;
+  @Input() customClass = '';
+  @Input() title?: string;
+  @Input('aria-label') ariaLabel?: string;
+  @Input() full = false;
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() routerLink: any;
-  @Output() clicked = new EventEmitter<any>();
+  @Output() clicked = new EventEmitter<Event>();
 
-  onClick(event?: any): void {
-    if (!this.disabled && !this.loading) {
-      this.clicked.emit(event);
+  get resolvedVariant(): UiButtonVariant {
+    return this.color ?? this.variant;
+  }
+
+  get buttonClasses(): string[] {
+    const classes: string[] = [this.resolvedVariant];
+
+    if (this.resolvedVariant === 'primary') {
+      classes.push('v-primary');
     }
+
+    if (this.full) {
+      classes.push('btn-full');
+    }
+
+    if (this.loading) {
+      classes.push('is-loading');
+    }
+
+    if (this.customClass.trim()) {
+      classes.push(...this.customClass.trim().split(/\s+/));
+    }
+
+    return classes;
+  }
+
+  get computedAriaLabel(): string | null {
+    return this.ariaLabel || this.title || this.label || null;
+  }
+
+  onClick(event?: Event): void {
+    if (this.disabled || this.loading) {
+      event?.preventDefault();
+      event?.stopPropagation();
+      return;
+    }
+
+    this.clicked.emit(event);
   }
 }

@@ -1,49 +1,71 @@
 <section id="about" class="about-section">
-    <div class="section-title-wrapper">
-      <h2 class="section-title">À propos de nous</h2>
-    </div>
-    <div class="container">
-      <div class="about-grid about-highlight">
-        <div class="about-text">
-          <h3>Qui sommes-nous&nbsp;?</h3>
-          <p>
-            <span class="highlight-blue">{{ selectedClub?.name || 'Olympique Taekwondo' }}</span>, fondé en 1995, est dédié à l’excellence en Taekwondo.<br>
-            Nous accueillons des pratiquants de tous niveaux dans un environnement de <span class="highlight-blue">respect</span> et de <span class="highlight-blue">discipline</span>.
-          </p>
-          <p>
-            Notre mission est de former des athlètes non seulement sur le plan physique, mais aussi sur le plan mental, en mettant l’accent sur le <span class="highlight-blue">développement personnel</span> et la <span class="highlight-blue">maîtrise de soi</span>.
-          </p>
-        </div>
-        <div class="about-image">
-          <img src="assets/images/image2.JPG" alt="Salle d'entraînement du club de Taekwondo" loading="lazy" decoding="async">
+  <div class="about-container">
+
+    <!-- Bloc principal 2 colonnes -->
+    <div class="about-main">
+      <div class="about-text">
+        <span class="section-eyebrow">À propos de nous</span>
+        <h2 class="about-heading">
+          Un club fondé sur<br>
+          <em>l'excellence et le respect</em>
+        </h2>
+        <p class="about-lead">
+          <strong>{{ selectedClub?.name || 'Olympique Taekwondo Villeurbannais' }}</strong>, fondé en 1995, accueille des pratiquants de tous niveaux dans un environnement de
+          <strong>respect</strong> et de <strong>discipline</strong>.
+        </p>
+        <p>
+          Notre mission est de former des athlètes sur le plan physique et mental, en mettant l'accent sur le
+          <strong>développement personnel</strong> et la <strong>maîtrise de soi</strong>.
+        </p>
+
+        <!-- Chips de valeurs -->
+        <div class="about-chips">
+          <span class="about-chip"><i class="ri-shield-check-line" aria-hidden="true"></i> Respect</span>
+          <span class="about-chip"><i class="ri-mental-health-line" aria-hidden="true"></i> Discipline</span>
+          <span class="about-chip"><i class="ri-trophy-line" aria-hidden="true"></i> Excellence</span>
+          <span class="about-chip"><i class="ri-team-line" aria-hidden="true"></i> Esprit d'équipe</span>
         </div>
       </div>
-  
-      <div class="mv-values-grid">
-        <div class="mv-card">
-          <i class="fas fa-bullseye"></i>
-          <h3>Notre Mission</h3>
-          <p>
-            <span class="highlight-blue">Accompagner</span> chaque pratiquant dans un <span class="highlight-blue">environnement sûr</span> et stimulant, pour progresser et s’épanouir à travers le Taekwondo.
-          </p>
-        </div>
-        <div class="mv-card">
-          <i class="fas fa-eye"></i>
-          <h3>Notre Vision</h3>
-          <p>
-            <span class="highlight-blue">Inspirer</span> et <span class="highlight-blue">transmettre</span> les valeurs du Taekwondo, pour bâtir une communauté forte et ouverte à toutes les générations.
-          </p>
-        </div>
-        <div class="mv-card">
-          <i class="fas fa-heart"></i>
-          <h3>Nos Valeurs</h3>
-          <ul>
-            <li><strong class="highlight-blue">Respect</strong> : Valoriser chaque individu et traiter tout le monde avec dignité.</li>
-            <li><strong class="highlight-blue">Discipline</strong> : Atteindre l’excellence par la persévérance.</li>
-            <li><strong class="highlight-blue">Excellence</strong> : S’efforcer d’être les meilleurs dans tout ce que nous entreprenons.</li>
-          </ul>
+
+      <div class="about-visual">
+        <img src="assets/images/image2.JPG"
+             alt="Salle d'entraînement du club de Taekwondo"
+             loading="lazy" decoding="async">
+        <div class="about-visual__badge">
+          <span class="about-visual__badge-year">1995</span>
+          <span class="about-visual__badge-label">Fondé en</span>
         </div>
       </div>
     </div>
-  </section>
-  
+
+    <!-- Cards Mission / Vision / Valeurs -->
+    <div class="about-cards">
+      <div class="about-card">
+        <div class="about-card__icon">
+          <i class="ri-focus-3-line" aria-hidden="true"></i>
+        </div>
+        <h3>Notre Mission</h3>
+        <p>Accompagner chaque pratiquant dans un environnement sûr et stimulant, pour progresser et s'épanouir à travers le Taekwondo.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card__icon">
+          <i class="ri-eye-line" aria-hidden="true"></i>
+        </div>
+        <h3>Notre Vision</h3>
+        <p>Inspirer et transmettre les valeurs du Taekwondo, pour bâtir une communauté forte et ouverte à toutes les générations.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card__icon">
+          <i class="ri-heart-line" aria-hidden="true"></i>
+        </div>
+        <h3>Nos Valeurs</h3>
+        <ul>
+          <li><i class="ri-check-line" aria-hidden="true"></i> <strong>Respect</strong> — chaque individu est valorisé</li>
+          <li><i class="ri-check-line" aria-hidden="true"></i> <strong>Discipline</strong> — excellence par persévérance</li>
+          <li><i class="ri-check-line" aria-hidden="true"></i> <strong>Maîtrise</strong> — aller plus loin chaque jour</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>

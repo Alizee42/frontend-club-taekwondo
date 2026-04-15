@@ -1,32 +1,44 @@
-<section id="enseignants" class="enseignants-section">
+<section id="enseignants" class="teachers-section">
   <div class="container">
-    <div class="section-title-wrapper">
+    <div class="section-head">
+      <span class="section-eyebrow">L'équipe pédagogique</span>
       <h2 class="section-title">Nos Enseignants</h2>
+      <p class="section-subtitle">Des passionnés dédiés à votre progression</p>
     </div>
-    <p class="section-subtitle">
-      Découvrez l'équipe pédagogique passionnée qui encadre nos élèves.
-    </p>
 
-    <div class="teachers-grid">
-      <div *ngFor="let professeur of professeurs" class="teacher-card">
-        <img 
-          [src]="professeur.photo || 'assets/images/default-teacher.jpg'" 
-          [attr.alt]="(professeur.nom + ' ' + professeur.prenom + ' – ' + (professeur.specialite || 'Enseignant'))"
-          loading="lazy"
-          decoding="async"
-        >
-        <div class="teacher-info">
-          <h3>{{ professeur.nom }} {{ professeur.prenom }}</h3>
-          <p class="specialite">{{ professeur.specialite }}</p>
-          <p class="description">{{ professeur.description }}</p>
-
-          <div class="social-links" *ngIf="professeur.facebook || professeur.instagram || professeur.linkedin">
-            <a *ngIf="professeur.facebook" [href]="professeur.facebook" target="_blank"><i class="ri-facebook-line"></i></a>
-            <a *ngIf="professeur.instagram" [href]="professeur.instagram" target="_blank"><i class="ri-instagram-line"></i></a>
-            <a *ngIf="professeur.linkedin" [href]="professeur.linkedin" target="_blank"><i class="ri-linkedin-line"></i></a>
+    <div class="teachers-grid" *ngIf="professeurs.length > 0">
+      <article *ngFor="let professeur of professeurs" class="teacher-card">
+        <div class="teacher-card__photo-wrap">
+          <img
+            [src]="professeur.photo || 'assets/images/default-teacher.jpg'"
+            [attr.alt]="professeur.nom + ' ' + professeur.prenom"
+            loading="lazy" decoding="async"
+          >
+          <div class="teacher-card__overlay">
+            <p class="teacher-card__desc">{{ professeur.description }}</p>
+            <div class="teacher-card__socials" *ngIf="professeur.facebook || professeur.instagram || professeur.linkedin">
+              <a *ngIf="professeur.facebook" [href]="professeur.facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <i class="ri-facebook-line"></i>
+              </a>
+              <a *ngIf="professeur.instagram" [href]="professeur.instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <i class="ri-instagram-line"></i>
+              </a>
+              <a *ngIf="professeur.linkedin" [href]="professeur.linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                <i class="ri-linkedin-line"></i>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+        <div class="teacher-card__info">
+          <h3>{{ professeur.nom }} {{ professeur.prenom }}</h3>
+          <span class="teacher-card__grade">{{ professeur.specialite }}</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="no-teachers" *ngIf="professeurs.length === 0">
+      <i class="ri-user-3-line" aria-hidden="true"></i>
+      <p>Aucun enseignant disponible pour ce club.</p>
     </div>
   </div>
 </section>

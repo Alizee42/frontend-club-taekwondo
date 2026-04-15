@@ -1,93 +1,202 @@
-/* Style inspiré du titre de connexion */
-.ui-title {
-  color: #1E6091;
-  font-size: 2.25rem;
-  font-weight: 700;
-  /* espace vertical augmenté pour descendre visuellement le titre */
-  margin-top: 0.8rem;
-  letter-spacing: 2.5px;
-  line-height: 1.15;
-  text-align: left;
-  transition: color 0.2s;
-  text-shadow: 0 2px 8px rgba(30,96,145,0.10), 0 1px 0 #fff;
-  position: relative;
+:host {
+  display: block;
 }
 
-.ui-title::after {
-  /* disabled to avoid double underline when using the card underline */
-  display: none;
-}
-
-/* New layout for title with subtitle and actions */
 .ui-title-wrapper {
-  margin-bottom: 1rem;
-}
-.ui-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.ui-title-main {
-  flex: 1 1 auto;
-}
-.ui-subtitle {
-  margin: 0.25rem 0 0 0;
-  color: #6b7280; /* gray-600 */
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-.ui-title-actions {
-  flex: 0 0 auto;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-.ui-title-underline {
-  /* more visible full-width underline */
-  height: 2px;
-  width: 100%;
-  margin-top: 8px;
-  border-radius: 0;
-  background: rgba(30,96,145,0.18); /* solid subtle brand color */
-  box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset;
-  opacity: 1;
+  margin-bottom: var(--sp-4);
 }
 
-@media (max-width: 640px) {
-  .ui-title-row { flex-direction: column; align-items: flex-start; }
-  .ui-title-actions { width: 100%; margin-top: 0.5rem; }
-}
-
-/* Ajustement vertical spécifique mobile pour éviter un espacement excessif */
-@media (max-width: 640px) {
-  .ui-title { margin-top: 0.4rem; }
-}
-
-/* Strong card-style variant */
 .ui-title-card {
-  /* simplified flat variant (no heavy card) */
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+
+.ui-title-left {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+
+.ui-title-main {
+  min-width: 0;
+}
+
+.ui-title-main h1,
+.ui-title-main h2,
+.ui-title-main h3,
+.ui-title-main h4,
+.ui-title-main h5,
+.ui-title-main h6 {
+  margin: 0;
+}
+
+.ui-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.ui-title-main h1.ui-title {
+  font-size: clamp(1.9rem, 1.45rem + 1.3vw, var(--text-4xl));
+}
+
+.ui-title-main h2.ui-title {
+  font-size: clamp(1.6rem, 1.3rem + 1vw, var(--text-3xl));
+}
+
+.ui-title-main h3.ui-title {
+  font-size: var(--text-2xl);
+}
+
+.ui-title-main h4.ui-title {
+  font-size: var(--text-xl);
+}
+
+.ui-title-main h5.ui-title {
+  font-size: var(--text-lg);
+}
+
+.ui-title-main h6.ui-title {
+  font-size: var(--text-base);
+}
+
+.ui-title--brand {
+  color: var(--brand-primary-dark);
+}
+
+.ui-title--default {
+  color: var(--color-text);
+}
+
+.ui-title--muted {
+  color: var(--color-text-2);
+}
+
+.ui-title--danger {
+  color: var(--color-danger);
+}
+
+.ui-title--success {
+  color: var(--color-success);
+}
+
+.ui-title-gradient {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ui-subtitle {
+  margin: var(--sp-2) 0 0;
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+}
+
+.ui-title-underline {
+  width: min(100%, 120px);
+  height: 3px;
+  margin-top: var(--sp-3);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--brand-primary) 22%, white);
+}
+
+.ui-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--brand-primary) 10%, white);
+  color: var(--brand-primary);
+  flex-shrink: 0;
+}
+
+.ui-title-icon i {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.ui-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius);
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xs);
+  flex-shrink: 0;
+}
+
+.ui-title-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  background: transparent;
-  border-radius: 6px;
-  padding: 0;
-  box-shadow: none;
-  border: none;
+  justify-content: flex-end;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
 }
-.ui-title-left { display:flex; align-items:center; gap:12px; }
-.ui-avatar { width:48px; height:48px; border-radius:8px; object-fit:cover; border:1px solid rgba(0,0,0,0.06); }
-.ui-title-icon { font-size: 28px; color: var(--blue-main); margin-right: 8px; vertical-align: middle; }
-.ui-title-main h1, .ui-title-main h2 { margin:0; font-weight:800; letter-spacing:0.2px; }
-.ui-title-main h1 { font-size:1.6rem; }
-.ui-title-main h2 { font-size:1.4rem; }
-.ui-subtitle { color:#64748b; margin-top:4px; font-size:0.95rem; }
-.ui-title-actions ::ng-deep .btn { border-radius:999px; padding:8px 12px; }
+
+.ui-title-wrapper--center .ui-title-card {
+  flex-direction: column;
+  align-items: center;
+}
+
+.ui-title-wrapper--center .ui-title-left,
+.ui-title-wrapper--center .ui-title-main {
+  align-items: center;
+  text-align: center;
+}
+
+.ui-title-wrapper--center .ui-title-actions {
+  justify-content: center;
+}
+
+.ui-title-wrapper--center .ui-title-underline {
+  margin-inline: auto;
+}
+
+.ui-title-wrapper--right .ui-title-card {
+  flex-direction: row-reverse;
+}
+
+.ui-title-wrapper--right .ui-title-left,
+.ui-title-wrapper--right .ui-title-main {
+  text-align: right;
+}
+
+.ui-title-wrapper--right .ui-title-actions {
+  justify-content: flex-start;
+}
+
+.ui-title-wrapper--right .ui-title-underline {
+  margin-left: auto;
+}
 
 @media (max-width: 640px) {
-  .ui-title-card { padding:10px; border-radius:8px; }
-  .ui-avatar { width:40px; height:40px; }
-  .ui-title-main h1 { font-size:1.25rem; }
+  .ui-title-card,
+  .ui-title-wrapper--right .ui-title-card {
+    flex-direction: column;
+  }
+
+  .ui-title-left,
+  .ui-title-wrapper--right .ui-title-left {
+    width: 100%;
+    gap: var(--sp-3);
+    text-align: left;
+  }
+
+  .ui-title-actions,
+  .ui-title-wrapper--right .ui-title-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .ui-title-wrapper--center .ui-title-left,
+  .ui-title-wrapper--center .ui-title-actions {
+    justify-content: center;
+  }
 }

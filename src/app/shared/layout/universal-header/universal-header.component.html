@@ -1,71 +1,166 @@
-<header class="main-header">
-  <div class="header-container compact">
+<!-- ═══════════════════════════════════════════════════════════
+     STATE PUBLIC (non connecté)
+     ═══════════════════════════════════════════════════════════ -->
+<header class="uh" *ngIf="!isUserLoggedIn">
+  <div class="uh__inner">
+
     <!-- Logo -->
-    <div class="logo">
-      <a routerLink="/">
-        <span class="brand-strong">Olympique</span>
-        <span class="brand-mid">Taekwondo</span>
-        <span class="brand-thin">{{ clubName }}</span>
-      </a>
-  <button class="change-club-btn" (click)="changeClub.emit()" title="Changer de club">Changer de club</button>
-    </div>
-    <!-- Navigation -->
-    <nav class="nav-wrapper">
-      <ng-container *ngIf="isUserLoggedIn; else publicNav">
-        <!-- Pour ADMIN / SUPER_ADMIN sur leurs dashboards ET pour toute la zone Parent/Membre et la page Profil: menu minimal -->
-        <ul class="main-nav dashboard-nav" *ngIf="isDashboardPage || isParentArea || isMembreArea || isProfilePage; else publicNav">
-          <li><a [routerLink]="dashboardRoute" routerLinkActive="active" (click)="goToDashboard.emit()" class="dashboard-btn">Dashboard</a></li>
-          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="home-btn" title="Retour à l'accueil">Retour Accueil</a></li>
-        </ul>
-      </ng-container>
-      <ng-template #publicNav>
-        <ul class="main-nav">
-          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a></li>
-          <li><a routerLink="/galerie" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Galerie</a></li>
-          <li><a routerLink="/inscription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inscription</a></li>
-          <li><a routerLink="/boutique" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Boutique</a></li>
-          <li><a routerLink="/evenements" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Événements</a></li>
-          <li><a routerLink="/contact" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Contact</a></li>
-          <li *ngIf="!isUserLoggedIn"><a routerLink="/connexion" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Connexion</a></li>
-        </ul>
-      </ng-template>
+    <a class="uh-logo" routerLink="/" (click)="closeAll()">
+      <span class="uh-logo__strong">Olympique</span>
+      <span class="uh-logo__mid"> Taekwondo</span>
+      <span class="uh-logo__thin" *ngIf="clubName"> · {{ clubName }}</span>
+    </a>
+
+    <!-- Nav principale -->
+    <nav class="uh-nav" aria-label="Navigation principale">
+      <a class="uh-nav__link" routerLink="/"            routerLinkActive="uh-nav__link--active" [routerLinkActiveOptions]="{exact:true}">Accueil</a>
+      <a class="uh-nav__link" routerLink="/galerie"     routerLinkActive="uh-nav__link--active">Galerie</a>
+      <a class="uh-nav__link" routerLink="/inscription" routerLinkActive="uh-nav__link--active">Inscription</a>
+      <a class="uh-nav__link" routerLink="/boutique"    routerLinkActive="uh-nav__link--active">Boutique</a>
+      <a class="uh-nav__link" routerLink="/evenements"  routerLinkActive="uh-nav__link--active">Événements</a>
+      <a class="uh-nav__link" routerLink="/contact"     routerLinkActive="uh-nav__link--active">Contact</a>
     </nav>
-    <!-- Actions utilisateur à droite -->
-    <div class="user-actions" *ngIf="isUserLoggedIn">
-      <div class="actions-inline">
-        <!-- Panier (affiché seulement si commande passée) -->
-        <ng-container *ngIf="cartCount > 0">
-          <div class="cart-wrapper">
-            <a routerLink="/boutique/panier" class="cart-icon" title="Mon panier">
-              <i class="ri-shopping-cart-line"></i>
-              <span class="badge">{{ cartCount }}</span>
-            </a>
-          </div>
-        </ng-container>
-        <!-- Notifications (affiché si showNotifications) -->
-        <ng-container *ngIf="showNotifications">
-          <div class="notification-wrapper">
-            <div class="notification-icon" (click)="openNotifications.emit()">
-              <i class="ri-notification-line"></i>
-              <span class="badge" *ngIf="unreadNotifications > 0">{{ unreadNotifications }}</span>
-            </div>
-          </div>
-        </ng-container>
-        <!-- Dropdown utilisateur -->
-        <div class="user-dropdown">
-          <button class="user-btn" (click)="toggleUserDropdown()">
-            <div class="avatar">{{ getUserInitials() }}</div>
-            <span class="username">{{ getUserName() }}</span>
-            <span class="arrow" [class.open]="userDropdownOpen">▼</span>
+
+    <!-- Actions publiques -->
+    <div class="uh-actions">
+      <button class="uh-btn-club" (click)="changeClub.emit()" title="Changer de club">
+        <i class="ri-map-pin-line"></i>
+        <span>{{ clubName || 'Choisir un club' }}</span>
+        <i class="ri-arrow-down-s-line"></i>
+      </button>
+      <a class="uh-btn-login" routerLink="/connexion">
+        <i class="ri-login-box-line"></i>
+        <span>Connexion</span>
+      </a>
+    </div>
+
+    <!-- Burger mobile -->
+    <button class="uh-burger" (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen" aria-label="Menu">
+      <i [class]="mobileOpen ? 'ri-close-line' : 'ri-menu-line'"></i>
+    </button>
+
+  </div>
+
+  <!-- Drawer mobile -->
+  <div class="uh-drawer" [class.uh-drawer--open]="mobileOpen" (click)="$event.stopPropagation()">
+    <button class="uh-drawer__link uh-drawer__link--club" (click)="changeClub.emit(); closeAll()">
+      <i class="ri-map-pin-line"></i> {{ clubName || 'Choisir un club' }}
+    </button>
+    <div class="uh-drawer__sep"></div>
+    <a class="uh-drawer__link" routerLink="/"            (click)="closeAll()">Accueil</a>
+    <a class="uh-drawer__link" routerLink="/galerie"     (click)="closeAll()">Galerie</a>
+    <a class="uh-drawer__link" routerLink="/inscription" (click)="closeAll()">Inscription</a>
+    <a class="uh-drawer__link" routerLink="/boutique"    (click)="closeAll()">Boutique</a>
+    <a class="uh-drawer__link" routerLink="/evenements"  (click)="closeAll()">Événements</a>
+    <a class="uh-drawer__link" routerLink="/contact"     (click)="closeAll()">Contact</a>
+    <a class="uh-drawer__link uh-drawer__link--cta" routerLink="/connexion" (click)="closeAll()">
+      <i class="ri-login-box-line"></i> Connexion
+    </a>
+  </div>
+  <div class="uh-overlay" [class.uh-overlay--visible]="mobileOpen" (click)="closeAll()"></div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STATE CONNECTÉ
+     ═══════════════════════════════════════════════════════════ -->
+<header class="uh uh--connected" *ngIf="isUserLoggedIn">
+  <div class="uh__inner">
+
+    <!-- Logo -->
+    <a class="uh-logo" [routerLink]="dashboardRoute" (click)="closeAll()">
+      <span class="uh-logo__strong">Olympique</span>
+      <span class="uh-logo__mid"> Taekwondo</span>
+      <span class="uh-logo__thin" *ngIf="clubName"> · {{ clubName }}</span>
+    </a>
+
+    <!-- Nav connectée -->
+    <nav class="uh-nav" aria-label="Navigation connectée">
+      <a class="uh-nav__link" [routerLink]="dashboardRoute" routerLinkActive="uh-nav__link--active" (click)="goToDashboard.emit()">
+        <i class="ri-dashboard-line"></i> Dashboard
+      </a>
+      <a class="uh-nav__link" routerLink="/" routerLinkActive="uh-nav__link--active" [routerLinkActiveOptions]="{exact:true}">
+        <i class="ri-home-4-line"></i> Accueil
+      </a>
+    </nav>
+
+    <!-- Actions connectées -->
+    <div class="uh-actions">
+
+      <!-- Panier -->
+      <a class="uh-icon-btn" routerLink="/boutique/panier" title="Mon panier" *ngIf="cartCount > 0">
+        <i class="ri-shopping-cart-line"></i>
+        <span class="uh-badge">{{ cartCount }}</span>
+      </a>
+
+      <!-- Notifications -->
+      <button class="uh-icon-btn" title="Notifications" (click)="toggleNotif(); $event.stopPropagation()">
+        <i class="ri-notification-3-line"></i>
+        <span class="uh-badge" *ngIf="unreadNotifications > 0">{{ unreadNotifications }}</span>
+      </button>
+
+      <!-- Panel Notifs -->
+      <div class="uh-notif-panel" [class.is-open]="notifOpen" (click)="$event.stopPropagation()">
+        <div class="uh-notif-panel__head">
+          <span>Notifications</span>
+          <button class="uh-notif-panel__close" (click)="notifOpen=false">
+            <i class="ri-close-line"></i>
           </button>
-          <div class="dropdown" [class.show]="userDropdownOpen">
-            <button class="menu-item" (click)="goToSpecializedDashboard(); closeUserDropdown()">📊 Dashboard</button>
-            <button class="menu-item" (click)="goToProfil(); closeUserDropdown()">👤 Mon Profil</button>
-            <hr class="separator">
-            <button class="menu-item logout" (click)="handleLogout(); closeUserDropdown()">🚪 Se déconnecter</button>
-          </div>
+        </div>
+        <div class="uh-notif-panel__body">
+          <p *ngIf="unreadNotifications === 0" class="uh-notif-panel__empty">Aucune nouvelle notification.</p>
+          <p *ngIf="unreadNotifications > 0"   class="uh-notif-panel__count">{{ unreadNotifications }} notification(s) non lue(s).</p>
+          <button class="uh-notif-panel__see-all" (click)="openNotifications.emit(); notifOpen=false">
+            Voir toutes les notifications
+          </button>
         </div>
       </div>
+
+      <!-- Avatar + dropdown user -->
+      <div class="uh-user" (click)="$event.stopPropagation()">
+        <button class="uh-user__btn" (click)="toggleUserDropdown()" [attr.aria-expanded]="userDropdownOpen">
+          <img class="uh-user__avatar uh-user__avatar--img" [src]="userAvatar" [alt]="getUserName()" *ngIf="userAvatar">
+          <div class="uh-user__avatar" *ngIf="!userAvatar">{{ getUserInitials() }}</div>
+          <span class="uh-user__name">{{ getUserName() }}</span>
+          <i class="ri-arrow-down-s-line uh-user__chevron" [class.uh-user__chevron--open]="userDropdownOpen"></i>
+        </button>
+        <div class="uh-user__dropdown" [class.is-open]="userDropdownOpen">
+          <button class="uh-user__item" (click)="goToProfil(); closeUserDropdown()">
+            <i class="ri-user-3-line"></i> Mon profil
+          </button>
+          <button class="uh-user__item" (click)="goToDashboard.emit(); closeUserDropdown()">
+            <i class="ri-dashboard-line"></i> Dashboard
+          </button>
+          <div class="uh-user__sep"></div>
+          <button class="uh-user__item uh-user__item--danger" (click)="handleLogout(); closeUserDropdown()">
+            <i class="ri-logout-box-r-line"></i> Se déconnecter
+          </button>
+        </div>
+      </div>
+
     </div>
+
+    <!-- Burger mobile -->
+    <button class="uh-burger" (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen" aria-label="Menu">
+      <i [class]="mobileOpen ? 'ri-close-line' : 'ri-menu-line'"></i>
+    </button>
+
   </div>
+
+  <!-- Drawer mobile -->
+  <div class="uh-drawer" [class.uh-drawer--open]="mobileOpen" (click)="$event.stopPropagation()">
+    <a class="uh-drawer__link" [routerLink]="dashboardRoute" (click)="goToDashboard.emit(); closeAll()">
+      <i class="ri-dashboard-line"></i> Dashboard
+    </a>
+    <a class="uh-drawer__link" routerLink="/" (click)="closeAll()">
+      <i class="ri-home-4-line"></i> Accueil
+    </a>
+    <div class="uh-drawer__sep"></div>
+    <button class="uh-drawer__link" (click)="goToProfil(); closeAll()">
+      <i class="ri-user-3-line"></i> Mon profil
+    </button>
+    <button class="uh-drawer__link uh-drawer__link--danger" (click)="handleLogout(); closeAll()">
+      <i class="ri-logout-box-r-line"></i> Se déconnecter
+    </button>
+  </div>
+  <div class="uh-overlay" [class.uh-overlay--visible]="mobileOpen" (click)="closeAll()"></div>
 </header>

@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.skeleton-stack {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.skeleton-block {
+  display: block;
+}
+
+.skeleton-block--text {
+  border-radius: var(--radius-full);
+}
+
+.skeleton-block--rect {
+  border-radius: var(--radius-md);
+}
+
+.skeleton-block--circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+}

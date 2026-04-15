@@ -1,41 +1,47 @@
-<section id="schedule-info" class="schedule-info-section">
+<section id="horaires" class="schedule-section">
   <div class="container">
-    <h2 class="section-title">Horaires des Cours</h2>
-    <div class="schedule-info-container">
-      <div *ngIf="!horairesParJour || horairesParJour.length === 0" class="no-horaires-message" style="text-align:center;padding:2em 0;color:#b71c1c;font-size:1.15em;">
-        Aucun horaire n'est disponible pour ce club.
-      </div>
-      <div class="schedule-grid" *ngIf="horairesParJour && horairesParJour.length > 0">
-        <div *ngFor="let jourBlock of horairesParJour" class="schedule-card premium modern-horaire-card">
-          <div class="modern-horaire-header">
-            <span class="modern-day-badge">{{ jourBlock.jour }}</span>
-          </div>
-          <div class="modern-horaire-body" style="width:100%;flex-direction:column;gap:0.5em;">
-            <ng-container *ngFor="let groupe of (jourBlock.horaires | groupBy:'groupe')">
-              <fieldset style="border:1.5px solid #e3eafc;border-radius:10px;padding:0.7em 1em 0.7em 1em;margin-bottom:1em;">
-                <legend style="font-weight:700;color:#1976d2;font-size:1.08em;padding:0.3em 1em 0.3em 1em;border-radius:8px;background:#eaf1fa;">{{ groupe.key || 'Sans groupe' }}</legend>
-                <ng-container *ngFor="let h of groupe.items">
-                  <div class="modern-horaire-time-row" style="gap:2em;padding:0.9em 0 0.9em 0;align-items:center;display:flex;flex-wrap:wrap;">
-                    <span class="time">
-                      <i class="fas fa-clock" *ngIf="h.plage || (h.heureDebut && h.heureFin)"></i>
-                      {{ h.plage ? h.plage : (h.heureDebut && h.heureFin ? h.heureDebut + ' - ' + h.heureFin : '') }}
+
+    <div class="section-head">
+      <span class="section-eyebrow">Nos créneaux</span>
+      <h2 class="section-title">Horaires des Cours</h2>
+    </div>
+
+    <div *ngIf="!horairesParJour || horairesParJour.length === 0" class="no-horaires-message">
+      Aucun horaire disponible pour ce club.
+    </div>
+
+    <div class="schedule-grid" *ngIf="horairesParJour && horairesParJour.length > 0">
+      <div *ngFor="let jourBlock of horairesParJour" class="schedule-card">
+        <div class="schedule-card__header">
+          <i class="ri-calendar-line" aria-hidden="true"></i>
+          <span class="day-badge">{{ jourBlock.jour }}</span>
+        </div>
+        <div class="schedule-card__body">
+          <ng-container *ngFor="let groupe of (jourBlock.horaires | groupBy:'groupe')">
+            <fieldset class="horaire-groupe">
+              <legend class="horaire-groupe-label">{{ groupe.key || 'Sans groupe' }}</legend>
+              <ng-container *ngFor="let h of groupe.items">
+                <div class="horaire-time-row">
+                  <span class="time">
+                    <i class="ri-time-line" *ngIf="h.plage || (h.heureDebut && h.heureFin)" aria-hidden="true"></i>
+                    {{ h.plage ? h.plage : (h.heureDebut && h.heureFin ? h.heureDebut + ' - ' + h.heureFin : '') }}
+                  </span>
+                  <span *ngIf="h.adresse || h.codePostal || h.ville" class="card-adresse">
+                    <span class="horaire-addr-line">
+                      <i class="ri-map-pin-line" aria-hidden="true"></i>
+                      <span>{{ h.adresse }}</span>
                     </span>
-                    <span *ngIf="h.adresse || h.codePostal || h.ville" class="card-adresse" style="display:flex;flex-direction:column;align-items:flex-start;gap:0.1em;">
-                      <span style="display:flex;align-items:center;gap:0.4em;">
-                        <i class="ri-map-pin-line"></i>
-                        <span>{{ h.adresse }}</span>
-                      </span>
-                      <span *ngIf="h.codePostal || h.ville" style="margin-left:1.6em;">
-                        {{ h.codePostal }}<span *ngIf="h.codePostal && h.ville">&nbsp;</span>{{ h.ville }}
-                      </span>
+                    <span *ngIf="h.codePostal || h.ville" class="horaire-addr-city">
+                      {{ h.codePostal }}<span *ngIf="h.codePostal && h.ville">&nbsp;</span>{{ h.ville }}
                     </span>
-                  </div>
-                </ng-container>
-              </fieldset>
-            </ng-container>
-          </div>
+                  </span>
+                </div>
+              </ng-container>
+            </fieldset>
+          </ng-container>
         </div>
       </div>
     </div>
+
   </div>
 </section>

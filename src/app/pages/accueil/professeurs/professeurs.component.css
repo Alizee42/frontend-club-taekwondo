@@ -1,148 +1,170 @@
-.enseignants-section {
-  background: var(--surface-alt);
-  padding: 60px 20px;
-  color: var(--text-primary);
-  text-align: center;
+:host { display: block; }
+
+.teachers-section {
+  background: var(--color-surface-2);
+  padding: var(--sp-20) var(--container-padding);
 }
 
-.section-title-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 1.3rem;
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
 }
-.section-title {
+
+/* ── En-tête ─── */
+.section-head {
   text-align: center;
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: var(--blue-main);
-  margin-bottom: 1.3rem;
-  letter-spacing: 0.5px;
-  position: relative;
-  display: block;
-  padding-bottom: 0.18em;
+  margin-bottom: var(--sp-12);
 }
-.section-title::after {
-  content: '';
-  display: block;
-  width: 48px;
-  height: 4px;
-  background: linear-gradient(90deg, var(--blue-main) 70%, var(--orange-main) 100%);
-  border-radius: 2px;
-  margin-top: 0.22em;
-  margin-left: auto;
-  margin-right: auto;
+
+.section-eyebrow {
+  display: inline-block;
+  color: var(--brand-primary);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+}
+
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  font-weight: 800;
+  color: var(--brand-primary-dark);
+  margin: 0 0 var(--sp-3) 0;
 }
 
 .section-subtitle {
-  font-size: 1.1em;
-  margin-bottom: 40px;
-  color: var(--text-secondary);
+  font-size: var(--text-base);
+  color: var(--color-text-2);
 }
 
+/* ── Grille ─── */
 .teachers-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px;
+  gap: var(--sp-6);
   justify-content: center;
-  align-items: stretch;
 }
 
+/* ── Carte enseignant ─── */
 .teacher-card {
-  border: 1.5px solid var(--border-subtle);
-  background: var(--surface-0);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 240px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  width: 260px;
-  min-width: 260px;
-  max-width: 260px;
-  /* plus de hauteur fixe, la hauteur s'adapte au contenu */
-  align-items: stretch;
-  text-align: center;
-  transition: transform 0.3s;
-  border: var(--border-soft);
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(135deg, #fafdff 60%, #eaf3ff 100%);
-  border-radius: 22px;
-  box-shadow: 0 8px 32px -8px rgba(30,96,145,.13), 0 1.5px 0 0 var(--blue-main);
-  border: 2.2px solid var(--blue-main);
-  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--t-base), transform var(--t-base);
 }
 
 .teacher-card:hover {
+  box-shadow: var(--shadow-lg);
   transform: translateY(-6px);
-  box-shadow: 0 16px 48px -8px rgba(30,96,145,.22), 0 2.5px 0 0 var(--orange-main);
-  border-color: var(--orange-main);
-  transform: translateY(-6px) scale(1.025);
 }
 
-.teacher-card img {
+/* Photo + overlay reveal */
+.teacher-card__photo-wrap {
+  position: relative;
+  height: 260px;
+  overflow: hidden;
+}
+
+.teacher-card__photo-wrap img {
   width: 100%;
-  height: 220px;
+  height: 100%;
   object-fit: cover;
-  border-bottom: 3px solid var(--blue-main);
-  width: 90px !important;
-  height: 90px !important;
-  margin: 18px auto 8px auto;
-  object-fit: cover;
-  border-radius: 50%;
-  margin: 28px auto 10px auto;
-  box-shadow: 0 0 0 4px rgba(30,96,145,.08), 0 2px 8px -4px rgba(30,96,145,.10);
-  border: 3px solid var(--orange-main);
+  display: block;
+  transition: transform var(--t-slow);
 }
 
-.teacher-info {
-  padding: 20px;
-  flex: 1 1 auto;
+.teacher-card:hover .teacher-card__photo-wrap img {
+  transform: scale(1.07);
+}
+
+.teacher-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(14, 31, 59, 0.95) 0%, rgba(14, 31, 59, 0.4) 60%, transparent 100%);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  padding: var(--sp-4);
+  opacity: 0;
+  transition: opacity var(--t-base);
 }
 
-.teacher-info h3 {
-  margin: 10px 0 5px;
-  font-size: 1.3em;
-  color: var(--red-main);
-  color: var(--blue-main) !important;
-  font-weight: 700;
+.teacher-card:hover .teacher-card__overlay {
+  opacity: 1;
 }
 
-.teacher-info .specialite {
-  font-size: 1em;
-  color: var(--blue-main);
-  margin-bottom: 10px;
-  color: var(--orange-main) !important;
-  font-weight: 600;
-}
-
-.teacher-info .description {
-  font-size: 0.95em;
-  color: var(--text-secondary);
-  margin-bottom: 15px;
+.teacher-card__desc {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.85);
   font-style: italic;
+  line-height: var(--leading-base);
+  margin-bottom: var(--sp-3);
 }
 
-.social-links {
+.teacher-card__socials {
   display: flex;
+  gap: var(--sp-2);
+}
+
+.teacher-card__socials a {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 20px 10px 0 10px !important;
-}
-
-.social-links a {
-  color: var(--blue-main);
-  font-size: 1.3em;
-  transition: color 0.3s;
-  background: #fafdff;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
-  padding: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-text-inv);
+  font-size: 0.95rem;
+  transition: background var(--t-fast);
 }
 
-.social-links a:hover {
-  color: var(--red-main);
-  color: var(--orange-main) !important;
-  background: #eaf3ff;
+.teacher-card__socials a:hover {
+  background: var(--brand-accent);
+  text-decoration: none;
+}
+
+/* Info sous la photo */
+.teacher-card__info {
+  padding: var(--sp-4) var(--sp-5);
+  text-align: center;
+}
+
+.teacher-card__info h3 {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--brand-primary-dark);
+  margin: 0 0 var(--sp-1) 0;
+}
+
+.teacher-card__grade {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--brand-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Empty state ─── */
+.no-teachers {
+  text-align: center;
+  padding: var(--sp-12) 0;
+  color: var(--color-text-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.no-teachers i {
+  font-size: 2.5rem;
+  opacity: 0.4;
+}
+
+.no-teachers p {
+  font-size: var(--text-sm);
 }

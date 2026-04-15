@@ -1,0 +1,34 @@
+<section
+  class="empty-state empty-state-card"
+  [class.empty-state-card--compact]="compact"
+  [class.empty-state-card--left]="!centered"
+>
+  <div *ngIf="icon" class="empty-state-visual" aria-hidden="true">
+    <i [class]="icon"></i>
+  </div>
+
+  <div class="empty-state-copy">
+    <h3 *ngIf="title">{{ title }}</h3>
+    <p *ngIf="description">{{ description }}</p>
+  </div>
+
+  <div class="empty-state-actions">
+    <ng-container *ngIf="actionLabel">
+      <a
+        *ngIf="actionLink; else emptyStateActionButton"
+        class="btn primary"
+        [routerLink]="actionLink"
+        (click)="onActionClick()"
+      >
+        {{ actionLabel }}
+      </a>
+      <ng-template #emptyStateActionButton>
+        <button class="btn primary" type="button" (click)="onActionClick()">
+          {{ actionLabel }}
+        </button>
+      </ng-template>
+    </ng-container>
+
+    <ng-content select="[empty-state-actions]"></ng-content>
+  </div>
+</section>

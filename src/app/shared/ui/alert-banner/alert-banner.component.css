@@ -1,58 +1,64 @@
 :host {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: var(--z-toast);
+  display: block;
 }
 
-.toast-stack {
-  position: fixed;
-  top: var(--sp-5);
-  right: var(--sp-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-  width: min(calc(100vw - 2rem), 26rem);
-  pointer-events: none;
-}
-
-.message-box {
+.alert-banner {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: start;
   gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--shadow-lg);
-  pointer-events: auto;
-  animation: toast-enter var(--t-slow) both;
+  box-shadow: var(--shadow-xs);
 }
 
-.icon-circle {
+.alert-banner__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.icon-circle i {
-  font-size: 1.1rem;
+.alert-banner__icon i {
+  font-size: 1.2rem;
   line-height: 1;
 }
 
-.message-text {
+.alert-banner__content {
   min-width: 0;
+}
+
+.alert-banner__title {
+  display: block;
+  margin-bottom: var(--sp-1);
+  font-size: var(--text-sm);
+}
+
+.alert-banner__message,
+.alert-banner__content p {
+  margin: 0;
+  color: var(--color-text-2);
   font-size: var(--text-sm);
   line-height: var(--leading-base);
 }
 
-.exit-button {
+.alert-banner__content > :last-child {
+  margin-bottom: 0;
+}
+
+.alert-banner__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.alert-banner__close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -63,85 +69,67 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
-  opacity: 0.72;
+  opacity: 0.7;
   transition:
     opacity var(--t-fast),
-    background-color var(--t-fast),
-    transform var(--t-fast);
+    background-color var(--t-fast);
 }
 
-.exit-button:hover {
+.alert-banner__close:hover {
   opacity: 1;
   background: rgba(15, 23, 42, 0.08);
-  transform: scale(1.04);
 }
 
-.exit-button i {
-  font-size: 1rem;
-  line-height: 1;
-}
-
-.message-box-success {
+.alert-banner--success {
   background: var(--color-success-bg);
   border-color: color-mix(in srgb, var(--color-success) 24%, white);
   color: var(--color-success-ink);
 }
 
-.message-box-success .icon-circle {
+.alert-banner--success .alert-banner__icon {
   background: var(--color-success);
   color: var(--color-text-inv);
 }
 
-.message-box-error {
+.alert-banner--error {
   background: var(--color-danger-bg);
   border-color: color-mix(in srgb, var(--color-danger) 24%, white);
   color: var(--color-danger-ink);
 }
 
-.message-box-error .icon-circle {
+.alert-banner--error .alert-banner__icon {
   background: var(--color-danger);
   color: var(--color-text-inv);
 }
 
-.message-box-warning {
+.alert-banner--warning {
   background: var(--color-warning-bg);
   border-color: color-mix(in srgb, var(--color-warning) 24%, white);
   color: var(--color-warning-ink);
 }
 
-.message-box-warning .icon-circle {
+.alert-banner--warning .alert-banner__icon {
   background: var(--color-warning);
   color: var(--color-text-inv);
 }
 
-.message-box-info {
+.alert-banner--info {
   background: var(--color-info-bg);
   border-color: color-mix(in srgb, var(--color-info) 24%, white);
   color: var(--color-info-ink);
 }
 
-.message-box-info .icon-circle {
+.alert-banner--info .alert-banner__icon {
   background: var(--color-info);
   color: var(--color-text-inv);
 }
 
-@keyframes toast-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(24px, 0, 0);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
 @media (max-width: 768px) {
-  .toast-stack {
-    top: var(--sp-4);
-    right: var(--sp-4);
-    left: var(--sp-4);
-    width: auto;
+  .alert-banner {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .alert-banner__actions {
+    grid-column: 1 / -1;
   }
 }

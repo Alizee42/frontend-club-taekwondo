@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, EventEmitter, HostListener, Input, OnChanges, Output } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+
+type RoleStr = 'ADMIN' | 'SUPER_ADMIN' | 'MEMBRE' | 'PARENT' | string;
 
 @Component({
   selector: 'universal-header',
@@ -10,93 +11,81 @@ import { RouterModule } from '@angular/router';
   templateUrl: './universal-header.component.html',
   styleUrls: ['./universal-header.component.css']
 })
-export class UniversalHeaderComponent {
-  userDropdownOpen = false;
-  showNotifications: boolean = true;
-  // Zone courante (déduite de l'URL)
-  isDashboardPage = false;
-  isParentArea = false;
-  isMembreArea = false;
-  isProfilePage = false;
+export class UniversalHeaderComponent implements OnChanges {
 
-  toggleUserDropdown() {
-    this.userDropdownOpen = !this.userDropdownOpen;
-  }
-
-  closeUserDropdown() {
-    this.userDropdownOpen = false;
-  }
-
-  getUserInitials(): string {
-    if (this.userName) {
-      const parts = this.userName.split(' ');
-      return (parts[0]?.charAt(0) ?? '') + (parts[1]?.charAt(0) ?? '');
-    }
-    return '';
-  }
-
-  getUserName(): string {
-    return this.userName ?? '';
-  }
-
-  goToSpecializedDashboard() {
-    this.goToDashboard.emit();
-  }
-
-  goToProfil() {
-    this.router.navigate(['/profil']);
-  }
-
-  handleLogout() {
-    this.logout.emit();
-  }
-  @Input() cartCount: number = 0;
-  dashboardRoute: string = '/dashboard';
-  @Input() role: string = '';
-
-  ngOnChanges() {
-    if (this.isUserLoggedIn && this.role) {
-      const role = this.role.trim().toUpperCase();
-      if (role === 'SUPER_ADMIN') {
-        this.dashboardRoute = '/super-admin/dashboard-super-admin';
-      } else if (role === 'ADMIN') {
-        this.dashboardRoute = '/admin/dashboard-admin';
-      } else if (role === 'PARENT') {
-        this.dashboardRoute = '/parent/dashboard-parent';
-      } else if (role === 'MEMBRE') {
-        this.dashboardRoute = '/membre/dashboard-membre';
-      } else {
-        this.dashboardRoute = '/dashboard';
-      }
-    } else {
-      this.dashboardRoute = '/dashboard';
-    }
-  }
-  constructor(private router: Router) {
-    this.router.events.subscribe(() => {
-      const url = this.router.url || '';
-      // Pages tableau de bord (tous rôles)
-      // Garder l'affichage 'dashboard' pour les routes qui commencent par les préfixes admin/super-admin
-      this.isDashboardPage = url.startsWith('/super-admin') || url.startsWith('/admin') || /\b(dashboard|dashboard-admin|dashboard-super-admin|dashboard-parent|dashboard-membre)\b/.test(url);
-      // Zone Parent: toutes les routes qui commencent par /parent
-      this.isParentArea = url.startsWith('/parent');
-      // Zone Membre: toutes les routes qui commencent par /membre
-      this.isMembreArea = url.startsWith('/membre');
-      // Page Profil
-      this.isProfilePage = url.startsWith('/profil');
-    });
-  }
-  showDropdown = false;
   @Input() clubName: string = '';
-  @Input() logoUrl: string = '';
   @Input() isUserLoggedIn: boolean = false;
   @Input() userName?: string;
   @Input() userAvatar?: string;
   @Input() unreadNotifications: number = 0;
+  @Input() role: RoleStr = '';
+  @Input() cartCount: number = 0;
 
-  @Output() changeClub = new EventEmitter<void>();
-  @Output() logout = new EventEmitter<void>();
-  @Output() goToDashboard = new EventEmitter<void>();
-  @Output() goToProfile = new EventEmitter<void>();
+  @Output() changeClub       = new EventEmitter<void>();
+  @Output() logout            = new EventEmitter<void>();
+  @Output() goToDashboard     = new EventEmitter<void>();
+  @Output() goToProfile       = new EventEmitter<void>();
   @Output() openNotifications = new EventEmitter<void>();
+
+  userDropdownOpen = false;
+  notifOpen        = false;
+  mobileOpen       = false;
+  dashboardRoute   = '/dashboard';
+
+  constructor(private router: Router) {}
+
+  ngOnChanges(): void {
+    const r = (this.role ?? '').toString().toUpperCase();
+    if      (r === 'SUPER_ADMIN') { this.dashboardRoute = '/super-admin/dashboard-super-admin'; }
+    else if (r === 'ADMIN')       { this.dashboardRoute = '/admin/dashboard-admin'; }
+    else if (r === 'PARENT')      { this.dashboardRoute = '/parent/dashboard-parent'; }
+    else if (r === 'MEMBRE')      { this.dashboardRoute = '/membre/dashboard-membre'; }
+    else                          { this.dashboardRoute = '/dashboard'; }
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.userDropdownOpen = false;
+    this.notifOpen = false;
+  }
+
+  closeAll(): void {
+    this.userDropdownOpen = false;
+    this.notifOpen = false;
+    this.mobileOpen = false;
+  }
+
+  toggleUserDropdown(): void {
+    this.userDropdownOpen = !this.userDropdownOpen;
+    if (this.userDropdownOpen) { this.notifOpen = false; }
+  }
+
+  toggleNotif(): void {
+    this.notifOpen = !this.notifOpen;
+    if (this.notifOpen) { this.userDropdownOpen = false; }
+  }
+
+  toggleMobile(): void {
+    this.mobileOpen = !this.mobileOpen;
+    if (this.mobileOpen) {
+      this.userDropdownOpen = false;
+      this.notifOpen = false;
+    }
+  }
+
+  closeUserDropdown(): void { this.userDropdownOpen = false; }
+
+  getUserInitials(): string {
+    const name = this.userName ?? '';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) { return (parts[0][0] + parts[1][0]).toUpperCase(); }
+    if (parts.length === 1) { return parts[0].substring(0, 2).toUpperCase(); }
+    return 'U';
+  }
+
+  getUserName(): string { return this.userName ?? ''; }
+
+  goToProfil(): void { this.router.navigate(['/profil']); }
+
+  handleLogout(): void { this.logout.emit(); }
 }

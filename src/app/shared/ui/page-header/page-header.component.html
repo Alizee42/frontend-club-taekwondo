@@ -1,0 +1,38 @@
+<header class="page-header-block" [ngClass]="'page-header-block--' + align">
+  <nav
+    *ngIf="breadcrumbs.length"
+    class="page-header-breadcrumbs"
+    aria-label="Fil d'Ariane"
+  >
+    <ng-container *ngFor="let crumb of breadcrumbs; let last = last">
+      <a *ngIf="crumb.link && !last; else currentBreadcrumb" [routerLink]="crumb.link">
+        {{ crumb.label }}
+      </a>
+      <ng-template #currentBreadcrumb>
+        <span [attr.aria-current]="last ? 'page' : null">{{ crumb.label }}</span>
+      </ng-template>
+      <i *ngIf="!last" class="ri-arrow-right-s-line" aria-hidden="true"></i>
+    </ng-container>
+  </nav>
+
+  <div class="page-header-shell">
+    <div class="page-header-copy">
+      <span *ngIf="eyebrow" class="page-header-eyebrow">{{ eyebrow }}</span>
+
+      <div class="page-header-title-row">
+        <span *ngIf="icon" class="page-header-icon" aria-hidden="true">
+          <i [class]="icon"></i>
+        </span>
+
+        <div class="page-header-text">
+          <h1>{{ title }}</h1>
+          <p *ngIf="subtitle">{{ subtitle }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-header-actions">
+      <ng-content select="[page-header-actions]"></ng-content>
+    </div>
+  </div>
+</header>

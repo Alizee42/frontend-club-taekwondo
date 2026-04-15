@@ -1,0 +1,10 @@
+<div class="skeleton-stack" [class.skeleton-stack--circle]="variant === 'circle'">
+  <span
+    *ngFor="let line of lineIndexes; let index = index"
+    class="skeleton skeleton-block"
+    [ngClass]="'skeleton-block--' + variant"
+    [style.width]="getLineWidth(index)"
+    [style.height]="resolvedHeight"
+    aria-hidden="true"
+  ></span>
+</div>

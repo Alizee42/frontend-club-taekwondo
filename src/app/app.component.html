@@ -1,9 +1,11 @@
 
 
 <ng-container>
+		<!-- Header public : affiché uniquement quand l'utilisateur n'est pas connecté -->
 		<universal-header
+			*ngIf="!isUserLoggedIn"
 			[clubName]="selectedClub?.name || selectedClub?.nom || ''"
-			[isUserLoggedIn]="isUserLoggedIn"
+			[isUserLoggedIn]="false"
 			[userName]="userName"
 			[userAvatar]="userAvatar"
 			[unreadNotifications]="unreadNotifications"
@@ -12,6 +14,9 @@
 			(changeClub)="onChangeClub()"
 			(goToDashboard)="onGoToDashboard()"
 		></universal-header>
+
+		<!-- Header connecté : navigation dynamique selon le rôle -->
+		<app-connected-header *ngIf="isUserLoggedIn"></app-connected-header>
 
 			<div *ngIf="showSelectClubModal">
 				<div class="club-modal-overlay" (click)="showSelectClubModal = false"></div>

@@ -1,61 +1,112 @@
-<header class="connected-header">
-  <div class="header-content">
-    <!-- Logo segmenté identique au header public -->
-    <div class="logo">
-      <a [routerLink]="['/']" (click)="closeUserDropdown()">
-        <span class="brand-strong">Olympique</span>
-        <span class="brand-mid">Taekwondo</span>
-        <span class="brand-thin">Villeurbannais</span>
+<header class="ch" (click)="$event.stopPropagation()">
+  <div class="ch-inner">
+
+    <!-- Logo -->
+    <div class="ch-logo">
+      <a [routerLink]="['/']" (click)="closePanels()">
+        <span class="ch-logo__strong">Olympique</span>
+        <span class="ch-logo__mid">Taekwondo</span>
+        <span class="ch-logo__thin">Villeurbannais</span>
       </a>
     </div>
 
-    <!-- Navigation interne -->
-    <nav class="connected-nav">
-      <button type="button" class="nav-item" (click)="goToDashboard()">Dashboard</button>
-      <a class="nav-item" [routerLink]="['/']">Accueil du site</a>
+    <!-- Nav desktop — items dynamiques selon le rôle -->
+    <nav class="ch-nav" aria-label="Navigation principale">
+      <a *ngFor="let item of navItems"
+         class="ch-nav__link"
+         [routerLink]="item.route"
+         routerLinkActive="ch-nav__link--active">
+        {{ item.label }}
+      </a>
     </nav>
 
-    <!-- Actions utilisateur (notifications + menu) -->
-    <div class="user-actions">
-      <div class="actions-inline">
-        <!-- Dropdown utilisateur (à gauche) -->
-        <div class="user-dropdown">
-          <button class="user-btn" (click)="toggleUserDropdown()">
-            <div class="avatar">{{ getUserInitials() }}</div>
-            <span class="username">{{ getUserName() }}</span>
-            <span class="arrow" [class.open]="userDropdownOpen">▼</span>
-          </button>
-          <div class="dropdown" [class.show]="userDropdownOpen">
-            <button class="menu-item" (click)="goToProfil(); closeUserDropdown()">👤 Mon Profil</button>
-            <hr class="separator">
-            <button class="menu-item logout" (click)="logout(); closeUserDropdown()">🚪 Se déconnecter</button>
+    <!-- Actions desktop -->
+    <div class="ch-actions">
+
+      <!-- Notifications -->
+      <div class="ch-notif" (click)="$event.stopPropagation()">
+        <button class="ch-notif__btn" aria-label="Notifications"
+                [attr.aria-expanded]="notificationsOpen"
+                (click)="toggleNotifications()">
+          <i class="ri-notification-3-line"></i>
+          <span class="ch-badge" *ngIf="unreadCount > 0" aria-live="polite">{{ unreadCount }}</span>
+        </button>
+        <div class="ch-notif__panel" *ngIf="notificationsOpen"
+             role="dialog" aria-label="Vos notifications">
+          <div class="ch-notif__head">
+            <h4>Notifications</h4>
+            <button class="ch-notif__read-all" *ngIf="unreadCount > 0"
+                    (click)="markAllAsRead()">Tout marquer lu</button>
           </div>
-        </div>
-        <!-- Notifications (à droite) -->
-        <div class="notification-wrapper">
-          <div class="notification-icon" (click)="toggleNotifications()">
-            <i class="ri-notification-line"></i>
-            <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
-          </div>
-          <div class="notification-preview" *ngIf="notificationsOpen">
-            <div class="notification-header">
-              <h4>Notifications</h4>
-              <button class="mark-all-read" *ngIf="unreadCount > 0" (click)="markAllAsRead()">Tout marquer comme lu</button>
-            </div>
-            <div *ngIf="notifications.length === 0" class="no-notifications"><p>Aucune notification</p></div>
-            <ul *ngIf="notifications.length > 0" class="notification-list">
-              <li *ngFor="let n of notifications" class="notification-item" [class.unread]="!n.lu" (click)="markAsRead(n)">
-                <div class="notification-icon-item"><i [class]="getNotificationIcon(n.type)"></i></div>
-                <div class="notification-content">
-                  <h5>{{ n.titre }}</h5>
-                  <p>{{ n.message }}</p>
-                  <span class="notification-time">{{ getTimeAgo(n.date) }}</span>
-                </div>
-              </li>
-            </ul>
-          </div>
+          <p class="ch-notif__empty" *ngIf="notifications.length === 0">Aucune notification</p>
+          <ul class="ch-notif__list" *ngIf="notifications.length > 0">
+            <li *ngFor="let n of notifications"
+                class="ch-notif__item" [class.is-unread]="!n.lu"
+                (click)="markAsRead(n)">
+              <span class="ch-notif__ico"><i [class]="getNotificationIcon(n.type)"></i></span>
+              <div class="ch-notif__body">
+                <strong>{{ n.titre }}</strong>
+                <p>{{ n.message }}</p>
+                <time>{{ getTimeAgo(n.date) }}</time>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
+
+      <!-- User dropdown -->
+      <div class="ch-user" (click)="$event.stopPropagation()">
+        <button class="ch-user__btn" [attr.aria-expanded]="userDropdownOpen"
+                (click)="toggleUserDropdown()">
+          <span class="ch-user__avatar">{{ getUserInitials() }}</span>
+          <span class="ch-user__name">{{ getUserName() }}</span>
+          <i class="ri-arrow-down-s-line ch-user__chevron"
+             [class.is-open]="userDropdownOpen"></i>
+        </button>
+        <div class="ch-user__dropdown" [class.is-open]="userDropdownOpen" role="menu">
+          <button class="ch-user__item" role="menuitem"
+                  (click)="goToProfil(); closePanels()">
+            <i class="ri-user-3-line"></i> Mon Profil
+          </button>
+          <hr class="ch-user__sep">
+          <button class="ch-user__item ch-user__item--danger" role="menuitem"
+                  (click)="logout(); closePanels()">
+            <i class="ri-logout-box-r-line"></i> Se déconnecter
+          </button>
+        </div>
+      </div>
+
     </div>
+
+    <!-- Hamburger mobile -->
+    <button class="ch-burger" (click)="toggleMobileMenu()"
+            aria-label="Menu" [attr.aria-expanded]="mobileMenuOpen">
+      <i [class]="mobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'"></i>
+    </button>
+
   </div>
+
+  <!-- Mobile drawer -->
+  <div class="ch-drawer" [class.is-open]="mobileMenuOpen">
+    <nav class="ch-drawer__nav" aria-label="Navigation mobile">
+      <a *ngFor="let item of navItems"
+         class="ch-drawer__link"
+         [routerLink]="item.route"
+         routerLinkActive="is-active"
+         (click)="mobileMenuOpen = false">
+        <i [class]="item.icon"></i> {{ item.label }}
+      </a>
+    </nav>
+    <hr class="ch-drawer__sep">
+    <button class="ch-drawer__link" (click)="goToProfil(); mobileMenuOpen = false">
+      <i class="ri-user-3-line"></i> Mon Profil
+    </button>
+    <button class="ch-drawer__link ch-drawer__link--danger" (click)="logout(); mobileMenuOpen = false">
+      <i class="ri-logout-box-r-line"></i> Se déconnecter
+    </button>
+  </div>
+
+  <!-- Overlay mobile -->
+  <div class="ch-overlay" *ngIf="mobileMenuOpen" (click)="mobileMenuOpen = false"></div>
+
 </header>

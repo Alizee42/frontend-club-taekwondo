@@ -1,29 +1,32 @@
-import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
+
+type UiTitleTone = 'brand' | 'default' | 'muted' | 'danger' | 'success';
 
 @Component({
   selector: 'ui-title',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="ui-title-wrapper" [style.textAlign]="align">
-      <!-- Card style header -->
+    <div [ngClass]="wrapperClasses">
       <div class="ui-title-card">
         <div class="ui-title-left">
-          <i *ngIf="icon" [class]="icon + ' ui-title-icon'"></i>
+          <span *ngIf="icon" class="ui-title-icon" aria-hidden="true">
+            <i [class]="icon"></i>
+          </span>
           <img *ngIf="logoUrl" [src]="logoUrl" alt="logo" class="ui-avatar" />
           <div class="ui-title-main">
             <ng-container [ngSwitch]="level">
-              <h1 *ngSwitchCase="1" [ngClass]="titleClass" [style.color]="color">{{ text }}</h1>
-              <h2 *ngSwitchCase="2" [ngClass]="titleClass" [style.color]="color">{{ text }}</h2>
-              <h3 *ngSwitchCase="3" [ngClass]="titleClass" [style.color]="color">{{ text }}</h3>
-              <h4 *ngSwitchCase="4" [ngClass]="titleClass" [style.color]="color">{{ text }}</h4>
-              <h5 *ngSwitchCase="5" [ngClass]="titleClass" [style.color]="color">{{ text }}</h5>
-              <h6 *ngSwitchCase="6" [ngClass]="titleClass" [style.color]="color">{{ text }}</h6>
-              <h2 *ngSwitchDefault [ngClass]="titleClass" [style.color]="color">{{ text }}</h2>
+              <h1 *ngSwitchCase="1" [ngClass]="titleClasses">{{ text }}</h1>
+              <h2 *ngSwitchCase="2" [ngClass]="titleClasses">{{ text }}</h2>
+              <h3 *ngSwitchCase="3" [ngClass]="titleClasses">{{ text }}</h3>
+              <h4 *ngSwitchCase="4" [ngClass]="titleClasses">{{ text }}</h4>
+              <h5 *ngSwitchCase="5" [ngClass]="titleClasses">{{ text }}</h5>
+              <h6 *ngSwitchCase="6" [ngClass]="titleClasses">{{ text }}</h6>
+              <h2 *ngSwitchDefault [ngClass]="titleClasses">{{ text }}</h2>
             </ng-container>
             <p *ngIf="subtitle" class="ui-subtitle">{{ subtitle }}</p>
-            <div class="ui-title-underline" *ngIf="underline"></div>
+            <div *ngIf="underline" class="ui-title-underline"></div>
           </div>
         </div>
         <div class="ui-title-actions">
@@ -36,20 +39,59 @@ import { CommonModule } from '@angular/common';
 })
 export class UiTitleComponent {
   @Input() text = '';
-  @Input() level: number = 2;
-  @Input() align: 'left'|'center'|'right' = 'left';
-  @Input() color: string = 'var(--blue-main)';
+  @Input() level = 2;
+  @Input() align: 'left' | 'center' | 'right' = 'left';
+  @Input() color = 'var(--blue-main)';
   @Input() gradient = true;
-  @Input() subtitle: string | undefined;
-  // underline disabled by default for a cleaner header. Pass [underline]="true" when needed.
-  @Input() underline: boolean = false;
+  @Input() subtitle?: string;
+  @Input() underline = false;
   @Input() logoUrl?: string;
   @Input() icon?: string;
 
-  get titleClass() {
-    return {
-      'ui-title': true,
-      'ui-title-gradient': this.gradient
-    };
+  get wrapperClasses(): string[] {
+    return ['ui-title-wrapper', `ui-title-wrapper--${this.align}`];
+  }
+
+  get titleClasses(): string[] {
+    const tone = this.resolveTone(this.color);
+    const classes = ['ui-title', `ui-title--${tone}`];
+
+    if (this.gradient && tone === 'brand') {
+      classes.push('ui-title-gradient');
+    }
+
+    return classes;
+  }
+
+  private resolveTone(color: string | undefined): UiTitleTone {
+    const token = (color || '').toLowerCase();
+
+    if (
+      token.includes('danger') ||
+      token.includes('red') ||
+      token.includes('brand-accent')
+    ) {
+      return 'danger';
+    }
+
+    if (token.includes('success') || token.includes('green')) {
+      return 'success';
+    }
+
+    if (
+      token.includes('muted') ||
+      token.includes('gray') ||
+      token.includes('grey') ||
+      token.includes('text-2') ||
+      token.includes('text-3')
+    ) {
+      return 'muted';
+    }
+
+    if (token.includes('default') || token.includes('color-text')) {
+      return 'default';
+    }
+
+    return 'brand';
   }
 }

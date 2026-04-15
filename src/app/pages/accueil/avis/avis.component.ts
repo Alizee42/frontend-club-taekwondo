@@ -141,14 +141,27 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private initOrUpdateSwiper(): void {
-    if (this.swiper) { this.swiper.update(); return; }
-    this.swiper = new Swiper('.avis-swiper', {
-      loop: true, spaceBetween: 30, slidesPerView: 1,
-      autoplay: { delay: 5000 },
-      pagination: { el: '.swiper-pagination', clickable: true },
-      navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-      breakpoints: { 768: { slidesPerView: 2 } },
-    });
+    if (this.swiper) {
+      this.swiper.destroy(true, true);
+      this.swiper = null;
+    }
+    const count = this.avisApprouves.length;
+    setTimeout(() => {
+      this.swiper = new Swiper('.avis-swiper', {
+        loop: count > 3,
+        rewind: count <= 3,
+        spaceBetween: 20,
+        slidesPerView: 1,
+        grabCursor: true,
+        autoplay: count > 1 ? { delay: 4500, disableOnInteraction: false } : false,
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        breakpoints: {
+          600: { slidesPerView: 2, spaceBetween: 16 },
+          900: { slidesPerView: 3, spaceBetween: 20 },
+        },
+      });
+    }, 0);
   }
 
   /** Charge TOUS les avis du club sélectionné (approuvés ou non) pour debug */

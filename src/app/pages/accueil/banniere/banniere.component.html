@@ -1,19 +1,54 @@
-    <!-- Hero Section -->
-    <section id="home" class="hero-section">
-        <video autoplay muted loop id="hero-video">
-            <source src="assets/videos/video1.MOV" type="video/mp4">
-            Votre navigateur ne supporte pas la vidéo.
-        </video>
-        <div class="overlay">
-            <h1>Rejoignez l’aventure Taekwondo<br><span *ngIf="selectedClub">{{ selectedClub.name }}</span></h1>
-            <p>Sport, esprit d’équipe et progression pour tous les âges</p>
-                                                <div style="max-width: 300px; margin: 1.2rem auto 0 auto; text-align: center;">
-                                                    <ui-button
-                                                        variant="primary"
-                                                        [label]="'Inscrivez-vous maintenant'"
-                                                        [routerLink]="['/inscription']"
-                                                        customClass="banner-small"
-                                                    ></ui-button>
-                                                </div>
-        </div>
-    </section>
+<section class="hero">
+  <!-- Vidéo de fond -->
+  <video autoplay muted loop playsinline class="hero-video" aria-hidden="true">
+    <source src="assets/videos/video1.MOV" type="video/mp4">
+  </video>
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <!-- Contenu principal -->
+  <div class="hero-body">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow__dot" aria-hidden="true"></span>
+      Club de Taekwondo · Lyon
+    </div>
+
+    <div class="hero-identity">
+      <span class="hero-identity__strong">Olympique</span>
+      <span class="hero-identity__mid">Taekwondo</span>
+      <span class="hero-identity__thin">{{ selectedClub?.name || 'Villeurbannais' }}</span>
+    </div>
+
+    <p class="hero-slogan" aria-live="polite">{{ currentSlogan }}</p>
+
+    <div class="hero-ctas">
+      <a class="hero-btn hero-btn--primary" [routerLink]="['/inscription']">
+        <i class="ri-user-add-line" aria-hidden="true"></i>
+        Rejoindre le club
+      </a>
+      <a class="hero-btn hero-btn--ghost" href="#about">
+        Découvrir
+        <i class="ri-arrow-down-line" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="hero-stats" aria-label="Chiffres clés du club">
+    <div class="hero-stat">
+      <span class="hero-stat__value">30+</span>
+      <span class="hero-stat__label">ans d'expérience</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat__value">200+</span>
+      <span class="hero-stat__label">membres actifs</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat__value">50+</span>
+      <span class="hero-stat__label">médailles</span>
+    </div>
+    <div class="hero-stat">
+      <i class="ri-shield-star-line hero-stat__icon" aria-hidden="true"></i>
+      <span class="hero-stat__label">Club FFT affilié</span>
+    </div>
+  </div>
+</section>

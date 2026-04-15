@@ -1,11 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { AuthService, Utilisateur } from '../../../services/auth.service';
 import { environment } from '../../../../environments/environment';
 
 type RoleUp = 'ADMIN' | 'MEMBRE' | 'PARENT' | 'SUPER_ADMIN';
+
+interface NavItem {
+  label: string;
+  route: string;
+  icon: string;
+}
 
 @Component({
   selector: 'app-connected-header',
@@ -19,7 +26,10 @@ export class ConnectedHeaderComponent implements OnInit {
   
   // Propriétés pour le dropdown utilisateur
   userDropdownOpen = false;
-  
+
+  // Menu mobile
+  mobileMenuOpen = false;
+
   // Notifications
   notificationsOpen = false;
   notifications: any[] = [];
@@ -55,24 +65,45 @@ export class ConnectedHeaderComponent implements OnInit {
     return null;
   }
 
+  get navItems(): NavItem[] {
+    switch (this.getStoredRole()) {
+      case 'ADMIN': return [
+        { label: 'Dashboard',   route: '/admin/dashboard-admin',       icon: 'ri-dashboard-line' },
+        { label: 'Membres',     route: '/admin/membres-admin',         icon: 'ri-team-line' },
+        { label: 'Paiements',   route: '/admin/gestion-paiements',     icon: 'ri-money-euro-circle-line' },
+        { label: 'Documents',   route: '/admin/gestion-documents',     icon: 'ri-file-list-line' },
+        { label: 'Événements',  route: '/admin/gestion-evenements',    icon: 'ri-calendar-event-line' },
+      ];
+      case 'PARENT': return [
+        { label: 'Dashboard',   route: '/parent/dashboard-parent',     icon: 'ri-dashboard-line' },
+        { label: 'Paiements',   route: '/parent/paiement-parent',      icon: 'ri-wallet-3-line' },
+        { label: 'Documents',   route: '/parent/documents-parent',     icon: 'ri-folder-line' },
+        { label: 'Événements',  route: '/parent/evenements-parent',    icon: 'ri-calendar-event-line' },
+        { label: 'Commandes',   route: '/parent/commandes-parent',     icon: 'ri-shopping-bag-line' },
+      ];
+      case 'MEMBRE': return [
+        { label: 'Dashboard',   route: '/membre/dashboard-membre',     icon: 'ri-dashboard-line' },
+        { label: 'Paiements',   route: '/membre/paiement',             icon: 'ri-wallet-3-line' },
+        { label: 'Documents',   route: '/membre/documents',            icon: 'ri-folder-line' },
+        { label: 'Événements',  route: '/membre/evenements-membre',    icon: 'ri-calendar-event-line' },
+        { label: 'Commandes',   route: '/membre/commandes-membre',     icon: 'ri-shopping-bag-line' },
+      ];
+      case 'SUPER_ADMIN': return [
+        { label: 'Dashboard',   route: '/super-admin/dashboard-super-admin', icon: 'ri-dashboard-line' },
+        { label: 'Clubs',       route: '/super-admin/gestion-clubs',         icon: 'ri-building-line' },
+        { label: 'Utilisateurs',route: '/super-admin/gestion-utilisateurs',  icon: 'ri-user-settings-line' },
+        { label: 'Paiements',   route: '/super-admin/gestion-paiements',     icon: 'ri-money-euro-circle-line' },
+      ];
+      default: return [];
+    }
+  }
+
   goToDashboard(): void {
-    const storedRole = this.getStoredRole();
-    switch (storedRole) {
-      case 'ADMIN':
-        this.router.navigate(['/admin/dashboard-admin']);
-        break;
-      case 'SUPER_ADMIN':
-        this.router.navigate(['/super-admin/dashboard-super-admin']);
-        break;
-      case 'MEMBRE':
-        this.router.navigate(['/membre/dashboard-membre']);
-        break;
-      case 'PARENT':
-        this.router.navigate(['/parent/dashboard-parent']);
-        break;
-      default:
-        this.router.navigate(['/connexion']);
-        break;
+    const first = this.navItems[0];
+    if (first) {
+      this.router.navigate([first.route]);
+    } else {
+      this.router.navigate(['/connexion']);
     }
   }
 
@@ -83,6 +114,28 @@ export class ConnectedHeaderComponent implements OnInit {
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/'], { replaceUrl: true });
+  }
+
+  // ===== Fermeture au clic extérieur =====
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.userDropdownOpen = false;
+    this.notificationsOpen = false;
+  }
+
+  closePanels(): void {
+    this.userDropdownOpen = false;
+    this.notificationsOpen = false;
+    this.mobileMenuOpen = false;
+  }
+
+  // ===== Menu mobile =====
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+    if (this.mobileMenuOpen) {
+      this.userDropdownOpen = false;
+      this.notificationsOpen = false;
+    }
   }
 
   // ===== Dropdown utilisateur =====
@@ -154,7 +207,7 @@ export class ConnectedHeaderComponent implements OnInit {
     this.enfantsLoaded = true; // éviter appels multiples
     try {
       const base = environment.apiUrl;
-      const list = await this.http.get<any[]>(`${base}/membres/mes-enfants`).toPromise();
+      const list = await firstValueFrom(this.http.get<any[]>(`${base}/membres/mes-enfants`));
       if (Array.isArray(list)) {
         this.enfants = list.map(e => ({ prenom: e.prenom || '', nom: e.nom || '' }));
       }

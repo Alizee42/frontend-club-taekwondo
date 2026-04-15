@@ -9,6 +9,7 @@ import { ToastContainerComponent } from './shared/toast/toast-container/toast-co
 
 import { FooterComponent } from './layout/footer/footer.component';
 import { UniversalHeaderComponent } from './shared/layout/universal-header/universal-header.component';
+import { ConnectedHeaderComponent } from './components/shared/connected-header/connected-header.component';
 
 import { ParametresPaiementService } from './services/parametres-paiement.service';
 import { ClubSelectComponent } from './club-select/club-select.component';
@@ -20,6 +21,7 @@ import { ClubSelectComponent } from './club-select/club-select.component';
   CommonModule,
   RouterModule,
   UniversalHeaderComponent,
+  ConnectedHeaderComponent,
   FooterComponent,
   ToastContainerComponent,
   ClubSelectComponent,
@@ -40,11 +42,13 @@ export class AppComponent implements OnInit, OnDestroy {
   currentUser: any = null;
 
   onClubSelected(club: Club) {
-    // Vérification : l'utilisateur doit choisir le club associé à son compte
-    const userClubId = this.currentUser?.['clubId'];
-    if (userClubId && club.id !== userClubId) {
-      alert('Veuillez sélectionner le club associé à votre compte.');
-      return;
+    // Si l'utilisateur est connecté, il doit choisir le club associé à son compte
+    if (this.isUserLoggedIn) {
+      const userClubId = this.currentUser?.['clubId'];
+      if (userClubId && club.id !== userClubId) {
+        alert('Veuillez sélectionner le club associé à votre compte.');
+        return;
+      }
     }
     this.clubService.setSelectedClub(club);
     this.showSelectClubModal = false;
@@ -99,6 +103,9 @@ export class AppComponent implements OnInit, OnDestroy {
     const initial = this.clubService.getSelectedClub();
     if (initial && initial.id) {
       this.clubSelectionService.setSelectedClubId(initial.id);
+    } else {
+      // Aucun club en localStorage : montrer la modale de sélection dès l'arrivée
+      this.showSelectClubModal = true;
     }
     this.clubService.selectedClub$.subscribe(c => {
       this.clubSelectionService.setSelectedClubId(c?.id ?? null);

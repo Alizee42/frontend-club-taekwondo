@@ -1,26 +1,25 @@
 <div class="toast-stack">
-    <div
-      *ngFor="let toast of (toasts$ | async); trackBy: trackById"
-      class="message-box"
-      [ngClass]="'message-box-' + normalizeType(toast.type)"
-      role="status"
-      aria-live="polite"
-    >
-      <!-- Icône moderne avec émojis -->
-      <div class="icon-circle" aria-hidden="true">
-        <span [innerHTML]="getIcon(toast.type)"></span>
-      </div>
-  
-      <span class="message-text">{{ toast.message }}</span>
-  
-      <button
-        *ngIf="toast.dismissible"
-        class="exit-button"
-        (click)="$event.stopPropagation(); removeToast(toast.id)"
-        aria-label="Fermer"
-      >
-        ×
-      </button>
+  <div
+    *ngFor="let toast of (toasts$ | async); trackBy: trackById"
+    class="message-box"
+    [ngClass]="'message-box-' + normalizeType(toast.type)"
+    [attr.role]="normalizeType(toast.type) === 'error' ? 'alert' : 'status'"
+    [attr.aria-live]="normalizeType(toast.type) === 'error' ? 'assertive' : 'polite'"
+  >
+    <div class="icon-circle" aria-hidden="true">
+      <i [class]="getIconClass(toast.type)"></i>
     </div>
+
+    <span class="message-text">{{ toast.message }}</span>
+
+    <button
+      *ngIf="toast.dismissible"
+      class="exit-button"
+      type="button"
+      (click)="$event.stopPropagation(); removeToast(toast.id)"
+      aria-label="Fermer"
+    >
+      <i class="ri-close-line" aria-hidden="true"></i>
+    </button>
   </div>
-  
+</div>

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ToastService } from '../toast.service';
 import { Toast } from '../toast.model';
+import { ToastService } from '../toast.service';
 
 type Normalized = 'success' | 'error' | 'info' | 'warning';
 
@@ -26,23 +26,37 @@ export class ToastContainerComponent implements OnInit {
     this.toastService.remove(id);
   }
 
-  trackById = (_: number, t: Toast) => t.id;
+  trackById = (_: number, toast: Toast) => toast.id;
 
-  /** Mappe 'warn' -> 'warning' et sécurise les autres valeurs */
   normalizeType(type: string | undefined | null): Normalized {
-    const t = (type || '').toLowerCase();
-    if (t === 'success' || t === 'error' || t === 'info' || t === 'warning') return t;
-    if (t === 'warn') return 'warning';
+    const normalized = (type || '').toLowerCase();
+
+    if (
+      normalized === 'success' ||
+      normalized === 'error' ||
+      normalized === 'info' ||
+      normalized === 'warning'
+    ) {
+      return normalized;
+    }
+
+    if (normalized === 'warn') {
+      return 'warning';
+    }
+
     return 'info';
   }
 
-  getIcon(type: string): string {
+  getIconClass(type: string | undefined | null): string {
     switch (this.normalizeType(type)) {
-      case 'success':  return '✅';
-      case 'error':    return '❌';
-      case 'info':     return 'ℹ️';
-      case 'warning':  return '⚠️';
-      default:         return 'ℹ️';
+      case 'success':
+        return 'ri-check-line';
+      case 'error':
+        return 'ri-close-line';
+      case 'warning':
+        return 'ri-alert-line';
+      default:
+        return 'ri-information-line';
     }
   }
 }
