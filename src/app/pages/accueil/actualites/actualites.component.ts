@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button/ui-button.component';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router'; 
+import { RouterModule } from '@angular/router';
 import { ActualiteService } from '../../../services/actualite.service';
 import { ClubSelectionService } from '../../../services/club-selection.service';
 
@@ -11,7 +10,6 @@ import { ClubSelectionService } from '../../../services/club-selection.service';
   imports: [
     CommonModule,
     RouterModule,
-    UiButtonComponent,
   ],
   templateUrl: './actualites.component.html',
   styleUrls: ['./actualites.component.css']

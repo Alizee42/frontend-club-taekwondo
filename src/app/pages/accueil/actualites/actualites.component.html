@@ -1,69 +1,40 @@
 <section id="actualites" class="section-actualites">
   <div class="container">
+
     <div class="section-head">
       <span class="section-eyebrow">La vie du club</span>
       <h2 class="section-title">Actualités</h2>
     </div>
-    <!-- Actualité à la une -->
-    <div *ngIf="featuredNews" class="actu-featured-slider">
-      <div class="slider-featured-image">
-        <img 
-          [src]="featuredNews.imageUrl ? featuredNews.imageUrl : 'assets/images/dobok.jpg'"
-          [attr.alt]="featuredNews.titre + ' – image à la une'"
-          (error)="onImageError($event)"
-          loading="lazy" decoding="async"
-        >
-          <span class="badge badge-slider-featured"
-                [ngClass]="'badge-' + (featuredNews.typeActu?.toLowerCase() || 'default')"
-          >{{ featuredNews.typeActu }}</span>
-      </div>
-      <div class="slider-featured-content">
-        <h3>{{ featuredNews.titre }}</h3>
-        <p>{{ featuredNews.contenu | slice:0:200 }}...</p>
-        <div class="featured-btn-wrapper">
-          <ui-button
-            variant="primary"
-            [label]="'En savoir plus'"
-            [routerLink]="['/actualite', featuredNews.id]"
-            customClass="banner-small"
-          ></ui-button>
+
+    <div class="actu-grid">
+      <div
+        *ngFor="let actu of news.slice(0, 3); trackBy: trackById"
+        class="actu-card"
+        [routerLink]="['/actualite', actu.id]"
+      >
+        <div class="actu-card__img">
+          <img
+            [src]="actu.imageUrl || 'assets/images/dobok.jpg'"
+            [attr.alt]="actu.titre"
+            (error)="onImageError($event)"
+            loading="lazy"
+          >
+          <span class="actu-badge badge-{{ actu.typeActu?.toLowerCase() || 'default' }}">
+            {{ actu.typeActu || 'Info' }}
+          </span>
+        </div>
+        <div class="actu-card__body">
+          <span class="actu-card__date" *ngIf="actu.datePublication">
+            {{ actu.datePublication | date:'d MMM yyyy' }}
+          </span>
+          <h3 class="actu-card__title">{{ actu.titre }}</h3>
+          <p class="actu-card__excerpt">{{ actu.contenu | slice:0:110 }}…</p>
+          <span class="actu-card__link">
+            Lire la suite <i class="ri-arrow-right-line"></i>
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- Slider horizontal des autres actualités -->
-    <div class="actu-slider-wrapper">
-      <div class="actu-slider" tabindex="0">
-        <div *ngFor="let actu of filteredNews; trackBy: trackById" class="actu-slider-card">
-          <div class="slider-card-image">
-            <img 
-              [src]="actu.imageUrl ? actu.imageUrl : 'assets/images/dobok.jpg'" 
-              [attr.alt]="'Illustration: ' + actu.titre" 
-              (error)="onImageError($event)" 
-              loading="lazy" decoding="async"
-            >
-            <span class="badge badge-slider"
-                  [ngClass]="'badge-' + (actu.typeActu?.toLowerCase() || 'default')"
-            >{{ actu.typeActu }}</span>
-          </div>
-          <div class="slider-card-content">
-            <h4>{{ actu.titre }}</h4>
-            <p>{{ actu.contenu | slice:0:100 }}...</p>
-            <div *ngIf="actu.complement" class="complement-card">
-              <span class="complement-label">Complément :</span>
-              <span class="complement-value">{{ actu.complement }}</span>
-            </div>
-            <div class="card-btn-wrapper">
-              <ui-button
-                variant="secondary"
-                [label]="'En savoir plus'"
-                [routerLink]="['/actualite', actu.id]"
-                customClass="banner-small"
-              ></ui-button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
