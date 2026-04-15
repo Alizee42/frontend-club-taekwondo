@@ -14,6 +14,7 @@ type CreatePiPayload = {
   paiementId: number;
   echeanceId?: number;
   customerEmail?: string;
+  sendReceiptEmail?: boolean;
 };
 
 type CreatePiResponse = {
@@ -122,6 +123,25 @@ export class StripeService {
 
   setClientSecret(clientSecret: string | null): void {
     this.clientSecret = clientSecret;
+  }
+
+  /** Synchronise l'état d'un PaymentIntent avec la BDD */
+  async syncPayment(paymentIntentId: string): Promise<any> {
+    return firstValueFrom(
+      this.http.post<any>(`${this.backendUrl}/sync-payment`, { paymentIntentId })
+    );
+  }
+
+  /** Récupère l'URL du reçu Stripe pour un paiement */
+  async getReceiptUrl(paiementId: number): Promise<string | null> {
+    try {
+      const res = await firstValueFrom(
+        this.http.get<{ receiptUrl: string }>(`${this.backendUrl}/receipt/${paiementId}`)
+      );
+      return res?.receiptUrl ?? null;
+    } catch {
+      return null;
+    }
   }
 
   async confirmerPaiement(): Promise<{

@@ -65,9 +65,8 @@ export class AuthService {
 
   logout(): void {
     
-    // Nettoyer toutes les clés de token pour compatibilité
+    // Nettoyer toutes les clés de token
     localStorage.removeItem(this.K_TOKEN);
-    localStorage.removeItem('auth_token');
     localStorage.removeItem(this.K_ROLE);
     localStorage.removeItem(this.K_USER);
     localStorage.removeItem(this.K_USER_LEGACY);
@@ -148,9 +147,8 @@ export class AuthService {
       role: normalizedRole,
     };
 
-    // ✅ Stocker le token sous les deux clés pour compatibilité
+    // Stocker le token
     localStorage.setItem(this.K_TOKEN, res.token);
-    localStorage.setItem('auth_token', res.token); // Compatibilité avec d'autres composants
     
     if (normalizedRole) localStorage.setItem(this.K_ROLE, normalizedRole);
     this.persistUser(utilisateur);
@@ -177,8 +175,8 @@ export class AuthService {
   }
 
   private hydrateFromStorage() {
-    // Vérifier les deux clés de token pour compatibilité
-    const token = localStorage.getItem(this.K_TOKEN) || localStorage.getItem('auth_token');
+    // Lire le token depuis la clé canonique
+    const token = localStorage.getItem(this.K_TOKEN);
     const role = localStorage.getItem(this.K_ROLE);
     let user: Utilisateur | null = null;
 

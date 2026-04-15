@@ -1,11 +1,12 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { StripeService } from '../../services/stripe.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
 import { AuthService } from '../../services/auth.service';
+import { MembreService } from '../../services/membre.service';
+import { PaiementService } from '../../services/paiement.service';
 import { environment } from '../../../environments/environment';
 
 type TypePaiement = 'UNIQUE' | 'ECHELONNE';
@@ -18,7 +19,6 @@ type TypePaiement = 'UNIQUE' | 'ECHELONNE';
   styleUrls: ['./paiement.component.css']
 })
 export class PaiementComponent implements OnInit, AfterViewInit {
-private readonly API = `${environment.apiUrl}`;
 
   // Wizard -> 3 étapes : 1 Mode, 2 Paiement, 3 Confirmation
   step = 1;
@@ -70,7 +70,7 @@ private readonly API = `${environment.apiUrl}`;
   stripeReady = false;
   private stripeElementMounted = false;
 
-  // Affichage “payées”
+  // Affichage "payées"
   private showPaidByPlanId: Record<number, boolean> = {};
 
   // Confirmation
@@ -79,18 +79,15 @@ private readonly API = `${environment.apiUrl}`;
   montantPaye = 0;
   today = new Date();
 
- constructor(
-  private http: HttpClient,
-  private stripeService: StripeService,
-  private parametresService: ParametresPaiementService,
-  private auth: AuthService   // injecte AuthService
-) {}
+  constructor(
+    private stripeService: StripeService,
+    private parametresService: ParametresPaiementService,
+    private auth: AuthService,
+    private membreService: MembreService,
+    private paiementService: PaiementService
+  ) {}
 
   // ===== Utils =====
-private authHeaders() {
-  return this.auth.getAuthHeaders();
-}
-
 
   private log(where: string, payload?: any) { console.log(`[Membre][${where}]`, payload ?? ''); }
   private isPaid(s: any) { return /pay[eé]e?/i.test(String(s ?? '')); }
@@ -98,13 +95,17 @@ private authHeaders() {
     if (!clientSecret) return null;
     const i = clientSecret.indexOf('_secret_'); return i > 0 ? clientSecret.substring(0, i) : null;
   }
-  private buildFactureUrl(paiementId: number){ return `${this.API}/paiements/${paiementId}/facture`; }
+  private buildFactureUrl(paiementId: number) { return `${environment.apiUrl}/paiements/${paiementId}/facture`; }
+
   telechargerFacture(): void {
     const pid = this.paiementIdEnCours;
     if (!pid) return;
-    this.http.get<{receiptUrl: string}>(`${this.API}/paiements/${pid}/facture`, { headers: this.authHeaders() })
-      .subscribe({ next: r => { if (r?.receiptUrl) window.open(r.receiptUrl, '_blank', 'noopener'); }, error: () => {} });
+    this.paiementService.getFactureUrl(pid).subscribe({
+      next: r => { if (r?.receiptUrl) window.open(r.receiptUrl, '_blank', 'noopener'); },
+      error: () => {}
+    });
   }
+
   private myUserId(): number { return this.auth.getUtilisateurConnecte()?.id ?? this.auth.getUserIdFromToken() ?? 0; }
 
   /** mapping + normalisation pour l'historique */
@@ -162,11 +163,7 @@ private authHeaders() {
     if (!this.lastPaymentIntentId) return;
     try {
       this.log('sync-payment.req', this.lastPaymentIntentId);
-      await firstValueFrom(this.http.post(
-        `${this.API}/stripe/sync-payment`,
-        { paymentIntentId: this.lastPaymentIntentId },
-        { headers: this.authHeaders() }
-      ));
+      await this.stripeService.syncPayment(this.lastPaymentIntentId);
       this.log('sync-payment.ok');
     } catch (e) { this.log('sync-payment.err', e); }
     finally { this.lastPaymentIntentId = null; }
@@ -195,20 +192,17 @@ private authHeaders() {
 
   // ===== Chargements =====
   loadMembre(): void {
-    this.http.get<any>(`${this.API}/membres/me`, { headers: this.authHeaders() })
-      .subscribe({
-        next: (me) => {
-          const authUser = this.auth.getUtilisateurConnecte();
+    this.membreService.getMembreConnecte().subscribe({
+      next: (me: any) => {
+        const authUser = this.auth.getUtilisateurConnecte();
+        if (me) {
           this.membreId = Number(me?.id ?? me?.membreId ?? me?.userId ?? 0) || null;
           const prenom = me?.prenom || me?.firstName || authUser?.prenom || '';
           const nom = me?.nom || me?.lastName || authUser?.nom || '';
           this.userEmail = me?.email || me?.utilisateur?.email || authUser?.email || null;
           this.membreNom = (prenom || 'Vous') + (nom ? ` ${nom}` : '');
           this.log('me', { id: this.membreId, nom: this.membreNom, email: this.userEmail });
-          this.loadPaiements();
-        },
-        error: _ => {
-          const authUser = this.auth.getUtilisateurConnecte();
+        } else {
           const localId = this.auth.getMembreIdFromToken() ?? this.myUserId();
           if (localId) this.membreId = localId;
           const localNom = authUser?.nom || '';
@@ -216,16 +210,15 @@ private authHeaders() {
           this.userEmail = authUser?.email || null;
           this.membreNom = (localPrenom || 'Vous') + (localNom ? ` ${localNom}` : '');
           this.log('me.fallback.auth', { id: this.membreId, nom: this.membreNom, email: this.userEmail });
-          this.loadPaiements();
         }
-      });
+        this.loadPaiements();
+      }
+    });
   }
 
   loadPaiements(): void {
-    const headers = this.authHeaders();
-
     // 1) Route membre dédiée (si dispo)
-    this.http.get<any[]>(`${this.API}/paiements/membre/mes-paiements`, { headers }).subscribe({
+    this.paiementService.getMesPaiementsMembre().subscribe({
       next: (data1) => {
         this.log('paiements.route#1.ok', data1);
         const mapped1 = (data1 || []).map(p => this.mapPaiementFromApi(p));
@@ -235,7 +228,7 @@ private authHeaders() {
       error: _ => {
         // 2) Route filtrée par membreId si supportée
         if (this.membreId) {
-          this.http.get<any[]>(`${this.API}/paiements?membreId=${this.membreId}`, { headers }).subscribe({
+          this.paiementService.getPaiementsByMembreId(this.membreId).subscribe({
             next: (data2) => {
               this.log('paiements.route#2.ok', data2);
               const mapped2 = (data2 || []).map(p => this.mapPaiementFromApi(p));
@@ -244,7 +237,7 @@ private authHeaders() {
             },
             error: _ => {
               // 3) Fallback : GET /paiements puis filtre client
-              this.http.get<any[]>(`${this.API}/paiements`, { headers }).subscribe({
+              this.paiementService.getAllPaiements().subscribe({
                 next: (data3) => {
                   this.log('paiements.route#3.ok', data3);
                   const mapped3 = (data3 || []).map(p => this.mapPaiementFromApi(p));
@@ -257,7 +250,7 @@ private authHeaders() {
           });
         } else {
           // pas de membreId -> on tente directement la 3
-          this.http.get<any[]>(`${this.API}/paiements`, { headers }).subscribe({
+          this.paiementService.getAllPaiements().subscribe({
             next: (data3) => {
               this.log('paiements.route#3.ok', data3);
               const mapped3 = (data3 || []).map(p => this.mapPaiementFromApi(p));
@@ -391,7 +384,7 @@ private authHeaders() {
   }
 
   // ===== Création + paiement =====
-  initierPaiement(fromModal = false): void{
+  async initierPaiement(fromModal = false): Promise<void> {
     if ((this.enCoursDePaiement && !fromModal && this.confirming) || !this.membreId) { this.log('initierPaiement.abort'); return; }
     if (!this.cardElement) {
       this.paiementErreur = true;
@@ -414,75 +407,65 @@ private authHeaders() {
     };
     this.log('create.paiement.req', dtoCreation);
 
-    // ✅ Endpoint membre côté back
-    this.http.post<any>(`${this.API}/paiements/ajouter-membre`, dtoCreation, { headers: this.authHeaders() })
-      .subscribe({
-        next: (creationRes) => {
-          this.log('create.paiement.res', creationRes);
-          const paiementId = creationRes?.id ?? creationRes?.paiementId;
-          if (!paiementId) { this.failPaiement('ID de paiement introuvable après création'); this.confirming = false; return; }
-          this.paiementIdEnCours = Number(paiementId);
+    try {
+      const creationRes = await firstValueFrom(this.paiementService.ajouterPaiementMembre(dtoCreation));
+      this.log('create.paiement.res', creationRes);
+      const paiementId = creationRes?.id ?? creationRes?.paiementId;
+      if (!paiementId) { this.failPaiement('ID de paiement introuvable après création'); this.confirming = false; return; }
+      this.paiementIdEnCours = Number(paiementId);
 
-          // snapshot pour affichage optimiste
-          const createdSnapshot = {
-            ...creationRes,
-            id: this.paiementIdEnCours,
-            paiementId: this.paiementIdEnCours,
-            membreId: this.membreId,
-            type: this.typeChoisi,
-            modePaiement: this.modePaiement,
-            montantTotal: this.montantInitial
-          };
+      const createdSnapshot = {
+        ...creationRes,
+        id: this.paiementIdEnCours,
+        paiementId: this.paiementIdEnCours,
+        membreId: this.membreId,
+        type: this.typeChoisi,
+        modePaiement: this.modePaiement,
+        montantTotal: this.montantInitial
+      };
 
-          this.factureUrl = creationRes?.factureUrl || this.buildFactureUrl(this.paiementIdEnCours);
-          this.montantPaye = this.getMontantAPayerMaintenant();
+      this.factureUrl = creationRes?.factureUrl || this.buildFactureUrl(this.paiementIdEnCours);
+      this.montantPaye = this.getMontantAPayerMaintenant();
 
-          let echeanceIdToPay: number | undefined = undefined;
-          if (Array.isArray(creationRes?.echeances)) {
-            const firstUnpaid = (creationRes.echeances as any[])
-              .sort((a, b) => (a?.numero ?? 0) - (b?.numero ?? 0))
-              .find(e => !this.isPaid(e?.statut));
-            echeanceIdToPay = firstUnpaid?.id;
-          }
+      let echeanceIdToPay: number | undefined = undefined;
+      if (Array.isArray(creationRes?.echeances)) {
+        const firstUnpaid = (creationRes.echeances as any[])
+          .sort((a, b) => (a?.numero ?? 0) - (b?.numero ?? 0))
+          .find(e => !this.isPaid(e?.statut));
+        echeanceIdToPay = firstUnpaid?.id;
+      }
 
-          const piPayload: any = { paiementId: this.paiementIdEnCours, sendReceiptEmail: this.envoyerRecuEmail };
-          if (echeanceIdToPay) piPayload.echeanceId = echeanceIdToPay;
-          if (this.envoyerRecuEmail && this.userEmail) piPayload.customerEmail = this.userEmail; // ✅ reçu Stripe si coché
-          this.log('createPI.req', piPayload);
+      const piPayload: any = { paiementId: this.paiementIdEnCours, sendReceiptEmail: this.envoyerRecuEmail };
+      if (echeanceIdToPay) piPayload.echeanceId = echeanceIdToPay;
+      if (this.envoyerRecuEmail && this.userEmail) piPayload.customerEmail = this.userEmail;
+      this.log('createPI.req', piPayload);
 
-          this.http.post<any>(`${this.API}/stripe/create-payment-intent`, piPayload, { headers: this.authHeaders() })
-            .subscribe({
-              next: async (resPI) => {
-                this.log('createPI.res', resPI);
-                const clientSecret = resPI?.clientSecret;
-                this.lastPaymentIntentId = resPI?.paymentIntentId ?? this.extractPiIdFromClientSecret(clientSecret);
-                if (!clientSecret) { this.failPaiement('Client secret Stripe manquant'); this.confirming = false; return; }
+      const resPI = await this.stripeService.createPaymentIntent(piPayload);
+      this.log('createPI.res', resPI);
+      const clientSecret = resPI?.clientSecret;
+      this.lastPaymentIntentId = resPI?.paymentIntentId ?? this.extractPiIdFromClientSecret(clientSecret);
+      if (!clientSecret) { this.failPaiement('Client secret Stripe manquant'); this.confirming = false; return; }
 
-                try {
-                  if (!this.stripe) { this.failPaiement('Stripe non initialisé'); this.confirming = false; return; }
-                  const result = await this.stripe.confirmCardPayment(clientSecret, { payment_method: { card: this.cardElement } });
-                  if (result?.error) { this.failPaiement(result.error.message || 'Erreur de paiement'); this.confirming = false; return; }
+      if (!this.stripe) { this.failPaiement('Stripe non initialisé'); this.confirming = false; return; }
+      const result = await this.stripe.confirmCardPayment(clientSecret, { payment_method: { card: this.cardElement } });
+      if (result?.error) { this.failPaiement(result.error.message || 'Erreur de paiement'); this.confirming = false; return; }
 
-                  await this.syncPaymentIntentOnce();
-                  this.paymentDate = new Date();
+      await this.syncPaymentIntentOnce();
+      this.paymentDate = new Date();
 
-                  if (fromModal) this.modalCarteOuverte = false;
-                  this.paiementReussi = true; this.enCoursDePaiement = false; this.confirming = false;
-                  this.step = 3; // ✅ confirmation (3ème étape)
+      if (fromModal) this.modalCarteOuverte = false;
+      this.paiementReussi = true; this.enCoursDePaiement = false; this.confirming = false;
+      this.step = 3;
 
-                  // Préparer un nouveau cycle propre (le Payment Element sera remonté au prochain paiement)
-                  this.resetStripeMainElement();
-
-                  this.loadPaiements();
-                  this.ensureInHistory(createdSnapshot); // filet optimiste
-                  this.log('paiement.succes', { paiementId: this.paiementIdEnCours, factureUrl: this.factureUrl });
-                } catch (e) { this.failPaiement('Exception lors de la confirmation Stripe'); this.log('confirm.err', e); this.confirming = false; }
-              },
-              error: (errPI) => { this.failPaiement('Erreur création PaymentIntent Stripe'); this.log('createPI.err', errPI); this.confirming = false; }
-            });
-        },
-        error: (err) => { this.failPaiement('Erreur création du paiement en BDD'); this.log('create.paiement.err', err); this.confirming = false; }
-      });
+      this.resetStripeMainElement();
+      this.loadPaiements();
+      this.ensureInHistory(createdSnapshot);
+      this.log('paiement.succes', { paiementId: this.paiementIdEnCours, factureUrl: this.factureUrl });
+    } catch (e) {
+      this.failPaiement('Erreur lors du paiement');
+      this.log('initierPaiement.err', e);
+      this.confirming = false;
+    }
   }
 
   private failPaiement(msg: string){
@@ -514,8 +497,8 @@ private authHeaders() {
       this.log('stripe.element.parentModal.mounted');
     });
   }
-  
-  payerEcheances(): void{
+
+  async payerEcheances(): Promise<void> {
     if (this.enCoursDePaiement || this.confirming) return;
     if (!this.paiementActuel || !this.cardElementParentModal || !this.echeanceEnCours) return;
 
@@ -524,38 +507,38 @@ private authHeaders() {
 
     const paiementId = Number(this.paiementActuel?.id || this.paiementActuel?.paiementId);
     const echeanceId = Number(this.echeanceEnCours?.id);
-  const payload: any = { paiementId, echeanceId, sendReceiptEmail: this.envoyerRecuEmail };
-  if (this.envoyerRecuEmail && this.userEmail) payload.customerEmail = this.userEmail; // ✅ reçu Stripe si coché
+    const payload: any = { paiementId, echeanceId, sendReceiptEmail: this.envoyerRecuEmail };
+    if (this.envoyerRecuEmail && this.userEmail) payload.customerEmail = this.userEmail;
     this.log('echeance.createPI.req', payload);
 
-    this.http.post<any>(`${this.API}/stripe/create-payment-intent`, payload, { headers: this.authHeaders() })
-      .subscribe({
-        next: async (resPI) => {
-          this.log('echeance.createPI.res', resPI);
-          const clientSecret = resPI?.clientSecret;
-          this.lastPaymentIntentId = resPI?.paymentIntentId ?? this.extractPiIdFromClientSecret(clientSecret);
-          if (!clientSecret) { this.failPaiement('Client secret Stripe manquant'); this.confirming = false; return; }
+    try {
+      const resPI = await this.stripeService.createPaymentIntent(payload);
+      this.log('echeance.createPI.res', resPI);
+      const clientSecret = resPI?.clientSecret;
+      this.lastPaymentIntentId = resPI?.paymentIntentId ?? this.extractPiIdFromClientSecret(clientSecret);
+      if (!clientSecret) { this.failPaiement('Client secret Stripe manquant'); this.confirming = false; return; }
 
-          try {
-            if (!this.stripe) { this.failPaiement('Stripe non initialisé'); this.confirming = false; return; }
-            const result = await this.stripe.confirmCardPayment(clientSecret, { payment_method: { card: this.cardElementParentModal } });
-            this.enCoursDePaiement = false;
-            if (result?.error) { this.paiementErreur = true; this.erreurMessage = result.error.message || 'Erreur de paiement'; this.confirming = false; return; }
+      if (!this.stripe) { this.failPaiement('Stripe non initialisé'); this.confirming = false; return; }
+      const result = await this.stripe.confirmCardPayment(clientSecret, { payment_method: { card: this.cardElementParentModal } });
+      this.enCoursDePaiement = false;
+      if (result?.error) { this.paiementErreur = true; this.erreurMessage = result.error.message || 'Erreur de paiement'; this.confirming = false; return; }
 
-            await this.syncPaymentIntentOnce();
-            this.paiementReussi = true; this.fermerModalPaiement(); this.loadPaiements(); this.confirming = false;
-          } catch (e) { this.failPaiement('Exception lors de la confirmation Stripe'); this.log('echeance.confirm.err', e); this.confirming = false; }
-        },
-        error: (err) => { this.failPaiement('Erreur création PaymentIntent Stripe'); this.log('echeance.createPI.err', err); this.confirming = false; }
-      });
+      await this.syncPaymentIntentOnce();
+      this.paiementReussi = true; this.fermerModalPaiement(); this.loadPaiements(); this.confirming = false;
+    } catch (e) {
+      this.failPaiement('Exception lors de la confirmation Stripe');
+      this.log('echeance.confirm.err', e);
+      this.confirming = false;
+    }
   }
 
   /** Ouvre le reçu Stripe natif (paiement ou échéance) via le back */
   ouvrirRecuStripe(paiementId?: number, echeanceId?: number): void {
     const pid = paiementId ?? this.paiementIdEnCours;
     if (!pid) { this.log('receipt.abort.noPid'); return; }
-    this.http.get<{receiptUrl: string}>(`${this.API}/stripe/receipt/${pid}`, { headers: this.authHeaders() })
-      .subscribe({ next: r => { if (r?.receiptUrl) window.open(r.receiptUrl, '_blank', 'noopener'); }, error: () => {} });
+    this.stripeService.getReceiptUrl(pid).then(url => {
+      if (url) window.open(url, '_blank', 'noopener');
+    });
   }
 
   /** Réinitialise l'élément Stripe de la modale principale pour un nouveau paiement */
@@ -568,15 +551,12 @@ private authHeaders() {
 
   /** Lancer un nouveau paiement depuis l'écran de confirmation */
   nouveauPaiement(): void {
-    // Réinitialise l'état du wizard et du composant
     this.step = 1;
     this.paiementReussi = false;
     this.paiementErreur = false;
     this.enCoursDePaiement = false;
     this.erreurMessage = '';
     this.paymentDate = null;
-    // Ne pas effacer paiementIdEnCours tout de suite pour permettre d'ouvrir le reçu après coup si besoin
-    // (il sera remplacé à la prochaine création)
     this.resetStripeMainElement();
   }
 

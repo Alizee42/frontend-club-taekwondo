@@ -1,0 +1,19 @@
+/* =============================================
+   OVERRIDES UI-BUTTON (aspect cohérent global)
+   ============================================= */
+
+/* Global overrides for ui-button to ensure consistent look across components */
+.ui-btn.btn-icon-only.success {
+  background: linear-gradient(180deg, var(--success, #22c55e), #16a34a) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(34,197,94,0.16) !important;
+}
+.ui-btn.btn-icon-only.danger {
+  background: linear-gradient(180deg, var(--red-main, var(--danger)), color-mix(in srgb,var(--red-main, var(--danger)) 82%, black)) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(176,42,55,0.16) !important;
+}
+.ui-btn.success { background: linear-gradient(180deg, var(--success, #22c55e), #16a34a) !important; color:#fff !important; }
+.ui-btn.danger { background: linear-gradient(180deg, var(--red-main, var(--danger)), color-mix(in srgb,var(--red-main, var(--danger)) 82%, black)) !important; color:#fff !important; }

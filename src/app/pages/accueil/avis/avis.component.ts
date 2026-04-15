@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AvisService, Avis } from '../../../services/avis.service';
 import { ClubSelectionService } from '../../../services/club-selection.service';
+import { ClubService } from '../../../services/club.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { AuthService } from '../../../services/auth.service';
 import Swiper from 'swiper/bundle';
@@ -52,26 +53,7 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
 
   envoyerAvisForm(data: any) {
     // Récupérer le clubId depuis plusieurs sources (service, clubService/localStorage)
-    let clubId = this.clubSelectionService.getSelectedClubId();
-    if (clubId === null || clubId === undefined) {
-      // Essayer via ClubService (stockage localStorage)
-      try {
-        const sel = (window as any)?.clubServiceSelectedClub ?? null;
-      } catch (e) {
-        // ignore
-      }
-      try {
-        // Utiliser la méthode publique si disponible
-        // (on récupère directement depuis localStorage pour être sûr)
-        const raw = localStorage.getItem('selectedClub');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed.id) clubId = parsed.id;
-        }
-      } catch (e) {
-        console.warn('[Avis] Impossible de lire selectedClub dans localStorage', e);
-      }
-    }
+    let clubId = this.clubSelectionService.getSelectedClubId() ?? this.clubService.getSelectedClub()?.id ?? null;
     if (clubId === null || clubId === undefined) {
       this.toast.warning("Veuillez sélectionner un club avant d'envoyer votre avis.");
       return;
@@ -141,6 +123,7 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
     private avisService: AvisService,
     private toast: ToastService,
     private clubSelectionService: ClubSelectionService,
+    private clubService: ClubService,
     private authService: AuthService
   ) {}
 

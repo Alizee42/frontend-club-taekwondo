@@ -1,0 +1,47 @@
+/* =============================================
+   STATUS BADGES
+   ============================================= */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-weight: 600;
+  font-size: .9rem;
+  line-height: 1;
+  padding: .45rem .65rem;
+  border-radius: 999px;
+  /* pill */
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+  user-select: none;
+}
+
+/* Icône (peut être <i> ou <span>) */
+.status-badge .status-icon {
+  font-size: 1.05rem;
+  /* légèrement plus grande */
+  line-height: 1;
+}
+
+/* Variants */
+.status-validé,
+.status--success {
+  background: color-mix(in srgb, var(--success) 12%, white);
+  color: var(--success-ink);
+  border-color: color-mix(in srgb, var(--success) 35%, white);
+}
+
+.status-en-attente,
+.status--warning {
+  background: color-mix(in srgb, var(--warning) 14%, white);
+  color: var(--warning-ink);
+  border-color: color-mix(in srgb, var(--warning) 38%, white);
+}
+
+.status-refusé,
+.status--danger {
+  background: color-mix(in srgb, var(--danger) 12%, white);
+  color: var(--danger-ink);
+  border-color: color-mix(in srgb, var(--danger) 36%, white);
+}

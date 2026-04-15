@@ -75,6 +75,48 @@ export class PaiementService {
       .pipe(catchError(this.handleError));
   }
 
+  /** Paiements du parent connecté (avec enfants) */
+  getMesPaiementsParent(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/parent/mes-paiements`)
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Créer un paiement côté parent */
+  ajouterPaiementParent(dto: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/parent/ajouter`, dto)
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Obtenir l’URL de facture/reçu d’un paiement */
+  getFactureUrl(paiementId: number): Observable<{ receiptUrl: string }> {
+    return this.http.get<{ receiptUrl: string }>(`${this.apiUrl}/${paiementId}/facture`)
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Paiements du membre connecté */
+  getMesPaiementsMembre(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/membre/mes-paiements`)
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Paiements filtrés par membreId */
+  getPaiementsByMembreId(membreId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}?membreId=${membreId}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Tous les paiements (fallback) */
+  getAllPaiements(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Créer un paiement côté membre */
+  ajouterPaiementMembre(dto: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/ajouter-membre`, dto)
+      .pipe(catchError(this.handleError));
+  }
+
   /* ===== Gestion des erreurs ===== */
   private handleError(error: HttpErrorResponse) {
     const msg = error.error instanceof ErrorEvent

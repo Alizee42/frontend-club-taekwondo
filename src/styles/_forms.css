@@ -1,0 +1,41 @@
+/* =============================================
+   FORM CONTROLS GLOBAUX
+   ============================================= */
+
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+select {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-h);
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+input::placeholder,
+select::placeholder {
+  color: #9ca3af
+}
+
+input:focus,
+select:focus {
+  outline: 0;
+  border-color: var(--focus);
+  /* focus ring accessible */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, .2);
+}
+
+/* Désactivés */
+input:disabled,
+select:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}

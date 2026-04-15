@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { FormsModule } from '@angular/forms';
+import { ClubService } from '../../services/club.service';
 
 @Component({
   selector: 'app-gestion-utilisateurs',
@@ -31,20 +32,11 @@ export class GestionUtilisateursComponent implements OnInit {
   modalTitle = '';
   utilisateurEdit: any = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private clubService: ClubService) {}
 
   ngOnInit(): void {
-    this.clubId = this.getClubIdFromLocalStorage();
+    this.clubId = this.clubService.getSelectedClub()?.id ?? null;
     this.chargerUtilisateursClub();
-  }
-
-  getClubIdFromLocalStorage(): number | null {
-    const rawClub = localStorage.getItem('selectedClub');
-    if (rawClub) {
-      const club = JSON.parse(rawClub);
-      return club.id || null;
-    }
-    return null;
   }
 
   chargerUtilisateursClub(): void {

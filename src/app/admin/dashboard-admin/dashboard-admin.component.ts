@@ -7,6 +7,7 @@ import { Observable, of, forkJoin, interval, Subject } from 'rxjs';
 import { map, catchError, takeUntil, switchMap, filter } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
+import { ClubService } from '../../services/club.service';
 
 interface DashboardStats {
   nbMembres: number;
@@ -118,10 +119,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
     /** Appelle l'API pour récupérer l'admin du club sélectionné */
     fetchAdminNameForSelectedClub(): void {
-      try {
-        const rawClub = localStorage.getItem('selectedClub');
-        const club = rawClub ? JSON.parse(rawClub) : null;
-        if (club && club.id) {
+      const club = this.clubService.getSelectedClub();
+      if (club && club.id) {
           this.http.get<any[]>(`${environment.apiUrl}/utilisateurs?role=ADMIN&clubId=${club.id}`).subscribe({
             next: (admins) => {
               if (admins && admins.length > 0) {
@@ -138,9 +137,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         } else {
           this.adminName = 'Admin';
         }
-      } catch {
-        this.adminName = 'Admin';
-      }
     }
   private destroy$ = new Subject<void>();
 
@@ -148,7 +144,7 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   private readonly base = environment.apiUrl;
   private url = (path: string) => `${this.base}/${String(path).replace(/^\/+/, '')}`;
 
-  constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService, private clubService: ClubService) {}
 
   // ...existing code...
 

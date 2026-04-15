@@ -1,0 +1,39 @@
+/* =============================================
+   TABLES UTILITAIRES & CARTE DE BASE
+   ============================================= */
+
+/* ---------- UTILES TABLE ---------- */
+.table-status {
+  white-space: nowrap;
+  /* évite les retours à la ligne pour les badges */
+  vertical-align: middle;
+}
+
+/* Cartes / blocs */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+/* Petits helpers */
+.mt-1 {
+  margin-top: .25rem
+}
+
+.mt-2 {
+  margin-top: .5rem
+}
+
+.mt-3 {
+  margin-top: .75rem
+}
+
+.gap-1 {
+  gap: .25rem
+}
+
+.gap-2 {
+  gap: .5rem
+}
