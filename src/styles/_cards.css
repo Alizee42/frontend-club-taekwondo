@@ -1,70 +1,68 @@
 /* =============================================
-   UTILITAIRES BORDURES & CARTES — ACCUEIL
+   PHASE 0 - CARDS
    ============================================= */
 
+.card,
 .card-base {
-  background: var(--surface-0);
-  border: var(--border-soft);
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 3px 8px -2px rgba(0, 0, 0, .06);
-  transition: .25s ease
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
+.card-header {
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.card-body {
+  padding: var(--sp-5);
+}
+
+.card-footer {
+  padding: var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+
+.card--hover,
+.card-base.hoverable {
+  transition: transform var(--t-fast), box-shadow var(--t-base);
+}
+
+.card--hover:hover,
 .card-base.hoverable:hover {
-  box-shadow: 0 6px 18px -4px rgba(0, 0, 0, .12);
-  transform: translateY(-3px)
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-.card-accent-top {
-  position: relative
+.card--accent,
+.card-accent-left {
+  border-left: 3px solid var(--brand-primary);
 }
 
 .card-accent-top::before {
-  content: "";
+  content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 4px;
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
-  background: var(--grad-accent)
-}
-
-.card-accent-left {
-  position: relative
-}
-
-.card-accent-left::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 5px;
-  height: 100%;
-  border-bottom-left-radius: inherit;
-  border-top-left-radius: inherit;
-  background: var(--blue-main)
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--brand-primary);
 }
 
 .border-soft {
-  border: var(--border-soft) !important
-}
-
-.radius-md {
-  border-radius: var(--radius-md) !important
-}
-
-.radius-lg {
-  border-radius: var(--radius-lg) !important
+  border: 1px solid var(--color-border) !important;
 }
 
 .radius-sm {
-  border-radius: var(--radius-sm) !important
+  border-radius: var(--radius-sm) !important;
 }
 
-/* Badges harmonisés */
-.badge {
-  font-weight: 600;
-  letter-spacing: .5px
+.radius-md {
+  border-radius: var(--radius-md) !important;
+}
+
+.radius-lg {
+  border-radius: var(--radius-lg) !important;
 }

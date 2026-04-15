@@ -1,39 +1,60 @@
 /* =============================================
-   TABLES UTILITAIRES & CARTE DE BASE
+   PHASE 0 - TABLES
    ============================================= */
 
-/* ---------- UTILES TABLE ---------- */
-.table-status {
+.table-wrap,
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.table,
+.table-wrap > table,
+.table-wrapper > table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+.table th,
+.table-wrap > table th,
+.table-wrapper > table th {
+  padding: var(--sp-3) var(--sp-4);
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-2);
   white-space: nowrap;
-  /* évite les retours à la ligne pour les badges */
+}
+
+.table td,
+.table-wrap > table td,
+.table-wrapper > table td {
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
   vertical-align: middle;
 }
 
-/* Cartes / blocs */
-.card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+.table tbody tr:hover,
+.table-wrap > table tbody tr:hover,
+.table-wrapper > table tbody tr:hover {
+  background: var(--color-surface-2);
 }
 
-/* Petits helpers */
-.mt-1 {
-  margin-top: .25rem
+.table tbody tr:last-child td,
+.table-wrap > table tbody tr:last-child td,
+.table-wrapper > table tbody tr:last-child td {
+  border-bottom: 0;
 }
 
-.mt-2 {
-  margin-top: .5rem
-}
-
-.mt-3 {
-  margin-top: .75rem
-}
-
-.gap-1 {
-  gap: .25rem
-}
-
-.gap-2 {
-  gap: .5rem
+.table-status {
+  white-space: nowrap;
+  vertical-align: middle;
 }

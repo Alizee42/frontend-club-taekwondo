@@ -1,89 +1,153 @@
 /* =============================================
-   VARIABLES CSS GLOBALES & DESIGN TOKENS
+   DESIGN TOKENS — SOURCE OF TRUTH
    ============================================= */
 :root {
-  /* Brand */
-  --blue-main: #1E6091;
-  --blue-hover: #283a5a;
-  --blue-dark: #1B263B;
-  --red-main: #E63946;
-  --red-hover: #b22e39;
-  --orange-main: #F1A208;
-  --accent-hover: #e4b343;
 
-  /* Neutral / surfaces */
-  --surface-0: #ffffff;
-  --surface-50: #f9fafb;
-  --surface-100: #f4f6f9;
-  --surface-200: #eef1f5;
-  --surface-alt: #F0F4F8;
-  /* ancien F0F4F8 */
-  --surface-accent: #F8F9FA;
-  /* ancien about-section */
+  /* ── Brand ─────────────────────────────────── */
+  --brand-primary:      #1A5CA8;   /* bleu acier — boutons, liens */
+  --brand-primary-dark: #0E1F3B;   /* navy profond — header, hero  */
+  --brand-primary-hover:#1247A0;
+  --brand-accent:       #E63946;   /* rouge — badges, alertes, CTA 2 */
+  --brand-accent-hover: #C41E2A;
+  --brand-gradient:     linear-gradient(135deg, #1A5CA8 0%, #0E1F3B 100%);
+  --brand-gradient-r:   linear-gradient(135deg, #0E1F3B 0%, #1A5CA8 100%);
+  --brand-dark:         var(--brand-primary-dark);
 
-  /* Text scale */
-  --text-primary: #1B2533;
-  --text-secondary: #4B5A6B;
-  --text-muted: #6C7581;
-  --text-inverse: #ffffff;
+  /* ── Surfaces ───────────────────────────────── */
+  --color-bg:           #F7F9FC;   /* fond de page */
+  --color-surface:      #FFFFFF;   /* cartes, modales */
+  --color-surface-2:    #F0F4F9;   /* cartes secondaires */
+  --color-surface-3:    #E8EDF5;   /* input background */
 
-  /* UI */
-  --text-main: #1e1e1e;
-  --background-light: #fdfdfd;
-  --card-bg: #f4f4f4;
-  --shadow: 0 8px 20px rgba(0, 0, 0, .1);
+  /* ── Text ───────────────────────────────────── */
+  --color-text:         #111827;
+  --color-text-2:       #4B5563;
+  --color-text-3:       #9CA3AF;
+  --color-text-inv:     #FFFFFF;
 
-  /* Borders */
-  --border-subtle: #e2e8f0;
-  --border-strong: #cbd5e1;
+  /* ── Borders ────────────────────────────────── */
+  --color-border:       #E5E7EB;
+  --color-border-2:     #D1D5DB;
+  --color-border-focus: var(--brand-primary);
 
-  /* Gradients */
-  --grad-accent: linear-gradient(90deg, var(--blue-main), var(--red-main));
-  --grad-soft: linear-gradient(135deg, #ffffff, #f6f9fc 55%, #f1f5f9);
-  --grad-hero: radial-gradient(circle at 35% 40%, rgba(255, 255, 255, .25), rgba(255, 255, 255, 0) 60%), linear-gradient(120deg, #1E6091, #283a5a 60%);
+  /* ── Status ─────────────────────────────────── */
+  --color-success:      #059669;
+  --color-success-bg:   #ECFDF5;
+  --color-success-ink:  #065F46;
+  --color-warning:      #D97706;
+  --color-warning-bg:   #FFFBEB;
+  --color-warning-ink:  #92400E;
+  --color-danger:       #DC2626;
+  --color-danger-bg:    #FEF2F2;
+  --color-danger-ink:   #991B1B;
+  --color-info:         var(--brand-primary);
+  --color-info-bg:      #EFF6FF;
+  --color-info-ink:     #1E40AF;
 
-  /* Status colors */
-  --success: #2ecc71;
-  --success-ink: #1b5e36;
-  --warning: #f59e0b;
-  --warning-ink: #7a4f00;
-  --danger: #ef4444;
-  --danger-ink: #7f1d1d;
+  /* ── Shadows ────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -1px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 20px -3px rgba(0,0,0,.10), 0 4px 6px -2px rgba(0,0,0,.05);
+  --shadow-xl: 0 20px 30px -5px rgba(0,0,0,.12), 0 10px 12px -5px rgba(0,0,0,.06);
 
-  /* Controls */
-  --control-h: 40px;
-  --radius: 8px;
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-pill: 999px;
+  /* ── Radius ─────────────────────────────────── */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius:      8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
 
-  /* Border sets */
-  --border-soft: 1px solid var(--border-subtle);
-  --border-strong-set: 1px solid var(--border-strong);
-  --border-accent: 2px solid var(--blue-main);
-  --border: #e5e7eb;
-  --focus: #3b82f6;
+  /* ── Typography ─────────────────────────────── */
+  --font-sans:     'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+  --text-xs:       0.75rem;
+  --text-sm:       0.875rem;
+  --text-base:     0.9375rem;
+  --text-lg:       1.0625rem;
+  --text-xl:       1.25rem;
+  --text-2xl:      1.5rem;
+  --text-3xl:      1.875rem;
+  --text-4xl:      2.25rem;
+  --leading-tight: 1.25;
+  --leading-base:  1.5;
+  --leading-loose: 1.65;
 
-  /* 📱 RESPONSIVE BREAKPOINTS */
-  --mobile-max: 767px;
-  --tablet-min: 768px;
-  --tablet-max: 1023px;
-  --desktop-min: 1024px;
+  /* ── Spacing scale ──────────────────────────── */
+  --sp-1:  0.25rem;  --sp-2:  0.5rem;   --sp-3:  0.75rem;
+  --sp-4:  1rem;     --sp-5:  1.25rem;  --sp-6:  1.5rem;
+  --sp-8:  2rem;     --sp-10: 2.5rem;   --sp-12: 3rem;
+  --sp-16: 4rem;     --sp-20: 5rem;
 
-  /* 📱 RESPONSIVE SPACING */
-  --container-padding: 1rem;
-  --card-gap: 1rem;
-  --section-spacing: 2rem;
+  /* ── Controls ───────────────────────────────── */
+  --control-h:   44px;
+  --control-h-sm:36px;
+  --control-h-lg:52px;
+
+  /* ── Layout ─────────────────────────────────── */
+  --container-max:     1200px;
+  --container-padding: 1.5rem;
+
+  /* ── Transitions ────────────────────────────── */
+  --t-fast:  0.12s ease;
+  --t-base:  0.20s ease;
+  --t-slow:  0.30s ease;
+
+  /* ── Z-index ────────────────────────────────── */
+  --z-sticky:   50;
+  --z-dropdown: 100;
+  --z-modal:    200;
+  --z-toast:    300;
+
+  /* ── Backward-compat aliases ────────────────── */
+  --blue-main:        var(--brand-primary);
+  --blue-hover:       var(--brand-primary-hover);
+  --blue-dark:        var(--brand-primary-dark);
+  --red-main:         var(--brand-accent);
+  --red-hover:        var(--brand-accent-hover);
+  --orange-main:      #F59E0B;
+  --surface-0:        var(--color-surface);
+  --surface-50:       var(--color-bg);
+  --surface-100:      var(--color-bg);
+  --surface-200:      var(--color-surface-2);
+  --text-primary:     var(--color-text);
+  --text-secondary:   var(--color-text-2);
+  --text-muted:       var(--color-text-3);
+  --text-main:        var(--color-text);
+  --text-inverse:     var(--color-text-inv);
+  --background-light: var(--color-bg);
+  --card-bg:          var(--color-surface-2);
+  --shadow:           var(--shadow-md);
+  --border-subtle:    var(--color-border);
+  --border-strong:    var(--color-border-2);
+  --border:           var(--color-border);
+  --focus:            var(--brand-primary);
+  --border-soft:      1px solid var(--color-border);
+  --border-accent:    2px solid var(--brand-primary);
+  --success:          var(--color-success);
+  --success-ink:      var(--color-success-ink);
+  --warning:          var(--color-warning);
+  --warning-ink:      var(--color-warning-ink);
+  --danger:           var(--color-danger);
+  --danger-ink:       var(--color-danger-ink);
+  --grad-accent:      linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+  --grad-soft:        linear-gradient(135deg, #fff, #f6f9fc 55%, #f1f5f9);
+  --grad-hero:        var(--brand-gradient);
+  --radius-pill:      var(--radius-full);
+  --transition-base:  var(--t-base);
+
+  /* ── Responsive spacing ─────────────────────── */
+  --container-padding-mob: 1rem;
+  --card-gap:        var(--sp-4);
+  --section-spacing: var(--sp-8);
 }
 
-/* 📱 RESPONSIVE CONTAINER PADDING */
 @media (max-width: 767px) {
   :root {
-    --container-padding: 0.75rem;
-    --card-gap: 0.75rem;
-    --section-spacing: 1.5rem;
-    --control-h: 44px;
-    /* Plus grand sur mobile pour faciliter les taps */
+    --container-padding: var(--container-padding-mob);
+    --card-gap:          0.75rem;
+    --section-spacing:   var(--sp-6);
+    --control-h:         48px;
   }
 }
