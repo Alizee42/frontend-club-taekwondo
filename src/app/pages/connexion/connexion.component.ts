@@ -9,6 +9,7 @@ import { ClubSelectionService } from '../../services/club-selection.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -16,7 +17,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './connexion.component.html',
   styleUrls: ['./connexion.component.css'],
   standalone: true,
-  imports: [FormsModule,CommonModule],
+  imports: [FormsModule, CommonModule, RouterLink],
 })
 export class ConnexionComponent {
   email: string = '';

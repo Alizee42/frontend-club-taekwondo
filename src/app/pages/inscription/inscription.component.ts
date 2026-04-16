@@ -42,6 +42,61 @@ export class InscriptionComponent implements OnInit {
   toggleConfirmPasswordVisibility = false;
   today: string = new Date().toISOString().split('T')[0];
 
+  // Accordéon étape 1
+  openSection: 'identite' | 'adresse' | 'password' = 'identite';
+  sectionDone = { identite: false, adresse: false, password: false };
+
+  // Accordéon étape 2 — membres
+  openMembre: number | null = 0;
+
+  private readonly SECTION_FIELDS: Record<string, string[]> = {
+    identite: ['nom', 'prenom', 'email', 'telephone', 'dateNaissance', 'role'],
+    adresse:  ['adresseLigne1', 'codePostal', 'ville', 'pays'],
+    password: ['password', 'confirmPassword'],
+  };
+
+  get sectionsCompleted(): number {
+    return [this.sectionDone.identite, this.sectionDone.adresse, this.sectionDone.password].filter(Boolean).length;
+  }
+
+  isLocked(section: 'identite' | 'adresse' | 'password'): boolean {
+    if (section === 'identite') return false;
+    if (section === 'adresse')  return !this.sectionDone.identite;
+    if (section === 'password') return !this.sectionDone.adresse;
+    return false;
+  }
+
+  openSectionIfAllowed(section: 'identite' | 'adresse' | 'password'): void {
+    if (!this.isLocked(section)) this.openSection = section;
+  }
+
+  nextSection(current: 'identite' | 'adresse' | 'password'): void {
+    const fields = this.SECTION_FIELDS[current];
+    fields.forEach(f => this.utilisateurForm.get(f)?.markAsTouched());
+
+    if (current === 'identite' && !this.selectedClub) {
+      this.utilisateurForm.get('clubId')?.markAsTouched();
+    }
+
+    const invalid = fields.some(f => this.utilisateurForm.get(f)?.invalid);
+    const clubInvalid = current === 'identite' && !this.selectedClub && this.utilisateurForm.get('clubId')?.invalid;
+    if (invalid || clubInvalid) return;
+
+    if (current === 'password' && this.utilisateurForm.errors?.['passwordMismatch']) return;
+
+    this.sectionDone[current] = true;
+    const next: Record<string, 'identite' | 'adresse' | 'password'> = {
+      identite: 'adresse',
+      adresse:  'password',
+      password: 'password',
+    };
+    if (current !== 'password') this.openSection = next[current];
+  }
+
+  isSectionOpen(section: 'identite' | 'adresse' | 'password'): boolean {
+    return this.openSection === section;
+  }
+
   ceinturesDisponibles = ['Blanche', 'Jaune', 'Orange', 'Verte', 'Bleue', 'Marron', 'Noire'];
   roleMembreSeul: boolean = false;
   // clubs loaded from API for selection
@@ -172,6 +227,14 @@ export class InscriptionComponent implements OnInit {
     return this.membresForm.get('membres') as FormArray;
   }
 
+  toggleMembre(i: number): void {
+    this.openMembre = this.openMembre === i ? null : i;
+  }
+
+  isMembreOpen(i: number): boolean {
+    return this.openMembre === i;
+  }
+
   addMembre(values?: any): void {
     const membre = this.fb.group({
       nom: [values?.nom || '', Validators.required],
@@ -181,6 +244,7 @@ export class InscriptionComponent implements OnInit {
       numeroLicence: [values?.numeroLicence ?? '']
     });
     this.membres.push(membre);
+    this.openMembre = this.membres.length - 1;
   }
 
   removeMembre(index: number): void {

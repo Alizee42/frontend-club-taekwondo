@@ -1,62 +1,121 @@
-<div class="login-container">
-  <div class="login-card">
-    <h1>Connexion</h1>
+<div class="login-split">
 
-    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          [(ngModel)]="email"
-          required
-          autocomplete="username"
-        />
-      </div>
+  <!-- Panel gauche : identité visuelle -->
+  <aside class="login-brand" aria-hidden="true">
+    <div class="login-brand__inner">
 
-      <div class="form-group">
-        <label for="password">Mot de passe</label>
+      <div class="login-brand__badge">Espace du club</div>
 
-        <div class="password-wrapper">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            id="password"
-            name="password"
-            [(ngModel)]="password"
-            required
-            autocomplete="current-password"
-          />
-
-          <button
-            type="button"
-            class="toggle-password"
-            (click)="togglePassword()"
-            [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
-            [attr.aria-pressed]="showPassword"
-            [attr.aria-controls]="'password'"
-          >
-            <i class="ri-eye-line" *ngIf="!showPassword" aria-hidden="true"></i>
-            <i class="ri-eye-off-line" *ngIf="showPassword" aria-hidden="true"></i>
-          </button>
+      <div class="login-brand__logo">
+        <i class="ri-medal-line login-brand__icon"></i>
+        <div class="login-brand__name">
+          <span class="login-brand__strong">Olympique</span>
+          <span class="login-brand__mid">Taekwondo</span>
+          <span class="login-brand__thin">Villeurbannais</span>
         </div>
       </div>
 
-      <button type="submit" class="submit-btn" [disabled]="loginForm.invalid">
-        Se connecter
-      </button>
-    </form>
+      <p class="login-brand__tagline">Maîtrise, respect, dépassement de soi.</p>
 
-    <div class="login-note" style="margin-top:12px; font-size:0.95rem; color:#555;">
-      <em>Remarque : si vous êtes super-admin, vous pouvez vous connecter sans sélectionner de club.</em>
+      <div class="login-brand__divider"></div>
+
+      <ul class="login-brand__features">
+        <li>
+          <span class="login-brand__feat-ico"><i class="ri-secure-payment-line"></i></span>
+          <div>
+            <strong>Paiements en ligne</strong>
+            <span>Cotisations et échéances simplifiées</span>
+          </div>
+        </li>
+        <li>
+          <span class="login-brand__feat-ico"><i class="ri-file-list-3-line"></i></span>
+          <div>
+            <strong>Documents</strong>
+            <span>Certificats, licences, formulaires</span>
+          </div>
+        </li>
+        <li>
+          <span class="login-brand__feat-ico"><i class="ri-calendar-event-line"></i></span>
+          <div>
+            <strong>Événements</strong>
+            <span>Compétitions, stages, examens</span>
+          </div>
+        </li>
+      </ul>
+
     </div>
+  </aside>
 
-    <!-- Lien mot de passe oublié -->
-    <div class="forgot-password-container">
-      <a href="/mot-de-passe-oublie" class="forgot-password">
-        <i class="ri-lock-unlock-line"></i>
+  <!-- Panel droit : formulaire -->
+  <main class="login-form-panel">
+    <div class="login-form-inner">
+
+      <!-- Logo mobile uniquement -->
+      <div class="login-mobile-logo">
+        <i class="ri-medal-line"></i>
+        <span>OTV</span>
+      </div>
+
+      <h1 class="login-title">Connexion</h1>
+      <p class="login-subtitle text-muted">Accédez à votre espace personnel</p>
+
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form" novalidate>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Adresse email</label>
+          <input
+            class="form-input"
+            type="email"
+            id="email"
+            name="email"
+            [(ngModel)]="email"
+            required
+            autocomplete="username"
+            placeholder="vous@exemple.fr"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Mot de passe</label>
+          <div class="password-wrapper">
+            <input
+              class="form-input"
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              name="password"
+              [(ngModel)]="password"
+              required
+              autocomplete="current-password"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              [attr.aria-pressed]="showPassword"
+            >
+              <i class="ri-eye-line" *ngIf="!showPassword" aria-hidden="true"></i>
+              <i class="ri-eye-off-line" *ngIf="showPassword" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="loginForm.invalid">
+          Se connecter
+        </button>
+
+      </form>
+
+      <a routerLink="/mot-de-passe-oublie" class="forgot-link">
         Mot de passe oublié ?
       </a>
+
+      <p class="text-muted superadmin-note">
+        Les super-admins peuvent se connecter sans sélectionner de club.
+      </p>
+
     </div>
-  </div>
+  </main>
+
 </div>

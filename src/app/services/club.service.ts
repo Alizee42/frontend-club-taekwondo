@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface Club {
   id: number;
@@ -15,9 +15,6 @@ export interface Club {
 
 @Injectable({ providedIn: 'root' })
 export class ClubService {
-  deleteClub(id: number): Observable<any> {
-    return this.http.delete(`/api/clubs/${id}`);
-  }
   private selectedClubSubject: BehaviorSubject<Club | null>;
   public selectedClub$: Observable<Club | null>;
 
@@ -25,6 +22,10 @@ export class ClubService {
     const club = this.getSelectedClub();
     this.selectedClubSubject = new BehaviorSubject<Club | null>(club);
     this.selectedClub$ = this.selectedClubSubject.asObservable();
+  }
+
+  deleteClub(id: number): Observable<any> {
+    return this.http.delete(`/api/clubs/${id}`);
   }
 
   getClubs(): Observable<Club[]> {
@@ -41,15 +42,25 @@ export class ClubService {
 
   getSelectedClub(): Club | null {
     const club = localStorage.getItem('selectedClub');
-    return club ? JSON.parse(club) : null;
+    if (!club) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(club);
+    } catch (error) {
+      console.warn('[ClubService] selectedClub invalide en localStorage, suppression automatique.', error);
+      localStorage.removeItem('selectedClub');
+      return null;
+    }
   }
 
-  setSelectedClub(club: Club) {
+  setSelectedClub(club: Club): void {
     localStorage.setItem('selectedClub', JSON.stringify(club));
     this.selectedClubSubject.next(club);
   }
 
-  clearSelectedClub() {
+  clearSelectedClub(): void {
     localStorage.removeItem('selectedClub');
     this.selectedClubSubject.next(null);
   }

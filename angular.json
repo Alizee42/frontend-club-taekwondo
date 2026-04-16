@@ -21,6 +21,14 @@
             "assets": ["src/assets", "src/favicon.ico"],
             "styles": [
               "@angular/material/prebuilt-themes/azure-blue.css",
+              "node_modules/@fontsource/poppins/400.css",
+              "node_modules/@fontsource/poppins/500.css",
+              "node_modules/@fontsource/poppins/600.css",
+              "node_modules/@fontsource/poppins/700.css",
+              "node_modules/material-icons/iconfont/material-icons.css",
+              "node_modules/remixicon/fonts/remixicon.css",
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+              "node_modules/swiper/swiper-bundle.min.css",
               "src/styles.css",
               "src/responsive.css"
             ],

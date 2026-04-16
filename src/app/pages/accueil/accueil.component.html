@@ -1,26 +1,3 @@
-
-
-<!-- Modale club style premium -->
-<div class="club-modal-premium-backdrop" *ngIf="showClubModal">
-	<div class="club-modal-premium">
-				<button class="close-modal-btn" (click)="closeModal()" aria-label="Fermer">
-					&#10005;
-				</button>
-		<div class="club-modal-premium-logo-wrap">
-		</div>
-		<div class="club-modal-premium-title">Bienvenue sur le portail olympique Taekwondo</div>
-		<div class="club-modal-premium-slogan">Maîtrise, Respect, Dépassement de soi</div>
-		<div class="club-modal-premium-desc">
-		Ce portail regroupe tous les clubs partenaires et permet à chaque membre d’accéder à son espace personnel, suivre l’actualité, gérer ses inscriptions et profiter de services exclusifs.<br><br>
-		<b>Merci de sélectionner votre club pour accéder à votre espace personnalisé et profiter pleinement de l’expérience Taekwondo !</b>
-		</div>
-		<div class="club-modal-premium-select">
-			<app-club-select (clubSelected)="onClubSelected($event)"></app-club-select>
-		</div>
-	</div>
-</div>
-
-
 <app-banniere></app-banniere>
 <app-a-propos></app-a-propos>
 <app-horaires></app-horaires>
