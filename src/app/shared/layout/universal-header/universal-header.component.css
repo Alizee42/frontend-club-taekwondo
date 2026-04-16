@@ -9,7 +9,7 @@
   top: 0;
   z-index: var(--z-sticky, 50);
   height: 64px;
-  background: var(--brand-gradient, linear-gradient(135deg, #0E1F3B 0%, #1A5CA8 100%));
+  background: var(--brand-primary-dark, #0E1F3B);
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,.18));
   font-family: var(--font-sans, 'Poppins', sans-serif);
 }

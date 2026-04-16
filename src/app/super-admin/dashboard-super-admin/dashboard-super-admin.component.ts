@@ -6,13 +6,11 @@ import { ActualiteService } from '../../services/actualite.service';
 import { AvisService, Avis } from '../../services/avis.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
-
 @Component({
   selector: 'app-dashboard-super-admin',
   templateUrl: './dashboard-super-admin.component.html',
   styleUrls: ['./dashboard-super-admin.component.css'],
-  imports: [CommonModule, FormsModule, UiTitleComponent]
+  imports: [CommonModule, FormsModule]
 })
 export class DashboardSuperAdminComponent implements OnInit {
   // Champs du formulaire club pour <ui-form>
@@ -80,6 +78,8 @@ export class DashboardSuperAdminComponent implements OnInit {
   navigateToHoraires() {
     this.router.navigate(['super-admin/gestion-horaires']);
   }
+
+  today = new Date();
 
   // KPIs globaux
   clubsCount = 0;

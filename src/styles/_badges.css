@@ -9,13 +9,16 @@
   align-items: center;
   justify-content: center;
   gap: var(--sp-2);
-  padding: var(--sp-1) var(--sp-3);
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1.2;
+  padding: 0 8px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  line-height: 20px;
   white-space: nowrap;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-2);
 }
 
 .badge-pill,
@@ -24,40 +27,71 @@
 }
 
 .status-badge .status-icon {
-  font-size: 1em;
+  font-size: 0.95em;
   line-height: 1;
 }
 
 .badge-success,
 .status--success {
-  background: var(--color-success-bg);
+  background: color-mix(in srgb, var(--color-success) 6%, white);
   color: var(--color-success-ink);
-  border-color: color-mix(in srgb, var(--color-success) 24%, white);
+  border-color: transparent;
 }
 
 .badge-warning,
 .badge-warn,
 .status--warning {
-  background: var(--color-warning-bg);
+  background: color-mix(in srgb, var(--color-warning) 6%, white);
   color: var(--color-warning-ink);
-  border-color: color-mix(in srgb, var(--color-warning) 24%, white);
+  border-color: transparent;
 }
 
 .badge-danger,
 .status--danger {
-  background: var(--color-danger-bg);
+  background: color-mix(in srgb, var(--color-danger) 6%, white);
   color: var(--color-danger-ink);
-  border-color: color-mix(in srgb, var(--color-danger) 24%, white);
+  border-color: transparent;
 }
 
 .badge-secondary {
-  background: var(--color-surface-2);
+  background: transparent;
   color: var(--color-text-2);
   border-color: var(--color-border);
 }
 
 .badge-dark {
-  background: var(--brand-primary-dark);
+  background: color-mix(in srgb, var(--brand-primary-dark) 8%, white);
   color: var(--color-text-inv);
-  border-color: var(--brand-primary-dark);
+  border-color: transparent;
+}
+
+/* Compact variant for tables and inline counts */
+.badge--sm,
+.badge-compact,
+.table .status-badge,
+.table td .status-badge {
+  padding: 0 6px;
+  min-width: 18px;
+  height: 18px;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  line-height: 18px;
+}
+
+/* Subtle info variant */
+.badge-info,
+.status--info {
+  background: var(--color-info-bg);
+  color: var(--color-info-ink);
+  border-color: transparent;
+}
+
+/* Small dot variant for dense UIs */
+.badge-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-info-ink);
+  border: none;
 }

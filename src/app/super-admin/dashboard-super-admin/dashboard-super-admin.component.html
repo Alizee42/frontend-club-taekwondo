@@ -1,112 +1,188 @@
+<div class="dash-admin">
 
-<div class="dashboard-admin">
-  <header class="dashboard-header">
-  <ui-title text="Tableau de bord Super Admin" [level]="1" align="center" icon="ri-dashboard-line"></ui-title>
-    <div class="welcome-message">Bienvenue, <span class="highlight">Super Admin</span></div>
-  </header>
+  <!-- En-tête -->
+  <div class="dash-header">
+    <div class="dash-header__panel">
+      <i class="ri-layout-grid-line"></i>
+    </div>
+    <div class="dash-header__body">
+      <h1 class="dash-header__title">Tableau de bord</h1>
+      <p class="dash-header__sub">Bonjour, <strong>Super Admin</strong></p>
+    </div>
+    <div class="dash-header__date">
+      <i class="ri-calendar-2-line"></i>
+      <span>{{ today | date:'d MMM yyyy' }}</span>
+    </div>
+  </div>
 
   <!-- KPI -->
-  <div class="kpi-container">
-    <div class="kpi-card kpi-club">
-      <div class="kpi-icon-wrapper"><i class="ri-community-line"></i></div>
-      <div class="kpi-info">
-        <h3>{{ clubsCount }}</h3>
-        <p>Clubs</p>
+  <div class="kpi-grid">
+
+    <div class="kpi-card kpi-card--blue">
+      <div class="kpi-card__icon"><i class="ri-community-line"></i></div>
+      <div class="kpi-card__body">
+        <div class="kpi-card__value">{{ clubsCount }}</div>
+        <div class="kpi-card__label">Clubs</div>
       </div>
     </div>
-    <div class="kpi-card kpi-orange">
-      <div class="kpi-icon-wrapper"><i class="ri-user-star-line"></i></div>
-      <div class="kpi-info">
-        <h3>{{ adminsCount }}</h3>
-        <p>Admins</p>
+
+    <div class="kpi-card kpi-card--purple">
+      <div class="kpi-card__icon"><i class="ri-user-star-line"></i></div>
+      <div class="kpi-card__body">
+        <div class="kpi-card__value">{{ adminsCount }}</div>
+        <div class="kpi-card__label">Admins</div>
       </div>
     </div>
-    <div class="kpi-card kpi-blue">
-      <div class="kpi-icon-wrapper"><i class="ri-team-line"></i></div>
-      <div class="kpi-info">
-        <h3>{{ membresCount }}</h3>
-        <p>Membres</p>
+
+    <div class="kpi-card kpi-card--green">
+      <div class="kpi-card__icon"><i class="ri-team-line"></i></div>
+      <div class="kpi-card__body">
+        <div class="kpi-card__value">{{ membresCount }}</div>
+        <div class="kpi-card__label">Membres</div>
       </div>
     </div>
-    <div class="kpi-card kpi-green">
-      <div class="kpi-icon-wrapper"><i class="ri-hand-coin-line"></i></div>
-      <div class="kpi-info">
-        <h3>{{ paiementsTotal | currency:'EUR' }}</h3>
-        <p>Paiements reçus</p>
+
+    <div class="kpi-card kpi-card--teal">
+      <div class="kpi-card__icon"><i class="ri-hand-coin-line"></i></div>
+      <div class="kpi-card__body">
+        <div class="kpi-card__value">{{ paiementsTotal | currency:'EUR':'symbol':'1.0-0' }}</div>
+        <div class="kpi-card__label">Paiements reçus</div>
       </div>
     </div>
-    <div class="kpi-card kpi-paiement-attente">
-      <div class="kpi-icon-wrapper"><i class="ri-time-line"></i></div>
-      <div class="kpi-info">
-        <h3>{{ paiementsAttente }}</h3>
-        <p>Paiements en attente</p>
+
+    <div class="kpi-card kpi-card--amber">
+      <div class="kpi-card__icon"><i class="ri-time-line"></i></div>
+      <div class="kpi-card__body">
+        <div class="kpi-card__value">{{ paiementsAttente }}</div>
+        <div class="kpi-card__label">En attente</div>
       </div>
     </div>
-    <div class="kpi-card kpi-log">
-      <div class="kpi-icon-wrapper"><i class="ri-shield-check-line"></i></div>
-      <div class="kpi-info">
-        <h3>{{ logsCount }}</h3>
-        <p>Logs sécurité</p>
+
+    <div class="kpi-card kpi-card--red">
+      <div class="kpi-card__icon"><i class="ri-shield-check-line"></i></div>
+      <div class="kpi-card__body">
+        <div class="kpi-card__value">{{ logsCount }}</div>
+        <div class="kpi-card__label">Logs sécurité</div>
       </div>
     </div>
+
   </div>
 
-  <!-- Sections -->
-  <div class="dashboard-grid">
-    <!-- Section Gestion du club -->
-    <div class="dashboard-section">
-      <div class="section-header">
-        <div class="section-icon"><i class="ri-community-line"></i></div>
-        <h2>Gestion du club</h2>
+  <!-- Sections de navigation -->
+  <div class="dash-sections">
+
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--blue">
+        <i class="ri-community-line"></i>
+        <span>Gestion du club</span>
       </div>
-      <ul>
-        <li (click)="navigateToClubs()"><i class="ri-community-line"></i> Clubs</li>
-        <li (click)="navigateToEnseignants()"><i class="ri-graduation-cap-line"></i> Enseignants</li>
-        <li (click)="navigateToEvenements()"><i class="ri-calendar-event-line"></i> Événements</li>
-        <li (click)="navigateToGalerie()"><i class="ri-image-line"></i> Galerie / Médias</li>
-        <li (click)="navigateToHoraires()"><i class="ri-time-line"></i> Horaires</li>
-      </ul>
+      <div class="dash-section__body">
+        <button class="nav-card" (click)="navigateToClubs()">
+          <i class="ri-community-line"></i>
+          <span>Clubs</span>
+          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="clubsCount > 0">{{ clubsCount }}</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToEnseignants()">
+          <i class="ri-graduation-cap-line"></i>
+          <span>Enseignants</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToEvenements()">
+          <i class="ri-calendar-event-line"></i>
+          <span>Événements</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToGalerie()">
+          <i class="ri-image-line"></i>
+          <span>Galerie / Médias</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToHoraires()">
+          <i class="ri-time-line"></i>
+          <span>Horaires</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- Section Gestion des membres -->
-    <div class="dashboard-section">
-      <div class="section-header">
-        <div class="section-icon"><i class="ri-user-line"></i></div>
-        <h2>Gestion des membres</h2>
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--green">
+        <i class="ri-user-line"></i>
+        <span>Gestion des membres</span>
       </div>
-      <ul>
-        <li (click)="navigateToMembres()"><i class="ri-team-line"></i> Membres</li>
-  <li (click)="navigateToDocuments()"><i class="ri-file-list-line"></i> Documents</li>
-        <li (click)="navigateToAdmins()"><i class="ri-user-star-line"></i> Admins</li>
-      </ul>
+      <div class="dash-section__body">
+        <button class="nav-card" (click)="navigateToMembres()">
+          <i class="ri-team-line"></i>
+          <span>Membres</span>
+          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="membresCount > 0">{{ membresCount }}</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToDocuments()">
+          <i class="ri-file-list-line"></i>
+          <span>Documents</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToAdmins()">
+          <i class="ri-user-star-line"></i>
+          <span>Admins</span>
+          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="adminsCount > 0">{{ adminsCount }}</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- Section Gestion financière -->
-    <div class="dashboard-section">
-      <div class="section-header">
-        <div class="section-icon"><i class="ri-wallet-3-line"></i></div>
-        <h2>Gestion financière</h2>
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--amber">
+        <i class="ri-wallet-3-line"></i>
+        <span>Gestion financière</span>
       </div>
-      <ul>
-        <li (click)="navigateToPaiement()"><i class="ri-money-euro-circle-line"></i> Paiements</li>
-        <li (click)="navigateToCommandes()"><i class="ri-shopping-bag-3-line"></i> Commandes</li>
-      </ul>
+      <div class="dash-section__body">
+        <button class="nav-card" (click)="navigateToPaiement()">
+          <i class="ri-money-euro-circle-line"></i>
+          <span>Paiements</span>
+          <span class="nav-card__badge" *ngIf="paiementsAttente > 0">{{ paiementsAttente }}</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToCommandes()">
+          <i class="ri-shopping-bag-3-line"></i>
+          <span>Commandes</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- Section Administration -->
-    <div class="dashboard-section">
-      <div class="section-header">
-        <div class="section-icon"><i class="ri-settings-3-line"></i></div>
-        <h2>Administration</h2>
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--purple">
+        <i class="ri-settings-3-line"></i>
+        <span>Administration</span>
       </div>
-      <ul>
-        <li (click)="navigateToAvis()"><i class="ri-star-line"></i> Avis</li>
-        <li (click)="navigateToActualites()"><i class="ri-newspaper-line"></i> Actualités</li>
-        <li (click)="navigateToUtilisateurs()"><i class="ri-user-line"></i> Utilisateurs</li>
-        <li (click)="navigateToLogs()"><i class="ri-shield-check-line"></i> Logs sécurité</li>
-      </ul>
+      <div class="dash-section__body">
+        <button class="nav-card" (click)="navigateToAvis()">
+          <i class="ri-star-line"></i>
+          <span>Avis</span>
+          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="avisCount > 0">{{ avisCount }}</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToActualites()">
+          <i class="ri-newspaper-line"></i>
+          <span>Actualités</span>
+          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="actualitesCount > 0">{{ actualitesCount }}</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToUtilisateurs()">
+          <i class="ri-user-3-line"></i>
+          <span>Utilisateurs</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+        <button class="nav-card" (click)="navigateToLogs()">
+          <i class="ri-shield-check-line"></i>
+          <span>Logs sécurité</span>
+          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+        </button>
+      </div>
     </div>
+
   </div>
-<!-- Nettoyage : suppression des doublons et fermeture correcte des <div> -->
+
 </div>
-

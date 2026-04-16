@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -49,11 +48,17 @@ type SectionKey = keyof typeof LS_KEYS;
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [CommonModule, UiTitleComponent],
+  imports: [CommonModule],
   templateUrl: './dashboard-admin.component.html',
   styleUrls: ['./dashboard-admin.component.css']
 })
 export class DashboardAdminComponent implements OnInit, OnDestroy {
+
+  // Loading state
+  loading = true;
+
+  // Date du jour
+  today = new Date();
 
   // KPIs
   nbMembres = 0;
@@ -171,8 +176,12 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         this.totalPaiements = data?.totalPaiements ?? 0;
         this.paiementsAttente = data?.paiementsAttente ?? 0;
         this.evenementsAVenir = data?.evenementsAVenir ?? 0;
+        this.loading = false;
       },
-      error: (err) => console.error('❌ Erreur chargement stats dashboard', err)
+      error: (err) => {
+        console.error('❌ Erreur chargement stats dashboard', err);
+        this.loading = false;
+      }
     });
   }
 
