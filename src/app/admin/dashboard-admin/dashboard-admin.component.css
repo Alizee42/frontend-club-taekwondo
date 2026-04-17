@@ -9,7 +9,7 @@
   gap: var(--sp-5);
 }
 
-/* ── Header ────────────────────────────────── */
+/* —— Header —————————————————————————————————— */
 .dash-header {
   display: flex;
   align-items: stretch;
@@ -77,14 +77,14 @@
   color: var(--brand-primary);
 }
 
-/* ── KPI Grid ──────────────────────────────── */
+/* —— KPI Grid ————————————————————————————————— */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--sp-3);
 }
 
-/* ── KPI Card ──────────────────────────────── */
+/* —— KPI Card ————————————————————————————————— */
 .kpi-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -161,7 +161,7 @@
   100% { background-position:  600px 0; }
 }
 
-/* ── Sections ──────────────────────────────── */
+/* —— Sections ————————————————————————————————— */
 .dash-sections {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -210,7 +210,7 @@
   padding: var(--sp-2);
 }
 
-/* ── Nav Card ──────────────────────────────── */
+/* —— Nav Card ————————————————————————————————— */
 .nav-card {
   display: flex;
   align-items: center;
@@ -284,7 +284,7 @@
   transform: translateX(2px);
 }
 
-/* ── Responsive ────────────────────────────── */
+/* —— Responsive ————————————————————————————— */
 @media (max-width: 1024px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }

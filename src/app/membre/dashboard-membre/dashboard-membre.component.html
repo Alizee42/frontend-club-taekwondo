@@ -1,86 +1,121 @@
-<div class="parent-dashboard">
-  <!-- Header unique -->
-  <header class="parent-header parent-header-flex">
-    <div class="header-left header-logo-parent">
-      <img src="assets/images/logo-club.png" alt="Logo club" class="logo-header" />
+<div class="dashboard-shell">
+  <div class="dash-header">
+    <div class="dash-header__panel">
+      <i class="ri-shield-user-line"></i>
     </div>
-    <div class="header-center header-center-full">
-      <h1>Espace Membre</h1>
-      <p class="welcome">
-        Bonjour <span class="highlight">{{ utilisateurConnecte?.prenom }}</span> 👋
-      </p>
+    <div class="dash-header__body">
+      <h1 class="dash-header__title">Espace membre</h1>
+      <p class="dash-header__sub">Bonjour, <strong>{{ utilisateurConnecte?.prenom || 'Membre' }}</strong> — Voici un resume de votre espace membre.</p>
     </div>
-    <div class="header-right header-right-profile">
-      <button class="btn-ui" (click)="navigateToProfil()">
-        <i class="ri-user-3-line"></i> Mon profil
+    <a class="dash-header__action" (click)="navigateToSupport()" tabindex="0">
+      <i class="ri-customer-service-2-line"></i>
+      <span>Support</span>
+    </a>
+  </div>
+
+  <div class="kpi-grid" aria-label="Indicateurs membre">
+    <article class="kpi-card kpi-card--documents card card-accent-left">
+      <div class="kpi-card__top">
+        <span class="kpi-card__icon"><i class="ri-folder-warning-line"></i></span>
+      </div>
+      <div class="kpi-card__body">
+        <strong class="kpi-card__value">{{ stats.documentsManquants }}</strong>
+        <span class="kpi-card__label">Documents manquants</span>
+      </div>
+      <span class="kpi-card__badge status-badge" [ngClass]="stats.documentsManquants > 0 ? 'status--warning' : 'status--success'">
+        {{ stats.documentsManquants > 0 ? 'A traiter' : 'Complet' }}
+      </span>
+    </article>
+
+    <article class="kpi-card kpi-card--payments card card-accent-left">
+      <div class="kpi-card__top">
+        <span class="kpi-card__icon"><i class="ri-wallet-3-line"></i></span>
+      </div>
+      <div class="kpi-card__body">
+        <strong class="kpi-card__value">{{ stats.paiementsEnRetard }}</strong>
+        <span class="kpi-card__label">Paiements en retard</span>
+      </div>
+      <span class="kpi-card__badge status-badge" [ngClass]="stats.paiementsEnRetard > 0 ? 'status--danger' : 'status--success'">
+        {{ stats.paiementsEnRetard > 0 ? 'Urgent' : 'OK' }}
+      </span>
+    </article>
+
+    <article class="kpi-card kpi-card--orders card card-accent-left">
+      <div class="kpi-card__top">
+        <span class="kpi-card__icon"><i class="ri-shopping-bag-line"></i></span>
+      </div>
+      <div class="kpi-card__body">
+        <strong class="kpi-card__value">{{ stats.commandesEnCours }}</strong>
+        <span class="kpi-card__label">Commandes en cours</span>
+      </div>
+      <span class="kpi-card__badge status-badge" [ngClass]="stats.commandesEnCours > 0 ? 'status--info' : 'status--success'">
+        {{ stats.commandesEnCours > 0 ? 'En cours' : 'Calme' }}
+      </span>
+    </article>
+
+    <article class="kpi-card kpi-card--events card card-accent-left">
+      <div class="kpi-card__top">
+        <span class="kpi-card__icon"><i class="ri-calendar-event-line"></i></span>
+      </div>
+      <div class="kpi-card__body">
+        <strong class="kpi-card__value">{{ stats.evenementsAVenir }}</strong>
+        <span class="kpi-card__label">Evenements a venir</span>
+      </div>
+      <span class="kpi-card__badge status-badge status--info">Agenda</span>
+    </article>
+  </div>
+
+  <nav class="dash-section" aria-label="Raccourcis membre">
+    <div class="dash-section__head dash-section__head--blue">
+      <i class="ri-flashlight-line"></i>
+      <span>Mes services</span>
+    </div>
+    <div class="dash-section__body">
+      <button class="nav-card" type="button" (click)="navigateToPaiements()">
+        <i class="ri-wallet-3-line"></i>
+        <span>Paiements</span>
+        <span *ngIf="stats.paiementsEnRetard > 0" class="nav-card__badge nav-card__badge--danger">{{ stats.paiementsEnRetard }}</span>
+        <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+      </button>
+      <button class="nav-card" type="button" (click)="navigateToDocuments()">
+        <i class="ri-folder-upload-line"></i>
+        <span>Documents</span>
+        <span *ngIf="stats.documentsManquants > 0" class="nav-card__badge nav-card__badge--warning">{{ stats.documentsManquants }}</span>
+        <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+      </button>
+      <button class="nav-card" type="button" (click)="navigateToCommandes()">
+        <i class="ri-shopping-bag-line"></i>
+        <span>Commandes</span>
+        <span *ngIf="stats.commandesEnCours > 0" class="nav-card__badge nav-card__badge--neutral">{{ stats.commandesEnCours }}</span>
+        <i class="ri-arrow-right-s-line nav-card__arrow"></i>
+      </button>
+      <button class="nav-card" type="button" (click)="navigateToEvenements()">
+        <i class="ri-calendar-event-line"></i>
+        <span>Evenements</span>
+        <span *ngIf="stats.evenementsAVenir > 0" class="nav-card__badge nav-card__badge--neutral">{{ stats.evenementsAVenir }}</span>
+        <i class="ri-arrow-right-s-line nav-card__arrow"></i>
       </button>
     </div>
-  </header>
+  </nav>
 
-  <!-- Actions rapides -->
-  <section class="quick-actions">
-    <div class="action-card" (click)="navigateToPaiements()">
-      <i class="ri-wallet-3-line"></i>
-      <span>Paiements</span>
+  <section class="profile-panel card">
+    <div class="profile-panel__head">
+      <i class="ri-user-line"></i>
+      <h2>Mes informations</h2>
     </div>
-    <div class="action-card" (click)="navigateToDocuments()">
-      <i class="ri-folder-upload-line"></i>
-      <span>Documents</span>
-    </div>
-    <div class="action-card" (click)="navigateToCommandes()">
-      <i class="ri-shopping-bag-line"></i>
-      <span>Commandes</span>
-    </div>
-    <div class="action-card" (click)="navigateToEvenements()">
-      <i class="ri-calendar-event-line"></i>
-      <span>Événements</span>
+    <div class="profile-list">
+      <div class="profile-item">
+        <i class="ri-user-3-line"></i>
+        <span>{{ utilisateurConnecte?.prenom }} {{ utilisateurConnecte?.nom }}</span>
+      </div>
+      <div class="profile-item">
+        <i class="ri-mail-line"></i>
+        <span>{{ utilisateurConnecte?.email }}</span>
+      </div>
+      <div class="profile-item" *ngIf="utilisateurConnecte?.telephone">
+        <i class="ri-phone-line"></i>
+        <span>{{ utilisateurConnecte?.telephone }}</span>
+      </div>
     </div>
   </section>
-
-  <!-- Grille principale -->
-  <main class="main-grid">
-    <!-- Colonne gauche : résumé membre -->
-    <section class="card profile-summary">
-      <h2 class="section-title"><i class="ri-information-line"></i> Mes informations</h2>
-      <div class="profile-rows">
-        <div><i class="ri-user-3-line"></i> {{ utilisateurConnecte?.prenom }} {{ utilisateurConnecte?.nom }}</div>
-        <div><i class="ri-mail-line"></i> {{ utilisateurConnecte?.email }}</div>
-        <div *ngIf="utilisateurConnecte?.telephone"><i class="ri-phone-line"></i> {{ utilisateurConnecte?.telephone }}</div>
-      </div>
-    </section>
-    <!-- Colonne centre : alertes -->
-    <section class="card alerts-card">
-      <h2 class="section-title"><i class="ri-notification-3-line"></i> Alertes importantes</h2>
-      <div class="alerts">
-        <div *ngIf="stats.paiementsEnRetard > 0" class="pill danger">
-          <i class="ri-error-warning-line"></i> Paiements en retard ({{ stats.paiementsEnRetard }})
-        </div>
-        <div *ngIf="stats.documentsManquants > 0" class="pill warning">
-          <i class="ri-folder-warning-line"></i>
-          Documents manquants ({{ stats.documentsManquants }})
-          <button class="btn-ui btn-doc-link" (click)="navigateToDocuments()">Compléter</button>
-        </div>
-        <div *ngIf="stats.commandesEnCours > 0" class="pill info">
-          <i class="ri-shopping-bag-3-line"></i> Commandes en cours ({{ stats.commandesEnCours }})
-        </div>
-        <div
-          *ngIf="alertsReady && stats.paiementsEnRetard === 0
-              && stats.documentsManquants === 0
-              && stats.commandesEnCours === 0"
-          class="pill ok"
-        >
-          <i class="ri-checkbox-circle-line"></i> Aucun élément en attente 🎉
-        </div>
-      </div>
-    </section>
-
-    <!-- Colonne droite : support -->
-    <section class="card support-card">
-      <h2 class="section-title"><i class="ri-customer-service-2-line"></i> Besoin d’aide ?</h2>
-      <p class="muted">Notre équipe est là pour vous accompagner.</p>
-      <button class="btn-support" (click)="navigateToSupport()">
-        <i class="ri-message-2-line"></i> Contacter le support
-      </button>
-    </section>
-  </main>
 </div>

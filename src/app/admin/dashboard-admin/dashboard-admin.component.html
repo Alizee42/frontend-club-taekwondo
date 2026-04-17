@@ -83,6 +83,7 @@
         <button class="nav-card" (click)="navigateToHoraires()">
           <i class="ri-time-line"></i>
           <span>Horaires</span>
+          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="badge.horaires > 0">{{ badge.horaires }}</span>
           <i class="ri-arrow-right-s-line nav-card__arrow"></i>
         </button>
       </div>
