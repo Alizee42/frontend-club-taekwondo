@@ -145,6 +145,18 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     });
   }
 
+  ouvrirRecuStripe(paiementId: number): void {
+    if (!paiementId) return;
+    this.stripeService.getReceiptUrl(paiementId).then(url => {
+      if (url) {
+        window.open(url, '_blank', 'noopener');
+      } else {
+        this.paiementErreur = true;
+        this.erreurMessage = 'Le reçu n\'est pas encore disponible. Veuillez réessayer dans quelques instants.';
+      }
+    });
+  }
+
   private async syncPaymentIntentOnce(): Promise<void> {
     if (!this.lastPaymentIntentId) return;
     try {
@@ -246,9 +258,9 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     const s = String(raw ?? '')
       .normalize('NFD').replace(/\p{Diacritic}/gu, '')
       .toLowerCase().trim();
-    if (['paye','payé','payee','payée'].includes(s)) return { statutDisplay: 'payé', statutCss: 'badge-payé' };
-    if (['annule','annulé'].includes(s)) return { statutDisplay: 'annulé', statutCss: 'badge-annulé' };
-    return { statutDisplay: 'en attente', statutCss: 'badge-en-attente' };
+    if (['paye','payé','payee','payée'].includes(s)) return { statutDisplay: 'payé', statutCss: 'status--success' };
+    if (['annule','annulé'].includes(s)) return { statutDisplay: 'annulé', statutCss: 'status--danger' };
+    return { statutDisplay: 'en attente', statutCss: 'status--warning' };
   }
 
   mettreAJourFiltresPaiements(): void {
@@ -275,9 +287,9 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     return !this.hasPlans(enfantId);
   }
 
-  nextUnpaid(paiement: any){ const list = Array.isArray(paiement?.echeances) ? paiement.echeances : []; return list.find((e: any) => (e?.statutCss || '') !== 'badge-payé') || null; }
-  unpaidEcheances(paiement: any){ const list = Array.isArray(paiement?.echeances) ? paiement.echeances : []; return list.filter((e: any) => (e?.statutCss || '') !== 'badge-payé'); }
-  paidEcheances(paiement: any){ const list = Array.isArray(paiement?.echeances) ? paiement.echeances : []; return list.filter((e: any) => (e?.statutCss || '') === 'badge-payé'); }
+  nextUnpaid(paiement: any){ const list = Array.isArray(paiement?.echeances) ? paiement.echeances : []; return list.find((e: any) => (e?.statutCss || '') !== 'status--success') || null; }
+  unpaidEcheances(paiement: any){ const list = Array.isArray(paiement?.echeances) ? paiement.echeances : []; return list.filter((e: any) => (e?.statutCss || '') !== 'status--success'); }
+  paidEcheances(paiement: any){ const list = Array.isArray(paiement?.echeances) ? paiement.echeances : []; return list.filter((e: any) => (e?.statutCss || '') === 'status--success'); }
   toggleShowPaid(planId: number){ this.showPaidByPlanId[planId] = !this.showPaidByPlanId[planId]; }
   isShowPaid(planId: number){ return !!this.showPaidByPlanId[planId]; }
   paidCount(paiement: any){ return this.paidEcheances(paiement).length; }
@@ -285,7 +297,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   calculerMontantRestant(paiement: any): number{
     if (!Array.isArray(paiement?.echeances) || paiement.echeances.length === 0) return Number(paiement?.montantTotal || 0);
     const paye = paiement.echeances
-      .filter((e: any) => (e?.statutCss || '') === 'badge-payé')
+      .filter((e: any) => (e?.statutCss || '') === 'status--success')
       .reduce((sum: number, e: any) => sum + Number(e?.montant || 0), 0);
     return Math.max(0, Number(paiement?.montantTotal || 0) - paye);
   }
@@ -519,7 +531,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   // ===== Paiement d'échéance (historique)
   ouvrirModalPaiement(paiement: any, echeance: any): void{
     if (!paiement || !echeance) return;
-    if ((echeance?.statutCss || '') === 'badge-payé') return;
+    if ((echeance?.statutCss || '') === 'status--success') return;
 
     this.paiementActuel = paiement; this.echeanceEnCours = echeance;
     this.montantTotalAPayer = Number(echeance?.montant || 0); this.modalOuverte = true;

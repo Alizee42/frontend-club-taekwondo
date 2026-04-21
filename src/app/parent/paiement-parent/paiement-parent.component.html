@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
 
   <!-- Header -->
   <div class="dash-header">
@@ -38,7 +38,10 @@
                   [class.active]="enfantSelectionne === enfant.id"
                   (click)="selectMembre(enfant)"
                   [attr.aria-label]="'Sélectionner ' + enfant.prenom + ' ' + enfant.nom">
-            <div class="avatar">{{ (enfant.prenom && enfant.prenom[0]) || '👤' }}</div>
+            <div class="avatar">
+              <span *ngIf="enfant.prenom">{{ enfant.prenom[0] }}</span>
+              <i *ngIf="!enfant.prenom" class="ri-user-line"></i>
+            </div>
             <div class="meta">
               <div class="name">{{ enfant.prenom }} {{ enfant.nom }}</div>
             </div>
@@ -46,7 +49,7 @@
         </div>
 
         <div class="actions center">
-          <button class="btn primary wide"
+          <button class="btn btn-primary full"
                   [disabled]="!enfantSelectionne"
                   (click)="nextStep()">
             Continuer
@@ -63,7 +66,7 @@
           <label class="mode-card" [class.active]="typeChoisi === 'UNIQUE'">
             <input type="radio" name="mode" (change)="setMode('UNIQUE')" [checked]="typeChoisi==='UNIQUE'">
             <div class="mode-body">
-              <div class="mode-icon">💳</div>
+              <div class="mode-icon"><i class="ri-bank-card-line"></i></div>
               <div class="mode-title">En une fois</div>
               <div class="mode-desc muted">Un seul règlement. Aucun paramétrage nécessaire.</div>
             </div>
@@ -73,22 +76,22 @@
           <label class="mode-card" [class.active]="typeChoisi === 'ECHELONNE'">
             <input type="radio" name="mode" (change)="setMode('ECHELONNE')" [checked]="typeChoisi==='ECHELONNE'">
             <div class="mode-body">
-              <div class="mode-icon">📆</div>
+              <div class="mode-icon"><i class="ri-calendar-schedule-line"></i></div>
               <div class="mode-title">En plusieurs fois</div>
 
               <!-- Petit texte gris quand les options sont MASQUÉES -->
-              <p class="mode-hint" *ngIf="typeChoisi !== 'ECHELONNE'">
-                Choisir le nombre d’échéances.
+                <p class="mode-hint" *ngIf="typeChoisi !== 'ECHELONNE'">
+                Choisir le nombre d'écheances.
               </p>
 
               <!-- Options visibles UNIQUEMENT quand ECHELONNE est sélectionné -->
               <div class="split-line" *ngIf="typeChoisi === 'ECHELONNE' && echeancesOptions.length">
                 <div class="field">
-                  <div class="label">Nombre d’échéances</div>
+                  <div class="label">Nombre d'échéances</div>
                   <select [(ngModel)]="nombreEcheances"
                           (focus)="onEcheancesFocusOrChange()"
                           (change)="onEcheancesFocusOrChange()"
-                          aria-label="Nombre d’échéances">
+                          aria-label="Nombre d'échéances">
                     <ng-container *ngFor="let n of echeancesOptions">
                       <option *ngIf="n > 1" [value]="n">{{ n }}</option>
                     </ng-container>
@@ -107,17 +110,17 @@
                 </div>
               </div>
 
-              <!-- Cas où l’échelonné est choisi mais aucune option dispo -->
+              <!-- Cas où l'échelonné est choisi mais aucune option dispo -->
               <p class="mode-hint" *ngIf="typeChoisi === 'ECHELONNE' && !echeancesOptions.length">
-                Le paiement échelonné n’est pas disponible pour le moment.
+                Le paiement échelonné n'est pas disponible pour le moment.
               </p>
             </div>
           </label>
         </div>
 
         <div class="actions">
-          <button class="btn link" (click)="previousStep()">← Retour</button>
-          <button class="btn primary" (click)="nextStep()">Continuer</button>
+          <button class="btn btn-ghost btn-sm" (click)="previousStep()">← Retour</button>
+          <button class="btn btn-primary" (click)="nextStep()">Continuer</button>
         </div>
       </div>
 
@@ -163,40 +166,31 @@
         <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
 
         <div class="actions">
-          <button class="btn link" (click)="previousStep()" [disabled]="enCoursDePaiement">← Retour</button>
-          <button class="btn primary" (click)="ouvrirModalCarte()" [disabled]="enCoursDePaiement || (envoyerRecuEmail && (!userEmail || !userEmail.includes('@')))">Payer maintenant</button>
+          <button class="btn btn-ghost btn-sm" (click)="previousStep()" [disabled]="enCoursDePaiement">← Retour</button>
+          <button class="btn btn-primary" (click)="ouvrirModalCarte()" [disabled]="enCoursDePaiement || (envoyerRecuEmail && (!userEmail || !userEmail.includes('@')))">Payer maintenant</button>
         </div>
       </div>
 
       <!-- Étape 4 : Confirmation -->
       <div class="step-body" *ngIf="step === 4">
         <div class="confirm">
-          <div class="confirm-icon" aria-hidden="true">🎉</div>
-          <h3>Paiement confirmé</h3>
-          <p class="lead">
-            Merci ! Votre règlement du
-            <strong>{{ (paymentDate || today) | date:'dd/MM/yyyy HH:mm' }}</strong>
-            a bien été pris en compte.
-          </p>
+          <div class="confirm-icon" aria-hidden="true"><i class="ri-checkbox-circle-fill"></i></div>
+          <h3 class="confirm-title">Paiement confirmé</h3>
+          <p class="confirm-sub">Votre règlement a bien été pris en compte.</p>
 
-          <div class="doc-box">
-            <p class="muted">Reçu de paiement:</p>
-            <div class="actions center" style="gap:8px; flex-wrap: wrap;">
-              <a class="btn primary"
-                 *ngIf="factureUrl"
-                 [href]="factureUrl"
-                 target="_blank"
-                 rel="noopener">
-                Ouvrir le reçu
-              </a>
-            </div>
-            <p class="muted small" *ngIf="envoyerRecuEmail && userEmail">
-              Reçu envoyé à <strong>{{ userEmail }}</strong>
-            </p>
+          <div class="confirm-amount">{{ montantPaye | currency:'EUR' }}</div>
+          <div class="confirm-date">le {{ (paymentDate || today) | date:'dd/MM/yyyy' }} à {{ (paymentDate || today) | date:'HH:mm' }}</div>
+
+          <div class="confirm-actions">
+            <a class="btn btn-primary" *ngIf="factureUrl" [href]="factureUrl" target="_blank" rel="noopener">
+              <i class="ri-file-text-line"></i> Voir le reçu
+            </a>
+            <button class="btn btn-outline" (click)="step = 1">Nouveau paiement</button>
           </div>
 
-          <div class="actions center" style="margin-top: 8px">
-            <button class="btn ghost" (click)="step = 1">Effectuer un autre paiement</button>
+          <div class="confirm-email" *ngIf="envoyerRecuEmail && userEmail">
+            <i class="ri-mail-check-line"></i>
+            Reçu envoyé à <strong>{{ userEmail }}</strong>
           </div>
         </div>
       </div>
@@ -223,7 +217,11 @@
           </div>
         </div>
 
-        <p class="muted small">Les montants sont affichés en étape 3.</p>
+        <div class="rec-row" *ngIf="step >= 3">
+          <div class="k">{{ typeChoisi === 'UNIQUE' ? 'Montant' : 'Par échéance' }}</div>
+          <div class="v">{{ getMontantAPayerMaintenant() | currency:'EUR' }}</div>
+        </div>
+        <p class="muted small" *ngIf="step < 3">Le montant sera affiché à l'étape suivante.</p>
       </div>
     </aside>
   </section>
@@ -242,17 +240,23 @@
           <!-- En-tête enfant avec badge dans la même ligne -->
           <ng-container *ngIf="getFirstPlan(enfant.id) as plan; else headerSansPlan">
             <div class="child-line">
-              <div class="avatar">{{ (enfant.prenom && enfant.prenom[0]) || '👤' }}</div>
+              <div class="avatar">
+                <span *ngIf="enfant.prenom">{{ enfant.prenom[0] }}</span>
+                <i *ngIf="!enfant.prenom" class="ri-user-line"></i>
+              </div>
               <div class="title">
                 <h3>{{ enfant.prenom }} {{ enfant.nom }}</h3>
               </div>
-              <div class="pill" [ngClass]="plan.statutCss">{{ plan.statutDisplay }}</div>
+              <span class="status-badge" [ngClass]="plan.statutCss">{{ plan.statutDisplay }}</span>
             </div>
           </ng-container>
 
           <ng-template #headerSansPlan>
             <div class="child-line">
-              <div class="avatar">{{ (enfant.prenom && enfant.prenom[0]) || '👤' }}</div>
+              <div class="avatar">
+                <span *ngIf="enfant.prenom">{{ enfant.prenom[0] }}</span>
+                <i *ngIf="!enfant.prenom" class="ri-user-line"></i>
+              </div>
               <div class="title">
                 <h3>{{ enfant.prenom }} {{ enfant.nom }}</h3>
               </div>
@@ -287,7 +291,7 @@
               </div>
 
               <details class="accordion">
-                <summary>Voir l’échéancier</summary>
+                <summary>Voir l'échéancier</summary>
 
                 <!-- Non payées -->
                 <ul class="list compact" *ngIf="unpaidEcheances(plan).length">
@@ -295,14 +299,14 @@
                     <span class="muted">#{{ e.numero }}</span>
                     <span class="muted">{{ e.dateAffichable | date:'dd/MM/yyyy' }}</span>
                     <span class="grow">{{ e.montant | currency:'EUR' }}</span>
-                    <span class="pill" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
-                    <button class="btn chip" (click)="ouvrirModalPaiement(plan, e)">Payer</button>
+                    <span class="status-badge" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
+                    <button class="btn btn-soft-primary btn-sm" (click)="ouvrirModalPaiement(plan, e)">Payer</button>
                   </li>
                 </ul>
 
                 <!-- Payées -->
                 <div class="paid-toggle" *ngIf="paidEcheances(plan).length">
-                  <button class="btn link" (click)="toggleShowPaid(plan.id)">
+                  <button class="btn btn-ghost btn-sm" (click)="toggleShowPaid(plan.id)">
                     {{ isShowPaid(plan.id) ? 'Masquer' : 'Afficher' }} les payées ({{ paidEcheances(plan).length }})
                   </button>
                 </div>
@@ -311,7 +315,8 @@
                     <span class="muted">#{{ e.numero }}</span>
                     <span class="muted">{{ e.dateAffichable | date:'dd/MM/yyyy' }}</span>
                     <span class="grow">{{ e.montant | currency:'EUR' }}</span>
-                    <span class="pill" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
+                    <span class="status-badge" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
+                    <button class="btn btn-soft-primary btn-sm" (click)="ouvrirRecuStripe(plan.id)">Reçu</button>
                   </li>
                 </ul>
               </details>
@@ -324,7 +329,8 @@
               <li class="item" *ngFor="let p of getPaiementsUniquesPourEnfant(enfant.id)">
                 <span class="muted">{{ (p.datePaiement || p.dateAffichable) | date:'dd/MM/yyyy' }}</span>
                 <span class="grow">{{ p.montantTotal | currency:'EUR' }}</span>
-                <span class="pill" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
+                <span class="status-badge" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
+                <button class="btn btn-soft-primary btn-sm" *ngIf="p.statutCss==='status--success'" (click)="ouvrirRecuStripe(p.id)">Reçu</button>
               </li>
             </ul>
           </ng-container>
@@ -333,42 +339,99 @@
     </div>
   </section> <!-- ✅ fermeture manquante du bloc HISTORIQUE -->
 
-</div> <!-- ✅ fe
+</div>
 
 <!-- Modal paiement échéance -->
-<div class="modal" *ngIf="modalOuverte">
-  <div class="modal-content">
-    <h3>Payer une échéance</h3>
-    <p>Montant : <strong>{{ montantTotalAPayer | currency:'EUR' }}</strong></p>
-    <p class="muted small" *ngIf="userEmail && envoyerRecuEmail">
-      Un reçu Stripe sera envoyé à <strong>{{ userEmail }}</strong>.
-    </p>
-    <div id="card-element-parent-modal" class="stripe-card" aria-label="Saisie de carte pour l’échéance"></div>
-    <div class="actions">
-      <button class="btn primary" (click)="payerEcheances()" [disabled]="enCoursDePaiement">Payer</button>
-      <button class="btn ghost danger" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement">Annuler</button>
+<div class="modal-overlay" *ngIf="modalOuverte" (click)="!enCoursDePaiement && fermerModalPaiement()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement" aria-label="Fermer">×</button>
+
+    <div class="modal-card__header">
+      <div class="modal-card__icon"><i class="ri-lock-line"></i></div>
+      <div>
+        <h3 class="modal-card__title">Payer une échéance</h3>
+        <p class="modal-card__sub">Vos données bancaires ne nous sont jamais transmises.</p>
+      </div>
     </div>
+
+    <div class="modal-card__amount">
+      <span class="modal-card__amount-label">Montant de l'échéance</span>
+      <span class="modal-card__amount-value">{{ montantTotalAPayer | currency:'EUR' }}</span>
+    </div>
+
+    <div class="modal-card__field">
+      <label class="modal-card__label">Carte bancaire</label>
+      <div id="card-element-parent-modal" class="stripe-card" aria-label="Saisie de carte pour l'échéance"></div>
+    </div>
+
+    <p class="modal-card__receipt" *ngIf="envoyerRecuEmail && userEmail">
+      <i class="ri-mail-send-line"></i> Reçu envoyé à <strong>{{ userEmail }}</strong>
+    </p>
+
     <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
+
+    <div class="modal-card__actions">
+      <button class="btn btn-primary btn-full" (click)="payerEcheances()" [disabled]="enCoursDePaiement">
+        <span *ngIf="enCoursDePaiement" class="btn-spinner"></span>
+        {{ enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement' }}
+      </button>
+      <button class="btn btn-ghost btn-full" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement">Annuler</button>
+    </div>
+
+    <p class="modal-card__stripe-badge">
+      <i class="ri-shield-check-line"></i> Paiement sécurisé par <strong>Stripe</strong>
+    </p>
   </div>
 </div>
 
 <!-- Modal carte principale -->
-<div class="modal" *ngIf="modalCarteOuverte">
-  <div class="modal-content">
-    <h3>Coordonnées bancaires</h3>
-    <p class="muted small">Saisie sécurisée via Stripe.</p>
-    <p class="muted small" *ngIf="userEmail && envoyerRecuEmail">
-      Un reçu Stripe sera envoyé à <strong>{{ userEmail }}</strong>.
-    </p>
-    <div id="card-element-main-modal" class="stripe-card" aria-label="Saisie de la carte"></div>
-    <div class="actions">
-      <button class="btn primary"
-              (click)="validerCarte()"
-              [disabled]="!stripeReady || enCoursDePaiement">
-        {{ enCoursDePaiement ? 'Paiement en cours…' : 'Payer' }}
-      </button>
-      <button class="btn ghost danger" (click)="fermerModalCarte()" [disabled]="enCoursDePaiement">Annuler</button>
+<div class="modal-overlay" *ngIf="modalCarteOuverte" (click)="!enCoursDePaiement && fermerModalCarte()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="fermerModalCarte()" [disabled]="enCoursDePaiement" aria-label="Fermer">×</button>
+
+    <!-- En-tête -->
+    <div class="modal-card__header">
+      <div class="modal-card__icon"><i class="ri-lock-line"></i></div>
+      <div>
+        <h3 class="modal-card__title">Paiement sécurisé</h3>
+        <p class="modal-card__sub">Vos données bancaires ne nous sont jamais transmises.</p>
+      </div>
     </div>
+
+    <!-- Récap montant -->
+    <div class="modal-card__amount">
+      <span class="modal-card__amount-label">Montant à régler</span>
+      <span class="modal-card__amount-value">{{ getMontantAPayerMaintenant() | currency:'EUR' }}</span>
+    </div>
+
+    <!-- Formulaire Stripe -->
+    <div class="modal-card__field">
+      <label class="modal-card__label">Carte bancaire</label>
+      <div class="stripe-loading" *ngIf="!stripeReady">
+        <span class="stripe-spinner"></span> Chargement du formulaire...
+      </div>
+      <div id="card-element-main-modal" class="stripe-card" [class.hidden]="!stripeReady" aria-label="Saisie de la carte"></div>
+    </div>
+
+    <!-- Info email reçu -->
+    <p class="modal-card__receipt" *ngIf="envoyerRecuEmail && userEmail">
+      <i class="ri-mail-send-line"></i> Reçu envoyé à <strong>{{ userEmail }}</strong>
+    </p>
+
+    <!-- Erreur -->
     <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
+
+    <!-- Actions -->
+    <div class="modal-card__actions">
+      <button class="btn btn-primary btn-full" (click)="validerCarte()" [disabled]="!stripeReady || enCoursDePaiement">
+        <span *ngIf="enCoursDePaiement" class="btn-spinner"></span>
+        {{ enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement' }}
+      </button>
+      <button class="btn btn-ghost btn-full" (click)="fermerModalCarte()" [disabled]="enCoursDePaiement">Annuler</button>
+    </div>
+
+    <p class="modal-card__stripe-badge">
+      <i class="ri-shield-check-line"></i> Paiement sécurisé par <strong>Stripe</strong>
+    </p>
   </div>
 </div>

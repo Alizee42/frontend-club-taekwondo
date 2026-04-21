@@ -425,75 +425,6 @@
   justify-content: center;
 }
 
-/* —— Boutons (wrappers locaux) ——————————————*/
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--sp-2) var(--sp-4);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
-  text-decoration: none;
-}
-
-.btn.primary {
-  background: var(--brand-primary);
-  color: #fff;
-}
-
-.btn.primary:hover:not(:disabled) {
-  background: var(--brand-primary-dark);
-  transform: translateY(-1px);
-}
-
-.btn.primary:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-}
-
-.btn.link {
-  background: transparent;
-  color: var(--brand-primary);
-  padding: var(--sp-2) var(--sp-2);
-}
-
-.btn.link:hover {
-  color: var(--brand-primary-dark);
-}
-
-.btn.ghost {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-}
-
-.btn.ghost:hover:not(:disabled) {
-  background: var(--color-surface-2);
-}
-
-.btn.ghost.danger {
-  color: var(--color-danger);
-  border-color: color-mix(in srgb, var(--color-danger) 20%, white);
-  background: color-mix(in srgb, var(--color-danger) 5%, white);
-}
-
-.btn.chip {
-  background: color-mix(in srgb, var(--brand-primary) 8%, white);
-  border: 1px solid color-mix(in srgb, var(--brand-primary) 25%, white);
-  color: var(--brand-primary);
-  border-radius: var(--radius-full);
-  padding: var(--sp-1) var(--sp-3);
-  font-size: var(--text-xs);
-}
-
-.btn.wide {
-  width: 100%;
-  justify-content: center;
-}
 
 /* —— Erreur ————————————————————————————————*/
 .error {
@@ -505,38 +436,83 @@
 
 /* —— Confirmation ——————————————————————————*/
 .confirm {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--sp-5);
   text-align: center;
+  background: linear-gradient(145deg, #e0f2fe 0%, #ede9fe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5) var(--sp-4) var(--sp-5);
 }
 
 .confirm-icon {
-  font-size: 2.2rem;
-  margin-bottom: var(--sp-2);
+  font-size: 3rem;
+  color: var(--color-success);
+  margin-bottom: var(--sp-3);
+  display: block;
 }
 
-.confirm h3 {
-  margin: 0 0 var(--sp-2);
+.confirm-title {
+  margin: 0 0 var(--sp-1);
   font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-text);
 }
 
-.confirm .lead {
-  margin: 0 0 var(--sp-3);
+.confirm-sub {
+  margin: 0 0 var(--sp-4);
   color: var(--color-text-2);
   font-size: var(--text-sm);
 }
 
-.confirm .doc-box {
+.confirm-amount {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--brand-primary);
+  margin-bottom: var(--sp-1);
+}
+
+.confirm-date {
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+  margin-bottom: var(--sp-5);
+}
+
+.confirm-actions {
+  display: flex;
+  flex-direction: row;
+  gap: var(--sp-3);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 auto var(--sp-4);
+}
+
+.confirm-actions .btn,
+.confirm-actions a.btn {
+  flex: 1;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--brand-primary);
+  color: var(--brand-primary);
+  font-weight: 700;
+}
+
+.btn-outline:hover {
+  background: color-mix(in srgb, var(--brand-primary) 8%, transparent);
+}
+
+.confirm-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: var(--color-surface-2);
-  border: 1px dashed var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: var(--sp-3);
-  margin: var(--sp-3) auto 0;
-  max-width: 480px;
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
 }
 
 /* —— Aside récap ———————————————————————————*/
@@ -667,30 +643,6 @@
   transition: width .3s ease;
 }
 
-/* Pills statut */
-.pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px var(--sp-2);
-  border-radius: var(--radius-full);
-  font-weight: 600;
-  font-size: var(--text-xs);
-}
-
-.pill.badge-payé {
-  background: color-mix(in srgb, var(--color-success) 12%, white);
-  color: var(--color-success);
-}
-
-.pill.badge-en-attente {
-  background: color-mix(in srgb, var(--color-warning) 12%, white);
-  color: var(--color-warning);
-}
-
-.pill.badge-annulé {
-  background: color-mix(in srgb, var(--color-danger) 12%, white);
-  color: var(--color-danger);
-}
 
 /* Lists */
 .list {
@@ -731,7 +683,7 @@
 }
 
 .list.uniques .item {
-  grid-template-columns: 110px 1fr auto;
+  grid-template-columns: 110px 1fr auto auto;
 }
 
 /* Accordion */
@@ -766,21 +718,68 @@ details.accordion summary {
   font-size: var(--text-sm);
 }
 
+/* —— Modal close ——————————————————————————— */
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text-2);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.modal-close:hover { background: var(--color-surface-2); color: var(--color-text); }
+.modal-close:disabled { opacity: .4; cursor: not-allowed; }
+
+/* —— Stripe loading ——————————————————————— */
+.stripe-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-3);
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+}
+
+.stripe-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.stripe-card.hidden { display: none; }
+
 /* —— Modal ————————————————————————————————— */
-.modal {
+.modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.4);
+  background: rgba(8, 20, 40, .55);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--sp-5);
   z-index: 1000;
 }
 
 .modal-content {
+  position: relative;
+  z-index: 1001;
   width: min(680px, 92vw);
   max-height: 90vh;
-  overflow: auto;
+  overflow-y: auto;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -788,11 +787,128 @@ details.accordion summary {
   box-shadow: var(--shadow-lg);
 }
 
-.modal-content h3 {
-  margin: 0 0 var(--sp-3);
-  font-size: var(--text-lg);
+/* —— Modal carte paiement (redesign) ———————*/
+.modal-card {
+  position: relative;
+  z-index: 1001;
+  width: min(440px, 92vw);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.modal-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding-right: 32px;
+}
+
+.modal-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--brand-primary) 10%, white);
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.modal-card__title {
+  margin: 0 0 2px;
+  font-size: var(--text-base);
   font-weight: 700;
   color: var(--color-text);
+}
+
+.modal-card__sub {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+}
+
+.modal-card__amount {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.modal-card__amount-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+
+.modal-card__amount-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+.modal-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.modal-card__label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.modal-card__receipt {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.modal-card__stripe-badge {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-text-3, #9ca3af);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin-right: 6px;
+  flex-shrink: 0;
 }
 
 /* —— Responsive ————————————————————————————*/

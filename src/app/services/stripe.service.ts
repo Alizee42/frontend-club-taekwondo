@@ -43,18 +43,40 @@ export class StripeService {
     return el?.content || null;
   }
 
-  /** Récupère et met en cache la clé publique Stripe */
+  /** Recupere et met en cache la cle publique Stripe */
   private getPublicKey(): Promise<string> {
     if (!this.publicKeyPromise) {
       this.publicKeyPromise = (async () => {
-        // Utiliser uniquement l'endpoint public clé Stripe
         try {
           const r = await firstValueFrom(this.http.get<any>(`${this.backendUrl}/public-key`));
           const k = r?.publicKey ?? r?.key ?? r?.stripePublicKey;
           if (k) return k;
-        } catch { /* ignore */ }
+        } catch {
+          // handled below with a more actionable message
+        }
 
-        throw new Error('Clé publique Stripe introuvable (public-key).');
+        let diagnostic =
+          'Le backend Stripe ne semble pas demarre avec le profil local ' +
+          '(SPRING_PROFILES_ACTIVE=local) ou les cles Stripe sont absentes.';
+
+        try {
+          const status = await firstValueFrom(
+            this.http.get<any>(`${this.backendUrl}/config-status`)
+          );
+          const publishableKeyConfigured = !!status?.publishableKeyConfigured;
+          const secretKeyConfigured = !!status?.secretKeyConfigured;
+
+          diagnostic =
+            'Verification recommandee: /api/stripe/config-status ' +
+            `(publishableKeyConfigured=${publishableKeyConfigured}, ` +
+            `secretKeyConfigured=${secretKeyConfigured}). ` +
+            'En local, demarrez le backend avec SPRING_PROFILES_ACTIVE=local.';
+        } catch {
+          diagnostic +=
+            ' Verifiez aussi que http://localhost:8080/api/stripe/config-status est accessible.';
+        }
+
+        throw new Error(`Cle publique Stripe introuvable (public-key). ${diagnostic}`);
       })();
     }
     return this.publicKeyPromise;
@@ -64,7 +86,7 @@ export class StripeService {
     if (this.stripe) return this.stripe;
     const pk = await this.getPublicKey();
     const stripe = await loadStripe(pk);
-    if (!stripe) throw new Error('Stripe non initialisé (clé publique invalide ?)');
+    if (!stripe) throw new Error('Stripe non initialise (cle publique invalide ?)');
     this.stripe = stripe;
     return stripe;
   }
@@ -75,12 +97,12 @@ export class StripeService {
 
   // ---------- API BACKEND ----------
 
-  /** Crée (ou réutilise) un PaymentIntent côté backend */
+  /** Cree (ou reutilise) un PaymentIntent cote backend */
   async createPaymentIntent(paiementData: CreatePiPayload): Promise<CreatePiResponse> {
     if (!paiementData?.paiementId) {
       throw new Error(
         'createPaymentIntent: "paiementId" est requis. ' +
-        'Crée la commande pour obtenir un paiementId avant d’initier le paiement.'
+        'Cree la commande pour obtenir un paiementId avant d initier le paiement.'
       );
     }
 
@@ -100,7 +122,9 @@ export class StripeService {
     this.elements = stripe.elements({ locale: 'fr' });
 
     if (this.cardElement) {
-      try { this.cardElement.unmount(); } catch {}
+      try {
+        this.cardElement.unmount();
+      } catch {}
       this.cardElement = null;
     }
 
@@ -115,7 +139,9 @@ export class StripeService {
 
   unmount(): void {
     if (this.cardElement) {
-      try { this.cardElement.unmount(); } catch {}
+      try {
+        this.cardElement.unmount();
+      } catch {}
       this.cardElement = null;
     }
     this.elements = null;
@@ -125,14 +151,14 @@ export class StripeService {
     this.clientSecret = clientSecret;
   }
 
-  /** Synchronise l'état d'un PaymentIntent avec la BDD */
+  /** Synchronise l etat d un PaymentIntent avec la BDD */
   async syncPayment(paymentIntentId: string): Promise<any> {
     return firstValueFrom(
       this.http.post<any>(`${this.backendUrl}/sync-payment`, { paymentIntentId })
     );
   }
 
-  /** Récupère l'URL du reçu Stripe pour un paiement */
+  /** Recupere l URL du recu Stripe pour un paiement */
   async getReceiptUrl(paiementId: number): Promise<string | null> {
     try {
       const res = await firstValueFrom(
@@ -151,7 +177,7 @@ export class StripeService {
     message?: string;
   }> {
     const stripe = await this.ensureStripe();
-    if (!this.cardElement) return { success: false, message: 'Élément carte non monté' };
+    if (!this.cardElement) return { success: false, message: 'Element carte non monte' };
     if (!this.clientSecret) return { success: false, message: 'Client secret manquant' };
 
     const result = await stripe.confirmCardPayment(this.clientSecret, {
@@ -159,7 +185,7 @@ export class StripeService {
     });
 
     if (result.error) {
-      return { success: false, message: result.error.message || 'Paiement refusé' };
+      return { success: false, message: result.error.message || 'Paiement refuse' };
     }
 
     const pi = result.paymentIntent;
@@ -169,8 +195,8 @@ export class StripeService {
       return { success: true, status, paymentIntentId: pi?.id };
     }
     if (status === 'requires_action') {
-      return { success: false, status, message: 'Action supplémentaire requise.' };
+      return { success: false, status, message: 'Action supplementaire requise.' };
     }
-    return { success: false, status, message: 'Paiement non confirmé.' };
+    return { success: false, status, message: 'Paiement non confirme.' };
   }
 }

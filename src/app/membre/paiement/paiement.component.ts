@@ -268,9 +268,9 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     const s = String(raw ?? '')
       .normalize('NFD').replace(/\p{Diacritic}/gu, '')
       .toLowerCase().trim();
-    if (['paye','payé','payee','payée'].includes(s)) return { statutDisplay: 'payé', statutCss: 'badge-payé' };
-    if (['annule','annulé'].includes(s)) return { statutDisplay: 'annulé', statutCss: 'badge-annulé' };
-    return { statutDisplay: 'en attente', statutCss: 'badge-en-attente' };
+    if (['paye','payé','payee','payée'].includes(s)) return { statutDisplay: 'payé', statutCss: 'status--success' };
+    if (['annule','annulé'].includes(s)) return { statutDisplay: 'annulé', statutCss: 'status--danger' };
+    return { statutDisplay: 'en attente', statutCss: 'status--warning' };
   }
 
   mettreAJourFiltresPaiements(): void {
@@ -279,8 +279,8 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   }
 
   // ===== Sélecteurs / helpers =====
-  unpaidEcheances(p:any){ return (p?.echeances || []).filter((e:any)=> (e?.statutCss||'')!=='badge-payé'); }
-  paidEcheances(p:any){ return (p?.echeances || []).filter((e:any)=> (e?.statutCss||'')==='badge-payé'); }
+  unpaidEcheances(p:any){ return (p?.echeances || []).filter((e:any)=> (e?.statutCss||'')!=='status--success'); }
+  paidEcheances(p:any){ return (p?.echeances || []).filter((e:any)=> (e?.statutCss||'')==='status--success'); }
   toggleShowPaid(id:number){ this.showPaidByPlanId[id]=!this.showPaidByPlanId[id]; }
   isShowPaid(id:number){ return !!this.showPaidByPlanId[id]; }
   paidCount(p:any){ return this.paidEcheances(p).length; }
@@ -288,7 +288,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   calculerMontantRestant(p:any): number{
     if (!Array.isArray(p?.echeances) || !p.echeances.length) return Number(p?.montantTotal||0);
     const paye = p.echeances
-      .filter((e:any)=>(e?.statutCss||'')==='badge-payé')
+      .filter((e:any)=>(e?.statutCss||'')==='status--success')
       .reduce((s:number,e:any)=>s+Number(e?.montant||0),0);
     return Math.max(0, Number(p?.montantTotal||0)-paye);
   }
@@ -478,7 +478,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   // ===== Paiement d'échéance (historique) =====
   ouvrirModalPaiement(paiement: any, echeance: any): void{
     if (!paiement || !echeance) return;
-    if ((echeance?.statutCss || '') === 'badge-payé') return;
+    if ((echeance?.statutCss || '') === 'status--success') return;
 
     this.paiementActuel = paiement; this.echeanceEnCours = echeance;
     this.montantTotalAPayer = Number(echeance?.montant || 0); this.modalOuverte = true;
@@ -535,9 +535,14 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   /** Ouvre le reçu Stripe natif (paiement ou échéance) via le back */
   ouvrirRecuStripe(paiementId?: number, echeanceId?: number): void {
     const pid = paiementId ?? this.paiementIdEnCours;
-    if (!pid) { this.log('receipt.abort.noPid'); return; }
+    if (!pid) return;
     this.stripeService.getReceiptUrl(pid).then(url => {
-      if (url) window.open(url, '_blank', 'noopener');
+      if (url) {
+        window.open(url, '_blank', 'noopener');
+      } else {
+        this.paiementErreur = true;
+        this.erreurMessage = 'Le reçu n\'est pas encore disponible. Veuillez réessayer dans quelques instants.';
+      }
     });
   }
 

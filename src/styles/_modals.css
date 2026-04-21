@@ -12,7 +12,7 @@
   background: rgba(8, 20, 40, .55);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  z-index: 2000;
+  z-index: 11000;
   animation: overlayIn .18s ease-out
 }
 
@@ -33,7 +33,7 @@
   border: 1px solid rgba(0, 0, 0, .06);
   box-shadow: 0 20px 45px rgba(0, 0, 0, .2), 0 2px 6px rgba(0, 0, 0, .06);
   padding: 22px 22px 18px;
-  z-index: 2001;
+  z-index: 11001;
   transform-origin: center;
   animation: modalIn .22s cubic-bezier(.2, .8, .2, 1)
 }
