@@ -1,281 +1,160 @@
-/* ================== Variables ================== */
-:root {
-  --blue-main:#1E6091;
-  --blue-hover:#19517b;
-  --red-main:#E63946;
-  --red-hover:#c22f3a;
-  --card-bg:#ffffff;
-  --text-main:#0f172a;
-  --background-hover:#f5f7fb;
-  --border:#e5e7eb;
+.documents-container {
+  padding: 2rem;
 }
 
-/* ================== Layout global ================== */
-.documents-container{
-  padding:2rem;
-  margin:0 auto;
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 1.5rem;
 }
 
-/* ================== Header (titre centré + carte user) ================== */
-/* Header standard */
-.header-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px; }
-
-/* (user-info-card retiré) */
-
-/* Titre et header en mobile */
-@media (max-width: 720px){
-  .header-bar{ flex-wrap:wrap; }
+/* ── Sélecteur enfant ── */
+.kid-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 480px;
+  margin-bottom: 2rem;
 }
 
-/* ================== Intro ================== */
-h1{ color:var(--blue-main); text-align:center; }
-.intro{
-  text-align:center; color:var(--text-main);
-  margin-bottom:2rem; font-size:1.05rem;
+/* ── Grille 2 colonnes ── */
+.documents-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-/* ================== Sélecteur enfant (Parent) ================== */
-.kid-picker{
-  display:flex;
-  align-items:flex-end;
-  gap:12px;
-  margin-bottom: 40px;
-  max-width:520px;
-}
-.kid-picker label{
-  font-weight:800; color:var(--text-main);
-  white-space:nowrap;
-}
-.kid-picker select{
-  flex:1;
-  padding:.55rem .65rem;
-  border:1px solid var(--border);
-  border-radius:8px;
-  font-size:1rem;
-  box-sizing:border-box;
-  appearance:none;
-  background:#fff;
-}
-.kid-picker select:focus{
-  outline:none; border-color:var(--blue-main);
-  box-shadow:0 0 0 3px rgba(30,96,145,.15);
-}
-@media (max-width:560px){
-  .kid-picker{ flex-direction:column; align-items:stretch; }
+/* ── En-têtes de carte ── */
+.card-header h3 {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
 }
 
-/* ================== Grille 2 colonnes ================== */
-.documents-grid{
-  display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2rem;
-}
-@media (max-width: 920px){
-  .documents-grid{ grid-template-columns:1fr; }
+.section-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  margin: 0 0 1rem;
 }
 
-/* ================== Bloc: Documents obligatoires ================== */
-.required-documents{
-  background:var(--card-bg);
-  padding:1.5rem;
-  border-radius:10px;
-  box-shadow:0 4px 10px rgba(0,0,0,.06);
-  border:1px solid var(--border);
-}
-.required-documents h2{ color:var(--blue-main); margin:0 0 1rem 0; }
-.required-documents .description{ color:var(--text-main); margin-bottom:1rem; }
-
-.required-documents ul{ list-style:none; padding:0; margin:0; }
-.required-documents li{
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:.5rem; padding:.5rem .75rem; border-radius:6px;
+/* ── Liste documents obligatoires ── */
+.required-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-/* Chips de statut */
-.status-chip{
-  display:inline-flex; align-items:center; gap:.35rem; font-weight:700; font-size:.9rem;
-  padding:.25rem .55rem; border-radius:999px; border:1px solid transparent;
+.required-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
 }
-.status-chip.ok{ background:#ecfdf5; color:#166534; border-color:#a7f3d0; }
-.status-chip.wait{ background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-.status-chip.ko{ background:#fef2f2; color:#991b1b; border-color:#fecaca; }
 
-.tooltip-icon{
-  margin-left:.4rem; background:#ddd; color:#333; font-size:.8rem; font-weight:800;
-  width:1.1rem; height:1.1rem; border-radius:999px; display:inline-grid; place-items:center; cursor:pointer;
-  position:relative;
+.required-list li:nth-child(odd) {
+  background: var(--color-surface-2);
 }
-.tooltip-icon[title]::after{
+
+/* ── Tooltip (motif interne) ── */
+.tooltip-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  background: var(--color-border);
+  color: var(--color-text-2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  position: relative;
+  margin-left: 0.25rem;
+}
+
+.tooltip-icon[title]::after {
   content: attr(title);
-  position:absolute; bottom:125%; left:50%; transform:translateX(-50%);
-  background:#333; color:#fff; padding:.45rem .6rem; border-radius:4px; font-size:.8rem; white-space:nowrap;
-  opacity:0; visibility:hidden; transition:opacity .2s ease-in-out; z-index:10;
-}
-.tooltip-icon[title]:hover::after{ opacity:1; visibility:visible; }
-
-/* ================== Bloc: Upload ================== */
-.upload-section{
-  background:var(--card-bg);
-  padding:1.5rem;
-  border-radius:10px;
-  box-shadow:0 4px 10px rgba(0,0,0,.06);
-  border:1px solid var(--border);
-}
-.upload-section h2{ color:var(--blue-main); margin:0 0 1rem 0; }
-.upload-section .description{ color:var(--text-main); margin-bottom:1rem; }
-.upload-section .form-group{ margin-bottom:1rem; }
-.upload-section label{ display:block; font-weight:800; margin-bottom:.45rem; }
-
-/* Champs */
-.upload-section select,
-.upload-section input[type="file"]{
-  width:100%;
-  padding:.55rem .65rem;
-  border:1px solid var(--border);
-  border-radius:8px;
-  font-size:1rem;
-  box-sizing:border-box;
-  appearance:none;
-  background:#fff;
-}
-.upload-section select:focus,
-.upload-section input[type="file"]:focus{
-  outline:none; border-color:var(--blue-main);
-  box-shadow:0 0 0 3px rgba(30,96,145,.15);
-}
-.error-message{ color:#b91c1c; display:block; margin-top:.3rem; }
-
-/* Bouton upload */
-.btn-upload{
-  background:var(--blue-main); color:#fff;
-  padding:.7rem 1.2rem; border:none; border-radius:10px; cursor:pointer; font-size:1rem; font-weight:800;
-  transition:filter .2s ease, transform .05s ease;
-}
-.btn-upload:hover{ filter:brightness(.97); }
-.btn-upload:disabled{ opacity:.6; cursor:not-allowed; }
-
-/* ================== Bloc: Liste des documents ================== */
-.documents-list{ grid-column:1 / -1; margin-top:2rem; }
-.documents-list h2{ color:var(--blue-main); margin:0 0 1rem 0; }
-
-.full-width-table{ width:100%; border-collapse:collapse; margin-top:1rem; }
-.full-width-table th, .full-width-table td{
-  padding:.75rem 1rem; text-align:left; border-bottom:1px solid var(--border);
-  vertical-align:middle;
-}
-.full-width-table th{
-  background:var(--blue-main); color:#fff; font-weight:bold; text-transform:uppercase; letter-spacing:.02em;
-}
-.full-width-table tr:hover{ background:var(--background-hover); }
-.full-width-table td{ color:var(--text-main); }
-.full-width-table td:last-child{
-  display:flex; gap:.5rem; justify-content:flex-start; flex-wrap:wrap;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-text);
+  color: var(--color-surface);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* Colonne Aperçu compacte */
-.col-apercu{ width:120px; text-align:center; }
-.cell-apercu{ display:flex; align-items:center; gap:8px; }
-
-/* ================== Badges (UNIFIÉS) ================== */
-.badge{
-  display:inline-flex; align-items:center; font-weight:800;
-  padding:.25rem .55rem; border-radius:999px;
-}
-.badge-valid{ background:#ecfdf5; color:#166534; }
-.badge-pending{ background:#fff7ed; color:#b45309; }
-.badge-refused{ background:#fef2f2; color:#991b1b; }
-
-/* ================== Boutons d'action ================== */
-.btn-action{
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:.5rem .9rem;
-  border:none; border-radius:10px; cursor:pointer;
-  transition:background-color .2s ease, transform .05s ease, filter .2s ease;
-}
-.btn-action:hover{ filter:brightness(.97); }
-.btn-action:active{ transform:translateY(1px); }
-.btn-action:disabled{ background:#ccc; color:#666; cursor:not-allowed; opacity:.6; }
-.btn-edit{ background:var(--blue-main); color:#fff; }
-.btn-edit:hover{ background:var(--blue-hover); }
-.btn-delete{ background:var(--red-main); color:#fff; }
-.btn-delete:hover{ background:var(--red-hover); }
-
-/* ================== Boutons icône: Aperçu / Télécharger (liste & modale) ================== */
-.icon-btn,
-.btn-apercu{
-  width:36px; height:36px;
-  display:inline-flex; align-items:center; justify-content:center;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:#fff;
-  color:var(--blue-main);
-  box-shadow:0 1px 2px rgba(0,0,0,.04);
-  cursor:pointer;
-  transition:transform .05s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
-  text-decoration:none;
-}
-.icon-btn i,
-.btn-apercu i{ font-size:18px; line-height:1; }
-.icon-btn:hover,
-.btn-apercu:hover{
-  background:var(--background-hover);
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-  transform:translateY(-1px);
-}
-.icon-btn:focus-visible,
-.btn-apercu:focus-visible{
-  outline:3px solid rgba(30,96,145,.25);
-  outline-offset:2px;
+.tooltip-icon[title]:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
 
-/* ================== Modale Aperçu (style “gestion-documents”) ================== */
-.modal-overlay{
-  position:fixed; inset:0; background:rgba(2,6,23,.6);
-  display:flex; align-items:center; justify-content:center; z-index:1200; padding:16px;
-}
-.modal-content{
-  background:#fff; border-radius:14px; box-shadow:0 10px 26px rgba(2,6,23,.08);
-  width:min(980px,96vw); max-height:92vh; padding:1rem; position:relative;
-  display:flex; flex-direction:column; gap:12px;
-  border:1px solid var(--border);
+/* ── Zone d'upload ── */
+.upload-zone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  transition: border-color var(--t-fast);
 }
 
-/* Barre d’actions en haut à droite (ouvrir / télécharger / fermer) */
-.modal-top-actions{
-  position:absolute; top:10px; right:10px;
-  display:flex; align-items:center; gap:.5rem;
-}
-.close-button{
-  width:36px; height:36px;
-  display:inline-flex; align-items:center; justify-content:center;
-  background:#fff; border:1px solid var(--border); border-radius:999px;
-  font-size:1.6rem; line-height:1; cursor:pointer;
-  box-shadow:0 1px 2px rgba(0,0,0,.04);
-  transition:background .15s ease, transform .05s ease, box-shadow .15s ease;
-}
-.close-button:hover{ background:var(--background-hover); box-shadow:0 2px 8px rgba(0,0,0,.08); transform:translateY(-1px); }
-.close-button:focus-visible{ outline:3px solid rgba(30,96,145,.25); outline-offset:2px; }
-
-/* Zone d’aperçu */
-.preview-image{
-  width:100%; height:auto; max-height:74vh;
-  object-fit:contain; border-radius:8px; border:1px solid var(--border);
-}
-.preview-frame{
-  width:100%; height:74vh; border:1px solid var(--border); border-radius:8px; background:#fff;
+.upload-zone:focus-within,
+.upload-zone:hover {
+  border-color: var(--brand-primary);
 }
 
-/* Actions en bas (si jamais utilisées) */
-.modal-actions{
-  margin-top:.25rem;
-  display:flex; gap:.5rem; justify-content:flex-end; flex-wrap:wrap;
+.upload-zone input[type="file"] {
+  width: 100%;
+  font-size: var(--text-sm);
+  cursor: pointer;
 }
 
-/* ================== Petites améliorations ================== */
-.full-width-table th:nth-child(2),
-.full-width-table td:nth-child(2){ text-align:center; }
-.full-width-table td a, .full-width-table td button { white-space:nowrap; }
+/* ── Liste documents (full width) ── */
+.documents-list {
+  grid-column: 1 / -1;
+}
 
-/* Responsive modale */
-@media (max-width:640px){
-  .preview-frame { height:68vh; }
-  .preview-image { max-height:68vh; }
+.list-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.75rem;
+}
+
+/* ── Aperçu modal ── */
+.preview-img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .documents-container {
+    padding: 1rem;
+  }
+
+  .documents-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kid-picker {
+    max-width: 100%;
+  }
 }

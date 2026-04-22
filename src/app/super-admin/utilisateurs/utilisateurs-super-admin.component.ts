@@ -6,12 +6,12 @@ import { UtilisateurFormComponent } from './utilisateur-form.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-utilisateurs-super-admin',
   standalone: true,
-  imports: [CommonModule, UtilisateurFormComponent, UiTableComponent, UiButtonComponent, UiModalComponent, UiTitleComponent],
+  imports: [CommonModule, UtilisateurFormComponent, UiTableComponent, UiButtonComponent, UiModalComponent, PageHeaderComponent],
   templateUrl: './utilisateurs-super-admin.component.html',
   styleUrls: ['./utilisateurs-super-admin.component.css']
 })

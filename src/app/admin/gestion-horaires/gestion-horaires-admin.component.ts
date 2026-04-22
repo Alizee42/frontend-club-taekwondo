@@ -1,16 +1,16 @@
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { Component, OnInit, Input } from '@angular/core';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { HorairesService } from '../../services/horaires.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-gestion-horaires-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiTitleComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, PageHeaderComponent],
   templateUrl: './gestion-horaires-admin.component.html',
   styleUrls: ['./gestion-horaires-admin.component.css']
 })

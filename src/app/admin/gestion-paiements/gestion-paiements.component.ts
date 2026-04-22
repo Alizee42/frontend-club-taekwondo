@@ -1,19 +1,16 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { Chart, ArcElement, Tooltip, Legend, DoughnutController } from 'chart.js';
-
 import { SuiviPaiementsComponent } from '../../shared/components/suivi-paiements/suivi-paiements.component';
 import { EcheanceComponent } from '../../shared/components/echeance/echeance.component';
 import { AjoutPaiementComponent } from './ajout-paiement/ajout-paiement.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
-import type { UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { PaymentAdminService } from '../../services/payment-admin.service';
 import { DashboardStats } from '../../models/dashboard-stats.model';
 import { DaySum } from '../../models/day-sum';
 import { MembreRetard } from '../../models/membre-retard';
-
-Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
 @Component({
   selector: 'app-gestion-paiements',
@@ -21,48 +18,19 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
   imports: [
     CommonModule,
     SuiviPaiementsComponent,
-    AjoutPaiementComponent,
-    UiTitleComponent,
     EcheanceComponent,
-    ],
-    templateUrl: './gestion-paiements.component.html',
-    styleUrls: ['./gestion-paiements.component.css']
-  })
+    AjoutPaiementComponent,
+    UiButtonComponent,
+    UiModalComponent,
+    PageHeaderComponent
+  ],
+  templateUrl: './gestion-paiements.component.html',
+  styleUrls: ['./gestion-paiements.component.css']
+})
 export class GestionPaiementsComponent implements OnInit, OnDestroy {
-  constructor(private paymentService: PaymentAdminService) {}
-  echeancesColumns = [
-    { key: 'datePaiement', label: 'Date', type: 'date' as const, cellClass: undefined, display: (row: any) => this.formatDate(row && row.datePaiement) },
-    { key: 'utilisateur', label: 'Payé par', type: 'text' as const, cellClass: undefined, display: (row: any) => `${row && row.utilisateurPrenom ? row.utilisateurPrenom : ''} ${row && row.utilisateurNom ? row.utilisateurNom : ''}` },
-    { key: 'membre', label: 'Pour', type: 'text' as const, cellClass: undefined, display: (row: any) => `${row && row.membrePrenom ? row.membrePrenom : ''} ${row && row.membreNom ? row.membreNom : ''}` },
-    { key: 'type', label: 'Type de paiement', type: 'text' as const, cellClass: undefined, display: (row: any) => `${row && row.type ? row.type : ''} – ${row && row.modePaiement ? row.modePaiement : ''}` },
-    { key: 'montantTotal', label: 'Total', type: 'number' as const, cellClass: 'num', display: (row: any) => this.formatCurrency(row && row.montantTotal) },
-    { key: 'montantPaye', label: 'Payé', type: 'number' as const, cellClass: 'num', display: (row: any) => this.formatCurrency(row && (row.montantPaye != null ? row.montantPaye : row.montantTotal)) },
-    { key: 'montantRestant', label: 'Restant', type: 'number' as const, cellClass: 'num', display: (row: any) => this.formatCurrency(row && (row.montantRestant != null ? row.montantRestant : ((row.montantTotal || 0) - (row.montantPaye || 0)))) },
-    { key: 'statut', label: 'Statut', type: 'text' as const, cellClass: undefined }
-  ];
-  echeancesActions = [
-    // Exemple d'action, à adapter selon besoins
-    // { label: 'Voir', icon: 'ri-eye-line', action: 'voir', variant: 'secondary' },
-    // { label: 'Relancer', icon: 'ri-mail-send-line', action: 'relancer', variant: 'primary', show: (row: any) => row.statut === 'En attente' }
-  ];
-
-  onEcheanceAction(event: { action: string, row: any }) {
-    // À compléter selon les actions souhaitées
-    console.log('Action sur échéance', event);
-  }
-
-  formatDate(date: string | Date): string {
-    if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleDateString('fr-FR');
-  }
-
-  formatCurrency(val: number): string {
-    if (val == null) return '';
-    return val.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
-  }
   ongletActif: 'paiements' | 'echeances' = 'paiements';
   modalAjoutVisible = false;
+  paiements: any[] = [];
 
   stats: DashboardStats & {
     courbe: DaySum[];
@@ -76,77 +44,87 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
     membresEnRetard: []
   };
 
-  paiements: any[] = [];
   private statsSubscription?: Subscription;
 
+  constructor(private paymentService: PaymentAdminService) {}
 
   ngOnInit(): void {
-    this.statsSubscription = this.paymentService.dashboardStats$.subscribe(data => {
-      if (data) {
-        this.stats = {
-          totalPayes: data.totalPayes || 0,
-          totalAnnules: data.totalAnnules || 0,
-          totalAttente: data.totalAttente || 0,
-          pourcentagePayesMois: data.pourcentagePayesMois || 0,
-          courbe: data.courbe || [],
-          membresEnRetard: data.membresEnRetard || []
-        };
+    this.statsSubscription = this.paymentService.dashboardStats$.subscribe((data) => {
+      if (!data) {
+        return;
       }
+
+      this.stats = {
+        totalPayes: data.totalPayes || 0,
+        totalAnnules: data.totalAnnules || 0,
+        totalAttente: data.totalAttente || 0,
+        pourcentagePayesMois: data.pourcentagePayesMois || 0,
+        courbe: data.courbe || [],
+        membresEnRetard: data.membresEnRetard || []
+      };
     });
+
     this.refreshStats();
     this.loadPaiements();
   }
 
-  /** Retourne toutes les échéances présentes dans la liste de paiements (plat) */
+  get totalPaiements(): number {
+    return this.paiements.length;
+  }
+
+  get nbRetards(): number {
+    return this.stats.membresEnRetard.length;
+  }
+
   getAllEcheances(): any[] {
-    try {
-      if (!Array.isArray(this.paiements)) return [];
-      return this.paiements.reduce((acc: any[], p: any) => {
-        const ech = Array.isArray(p.echeances) ? p.echeances.map((e: any) => ({
-          ...e,
-          paiementId: p.id,
-          paiementDate: p.datePaiement,
-          parentPrenom: p.utilisateurPrenom,
-          parentNom: p.utilisateurNom,
-          membrePrenom: p.membrePrenom,
-          membreNom: p.membreNom,
-          club: p.club || p.clubNom || p.clubName,
-          montantTotal: p.montantTotal,
-          montantPaye: p.montantPaye,
-          montantRestant: p.montantRestant
-        })) : [];
-        return acc.concat(ech);
-      }, []);
-    } catch (err) {
-      console.warn('[GestionPaiements] getAllEcheances error', err);
+    if (!Array.isArray(this.paiements)) {
       return [];
     }
+
+    return this.paiements.reduce((acc: any[], paiement: any) => {
+      const echeances = Array.isArray(paiement.echeances)
+        ? paiement.echeances.map((echeance: any) => ({
+            ...echeance,
+            paiementId: paiement.id,
+            paiementDate: paiement.datePaiement,
+            parentPrenom: paiement.utilisateurPrenom,
+            parentNom: paiement.utilisateurNom,
+            membrePrenom: paiement.membrePrenom,
+            membreNom: paiement.membreNom,
+            club: paiement.club || paiement.clubNom || paiement.clubName,
+            montantTotal: paiement.montantTotal,
+            montantPaye: paiement.montantPaye,
+            montantRestant: paiement.montantRestant
+          }))
+        : [];
+
+      return acc.concat(echeances);
+    }, []);
   }
 
   loadPaiements(): void {
     this.paymentService.getAllPaiements().subscribe({
-      next: (res) => {
-        this.paiements = Array.isArray(res) ? res : [];
-        // Debug + robustification : calculer localement montantPaye / montantRestant
-        try {
-          this.paiements.forEach((p: any) => {
-            // montant payé = somme des échéances payées si présentes
-            if (Array.isArray(p.echeances) && p.echeances.length) {
-              p.montantPaye = p.echeances.reduce((s: number, e: any) => {
-                const st = (e && e.statut || '').toString().toLowerCase();
-                return st === 'payé' || st === 'paye' ? s + (Number(e.montant) || 0) : s;
-              }, 0);
-            } else {
-              p.montantPaye = (p.statut || '').toString().toLowerCase().includes('pay') || (p.statut || '').toString().toLowerCase().includes('payé') ? (Number(p.montantTotal) || 0) : 0;
-            }
-            p.montantRestant = Math.max(0, (Number(p.montantTotal) || 0) - (Number(p.montantPaye) || 0));
-          });
-        } catch (err) {
-          console.warn('[GestionPaiements] erreur lors du calcul local des montants', err);
-        }
-        console.log('[GestionPaiements] paiements chargés:', this.paiements.length, this.paiements.slice ? this.paiements.slice(0,3) : this.paiements);
+      next: (response) => {
+        this.paiements = Array.isArray(response) ? response : [];
+
+        this.paiements.forEach((paiement: any) => {
+          if (Array.isArray(paiement.echeances) && paiement.echeances.length) {
+            paiement.montantPaye = paiement.echeances.reduce((sum: number, echeance: any) => {
+              const statut = (echeance?.statut || '').toString().toLowerCase();
+              return statut === 'paye' || statut === 'payé' ? sum + (Number(echeance.montant) || 0) : sum;
+            }, 0);
+          } else {
+            const statut = (paiement.statut || '').toString().toLowerCase();
+            paiement.montantPaye = statut.includes('pay') ? Number(paiement.montantTotal) || 0 : 0;
+          }
+
+          paiement.montantRestant = Math.max(
+            0,
+            (Number(paiement.montantTotal) || 0) - (Number(paiement.montantPaye) || 0)
+          );
+        });
       },
-      error: (err) => {
+      error: () => {
         this.paiements = [];
       }
     });
@@ -154,18 +132,14 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
 
   refreshStats(): void {
     this.paymentService.refreshDashboardStats().subscribe({
-      next: () => console.log('[✔️] Stats paiements actualisées'),
-      error: err => {
-        console.error('[❌] Erreur refresh stats', err);
-        // Garder les valeurs par défaut en cas d'erreur
-      }
+      next: () => undefined,
+      error: () => undefined
     });
   }
 
   changerOnglet(onglet: 'paiements' | 'echeances'): void {
     this.ongletActif = onglet;
     if (onglet === 'echeances') {
-      console.log('[GestionPaiements] bascule onglet echeances - paiements current length=', this.paiements.length);
       this.loadPaiements();
     }
   }
@@ -180,13 +154,12 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
 
   onPaiementAjoute(): void {
     this.fermerModalAjout();
+    this.ongletActif = 'paiements';
     this.refreshStats();
     this.loadPaiements();
   }
 
   ngOnDestroy(): void {
-    if (this.statsSubscription) {
-      this.statsSubscription.unsubscribe();
-    }
+    this.statsSubscription?.unsubscribe();
   }
 }

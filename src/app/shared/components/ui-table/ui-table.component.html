@@ -6,28 +6,37 @@
           [ngClass]="col.headerClass">
         {{ col.label }}
       </th>
-  <th *ngIf="actions.length" style="width:80px;min-width:80px;padding:0 6px;text-align:center;">Actions</th>
+      <th *ngIf="actions.length" class="col-actions">Actions</th>
     </tr>
   </thead>
   <tbody>
+    <!-- État vide -->
+    <tr *ngIf="!data?.length" class="empty-row">
+      <td [attr.colspan]="columns.length + (actions.length ? 1 : 0)">
+        <i class="ri-inbox-line"></i>
+        Aucune donnée à afficher
+      </td>
+    </tr>
+
     <tr *ngFor="let row of data">
-    <td *ngFor="let col of columns" [ngClass]="col.cellClass"
-      [ngStyle]="col.width ? {'width': col.width, 'min-width': col.width, 'max-width': col.width} : {}">
+      <td *ngFor="let col of columns" [ngClass]="col.cellClass"
+          [ngStyle]="col.width ? {'width': col.width, 'min-width': col.width, 'max-width': col.width} : {}">
+
         <ng-container *ngIf="col.type === 'image'">
           <img [src]="row[col.key]" alt="photo" class="galerie-table-img" *ngIf="row[col.key]; else noImg" />
-          <ng-template #noImg><span style="color:#888">Aucune image</span></ng-template>
+          <ng-template #noImg><span class="cell-no-image">Aucune image</span></ng-template>
         </ng-container>
 
-        <!-- Edition individuelle : si la cellule est en édition -->
         <ng-container *ngIf="isEditing(row, col.key); else viewCell">
-          <input [(ngModel)]="editValue" style="width:110px;max-width:110px;padding:2px 6px;font-size:0.98em;display:inline-block;vertical-align:middle;" />
-          <button (click)="saveEdit(row, col.key)" style="background:none;border:none;color:#388e3c;margin-left:4px;cursor:pointer;">
+          <input [(ngModel)]="editValue" class="cell-edit-input" />
+          <button type="button" (click)="saveEdit(row, col.key)" class="cell-edit-btn cell-edit-confirm">
             <i class="ri-check-line"></i>
           </button>
-          <button (click)="cancelEdit()" style="background:none;border:none;color:#d32f2f;margin-left:2px;cursor:pointer;">
+          <button type="button" (click)="cancelEdit()" class="cell-edit-btn cell-edit-cancel">
             <i class="ri-close-line"></i>
           </button>
         </ng-container>
+
         <ng-template #viewCell>
           <ng-container [ngSwitch]="col.type">
             <ng-container *ngSwitchCase="'button'">
@@ -47,11 +56,11 @@
               <span *ngIf="col.render" [innerHTML]="col.render(row)"></span>
             </ng-container>
           </ng-container>
-          <!-- Bouton édition supprimé hors colonne Actions -->
         </ng-template>
       </td>
-      <td *ngIf="actions.length" style="min-width:80px;padding:0 6px;text-align:center;">
-        <div style="display:flex;gap:6px;justify-content:center;align-items:center;">
+
+      <td *ngIf="actions.length" class="col-actions">
+        <div class="actions-cell">
           <ng-container *ngFor="let act of actions">
             <ng-container *ngIf="(act.show ? act.show(row) : true)">
               <ui-icon-button

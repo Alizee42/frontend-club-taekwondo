@@ -6,12 +6,12 @@ import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { HorairesService } from '../../services/horaires.service';
 import { ClubService, Club } from '../../services/club.service';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-gestion-horaires-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiTitleComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, PageHeaderComponent],
   templateUrl: './gestion-horaires-super-admin.component.html',
   styleUrls: ['./gestion-horaires-super-admin.component.css']
 })

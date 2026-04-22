@@ -5,8 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ClubService, Club } from '../../services/club.service';
 import { labelFor as docLabelFor, normalizeStatus, unifyType } from '../../shared/documents/doc-utils';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 
@@ -44,7 +44,7 @@ interface Row {
 @Component({
   selector: 'app-documents-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTitleComponent, UiButtonComponent, UiTableComponent, UiModalComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiTableComponent, UiModalComponent, PageHeaderComponent],
   templateUrl: './documents-super-admin.component.html',
   styleUrls: ['./documents-super-admin.component.css']
 })

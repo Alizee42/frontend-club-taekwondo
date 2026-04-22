@@ -1,2 +1,26 @@
-h2 { color: #455a64; }
-p { font-size: 1.1em; }
+:host {
+  display: block;
+}
+
+.logs-placeholder {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 760px;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 252, 0.96));
+  box-shadow: 0 14px 28px -30px rgba(15, 23, 42, 0.4);
+}
+
+.logs-placeholder h2 {
+  margin: 0;
+  color: var(--color-text-1);
+  font-size: 1.1rem;
+}
+
+.logs-placeholder p {
+  margin: 0;
+  color: var(--color-text-2);
+  line-height: 1.65;
+}

@@ -1,175 +1,114 @@
-/* ================== Variables (fallback locales) ================== */
-:root{
-  --blue-main:#1E6091;
-  --blue-hover:#19517b;
-  --red-main:#E63946;
-  --red-hover:#c22f3a;
-  --card-bg:#ffffff;
-  --text-main:#0f172a;
-  --background-hover:#f5f7fb;
+.documents-container {
+  padding: 2rem;
 }
 
-/* ================== Layout global ================== */
-.documents-container{
-  padding:2rem;
-  margin:0 auto;
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 1.5rem;
 }
 
-/* ================== Header (titre centré + carte user) ================== */
-/* Header standard */
-.header-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px; }
-
-/* (user-info-card retiré) */
-
-/* Titre et header en mobile : on empile, on retire le position:absolute */
-@media (max-width: 720px){ .header-bar{ flex-wrap:wrap; } }
-
-/* ================== Intro ================== */
-h1{ color:var(--blue-main); text-align:center; }
-.intro{
-  text-align:center; color:var(--text-main);
-  margin-bottom:2rem; font-size:1.05rem;
+/* ── Grille 2 colonnes ── */
+.documents-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-/* ================== Grille 2 colonnes ================== */
-.documents-grid{
-  display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2rem;
-}
-@media (max-width: 920px){
-  .documents-grid{ grid-template-columns:1fr; }
-}
-
-/* ================== Bloc: Documents obligatoires ================== */
-.required-documents{
-  background-color:var(--card-bg);
-  padding:1.5rem;
-  border-radius:8px;
-  box-shadow:0 4px 6px rgba(0,0,0,.1);
-}
-.required-documents h2{ color:var(--blue-main); margin:0 0 1rem 0; }
-.required-documents .description{ color:var(--text-main); margin-bottom:1rem; }
-
-.required-documents ul{ list-style:none; padding:0; margin:0; }
-.required-documents li{
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:.5rem; padding:.5rem .75rem; border-radius:6px;
+/* ── En-têtes de carte ── */
+.card-header h3 {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
 }
 
-/* États basiques conservés (si ton TS renvoie .uploaded/.not-uploaded) */
-.required-documents li span.uploaded{ color:#166534; font-weight:bold; }
-.required-documents li span.not-uploaded{ color:#b45309; font-weight:bold; }
-
-/* Variante “chip” générique si le TS renvoie une classe personnalisée */
-.status-chip{
-  display:inline-flex; align-items:center; gap:.35rem; font-weight:700; font-size:.9rem;
-  padding:.25rem .55rem; border-radius:999px; border:1px solid transparent;
-}
-.status-chip.ok{ background:#ecfdf5; color:#166534; border-color:#a7f3d0; }
-.status-chip.wait{ background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-.status-chip.ko{ background:#fef2f2; color:#991b1b; border-color:#fecaca; }
-
-.tooltip-icon{
-  margin-left:.4rem; background:#ddd; color:#333; font-size:.8rem; font-weight:800;
-  width:1.1rem; height:1.1rem; border-radius:999px; display:inline-grid; place-items:center; cursor:pointer;
-  position:relative;
-}
-.tooltip-icon[title]::after{
-  content: attr(title);
-  position:absolute; bottom:125%; left:50%; transform:translateX(-50%);
-  background:#333; color:#fff; padding:.45rem .6rem; border-radius:4px; font-size:.8rem; white-space:nowrap;
-  opacity:0; visibility:hidden; transition:opacity .2s ease-in-out; z-index:10;
-}
-.tooltip-icon[title]:hover::after{ opacity:1; visibility:visible; }
-
-/* ================== Bloc: Upload ================== */
-.upload-section{
-  background-color:var(--card-bg);
-  padding:1.5rem;
-  border-radius:8px;
-  box-shadow:0 4px 6px rgba(0,0,0,.1);
-}
-.upload-section h2{ color:var(--blue-main); margin:0 0 1rem 0; }
-.upload-section .description{ color:var(--text-main); margin-bottom:1rem; }
-.upload-section .form-group{ margin-bottom:1rem; }
-.upload-section label{ display:block; font-weight:800; margin-bottom:.45rem; }
-
-/* Champs */
-.upload-section select,
-.upload-section input[type="file"]{
-  width:100%;
-  padding:.55rem .65rem;
-  border:1px solid #ddd;
-  border-radius:8px;
-  font-size:1rem;
-  box-sizing:border-box;
-  appearance:none;
-}
-.upload-section select:focus,
-.upload-section input[type="file"]:focus{
-  outline:none; border-color:var(--blue-main);
-  box-shadow:0 0 0 3px rgba(30,96,145,.15);
-}
-.error-message{ color:#b91c1c; display:block; margin-top:.3rem; }
-
-/* Bouton upload */
-.upload-section button{
-  background-color:var(--blue-main); color:#fff;
-  padding:.7rem 1.2rem; border:none; border-radius:10px; cursor:pointer; font-size:1rem; font-weight:800;
-  transition:filter .2s ease, transform .05s ease;
-}
-.upload-section button:hover{ filter:brightness(.97); }
-.upload-section button:disabled{ opacity:.6; cursor:not-allowed; }
-
-/* ================== Bloc: Liste des documents ================== */
-.documents-list{ grid-column:1 / -1; margin-top:2rem; }
-.documents-list h2{ color:var(--blue-main); margin:0 0 1rem 0; }
-
-.full-width-table{ width:100%; border-collapse:collapse; margin-top:1rem; }
-.full-width-table th, .full-width-table td{
-  padding:.75rem 1rem; text-align:left; border-bottom:1px solid #ddd;
-}
-.full-width-table th{
-  background-color:var(--blue-main); color:#fff; font-weight:bold; text-transform:uppercase; letter-spacing:.02em;
-}
-.full-width-table tr:hover{ background-color:var(--background-hover); }
-.full-width-table td{ color:var(--text-main); }
-.full-width-table td:last-child{
-  display:flex; gap:.5rem; justify-content:flex-start; flex-wrap:wrap;
+.section-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  margin: 0 0 1rem;
 }
 
-/* Statuts (table) — on garde tes classes existantes */
-.status-validé{ color:green; font-weight:bold; }
-.status-en-attente{ color:orange; font-weight:bold; }
-.status-refusé{ color:red; font-weight:bold; }
-
-/* Badges colorés cohérents */
-.badge{ display:inline-flex; align-items:center; font-weight:800; padding:.25rem .55rem; border-radius:999px; }
-.badge-payé{ background:#ecfdf5; color:#166534; }
-.badge-en-attente{ background:#fff7ed; color:#b45309; }
-.badge-annulé{ background:#fef2f2; color:#991b1b; }
-
-/* ================== Boutons d'action (alignés, plus de conflit) ================== */
-.btn-action{
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:.5rem .9rem;
-  border:none; border-radius:10px; cursor:pointer;
-  transition:background-color .2s ease, transform .05s ease, filter .2s ease;
-}
-.btn-action:disabled{ background-color:#ccc; color:#666; cursor:not-allowed; opacity:.6; }
-.btn-action:hover{ filter:brightness(.97); }
-.btn-action:active{ transform:translateY(1px); }
-
-.btn-edit{ background-color:var(--blue-main); color:#fff; }
-.btn-edit:hover{ background-color:var(--blue-hover); }
-.btn-delete{ background-color:var(--red-main); color:#fff; }
-.btn-delete:hover{ background-color:var(--red-hover); }
-
-/* ================== Barre info utilisateur (si utilisée ailleurs) ================== */
-.user-info-bar{
-  display:flex; align-items:center; justify-content:space-between;
-  background-color:#f9f9f9; padding:.8rem 1rem; border-radius:8px;
-  box-shadow:0 2px 4px rgba(0,0,0,.1); margin-bottom:1.5rem; font-size:.9rem;
+/* ── Liste documents obligatoires ── */
+.required-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-/* Nettoyage doublons */
-.refused{ color:red; font-weight:bold; margin-left:1rem; display:inline-flex; align-items:center; }
+.required-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.required-list li:nth-child(odd) {
+  background: var(--color-surface-2);
+}
+
+/* ── Zone d'upload ── */
+.upload-zone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  transition: border-color var(--t-fast);
+}
+
+.upload-zone:focus-within,
+.upload-zone:hover {
+  border-color: var(--brand-primary);
+}
+
+.upload-zone input[type="file"] {
+  width: 100%;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+/* ── Liste documents (full width) ── */
+.documents-list {
+  grid-column: 1 / -1;
+}
+
+.list-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.75rem;
+}
+
+.muted {
+  font-size: var(--text-sm);
+  color: var(--color-text-3);
+  text-align: center;
+  padding: 1rem;
+}
+
+/* ── Aperçu modal ── */
+.preview-img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .documents-container {
+    padding: 1rem;
+  }
+
+  .documents-grid {
+    grid-template-columns: 1fr;
+  }
+}

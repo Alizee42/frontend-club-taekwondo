@@ -1,316 +1,338 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { SuiviPaiementsComponent } from '../../shared/components/suivi-paiements/suivi-paiements.component';
+import { Club, ClubService } from '../../services/club.service';
 import { SuperAdminPaiementService } from '../../services/super-admin-paiement.service';
-import { ClubService, Club } from '../../services/club.service';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { AjoutPaiementComponent } from '../../admin/gestion-paiements/ajout-paiement/ajout-paiement.component';
 
 @Component({
   selector: 'app-gestion-paiements-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTitleComponent, SuiviPaiementsComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SuiviPaiementsComponent,
+    UiButtonComponent,
+    UiModalComponent,
+    PageHeaderComponent,
+    AjoutPaiementComponent
+  ],
   templateUrl: './gestion-paiements-super-admin.component.html',
   styleUrls: ['./gestion-paiements-super-admin.component.css']
 })
 export class GestionPaiementsSuperAdminComponent implements OnInit {
-  @ViewChild('suivi') suivi?: SuiviPaiementsComponent;
   clubs: Club[] = [];
   selectedClubId: number | 'all' = 'all';
   paiements: any[] = [];
   filteredPaiements: any[] = [];
+
   stats = {
     total: 0,
     count: 0,
     rembourses: 0,
     enAttente: 0
   };
+
   filter = {
     q: '',
-    dateDebut: '',
-    dateFin: '',
     statut: 'all',
-    // keep 'type' property for compatibility but toolbar no longer uses it
-    type: 'all',
     mode: 'all'
   };
-  // Vue globale : 'paiements' ou 'utilisateurs' (contrôle partagé)
+
   viewMode: 'paiements' | 'utilisateurs' = 'paiements';
-  // Recherche pour la vue 'utilisateurs' (utilisée par la toolbar)
-  searchUsers: string = '';
-  groupByParentLocal: boolean = false;
+  groupByParentLocal = false;
+
+  modalAjoutVisible = false;
   modalPaiementVisible = false;
   paiementSelectionne: any = null;
-  statutOptions = [
-    { value: 'all', label: 'Tous' },
-    { value: 'payé', label: 'Payé' },
-    { value: 'remboursé', label: 'Remboursé' },
-    { value: 'en attente', label: 'En attente' }
-  ];
-  typeOptions = [
-    { value: 'all', label: 'Tous' },
-    { value: 'cotisation', label: 'Cotisation' },
-    { value: 'licence', label: 'Licence' },
-    { value: 'autre', label: 'Autre' }
-  ];
-  // Colonnes pour ui-table
-  tableColumns: UiTableColumn[] = [
-    { key: 'club', label: 'Club', type: 'text' },
-    { key: 'datePaiement', label: 'Date', type: 'date', display: (row: any) => this.formatDate(row.datePaiement) },
-    { key: 'utilisateur', label: 'Payé par', type: 'text', display: (row: any) => `${row.utilisateurPrenom} ${row.utilisateurNom}` },
-    { key: 'membre', label: 'Pour', type: 'text', display: (row: any) => `${row.membrePrenom} ${row.membreNom}` },
-    { key: 'type', label: 'Type de paiement', type: 'text', display: (row: any) => `${row.type} – ${row.modePaiement}` },
-    { key: 'montantTotal', label: 'Total', type: 'number', cellClass: 'num', display: (row: any) => this.formatCurrency(row.montantTotal) },
-  { key: 'statut', label: 'Statut', type: 'text', render: (row: any) => this.getBadge(row.statut) }
-  ];
-  tableActions = [
-    { label: 'Voir', icon: 'ri-eye-line', action: 'details', variant: 'ghost' as const, title: 'Détail paiement' }
-  ];
-  // TrackBy pour ui-table (optionnel)
-  trackByPaiement(index: number, p: any) {
-    return p && p.id ? p.id : index;
-  }
-  // Modale ajout paiement
-  modalAjoutVisible = false;
-  ouvrirAjoutPaiement() {
-    this.modalAjoutVisible = true;
-  }
-  fermerModalAjout() {
-    this.modalAjoutVisible = false;
-  }
-  onPaiementAjoute() {
-    this.modalAjoutVisible = false;
-    // Rafraîchir la liste après ajout
-    this.paiementService.getAllPaiements().subscribe(res => {
-      this.paiements = Array.isArray(res) ? res : [];
-      this.applyFilters();
-    });
-  }
-  // Action du tableau (voir détail)
-  onAction(event: { action: string, row: any }) {
-    if (event.action === 'details') {
-      this.ouvrirDetailsPaiement(event.row);
-    }
-  }
 
-  onEcheanceAction(event: { action: string, row: any }) {
-    console.log('[SuperAdmin][Échéances] action', event);
-    if (event.action === 'details') this.ouvrirDetailsPaiement(event.row);
-  }
-  getClubLogo(clubId: number): string | null {
-    const club = this.clubs.find((c: any) => c.id === clubId);
-    if (!club) return null;
-    return (club as any).logoUrl || (club as any).logo || null;
-  }
   constructor(
     private paiementService: SuperAdminPaiementService,
     private clubService: ClubService
   ) {}
+
   ngOnInit(): void {
-    this.clubService.getClubs().subscribe(clubs => {
-      this.clubs = clubs;
-      console.log('[SuperAdmin][Paiements] clubs loaded:', this.clubs?.length, this.clubs?.slice ? this.clubs.slice(0,5) : this.clubs);
+    this.clubService.getClubs().subscribe((clubs) => {
+      this.clubs = clubs || [];
     });
-    this.paiementService.getAllPaiements().subscribe(res => {
-      this.paiements = Array.isArray(res) ? res : [];
-      // Calcul local des montants payés/restants si backend ne les fournit pas
-      try {
-        this.paiements.forEach((p: any) => {
-          if (Array.isArray(p.echeances) && p.echeances.length) {
-            p.montantPaye = p.echeances.reduce((s: number, e: any) => {
-              const st = (e && e.statut || '').toString().toLowerCase();
-              return (st === 'payé' || st === 'paye') ? s + (Number(e.montant) || 0) : s;
-            }, 0);
-          } else {
-            const st = (p.statut || '').toString().toLowerCase();
-            p.montantPaye = (st === 'payé' || st === 'paye') ? (Number(p.montantTotal) || 0) : 0;
-          }
-          p.montantRestant = Math.max(0, (Number(p.montantTotal) || 0) - (Number(p.montantPaye) || 0));
-        });
-      } catch (err) {
-        console.warn('[SuperAdmin][Paiements] erreur calcul montants locaux', err);
-      }
-      console.log('[SuperAdmin][Paiements] paiements loaded:', this.paiements.length, this.paiements.slice ? this.paiements.slice(0,5) : this.paiements);
-      this.applyFilters();
-    });
+
+    this.refresh();
   }
 
-  
-  /** Recompute montantPaye / montantRestant for a list of paiements */
-  private computeLocalMontants(list: any[]): void {
-    if (!Array.isArray(list)) return;
-    try {
-      list.forEach((p: any) => {
-        if (Array.isArray(p.echeances) && p.echeances.length) {
-          p.montantPaye = p.echeances.reduce((s: number, e: any) => {
-            const st = (e && e.statut || '').toString().toLowerCase();
-            return (st === 'payé' || st === 'paye') ? s + (Number(e.montant) || 0) : s;
-          }, 0);
-        } else {
-          const st = (p.statut || '').toString().toLowerCase();
-          p.montantPaye = (st === 'payé' || st === 'paye') ? (Number(p.montantTotal) || 0) : 0;
-        }
-        p.montantRestant = Math.max(0, (Number(p.montantTotal) || 0) - (Number(p.montantPaye) || 0));
-      });
-    } catch (err) {
-      console.warn('[SuperAdmin][Paiements] computeLocalMontants error', err);
+  get totalClubs(): number {
+    if (this.selectedClubId === 'all') {
+      return this.clubs.length;
     }
+
+    return this.filteredPaiements.reduce((setSize, paiement, index, array) => {
+      const currentSet = new Set(array.slice(0, index + 1).map((row: any) => Number(row.clubId)).filter((id) => !Number.isNaN(id)));
+      return currentSet.size;
+    }, 0);
   }
 
-  /** Normalise et renvoie un libellé de type cohérent */
-  libelleType(t?: string, ech?: { id?: number }[] | undefined): string {
-    const v = this.sansAccents ? this.sansAccents(t || '') : (t || '').toLowerCase();
-    if (v.includes('echel') || v.includes('echeanc') || v.includes('echean')) return 'Échelonné';
-    if (v.includes('unique') || v.includes('cotis') || v.includes('cotisation')) return 'Unique';
-    if (Array.isArray(ech) && ech.length > 0) return 'Échelonné';
-    return 'Unique';
+  ouvrirAjoutPaiement(): void {
+    this.modalAjoutVisible = true;
   }
 
-  /** Normalise et renvoie un libellé de mode de paiement cohérent */
-  libelleMode(m?: string): string {
-    const v = this.sansAccents ? this.sansAccents(m || '') : (m || '').toLowerCase();
-    if (!v) return '—';
-    if (v.includes('cb') || v.includes('carte') || v.includes('stripe') || v.includes('card')) return 'CB';
-    if (v.includes('virement') || v.includes('vir')) return 'Virement';
-    if (v.includes('espec') || v.includes('espace') || v.includes('espece') || v.includes('espèces')) return 'Espèces';
-    if (v.includes('cheque') || v.includes('chequ') || v.includes('cheq')) return 'Chèque';
-    if (v.includes('paypal')) return 'PayPal';
-    return 'Autre';
+  fermerModalAjout(): void {
+    this.modalAjoutVisible = false;
   }
 
-  /** Manual refresh triggered by toolbar */
+  onPaiementAjoute(): void {
+    this.fermerModalAjout();
+    this.refresh();
+  }
+
+  onClubChange(): void {
+    this.applyFilters();
+  }
+
   refresh(): void {
-    console.log('[SuperAdmin][Paiements] manual refresh');
     this.paiementService.getAllPaiements().subscribe({
       next: (res) => {
         this.paiements = Array.isArray(res) ? res : [];
         this.computeLocalMontants(this.paiements);
         this.applyFilters();
       },
-      error: (err) => {
-        console.error('[SuperAdmin][Paiements] refresh error', err);
+      error: () => {
+        this.paiements = [];
+        this.filteredPaiements = [];
+        this.computeStats();
       }
     });
   }
 
   resetFilters(): void {
-    this.filter = { q: '', dateDebut: '', dateFin: '', statut: 'all', type: 'all', mode: 'all' };
+    this.filter = {
+      q: '',
+      statut: 'all',
+      mode: 'all'
+    };
+    this.groupByParentLocal = false;
+    this.viewMode = 'paiements';
     this.applyFilters();
   }
 
-  /** Clear a single filter field and reapply filters */
-  clearFilter(key: 'q' | 'statut' | 'type' | 'mode') {
-    if (key === 'q') {
-      this.filter.q = '';
-    } else if (key === 'statut') {
-      this.filter.statut = 'all';
-    } else if (key === 'type') {
-      this.filter.type = 'all';
-    } else if (key === 'mode') {
-      this.filter.mode = 'all';
-    }
-    this.applyFilters();
-  }
+  applyFilters(): void {
+    const query = (this.filter.q || '').trim().toLowerCase();
+    const statut = this.normalize(this.filter.statut);
+    const mode = this.normalize(this.filter.mode);
 
-  /** Filtre minimal pour la recherche 'Par utilisateur' du toolbar (évite erreur template) */
-  filtrerUtilisateurs(): void {
-    // Pour l'instant on se contente de logguer; si on veut filtrer une liste d'utilisateurs
-    // il faudra ajouter la logique et la source de données correspondante.
-    console.log('[SuperAdmin][Paiements] filtrerUtilisateurs search=', this.searchUsers);
-    // TODO: implémenter le filtrage des utilisateurs si nécessaire
-  }
-  onClubChange() {
-    console.log('[SuperAdmin][Paiements] onClubChange selectedClubId=', this.selectedClubId);
-    this.applyFilters();
-  }
-  // onglet navigation removed — no-op
-  applyFilters() {
-    console.log('[SuperAdmin][Paiements] applyFilters start - total paiements=', this.paiements?.length, 'selectedClubId=', this.selectedClubId);
-    let data = this.paiements;
+    let data = [...this.paiements];
+
     if (this.selectedClubId !== 'all') {
-      const filterVal = this.selectedClubId;
-      if (typeof filterVal === 'number') {
-        data = data.filter(p => Number(p.clubId) === Number(filterVal));
-      } else {
-        // fallback: match by club name if filter is string
-        const fv = String(filterVal).toLowerCase();
-        data = data.filter(p => ((p.club || p.clubNom || p.clubName) || '').toString().toLowerCase().includes(fv) || String(p.clubId) === fv);
-      }
+      data = data.filter((paiement) => Number(paiement.clubId) === Number(this.selectedClubId));
     }
-    if (this.filter.dateDebut) {
-      const d1 = new Date(this.filter.dateDebut);
-      data = data.filter(p => new Date(p.datePaiement) >= d1);
+
+    if (query) {
+      data = data.filter((paiement) => {
+        const haystack = [
+          paiement.club,
+          paiement.clubNom,
+          paiement.clubName,
+          paiement.utilisateurPrenom,
+          paiement.utilisateurNom,
+          paiement.utilisateurEmail,
+          paiement.membrePrenom,
+          paiement.membreNom,
+          paiement.type,
+          paiement.modePaiement
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return haystack.includes(query);
+      });
     }
-    if (this.filter.dateFin) {
-      const d2 = new Date(this.filter.dateFin);
-      data = data.filter(p => new Date(p.datePaiement) <= d2);
+
+    if (statut !== 'all') {
+      data = data.filter((paiement) => this.normalize(paiement.statut).includes(statut));
     }
-    if (this.filter.statut !== 'all') {
-      data = data.filter(p => p.statut && p.statut.toLowerCase().includes(this.filter.statut));
+
+    if (mode !== 'all') {
+      data = data.filter((paiement) => this.normalize(this.libelleMode(paiement.modePaiement)).includes(mode));
     }
-    if (this.filter.type !== 'all') {
-      data = data.filter(p => p.type && p.type.toLowerCase().includes(this.filter.type));
-    }
-    this.filteredPaiements = data;
-    console.log('[SuperAdmin][Paiements] applyFilters end - filteredPaiements=', this.filteredPaiements.length, this.filteredPaiements.slice ? this.filteredPaiements.slice(0,5) : this.filteredPaiements);
+
+    this.filteredPaiements = data.sort((a, b) => {
+      const dateA = a.datePaiement ? new Date(a.datePaiement).getTime() : 0;
+      const dateB = b.datePaiement ? new Date(b.datePaiement).getTime() : 0;
+      return dateB - dateA;
+    });
+
     this.computeStats();
   }
-  computeStats() {
+
+  computeStats(): void {
     const paiements = this.filteredPaiements;
     this.stats.count = paiements.length;
-    this.stats.total = paiements.reduce((sum, p) => sum + (p.montantTotal || 0), 0);
-    this.stats.rembourses = paiements.filter(p => p.statut && p.statut.toLowerCase().includes('rembours')).length;
-    this.stats.enAttente = paiements.filter(p => p.statut && p.statut.toLowerCase().includes('attente')).length;
+    this.stats.total = paiements.reduce((sum, paiement) => sum + (Number(paiement.montantTotal) || 0), 0);
+    this.stats.rembourses = paiements.filter((paiement) => this.normalize(paiement.statut).includes('rembours')).length;
+    this.stats.enAttente = paiements.filter((paiement) => this.normalize(paiement.statut).includes('attente')).length;
   }
-  ouvrirDetailsPaiement(p: any) {
-    this.paiementSelectionne = p;
+
+  ouvrirDetailsPaiement(paiement: any): void {
+    this.paiementSelectionne = paiement;
     this.modalPaiementVisible = true;
   }
-  fermerModalPaiement() {
+
+  fermerModalPaiement(): void {
     this.modalPaiementVisible = false;
     this.paiementSelectionne = null;
   }
-  getBadge(statut: string) {
-    if (!statut) return '';
-    const s = statut.toLowerCase();
-    if (s.includes('payé')) return '<span class="badge status-validé">Payé</span>';
-    if (s.includes('attente')) return '<span class="badge status-en-attente">En attente</span>';
-    if (s.includes('rembours')) return '<span class="badge status-rembourse">Remboursé</span>';
-    if (s.includes('annul')) return '<span class="badge status-refusé">Annulé</span>';
-    return '<span class="badge">' + statut + '</span>';
-  }
-  
-  private sansAccents(s?: string): string { return (s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase(); }
-  formatDate(date: string | Date): string {
-    if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleDateString('fr-FR');
-  }
-  formatCurrency(val: number): string {
-    if (val == null) return '';
-    return val.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
-  }
-  exportCSV() {
-    const rows = this.filteredPaiements;
-    if (!rows.length) return;
-    const header = ['Club','Date','Payé par','Pour','Type de paiement','Total','Statut'];
-    const data = rows.map((row: any) => [
-      row.club,
-      this.formatDate(row.datePaiement),
-      `${row.utilisateurPrenom} ${row.utilisateurNom}`,
-      `${row.membrePrenom} ${row.membreNom}`,
-      `${row.type} – ${row.modePaiement}`,
-      row.montantTotal,
-      row.statut
-    ].join(';')).join('\n');
-    const csv = header.join(';') + '\n' + data;
-    const blob = new Blob([csv], { type: 'text/csv' });
+
+  exportCSV(): void {
+    if (!this.filteredPaiements.length) {
+      return;
+    }
+
+    const header = ['Club', 'Date', 'Paye par', 'Pour', 'Type', 'Mode', 'Montant', 'Statut'];
+    const rows = this.filteredPaiements.map((paiement: any) => [
+      this.getClubName(paiement),
+      this.formatDate(paiement.datePaiement),
+      `${paiement.utilisateurPrenom || ''} ${paiement.utilisateurNom || ''}`.trim(),
+      `${paiement.membrePrenom || ''} ${paiement.membreNom || ''}`.trim(),
+      this.libelleType(paiement.type, paiement.echeances),
+      this.libelleMode(paiement.modePaiement),
+      Number(paiement.montantTotal || 0),
+      paiement.statut || ''
+    ]);
+
+    const csv = [header, ...rows].map((row) => row.join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'paiements-clubs.csv';
-    a.click();
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'super-admin-paiements.csv';
+    anchor.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  getClubName(paiement: any): string {
+    if (!paiement) {
+      return '';
+    }
+
+    if (paiement.club || paiement.clubNom || paiement.clubName) {
+      return paiement.club || paiement.clubNom || paiement.clubName;
+    }
+
+    const club = this.clubs.find((item) => Number(item.id) === Number(paiement.clubId));
+    return club?.nom || '';
+  }
+
+  getBadgeLabel(statut?: string): string {
+    const normalized = this.normalize(statut);
+    if (normalized.includes('paye')) {
+      return 'Paye';
+    }
+    if (normalized.includes('rembours')) {
+      return 'Rembourse';
+    }
+    if (normalized.includes('annul')) {
+      return 'Annule';
+    }
+    if (normalized.includes('retard')) {
+      return 'En retard';
+    }
+    return 'En attente';
+  }
+
+  getBadgeClass(statut?: string): string {
+    const normalized = this.normalize(statut);
+    if (normalized.includes('paye')) {
+      return 'status-chip status-chip--success';
+    }
+    if (normalized.includes('rembours')) {
+      return 'status-chip status-chip--info';
+    }
+    if (normalized.includes('annul')) {
+      return 'status-chip status-chip--neutral';
+    }
+    if (normalized.includes('retard')) {
+      return 'status-chip status-chip--danger';
+    }
+    return 'status-chip status-chip--warning';
+  }
+
+  libelleType(type?: string, echeances?: { id?: number }[] | undefined): string {
+    const normalized = this.normalize(type);
+    if (normalized.includes('echel') || normalized.includes('echeanc')) {
+      return 'Echelonne';
+    }
+    if (Array.isArray(echeances) && echeances.length > 0) {
+      return 'Echelonne';
+    }
+    return 'Unique';
+  }
+
+  libelleMode(mode?: string): string {
+    const normalized = this.normalize(mode);
+    if (!normalized) {
+      return '-';
+    }
+    if (normalized.includes('cb') || normalized.includes('stripe') || normalized.includes('carte')) {
+      return 'CB';
+    }
+    if (normalized.includes('virement') || normalized.includes('vir')) {
+      return 'Virement';
+    }
+    if (normalized.includes('espec') || normalized.includes('espece') || normalized.includes('espace')) {
+      return 'Especes';
+    }
+    if (normalized.includes('cheq')) {
+      return 'Cheque';
+    }
+    return 'Autre';
+  }
+
+  formatDate(date: string | Date): string {
+    if (!date) {
+      return '';
+    }
+
+    return new Date(date).toLocaleDateString('fr-FR');
+  }
+
+  formatCurrency(value: number): string {
+    if (value == null) {
+      return '';
+    }
+
+    return value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+  }
+
+  private computeLocalMontants(list: any[]): void {
+    if (!Array.isArray(list)) {
+      return;
+    }
+
+    list.forEach((paiement: any) => {
+      if (Array.isArray(paiement.echeances) && paiement.echeances.length) {
+        paiement.montantPaye = paiement.echeances.reduce((sum: number, echeance: any) => {
+          const statut = this.normalize(echeance?.statut);
+          return statut === 'paye' ? sum + (Number(echeance?.montant) || 0) : sum;
+        }, 0);
+      } else {
+        paiement.montantPaye = this.normalize(paiement.statut) === 'paye' ? Number(paiement.montantTotal) || 0 : 0;
+      }
+
+      paiement.montantRestant = Math.max(
+        0,
+        (Number(paiement.montantTotal) || 0) - (Number(paiement.montantPaye) || 0)
+      );
+    });
+  }
+
+  private normalize(value: any): string {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .trim();
   }
 }

@@ -1,25 +1,25 @@
-<div class="utilisateurs-global">
-  <div class="header-bar-utilisateurs">
-    <ui-title [level]="1" text="Gestion des utilisateurs" subtitle="Créer et gérer les comptes utilisateurs" icon="ri-user-line">
-      <div title-actions>
-        <ui-button icon="ri-user-add-line" label="Ajouter un utilisateur" (clicked)="onAddUtilisateur()" variant="primary"></ui-button>
-      </div>
-    </ui-title>
+<div class="page-shell">
+  <app-page-header title="Gestion des utilisateurs" icon="ri-user-line" subtitle="Créer et gérer les comptes utilisateurs">
+    <ng-container page-header-actions>
+      <ui-button icon="ri-user-add-line" label="Ajouter un utilisateur" (clicked)="onAddUtilisateur()" variant="primary"></ui-button>
+    </ng-container>
+  </app-page-header>
+  <div class="table-wrap">
+    <ui-table
+      [columns]="columns"
+      [data]="utilisateurs"
+      [actions]="actions"
+      (actionClick)="onTableAction($event)">
+    </ui-table>
   </div>
-  <ui-table
-    [columns]="columns"
-    [data]="utilisateurs"
-    [actions]="actions"
-    (actionClick)="onTableAction($event)"
-  ></ui-table>
-
-  <ui-modal [open]="showModal" [title]="mode === 'ajout' ? 'Ajouter un utilisateur' : 'Modifier l\'utilisateur'" (closed)="onCancelForm()">
-    <app-utilisateur-form
-      [utilisateur]="utilisateurEnCours"
-      [mode]="mode"
-      [clubs]="clubs"
-      (submitForm)="onSubmitForm($event)"
-      (cancel)="onCancelForm()"
-    ></app-utilisateur-form>
-  </ui-modal>
 </div>
+
+<ui-modal [open]="showModal" [title]="mode === 'ajout' ? 'Ajouter un utilisateur' : 'Modifier l\'utilisateur'" (closed)="onCancelForm()">
+  <app-utilisateur-form
+    [utilisateur]="utilisateurEnCours"
+    [mode]="mode"
+    [clubs]="clubs"
+    (submitForm)="onSubmitForm($event)"
+    (cancel)="onCancelForm()">
+  </app-utilisateur-form>
+</ui-modal>

@@ -1,100 +1,117 @@
-<div class="documents-container">
-  <div class="header-bar">
-  <ui-title [level]="2" text="Gestion des documents" align="left" icon="ri-file-text-line"></ui-title>
-  </div>
+<div class="page-shell">
+  <app-page-header title="Documents de l'enfant" icon="ri-file-text-line"></app-page-header>
 
-  <!-- Sélecteur enfant -->
-  <div class="kid-picker" *ngIf="enfants?.length">
-    <label for="kidSelect">Sélectionner l’enfant :</label>
-    <select id="kidSelect" [(ngModel)]="selectedKidId" (change)="onSelectKid()">
-      <option [ngValue]="null" disabled selected hidden>Sélectionnez un enfant </option>
-      <option *ngFor="let e of enfants" [value]="e.id">
-        {{ e.prenom }} {{ e.nom }}
-        <ng-container *ngIf="e.numeroLicence">— #{{ e.numeroLicence }}</ng-container>
-      </option>
-    </select>
-  </div>
+  <app-empty-state
+    *ngIf="!enfants?.length"
+    icon="ri-file-text-line"
+    title="Aucun enfant lié à ce compte"
+    description="Contactez l'administrateur pour associer un membre à votre compte.">
+  </app-empty-state>
 
-  <p class="intro" *ngIf="!enfants?.length">Aucun enfant lié à ce compte.</p>
-
-  <div class="documents-grid" *ngIf="selectedKidId">
-    <!-- Documents requis -->
-    <div class="required-documents">
-      <h2>Documents obligatoires</h2>
-      <p class="description">Ces documents sont nécessaires pour valider l’inscription :</p>
-      <ul>
-        <li *ngFor="let doc of requiredDocuments">
-          <span>{{ doc.label }}</span>
-          <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
-            <span class="status-chip" [class.ok]="statusInfo.state==='validé'"
-              [class.wait]="statusInfo.state==='en_attente'" [class.ko]="statusInfo.state==='refusé'">
-              <i class="ri-check-line" *ngIf="statusInfo.state==='validé'"></i>
-              <i class="ri-time-line" *ngIf="statusInfo.state==='en_attente'"></i>
-              <i class="ri-close-line" *ngIf="statusInfo.state==='refusé'"></i>
-              {{ statusInfo.text }}
-              <i *ngIf="statusInfo.tooltip" class="tooltip-icon" [title]="statusInfo.tooltip">i</i>
-            </span>
-          </ng-container>
-        </li>
-      </ul>
+  <ng-container *ngIf="enfants?.length">
+    <div class="filters-bar">
+      <select id="kidSelect" class="form-select" [(ngModel)]="selectedKidId" (change)="onSelectKid()">
+        <option [ngValue]="null" disabled selected hidden>Sélectionnez un enfant</option>
+        <option *ngFor="let e of enfants" [value]="e.id">
+          {{ e.prenom }} {{ e.nom }}<ng-container *ngIf="e.numeroLicence"> — #{{ e.numeroLicence }}</ng-container>
+        </option>
+      </select>
     </div>
 
-    <!-- Upload -->
-    <div class="upload-section">
-      <h2>Ajouter un document</h2>
-      <p class="description">Sélectionnez le type et téléversez le fichier pour l’enfant choisi.</p>
-
-      <form (ngSubmit)="onUploadDocumentForKid()" enctype="multipart/form-data" novalidate>
-        <div class="form-group">
-          <label for="documentType">Type de document :</label>
-          <select id="documentType" [(ngModel)]="documentType" name="documentType" required>
-            <option [ngValue]="null" disabled selected hidden>Sélectionnez un document</option>
-            <option *ngFor="let doc of requiredDocuments" [value]="doc.type" [disabled]="doc.uploaded">
-              {{ doc.label }}
-            </option>
-          </select>
+    <div class="documents-grid" *ngIf="selectedKidId">
+      <!-- Documents obligatoires -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Documents obligatoires</h3>
         </div>
-
-        <div class="form-group">
-          <label for="documentFile">Fichier :</label>
-          <input id="documentFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.png,.jpg,.jpeg"
-            required />
-          <small class="error-message" *ngIf="selectedFile && !isValidFile(selectedFile)">
-            Type ou taille de fichier invalide. Fichier PNG, JPEG ou PDF &lt; 5 Mo.
-          </small>
+        <div class="card-body">
+          <p class="section-desc">Ces documents sont nécessaires pour valider l'inscription.</p>
+          <ul class="required-list">
+            <li *ngFor="let doc of requiredDocuments">
+              <span>{{ doc.label }}</span>
+              <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
+                <span class="status-badge"
+                      [class.status--success]="statusInfo.state === 'validé'"
+                      [class.status--warning]="statusInfo.state === 'en_attente'"
+                      [class.status--danger]="statusInfo.state === 'refusé'">
+                  <i class="ri-check-line" *ngIf="statusInfo.state === 'validé'"></i>
+                  <i class="ri-time-line" *ngIf="statusInfo.state === 'en_attente'"></i>
+                  <i class="ri-close-line" *ngIf="statusInfo.state === 'refusé'"></i>
+                  {{ statusInfo.text }}
+                  <i *ngIf="statusInfo.tooltip" class="tooltip-icon" [title]="statusInfo.tooltip">i</i>
+                </span>
+              </ng-container>
+            </li>
+          </ul>
         </div>
+      </div>
 
-        <button type="submit" class="btn-upload"
-          [disabled]="!selectedKidId || !documentType || !selectedFile || !isValidFile(selectedFile)">
-          Téléverser
-        </button>
-      </form>
+      <!-- Upload -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Ajouter un document</h3>
+        </div>
+        <div class="card-body">
+          <p class="section-desc">Sélectionnez le type et téléversez le fichier pour l'enfant choisi.</p>
+          <form (ngSubmit)="onUploadDocumentForKid()" enctype="multipart/form-data" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="documentType">Type de document</label>
+              <select id="documentType" class="form-select" [(ngModel)]="documentType" name="documentType" required>
+                <option [ngValue]="null" disabled selected hidden>Sélectionnez un document</option>
+                <option *ngFor="let doc of requiredDocuments" [value]="doc.type" [disabled]="doc.uploaded">
+                  {{ doc.label }}
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="documentFile">Fichier</label>
+              <div class="upload-zone">
+                <input id="documentFile" type="file"
+                       (change)="onFileSelected($event)"
+                       accept=".pdf,.png,.jpg,.jpeg"
+                       required />
+              </div>
+              <small class="field-error" *ngIf="selectedFile && !isValidFile(selectedFile)">
+                Type ou taille invalide. PNG, JPEG ou PDF, max 5 Mo.
+              </small>
+            </div>
+            <button type="submit" class="btn btn-primary"
+                    [disabled]="!selectedKidId || !documentType || !selectedFile || !isValidFile(selectedFile)">
+              <i class="ri-upload-2-line"></i> Téléverser
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Liste des documents -->
+      <div class="documents-list">
+        <h3 class="list-title">Documents de l'enfant</h3>
+        <div class="table-wrap">
+          <ui-table
+            [columns]="tableColumns"
+            [data]="rows"
+            [actions]="tableActions"
+            (actionClick)="onActionTable($event)">
+          </ui-table>
+        </div>
+      </div>
     </div>
-
-    <!-- Liste des documents (ui-table) -->
-    <div class="documents-list">
-      <h2>Documents de l’enfant</h2>
-      <ui-table
-        [columns]="tableColumns"
-        [data]="rows"
-        [actions]="tableActions"
-        (actionClick)="onActionTable($event)">
-      </ui-table>
-
-      <!-- Modale d'aperçu via UiModal (sans actions Ouvrir/Télécharger) -->
-      <ui-modal [open]="!!previewing" (closed)="closePreview()" [title]="previewing?.nomDocument || 'Aperçu'">
-        <!-- IMAGE -->
-        <ng-container *ngIf="previewing && isImage(previewing.nomDocument); else pdfBlock2">
-          <img [attr.src]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null" alt="Aperçu image"
-               style="max-height:70vh;width:100%;object-fit:contain;" />
-        </ng-container>
-        <!-- PDF -->
-        <ng-template #pdfBlock2>
-          <object *ngIf="previewing" [data]="getSafeUrl(previewing.cheminFichier)" type="application/pdf" width="100%" height="600">
-            <p>Impossible d’afficher le PDF.</p>
-          </object>
-        </ng-template>
-      </ui-modal>
-    </div>
-  </div>
+  </ng-container>
 </div>
+
+<ui-modal [open]="!!previewing" (closed)="closePreview()" [title]="previewing?.nomDocument || 'Aperçu'">
+  <ng-container *ngIf="previewing && isImage(previewing.nomDocument); else pdfBlock2">
+    <img [attr.src]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null"
+         alt="Aperçu image"
+         class="preview-img" />
+  </ng-container>
+  <ng-template #pdfBlock2>
+    <object *ngIf="previewing"
+            [data]="getSafeUrl(previewing.cheminFichier)"
+            type="application/pdf"
+            width="100%"
+            height="600">
+      <p>Impossible d'afficher le PDF.</p>
+    </object>
+  </ng-template>
+</ui-modal>

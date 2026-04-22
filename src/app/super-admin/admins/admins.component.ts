@@ -6,13 +6,14 @@ import { environment } from '../../../environments/environment';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   standalone: true,
   selector: 'app-super-admin-admins',
   templateUrl: './admins.component.html',
   styleUrls: ['./admins.component.css'],
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent]
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, PageHeaderComponent]
 })
 export class AdminsComponent {
   getClubName(clubId: any): string {

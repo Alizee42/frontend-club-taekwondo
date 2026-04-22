@@ -1,90 +1,101 @@
-<div class="documents-container">
-  <div class="header-bar">
-  <ui-title [level]="2" text="Gestion des documents" align="left" icon="ri-file-text-line"></ui-title>
-  </div>
-
-  <p class="intro">Ajoutez vos documents obligatoires pour compléter votre inscription.</p>
+<div class="page-shell">
+  <app-page-header title="Mes documents" icon="ri-file-text-line"></app-page-header>
 
   <div class="documents-grid">
-    <!-- 📄 Documents obligatoires -->
-    <div class="required-documents">
-      <h2>Documents obligatoires</h2>
-      <p class="description">Ces documents sont nécessaires pour valider votre inscription :</p>
-      <ul>
-        <li *ngFor="let doc of requiredDocuments">
-          <span>{{ doc.label }}</span>
-          <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
-            <span class="status-chip"
-                  [class.ok]="statusInfo.state==='validé'"
-                  [class.wait]="statusInfo.state==='en_attente'"
-                  [class.ko]="statusInfo.state==='refusé'"
-                  [title]="statusInfo.tooltip || ''">
-              {{ statusInfo.state==='validé' ? '✔' : (statusInfo.state==='en_attente' ? '⏳' : '❌') }}
-              {{ statusInfo.text }}
-            </span>
-          </ng-container>
-        </li>
-      </ul>
+    <!-- Documents obligatoires -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Documents obligatoires</h3>
+      </div>
+      <div class="card-body">
+        <p class="section-desc">Ces documents sont nécessaires pour valider votre inscription.</p>
+        <ul class="required-list">
+          <li *ngFor="let doc of requiredDocuments">
+            <span>{{ doc.label }}</span>
+            <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
+              <span class="status-badge"
+                    [class.status--success]="statusInfo.state === 'validé'"
+                    [class.status--warning]="statusInfo.state === 'en_attente'"
+                    [class.status--danger]="statusInfo.state === 'refusé'">
+                <i class="ri-check-line" *ngIf="statusInfo.state === 'validé'"></i>
+                <i class="ri-time-line" *ngIf="statusInfo.state === 'en_attente'"></i>
+                <i class="ri-close-line" *ngIf="statusInfo.state === 'refusé'"></i>
+                {{ statusInfo.text }}
+              </span>
+            </ng-container>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <!-- ⬆️ Formulaire d'upload -->
-    <div class="upload-section">
-      <h2>Ajouter un document</h2>
-      <p class="description">Sélectionnez le type de document et téléversez le fichier correspondant.</p>
-      <form (ngSubmit)="onUploadDocument()" enctype="multipart/form-data">
-        <div class="form-group">
-          <label for="documentType">Type de document :</label>
-          <select id="documentType" class="styled-select"
-                  [(ngModel)]="documentType" name="documentType" required>
-            <option *ngFor="let doc of requiredDocuments"
-                    [value]="doc.type" [disabled]="doc.uploaded">
-              {{ doc.label }}
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="documentFile">Fichier :</label>
-          <input type="file" id="documentFile" accept=".pdf,.png,.jpg,.jpeg"
-                 (change)="onFileSelected($event)" required />
-          <small class="error-message" *ngIf="selectedFile && !isValidFile(selectedFile)">
-            Type ou taille de fichier invalide. Fichier PNG, JPEG ou PDF &lt; 5 Mo.
-          </small>
-        </div>
-        <button type="submit" class="btn-upload">Téléverser</button>
-      </form>
+    <!-- Formulaire d'upload -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Ajouter un document</h3>
+      </div>
+      <div class="card-body">
+        <p class="section-desc">Sélectionnez le type de document et téléversez le fichier correspondant.</p>
+        <form (ngSubmit)="onUploadDocument()" enctype="multipart/form-data">
+          <div class="form-group">
+            <label class="form-label" for="documentType">Type de document</label>
+            <select id="documentType" class="form-select"
+                    [(ngModel)]="documentType" name="documentType" required>
+              <option *ngFor="let doc of requiredDocuments" [value]="doc.type" [disabled]="doc.uploaded">
+                {{ doc.label }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="documentFile">Fichier</label>
+            <div class="upload-zone">
+              <input type="file" id="documentFile"
+                     accept=".pdf,.png,.jpg,.jpeg"
+                     (change)="onFileSelected($event)"
+                     required />
+            </div>
+            <small class="field-error" *ngIf="selectedFile && !isValidFile(selectedFile)">
+              Type ou taille invalide. PNG, JPEG ou PDF, max 5 Mo.
+            </small>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="ri-upload-2-line"></i> Téléverser
+          </button>
+        </form>
+      </div>
     </div>
 
-    <!-- 📂 Liste des documents -->
+    <!-- Liste des documents -->
     <div class="documents-list">
-      <h2>Vos documents</h2>
-      <ui-table
-        [columns]="tableColumns"
-        [data]="rows"
-        [actions]="tableActions"
-        (actionClick)="onActionTable($event)">
-      </ui-table>
+      <h3 class="list-title">Vos documents</h3>
+      <div class="table-wrap">
+        <ui-table
+          [columns]="tableColumns"
+          [data]="rows"
+          [actions]="tableActions"
+          (actionClick)="onActionTable($event)">
+        </ui-table>
+      </div>
     </div>
   </div>
-
-  <!-- Aperçu modal -->
-  <ui-modal
-    [open]="!!previewing"
-    (closed)="closePreview()"
-    [title]="previewing?.nomDocument || 'Aperçu'">
-    <ng-container *ngIf="previewing as d">
-      <div class="preview-content">
-        <ng-container *ngIf="d.cheminFichier as p">
-          <ng-container *ngIf="isPdf(p); else imagePreview">
-            <object [data]="getSafeUrl(p)" type="application/pdf" width="100%" height="600px">
-              <p>Impossible d’afficher le PDF. <a [href]="rawUrl(p)" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>.</p>
-            </object>
-          </ng-container>
-          <ng-template #imagePreview>
-            <img [src]="rawUrl(p)" alt="aperçu document" style="max-width:100%; max-height:600px; display:block; margin:0 auto;" />
-          </ng-template>
-        </ng-container>
-        <div *ngIf="!d.cheminFichier" class="muted">Aucun fichier à prévisualiser.</div>
-      </div>
-    </ng-container>
-  </ui-modal>
 </div>
+
+<ui-modal
+  [open]="!!previewing"
+  (closed)="closePreview()"
+  [title]="previewing?.nomDocument || 'Aperçu'">
+  <ng-container *ngIf="previewing as d">
+    <ng-container *ngIf="d.cheminFichier as p">
+      <ng-container *ngIf="isPdf(p); else imagePreview">
+        <object [data]="getSafeUrl(p)" type="application/pdf" width="100%" height="600px">
+          <p>Impossible d'afficher le PDF.
+            <a [href]="rawUrl(p)" target="_blank" rel="noopener">Ouvrir dans un onglet</a>.
+          </p>
+        </object>
+      </ng-container>
+      <ng-template #imagePreview>
+        <img [src]="rawUrl(p)" alt="aperçu document" class="preview-img" />
+      </ng-template>
+    </ng-container>
+    <p *ngIf="!d.cheminFichier" class="muted">Aucun fichier à prévisualiser.</p>
+  </ng-container>
+</ui-modal>

@@ -1,124 +1,113 @@
-<div class="gestion-actualites-container">
+<div class="page-shell">
+  <app-page-header
+    title="Gestion des actualites"
+    icon="ri-newspaper-line"
+    subtitle="Publier, modifier et mettre en avant les actualites du club"
+  >
+    <ng-container page-header-actions>
+      <ui-button
+        label="Ajouter une actualite"
+        icon="ri-add-line"
+        variant="primary"
+        (clicked)="openModal()"
+      ></ui-button>
+    </ng-container>
+  </app-page-header>
 
-  <!-- Bandeau titre -->
-  <div class="page-header">
-  <h2 class="page-title">Gestion des Actualités</h2>
-    <button class="btn-add" (click)="openModal()">
-      <i class="ri-add-line"></i> Nouvelle actualité
-    </button>
+  <div class="filters-bar">
+    <input
+      type="text"
+      class="form-input"
+      placeholder="Rechercher une actualite..."
+      [(ngModel)]="searchTerm"
+      name="searchTerm"
+    />
+
+    <select class="form-select" [(ngModel)]="typeFilter" name="typeFilter">
+      <option value="">Tous les types</option>
+      <option *ngFor="let option of typeOptions" [value]="option.value">{{ option.label }}</option>
+    </select>
+
+    <label class="filters-check ms-auto">
+      <input type="checkbox" [(ngModel)]="featuredOnly" name="featuredOnly" />
+      A la une uniquement
+    </label>
   </div>
 
-  <!-- Barre outils tableau -->
-  <div class="table-toolbar">
-    <h2><i class="ri-list-check"></i> Liste des Actualités</h2>
-    <div class="search-box">
-      <i class="ri-search-line"></i>
-      <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" name="searchTerm" />
-    </div>
+  <div class="table-wrap">
+    <ui-table
+      [columns]="columns"
+      [data]="filteredActualites()"
+      [actions]="actions"
+      (actionClick)="onTableAction($event)"
+    ></ui-table>
   </div>
-
-  <!-- Tableau -->
-  <div class="table-wrapper">
-    <table class="actualites-table">
-      <thead>
-        <tr>
-          <th>Titre</th>
-          <th>Type</th>
-          <th>Date</th>
-          <th>Image</th>
-          <th>À la une</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-  <tr *ngFor="let actu of filteredActualites()" [class.featured-row]="actu.isFeatured">
-          <td>{{ actu.titre }}</td>
-          <td>{{ actu.typeActu }}</td>
-          <td>{{ actu.datePublication | date: 'dd/MM/yyyy' }}</td>
-          <td>
-            <img *ngIf="actu.imageUrl" [src]="actu.imageUrl" class="thumbnail" />
-          </td>
-          <td>
-            <span *ngIf="actu.isFeatured" class="badge-featured-admin">🌟 À la une</span>
-            <button *ngIf="!actu.isFeatured" (click)="setFeatured(actu)" class="btn-feature-admin">
-              🌟 Mettre à la une
-            </button>
-          </td>
-          <td>
-            <button (click)="editActualite(actu)" class="btn-edit">
-              <i class="ri-edit-line"></i>
-            </button>
-            <button (click)="deleteActualite(actu.id!)" class="btn-delete">
-              <i class="ri-delete-bin-line"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Modale formulaire -->
-  <div class="modal-overlay" *ngIf="isModalOpen">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h2>
-          <i class="ri-file-edit-line"></i>
-          {{ actualite.id ? 'Modifier' : 'Nouvelle' }} actualité
-        </h2>
-        <button class="modal-close" (click)="closeModal()">
-          <i class="ri-close-line"></i>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <form (ngSubmit)="onSubmit()" #actualiteForm="ngForm" class="modal-form">
-          <div class="form-group">
-            <label for="titre">Titre</label>
-            <input type="text" id="titre" [(ngModel)]="actualite.titre" name="titre" required />
-          </div>
-
-          <div class="form-group">
-            <label for="typeActu">Type</label>
-            <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
-              <option value="evenement">Événement</option>
-              <option value="competition">Compétition</option>
-              <option value="annonce">Annonce</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="contenu">Contenu</label>
-            <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="image">Image</label>
-            <input type="file" id="image" (change)="onImageSelected($event)" />
-            <div class="image-preview" *ngIf="imageUrl">
-              <img [src]="imageUrl" alt="Prévisualisation" />
-            </div>
-          </div>
-
-          <div class="form-featured">
-            <label class="switch">
-              <input type="checkbox" [(ngModel)]="actualite.isFeatured" name="isFeatured" />
-              <span class="slider round"></span>
-            </label>
-            <div>
-              <strong>Mettre cette actualité à la une</strong>
-              <p>Elle sera affichée en première position sur le site.</p>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <div class="modal-actions">
-        <button type="submit" class="btn-submit" (click)="onSubmit()">
-          {{ actualite.id ? 'Mettre à jour' : 'Ajouter' }}
-        </button>
-        <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
-      </div>
-    </div>
-  </div>
-
 </div>
+
+<ui-modal
+  [open]="isModalOpen"
+  [title]="actualite.id ? 'Modifier une actualite' : 'Nouvelle actualite'"
+  (closed)="closeModal()"
+>
+  <form class="actualite-form" #actualiteForm="ngForm" (ngSubmit)="onSubmit()">
+    <div class="form-grid">
+      <div class="form-group form-group--full">
+        <label for="titre">Titre</label>
+        <input id="titre" type="text" [(ngModel)]="actualite.titre" name="titre" required />
+      </div>
+
+      <div class="form-group">
+        <label for="typeActu">Type</label>
+        <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
+          <option value="" disabled>Selectionner un type</option>
+          <option *ngFor="let option of typeOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="datePublication">Date de publication</label>
+        <input
+          id="datePublication"
+          type="text"
+          [ngModel]="actualite.datePublication | date: 'dd/MM/yyyy'"
+          name="datePublicationDisplay"
+          disabled
+        />
+      </div>
+
+      <div class="form-group form-group--full">
+        <label for="contenu">Contenu</label>
+        <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
+      </div>
+
+      <div class="form-group form-group--full">
+        <label for="image">Image</label>
+        <input id="image" type="file" accept="image/*" (change)="onImageSelected($event)" />
+        <p *ngIf="imageError" class="form-error">{{ imageError }}</p>
+      </div>
+
+      <div class="form-group form-group--full image-preview" *ngIf="imageUrl">
+        <label>Apercu</label>
+        <img [src]="imageUrl" alt="Apercu de l'image" />
+      </div>
+    </div>
+
+    <div class="featured-toggle">
+      <input id="isFeatured" type="checkbox" [(ngModel)]="actualite.isFeatured" name="isFeatured" />
+      <div class="featured-toggle-copy">
+        <label for="isFeatured">Mettre cette actualite a la une</label>
+        <p>Elle sera mise en avant sur le site du club.</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
+      <ui-button
+        [label]="actualite.id ? 'Mettre a jour' : 'Ajouter'"
+        variant="primary"
+        type="submit"
+        [disabled]="!!actualiteForm.invalid"
+      ></ui-button>
+    </div>
+  </form>
+</ui-modal>

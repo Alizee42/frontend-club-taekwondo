@@ -1,39 +1,36 @@
-<div class="container">
-  <div class="header-bar">
-  <ui-title text="Gestion des enseignants" [level]="2" align="left" icon="ri-user-star-line" [logoUrl]="currentClubLogo"></ui-title>
-    <ui-button label="Ajouter" (clicked)="openCreateModal()" [disabled]="!selectedClubId"></ui-button>
-  </div>
-
-  <div class="controls-row">
-    <label for="club">Club</label>
-    <select id="club" [(ngModel)]="selectedClubId" (change)="onClubChange()">
+<div class="page-shell">
+  <app-page-header title="Gestion des enseignants" icon="ri-user-star-line">
+    <ng-container page-header-actions>
+      <ui-button label="Ajouter" (clicked)="openCreateModal()" [disabled]="!selectedClubId"></ui-button>
+    </ng-container>
+  </app-page-header>
+  <div class="filters-bar">
+    <select class="form-select" [(ngModel)]="selectedClubId" (change)="onClubChange()">
       <option *ngFor="let c of clubs" [value]="c.id">{{ c.name || c.nom }}</option>
     </select>
   </div>
-
-  <div class="row">
-    <div *ngIf="loading">Chargement...</div>
-    <ui-table *ngIf="!loading"
+  <div class="table-wrap">
+    <ui-table
       [columns]="columns"
       [data]="enseignants"
       [actions]="actions"
       (actionClick)="handleAction($event)">
     </ui-table>
   </div>
+</div>
 
-  <ui-modal [open]="openModal" [title]="selected ? 'Modifier un enseignant' : 'Ajouter un enseignant'" (closed)="openModal=false">
-    <div class="modal-scroll">
-      <div class="photo-preview" *ngIf="photoPreviewUrl || form.photoUrl">
-        <img [src]="photoPreviewUrl || toFullImageUrl(form.photoUrl)" alt="Prévisualisation" />
-        <div class="uploading" *ngIf="uploadingPhoto">Téléversement…</div>
-      </div>
-      <ui-form
+<ui-modal [open]="openModal" [title]="selected ? 'Modifier un enseignant' : 'Ajouter un enseignant'" (closed)="openModal=false">
+  <div class="modal-scroll">
+    <div class="photo-preview" *ngIf="photoPreviewUrl || form.photoUrl">
+      <img [src]="photoPreviewUrl || toFullImageUrl(form.photoUrl)" alt="Prévisualisation" />
+      <div class="uploading" *ngIf="uploadingPhoto">Téléversement…</div>
+    </div>
+    <ui-form
       [title]="selected ? 'Éditer' : 'Créer'"
       [fields]="formFields"
       [model]="form"
       submitLabel="Enregistrer"
       (submitted)="onFormSubmit($event)">
-      </ui-form>
-    </div>
-  </ui-modal>
-</div>
+    </ui-form>
+  </div>
+</ui-modal>

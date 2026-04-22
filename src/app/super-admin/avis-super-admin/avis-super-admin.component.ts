@@ -8,12 +8,12 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-avis-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, UiTitleComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, PageHeaderComponent],
   templateUrl: './avis-super-admin.component.html',
   styleUrls: ['./avis-super-admin.component.css']
 })

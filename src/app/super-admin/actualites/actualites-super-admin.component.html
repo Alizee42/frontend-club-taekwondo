@@ -1,47 +1,35 @@
-<section class="actualites-section">
-  <div class="header-flex" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-  <ui-title [level]="2" text="Gestion des actualités" icon="ri-newspaper-line"></ui-title>
-    <ui-button label="Ajouter une actualité" (clicked)="openModal()" variant="primary" [disabled]="!clubIdSelectionne"></ui-button>
-  </div>
-  <div class="club-select club-select-below" style="margin: 0px 0px 20px 0; display: flex; align-items: center; gap: 8px;">
-  <label for="club-select" style="margin-bottom:0;font-weight:bold;">Sélectionnez un club :</label>
-    <select id="club-select" [(ngModel)]="clubIdSelectionne" (ngModelChange)="onClubChange()">
-      <option [ngValue]="null">-- Choisir --</option>
-  <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
+<div class="page-shell">
+  <app-page-header title="Gestion des actualités" icon="ri-newspaper-line">
+    <ng-container page-header-actions>
+      <ui-button label="Ajouter une actualité" (clicked)="openModal()" variant="primary" [disabled]="!clubIdSelectionne"></ui-button>
+    </ng-container>
+  </app-page-header>
+  <div class="filters-bar">
+    <select class="form-select" [(ngModel)]="clubIdSelectionne" (ngModelChange)="onClubChange()">
+      <option [ngValue]="null">-- Choisir un club --</option>
+      <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
     </select>
+    <input type="text" class="form-input" placeholder="Rechercher..." [(ngModel)]="searchTerm" name="searchTerm" />
   </div>
-  <div class="search-box">
-    <i class="ri-search-line"></i>
-    <input type="text" placeholder="Rechercher..." [(ngModel)]="searchTerm" name="searchTerm" />
-  </div>
-  <div *ngIf="loading">Chargement...</div>
   <div *ngIf="error" class="error">{{ error }}</div>
-  <div *ngIf="!clubs || clubs.length === 0" class="info">Aucun club disponible.</div>
-  <style>
-    ui-table .col-img      { width: 90px !important; min-width: 90px !important; max-width: 90px !important; }
-    ui-table .col-titre    { width: 320px !important; min-width: 320px !important; max-width: 320px !important; }
-    ui-table .col-type     { width: 70px !important; min-width: 70px !important; max-width: 70px !important; }
-    ui-table .col-date     { width: 80px !important; min-width: 80px !important; max-width: 80px !important; }
-    ui-table .col-featured { width: 130px !important; min-width: 130px !important; max-width: 130px !important; }
-  </style>
-  <ui-table
-    *ngIf="clubIdSelectionne"
-    [columns]="columns"
-    [data]="filteredActualites()"
-    [actions]="actions"
-    (actionClick)="onTableAction($event)"
-  ></ui-table>
-  <div *ngIf="clubIdSelectionne && (!filteredActualites() || filteredActualites().length === 0)">Aucune actualité pour le moment.</div>
-  <ui-modal [open]="isModalOpen" [title]="actualite.id ? 'Modifier une actualité' : 'Nouvelle actualité'" (closed)="closeModal()">
-    <ui-form
-      [fields]="fieldsWithoutFeatured"
-      [model]="actualite"
-      (submitted)="onSubmitForm($event)"
-      (cancel)="closeModal()"
-      [submitLabel]="actualite.id ? 'Mettre à jour' : 'Ajouter'"
-    ></ui-form>
-    <div *ngIf="imageFile" style="margin-top: 12px; text-align: center;">
-      <img [src]="imagePreviewUrl" alt="Aperçu de l'image" style="max-width: 100%; max-height: 180px; border-radius: 8px; box-shadow: 0 2px 8px #0001;" />
-    </div>
-  </ui-modal>
-</section>
+  <div class="table-wrap">
+    <ui-table
+      *ngIf="clubIdSelectionne"
+      [columns]="columns"
+      [data]="filteredActualites()"
+      [actions]="actions"
+      (actionClick)="onTableAction($event)">
+    </ui-table>
+  </div>
+</div>
+
+<ui-modal [open]="isModalOpen" [title]="actualite.id ? 'Modifier une actualité' : 'Nouvelle actualité'" (closed)="closeModal()">
+  <ui-form
+    [fields]="fieldsWithoutFeatured"
+    [model]="actualite"
+    (submitted)="onSubmitForm($event)"
+    (cancel)="closeModal()"
+    [submitLabel]="actualite.id ? 'Mettre à jour' : 'Ajouter'">
+  </ui-form>
+  <img *ngIf="imageFile" [src]="imagePreviewUrl" alt="Aperçu de l'image" class="upload-preview" />
+</ui-modal>

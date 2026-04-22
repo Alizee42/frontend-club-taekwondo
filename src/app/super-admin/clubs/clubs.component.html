@@ -1,10 +1,10 @@
-
-<section class="clubs-page-premium">
-  <div class="clubs-header-premium">
-  <ui-title [level]="1" text="Gestion des clubs" icon="ri-building-4-line"></ui-title>
-  <ui-button color="primary" (clicked)="openClubModal = true" label="Créer un club" class="ui-btn"></ui-button>
-  </div>
-  <div class="clubs-table-wrapper">
+<div class="page-shell">
+  <app-page-header title="Gestion des clubs" icon="ri-building-4-line">
+    <ng-container page-header-actions>
+      <ui-button variant="primary" (clicked)="openClubModal = true" label="Créer un club"></ui-button>
+    </ng-container>
+  </app-page-header>
+  <div class="table-wrap">
     <ui-table
       [columns]="clubColumns"
       [data]="clubs"
@@ -12,12 +12,13 @@
       (actionClick)="handleClubAction($event)">
     </ui-table>
   </div>
-  <ui-modal [open]="openClubModal" [title]="selectedClub ? 'Modifier le club' : 'Créer un nouveau club'" (closed)="closeClubModal()">
-    <ui-form
-      [fields]="clubFormFields"
-      [model]="selectedClub || newClub"
-      [submitLabel]="selectedClub ? 'Enregistrer' : 'Créer'"
-      (submitted)="onClubFormSubmit($event)">
-    </ui-form>
-  </ui-modal>
-</section>
+</div>
+
+<ui-modal [open]="openClubModal" [title]="selectedClub ? 'Modifier le club' : 'Créer un nouveau club'" (closed)="closeClubModal()">
+  <ui-form
+    [fields]="clubFormFields"
+    [model]="selectedClub || newClub"
+    [submitLabel]="selectedClub ? 'Enregistrer' : 'Créer'"
+    (submitted)="onClubFormSubmit($event)">
+  </ui-form>
+</ui-modal>

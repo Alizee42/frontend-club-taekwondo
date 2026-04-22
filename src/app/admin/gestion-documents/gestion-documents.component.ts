@@ -4,9 +4,10 @@
   import { FormsModule } from '@angular/forms';
   import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   import { environment } from '../../../environments/environment';
-  import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
   import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
   import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
+  import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+  import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
   import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
   
   /* ========= Types ========= */
@@ -72,7 +73,7 @@
     templateUrl: './gestion-documents.component.html',
     styleUrls: ['./gestion-documents.component.css'],
     standalone: true,
-  imports: [CommonModule, NgClass, NgFor, FormsModule, UiTitleComponent, UiButtonComponent, UiTableComponent],
+  imports: [CommonModule, NgClass, NgFor, FormsModule, UiButtonComponent, UiTableComponent, UiModalComponent, PageHeaderComponent],
   })
   export class GestionDocumentsComponent implements OnInit {
   // labelFor accessible dans le template (via util partagé)

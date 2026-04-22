@@ -1,724 +1,227 @@
-.page-title {
-  color: var(--blue-main);
-  font-size: 2.1rem;
-  font-weight: 700;
-  margin-bottom: 1.2rem;
-  margin-top: 0.2rem;
-  text-align: left;
-  letter-spacing: 0.5px;
-  line-height: 1.15;
-  background: linear-gradient(90deg, var(--blue-main) 60%, #e0e7ef 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.page-title {
-  color: var(--blue-main);
-  font-size: 2rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 1.2rem;
-  margin-top: 0.2rem;
-  text-align: left;
-}
-/* Header admin : titre à gauche, bouton à droite */
-.header-evenements-admin {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2.2rem;
-  gap: 1.2rem;
-}
-
-.header-evenements-admin .titre-section {
-  margin-bottom: 0;
-  font-size: 1.6rem;
-}
-
-.creation-btn-header {
-margin-left: auto;
-  min-width: 0;
-  white-space: nowrap;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.6rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.08);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  background: var(--blue-main);
-}
-/* Voir inscrits (gris neutre) */
-.btn-action-icon[title="Voir inscrits"] {
-  border-color: #cbd5e1;
-}
-.btn-action-icon[title="Voir inscrits"] i {
-  color: #64748b;
-}
-.btn-action-icon[title="Voir inscrits"]:hover, .btn-action-icon[title="Voir inscrits"]:focus {
-  background: #cbd5e1;
-  border-color: #64748b;
-}
-.btn-action-icon[title="Voir inscrits"]:hover i, .btn-action-icon[title="Voir inscrits"]:focus i {
-  color: #fff;
-}
-.btn-action-icon[title="Valider"] i {
-  color: #22c55e;
-}
-.btn-action-icon[title="Refuser"] i {
-  color: #ef4444;
-}
-/* Badge annulee harmonisé */
-.badge-annulee {
-  background: #f3f4f6;
-  color: #888;
-  border: 1.5px solid #d1d5db;
-  font-weight: 600;
-  box-shadow: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-}
-/* Partie inscription admin moderne et compacte */
-.inscriptions-admin-wrapper {
-  background: #fff;
-  border: 1.5px solid #e3e8f0;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(37,99,235,0.06);
-max-width: 1100px; 
- margin: 2.5rem auto 0 auto;
-  padding: 2rem 2rem 1.5rem 2rem;
-}
-.inscriptions-admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.7rem;
-}
-.inscriptions-admin-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--blue-main);
-}
-.btn-close-inscriptions {
-background: none;
-  color: var(--blue-main);
-  border: none;
-  border-radius: 0;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  transition: color 0.2s;
-}
-.btn-close-inscriptions:hover {
-  background: none;
-  color: #1746a2;
-}
-.inscriptions-admin-summary {
-  display: flex;
-  flex-direction: row;
-  gap: 0.6em;
-  margin-bottom: 1.2rem;
-  align-items: center;
-}
-.summary-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.7em;
-  font-size: 0.98rem;
-  font-weight: 500;
-  border-radius: 9px;
-  padding: 0.18em 0.7em;
-  background: #f3f4f6;
-  color: #2563eb;
-  border: 1px solid #e3e8f0;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.04);
-  min-width: 110px;
-  letter-spacing: 0.01em;
-}
-.summary-badge i {
-  font-size: 1em;
-  margin-right: 0.3em;
-}
-/* Harmonisation badges résumé */
-.summary-badge.total { color: #222; background: #f1f5f9; border-color: #e3e8f0; }
-.summary-badge.attente { color: #bfa100; background: #fffbe6; border-color: #ffe066; }
-.summary-badge.valide { color: #1a7f37; background: #e6ffed; border-color: #34d399; }
-.summary-badge.refuse { color: #d32f2f; background: #ffeaea; border-color: #fca5a5; }
-.inscriptions-admin-table-wrapper {
-  margin-top: 0.5rem;
-}
-/* MODERNISATION DES ELEMENTS DE LA MODALE */
-.modal-body form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-.form-group label {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--blue-main, #2563eb);
-  margin-bottom: 0.1rem;
-  letter-spacing: 0.01em;
-}
-.form-control {
-  border: 1.5px solid #e3e8f0;
-  border-radius: 7px;
-  padding: 0.55rem 0.9rem;
-  font-size: 1.05rem;
-  background: #f9fafe;
-  color: #222;
-  transition: border 0.2s, box-shadow 0.2s;
-  outline: none;
-}
-.form-control:focus {
-  border: 1.5px solid #2563eb;
-  box-shadow: 0 0 0 2px #2563eb22;
-  background: #fff;
-}
-.form-control[type="file"] {
-  padding: 0.3rem 0.2rem;
-  background: #fff;
-}
-.modal-body button[type="submit"],
-.modal-body .btn-success {
-  align-self: flex-end;
-  background: var(--blue-main, #2563eb) !important;
-  color: #fff !important;
-  font-weight: 600;
-  font-size: 1.08rem;
-  border-radius: 8px;
-  padding: 0.6rem 1.6rem;
-  margin-top: 0.7rem;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.10);
-  border: none;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.modal-body button[type="submit"]:hover,
-.modal-body .btn-success:hover {
-  background: #1746a2 !important;
-  box-shadow: 0 4px 16px rgba(37,99,235,0.13);
-}
-.modal-body button[type="submit"]:disabled,
-.modal-body .btn-success:disabled {
-  background: #bcd0f7 !important;
-  color: #fff !important;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-/* --- MODALE EVENEMENT --- */
-/* --- MODALE EVENEMENT MODERNE --- */
-/* --- MODALE EVENEMENT SOBRE ET LARGE --- */
-.modal-backdrop {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(30, 41, 59, 0.18);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s;
-  backdrop-filter: blur(2px);
-}
-.modal {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(37,99,235,0.10), 0 2px 8px rgba(0,0,0,0.04);
-  padding: 1.1rem 1.1rem 0.7rem 1.1rem;
-  min-width: 320px;
-  max-width: 96vw;
-  width: 480px;
-  max-height: 75vh;
-  overflow-y: auto;
-  position: relative;
-  animation: modalPopInSobre 0.28s cubic-bezier(.4,2,.6,1) both;
-  border: 1.5px solid #e3e8f0;
-  transition: box-shadow 0.2s, border 0.2s;
-}
-@keyframes modalPopInSobre {
-  from { transform: translateY(40px) scale(0.98); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
-}
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.7rem;
-  background: #fff;
-  border-radius: 12px 12px 0 0;
-  padding: 0.7rem 0.5rem 0.7rem 0.5rem;
-  box-shadow: none;
-  border-bottom: 1px solid #e3e8f0;
-}
-.modal-header h5 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--blue-main, #2563eb);
-  margin: 0;
-  letter-spacing: 0.01em;
-}
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.7rem;
-  color: #888;
-  cursor: pointer;
-  border-radius: 50%;
-  width: 2.2rem;
-  height: 2.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
-  transition: background 0.2s, color 0.2s;
-}
-.close-btn:hover {
-  background: #f3f4f6;
-  color: #2563eb;
-}
-.modal-body {
-  margin-bottom: 0.2rem;
-  padding: 0.1rem 0.1rem 0 0.1rem;
-}
-@media (max-width: 600px) {
-  .modal {
-    width: 98vw;
-    min-width: 0;
-    padding: 1.2rem 0.5rem 1rem 0.5rem;
-  }
-}
-.inscriptions-wrapper {
-  margin-top: 2.5rem;
-  padding: 2.5rem 1.5rem 1.5rem 1.5rem;
-  background: #f8fafc;
-  border-radius: 18px;
-  box-shadow: 0 2px 12px rgba(37,99,235,0.07);
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-  border: 1px solid #e3e8f0;
-}
-.inscriptions-wrapper .sous-titre-section {
-  font-size: 1.25rem;
-  color: #2563eb;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-}
-.inscriptions-wrapper .table-inscriptions {
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.04);
-}
-.inscriptions-wrapper .table-inscriptions th {
-  background: #e8eefd;
-  color: #2563eb;
-  font-weight: 600;
-}
-.inscriptions-wrapper .table-inscriptions td {
-  background: #fff;
-}
-.inscriptions-wrapper .badge-inscription {
-  min-width: 110px;
-  justify-content: center;
-}
-.inscriptions-wrapper .message-info {
-  margin: 1.2rem 0 0.5rem 0;
-  font-size: 1rem;
-  color: #888;
-}
-.inscriptions-wrapper .btn {
-  margin-top: 1.2rem;
-}
-@media (max-width: 700px) {
-  .inscriptions-wrapper {
-    padding: 1.2rem 0.3rem 0.7rem 0.3rem;
-  }
-}
-/* Carte inscriptions */
-.card-inscriptions {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(37,99,235,0.08);
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
-  margin-bottom: 2rem;
-}
-.sous-titre-section {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #2563eb;
-  margin-bottom: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-}
-.table-inscriptions {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-bottom: 1.2rem;
-}
-.table-inscriptions th, .table-inscriptions td {
-  text-align: center;
-  padding: 0.7rem 0.5rem;
-}
-
-
-.inscriptions-wrapper .message-info {
-  margin: 1.2rem 0 0.5rem 0;
-  font-size: 1rem;
-  color: #888;
-}
-.inscriptions-wrapper .btn {
-  margin-top: 1.2rem;
-}
-@media (max-width: 700px) {
-  .inscriptions-wrapper {
-    padding: 1.2rem 0.3rem 0.7rem 0.3rem;
-  }
-}
-/* Carte inscriptions */
-.card-inscriptions {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(37,99,235,0.08);
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
-  margin-bottom: 2rem;
-}
-.sous-titre-section {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #2563eb;
-  margin-bottom: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-}
-.table-inscriptions {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-bottom: 1.2rem;
-}
-.table-inscriptions th, .table-inscriptions td {
-  text-align: center;
-  padding: 0.7rem 0.5rem;
-}
-/* Centrage du contenu des cellules du tableau */
-.table-evenements th,
-.table-evenements td,
-.table-inscriptions th,
-.table-inscriptions td {
-  text-align: center;
-  vertical-align: middle;
-}
-
-.event-image {
-  margin-left: auto;
-  margin-right: auto;
-}
-.btn-action-icon[title="Voir"] {
-  border-color: #38bdf8;
-}
-.btn-action-icon[title="Voir"] i {
-  color: #38bdf8;
-}
-.btn-action-icon[title="Voir"]:hover, .btn-action-icon[title="Voir"]:focus {
-  background: #38bdf8;
-  border-color: #38bdf8;
-}
-.btn-action-icon[title="Voir"]:hover i, .btn-action-icon[title="Voir"]:focus i {
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-/* Boutons d'action sobres */
-.btn-action-icon {
-  background: #fff;
-  border: 1.5px solid #e3e8f0;
-  color: #444;
-  padding: 0.3rem 0.5rem;
-  font-size: 1.25rem;
-  border-radius: 7px;
-  transition: background 0.18s, color 0.18s, border 0.18s;
-  box-shadow: none;
-  outline: none;
-  margin-right: 0.3rem;
-  vertical-align: middle;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-action-icon i {
-  transition: color 0.18s;
-}
-/* Valider (vert) */
-.btn-action-icon[title="Valider"] {
-  border-color: #22c55e;
-}
-.btn-action-icon[title="Valider"] i {
-  color: #22c55e;
-}
-.btn-action-icon[title="Valider"]:hover, .btn-action-icon[title="Valider"]:focus {
-  background: #22c55e;
-  border-color: #22c55e;
-}
-.btn-action-icon[title="Valider"]:hover i, .btn-action-icon[title="Valider"]:focus i {
-  color: #fff;
-}
-/* Refuser (rouge) */
-.btn-action-icon[title="Refuser"] {
-  border-color: #ef4444;
-}
-.btn-action-icon[title="Refuser"] i {
-  color: #ef4444;
-}
-.btn-action-icon[title="Refuser"]:hover, .btn-action-icon[title="Refuser"]:focus {
-  background: #ef4444;
-  border-color: #ef4444;
-}
-.btn-action-icon[title="Refuser"]:hover i, .btn-action-icon[title="Refuser"]:focus i {
-  color: #fff;
-}
-/* Modifier (bleu) */
-.btn-action-icon[title="Modifier"] {
-  border-color: var(--blue-main);
-}
-.btn-action-icon[title="Modifier"] i {
-  color: var(--blue-main);
-}
-.btn-action-icon[title="Modifier"]:hover, .btn-action-icon[title="Modifier"]:focus {
-  background: var(--blue-main, #2563eb);
-  border-color: var(--blue-main, #2563eb);
-}
-.btn-action-icon[title="Modifier"]:hover i, .btn-action-icon[title="Modifier"]:focus i {
-  color: #fff;
-}
-/* Supprimer (poubelle) en rouge comme Refuser */
-.btn-action-icon[title="Supprimer"] {
-  border-color: #ef4444;
-}
-.btn-action-icon[title="Supprimer"] i {
-  color: #ef4444;
-}
-.btn-action-icon[title="Supprimer"]:hover, .btn-action-icon[title="Supprimer"]:focus {
-  background: #ef4444;
-  border-color: #ef4444;
-}
-.btn-action-icon[title="Supprimer"]:hover i, .btn-action-icon[title="Supprimer"]:focus i {
-  color: #fff;
-}
-/* Voir inscrit (bleu foncé, harmonisé) */
-.btn-action-icon[title="Voir inscrit"] {
-  border-color: #2563eb;
-}
-.btn-action-icon[title="Voir inscrit"] i {
-  color: #2563eb;
-}
-.btn-action-icon[title="Voir inscrit"]:hover, .btn-action-icon[title="Voir inscrit"]:focus {
-  background: #2563eb;
-  border-color: #2563eb;
-}
-.btn-action-icon[title="Voir inscrit"]:hover i, .btn-action-icon[title="Voir inscrit"]:focus i {
-  color: #fff;
-}
-
-/* Hover générique neutre, n'écrase pas les couleurs spécifiques */
-.btn-action-icon:hover, .btn-action-icon:focus {
-  filter: brightness(0.97);
-  box-shadow: 0 1px 6px #2563eb22;
-}
-.btn-action-icon:active {
-  background: #c7d2fe;
-}
-/* Accessibilité : cache visuel mais lisible par lecteur d'écran */
-.visually-hidden {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
-.event-image {
-  width: 80px;
-  height: 60px;
-  border-radius: 8px;
-  object-fit: cover;
-  object-position: center;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.10);
-  margin: 0.2rem 0;
+:host {
   display: block;
-  background: #f3f4f6;
-}
-/* --- Premium Admin Events Page --- */
-.gestion-evenements-admin {
-width: 100%;
-  margin: 2rem 0;
-  font-family: "Poppins", Arial, sans-serif;
-  color: var(--text-main, #222);
-  padding: 0.2rem 1rem;
 }
 
-.titre-section {
-  font-size: 2.1rem;
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(243, 247, 255, 0.96));
+  box-shadow: 0 14px 28px -28px rgba(15, 23, 42, 0.45);
+}
+
+.stat-label {
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--blue-main, #2563eb);
-  margin-bottom: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-2);
 }
 
-.card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(37,99,235,0.08), 0 1.5px 6px rgba(0,0,0,0.04);
-  padding: 2rem 1.5rem;
-  margin-bottom: 2.5rem;
-}
-.card-inscriptions {
-  border-left: 5px solid var(--blue-main, #2563eb);
+.stat-value {
+  font-size: clamp(1.65rem, 3vw, 2.15rem);
+  line-height: 1;
+  color: var(--brand-primary);
 }
 
-.table-evenements, .table-inscriptions {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: transparent;
+.stat-value--small {
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  line-height: 1.2;
 }
-/* En-têtes de tableau harmonisés, sans border-radius */
-.table-evenements th, .table-inscriptions th {
-  background: var(--blue-main, #2563eb);
-  color: #fff;
+
+.stat-meta {
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+}
+
+.feedback-stack {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.feedback {
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
   font-weight: 600;
-  padding: 1rem 0.7rem;
-  border-radius: 0;
-}
-.table-evenements td, .table-inscriptions td {
-  padding: 0.9rem 0.7rem;
-  background: #f9fafe;
-  border-bottom: 1px solid #e3e8f0;
-  font-size: 1rem;
-}
-.table-evenements tr.selected, .table-inscriptions tr.selected {
-  background: #e0eaff;
-}
-.table-evenements tr:hover, .table-inscriptions tr:hover {
-  background: #f1f5ff;
 }
 
-.badge-attente {
-  background: #fffbe6 !;
-  color: #bfa100;
-  border: 1.5px solid #ffe066;
-  font-weight: 600;
-  box-shadow: none;
+.feedback--success {
+  background: color-mix(in srgb, var(--color-success) 10%, white);
+  border-color: color-mix(in srgb, var(--color-success) 25%, white);
+  color: #166534;
 }
-.badge-valide {
- font-weight: 600;
-  box-shadow: none;
+
+.feedback--danger {
+  background: color-mix(in srgb, var(--color-danger) 10%, white);
+  border-color: color-mix(in srgb, var(--color-danger) 25%, white);
+  color: #991b1b;
+}
+
+.event-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.field-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.field--checkbox {
+  align-content: start;
+}
+
+.checkbox-line {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
-  background: #e6ffed;
-  color: #1a7f37;
-  border: 1.5px solid #34d399;
+  gap: 0.6rem;
+  min-height: 42px;
+  padding: 0 0.1rem;
+  color: var(--color-text-2);
 }
-.badge-refuse {
-  background: #ef4444;
-  color: #fff;
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
 }
-.badge-success {
-  background: #e6ffed;
-  color: #1a7f37;
-  border: 1.5px solid #34d399;
-  font-weight: 600;
-  box-shadow: none;
+
+.image-preview {
+  display: flex;
+  justify-content: flex-start;
 }
-.badge-danger {
-  background: #ffeaea;
-  color: #d32f2f;
-  border: 1.5px solid #fca5a5;
-  font-weight: 600;
-  box-shadow: none;
+
+.image-preview img {
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
 }
-.badge {
-  display: inline-block;
-  border-radius: 12px;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.08);
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
-/* Badge pour le nombre d'inscrits : pas de fond, pas de bordure, texte bleu principal */
-.badge-inscrits {
-  background: none !important;
-  border: none !important;
-  color: var(--blue-main, #2563eb) !important;
+
+.registrations-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.registration-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.summary-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text-1);
+  font-size: var(--text-sm);
   font-weight: 700;
-  box-shadow: none !important;
 }
-.inscriptions-wrapper .badge-attente,
-.inscriptions-wrapper .badge-valide,
-.inscriptions-wrapper .badge-refuse,
-.inscriptions-wrapper .badge-annulee {
-  display: inline-block;
-  border-radius: 12px;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  box-shadow: none;
+
+.summary-chip--success {
+  background: color-mix(in srgb, var(--color-success) 10%, white);
+  border-color: color-mix(in srgb, var(--color-success) 22%, white);
+  color: #166534;
 }
-.inscriptions-wrapper .badge-valide {
-  background: #e6ffed;
-  color: #1a7f37;
-  border: 1.5px solid #34d399;
+
+.summary-chip--warning {
+  background: color-mix(in srgb, var(--color-warning) 12%, white);
+  border-color: color-mix(in srgb, var(--color-warning) 24%, white);
+  color: #92400e;
 }
-.inscriptions-wrapper .badge-refuse {
-  background: #ffeaea;
-  color: #d32f2f;
-  border: 1.5px solid #fca5a5;
+
+.summary-chip--danger {
+  background: color-mix(in srgb, var(--color-danger) 10%, white);
+  border-color: color-mix(in srgb, var(--color-danger) 22%, white);
+  color: #991b1b;
 }
-.inscriptions-wrapper .badge-attente {
-  background: #fffbe6;
-  color: #bfa100;
-  border: 1.5px solid #ffe066;
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 0.32rem 0.7rem;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
-.inscriptions-wrapper .badge-annulee {
-  display: inline-block;
-  border-radius: 12px;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  box-shadow: none;
-  background: #f3f4f6;
-  color: #888;
-  border: 1.5px solid #d1d5db;
-  /* Suppression du flex et du gap pour cohérence */
+
+.status-chip--success {
+  background: color-mix(in srgb, var(--color-success) 10%, white);
+  border-color: color-mix(in srgb, var(--color-success) 25%, white);
+  color: #166534;
+}
+
+.status-chip--warning {
+  background: color-mix(in srgb, var(--color-warning) 12%, white);
+  border-color: color-mix(in srgb, var(--color-warning) 26%, white);
+  color: #92400e;
+}
+
+.status-chip--danger {
+  background: color-mix(in srgb, var(--color-danger) 10%, white);
+  border-color: color-mix(in srgb, var(--color-danger) 24%, white);
+  color: #991b1b;
+}
+
+.status-chip--neutral {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  color: var(--color-text-2);
+}
+
+@media (max-width: 960px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions ui-button {
+    width: 100%;
+  }
 }

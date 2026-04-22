@@ -1,74 +1,114 @@
-<div class="gestion-paiements-modern">
-  <!-- Header avec titre -->
-  <header class="page-header">
-  <ui-title [level]="2" text="Suivi des paiements" icon="ri-wallet-3-line"></ui-title>
-  </header>
+<div class="page-shell">
+  <app-page-header
+    title="Gestion des paiements"
+    icon="ri-wallet-3-line"
+    subtitle="Suivre les encaissements, les echeances et ajouter un nouveau paiement"
+  >
+    <ng-container page-header-actions>
+      <ui-button
+        label="Ajouter un paiement"
+        icon="ri-add-line"
+        (clicked)="ouvrirModalAjout()"
+      ></ui-button>
+      <ui-button
+        label="Rafraichir"
+        icon="ri-refresh-line"
+        variant="secondary"
+        (clicked)="refreshStats(); loadPaiements()"
+      ></ui-button>
+    </ng-container>
+  </app-page-header>
 
-  <!-- Stats KPI (compactes) -->
-  <section class="kpi-section">
-    <div class="kpi-card success">
-      <i class="ri-wallet-3-line"></i>
-      <div class="kpi-content">
-        <span class="kpi-label">Total encaissé</span>
-        <span class="kpi-value">{{ stats.totalPayes | currency:'EUR' }}</span>
+  <section class="stats-grid">
+    <article class="stat-card stat-card--success">
+      <div class="stat-icon"><i class="ri-wallet-3-line" aria-hidden="true"></i></div>
+      <div class="stat-copy">
+        <span class="stat-label">Total encaisse</span>
+        <strong class="stat-value">{{ stats.totalPayes | currency:'EUR' }}</strong>
       </div>
-    </div>
-    <div class="kpi-card warning">
-      <i class="ri-time-line"></i>
-      <div class="kpi-content">
-        <span class="kpi-label">En attente</span>
-        <span class="kpi-value">{{ stats.totalAttente | currency:'EUR' }}</span>
+    </article>
+
+    <article class="stat-card stat-card--warning">
+      <div class="stat-icon"><i class="ri-time-line" aria-hidden="true"></i></div>
+      <div class="stat-copy">
+        <span class="stat-label">En attente</span>
+        <strong class="stat-value">{{ stats.totalAttente | currency:'EUR' }}</strong>
       </div>
-    </div>
-    <div class="kpi-card danger">
-      <i class="ri-close-circle-line"></i>
-      <div class="kpi-content">
-        <span class="kpi-label">Annulés</span>
-        <span class="kpi-value">{{ stats.totalAnnules | currency:'EUR' }}</span>
+    </article>
+
+    <article class="stat-card stat-card--danger">
+      <div class="stat-icon"><i class="ri-close-circle-line" aria-hidden="true"></i></div>
+      <div class="stat-copy">
+        <span class="stat-label">Annules</span>
+        <strong class="stat-value">{{ stats.totalAnnules | currency:'EUR' }}</strong>
       </div>
-    </div>
-    <div class="kpi-card neutral">
-      <i class="ri-bar-chart-2-line"></i>
-      <div class="kpi-content">
-        <span class="kpi-label">% payés ce mois</span>
-        <span class="kpi-value">{{ stats.pourcentagePayesMois | number:'1.0-1' }}%</span>
+    </article>
+
+    <article class="stat-card stat-card--neutral">
+      <div class="stat-icon"><i class="ri-bar-chart-2-line" aria-hidden="true"></i></div>
+      <div class="stat-copy">
+        <span class="stat-label">Payes ce mois</span>
+        <strong class="stat-value">{{ stats.pourcentagePayesMois | number:'1.0-1' }}%</strong>
       </div>
-    </div>
+    </article>
   </section>
 
-  <!-- Onglets -->
-  <nav class="tabs-nav">
-    <button 
-      class="tab-button" 
-      [class.active]="ongletActif === 'paiements'"
-      (click)="changerOnglet('paiements')">
-      <i class="ri-money-euro-circle-line"></i> Paiements
-    </button>
-    <button 
-      class="tab-button" 
-      [class.active]="ongletActif === 'echeances'"
-      (click)="changerOnglet('echeances')">
-      <i class="ri-calendar-check-line"></i> Échéances
-    </button>
-  </nav>
-
-  <!-- Contenu des onglets -->
-  <section class="tab-content">
-    <app-suivi-paiements *ngIf="ongletActif === 'paiements'" [paiementsData]="paiements" [viewMode]="'paiements'"></app-suivi-paiements>
-    <div *ngIf="ongletActif === 'echeances'">
-      <!-- Use Echeance component in inline mode to show all échéances on the page -->
-      <app-echeance [echeances]="getAllEcheances()" [inline]="true"></app-echeance>
-    </div>
+  <section class="summary-strip">
+    <span class="summary-pill">
+      <i class="ri-bank-card-line" aria-hidden="true"></i>
+      {{ totalPaiements }} paiement(s)
+    </span>
+    <span class="summary-pill summary-pill--danger">
+      <i class="ri-alert-line" aria-hidden="true"></i>
+      {{ nbRetards }} membre(s) en retard
+    </span>
   </section>
 
-
-  <!-- Modal d'ajout (si visible) -->
-  <div class="modal-overlay" *ngIf="modalAjoutVisible" (click)="fermerModalAjout()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
-      <button class="modal-close" (click)="fermerModalAjout()">
-        <i class="ri-close-line"></i>
+  <div class="tabs-card">
+    <nav class="tabs-nav" aria-label="Navigation des paiements">
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="ongletActif === 'paiements'"
+        (click)="changerOnglet('paiements')"
+      >
+        <i class="ri-money-euro-circle-line" aria-hidden="true"></i>
+        <span>Paiements</span>
       </button>
-      <app-ajout-paiement (paiementAjoute)="onPaiementAjoute()"></app-ajout-paiement>
-    </div>
+
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="ongletActif === 'echeances'"
+        (click)="changerOnglet('echeances')"
+      >
+        <i class="ri-calendar-check-line" aria-hidden="true"></i>
+        <span>Echeances</span>
+      </button>
+    </nav>
+
+    <section class="tab-panel">
+      <app-suivi-paiements
+        *ngIf="ongletActif === 'paiements'"
+        [paiementsData]="paiements"
+        [viewMode]="'paiements'"
+      ></app-suivi-paiements>
+
+      <app-echeance
+        *ngIf="ongletActif === 'echeances'"
+        [echeances]="getAllEcheances()"
+        [inline]="true"
+      ></app-echeance>
+    </section>
   </div>
 </div>
+
+<ui-modal
+  [open]="modalAjoutVisible"
+  title="Ajouter un paiement"
+  (closed)="fermerModalAjout()"
+>
+  <div class="payment-modal-content">
+    <app-ajout-paiement (paiementAjoute)="onPaiementAjoute()"></app-ajout-paiement>
+  </div>
+</ui-modal>

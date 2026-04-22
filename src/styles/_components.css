@@ -8,13 +8,9 @@
   width: 48px;
   height: 4px;
   margin: 0.5rem auto 0 auto;
-  background: linear-gradient(90deg, #1E6091 60%, #A9D6E5 100%);
+  background: linear-gradient(90deg, var(--brand-primary) 60%, color-mix(in srgb, var(--brand-primary) 30%, white) 100%);
   border-radius: 2px;
   opacity: 0.85;
-}
-
-.ui-table img {
-  width: 37%;
 }
 
 .galerie-table-img {
@@ -24,4 +20,83 @@
   border-radius: 4px;
   display: block;
   margin: 0 auto;
+}
+
+/* =============================================
+   STANDARD PAGES DE GESTION — GESTION-STANDARD.md
+   ============================================= */
+
+/* Conteneur principal de chaque page de gestion */
+.page-shell {
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  width: 100%;
+  min-width: 0;
+}
+
+.page-shell > * {
+  min-width: 0;
+}
+
+.page-shell > .table-wrap,
+.page-shell > .table-wrapper {
+  width: 100%;
+}
+
+/* Barre de filtres */
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filters-bar .form-input  { max-width: 280px; min-width: 160px; }
+.filters-bar .form-select { max-width: 200px; min-width: 120px; }
+
+.filters-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Pousse un élément à la fin (droite) de la flex-bar */
+.ms-auto { margin-left: auto; }
+
+/* Footer de modale */
+.modal-footer {
+  display: flex;
+  gap: var(--sp-3);
+  justify-content: flex-end;
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .page-shell {
+    padding: var(--sp-4);
+  }
+
+  .filters-bar .form-input,
+  .filters-bar .form-select {
+    max-width: 100%;
+    min-width: 0;
+    flex: 1 1 140px;
+  }
+
+  .ms-auto {
+    margin-left: 0;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
 }

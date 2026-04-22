@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { GalerieService, Galerie } from '../../services/galerie.service';
-import { FormsModule } from '@angular/forms'; // Import nécessaire pour [(ngModel)]
-import { CommonModule } from '@angular/common'; // Import pour les directives Angular de base
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -12,8 +13,8 @@ import { environment } from '../../../environments/environment';
   selector: 'app-gestion-galerie',
   templateUrl: './gestion-galerie.component.html',
   styleUrls: ['./gestion-galerie.component.css'],
-  standalone: true, // Si vous utilisez Angular 14 standalone
-  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiButtonComponent], // Ajout des composants réutilisables
+  standalone: true,
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiButtonComponent, PageHeaderComponent],
 })
 export class GestionGalerieComponent implements OnInit {
   images: Galerie[] = [];
@@ -212,8 +213,7 @@ export class GestionGalerieComponent implements OnInit {
   // Gestion des actions du tableau réutilisable
   handleTableAction(event: { action: string; row: Galerie }) {
     if (event.action === 'edit') {
-      this.editImage(event.row);
-      this.afficherFormulaire = true;
+      this.openEditModal(event.row);
     } else if (event.action === 'delete') {
       if (confirm('Supprimer cette image ?')) {
         this.deleteImage(event.row.id);

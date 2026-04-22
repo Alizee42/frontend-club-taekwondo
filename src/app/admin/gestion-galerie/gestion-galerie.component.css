@@ -371,6 +371,8 @@ font-family: "Poppins", sans-serif;
     object-fit: cover; /* Maintient les proportions */
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
 .table-galerie td {
   padding: 0.9rem 0.7rem;
   background: #f9fafe;
@@ -400,21 +402,29 @@ font-family: "Poppins", sans-serif;
 .table-galerie tr:hover {
   background: #f1f5ff;
 }
-  }
-  .btn {
-    padding: 5px 10px;
-    margin-right: 5px;
-    cursor: pointer;
-  }
-  
-  .btn.edit {
-    background-color: #4caf50;
-    color: white;
-    border: none;
-  }
-  
-  .btn.delete {
-    background-color: #f44336;
-    color: white;
-    border: none;
-  }
+
+.btn {
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.btn.edit {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+}
+
+.btn.delete {
+  background-color: #f44336;
+  color: white;
+  border: none;
+}
+
+.upload-preview {
+  max-width: 100%;
+  max-height: 180px;
+  margin-top: var(--sp-3);
+  border-radius: var(--radius-sm);
+  display: block;
+}

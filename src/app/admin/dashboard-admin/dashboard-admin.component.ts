@@ -18,7 +18,6 @@ interface DashboardStats {
 type BadgeCounts = {
   avis: number;
   paiements: number;
-  inscriptions: number;
   commandes: number;
   documents: number;
   horaires: number;
@@ -30,7 +29,6 @@ type BadgeCounts = {
 const STATUS = {
   AVIS_NON_APPROUVE: 'false',            // query ?approuve=false
   PAIEMENT_EN_ATTENTE: 'EN_ATTENTE',     // normalisation
-  INSCRIPTION_EN_ATTENTE: 'EN_ATTENTE_PROBATION',
   COMMANDE_A_TRAITER: 'A_TRAITER'
 };
 
@@ -57,10 +55,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   evenementsAVenir = 0;
 
   // Badges (affichés dans l'UI)
-  badge: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0, horaires: 0, actualites: 0 };
+  badge: BadgeCounts = { avis: 0, paiements: 0, commandes: 0, documents: 0, horaires: 0, actualites: 0 };
 
   // Compteurs courants (ce que renvoie l'API pour chaque section)
-  private currentCounts: BadgeCounts = { avis: 0, paiements: 0, inscriptions: 0, commandes: 0, documents: 0, horaires: 0, actualites: 0 };
+  private currentCounts: BadgeCounts = { avis: 0, paiements: 0, commandes: 0, documents: 0, horaires: 0, actualites: 0 };
 
   // Bonjour
   prenomUtilisateur = 'Admin';
@@ -192,7 +190,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     forkJoin({
       avis: this.fetchAvis(),               
       paiements: this.fetchPaiements(),     
-      inscriptions: this.fetchInscriptions(), 
       commandes: this.fetchCommandes(),     
       documents: this.fetchDocuments(),
       horaires: this.fetchHoraires(),
@@ -202,7 +199,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         this.currentCounts = {
           avis: Number(res.avis || 0),
           paiements: Number(res.paiements || 0),
-          inscriptions: Number(res.inscriptions || 0),
           commandes: Number(res.commandes || 0),
           documents: Number(res.documents || 0),
           horaires: Number(res.horaires || 0),
@@ -253,21 +249,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
       }),
       catchError((err) => {
         console.error('❌ Erreur récupération paiements:', err);
-        return of(0);
-      })
-    );
-  }
-
-  /** Inscriptions en attente de probation UNIQUEMENT */
-  private fetchInscriptions(): Observable<number> {
-    const params = new HttpParams().set('statut', STATUS.INSCRIPTION_EN_ATTENTE);
-    return this.http.get<any[]>(this.url('inscriptions'), { params }).pipe(
-      map(list => {
-        const count = Array.isArray(list) ? list.filter(i => this.norm(i?.statut) === this.norm(STATUS.INSCRIPTION_EN_ATTENTE)).length : 0;
-        return count;
-      }),
-      catchError((err) => {
-        console.error('❌ Erreur récupération inscriptions:', err);
         return of(0);
       })
     );
@@ -369,10 +350,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   navigateToGestionCommande(): void {
     this.router.navigate(['/admin/gestion-commande']);
-  }
-
-  navigateToGestionInscription(): void {
-    this.router.navigate(['/admin/gestion-inscription']);
   }
 
   navigateToavis(): void {

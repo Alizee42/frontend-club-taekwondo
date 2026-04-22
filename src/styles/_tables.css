@@ -5,17 +5,22 @@
 .table-wrap,
 .table-wrapper {
   width: 100%;
+  min-width: 0;
   overflow-x: auto;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  scrollbar-gutter: stable both-edges;
 }
 
 .table,
 .table-wrap > table,
-.table-wrapper > table {
+.table-wrapper > table,
+.table-wrap > ui-table,
+.table-wrapper > ui-table {
   width: 100%;
+  min-width: 100%;
   border-collapse: collapse;
   background: transparent;
 }
@@ -26,10 +31,11 @@
   padding: var(--sp-3) var(--sp-4);
   text-align: left;
   font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-text-2);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-text-inv);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-primary-dark) 78%, black);
+  background: var(--brand-primary-dark);
   white-space: nowrap;
 }
 
@@ -40,12 +46,25 @@
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
   vertical-align: middle;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.table tbody tr:nth-child(even) td,
+.table-wrap > table tbody tr:nth-child(even) td,
+.table-wrapper > table tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--brand-primary) 4%, white);
 }
 
 .table tbody tr:hover,
 .table-wrap > table tbody tr:hover,
 .table-wrapper > table tbody tr:hover {
-  background: var(--color-surface-2);
+  background: transparent;
+}
+
+.table tbody tr:hover td,
+.table-wrap > table tbody tr:hover td,
+.table-wrapper > table tbody tr:hover td {
+  background: color-mix(in srgb, var(--brand-primary) 9%, white);
 }
 
 .table tbody tr:last-child td,

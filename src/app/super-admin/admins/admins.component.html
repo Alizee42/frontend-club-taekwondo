@@ -1,56 +1,54 @@
-<div class="admins-root">
-	<div class="header-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
-		<h2 style="margin: 0;">Administrateurs de clubs</h2>
-		<ui-button label="Créer un admin" color="primary" (click)="showModal = true"></ui-button>
-	</div>
-
-	<ui-table
-		[columns]="[
-			{ key: 'nom', label: 'Nom' },
-			{ key: 'prenom', label: 'Prénom' },
-			{ key: 'email', label: 'Email' },
-			{ key: 'clubName', label: 'Club' }
-		]"
-		[data]="adminsTable"
-		[actions]="tableActions"
-		(actionClick)="onTableAction($event)"
-	></ui-table>
-	<div *ngIf="admins.length === 0" class="empty-table">Aucun administrateur trouvé.</div>
-
-	<ui-modal [open]="showModal" (closed)="showModal = false" [title]="'Créer un administrateur de club'">
-	<form (ngSubmit)="createAdmin()" class="admin-form ui-form">
-			<div class="row">
-				<label>Nom *</label>
-				<input [(ngModel)]="newAdmin.nom" name="nom" required />
-			</div>
-			<div class="row">
-				<label>Prénom</label>
-				<input [(ngModel)]="newAdmin.prenom" name="prenom" />
-			</div>
-			<div class="row">
-				<label>Email *</label>
-				<input [(ngModel)]="newAdmin.email" name="email" type="email" required />
-			</div>
-			<div class="row">
-				<!-- Le mot de passe n'est plus saisi ici : un email de définition sera envoyé automatiquement -->
-				<label>Mot de passe</label>
-				<input [(ngModel)]="newAdmin.password" name="password" type="password" placeholder="(optionnel) sera défini par email" />
-			</div>
-			<div class="row">
-				<label>Club *</label>
-				<select [(ngModel)]="newAdmin.clubId" name="clubId" required>
-					<option [ngValue]="null">-- Choisir un club --</option>
-					<option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.name }}</option>
-				</select>
-				<small *ngIf="clubs.length === 0" class="hint">Aucun club disponible — créez d'abord un club.</small>
-			</div>
-
-			<div class="actions" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-				<ui-button [type]="'submit'" [disabled]="loading" [label]="loading ? 'En cours...' : 'Créer'" color="primary" class="ui-form-submit"></ui-button>
-				<small class="hint" style="color:#6b7280;">Un email sera envoyé au nouvel administrateur pour définir son mot de passe avant sa première connexion.</small>
-			</div>
-
-			<p class="message" *ngIf="message">{{ message }}</p>
-		</form>
-	</ui-modal>
+<div class="page-shell">
+  <app-page-header title="Administrateurs de clubs" icon="ri-shield-user-line">
+    <ng-container page-header-actions>
+      <ui-button label="Créer un admin" variant="primary" (clicked)="showModal = true"></ui-button>
+    </ng-container>
+  </app-page-header>
+  <div class="table-wrap">
+    <ui-table
+      [columns]="[
+        { key: 'nom', label: 'Nom' },
+        { key: 'prenom', label: 'Prénom' },
+        { key: 'email', label: 'Email' },
+        { key: 'clubName', label: 'Club' }
+      ]"
+      [data]="adminsTable"
+      [actions]="tableActions"
+      (actionClick)="onTableAction($event)">
+    </ui-table>
+  </div>
 </div>
+
+<ui-modal [open]="showModal" (closed)="showModal = false" title="Créer un administrateur de club">
+  <form (ngSubmit)="createAdmin()" class="admin-form">
+    <div class="form-group">
+      <label>Nom *</label>
+      <input [(ngModel)]="newAdmin.nom" name="nom" required />
+    </div>
+    <div class="form-group">
+      <label>Prénom</label>
+      <input [(ngModel)]="newAdmin.prenom" name="prenom" />
+    </div>
+    <div class="form-group">
+      <label>Email *</label>
+      <input [(ngModel)]="newAdmin.email" name="email" type="email" required />
+    </div>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input [(ngModel)]="newAdmin.password" name="password" type="password" placeholder="(optionnel) sera défini par email" />
+    </div>
+    <div class="form-group">
+      <label>Club *</label>
+      <select [(ngModel)]="newAdmin.clubId" name="clubId" required>
+        <option [ngValue]="null">-- Choisir un club --</option>
+        <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.name }}</option>
+      </select>
+      <small *ngIf="clubs.length === 0" class="hint">Aucun club disponible — créez d'abord un club.</small>
+    </div>
+    <p class="hint">Un email sera envoyé au nouvel administrateur pour définir son mot de passe.</p>
+    <p class="message" *ngIf="message">{{ message }}</p>
+    <div class="modal-footer">
+      <ui-button [type]="'submit'" [disabled]="loading" [label]="loading ? 'En cours...' : 'Créer'" variant="primary"></ui-button>
+    </div>
+  </form>
+</ui-modal>

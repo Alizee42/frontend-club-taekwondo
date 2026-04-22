@@ -1,25 +1,25 @@
-<section class="membres-section">
-  <div class="header-flex">
-  <ui-title [level]="2" text="Gestion des membres du club" icon="ri-group-line"></ui-title>
-    <div class="add-btn">
+<div class="page-shell">
+  <app-page-header title="Gestion des membres du club" icon="ri-group-line">
+    <ng-container page-header-actions>
       <ui-button label="Ajouter un membre" (clicked)="openAjoutModal()" variant="primary"></ui-button>
-    </div>
-  </div>
-  <div *ngIf="loading">Chargement...</div>
+    </ng-container>
+  </app-page-header>
   <div *ngIf="error" class="error">{{ error }}</div>
-  <ui-table
-    [columns]="columns"
-    [data]="membres"
-    [actions]="actions"
-    (actionClick)="onTableAction($event)"
-  ></ui-table>
-  <div *ngIf="!loading && membres.length === 0">Aucun membre pour ce club.</div>
-  <ui-modal [open]="showModal" [title]="modalMode === 'ajout' ? 'Ajouter un membre' : 'Modifier le membre'" (closed)="closeModal()">
-    <ui-form
-      [fields]="fields"
-      [model]="membreEnCours"
-      submitLabel="Valider"
-      (submitted)="onSubmitForm($event)"
-    ></ui-form>
-  </ui-modal>
-</section>
+  <div class="table-wrap">
+    <ui-table
+      [columns]="columns"
+      [data]="membres"
+      [actions]="actions"
+      (actionClick)="onTableAction($event)"
+    ></ui-table>
+  </div>
+</div>
+
+<ui-modal [open]="showModal" [title]="modalMode === 'ajout' ? 'Ajouter un membre' : 'Modifier le membre'" (closed)="closeModal()">
+  <ui-form
+    [fields]="fields"
+    [model]="membreEnCours"
+    submitLabel="Valider"
+    (submitted)="onSubmitForm($event)"
+  ></ui-form>
+</ui-modal>

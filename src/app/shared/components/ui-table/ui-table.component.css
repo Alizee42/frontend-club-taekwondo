@@ -1,129 +1,159 @@
-.edit-blue .ui-icn-btn {
-  background: #2563eb !important;
-  color: #fff !important;
-  border-radius: 5px;
-  border: none;
-  box-shadow: 0 1px 2px rgba(37,99,235,0.08);
-  transition: background 0.2s;
-}
-.edit-blue .ui-icn-btn:hover {
-  background: #1741a6 !important;
-}
-.td-center {
-  text-align: center !important;
-}
-.th-center {
-  text-align: center !important;
+/* ── Table de base ── */
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
 }
 
-.th-featured-center {
-  text-align: center !important;
-  vertical-align: middle !important;
+.ui-table {
+  width: 100%;
+  min-width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  font-size: var(--text-sm);
+  table-layout: auto;
 }
-/* Force la taille de toutes les images dans le tableau, même générées par innerHTML */
-.ui-table td img {
-width: 56% !important;
-height: 35% !important;
-object-fit: cover !important;
-border-radius: 4px !important;
-display: block;
-margin: 0 auto;
+
+/* En-têtes */
+.ui-table thead th {
+  padding: var(--sp-3) var(--sp-4);
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-text-inv);
+  background: var(--brand-primary-dark);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-primary-dark) 78%, black);
+  white-space: nowrap;
 }
-/* Limite la taille des images galerie uniquement */
+
+/* Cellules */
+.ui-table tbody td {
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: middle;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.ui-table tbody td:not(.col-actions) {
+  min-width: 0;
+}
+
+.ui-table tbody tr:not(.empty-row):nth-child(even) td {
+  background: color-mix(in srgb, var(--brand-primary) 4%, white);
+}
+
+.ui-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ui-table tbody tr:not(.empty-row):hover td {
+  background: color-mix(in srgb, var(--brand-primary) 9%, white);
+}
+
+.empty-row td,
+.ui-table tbody tr.empty-row:hover td {
+  background: transparent;
+}
+
+/* ── Colonne Actions ── */
+.col-actions {
+  width: 80px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ── État vide ── */
+.empty-row td {
+  text-align: center;
+  color: var(--color-text-3);
+  padding: 2.5rem var(--sp-4);
+}
+
+.empty-row i {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.35;
+}
+
+/* ── Édition inline ── */
+.cell-edit-input {
+  width: 110px;
+  max-width: 110px;
+  padding: 2px 6px;
+  font-size: var(--text-sm);
+  display: inline-block;
+  vertical-align: middle;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.cell-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 2px;
+  vertical-align: middle;
+}
+
+.cell-edit-confirm { color: var(--color-success); margin-left: 4px; }
+.cell-edit-cancel  { color: var(--color-danger);  margin-left: 2px; }
+
+/* ── Image en cellule ── */
 .galerie-table-img {
-max-width: 170px;
-max-height: 100px;
+  max-width: 120px;
+  max-height: 80px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   display: block;
   margin: 0 auto;
 }
-.ui-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  overflow: hidden;
-}
-.ui-table th, .ui-table td {
-  padding: 16px 18px;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: left;
-}
-.ui-table th {
-  background: var(--blue-main, #2563eb);
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  font-size: 1.08rem;
-}
-.ui-table tr:hover {
-  background: #f7c87311;
-}
-.ui-table-actions-btn {
-  margin-right: 8px;
-  padding: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  border: none;
-  background: #f3f7ff;
-  color: var(--blue-main, #2563eb);
-  cursor: pointer;
-  font-size: 1.18rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.07);
-  transition: background 0.2s, color 0.2s;
-}
-.ui-table-actions-btn.edit {
-  background: var(--blue-main, #2563eb);
-  color: #fff !important;
-}
-.ui-table-actions-btn:last-child {
-  color: #fff !important;
-  background: var(--red-main, #e53935);
-}
-.ui-table-actions-btn:last-child:hover {
-  background: #b71c1c;
-  color: #fff;
-}
-.ui-table-actions-btn i {
-  font-size: 1.25em;
-  margin: 0;
-}
-.ui-table-actions-btn:hover {
-  background: var(--blue-main, #2563eb);
-  color: #fff;
+
+.cell-no-image {
+  color: var(--color-text-3);
+  font-size: var(--text-sm);
 }
 
-/* Bouton compact pour "Voir" dans les cellules */
+/* ── Bouton "Voir" en cellule (utilisé via buttonCustomClass) ── */
+.btn-icon-only {
+  padding: 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .btn-view {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: var(--blue-main, #2563eb);
-  color: #fff !important;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  background: var(--brand-primary);
+  color: var(--color-surface) !important;
   text-decoration: none;
-  font-size: 0.9rem;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.15);
+  font-size: var(--text-sm);
 }
-.btn-view:hover { background: #1741a6; color: #fff !important; }
-.btn-view i { font-size: 1.05em; line-height: 1; }
+
+.btn-view:hover {
+  filter: brightness(0.92);
+}
+
 .btn-view.btn-icon-only {
-  padding: 6px;
-  width: 34px;
-  height: 34px;
-  justify-content: center;
-}
-/* Cas spécifique quand .btn-view est utilisé comme UiButton (classe .ui-btn) :
-   on neutralise le style parent pour laisser le UiIconButton enfant s'afficher
-   avec la même taille que les boutons d'actions (34x34). */
-.btn-view.ui-btn.btn-icon-only {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -132,17 +162,19 @@ max-height: 100px;
   height: auto !important;
 }
 
-/* Badges de statut réutilisables */
-.badge-pill {
-  display: inline-block;
-  padding: 4px 12px; /* +padding */
-  border-radius: 999px;
-  font-size: 13px;   /* +taille */
-  line-height: 1.2;
-  font-weight: 600;
-  white-space: nowrap;
-  vertical-align: middle;
+/* ── Utilitaires ── */
+.td-center { text-align: center !important; }
+.th-center { text-align: center !important; }
+.th-featured-center { text-align: center !important; vertical-align: middle !important; }
+
+.edit-blue .ui-icn-btn {
+  background: var(--brand-primary) !important;
+  color: var(--color-surface) !important;
+  border-radius: var(--radius-sm);
+  border: none;
+  transition: filter var(--t-fast);
 }
-.badge-success { background: #dcfce7; color: #166534; }
-.badge-danger  { background: #fee2e2; color: #991b1b; }
-.badge-warn    { background: #fef9c3; color: #92400e; }
+
+.edit-blue .ui-icn-btn:hover {
+  filter: brightness(0.88);
+}

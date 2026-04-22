@@ -4,13 +4,15 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { FormsModule } from '@angular/forms';
 import { ClubService } from '../../services/club.service';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-gestion-utilisateurs',
   standalone: true,
-  imports: [CommonModule, UiTableComponent, UiModalComponent, FormsModule],
+  imports: [CommonModule, UiTableComponent, UiModalComponent, UiButtonComponent, FormsModule, PageHeaderComponent],
   templateUrl: './gestion-utilisateurs.component.html',
   styleUrls: ['./gestion-utilisateurs.component.css']
 })

@@ -1,35 +1,31 @@
-<div class="gestion-galerie-admin">
-  <div class="clubs-header-premium" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
-  <h2 class="page-title">Gestion des galeries par club</h2>
-    <!-- Pour l'admin classique on affiche simplement un bouton Ajouter -->
-    <ui-button label="Ajouter une photo" variant="primary" (clicked)="openAddModal()"></ui-button>
+<div class="page-shell">
+  <app-page-header title="Galerie du club" icon="ri-gallery-line">
+    <ng-container page-header-actions>
+      <ui-button label="Ajouter une photo" variant="primary" (clicked)="openAddModal()"></ui-button>
+    </ng-container>
+  </app-page-header>
+  <div class="table-wrap">
+    <ui-table [columns]="tableColumns" [data]="images" [actions]="tableActions" (actionClick)="handleTableAction($event)"></ui-table>
   </div>
-
-  <ui-modal [open]="modalOpen" [title]="modalTitle" (closed)="closeModal()">
-    <form (ngSubmit)="submitImage()" style="display: flex; flex-direction: column; gap: 18px; padding: 8px 0;">
-      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-        <label for="titre">Titre</label>
-        <input id="titre" type="text" [(ngModel)]="formImage.titre" name="titre" required style="width: 100%;" />
-      </div>
-  <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-        <label for="description">Description</label>
-        <textarea id="description" [(ngModel)]="formImage.description" name="description" rows="3" style="width: 100%;"></textarea>
-      </div>
-  <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-        <label for="imageFile">Image</label>
-        <input id="imageFile" type="file" (change)="onFileSelected($event)" accept="image/*" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; font-size: 15px;" />
-        <img *ngIf="formImage.imageUrl" [src]="formImage.imageUrl" alt="Aperçu" style="max-width: 100%; max-height: 180px; margin-top: 8px; border-radius: 6px;" />
-      </div>
-      <div style="margin-top: 12px; display: flex; justify-content: center;">
-        <ui-button [label]="editMode ? 'Modifier' : 'Enregistrer'" type="submit" variant="primary" [disabled]="isSubmitting"></ui-button>
-      </div>
-    </form>
-  </ui-modal>
-
-  <div class="card">
-    <div style="padding: 8px 0;">
-      <ui-table [columns]="tableColumns" [data]="images" [actions]="tableActions" (actionClick)="handleTableAction($event)"></ui-table>
-    </div>
-  </div>
-
 </div>
+
+<ui-modal [open]="modalOpen" [title]="modalTitle" (closed)="closeModal()">
+  <form (ngSubmit)="submitImage()">
+    <div class="form-group">
+      <label for="titre">Titre</label>
+      <input id="titre" type="text" [(ngModel)]="formImage.titre" name="titre" required />
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" [(ngModel)]="formImage.description" name="description" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="imageFile">Image</label>
+      <input id="imageFile" type="file" (change)="onFileSelected($event)" accept="image/*" />
+      <img *ngIf="formImage.imageUrl" [src]="formImage.imageUrl" alt="Aperçu" class="upload-preview" />
+    </div>
+    <div class="modal-footer">
+      <ui-button [label]="editMode ? 'Modifier' : 'Enregistrer'" type="submit" variant="primary" [disabled]="isSubmitting"></ui-button>
+    </div>
+  </form>
+</ui-modal>

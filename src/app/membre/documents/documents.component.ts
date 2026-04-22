@@ -7,8 +7,8 @@ import { environment } from '../../../environments/environment';
 import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
 import { DOC_CATALOG } from '../../shared/documents/doc-utils';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { AuthService } from '../../services/auth.service';
 
 /* =========================
@@ -74,7 +74,7 @@ function labelFor(code: string) {
   standalone: true,
   templateUrl: './documents.component.html',
   styleUrls: ['./documents.component.css'],
-  imports: [CommonModule, FormsModule, UiTitleComponent, UiTableComponent, UiModalComponent]
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, PageHeaderComponent]
 })
 export class DocumentsComponent implements OnInit {
     private readonly API_BASE = environment.apiUrl;

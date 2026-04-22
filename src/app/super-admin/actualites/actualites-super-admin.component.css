@@ -292,3 +292,20 @@ input:checked + .slider:before {
 .btn-cancel:hover {
   background: #bcdffb;
 }
+
+/* Largeurs colonnes tableau actualités */
+:host ::ng-deep .col-img      { width: 90px !important; min-width: 90px !important; max-width: 90px !important; }
+:host ::ng-deep .col-titre    { width: 320px !important; min-width: 320px !important; max-width: 320px !important; }
+:host ::ng-deep .col-type     { width: 70px !important; min-width: 70px !important; max-width: 70px !important; }
+:host ::ng-deep .col-date     { width: 80px !important; min-width: 80px !important; max-width: 80px !important; }
+:host ::ng-deep .col-featured { width: 130px !important; min-width: 130px !important; max-width: 130px !important; }
+
+.upload-preview {
+  max-width: 100%;
+  max-height: 180px;
+  margin-top: var(--sp-3);
+  border-radius: var(--radius-sm);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}

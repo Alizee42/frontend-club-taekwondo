@@ -8,7 +8,7 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 interface Actualite {
   id?: string;
@@ -26,7 +26,7 @@ interface Actualite {
   standalone: true,
   templateUrl: './actualites-super-admin.component.html',
   styleUrls: ['./actualites-super-admin.component.css'],
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, UiTitleComponent]
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, PageHeaderComponent]
 })
 export class ActualitesSuperAdminComponent implements OnInit {
   actualites: Actualite[] = [];

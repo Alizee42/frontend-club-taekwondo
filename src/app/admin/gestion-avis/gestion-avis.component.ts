@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { AvisService, Avis } from '../../services/avis.service';
 import { ClubService, Club } from '../../services/club.service';
 
@@ -10,10 +11,12 @@ import { ClubService, Club } from '../../services/club.service';
   templateUrl: './gestion-avis.component.html',
   styleUrls: ['./gestion-avis.component.css'],
   standalone: true,
-  imports: [CommonModule, UiTableComponent, UiTitleComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, PageHeaderComponent],
 })
 export class GestionAvisComponent implements OnInit {
   avis: Avis[] = [];
+  searchTerm = '';
+  approvalFilter: '' | 'approved' | 'pending' = '';
   columns = [
     { key: 'pseudoVisiteur', label: 'Nom' },
     { key: 'contenu', label: 'Contenu' },
@@ -42,6 +45,24 @@ export class GestionAvisComponent implements OnInit {
     } else {
       this.avis = [];
     }
+  }
+
+  filteredAvis(): Avis[] {
+    const term = this.searchTerm.trim().toLowerCase();
+
+    return this.avis.filter((avis) => {
+      const matchesSearch = !term || [
+        avis.pseudoVisiteur,
+        avis.contenu,
+        avis.typeAvis ?? ''
+      ].some((value) => String(value || '').toLowerCase().includes(term));
+
+      const matchesApproval = !this.approvalFilter
+        || (this.approvalFilter === 'approved' && avis.approuve === true)
+        || (this.approvalFilter === 'pending' && avis.approuve !== true);
+
+      return matchesSearch && matchesApproval;
+    });
   }
 
   onTableAction(event: { action: string, row: Avis }) {

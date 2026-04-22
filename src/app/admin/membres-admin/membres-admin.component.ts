@@ -6,13 +6,13 @@ import { AuthService, Utilisateur } from '../../services/auth.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-membres-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiTitleComponent, UiFormComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, PageHeaderComponent],
   templateUrl: './membres-admin.component.html',
   styleUrls: ['./membres-admin.component.css']
 })

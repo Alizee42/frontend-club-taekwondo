@@ -4,16 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { Club, ClubService } from '../../services/club.service';
 import { Enseignant, EnseignantService } from '../../services/enseignant.service';
 import { environment } from '../../../environments/environment';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-enseignants-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTitleComponent, UiTableComponent, UiModalComponent, UiFormComponent, UiButtonComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiFormComponent, UiButtonComponent, PageHeaderComponent],
   templateUrl: './enseignants-super-admin.component.html',
   styleUrls: ['./enseignants-super-admin.component.css']
 })

@@ -299,3 +299,17 @@
   text-align: center;
   margin-top: 2em;
 }
+
+.accordion-arrow {
+  margin-left: auto;
+  font-size: 1.2rem;
+  color: var(--color-text-2);
+  pointer-events: none;
+}
+
+.plage-resume {
+  font-weight: 400;
+  color: var(--color-text-2);
+  font-size: 0.97em;
+  margin-left: 1em;
+}

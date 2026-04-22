@@ -5,10 +5,11 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 
 
 type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
@@ -56,7 +57,7 @@ interface RequiredDoc {
   selector: 'app-documents-parent',
   templateUrl: './documents-parent.component.html',
   styleUrls: ['./documents-parent.component.css'],
-  imports: [CommonModule, FormsModule, UiTitleComponent, UiTableComponent, UiModalComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, EmptyStateComponent, PageHeaderComponent],
 })
 export class DocumentsParentComponent implements OnInit {
   private readonly API_BASE = environment.apiUrl;

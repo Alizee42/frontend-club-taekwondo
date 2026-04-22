@@ -33,7 +33,6 @@ import { BoutiqueComponent } from './pages/boutique/boutique.component';
 import { GestionCommandeComponent } from './admin/gestion-commande/gestion-commande.component';
 import { EvenementsComponent } from './pages/evenements/evenements.component';
 import { GestionEvenementsComponent } from './admin/gestion-evenements/gestion-evenements.component';
-import { GestionInscriptionsComponent } from './admin/gestion-inscriptions/gestion-inscriptions.component';
 import { DashboardParentComponent } from './parent/dashboard-parent/dashboard-parent.component';
 import { PaiementParentComponent } from './parent/paiement-parent/paiement-parent.component';
 import { DocumentsParentComponent } from './parent/documents-parent/documents-parent.component';
@@ -88,7 +87,6 @@ export const routes: Routes = [
       { path: 'paiements', component: GestionPaiementsComponent },
       { path: 'gestion-commande', component: GestionCommandeComponent },
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
-      { path: 'gestion-inscription', component: GestionInscriptionsComponent },
       { path: 'membres', loadComponent: () => import('./admin/membres-admin/membres-admin.component').then(m => m.MembresAdminComponent) },
       { path: 'gestion-utilisateurs', component: GestionUtilisateursComponent }
     ]

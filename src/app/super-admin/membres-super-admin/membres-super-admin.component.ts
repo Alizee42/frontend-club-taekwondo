@@ -8,13 +8,12 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { MembresSuperAdminFormComponent } from './membres-super-admin-form.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
-
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-membres-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, MembresSuperAdminFormComponent, UiTitleComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, MembresSuperAdminFormComponent, PageHeaderComponent],
   templateUrl: './membres-super-admin.component.html',
   styleUrls: ['./membres-super-admin.component.css']
 })

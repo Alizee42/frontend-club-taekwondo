@@ -6,12 +6,12 @@ import { UiTableComponent } from '../../shared/components/ui-table/ui-table.comp
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
-import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-super-admin-clubs',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTableComponent, UiFormComponent, UiModalComponent, UiButtonComponent, UiTitleComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, UiFormComponent, UiModalComponent, UiButtonComponent, PageHeaderComponent],
   templateUrl: './clubs.component.html',
   styleUrls: ['./clubs.component.css']
 })

@@ -126,3 +126,11 @@
 .action-btn:hover {
   background: #dbeafe;
 }
+
+.upload-preview {
+  max-width: 100%;
+  max-height: 180px;
+  margin-top: var(--sp-3);
+  border-radius: var(--radius-sm);
+  display: block;
+}
