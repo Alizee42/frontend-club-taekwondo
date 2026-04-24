@@ -256,6 +256,21 @@
   min-width: var(--control-h-sm);
 }
 
+.btn.btn-xs,
+.ui-btn.btn-xs {
+  min-height: 28px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--radius);
+  font-size: var(--text-xs);
+}
+
+.btn.btn-icon-only.btn-xs,
+.ui-btn.btn-icon-only.btn-xs {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+}
+
 .btn.btn-icon-only .ui-btn-label,
 .ui-btn.btn-icon-only .ui-btn-label {
   display: none;
@@ -264,6 +279,70 @@
 .btn.full,
 .ui-btn.full {
   width: 100%;
+}
+
+/* =============================================
+   BOUTON ACTION TABLEAU
+   Ghost transparent au repos, teinte colorée au hover
+   ============================================= */
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-3);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: background var(--t-base), color var(--t-base);
+}
+
+.action-btn:hover:not(:disabled) {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.action-btn--primary {
+  background: color-mix(in srgb, var(--brand-primary) 10%, white);
+  color: var(--brand-primary);
+}
+
+.action-btn--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--brand-primary) 18%, white);
+}
+
+.action-btn--success {
+  background: color-mix(in srgb, var(--color-success) 10%, white);
+  color: var(--color-success-ink);
+}
+
+.action-btn--success:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-success) 18%, white);
+}
+
+.action-btn--danger {
+  background: color-mix(in srgb, var(--color-danger) 10%, white);
+  color: var(--color-danger-ink);
+}
+
+.action-btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 18%, white);
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.action-btn:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 1px;
 }
 
 .btn.banner-small,

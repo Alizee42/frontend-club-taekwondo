@@ -1,18 +1,19 @@
-<div class="evenements-container">
-  <!-- Header simple -->
-  <header class="page-header">
-    <h1>Événements Parents</h1>
-    <p>Gérez les inscriptions de vos enfants aux événements du club</p>
-    
-    <!-- 📱 Bouton actualiser visible sur mobile -->
-    <button 
-      (click)="actualiserDonnees()" 
-      class="btn btn-secondary visible-mobile"
-      [disabled]="isLoading">
+<div class="page-shell evenements-container">
+  <app-page-header
+    title="Evenements parents"
+    icon="ri-calendar-event-line"
+    subtitle="Gerez les inscriptions de vos enfants aux evenements du club">
+    <ng-container page-header-actions>
+      <button
+        type="button"
+        (click)="actualiserDonnees()"
+        class="btn btn-secondary refresh-action"
+        [disabled]="isLoading">
       <i class="ri-refresh-line"></i>
       Actualiser
-    </button>
-  </header>
+      </button>
+    </ng-container>
+  </app-page-header>
 
   <!-- Loading -->
   <div class="empty-state" *ngIf="isLoading">
@@ -66,12 +67,11 @@
     <!-- Section événements -->
     <div class="evenements-section">
       <div class="section-header">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="section-title-row">
           <h2 class="section-title">Événements disponibles</h2>
           <button (click)="actualiserDonnees()" 
                   [disabled]="isLoading"
-                  class="btn btn-secondary"
-                  style="flex: none; padding: 8px 12px; font-size: 0.8rem;">
+                  class="btn btn-secondary refresh-small">
             <i class="ri-refresh-line" [class.spinning]="isLoading"></i>
             Actualiser
           </button>

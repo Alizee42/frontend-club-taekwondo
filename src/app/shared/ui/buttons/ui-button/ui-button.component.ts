@@ -37,7 +37,7 @@ export class UiButtonComponent {
   }
 
   get buttonClasses(): string[] {
-    const classes: string[] = [this.resolvedVariant];
+    const classes: string[] = [this.resolvedVariant, `btn-${this.resolvedVariant}`];
 
     if (this.resolvedVariant === 'primary') {
       classes.push('v-primary');

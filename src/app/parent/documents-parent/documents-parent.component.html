@@ -99,7 +99,7 @@
   </ng-container>
 </div>
 
-<ui-modal [open]="!!previewing" (closed)="closePreview()" [title]="previewing?.nomDocument || 'Aperçu'">
+<ui-modal [open]="!!previewing" (closed)="closePreview()" [title]="previewing?.nomDocument || 'Aperçu'" size="xl">
   <ng-container *ngIf="previewing && isImage(previewing.nomDocument); else pdfBlock2">
     <img [attr.src]="previewing.cheminFichier ? rawUrl(previewing.cheminFichier) : null"
          alt="Aperçu image"

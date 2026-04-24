@@ -82,6 +82,7 @@
 <ui-modal
   [open]="!!previewing"
   (closed)="closePreview()"
+  size="xl"
   [title]="previewing?.nomDocument || 'Aperçu'">
   <ng-container *ngIf="previewing as d">
     <ng-container *ngIf="d.cheminFichier as p">

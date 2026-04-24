@@ -1,111 +1,177 @@
 <div class="page-shell">
+
   <app-page-header
     title="Gestion des paiements"
     icon="ri-wallet-3-line"
-    subtitle="Suivre les encaissements, les echeances et ajouter un nouveau paiement"
+    subtitle="{{ totalPaiements === 1 ? '1 paiement' : totalPaiements + ' paiements' }} · {{ nbRetards }} en retard"
   >
     <ng-container page-header-actions>
-      <ui-button
-        label="Ajouter un paiement"
-        icon="ri-add-line"
-        (clicked)="ouvrirModalAjout()"
-      ></ui-button>
       <ui-button
         label="Rafraichir"
         icon="ri-refresh-line"
         variant="secondary"
         (clicked)="refreshStats(); loadPaiements()"
       ></ui-button>
+      <ui-button
+        label="Ajouter un paiement"
+        icon="ri-add-line"
+        (clicked)="ouvrirModalAjout()"
+      ></ui-button>
     </ng-container>
   </app-page-header>
 
-  <section class="stats-grid">
-    <article class="stat-card stat-card--success">
-      <div class="stat-icon"><i class="ri-wallet-3-line" aria-hidden="true"></i></div>
-      <div class="stat-copy">
-        <span class="stat-label">Total encaisse</span>
-        <strong class="stat-value">{{ stats.totalPayes | currency:'EUR' }}</strong>
+  <div class="kpi-grid">
+    <article class="kpi-card kpi-card--primary">
+      <span class="kpi-icon"><i class="ri-safe-2-line"></i></span>
+      <div>
+        <span class="kpi-label">Encaisse</span>
+        <strong class="kpi-value">{{ totalEncaisse | currency:'EUR':'symbol':'1.0-0' }}</strong>
+        <span class="kpi-meta">sur {{ totalFacture | currency:'EUR':'symbol':'1.0-0' }}</span>
       </div>
     </article>
 
-    <article class="stat-card stat-card--warning">
-      <div class="stat-icon"><i class="ri-time-line" aria-hidden="true"></i></div>
-      <div class="stat-copy">
-        <span class="stat-label">En attente</span>
-        <strong class="stat-value">{{ stats.totalAttente | currency:'EUR' }}</strong>
+    <article class="kpi-card kpi-card--warning">
+      <span class="kpi-icon"><i class="ri-hourglass-2-line"></i></span>
+      <div>
+        <span class="kpi-label">A encaisser</span>
+        <strong class="kpi-value">{{ totalRestant | currency:'EUR':'symbol':'1.0-0' }}</strong>
+        <span class="kpi-meta">{{ paiementsOuvertsLabel }}</span>
       </div>
     </article>
 
-    <article class="stat-card stat-card--danger">
-      <div class="stat-icon"><i class="ri-close-circle-line" aria-hidden="true"></i></div>
-      <div class="stat-copy">
-        <span class="stat-label">Annules</span>
-        <strong class="stat-value">{{ stats.totalAnnules | currency:'EUR' }}</strong>
+    <article class="kpi-card" [class.kpi-card--danger]="nbRetards > 0">
+      <span class="kpi-icon"><i class="ri-alarm-warning-line"></i></span>
+      <div>
+        <span class="kpi-label">Retards</span>
+        <strong class="kpi-value">{{ nbRetards }}</strong>
+        <span class="kpi-meta">{{ nbRetards === 1 ? 'paiement a relancer' : 'paiements a relancer' }}</span>
       </div>
     </article>
 
-    <article class="stat-card stat-card--neutral">
-      <div class="stat-icon"><i class="ri-bar-chart-2-line" aria-hidden="true"></i></div>
-      <div class="stat-copy">
-        <span class="stat-label">Payes ce mois</span>
-        <strong class="stat-value">{{ stats.pourcentagePayesMois | number:'1.0-1' }}%</strong>
+    <article class="kpi-card kpi-card--success">
+      <span class="kpi-icon"><i class="ri-pie-chart-2-line"></i></span>
+      <div>
+        <span class="kpi-label">Taux encaisse</span>
+        <strong class="kpi-value">{{ tauxEncaissement | number:'1.0-1' }}%</strong>
+        <span class="kpi-meta">{{ paiementsSoldesLabel }}</span>
       </div>
     </article>
-  </section>
+  </div>
 
-  <section class="summary-strip">
-    <span class="summary-pill">
-      <i class="ri-bank-card-line" aria-hidden="true"></i>
-      {{ totalPaiements }} paiement(s)
-    </span>
-    <span class="summary-pill summary-pill--danger">
-      <i class="ri-alert-line" aria-hidden="true"></i>
-      {{ nbRetards }} membre(s) en retard
-    </span>
-  </section>
+  <div class="main-layout">
+    <div class="tableau-area">
+      <div class="tabs">
+        <button class="tab-btn" [class.active]="ongletActif === 'paiements'" (click)="ongletActif = 'paiements'">
+          <i class="ri-money-euro-circle-line"></i> Paiements
+        </button>
+        <button class="tab-btn" [class.active]="ongletActif === 'parents'" (click)="ongletActif = 'parents'">
+          <i class="ri-group-line"></i> Par parent
+        </button>
+        <button class="tab-btn" [class.active]="ongletActif === 'echeances'" (click)="changerOnglet('echeances')">
+          <i class="ri-calendar-check-line"></i> Echeances
+        </button>
+      </div>
 
-  <div class="tabs-card">
-    <nav class="tabs-nav" aria-label="Navigation des paiements">
-      <button
-        type="button"
-        class="tab-button"
-        [class.active]="ongletActif === 'paiements'"
-        (click)="changerOnglet('paiements')"
-      >
-        <i class="ri-money-euro-circle-line" aria-hidden="true"></i>
-        <span>Paiements</span>
-      </button>
+      <div class="tab-body">
+        <app-suivi-paiements
+          *ngIf="ongletActif !== 'echeances'"
+          [paiementsData]="paiements"
+          [viewMode]="ongletActif === 'parents' ? 'utilisateurs' : 'paiements'"
+          [showTitle]="false"
+          [showToolbar]="false"
+          [showFilters]="true"
+          [showClub]="false"
+        ></app-suivi-paiements>
 
-      <button
-        type="button"
-        class="tab-button"
-        [class.active]="ongletActif === 'echeances'"
-        (click)="changerOnglet('echeances')"
-      >
-        <i class="ri-calendar-check-line" aria-hidden="true"></i>
-        <span>Echeances</span>
-      </button>
-    </nav>
+        <app-echeance
+          *ngIf="ongletActif === 'echeances'"
+          [echeances]="getAllEcheances()"
+          [inline]="true"
+        ></app-echeance>
+      </div>
+    </div>
 
-    <section class="tab-panel">
-      <app-suivi-paiements
-        *ngIf="ongletActif === 'paiements'"
-        [paiementsData]="paiements"
-        [viewMode]="'paiements'"
-      ></app-suivi-paiements>
+    <aside class="params-sidebar">
+      <div class="card card-body">
+        <h3 class="params-title">
+          <i class="ri-settings-3-line"></i> Cotisation
+        </h3>
 
-      <app-echeance
-        *ngIf="ongletActif === 'echeances'"
-        [echeances]="getAllEcheances()"
-        [inline]="true"
-      ></app-echeance>
-    </section>
+        <div class="form-group">
+          <label class="form-label">Montant (€)</label>
+          <input class="form-input" type="number" [(ngModel)]="parametres.montantCotisation" min="0" step="5" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Modes acceptes</label>
+          <div class="check-list">
+            <label class="filters-check">
+              <input type="checkbox" [(ngModel)]="parametres.stripe" />
+              <i class="ri-bank-card-line"></i> Stripe (CB)
+            </label>
+            <label class="filters-check">
+              <input type="checkbox" [(ngModel)]="parametres.virement" />
+              <i class="ri-bank-line"></i> Virement
+            </label>
+            <label class="filters-check">
+              <input type="checkbox" [(ngModel)]="parametres.especes" />
+              <i class="ri-money-euro-circle-line"></i> Especes
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Echeances max</label>
+          <div class="ech-btns">
+            <button
+              *ngFor="let n of [1, 2, 3, 4]"
+              class="ech-btn"
+              [class.active]="parametres.echeancesAutorisees === n"
+              (click)="parametres.echeancesAutorisees = n"
+            >{{ n }}</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Intervalle</label>
+          <select class="form-select" [(ngModel)]="parametres.intervalleEcheance">
+            <option value="MENSUEL">Mensuel</option>
+            <option value="BIMESTRIEL">Bimestriel</option>
+            <option value="TRIMESTRIEL">Trimestriel</option>
+          </select>
+        </div>
+
+        <app-alert-banner
+          *ngIf="paramsSaved"
+          type="success"
+          message="Parametres sauvegardes"
+          [dismissible]="true"
+          (dismissed)="paramsSaved = false"
+        ></app-alert-banner>
+        <app-alert-banner
+          *ngIf="paramsError"
+          type="error"
+          [message]="paramsError"
+          [dismissible]="true"
+          (dismissed)="paramsError = ''"
+        ></app-alert-banner>
+
+        <ui-button
+          label="Sauvegarder"
+          variant="primary"
+          [loading]="paramsSaving"
+          (clicked)="sauvegarderParametres()"
+          [full]="true"
+        ></ui-button>
+      </div>
+    </aside>
   </div>
 </div>
 
 <ui-modal
   [open]="modalAjoutVisible"
   title="Ajouter un paiement"
+  size="xl"
   (closed)="fermerModalAjout()"
 >
   <div class="payment-modal-content">

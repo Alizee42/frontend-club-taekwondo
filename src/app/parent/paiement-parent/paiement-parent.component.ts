@@ -8,6 +8,8 @@ import { AuthService } from '../../services/auth.service';
 import { MembreService } from '../../services/membre.service';
 import { PaiementService } from '../../services/paiement.service';
 import { environment } from '../../../environments/environment';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 
 type TypePaiement = 'UNIQUE' | 'ECHELONNE';
 type HistoryFilter = 'AUTO' | 'ECHELONNE' | 'UNIQUE';
@@ -16,7 +18,7 @@ type MainTab = 'PAYER' | 'HISTO';
 @Component({
   selector: 'app-paiement-parent',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PageHeaderComponent, UiModalComponent],
   templateUrl: './paiement-parent.component.html',
   styleUrls: ['./paiement-parent.component.css']
   

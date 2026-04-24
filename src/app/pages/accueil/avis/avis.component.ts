@@ -8,6 +8,7 @@ import { ClubSelectionService } from '../../../services/club-selection.service';
 import { ClubService } from '../../../services/club.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environment';
 import Swiper from 'swiper/bundle';
 
 @Component({
@@ -257,6 +258,7 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getPhotoUrl(photo: string): string {
-    return `/api/uploads/avis/${encodeURIComponent(photo)}`;
+    const apiBase = environment.apiUrl.replace(/\/api\/?$/i, '');
+    return `${apiBase}/api/uploads/avis/${encodeURIComponent(photo)}`;
   }  
 }

@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { EvenementService, EvenementDTO } from '../../services/evenement.service';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-evenements-membre',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PageHeaderComponent],
   templateUrl: './evenements-membre.component.html',
   styleUrls: ['./evenements-membre.component.css']
 })

@@ -1,357 +1,457 @@
-.header-horaires {
-  margin-bottom: 1.5rem;
+.horaires-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.header-top {
+.horaires-toolbar {
   display: flex;
-  align-items: flex-start;
-  gap: 2em;
-}
-
-.header-top .ui-title {
-  margin: 0;
-}
-
-.header-top .ui-title::after {
-  display: none; /* titre compact dans la barre */
-}
-
-.header-top .ajout-horaires-btn-container {
-  margin-left: auto; /* pousse le bouton complètement à droite */
-}
-
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.7em;
-  margin-top: 0.75rem;
-}
-
-@media (max-width: 768px) {
-  .header-top {
-    flex-wrap: wrap;
-    gap: 1em;
-  }
-  .header-controls {
-    flex-wrap: wrap;
-  }
-  .header-controls .club-select {
-    width: 100%;
-    max-width: 360px;
-  }
-}
-.page-title {
-  color: var(--blue-main);
-  font-size: 2.1rem;
-  font-weight: 700;
-  margin-bottom: 1.2rem;
-  margin-top: 0.2rem;
-  text-align: left;
-  letter-spacing: 0.5px;
-  line-height: 1.15;
-  background: linear-gradient(90deg, var(--blue-main) 60%, #e0e7ef 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-/* Container flex pour header */
-.header-bar-horaires {
-  display: flex;
-  align-items: flex-start;
-  gap: 2em;
-}
-.ajout-horaires-btn-container {
-  margin-left: auto;
-}
-/* Aligne le label et le select club sur la même ligne */
-.club-select-row {
-  display: flex;
-  align-items: center;
-  gap: 0.7em;
-  flex: 1;
-  justify-content: center;
-}
-/* Bouton éditer à côté de la poubelle (fieldset ouvert) */
-.edit-horaire-btn.absolute {
-  background: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 2em;
-  height: 2em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 7px;
-  right: 45px;
-  margin-right: 0.5em;
-}
-/* Bouton éditer à côté de la poubelle */
-.edit-horaire-btn.modal {
-  background: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 2em;
-  height: 2em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 0.5em;
-}
-/* Header bar */
-.header-bar-horaires {
-  display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 2em;
-}
-/* Titre compact dans la barre d'entête */
-.header-bar-horaires .ui-title {
-  margin: 0;
-}
-.header-bar-horaires .ui-title::after {
-  display: none;
-}
-/* Le sélecteur s'étire et centre son contenu */
-.header-bar-horaires .club-select-row {
-  flex: 1 1 auto;
-  justify-content: center;
-}
-/* Le bouton reste poussé à droite */
-.header-bar-horaires .ajout-horaires-btn-container {
-  margin-left: auto;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  background: #fff;
 }
 
-/* Responsive: passe en colonne sur petits écrans */
-@media (max-width: 768px) {
-  .header-bar-horaires {
-    flex-wrap: wrap;
-    gap: 1em;
-  }
-  .header-bar-horaires .ajout-horaires-btn-container {
-    margin-left: 0;
-  }
+.club-filter {
+  display: grid;
+  gap: 0.45rem;
+  min-width: min(360px, 100%);
 }
-.titre-section {
-  font-size: 2.1rem;
+
+.club-filter label,
+.form-section label {
+  color: var(--color-text-2, #64748b);
+  font-size: 0.78rem;
   font-weight: 800;
-  color: #1a237e;
-  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.club-filter select,
+.form-section select,
+.form-section input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--color-border, #d8dee8);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-text, #111827);
+  font: inherit;
+  padding: 0.65rem 0.75rem;
+  outline: none;
+}
+
+.club-filter select:focus,
+.form-section select:focus,
+.form-section input:focus {
+  border-color: var(--color-primary, #1e6091);
+  box-shadow: 0 0 0 3px rgba(30, 96, 145, 0.12);
+}
+
+.toolbar-summary {
+  display: grid;
+  gap: 0.2rem;
+  text-align: right;
+}
+
+.toolbar-summary span {
+  color: var(--color-text-2, #64748b);
+  font-size: 0.86rem;
+}
+
+.toolbar-summary strong {
+  color: var(--color-text, #111827);
+  font-size: 1rem;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 0.85rem;
+}
+
+.kpi-card {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 36px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-left: 4px solid #64748b;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.kpi-card > div {
+  min-width: 0;
+  display: contents;
+}
+
+.kpi-card--primary {
+  border-left-color: #1e6091;
+}
+
+.kpi-card--success {
+  border-left-color: #18864b;
+}
+
+.kpi-card--info {
+  border-left-color: #4f46e5;
+}
+
+.kpi-icon {
+  grid-column: 1;
+  grid-row: 1;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #eef6fb;
+  color: #1e6091;
+  font-size: 1.15rem;
+  flex: 0 0 auto;
+}
+
+.kpi-card--success .kpi-icon {
+  background: #ecfdf3;
+  color: #18864b;
+}
+
+.kpi-card--info .kpi-icon {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.kpi-label,
+.kpi-meta {
+  display: block;
+  color: var(--color-text-2, #64748b);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.kpi-label {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kpi-meta {
+  align-self: start;
+  grid-column: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kpi-value {
+  display: block;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  color: var(--color-text, #111827);
+  font-size: 1.35rem;
+  line-height: 1.1;
   margin: 0;
-}
-.label-club-select {
-  font-weight: 600;
-  margin-right: 1em;
-}
-.club-select {
-  min-width: 180px;
-  padding: 0.4em 1em;
-  border-radius: 6px;
-  border: 1.5px solid #1976d2;
-  font-weight: 600;
-}
-.ajout-horaires-btn {
-  margin-left: auto;
-  margin-top: 0.1em;
+  text-align: left;
+  white-space: nowrap;
 }
 
-/* Formulaire ajout horaire */
-.ajout-horaire-vertical {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(160px, 1fr));
+  gap: 0.85rem;
+  align-items: start;
 }
-.select-jour {
-  margin-bottom: 0.5em;
+
+.day-card {
+  min-height: 210px;
+  overflow: hidden;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
-.plages-scrollable.scrollable {
-  max-height: 600px;
-  overflow-y: auto;
+
+.day-card--empty {
+  background: #fafafa;
 }
-.bloc-plage-ajout {
-  margin-bottom: 1em;
-  border: 1.5px solid #e3eafc;
-  border-radius: 10px;
-  padding: 0;
-  position: relative;
-  background: white;
-}
-.bloc-plage-ajout.closed {
-  background: #f7f9fc;
-  box-shadow: 0 1px 4px #e3eafc;
-}
-.legend-plage-ajout {
-  font-weight: 700;
-  color: #1976d2;
-  font-size: 1.08em;
-  padding: 0.7em 0.7em;
+
+.day-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 2.5em;
+  gap: 0.75rem;
+  min-height: 62px;
+  padding: 0.85rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  background: #f8fafc;
 }
-.toggle-plage {
-  flex: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+
+.day-card__header > div {
+  min-width: 0;
 }
-.delete-horaire-btn.modal {
-  background: #d32f2f;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 2em;
-  height: 2em;
-  cursor: pointer;
+
+.day-card__name {
+  display: block;
+  color: var(--color-text, #111827);
+  font-weight: 900;
+}
+
+.day-card__count {
+  display: block;
+  color: var(--color-text-2, #64748b);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.empty-day {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 1em;
-}
-.delete-horaire-btn.absolute {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-}
-.icon-toggle {
-  margin-left: 0.5em;
-}
-.plage-ajout-fields {
-  padding: 1.2em 1.2em 0.7em 1.2em;
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-.label-field {
-  font-weight: 600;
-  margin-bottom: 0.2em;
-}
-.select-plage {
-  margin-bottom: 0.5em;
-}
-.input-field {
-  margin-bottom: 0.5em;
-}
-.meme-adresse-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.7em;
-}
-.label-checkbox {
-  margin-bottom: 0;
-}
-.ajout-plage-actions {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5em;
-  margin-bottom: 1em;
-}
-.valider-btn {
-  font-weight: 600;
-  min-width: 140px;
-  height: 44px;
-  font-size: 1.08em;
-}
-.ajout-form-error {
-  color: #d32f2f;
+  min-height: 145px;
+  padding: 1rem;
+  color: var(--color-text-2, #64748b);
+  font-size: 0.9rem;
   text-align: center;
-  font-size: 1em;
-  margin-bottom: 0.7em;
 }
 
-/* Accordion */
-.accordion-header {
-  cursor: pointer;
+.slots-list {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+}
+
+.slot-card {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border: 1px solid #dbe6f3;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.slot-card__time {
+  width: fit-content;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: #eef6fb;
+  color: #1e6091;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.slot-card__body {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.slot-card__body strong {
+  color: var(--color-text, #111827);
+  font-size: 0.95rem;
+}
+
+.slot-card__body span {
+  color: var(--color-text-2, #64748b);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.slot-card__actions {
   display: flex;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.icon-action {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1em 1.2em;
-  background: #f7f9fc;
-  border-radius: 8px 8px 0 0;
-  border: 1.5px solid #e3eafc;
-  margin-bottom: 0.2em;
+  justify-content: center;
+  border: 1px solid var(--color-border, #d8dee8);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-text, #111827);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
 }
-.accordion-jour {
-  font-weight: 700;
-  font-size: 1.15em;
-  color: var(--blue-main);
+
+.icon-action:hover:not(:disabled) {
+  border-color: #1e6091;
+  background: #eef6fb;
+  color: #1e6091;
 }
-.ajout-plage-jour-btn {
-  margin-left: 1em;
-  padding: 0.6em 1.2em;
-  background: var(--blue-main);
+
+.icon-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.icon-action--add {
+  border-color: #1e6091;
+  background: #1e6091;
   color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 1em;
-  box-shadow: 0 1px 4px #e3eafc;
+}
+
+.icon-action--add:hover:not(:disabled) {
+  background: #174a70;
+  color: #fff;
+}
+
+.icon-action--danger:hover:not(:disabled) {
+  border-color: #dc2626;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.schedule-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.schedule-form--single {
+  gap: 1.15rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.form-section {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.form-section--wide,
+.check-row {
+  grid-column: 1 / -1;
+}
+
+.plages-stack {
+  display: grid;
+  gap: 0.75rem;
+  max-height: min(58vh, 620px);
+  overflow: auto;
+  padding-right: 0.2rem;
+}
+
+.plage-panel {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.plage-panel legend {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.plage-toggle {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 0.15rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-text, #111827);
+  text-align: left;
   cursor: pointer;
-  transition: background 0.2s;
-}
-.accordion-body {
-  border: 1.5px solid #e3eafc;
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  padding: 1.2em 1.2em 1.2em 1.2em;
-  background: white;
 }
 
-/* Modale ajout plage */
-.ajout-plage-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
+.plage-toggle span {
+  font-weight: 900;
 }
-.ajout-plage-jour {
+
+.plage-toggle small {
+  overflow: hidden;
+  color: var(--color-text-2, #64748b);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plage-panel .form-grid {
+  padding: 0 0.75rem 0.85rem;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--color-text, #111827);
   font-weight: 700;
-  color: #1976d2;
-  font-size: 1.1em;
 }
-.ajout-plage-modal-actions {
+
+.check-row input {
+  width: 16px;
+  height: 16px;
+}
+
+.form-alert {
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.modal-footer {
   display: flex;
-  justify-content: center;
-  gap: 1.5em;
-  margin-top: 1em;
-}
-/* Style spécifique pour le bouton 'Ajouter une plage horaire' */
-.ajout-plage-btn {
-  min-width: 140px;
-  height: 44px;
-  font-size: 1.08em;
-}
-.horaires-global {
-  padding: 2em 1em;
-}
-.header-bar-horaires {
-  margin-bottom: 2em;
-}
-.horaires-cards-container {
-  margin-top: 2em;
-}
-.no-horaires {
-  color: #d32f2f;
-  font-weight: 600;
-  text-align: center;
-  margin-top: 2em;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
 }
 
-.accordion-arrow {
-  margin-left: auto;
-  font-size: 1.2rem;
-  color: var(--color-text-2);
-  pointer-events: none;
+@media (max-width: 1280px) {
+  .week-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.plage-resume {
-  font-weight: 400;
-  color: var(--color-text-2);
-  font-size: 0.97em;
-  margin-left: 1em;
+@media (max-width: 860px) {
+  .horaires-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar-summary {
+    text-align: left;
+  }
+
+  .week-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
 }

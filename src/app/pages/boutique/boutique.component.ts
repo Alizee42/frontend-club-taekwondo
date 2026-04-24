@@ -5,6 +5,7 @@ import { PanierService } from '../../services/panier.service';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 interface Produit {
   id: number;
@@ -46,7 +47,7 @@ export class BoutiqueComponent implements OnInit {
   confirmationMessage = '';
 
   selections: Record<number, Selection> = {};
-  private readonly creerCommandeUrl = '/api/paiements/from-cart';
+  private readonly creerCommandeUrl = `${environment.apiUrl}/paiements/from-cart`;
 
   constructor(
     private panierService: PanierService,

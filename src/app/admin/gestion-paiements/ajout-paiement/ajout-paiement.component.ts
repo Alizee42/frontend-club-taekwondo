@@ -30,10 +30,10 @@ export class AjoutPaiementComponent implements OnInit {
   // Stepper
   currentStep = 0;
   steps = [
-    { label: '👤 Profil' },
-    { label: '💳 Détails' },
-    { label: '📆 Échéances' },
-    { label: '📁 Récap & Justificatif' }
+    { label: 'Profil' },
+    { label: 'Paiement' },
+    { label: 'Echeances' },
+    { label: 'Recapitulatif' }
   ];
 
   // Profil
@@ -319,3 +319,4 @@ export class AjoutPaiementComponent implements OnInit {
     });
   }
 }
+

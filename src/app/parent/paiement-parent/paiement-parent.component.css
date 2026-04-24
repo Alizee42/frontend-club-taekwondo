@@ -2,7 +2,7 @@
    PAIEMENT PARENT — design system unifié
    ============================================= */
 
-.page {
+.payment-page {
   padding: var(--container-padding);
   display: flex;
   flex-direction: column;
@@ -11,49 +11,6 @@
   width: 100%;
   max-width: none;
   margin: 0;
-}
-
-/* —— Header ————————————————————————————————— */
-.dash-header {
-  display: flex;
-  align-items: stretch;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-
-.dash-header__panel {
-  width: 68px;
-  background: var(--brand-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: rgba(255,255,255,.85);
-  font-size: 1.6rem;
-}
-
-.dash-header__body {
-  flex: 1;
-  padding: var(--sp-4) var(--sp-5);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.dash-header__title {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0;
-}
-
-.dash-header__sub {
-  font-size: var(--text-sm);
-  color: var(--color-text-2);
-  margin: 3px 0 0;
 }
 
 /* —— Layout 2 colonnes ————————————————————— */
@@ -718,24 +675,6 @@ details.accordion summary {
   font-size: var(--text-sm);
 }
 
-/* —— Modal close ——————————————————————————— */
-.modal-close {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--color-text-2);
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  transition: background var(--t-fast), color var(--t-fast);
-}
-.modal-close:hover { background: var(--color-surface-2); color: var(--color-text); }
-.modal-close:disabled { opacity: .4; cursor: not-allowed; }
-
 /* —— Stripe loading ——————————————————————— */
 .stripe-loading {
   display: flex;
@@ -761,55 +700,27 @@ details.accordion summary {
 
 .stripe-card.hidden { display: none; }
 
-/* —— Modal ————————————————————————————————— */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(8, 20, 40, .55);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--sp-5);
-  z-index: 1000;
-}
-
-.modal-content {
-  position: relative;
-  z-index: 1001;
-  width: min(680px, 92vw);
-  max-height: 90vh;
-  overflow-y: auto;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-5);
-  box-shadow: var(--shadow-lg);
-}
-
 /* —— Modal carte paiement (redesign) ———————*/
-.modal-card {
+:host ::ng-deep .ui-modal {
+  width: min(100%, 720px);
+}
+
+.payment-modal {
   position: relative;
-  z-index: 1001;
-  width: min(440px, 92vw);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-5);
-  box-shadow: var(--shadow-lg);
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
 }
 
-.modal-card__header {
+.payment-modal__header {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
   padding-right: 32px;
 }
 
-.modal-card__icon {
+.payment-modal__icon {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-md);
@@ -822,20 +733,20 @@ details.accordion summary {
   flex-shrink: 0;
 }
 
-.modal-card__title {
+.payment-modal__title {
   margin: 0 0 2px;
   font-size: var(--text-base);
   font-weight: 700;
   color: var(--color-text);
 }
 
-.modal-card__sub {
+.payment-modal__sub {
   margin: 0;
   font-size: var(--text-xs);
   color: var(--color-text-2);
 }
 
-.modal-card__amount {
+.payment-modal__amount {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -845,30 +756,30 @@ details.accordion summary {
   padding: var(--sp-3) var(--sp-4);
 }
 
-.modal-card__amount-label {
+.payment-modal__amount-label {
   font-size: var(--text-sm);
   color: var(--color-text-2);
 }
 
-.modal-card__amount-value {
+.payment-modal__amount-value {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--brand-primary);
 }
 
-.modal-card__field {
+.payment-modal__field {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
 }
 
-.modal-card__label {
+.payment-modal__label {
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-2);
 }
 
-.modal-card__receipt {
+.payment-modal__receipt {
   margin: 0;
   font-size: var(--text-xs);
   color: var(--color-text-2);
@@ -877,13 +788,13 @@ details.accordion summary {
   gap: 6px;
 }
 
-.modal-card__actions {
+.payment-modal__actions {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
 }
 
-.modal-card__stripe-badge {
+.payment-modal__stripe-badge {
   margin: 0;
   text-align: center;
   font-size: var(--text-xs);

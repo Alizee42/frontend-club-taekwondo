@@ -72,7 +72,7 @@
   </ng-template>
 </div>
 
-<ui-modal [open]="previewOpen" (closed)="closePreview()" [title]="previewName || 'Aperçu'">
+<ui-modal [open]="previewOpen" (closed)="closePreview()" [title]="previewName || 'Aperçu'" size="xl">
   <div class="preview-wrapper">
     <ng-container [ngSwitch]="previewType">
       <img *ngSwitchCase="'image'" [src]="previewUrl" alt="aperçu" class="preview-image" />

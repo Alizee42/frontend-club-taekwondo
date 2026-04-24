@@ -1,81 +1,149 @@
+:host {
+  display: contents;
+}
+
 .ui-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(25, 118, 210, 0.25);
-  backdrop-filter: blur(6px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeInBackdrop 0.4s;
+  z-index: var(--z-modal, 200);
+  display: grid;
+  place-items: center;
+  padding: clamp(14px, 3vw, 32px);
+  background:
+    linear-gradient(rgba(15, 23, 42, 0.44), rgba(15, 23, 42, 0.5));
+  backdrop-filter: blur(8px);
+  animation: fadeInBackdrop 0.16s ease-out;
 }
 
 .ui-modal {
-  background: linear-gradient(135deg, #f8fafc 70%, #e3f0ff 100%);
-  border-radius: 22px;
-  box-shadow: 0 12px 40px rgba(37,99,235,0.13), 0 2px 12px rgba(0,0,0,0.07);
-  min-width: 420px;
-  max-width: 600px;
-  width: 100%;
-  padding: 0 0 28px 0;
-  position: relative;
-  animation: fadeInModal 0.5s cubic-bezier(.23,1.01,.32,1);
-  overflow: hidden;
-  max-height: 90vh; /* Empêche de dépasser l'écran */
+  width: min(100%, 680px);
+  max-height: min(88vh, 920px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface, #fff);
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.26),
+    0 2px 8px rgba(15, 23, 42, 0.08);
+  animation: modalIn 0.18s cubic-bezier(.2,.8,.2,1);
+}
+
+.ui-modal--sm { width: min(100%, 460px); }
+.ui-modal--md { width: min(100%, 680px); }
+.ui-modal--lg { width: min(100%, 860px); }
+.ui-modal--xl { width: min(100%, 1120px); }
+
+.ui-modal--fullscreen {
+  width: min(100%, 1320px);
+  height: min(92vh, 940px);
 }
 
 .ui-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.2rem;
-  background: var(--blue-main, #2563eb);
-  color: #fff;
-  padding: 22px 28px 16px 28px;
-  border-top-left-radius: 22px;
-  border-top-right-radius: 22px;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.07);
+  gap: var(--sp-4, 1rem);
+  padding: var(--sp-5, 1.25rem) var(--sp-6, 1.5rem);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-primary, #1A5CA8) 22%, white);
+  background: var(--brand-primary, #1A5CA8);
+}
+
+.ui-modal-heading {
+  min-width: 0;
+  display: block;
 }
 
 .ui-modal-title {
-  font-size: 1.32rem;
-  font-weight: 700;
-  color: #fff;
   margin: 0;
-  letter-spacing: 0.5px;
+  color: var(--color-text-inv, #fff);
+  font-size: clamp(1.05rem, 1.8vw, 1.28rem);
+  font-weight: 750;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.ui-modal-subtitle {
+  margin: var(--sp-1, .25rem) 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: var(--text-sm, .875rem);
+  line-height: 1.45;
 }
 
 .ui-modal-close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #fff !important;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--radius, 8px);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-text-inv, #fff);
   cursor: pointer;
-  border-radius: 50%;
-  padding: 0.2rem 0.5rem;
-  transition: color 0.2s, box-shadow 0.2s, transform 0.2s;
-  font-weight: bold;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition:
+    background var(--t-fast, .12s ease),
+    border-color var(--t-fast, .12s ease),
+    color var(--t-fast, .12s ease),
+    transform var(--t-fast, .12s ease);
 }
+
 .ui-modal-close:hover {
-  color: #f7c873 !important;
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-inv, #fff);
+  transform: translateY(-1px);
+}
+
+.ui-modal-close:focus-visible {
+  outline: 2px solid var(--brand-primary, #1A5CA8);
+  outline-offset: 2px;
 }
 
 .ui-modal-content {
-  margin-top: 0.5rem;
-  padding: 18px 28px 0 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  overflow: auto;           /* Active le scroll du contenu */
+  min-height: 0;
+  overflow: auto;
+  padding: var(--sp-5, 1.25rem) var(--sp-6, 1.5rem) var(--sp-6, 1.5rem);
 }
 
 @keyframes fadeInBackdrop {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes fadeInModal {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .ui-modal-backdrop {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .ui-modal,
+  .ui-modal--sm,
+  .ui-modal--md,
+  .ui-modal--lg,
+  .ui-modal--xl,
+  .ui-modal--fullscreen {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-md, 12px);
+  }
+
+  .ui-modal-header,
+  .ui-modal-content {
+    padding-inline: var(--sp-4, 1rem);
+  }
 }

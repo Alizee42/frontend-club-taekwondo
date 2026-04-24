@@ -70,6 +70,41 @@
 /* Pousse un élément à la fin (droite) de la flex-bar */
 .ms-auto { margin-left: auto; }
 
+/* =============================================
+   ONGLETS (tabs)
+   ============================================= */
+
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab-btn {
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--color-surface);
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color var(--t-base), border-color var(--t-base);
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  background: color-mix(in srgb, var(--brand-primary) 6%, white);
+  color: var(--brand-primary);
+}
+
+.tab-btn.active {
+  background: color-mix(in srgb, var(--brand-primary) 11%, white);
+  color: var(--brand-primary);
+  border-bottom-color: var(--brand-primary);
+}
+
 /* Footer de modale */
 .modal-footer {
   display: flex;

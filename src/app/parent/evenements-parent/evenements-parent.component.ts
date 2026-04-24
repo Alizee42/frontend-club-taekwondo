@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EvenementService, EvenementDTO } from '../../services/evenement.service';
 import { MembreService } from '../../services/membre.service';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 interface Enfant {
   id: number;
@@ -16,7 +17,7 @@ interface Enfant {
 @Component({
   selector: 'app-evenements-parent',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PageHeaderComponent],
   templateUrl: './evenements-parent.component.html',
   styleUrls: ['./evenements-parent.component.css']
 })

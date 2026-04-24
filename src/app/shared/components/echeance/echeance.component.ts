@@ -1,7 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UiButtonComponent } from '../../ui/buttons/ui-button/ui-button.component';
+import { EmptyStateComponent } from '../../ui/empty-state/empty-state.component';
 import { AuthService } from '../../../services/auth.service';
+import { UiModalComponent } from '../../ui/modal/ui-modal.component';
 
 export interface EcheanceModel {
   id?: number;
@@ -20,7 +22,7 @@ export interface PaiementModel {
 @Component({
   selector: 'app-echeance',
   standalone: true,
-  imports: [CommonModule, UiButtonComponent],
+  imports: [CommonModule, UiButtonComponent, EmptyStateComponent, UiModalComponent],
   templateUrl: './echeance.component.html',
   styleUrls: ['./echeance.component.css']
 })
@@ -56,11 +58,36 @@ export class EcheanceComponent {
 
   classeBadge(statut?: string): string {
     const s = this.sansAccents(statut || '');
-    if (s === 'payé' || s === 'paye' || s === 'paye') return 'badge badge-success';
-    if (s.includes('retard')) return 'badge badge-danger';
-    if (s.includes('annul') || s.includes('annulé')) return 'badge badge-secondary';
-    if (s.includes('attente')) return 'badge badge-warning';
-    return 'badge badge-dark';
+    if (s === 'paye' || s === 'payé') return 'status-badge status--success';
+    if (s.includes('retard')) return 'status-badge status--danger';
+    if (s.includes('annul')) return 'status-badge';
+    if (s.includes('attente')) return 'status-badge status--warning';
+    return 'status-badge status--info';
+  }
+
+  isPaye(statut?: string): boolean {
+    return this.sansAccents(statut || '') === 'paye';
+  }
+
+  paidCount(g: any): number {
+    return (g?.echeances || []).filter((e: any) => this.isPaye(e?.statut)).length;
+  }
+
+  progressionGroupe(g: any): number {
+    const total = (g?.echeances || []).length;
+    if (!total) return 0;
+    return Math.round((this.paidCount(g) / total) * 100);
+  }
+
+  montantPayeGroupe(g: any): number {
+    return (g?.echeances || []).reduce((sum: number, e: any) => {
+      return this.isPaye(e?.statut) ? sum + (Number(e?.montant) || 0) : sum;
+    }, 0);
+  }
+
+  montantRestantGroupe(g: any): number {
+    const total = Number(g?.montantTotal) || (g?.echeances || []).reduce((sum: number, e: any) => sum + (Number(e?.montant) || 0), 0);
+    return Math.max(0, total - this.montantPayeGroupe(g));
   }
 
   onPayer(e: EcheanceModel) {
@@ -81,7 +108,19 @@ export class EcheanceComponent {
     for (const e of this.echeances || []) {
       const key = e.paiementId ?? 'no-paiement';
       if (!map.has(key)) {
-        map.set(key, { paiementId: key, paiementDate: e.paiementDate, parentPrenom: e.parentPrenom, parentNom: e.parentNom, membrePrenom: e.membrePrenom, membreNom: e.membreNom, club: e.club, echeances: [] });
+        map.set(key, {
+          paiementId: key,
+          paiementDate: e.paiementDate,
+          parentPrenom: e.parentPrenom,
+          parentNom: e.parentNom,
+          membrePrenom: e.membrePrenom,
+          membreNom: e.membreNom,
+          club: e.club,
+          montantTotal: e.montantTotal,
+          montantPaye: e.montantPaye,
+          montantRestant: e.montantRestant,
+          echeances: []
+        });
       }
       map.get(key).echeances.push(e);
     }

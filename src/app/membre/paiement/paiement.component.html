@@ -1,14 +1,9 @@
 ﻿<div class="page">
-  <!-- Header -->
-  <div class="dash-header">
-    <div class="dash-header__panel">
-      <i class="ri-wallet-3-line"></i>
-    </div>
-    <div class="dash-header__body">
-      <h1 class="dash-header__title">Paiement de votre cotisation</h1>
-      <p class="dash-header__sub">Renseignez les étapes pour procéder au règlement.</p>
-    </div>
-  </div>
+  <app-page-header
+    title="Paiement de votre cotisation"
+    icon="ri-wallet-3-line"
+    subtitle="Renseignez les etapes pour proceder au reglement">
+  </app-page-header>
 
   <!-- ====== LAYOUT PRINCIPAL : 2 COLONNES ====== -->
   <section class="grid-page">
@@ -288,9 +283,8 @@
 </div>
 
 <!-- Modal paiement échéance -->
-<div class="modal-overlay" *ngIf="modalOuverte" (click)="!enCoursDePaiement && fermerModalPaiement()">
-  <div class="modal-card" (click)="$event.stopPropagation()">
-    <button class="modal-close" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement" aria-label="Fermer">×</button>
+<ui-modal [open]="modalOuverte" title="Payer une echeance" (closed)="fermerModalPaiement()">
+  <div class="payment-modal">
 
     <div class="modal-card__header">
       <div class="modal-card__icon"><i class="ri-lock-line"></i></div>
@@ -328,12 +322,11 @@
       <i class="ri-shield-check-line"></i> Paiement sécurisé par <strong>Stripe</strong>
     </p>
   </div>
-</div>
+</ui-modal>
 
 <!-- Modal carte principale -->
-<div class="modal-overlay" *ngIf="modalCarteOuverte" (click)="!enCoursDePaiement && fermerModalCarte()">
-  <div class="modal-card" (click)="$event.stopPropagation()">
-    <button class="modal-close" (click)="fermerModalCarte()" [disabled]="enCoursDePaiement" aria-label="Fermer">×</button>
+<ui-modal [open]="modalCarteOuverte" title="Paiement securise" (closed)="fermerModalCarte()">
+  <div class="payment-modal">
 
     <!-- En-tête -->
     <div class="modal-card__header">
@@ -380,4 +373,4 @@
       <i class="ri-shield-check-line"></i> Paiement sécurisé par <strong>Stripe</strong>
     </p>
   </div>
-</div>
+</ui-modal>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Club {
   id: number;
@@ -15,6 +16,7 @@ export interface Club {
 
 @Injectable({ providedIn: 'root' })
 export class ClubService {
+  private readonly apiUrl = `${environment.apiUrl}/clubs`;
   private selectedClubSubject: BehaviorSubject<Club | null>;
   public selectedClub$: Observable<Club | null>;
 
@@ -25,19 +27,19 @@ export class ClubService {
   }
 
   deleteClub(id: number): Observable<any> {
-    return this.http.delete(`/api/clubs/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
   getClubs(): Observable<Club[]> {
-    return this.http.get<Club[]>('/api/clubs');
+    return this.http.get<Club[]>(this.apiUrl);
   }
 
   createClub(payload: Partial<Club>): Observable<Club> {
-    return this.http.post<Club>('/api/clubs', payload);
+    return this.http.post<Club>(this.apiUrl, payload);
   }
 
   editClub(club: Club): Observable<Club> {
-    return this.http.put<Club>(`/api/clubs/${club.id}`, club);
+    return this.http.put<Club>(`${this.apiUrl}/${club.id}`, club);
   }
 
   getSelectedClub(): Club | null {

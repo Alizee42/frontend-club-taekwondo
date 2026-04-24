@@ -19,29 +19,49 @@
     </ng-container>
   </app-page-header>
 
-  <section class="stats-grid">
-    <article class="stat-card stat-card--success">
-      <span class="stat-label">Total encaisse</span>
-      <strong class="stat-value">{{ stats.total | currency:'EUR' }}</strong>
-      <span class="stat-meta">sur {{ stats.count }} paiement(s)</span>
+  <section class="kpi-grid">
+    <article class="kpi-card kpi-card--primary">
+      <span class="kpi-icon"><i class="ri-safe-2-line"></i></span>
+      <div>
+        <span class="kpi-label">Encaisse</span>
+        <strong class="kpi-value">{{ stats.encaisse | currency:'EUR':'symbol':'1.0-0' }}</strong>
+        <span class="kpi-meta">sur {{ stats.total | currency:'EUR':'symbol':'1.0-0' }}</span>
+      </div>
     </article>
 
-    <article class="stat-card stat-card--info">
-      <span class="stat-label">Clubs visibles</span>
-      <strong class="stat-value">{{ totalClubs }}</strong>
-      <span class="stat-meta">selon le filtre actif</span>
+    <article class="kpi-card kpi-card--warning">
+      <span class="kpi-icon"><i class="ri-hourglass-2-line"></i></span>
+      <div>
+        <span class="kpi-label">A encaisser</span>
+        <strong class="kpi-value">{{ stats.restant | currency:'EUR':'symbol':'1.0-0' }}</strong>
+        <span class="kpi-meta">{{ paiementsEnAttenteLabel }}</span>
+      </div>
     </article>
 
-    <article class="stat-card stat-card--warning">
-      <span class="stat-label">En attente</span>
-      <strong class="stat-value">{{ stats.enAttente }}</strong>
-      <span class="stat-meta">paiement(s) a surveiller</span>
+    <article class="kpi-card" [class.kpi-card--danger]="stats.retards > 0">
+      <span class="kpi-icon"><i class="ri-alarm-warning-line"></i></span>
+      <div>
+        <span class="kpi-label">Retards</span>
+        <strong class="kpi-value">{{ stats.retards }}</strong>
+        <span class="kpi-meta">{{ retardsLabel }}</span>
+      </div>
     </article>
 
-    <article class="stat-card stat-card--neutral">
-      <span class="stat-label">Rembourses</span>
-      <strong class="stat-value">{{ stats.rembourses }}</strong>
-      <span class="stat-meta">sur la selection courante</span>
+    <article class="kpi-card kpi-card--success">
+      <span class="kpi-icon"><i class="ri-pie-chart-2-line"></i></span>
+      <div>
+        <span class="kpi-label">Taux encaisse</span>
+        <strong class="kpi-value">{{ stats.tauxEncaisse | number:'1.0-1' }}%</strong>
+        <span class="kpi-meta">{{ paiementsSoldesLabel }}</span>
+      </div>
+    </article>
+
+    <article class="kpi-card kpi-card--info">
+        <span class="kpi-icon"><i class="ri-building-4-line"></i></span>
+      <div>
+        <span class="kpi-label">Clubs visibles</span>
+        <strong class="kpi-value">{{ totalClubs }}</strong>
+      </div>
     </article>
   </section>
 
@@ -152,6 +172,7 @@
 <ui-modal
   [open]="modalAjoutVisible"
   title="Ajouter un paiement"
+  size="xl"
   (closed)="fermerModalAjout()"
 >
   <div class="modal-panel modal-panel--form">
@@ -162,6 +183,7 @@
 <ui-modal
   [open]="modalPaiementVisible"
   title="Detail du paiement"
+  size="lg"
   (closed)="fermerModalPaiement()"
 >
   <div *ngIf="paiementSelectionne as paiement" class="modal-panel">

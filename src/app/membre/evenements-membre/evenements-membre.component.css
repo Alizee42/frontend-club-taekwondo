@@ -2,41 +2,9 @@
    CONTAINER PRINCIPAL
 ======================== */
 .evenements-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   min-height: 100vh;
-}
-
-/* ========================
-   HEADER
-======================== */
-.page-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.page-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.page-header h1 i {
-  color: #3b82f6;
-  font-size: 2.25rem;
-}
-
-.page-header p {
-  font-size: 1.1rem;
-  color: #64748b;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 /* ========================
@@ -353,7 +321,7 @@
 ======================== */
 @media (max-width: 1024px) {
   .evenements-container {
-    padding: 1.5rem;
+    width: 100%;
   }
   
   .evenements-grid {
@@ -362,16 +330,6 @@
 }
 
 @media (max-width: 768px) {
-  .evenements-container {
-    padding: 1rem;
-  }
-  
-  .page-header h1 {
-    font-size: 2rem;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
   .evenements-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -387,10 +345,6 @@
 }
 
 @media (max-width: 480px) {
-  .page-header h1 {
-    font-size: 1.75rem;
-  }
-  
   .evenement-content {
     padding: 1rem;
   }

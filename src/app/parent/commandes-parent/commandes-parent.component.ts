@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommandeService, CommandeDTO } from '../../services/commande.service';
 import { AuthService } from '../../services/auth.service';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { UiTableColumn, UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 
 @Component({
   selector: 'app-commandes-parent',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CurrencyPipe, PageHeaderComponent, UiModalComponent, UiTableComponent],
   templateUrl: './commandes-parent.component.html',
   styleUrls: ['./commandes-parent.component.css']
 })
@@ -17,6 +20,50 @@ export class CommandesParentComponent implements OnInit {
   isLoading = false;
   errorMsg = '';
   search = '';
+  columns: UiTableColumn[] = [
+    {
+      key: 'dateCommande',
+      label: 'Date',
+      width: '130px',
+      display: (row: CommandeDTO) => this.formatDate(row.dateCommande)
+    },
+    {
+      key: 'beneficiaires',
+      label: 'Membre(s)',
+      render: (row: CommandeDTO) => this.renderBeneficiaires(row)
+    },
+    {
+      key: 'modePaiement',
+      label: 'Mode',
+      width: '170px',
+      display: (row: CommandeDTO) => this.normalizeModePaiement(row.modePaiement)
+    },
+    {
+      key: 'montantTotal',
+      label: 'Total',
+      width: '130px',
+      cellClass: 'td-right',
+      headerClass: 'th-right',
+      display: (row: CommandeDTO) => this.formatCurrency(row.montantTotal)
+    },
+    {
+      key: 'statut',
+      label: 'Statut',
+      width: '150px',
+      cellClass: 'td-center',
+      headerClass: 'th-center',
+      render: (row: CommandeDTO) => this.renderStatut(row.statut)
+    }
+  ];
+  actions = [
+    {
+      label: 'Voir les details',
+      icon: 'ri-eye-line',
+      action: 'details',
+      variant: 'ghost' as const,
+      title: 'Voir le detail de la commande'
+    }
+  ];
 
   constructor(
     private commandeService: CommandeService,
@@ -103,6 +150,28 @@ export class CommandesParentComponent implements OnInit {
   voirDetails(c: CommandeDTO) { this.commandeSelectionnee = c; }
   fermerDetails() { this.commandeSelectionnee = null; }
 
+  get commandesFiltrees(): CommandeDTO[] {
+    const q = this.search.trim().toLowerCase();
+    if (!q) return this.commandes;
+    return this.commandes.filter((commande) => {
+      const haystack = [
+        commande.id,
+        commande.dateCommande,
+        commande.modePaiement,
+        commande.statut,
+        this.beneficiaires(commande).join(' '),
+        this.articlesResume(commande)
+      ].join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+  }
+
+  onTableAction(event: { action: string; row: CommandeDTO }): void {
+    if (event.action === 'details') {
+      this.voirDetails(event.row);
+    }
+  }
+
   classeBadgeCommande(statut: string): string {
     const s = (statut || '')
       .toLowerCase()
@@ -132,5 +201,34 @@ export class CommandesParentComponent implements OnInit {
       default:
         return mode;
     }
+  }
+
+  private formatDate(value: string): string {
+    if (!value) return '-';
+    return new Intl.DateTimeFormat('fr-FR').format(new Date(value));
+  }
+
+  private formatCurrency(value: number): string {
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Number(value) || 0);
+  }
+
+  private renderStatut(statut: string): string {
+    const label = statut || '-';
+    return `<span class="${this.classeBadgeCommande(label)}">${label}</span>`;
+  }
+
+  private renderBeneficiaires(commande: CommandeDTO): string {
+    const noms = this.beneficiaires(commande);
+    if (!noms.length) return '<span class="muted">-</span>';
+    return `<div class="chips">${noms.map((nom) => `<span class="chip">${this.escapeHtml(nom)}</span>`).join('')}</div>`;
+  }
+
+  private escapeHtml(value: string): string {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 }

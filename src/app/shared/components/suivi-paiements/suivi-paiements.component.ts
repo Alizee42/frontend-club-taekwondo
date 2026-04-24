@@ -5,6 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { AjoutPaiementComponent } from '../../../admin/gestion-paiements/ajout-paiement/ajout-paiement.component';
 import { EcheanceComponent } from '../echeance/echeance.component';
 import { UiButtonComponent } from '../../ui/buttons/ui-button/ui-button.component';
+import { UiModalComponent } from '../../ui/modal/ui-modal.component';
+import { AlertBannerComponent } from '../../ui/alert-banner/alert-banner.component';
+import { EmptyStateComponent } from '../../ui/empty-state/empty-state.component';
+import { SkeletonComponent } from '../../ui/skeleton/skeleton.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
@@ -55,7 +59,7 @@ interface GroupeParent {
 @Component({
   selector: 'app-suivi-paiements',
   standalone: true,
-  imports: [CommonModule, FormsModule, AjoutPaiementComponent, EcheanceComponent, UiButtonComponent],
+  imports: [CommonModule, FormsModule, AjoutPaiementComponent, EcheanceComponent, UiButtonComponent, UiModalComponent, AlertBannerComponent, EmptyStateComponent, SkeletonComponent],
   templateUrl: './suivi-paiements.component.html',
   styleUrls: ['./suivi-paiements.component.css']
 })
@@ -70,6 +74,7 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
   @Input() showFilters: boolean = true;
   @Input() externalFilters?: { statut?: string; type?: string; mode?: string } | null = null;
   @Input() externalGroupByParent?: boolean | null = null;
+  @Input() showClub: boolean = true;
 
   private readonly API_BASE = environment.apiUrl;
   loading = false;
@@ -193,7 +198,7 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
     if (v.includes('paypal')) return 'PayPal';
     return 'Autre';
   }
-  classeBadge(statut?: string): string { const s = this.sansAccents(statut); if (s === 'paye') return 'badge badge-success'; if (s === 'annule') return 'badge badge-secondary'; if (s.includes('retard')) return 'badge badge-danger'; if (s.includes('attente')) return 'badge badge-warning'; return 'badge badge-dark'; }
+  classeBadge(statut?: string): string { const s = this.sansAccents(statut); if (s === 'paye') return 'status-badge status--success'; if (s === 'annule') return 'status-badge'; if (s.includes('retard')) return 'status-badge status--danger'; if (s.includes('attente')) return 'status-badge status--warning'; return 'status-badge status--info'; }
 
   montantPaye(p: Paiement): number { const total = p.montantTotal || 0; if (Array.isArray(p.echeances) && p.echeances.length) { return p.echeances.reduce((s, e) => { const st = this.sansAccents(e.statut); const m = e.montant || 0; return st === 'paye' ? s + m : s; }, 0); } const st = this.sansAccents(p.statut); return st === 'paye' ? total : 0; }
   montantRestant(p: Paiement): number { const restant = (p.montantTotal || 0) - this.montantPaye(p); return Math.max(0, Number.isFinite(restant) ? restant : 0); }
@@ -208,7 +213,22 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
     this.buildGroups(); this.buildUsersView();
   }
 
-  getClubName(p: Paiement): string { if (!p) return ''; if (p.clubId != null && Array.isArray(this.clubs)) { const found = this.clubs.find(c => Number(c.id) === Number(p.clubId)); if (found) return (found as any).nom || (found as any).name || String(found.id); } return (p.club || p.clubNom || p.clubName || (p.clubId != null ? String(p.clubId) : '')) as string; }
+  getClubName(p: Paiement): string {
+    if (!p) return '';
+    if (p.clubId != null && Array.isArray(this.clubs)) {
+      const found = this.clubs.find(c => Number(c.id) === Number(p.clubId));
+      if (found) return (found as any).nom || (found as any).name || `Club ${found.id}`;
+    }
+
+    const raw = (p.club || p.clubNom || p.clubName || '').toString().trim();
+    const genericMatch = raw.match(/^club\s+(\d+)$/i);
+    if (genericMatch && Array.isArray(this.clubs)) {
+      const found = this.clubs.find(c => Number(c.id) === Number(genericMatch[1]));
+      if (found) return (found as any).nom || (found as any).name || raw;
+    }
+
+    return raw || (p.clubId != null ? `Club ${p.clubId}` : '');
+  }
 
   resetFilters(): void { this.filtres = { q: '', statut: '', type: '', mode: '' }; this.applyFilters(); }
 

@@ -108,6 +108,7 @@
 <ui-modal
   [open]="!!documentEnApercu"
   [title]="documentEnApercu ? labelFor(documentEnApercu.typeDocument) : 'Apercu du document'"
+  size="xl"
   (closed)="fermerApercu()"
 >
   <div *ngIf="documentEnApercu as doc" class="preview-modal">

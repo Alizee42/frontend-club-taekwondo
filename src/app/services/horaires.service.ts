@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class HorairesService {
   updateHoraire(horaireId: number, horaire: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${horaireId}`, horaire);
   }
-  private apiUrl = '/api/horaires';
+  private apiUrl = `${environment.apiUrl}/horaires`;
 
   constructor(private http: HttpClient) {}
 

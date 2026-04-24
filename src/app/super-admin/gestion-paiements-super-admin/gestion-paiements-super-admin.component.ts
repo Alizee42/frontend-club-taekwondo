@@ -34,7 +34,12 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
     total: 0,
     count: 0,
     rembourses: 0,
-    enAttente: 0
+    enAttente: 0,
+    encaisse: 0,
+    restant: 0,
+    retards: 0,
+    soldes: 0,
+    tauxEncaisse: 0
   };
 
   filter = {
@@ -72,6 +77,18 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
       const currentSet = new Set(array.slice(0, index + 1).map((row: any) => Number(row.clubId)).filter((id) => !Number.isNaN(id)));
       return currentSet.size;
     }, 0);
+  }
+
+  get paiementsEnAttenteLabel(): string {
+    return this.stats.enAttente === 1 ? '1 paiement en attente' : `${this.stats.enAttente} paiements en attente`;
+  }
+
+  get paiementsSoldesLabel(): string {
+    return this.stats.soldes === 1 ? '1 paiement solde' : `${this.stats.soldes} paiements soldes`;
+  }
+
+  get retardsLabel(): string {
+    return this.stats.retards === 1 ? '1 paiement a relancer' : `${this.stats.retards} paiements a relancer`;
   }
 
   ouvrirAjoutPaiement(): void {
@@ -172,7 +189,12 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
     this.stats.count = paiements.length;
     this.stats.total = paiements.reduce((sum, paiement) => sum + (Number(paiement.montantTotal) || 0), 0);
     this.stats.rembourses = paiements.filter((paiement) => this.normalize(paiement.statut).includes('rembours')).length;
-    this.stats.enAttente = paiements.filter((paiement) => this.normalize(paiement.statut).includes('attente')).length;
+    this.stats.encaisse = paiements.reduce((sum, paiement) => sum + (Number(paiement.montantPaye) || 0), 0);
+    this.stats.restant = Math.max(0, this.stats.total - this.stats.encaisse);
+    this.stats.soldes = paiements.filter((paiement) => (Number(paiement.montantRestant) || 0) <= 0).length;
+    this.stats.enAttente = paiements.filter((paiement) => (Number(paiement.montantRestant) || 0) > 0).length;
+    this.stats.retards = paiements.filter((paiement) => this.isPaiementLate(paiement)).length;
+    this.stats.tauxEncaisse = this.stats.total > 0 ? Math.round((this.stats.encaisse / this.stats.total) * 1000) / 10 : 0;
   }
 
   ouvrirDetailsPaiement(paiement: any): void {
@@ -217,12 +239,23 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
       return '';
     }
 
-    if (paiement.club || paiement.clubNom || paiement.clubName) {
-      return paiement.club || paiement.clubNom || paiement.clubName;
+    if (paiement.clubId != null) {
+      const club = this.clubs.find((item) => Number(item.id) === Number(paiement.clubId));
+      if (club?.nom || club?.name) {
+        return club.nom || club.name;
+      }
     }
 
-    const club = this.clubs.find((item) => Number(item.id) === Number(paiement.clubId));
-    return club?.nom || '';
+    const raw = (paiement.club || paiement.clubNom || paiement.clubName || '').toString().trim();
+    const genericMatch = raw.match(/^club\s+(\d+)$/i);
+    if (genericMatch) {
+      const club = this.clubs.find((item) => Number(item.id) === Number(genericMatch[1]));
+      if (club?.nom || club?.name) {
+        return club.nom || club.name;
+      }
+    }
+
+    return raw;
   }
 
   getBadgeLabel(statut?: string): string {
@@ -325,6 +358,29 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
         0,
         (Number(paiement.montantTotal) || 0) - (Number(paiement.montantPaye) || 0)
       );
+    });
+  }
+
+  private isPaidStatus(statut: any): boolean {
+    return this.normalize(statut).includes('paye');
+  }
+
+  private isPaiementLate(paiement: any): boolean {
+    if (this.normalize(paiement?.statut).includes('retard')) {
+      return true;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return (Array.isArray(paiement?.echeances) ? paiement.echeances : []).some((echeance: any) => {
+      if (this.isPaidStatus(echeance?.statut) || !echeance?.dateEcheance) {
+        return false;
+      }
+
+      const due = new Date(echeance.dateEcheance);
+      due.setHours(0, 0, 0, 0);
+      return due < today;
     });
   }
 

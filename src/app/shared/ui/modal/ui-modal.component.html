@@ -1,8 +1,22 @@
-<div class="ui-modal-backdrop" *ngIf="open">
-  <div class="ui-modal">
+<div class="ui-modal-backdrop" *ngIf="open" (click)="onBackdropClick()">
+  <div
+    class="ui-modal"
+    [ngClass]="modalClasses"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="title ? 'uiModalTitle' : null"
+    (click)="$event.stopPropagation()"
+  >
     <div class="ui-modal-header">
-      <h2 class="ui-modal-title">{{ title }}</h2>
-      <button *ngIf="showClose" class="ui-modal-close" (click)="close()" aria-label="Fermer">&#10005;</button>
+      <div class="ui-modal-heading">
+        <div>
+          <h2 class="ui-modal-title" id="uiModalTitle">{{ title }}</h2>
+          <p *ngIf="subtitle" class="ui-modal-subtitle">{{ subtitle }}</p>
+        </div>
+      </div>
+      <button *ngIf="showClose" class="ui-modal-close" type="button" (click)="close()" aria-label="Fermer">
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
     </div>
     <div class="ui-modal-content">
       <ng-content></ng-content>

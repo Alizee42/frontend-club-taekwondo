@@ -1,113 +1,80 @@
-<div class="gestion-commandes">
-    <h2 class="page-title"><i class="ri-shopping-bag-3-line"></i> Mes commandes</h2>
-  
-    <div class="toolbar">
-      <div class="filters compact">
-        <!-- (facultatif) filtres simples -->
-      </div>
-  
-      <div class="search">
-        <i class="ri-search-line"></i>
-        <input class="search-input" placeholder="Rechercher (id commande)"
-               [(ngModel)]="search" (keyup.enter)="chargerCommandes()" (input)="chargerCommandes()" />
-      </div>
-  
-      <div class="toolbar-actions">
-        <button class="btn refresh" (click)="chargerCommandes()">
-          <i class="ri-refresh-line"></i> Rafraîchir
-        </button>
-      </div>
-    </div>
-  
-    <div class="loader" *ngIf="isLoading">Chargement…</div>
-    <div class="error" *ngIf="errorMsg"><i class="ri-error-warning-line"></i> {{ errorMsg }}</div>
-  
-    <div class="table-wrapper">
-      <table class="user-table">
+<div class="page-shell">
+  <app-page-header
+    title="Mes commandes"
+    icon="ri-shopping-bag-3-line"
+    subtitle="Consultez les commandes et les articles associes a vos enfants">
+  </app-page-header>
+
+  <div class="filters-bar">
+    <input
+      class="form-input"
+      type="search"
+      placeholder="Rechercher une commande"
+      [(ngModel)]="search" />
+
+    <button class="btn btn-secondary ms-auto" type="button" (click)="chargerCommandes()">
+      <i class="ri-refresh-line"></i>
+      Rafraichir
+    </button>
+  </div>
+
+  <div class="loader" *ngIf="isLoading">Chargement...</div>
+  <div class="error" *ngIf="errorMsg">
+    <i class="ri-error-warning-line"></i>
+    {{ errorMsg }}
+  </div>
+
+  <div class="table-wrap" *ngIf="!isLoading && !errorMsg">
+    <ui-table
+      [columns]="columns"
+      [data]="commandesFiltrees"
+      [actions]="actions"
+      (actionClick)="onTableAction($event)">
+    </ui-table>
+  </div>
+</div>
+
+<ui-modal
+  [open]="!!commandeSelectionnee"
+  [title]="'Commande #' + (commandeSelectionnee?.id || '')"
+  (closed)="fermerDetails()">
+  <ng-container *ngIf="commandeSelectionnee as commande">
+    <p class="modal-summary">{{ articlesResume(commande) }}</p>
+
+    <div class="table-wrap table-wrap--modal">
+      <table class="table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Membre(s)</th>
-            <th>Mode</th>
-            <th class="num">Total</th>
-            <th>Statut</th>
-            <th class="actions">Actions</th>
+            <th>Produit</th>
+            <th>Options</th>
+            <th class="th-right">Qte</th>
+            <th class="th-right">Prix</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let c of commandes; trackBy: trackByCommande">
-            <td>{{ c.dateCommande | date:'dd/MM/yyyy' }}</td>
-  
-            <td class="membre-cell">
+          <tr *ngFor="let ligne of commande.lignes">
+            <td>
+              <div>{{ ligne.produitNom }}</div>
+              <div class="muted">ID: {{ ligne.produitId }}</div>
+            </td>
+            <td>
               <div class="chips">
-                <span class="chip" *ngFor="let m of beneficiaires(c); trackBy: trackByMembre">{{ m }}</span>
+                <span class="chip" *ngIf="ligne.taille">Taille: {{ ligne.taille }}</span>
+                <span class="chip" *ngIf="ligne.couleur">Couleur: {{ ligne.couleur }}</span>
+                <span class="chip" *ngIf="ligne.beneficiairePrenom || ligne.beneficiaireNom">
+                  Membre: {{ ligne.beneficiairePrenom }} {{ ligne.beneficiaireNom }}
+                </span>
               </div>
             </td>
-  
-            <td class="cap">
-              {{ normalizeModePaiement(c.modePaiement) }}
-            </td>
-  
-            <td class="num">{{ c.montantTotal | currency:'EUR' }}</td>
-  
-            <td>
-              <span [class]="classeBadgeCommande(c.statut)">{{ c.statut }}</span>
-            </td>
-  
-            <td class="actions">
-              <button class="btn-icon" (click)="voirDetails(c)" [title]="articlesResume(c)">
-                <i class="ri-eye-line"></i>
-              </button>
-            </td>
-          </tr>
-  
-          <tr *ngIf="!commandes.length && !isLoading && !errorMsg">
-            <td colspan="6" class="muted">Aucune commande.</td>
+            <td class="td-right">{{ ligne.quantite }}</td>
+            <td class="td-right">{{ ligne.prix | currency:'EUR' }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-  
-    <!-- Modale détails -->
-    <div class="modal" *ngIf="commandeSelectionnee">
-      <div class="modal-content">
-        <span class="close" (click)="fermerDetails()">&times;</span>
-        <h3>Détails – Commande #{{ commandeSelectionnee!.id }}</h3>
-  
-        <table class="modal-table">
-          <thead>
-            <tr>
-              <th>Produit</th>
-              <th>Options</th>
-              <th class="num">Qté</th>
-              <th class="num">Prix</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let l of commandeSelectionnee!.lignes">
-              <td>
-                <div>{{ l.produitNom }}</div>
-                <div class="muted">ID: {{ l.produitId }}</div>
-              </td>
-              <td>
-                <div class="chips">
-                  <span class="chip" *ngIf="l.taille">Taille: {{ l.taille }}</span>
-                  <span class="chip" *ngIf="l.couleur">Couleur: {{ l.couleur }}</span>
-                  <span class="chip" *ngIf="l.beneficiairePrenom || l.beneficiaireNom">
-                    Membre: {{ l.beneficiairePrenom }} {{ l.beneficiaireNom }}
-                  </span>
-                </div>
-              </td>
-              <td class="num">{{ l.quantite }}</td>
-              <td class="num">{{ l.prix | currency:'EUR' }}</td>
-            </tr>
-          </tbody>
-        </table>
-  
-        <div class="modal-actions">
-          <button class="btn subtle" (click)="fermerDetails()">Fermer</button>
-        </div>
-      </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" (click)="fermerDetails()">Fermer</button>
     </div>
-  </div>
-  
+  </ng-container>
+</ui-modal>
