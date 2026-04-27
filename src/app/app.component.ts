@@ -39,6 +39,11 @@ export class AppComponent implements OnInit, OnDestroy {
     return window.location.pathname === '/';
   }
 
+  get isDashboardRoute(): boolean {
+    const url = this.router.url.split('?')[0];
+    return ['/admin', '/super-admin', '/membre', '/parent'].some(p => url.startsWith(p));
+  }
+
   showSelectClubModal = false;
   currentUser: any = null;
   selectedClub: Club | null = null;

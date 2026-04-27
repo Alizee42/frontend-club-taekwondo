@@ -1,7 +1,7 @@
 <!-- ═══════════════════════════════════════════════════════════
      STATE PUBLIC (non connecté)
      ═══════════════════════════════════════════════════════════ -->
-<header class="uh" *ngIf="!isUserLoggedIn">
+<header class="uh" *ngIf="!isUserLoggedIn || !isDashboardRoute">
   <div class="uh__inner">
 
     <!-- Logo -->
@@ -63,7 +63,7 @@
 <!-- ═══════════════════════════════════════════════════════════
      STATE CONNECTÉ
      ═══════════════════════════════════════════════════════════ -->
-<header class="uh uh--connected" *ngIf="isUserLoggedIn">
+<header class="uh uh--connected" *ngIf="isUserLoggedIn && isDashboardRoute">
   <div class="uh__inner">
 
     <!-- Logo -->

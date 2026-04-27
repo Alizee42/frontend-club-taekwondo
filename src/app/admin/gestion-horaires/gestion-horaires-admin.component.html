@@ -1,169 +1,262 @@
-<div class="page-shell">
-  <app-page-header title="Gestion des horaires du club" icon="ri-calendar-line">
+<div class="page-shell horaires-page">
+  <app-page-header
+    title="Gestion des horaires du club"
+    icon="ri-time-line"
+    subtitle="Organiser les créneaux de cours par jour et groupe"
+  >
     <ng-container page-header-actions>
-      <ui-button label="Ajouter des horaires" variant="primary" (clicked)="showAjoutModal = true"></ui-button>
+      <ui-button
+        label="Ajouter des horaires"
+        icon="ri-add-line"
+        variant="primary"
+        (clicked)="showAjoutModal = true"
+      ></ui-button>
     </ng-container>
   </app-page-header>
 
-  <div class="horaires-cards-container">
-    <div *ngIf="horairesParJour.length === 0" class="no-horaires">Aucun horaire pour ce club.</div>
-    <div class="accordion-horaires">
-      <div *ngFor="let jourBlock of horairesParJour; let i = index" class="accordion-item">
-        <div class="accordion-header" (click)="openedPlageIndex = (openedPlageIndex === i ? -1 : i)" [ngClass]="{ 'open': openedPlageIndex === i }">
-          <span class="accordion-jour">{{ jourBlock.jour }}</span>
-          <button class="ajout-plage-jour-btn" (click)="$event.stopPropagation(); openAjoutPlageModal(jourBlock.jour)">
-            Ajouter plage horaire
-          </button>
-          <i class="accordion-arrow" [ngClass]="openedPlageIndex === i ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
-        </div>
-        <div class="accordion-body" *ngIf="openedPlageIndex === i">
-          <div class="table-wrap">
-            <ui-table
-              [columns]="[
-                { key: 'heureDebut', label: 'Début' },
-                { key: 'heureFin', label: 'Fin' },
-                { key: 'groupe', label: 'Groupe' },
-                { key: 'adresse', label: 'Adresse' }
-              ]"
-              [data]="jourBlock.horaires"
-              [actions]="[
-                { label: 'Éditer', icon: 'ri-edit-2-line', action: 'edit', variant: 'primary' },
-                { label: 'Supprimer', icon: 'ri-delete-bin-6-line', action: 'delete', variant: 'danger' }
-              ]"
-              (actionClick)="onTableAction($event, jourBlock)"
-            ></ui-table>
-          </div>
-        </div>
+  <section class="kpi-grid">
+    <article class="kpi-card kpi-card--primary">
+      <span class="kpi-icon"><i class="ri-calendar-schedule-line"></i></span>
+      <div>
+        <strong class="kpi-value">{{ totalHoraires }}</strong>
+        <span class="kpi-label">Créneaux</span>
       </div>
-    </div>
-  </div>
+    </article>
+
+    <article class="kpi-card kpi-card--success">
+      <span class="kpi-icon"><i class="ri-calendar-check-line"></i></span>
+      <div>
+        <strong class="kpi-value">{{ totalJoursActifs }}/7</strong>
+        <span class="kpi-label">Jours actifs</span>
+      </div>
+    </article>
+
+    <article class="kpi-card kpi-card--info">
+      <span class="kpi-icon"><i class="ri-group-line"></i></span>
+      <div>
+        <strong class="kpi-value">{{ totalGroupes }}</strong>
+        <span class="kpi-label">Groupes</span>
+      </div>
+    </article>
+  </section>
+
+  <section class="week-grid">
+    @for (jourBlock of horairesParJour; track jourBlock.jour) {
+      <article class="day-card" [class.day-card--empty]="jourBlock.horaires.length === 0">
+        <header class="day-card__header">
+          <div>
+            <span class="day-card__name">{{ jourBlock.jour }}</span>
+            <span class="day-card__count">{{ getJourCountLabel(jourBlock) }}</span>
+          </div>
+          <button
+            type="button"
+            class="icon-action icon-action--add"
+            title="Ajouter un créneau"
+            aria-label="Ajouter un créneau"
+            (click)="openAjoutPlageModal(jourBlock.jour)"
+          >
+            <i class="ri-add-line"></i>
+          </button>
+        </header>
+
+        @if (jourBlock.horaires.length === 0) {
+          <div class="empty-day">Aucun cours planifié</div>
+        } @else {
+          <div class="slots-list">
+            @for (horaire of jourBlock.horaires; track horaire.id) {
+              <div class="slot-card">
+                <div class="slot-card__time">{{ buildPlageLabel(horaire) }}</div>
+                <div class="slot-card__body">
+                  <strong>{{ horaire.groupe || 'Groupe non renseigné' }}</strong>
+                  <span>{{ getAdresseLabel(horaire) || 'Adresse non renseignée' }}</span>
+                </div>
+                <div class="slot-card__actions">
+                  <button
+                    type="button"
+                    class="icon-action"
+                    title="Modifier"
+                    aria-label="Modifier"
+                    (click)="openEditHoraireModal(horaire)"
+                  >
+                    <i class="ri-edit-2-line"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-action icon-action--danger"
+                    title="Supprimer"
+                    aria-label="Supprimer"
+                    (click)="deleteHoraire(horaire.id)"
+                  >
+                    <i class="ri-delete-bin-6-line"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </article>
+    }
+  </section>
 </div>
 
-<!-- Modale : ajouter un horaire (nouveau jour) -->
-<ui-modal [open]="showAjoutModal" title="Ajouter un horaire" (closed)="showAjoutModal = false">
-  <form class="ajout-horaire ajout-horaire-vertical" (ngSubmit)="ajoutFormValid && addHoraire()" #ajoutForm="ngForm">
-    <div class="form-group">
+<!-- Modale : ajouter plusieurs créneaux sur un jour -->
+<ui-modal
+  [open]="showAjoutModal"
+  title="Ajouter des horaires"
+  subtitle="Créer plusieurs créneaux sur un même jour"
+  size="lg"
+  (closed)="showAjoutModal = false; resetAjoutForm()"
+>
+  <form class="schedule-form" (ngSubmit)="ajoutFormValid && addHoraire()" #ajoutForm="ngForm">
+    <div class="form-section">
       <label for="jour">Jour</label>
       <select id="jour" required [(ngModel)]="ajoutJour" name="jour" (change)="openedPlageIndex = 0">
-        <option value="">-- Sélectionner --</option>
-        <option value="Lundi">Lundi</option>
-        <option value="Mardi">Mardi</option>
-        <option value="Mercredi">Mercredi</option>
-        <option value="Jeudi">Jeudi</option>
-        <option value="Vendredi">Vendredi</option>
-        <option value="Samedi">Samedi</option>
-        <option value="Dimanche">Dimanche</option>
+        <option value="">Sélectionner un jour</option>
+        @for (jour of joursSemaine; track jour) {
+          <option [value]="jour">{{ jour }}</option>
+        }
       </select>
     </div>
-    <div *ngIf="ajoutJour && ajoutPlages.length > 0" class="plages-scrollable" [class.scrollable]="ajoutPlages.length > 1">
-      <ng-container *ngFor="let plage of ajoutPlages; let i = index">
-        <fieldset class="bloc-plage-ajout" [class.closed]="openedPlageIndex !== i">
-          <legend class="legend-plage-ajout">
-            <span (click)="openedPlageIndex = (openedPlageIndex === i ? -1 : i)" class="toggle-plage">
-              Horaire n°{{i+1}}
-              <span *ngIf="openedPlageIndex !== i" class="plage-resume">
-                <span *ngIf="plage.plage">{{ plage.plage }}</span>
-                <span *ngIf="plage.groupe"> | {{ plage.groupe }}</span>
-                <span *ngIf="plage.adresse || plage.codePostal || plage.ville"> | {{ plage.adresse }}<span *ngIf="plage.codePostal"> {{ plage.codePostal }}</span><span *ngIf="plage.ville"> {{ plage.ville }}</span></span>
-              </span>
-            </span>
-            <button type="button" (click)="$event.stopPropagation(); removePlageForm(i)" class="delete-horaire-btn modal" title="Supprimer cette plage">
-              <i class="ri-delete-bin-6-line"></i>
-            </button>
-            <i class="accordion-arrow" [ngClass]="openedPlageIndex === i ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
-          </legend>
-          <div *ngIf="openedPlageIndex === i" class="plage-ajout-fields">
-            <div class="form-group">
-              <label class="form-label">Plage horaire</label>
-              <select required [(ngModel)]="plage.plage" name="plage{{i}}">
-                <option value="">-- Sélectionner --</option>
-                <option value="8h - 9h">8h - 9h</option>
-                <option value="9h - 10h">9h - 10h</option>
-                <option value="10h - 11h">10h - 11h</option>
-                <option value="11h - 12h">11h - 12h</option>
-                <option value="14h - 15h">14h - 15h</option>
-                <option value="15h - 16h">15h - 16h</option>
-                <option value="16h - 17h">16h - 17h</option>
-                <option value="17h - 18h">17h - 18h</option>
-                <option value="18h - 19h">18h - 19h</option>
-                <option value="19h - 20h">19h - 20h</option>
-                <option value="20h - 21h">20h - 21h</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Groupe concerné</label>
-              <input type="text" [(ngModel)]="plage.groupe" name="groupe{{i}}" placeholder="Ex : Enfants, Adultes...">
-            </div>
-            <div *ngIf="i > 0" class="meme-adresse-checkbox">
-              <input type="checkbox" [(ngModel)]="plage.memeAdresse" name="memeAdresse{{i}}" (change)="onMemeAdresseChange(plage, ajoutPlages)">
-              <label>Même adresse que le premier horaire</label>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Adresse</label>
-              <input type="text" [(ngModel)]="plage.adresse" name="adresse{{i}}" placeholder="Adresse du cours">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Code postal</label>
-              <input type="text" [(ngModel)]="plage.codePostal" name="codePostal{{i}}" placeholder="Code postal">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Ville</label>
-              <input type="text" [(ngModel)]="plage.ville" name="ville{{i}}" placeholder="Ville">
-            </div>
-          </div>
-        </fieldset>
-      </ng-container>
-      <div class="ajout-plage-actions">
-        <ui-button label="Ajouter une plage horaire" variant="primary" (clicked)="addPlageForm()"></ui-button>
-        <ui-button type="submit" label="Valider" variant="primary" [disabled]="!ajoutFormValid"></ui-button>
+
+    @if (ajoutJour) {
+      <div class="plages-stack">
+        @for (plage of ajoutPlages; track $index) {
+          <fieldset class="plage-panel" [class.is-closed]="openedPlageIndex !== $index">
+            <legend>
+              <button
+                type="button"
+                class="plage-toggle"
+                (click)="openedPlageIndex = openedPlageIndex === $index ? -1 : $index"
+              >
+                <span>Créneau {{ $index + 1 }}</span>
+                @if (openedPlageIndex !== $index) {
+                  <small>{{ plage.plage || 'Horaire à choisir' }}{{ plage.groupe ? ' · ' + plage.groupe : '' }}</small>
+                }
+              </button>
+
+              <button
+                type="button"
+                class="icon-action icon-action--danger"
+                title="Supprimer"
+                aria-label="Supprimer"
+                [disabled]="ajoutPlages.length === 1"
+                (click)="removePlageForm($index)"
+              >
+                <i class="ri-delete-bin-6-line"></i>
+              </button>
+            </legend>
+
+            @if (openedPlageIndex === $index) {
+              <div class="form-grid">
+                <div class="form-section">
+                  <label>Plage horaire</label>
+                  <select required [(ngModel)]="plage.plage" [name]="'plage' + $index">
+                    <option value="">Sélectionner</option>
+                    @for (plageOption of plagesHoraires; track plageOption) {
+                      <option [value]="plageOption">{{ plageOption }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="form-section">
+                  <label>Groupe concerné</label>
+                  <input type="text" [(ngModel)]="plage.groupe" [name]="'groupe' + $index" placeholder="Enfants, ados, adultes..." />
+                </div>
+
+                @if ($index > 0) {
+                  <label class="check-row">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="plage.memeAdresse"
+                      [name]="'memeAdresse' + $index"
+                      (change)="onMemeAdresseChange(plage, ajoutPlages)"
+                    />
+                    Même adresse que le premier créneau
+                  </label>
+                }
+
+                <div class="form-section form-section--wide">
+                  <label>Adresse</label>
+                  <input type="text" [(ngModel)]="plage.adresse" [name]="'adresse' + $index" placeholder="Adresse du cours" />
+                </div>
+
+                <div class="form-section">
+                  <label>Code postal</label>
+                  <input type="text" [(ngModel)]="plage.codePostal" [name]="'codePostal' + $index" placeholder="69000" />
+                </div>
+
+                <div class="form-section">
+                  <label>Ville</label>
+                  <input type="text" [(ngModel)]="plage.ville" [name]="'ville' + $index" placeholder="Ville" />
+                </div>
+              </div>
+            }
+          </fieldset>
+        }
       </div>
-      <div *ngIf="!ajoutFormValid" class="ajout-form-error">
-        Veuillez remplir tous les champs pour chaque plage horaire.
-      </div>
-    </div>
+    }
+
+    @if (ajoutJour && !ajoutFormValid) {
+      <div class="form-alert">Tous les champs sont nécessaires pour publier les créneaux.</div>
+    }
+
+    <footer class="modal-footer">
+      <ui-button type="button" label="Ajouter un créneau" icon="ri-add-line" variant="secondary" (clicked)="addPlageForm()"></ui-button>
+      <ui-button type="submit" label="Publier" icon="ri-check-line" variant="primary" [disabled]="!ajoutFormValid"></ui-button>
+    </footer>
   </form>
 </ui-modal>
 
-<!-- Modale : ajouter une plage pour un jour donné -->
-<ui-modal [open]="showAjoutPlageModal" title="Ajouter une plage horaire" (closed)="closeAjoutPlageModal()">
-  <form (ngSubmit)="submitAjoutPlageModal()" #ajoutPlageForm="ngForm" class="ajout-plage-form">
-    <div class="ajout-plage-jour">Jour : {{ jourAjoutPlage }}</div>
-    <div class="form-group">
-      <label>Plage horaire</label>
-      <select required [(ngModel)]="ajoutPlageData.plage" name="plage">
-        <option value="">-- Sélectionner --</option>
-        <option value="8h - 9h">8h - 9h</option>
-        <option value="9h - 10h">9h - 10h</option>
-        <option value="10h - 11h">10h - 11h</option>
-        <option value="11h - 12h">11h - 12h</option>
-        <option value="14h - 15h">14h - 15h</option>
-        <option value="15h - 16h">15h - 16h</option>
-        <option value="16h - 17h">16h - 17h</option>
-        <option value="17h - 18h">17h - 18h</option>
-        <option value="18h - 19h">18h - 19h</option>
-        <option value="19h - 20h">19h - 20h</option>
-        <option value="20h - 21h">20h - 21h</option>
-      </select>
+<!-- Modale : ajouter / modifier un créneau -->
+<ui-modal
+  [open]="showAjoutPlageModal"
+  [title]="modalPlageTitle"
+  [subtitle]="jourAjoutPlage"
+  size="md"
+  (closed)="closeAjoutPlageModal()"
+>
+  <form (ngSubmit)="submitAjoutPlageModal()" #ajoutPlageForm="ngForm" class="schedule-form schedule-form--single">
+    <div class="form-grid">
+      <div class="form-section">
+        <label>Plage horaire</label>
+        <select required [(ngModel)]="ajoutPlageData.plage" name="plage">
+          <option value="">Sélectionner</option>
+          @for (plageOption of plagesHoraires; track plageOption) {
+            <option [value]="plageOption">{{ plageOption }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-section">
+        <label>Groupe</label>
+        <input type="text" [(ngModel)]="ajoutPlageData.groupe" name="groupe" placeholder="Groupe" required />
+      </div>
+
+      <div class="form-section form-section--wide">
+        <label>Adresse</label>
+        <input type="text" [(ngModel)]="ajoutPlageData.adresse" name="adresse" placeholder="Adresse" required />
+      </div>
+
+      <div class="form-section">
+        <label>Code postal</label>
+        <input type="text" [(ngModel)]="ajoutPlageData.codePostal" name="codePostal" placeholder="Code postal" required />
+      </div>
+
+      <div class="form-section">
+        <label>Ville</label>
+        <input type="text" [(ngModel)]="ajoutPlageData.ville" name="ville" placeholder="Ville" required />
+      </div>
     </div>
-    <div class="form-group">
-      <label>Groupe</label>
-      <input type="text" [(ngModel)]="ajoutPlageData.groupe" name="groupe" placeholder="Groupe" required>
-    </div>
-    <div class="form-group">
-      <label>Adresse</label>
-      <input type="text" [(ngModel)]="ajoutPlageData.adresse" name="adresse" placeholder="Adresse" required>
-    </div>
-    <div class="form-group">
-      <label>Code postal</label>
-      <input type="text" [(ngModel)]="ajoutPlageData.codePostal" name="codePostal" placeholder="Code postal" required>
-    </div>
-    <div class="form-group">
-      <label>Ville</label>
-      <input type="text" [(ngModel)]="ajoutPlageData.ville" name="ville" placeholder="Ville" required>
-    </div>
-    <div class="modal-footer">
+
+    <footer class="modal-footer">
       <ui-button type="button" label="Annuler" variant="ghost" (clicked)="closeAjoutPlageModal()"></ui-button>
-      <ui-button type="submit" label="Ajouter" variant="primary" [disabled]="!ajoutPlageForm.form.valid"></ui-button>
-    </div>
+      <ui-button
+        type="submit"
+        [label]="editingHoraireId ? 'Enregistrer' : 'Ajouter'"
+        icon="ri-check-line"
+        variant="primary"
+        [disabled]="!ajoutPlageForm.form.valid"
+      ></ui-button>
+    </footer>
   </form>
 </ui-modal>

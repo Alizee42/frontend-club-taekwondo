@@ -1,18 +1,26 @@
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { PaymentAdminService } from '../../../services/payment-admin.service';
 import { debounce } from './utils/debounce';
 
-type TypeProfil = 'ADULTE' | 'PARENT';
-type TypePaiement = 'unique' | 'echeances';
 type ModePaiement = 'especes' | 'virement' | 'stripe';
+type TypePaiement = 'unique' | 'echeances';
 
 interface EcheanceInput {
-  dateEcheance: string; // yyyy-MM-dd
+  dateEcheance: string;
   montant: number;
   statut?: 'en attente' | 'payé';
   numero?: number;
+}
+
+interface PersonResult {
+  id: number;
+  prenom: string;
+  nom: string;
+  email: string;
+  type: 'ADULTE' | 'PARENT';
 }
 
 @Component({
@@ -27,33 +35,20 @@ export class AjoutPaiementComponent implements OnInit {
   @Output() changementVue = new EventEmitter<string>();
   @Output() paiementAjoute = new EventEmitter<void>();
 
-  // Stepper
   currentStep = 0;
-  steps = [
-    { label: 'Profil' },
-    { label: 'Paiement' },
-    { label: 'Echeances' },
-    { label: 'Recapitulatif' }
-  ];
+  steps = [{ label: 'Payeur' }, { label: 'Paiement' }];
 
-  // Profil
-  typeProfil: TypeProfil = 'ADULTE';
-  creationManuelle = false;
-  nouvelUtilisateur = { prenom: '', nom: '', email: '', role: 'ADULTE' as TypeProfil };
-
-  // Enfants à créer à la volée si rôle = PARENT (facultatif)
-  enfantsNouveaux: Array<{ prenom: string; nom: string }> = [];
-
-  // Recherches & sélections
-  qAdulte = '';
-  qParent = '';
-  adultes: any[] = [];
-  parents: any[] = [];
+  // Recherche unifiée
+  searchQuery = '';
+  searchResults: PersonResult[] = [];
+  selectedPerson: PersonResult | null = null;
   enfantsDuParent: any[] = [];
-
-  selectedAdulteId?: number;
-  selectedParentId?: number;
   selectedMembreIds: number[] = [];
+
+  // Création manuelle (cas rare)
+  creationManuelle = false;
+  nouvelUtilisateur = { prenom: '', nom: '', email: '', role: 'ADULTE' as 'ADULTE' | 'PARENT' };
+  enfantsNouveaux: Array<{ prenom: string; nom: string }> = [];
 
   // Paiement
   typePaiement: TypePaiement = 'unique';
@@ -61,7 +56,7 @@ export class AjoutPaiementComponent implements OnInit {
   montantTotal = 0;
   datePaiement = this.today();
 
-  // Échéances
+  // Échéances inline
   nombreEcheances = 2;
   premiereDate = this.today();
   intervalDays = 30;
@@ -71,10 +66,6 @@ export class AjoutPaiementComponent implements OnInit {
   justificatifFile?: File;
   nomFichier = '';
 
-  // (facultatif)
-  commentaire = '';
-
-  // UI
   loading = false;
   errorMsg = '';
   successMsg = '';
@@ -82,109 +73,96 @@ export class AjoutPaiementComponent implements OnInit {
   constructor(private api: PaymentAdminService) {}
 
   ngOnInit(): void {
-    // charge des listes de base au démarrage
-    this.rechercheAdultes('');
-    this.rechercheParents('');
+    this.rechercherTout('');
   }
 
-  // --- Helpers ---
   today(): string {
-    const d = new Date();
-    return d.toISOString().slice(0, 10);
+    return new Date().toISOString().slice(0, 10);
   }
 
-  onFileSelected(ev: Event) {
-    const input = ev.target as HTMLInputElement | null;
-    const f = input?.files?.[0];
-    if (f) {
-      this.justificatifFile = f;
-      this.nomFichier = f.name;
-    }
-  }
-
-  // Recherches avec debounce
-  rechercheAdultes = debounce((q: string) => {
-    this.api.getAdultes(q).subscribe((res) => (this.adultes = res || []));
+  rechercherTout = debounce((q: string) => {
+    forkJoin({
+      adultes: this.api.getAdultes(q),
+      parents: this.api.getParents(q)
+    }).subscribe(({ adultes, parents }) => {
+      this.searchResults = [
+        ...(adultes || []).map(u => ({ ...u, type: 'ADULTE' as const })),
+        ...(parents || []).map(u => ({ ...u, type: 'PARENT' as const }))
+      ];
+    });
   }, 250);
 
-  rechercheParents = debounce((q: string) => {
-    this.api.getParents(q).subscribe((res) => (this.parents = res || []));
-  }, 250);
-
-  onSearchAdulte(q: string) {
-    this.qAdulte = q;
-    this.rechercheAdultes(q);
+  onSearch(q: string) {
+    this.searchQuery = q;
+    this.rechercherTout(q);
   }
 
-  onSearchParent(q: string) {
-    this.qParent = q;
-    this.rechercheParents(q);
-  }
-
-  onChangeParent() {
+  selectPerson(person: PersonResult) {
+    this.selectedPerson = person;
+    this.enfantsDuParent = [];
     this.selectedMembreIds = [];
-    if (this.selectedParentId) {
-      this.api.getMembresByParent(this.selectedParentId).subscribe(res => {
+    if (person.type === 'PARENT') {
+      this.api.getMembresByParent(person.id).subscribe(res => {
         this.enfantsDuParent = res || [];
+        this.selectedMembreIds = (res || []).map((m: any) => m.id);
       });
+    }
+  }
+
+  toggleMembre(ev: Event, id: number) {
+    const checked = (ev.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.selectedMembreIds.includes(id)) this.selectedMembreIds = [...this.selectedMembreIds, id];
     } else {
-      this.enfantsDuParent = [];
+      this.selectedMembreIds = this.selectedMembreIds.filter(x => x !== id);
     }
   }
 
-  // Gestion enfants nouveaux (création à la volée)
-  addEnfant() {
-    this.enfantsNouveaux.push({ prenom: '', nom: '' });
-  }
-  removeEnfant(i: number) {
-    this.enfantsNouveaux.splice(i, 1);
-  }
-  formatEnfantsNouveaux(): string {
-    if (!this.enfantsNouveaux?.length) return '';
-    return this.enfantsNouveaux
-      .map(e => `${(e.prenom || '').trim()} ${(e.nom || '').trim()}`.trim())
-      .filter(s => !!s)
-      .join(', ');
+  toggleCreationManuelle() {
+    this.creationManuelle = !this.creationManuelle;
+    if (this.creationManuelle) {
+      this.selectedPerson = null;
+    } else {
+      this.nouvelUtilisateur = { prenom: '', nom: '', email: '', role: 'ADULTE' };
+      this.enfantsNouveaux = [];
+    }
   }
 
-  // Échéances
+  addEnfant() { this.enfantsNouveaux.push({ prenom: '', nom: '' }); }
+  removeEnfant(i: number) { this.enfantsNouveaux.splice(i, 1); }
+
+  onTypePaiementChange() {
+    if (this.typePaiement === 'echeances') this.genererEcheances();
+    else this.echeances = [];
+  }
+
   genererEcheances() {
-    if (this.typePaiement !== 'echeances') {
-      this.echeances = [];
-      return;
-    }
-    if (!this.montantTotal || !this.nombreEcheances || !this.premiereDate) return;
-
-    const montantBase = Math.floor((this.montantTotal / this.nombreEcheances) * 100) / 100;
+    if (this.typePaiement !== 'echeances' || !this.montantTotal || !this.nombreEcheances || !this.premiereDate) return;
+    const base = Math.floor((this.montantTotal / this.nombreEcheances) * 100) / 100;
     const res: EcheanceInput[] = [];
-    let totalRep = 0;
-
+    let total = 0;
     const start = new Date(this.premiereDate);
     for (let i = 0; i < this.nombreEcheances; i++) {
       const d = new Date(start);
       d.setDate(d.getDate() + i * this.intervalDays);
-      const montant = montantBase;
-      totalRep += montant;
-      res.push({
-        dateEcheance: d.toISOString().slice(0, 10),
-        montant,
-        statut: 'en attente',
-        numero: i + 1
-      });
+      total += base;
+      res.push({ dateEcheance: d.toISOString().slice(0, 10), montant: base, statut: 'en attente', numero: i + 1 });
     }
-    const diff = Math.round((this.montantTotal - totalRep) * 100) / 100;
+    const diff = Math.round((this.montantTotal - total) * 100) / 100;
     if (diff !== 0 && res.length) res[res.length - 1].montant = +(res[res.length - 1].montant + diff).toFixed(2);
     this.echeances = res;
   }
 
-  // Navigation
+  onFileSelected(ev: Event) {
+    const f = (ev.target as HTMLInputElement)?.files?.[0];
+    if (f) { this.justificatifFile = f; this.nomFichier = f.name; }
+  }
+
   next() {
     if (!this.canGoNext(this.currentStep)) return;
     this.currentStep = Math.min(this.currentStep + 1, this.steps.length - 1);
   }
-  prev() {
-    this.currentStep = Math.max(this.currentStep - 1, 0);
-  }
+  prev() { this.currentStep = Math.max(this.currentStep - 1, 0); }
   isLastStep() { return this.currentStep === this.steps.length - 1; }
 
   canGoNext(step: number): boolean {
@@ -194,129 +172,71 @@ export class AjoutPaiementComponent implements OnInit {
         if (!this.nouvelUtilisateur.prenom?.trim()) { this.errorMsg = 'Prénom requis'; return false; }
         if (!this.nouvelUtilisateur.nom?.trim()) { this.errorMsg = 'Nom requis'; return false; }
       } else {
-        if (this.typeProfil === 'ADULTE' && !this.selectedAdulteId) { this.errorMsg = 'Sélectionne un adulte.'; return false; }
-        if (this.typeProfil === 'PARENT' && !this.selectedParentId) { this.errorMsg = 'Sélectionne un parent.'; return false; }
+        if (!this.selectedPerson) { this.errorMsg = 'Sélectionne un payeur.'; return false; }
       }
-    }
-    if (step === 1) {
-      if (this.montantTotal <= 0) { this.errorMsg = 'Montant invalide.'; return false; }
-      if (this.typePaiement === 'echeances' && !this.echeances.length) { this.errorMsg = 'Génère les échéances.'; return false; }
-    }
-    if (step === 2 && this.typePaiement === 'echeances') {
-      const sum = this.echeances.reduce((s, e) => s + (e.montant || 0), 0);
-      if (Math.abs(sum - this.montantTotal) > 0.01) { this.errorMsg = 'Somme des échéances ≠ montant total.'; return false; }
     }
     return true;
   }
 
-  // Gestion checkbox enfants
-  toggleMembre(ev: Event, id: number) {
-    const checked = (ev.target as HTMLInputElement).checked;
-    if (checked) {
-      if (!this.selectedMembreIds.includes(id)) {
-        this.selectedMembreIds = [...this.selectedMembreIds, id];
-      }
-    } else {
-      this.selectedMembreIds = this.selectedMembreIds.filter(x => x !== id);
-    }
-  }
-
-  // Soumission
   validerPaiement() {
-    this.loading = true;
     this.errorMsg = '';
+    if (this.montantTotal <= 0) { this.errorMsg = 'Montant invalide.'; return; }
+    if (this.typePaiement === 'echeances' && !this.echeances.length) { this.errorMsg = 'Génère les échéances.'; return; }
 
-    // Sécurise le cas UNIQUE : aucune échéance envoyée
-    if (this.typePaiement === 'unique') {
-      this.echeances = [];
-      // Option UX si tu veux un paiement immédiat par défaut :
-      // this.modePaiement = 'stripe';
-    }
-
-    // ✅ Mapping attendu par le backend
-    const typeBack: 'UNIQUE' | 'ECHELONNE' =
-      this.typePaiement === 'echeances' ? 'ECHELONNE' : 'UNIQUE';
-
+    this.loading = true;
+    const typeBack: 'UNIQUE' | 'ECHELONNE' = this.typePaiement === 'echeances' ? 'ECHELONNE' : 'UNIQUE';
     const echeancesBack = this.typePaiement === 'echeances'
-      ? this.echeances.map(e => ({
-          dateEcheance: e.dateEcheance,
-          montant: +e.montant,
-          statut: e.statut || 'en attente',
-          numero: e.numero
-        }))
+      ? this.echeances.map(e => ({ dateEcheance: e.dateEcheance, montant: +e.montant, statut: e.statut || 'en attente', numero: e.numero }))
       : undefined;
 
-    // ========= CAS 1 : Création manuelle -> JSON (/ajouter-complet)
     if (this.creationManuelle) {
-      const nom = (this.nouvelUtilisateur.nom || '').trim();
-      const prenom = (this.nouvelUtilisateur.prenom || '').trim();
-      if (!nom || !prenom) {
-        this.loading = false;
-        this.errorMsg = 'Nom et prénom sont requis pour la création.';
-        return;
-      }
-
       this.api.ajouterPaiementCompletJSON({
-        utilisateurNom: nom,
-        utilisateurPrenom: prenom,
-        utilisateurEmail: (this.nouvelUtilisateur.email || '').trim() || undefined,
-        // On envoie les deux clés (le back accepte l’une ou l’autre)
-        type: typeBack,                // 'UNIQUE' | 'ECHELONNE'
-        typePaiement: typeBack,        // 'UNIQUE' | 'ECHELONNE'
+        utilisateurNom: this.nouvelUtilisateur.nom.trim(),
+        utilisateurPrenom: this.nouvelUtilisateur.prenom.trim(),
+        utilisateurEmail: this.nouvelUtilisateur.email.trim() || undefined,
+        type: typeBack, typePaiement: typeBack,
         montantTotal: this.montantTotal,
-        modePaiement: this.modePaiement,     // 'especes' | 'virement' | 'stripe'
-        datePaiement: this.datePaiement,     // yyyy-MM-dd
+        modePaiement: this.modePaiement,
+        datePaiement: this.datePaiement,
         echeances: echeancesBack
       }).subscribe({
-        next: () => {
-          this.loading = false;
-          this.successMsg = 'Paiement ajouté avec succès.';
-          this.saved.emit();
-          this.paiementAjoute.emit();
-          this.changementVue.emit('paiements');
-        },
-        error: (err: any) => {
-          this.loading = false;
-          this.errorMsg = err?.error?.message || 'Erreur lors de la création du paiement.';
-        }
+        next: () => this.onSuccess(),
+        error: (err: any) => this.onError(err)
       });
-
       return;
     }
 
-    // ========= CAS 2 : Utilisateur existant -> JSON (/ajouter-manuel)
     const dto: any = {
-      type: typeBack,                 // 'UNIQUE' | 'ECHELONNE'
-      typePaiement: typeBack,         // 'UNIQUE' | 'ECHELONNE'
+      type: typeBack, typePaiement: typeBack,
       montantTotal: +this.montantTotal,
       modePaiement: this.modePaiement,
       datePaiement: this.datePaiement,
-      echeances: echeancesBack,       // uniquement si échelonné
-      commentaire: this.commentaire?.trim() || undefined
+      echeances: echeancesBack
     };
 
-    if (this.typeProfil === 'ADULTE') {
-      dto.utilisateurId = this.selectedAdulteId;
+    if (this.selectedPerson!.type === 'ADULTE') {
+      dto.utilisateurId = this.selectedPerson!.id;
     } else {
-      dto.parentId = this.selectedParentId;
-      if (this.selectedMembreIds?.length) {
-        dto.membreIds = this.selectedMembreIds;
-      }
+      dto.parentId = this.selectedPerson!.id;
+      if (this.selectedMembreIds.length) dto.membreIds = this.selectedMembreIds;
     }
 
     this.api.ajouterPaiementManuel(dto).subscribe({
-      next: () => {
-        this.loading = false;
-        this.successMsg = 'Paiement ajouté avec succès.';
-        this.saved.emit();
-        this.paiementAjoute.emit();
-        this.changementVue.emit('paiements');
-      },
-      error: (err: any) => {
-        this.loading = false;
-        this.errorMsg = err?.error?.message || 'Erreur lors de l’ajout du paiement.';
-      }
+      next: () => this.onSuccess(),
+      error: (err: any) => this.onError(err)
     });
   }
-}
 
+  private onSuccess() {
+    this.loading = false;
+    this.successMsg = 'Paiement ajouté avec succès.';
+    this.saved.emit();
+    this.paiementAjoute.emit();
+    this.changementVue.emit('paiements');
+  }
+
+  private onError(err: any) {
+    this.loading = false;
+    this.errorMsg = err?.error?.message || "Erreur lors de l'ajout du paiement.";
+  }
+}

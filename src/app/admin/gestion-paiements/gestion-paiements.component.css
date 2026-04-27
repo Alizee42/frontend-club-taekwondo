@@ -170,11 +170,14 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  overflow: hidden;
 }
 
 .tab-body {
   padding: var(--sp-4);
+}
+
+.tab-btn:not(.active) {
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* ── Sidebar paramètres ──────────────────────────── */

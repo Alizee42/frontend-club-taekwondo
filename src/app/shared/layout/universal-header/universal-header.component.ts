@@ -15,6 +15,7 @@ export class UniversalHeaderComponent implements OnChanges {
 
   @Input() clubName: string = '';
   @Input() isUserLoggedIn: boolean = false;
+  @Input() isDashboardRoute: boolean = false;
   @Input() userName?: string;
   @Input() userAvatar?: string;
   @Input() unreadNotifications: number = 0;

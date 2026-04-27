@@ -70,12 +70,9 @@
           <tr>
             <th *ngIf="showClub">Club</th>
             <th>Date</th>
-            <th>Payé par</th>
-            <th>Pour</th>
-            <th>Type</th>
-            <th class="num">Total</th>
-            <th class="num">Payé</th>
-            <th class="num">Restant</th>
+            <th>Payeur / Pour</th>
+            <th class="col-type">Type</th>
+            <th class="col-progress">Progression</th>
             <th>Statut</th>
             <th class="actions-col">Actions</th>
           </tr>
@@ -84,17 +81,35 @@
           <tr *ngFor="let p of paiementsFiltres; trackBy: trackByPaiement">
             <td *ngIf="showClub">{{ getClubName(p) }}</td>
             <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
-            <td>{{ p.utilisateurPrenom }} {{ p.utilisateurNom }}</td>
-            <td><span class="badge-pill">{{ p.membrePrenom }} {{ p.membreNom }}</span></td>
-            <td>{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</td>
-            <td class="num">{{ p.montantTotal | currency:'EUR' }}</td>
-            <td class="num">{{ montantPaye(p) | currency:'EUR' }}</td>
-            <td class="num">{{ montantRestant(p) | currency:'EUR' }}</td>
+            <td>
+              <div class="cell-payeur">
+                <span>{{ p.utilisateurPrenom }} {{ p.utilisateurNom }}</span>
+                <span *ngIf="p.membrePrenom" class="cell-pour">↳ {{ p.membrePrenom }} {{ p.membreNom }}</span>
+              </div>
+            </td>
+            <td class="col-type">{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</td>
+            <td class="col-progress">
+              <div class="progress-cell">
+                <div class="progress-amounts">
+                  <span class="progress-paye">{{ montantPaye(p) | currency:'EUR':'symbol':'1.0-0' }}</span>
+                  <span class="progress-total">/ {{ p.montantTotal | currency:'EUR':'symbol':'1.0-0' }}</span>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar-fill"
+                    [style.width.%]="p.montantTotal > 0 ? (montantPaye(p) / p.montantTotal * 100) : 0"
+                    [class.progress-bar-fill--done]="montantRestant(p) === 0"
+                    [class.progress-bar-fill--partial]="montantRestant(p) > 0 && montantPaye(p) > 0">
+                  </div>
+                </div>
+              </div>
+            </td>
             <td><span [class]="classeBadge(p.statut)">{{ p.statut }}</span></td>
             <td class="actions-col">
-              <button class="action-btn action-btn--primary" (click)="ouvrirEcheances(p)" title="Voir les échéances" aria-label="Voir les échéances"><i class="ri-calendar-event-line"></i></button>
-              <button class="action-btn action-btn--success" *ngIf="estPayable(p)" (click)="marquerPaiementPaye(p)" title="Marquer comme payé" aria-label="Marquer comme payé"><i class="ri-checkbox-circle-line"></i></button>
-              <button class="action-btn action-btn--danger" (click)="ouvrirAnnulation(p)" title="Annuler" aria-label="Annuler"><i class="ri-close-circle-line"></i></button>
+              <div class="actions-wrap">
+                <button class="action-btn action-btn--primary" (click)="ouvrirEcheances(p)" title="Voir les échéances" aria-label="Voir les échéances"><i class="ri-calendar-event-line"></i></button>
+                <button class="action-btn action-btn--success" *ngIf="estPayable(p)" (click)="marquerPaiementPaye(p)" title="Marquer comme payé" aria-label="Marquer comme payé"><i class="ri-checkbox-circle-line"></i></button>
+                <button class="action-btn action-btn--danger" (click)="ouvrirAnnulation(p)" title="Annuler" aria-label="Annuler"><i class="ri-close-circle-line"></i></button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -330,7 +345,7 @@
             <tbody>
               <tr *ngFor="let p of utilisateurSelectionne?.paiements; trackBy: trackByPaiement">
                 <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
-                <td>{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</td>
+                <td class="col-type">{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</td>
                 <td class="num">{{ p.montantTotal | currency:'EUR' }}</td>
                 <td class="num">{{ montantPaye(p) | currency:'EUR' }}</td>
                 <td class="num">{{ montantRestant(p) | currency:'EUR' }}</td>
