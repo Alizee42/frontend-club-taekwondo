@@ -4,13 +4,14 @@ import { CommonModule } from '@angular/common';
 import { ContactService } from '../../services/contact.service';
 import { ClubService } from '../../services/club.service';
 import type { Club } from '../../services/club.service';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-contact',
   templateUrl: './contact.component.html',
   styleUrls: ['./contact.component.css'],
   standalone: true,
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule, CommonModule, UiButtonComponent]
 })
 export class ContactComponent {
   club: Club | null = null;

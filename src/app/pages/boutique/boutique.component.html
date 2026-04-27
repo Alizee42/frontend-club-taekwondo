@@ -62,12 +62,15 @@
         </p>
       </div>
 
-      <button
-        class="btn-ajouter-panier"
-        (click)="ajouterAuPanier(p)"
-        [disabled]="!selections[p.id].taille">
-        Ajouter au panier
-      </button>
+      <ui-button
+        type="button"
+        variant="primary"
+        icon="ri-shopping-cart-line"
+        label="Ajouter au panier"
+        [full]="true"
+        [disabled]="!selections[p.id].taille"
+        (clicked)="ajouterAuPanier(p)"
+      />
 
       <p class="confirmation" *ngIf="confirmationMessage">{{ confirmationMessage }}</p>
     </div>

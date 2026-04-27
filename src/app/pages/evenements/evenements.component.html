@@ -107,19 +107,25 @@
 
         <!-- Actions -->
         <div class="card-actions">
-          <button *ngIf="canInscribe(evenement)" 
-                  class="btn btn-primary btn-inscription"
-                  (click)="inscrire(evenement)">
-            <i class="ri-user-add-line"></i>
-            S'inscrire
-          </button>
+          <ui-button
+            *ngIf="canInscribe(evenement)"
+            type="button"
+            variant="primary"
+            customClass="btn-inscription"
+            icon="ri-user-add-line"
+            label="S'inscrire"
+            (clicked)="inscrire(evenement)"
+          />
 
-          <button *ngIf="evenement.isInscrit" 
-                  class="btn btn-outline btn-desinscription"
-                  (click)="seDesinscrire(evenement)">
-            <i class="ri-user-unfollow-line"></i>
-            Se désinscrire
-          </button>
+          <ui-button
+            *ngIf="evenement.isInscrit"
+            type="button"
+            variant="secondary"
+            customClass="btn-desinscription"
+            icon="ri-user-unfollow-line"
+            label="Se désinscrire"
+            (clicked)="seDesinscrire(evenement)"
+          />
 
           <div *ngIf="isEvenementComplet(evenement) && !evenement.isInscrit" 
                class="status-message complet">
@@ -147,7 +153,7 @@
         <i class="ri-user-add-line"></i>
         Inscription à l'événement
       </h2>
-      <button class="btn-close" (click)="fermerModal()" aria-label="Fermer">
+      <button type="button" class="btn-close" (click)="fermerModal()" aria-label="Fermer">
         <i class="ri-close-line"></i>
       </button>
     </div>
@@ -197,21 +203,24 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-secondary" 
-              (click)="fermerModal()"
-              [disabled]="isInscriptionLoading">
-        <i class="ri-close-line"></i>
-        Annuler
-      </button>
+      <ui-button
+        type="button"
+        variant="secondary"
+        icon="ri-close-line"
+        label="Annuler"
+        (clicked)="fermerModal()"
+        [disabled]="isInscriptionLoading"
+      />
       
-      <button class="btn btn-primary" 
-              (click)="confirmerInscription()"
-              [disabled]="isInscriptionLoading || (userRole === 'PARENT' && !membreSelectionne)">
-        <i class="ri-loader-line spin" *ngIf="isInscriptionLoading"></i>
-        <i class="ri-check-line" *ngIf="!isInscriptionLoading"></i>
-        <span *ngIf="!isInscriptionLoading">Confirmer l'inscription</span>
-        <span *ngIf="isInscriptionLoading">Inscription en cours...</span>
-      </button>
+      <ui-button
+        type="button"
+        variant="primary"
+        [icon]="isInscriptionLoading ? 'ri-loader-line spin' : 'ri-check-line'"
+        [label]="isInscriptionLoading ? 'Inscription en cours...' : confirmInscriptionLabel"
+        (clicked)="confirmerInscription()"
+        [loading]="isInscriptionLoading"
+        [disabled]="isInscriptionLoading || (userRole === 'PARENT' && !membreSelectionne)"
+      />
     </div>
   </div>
 </div>

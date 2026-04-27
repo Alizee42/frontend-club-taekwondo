@@ -15,6 +15,7 @@
       <ui-button
         label="Ajouter un paiement"
         icon="ri-add-line"
+        variant="primary"
         (clicked)="ouvrirModalAjout()"
       ></ui-button>
     </ng-container>
@@ -61,13 +62,13 @@
   <div class="main-layout">
     <div class="tableau-area">
       <div class="tabs">
-        <button class="tab-btn" [class.active]="ongletActif === 'paiements'" (click)="ongletActif = 'paiements'">
+        <button type="button" class="tab-btn" [class.active]="ongletActif === 'paiements'" (click)="ongletActif = 'paiements'">
           <i class="ri-money-euro-circle-line"></i> Paiements
         </button>
-        <button class="tab-btn" [class.active]="ongletActif === 'parents'" (click)="ongletActif = 'parents'">
+        <button type="button" class="tab-btn" [class.active]="ongletActif === 'parents'" (click)="ongletActif = 'parents'">
           <i class="ri-group-line"></i> Par parent
         </button>
-        <button class="tab-btn" [class.active]="ongletActif === 'echeances'" (click)="changerOnglet('echeances')">
+        <button type="button" class="tab-btn" [class.active]="ongletActif === 'echeances'" (click)="changerOnglet('echeances')">
           <i class="ri-calendar-check-line"></i> Echeances
         </button>
       </div>
@@ -124,6 +125,7 @@
           <label class="form-label">Echeances max</label>
           <div class="ech-btns">
             <button
+              type="button"
               *ngFor="let n of [1, 2, 3, 4]"
               class="ech-btn"
               [class.active]="parametres.echeancesAutorisees === n"

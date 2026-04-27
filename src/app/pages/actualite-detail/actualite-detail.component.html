@@ -13,7 +13,13 @@
   <div *ngIf="actualite.complement" class="complement">
     <strong>Complément :</strong> {{ actualite.complement }}
   </div>
-  <button type="button" class="btn-retour" (click)="retourActualites()">← Retour aux actualités</button>
+  <ui-button
+    type="button"
+    variant="ghost"
+    icon="ri-arrow-left-line"
+    label="Retour aux actualités"
+    (clicked)="retourActualites()"
+  />
 </section>
 <div *ngIf="loading">Chargement...</div>
 <div *ngIf="error">{{ error }}</div>

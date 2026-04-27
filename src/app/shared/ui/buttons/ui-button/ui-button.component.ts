@@ -10,6 +10,8 @@ export type UiButtonVariant =
   | 'warning'
   | 'ghost';
 
+export type UiButtonSize = 'xs' | 'sm' | 'md' | 'lg';
+
 @Component({
   selector: 'ui-button',
   standalone: true,
@@ -22,6 +24,8 @@ export class UiButtonComponent {
   @Input() icon = '';
   @Input() variant: UiButtonVariant = 'primary';
   @Input() color?: UiButtonVariant;
+  @Input() size: UiButtonSize = 'md';
+  @Input() iconOnly = false;
   @Input() disabled = false;
   @Input() loading = false;
   @Input() customClass = '';
@@ -45,6 +49,14 @@ export class UiButtonComponent {
 
     if (this.full) {
       classes.push('btn-full');
+    }
+
+    if (this.size !== 'md') {
+      classes.push(`btn-${this.size}`);
+    }
+
+    if (this.iconOnly) {
+      classes.push('btn-icon-only');
     }
 
     if (this.loading) {

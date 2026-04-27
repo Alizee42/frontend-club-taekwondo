@@ -1,6 +1,6 @@
   import { Component, OnInit } from '@angular/core';
   import { HttpClient } from '@angular/common/http';
-  import { CommonModule, NgClass, NgFor } from '@angular/common';
+  import { CommonModule } from '@angular/common';
   import { FormsModule } from '@angular/forms';
   import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   import { environment } from '../../../environments/environment';
@@ -9,6 +9,8 @@
   import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
   import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
   import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
+  import { AuthService } from '../../services/auth.service';
+  import { ToastService } from '../../shared/toast/toast.service';
   
   /* ========= Types ========= */
   type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
@@ -73,7 +75,7 @@
     templateUrl: './gestion-documents.component.html',
     styleUrls: ['./gestion-documents.component.css'],
     standalone: true,
-  imports: [CommonModule, NgClass, NgFor, FormsModule, UiButtonComponent, UiTableComponent, UiModalComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiTableComponent, UiModalComponent, PageHeaderComponent],
   })
   export class GestionDocumentsComponent implements OnInit {
   // labelFor accessible dans le template (via util partagé)
@@ -95,34 +97,74 @@
   validerDocument(document: DocumentItem) {
     this.http.put(`${this.API_BASE}/documents/${document.id}/valider`, null, { observe: 'response' })
       .subscribe({
-        next: () => { document.status = 'validé'; },
-        error: (err) => { console.error('Erreur validation document', err); }
+        next: () => {
+          document.status = 'validé';
+          this.toast.success('Document validé.');
+        },
+        error: (err) => {
+          console.error('Erreur validation document', err);
+          this.toast.error('Erreur lors de la validation du document.');
+        }
       });
   }
     private readonly API_BASE = environment.apiUrl;
   
   utilisateurs: UtilisateurRow[] = [];
   utilisateursFiltres: UtilisateurRow[] = [];
-  // Vue: groupée ou tableau plat
-  groupByUser: boolean = true;
-    // Vue tableau: colonnes, actions et données à plat
-  tableColumns: UiTableColumn[] = [];
   groupedTableColumns: UiTableColumn[] = [];
-    tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [
-      { label: 'Valider', icon: 'ri-check-line', action: 'approve', color: '#16a34a', show: (row: any) => (row?.statut ?? '') !== 'validé', title: 'Valider' },
-      { label: 'Refuser', icon: 'ri-close-line', action: 'reject', color: '#dc2626', show: (row: any) => (row?.statut ?? '') !== 'refusé', title: 'Refuser' },
-      { label: 'Télécharger', icon: 'ri-download-line', action: 'download', color: 'var(--blue-main)', show: (row: any) => (row?.statut ?? '') === 'validé', title: 'Télécharger' }
-    ];
-  flatRows: Array<any> = [];
-  
-    searchTerm: string = '';
-    filtreStatut: '' | 'validé' | 'refusé' | 'en_attente' = '';
+  tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [
+    { label: 'Valider', icon: 'ri-check-line', action: 'approve', color: '#16a34a', show: (row: any) => (row?.statut ?? '') !== 'validé', title: 'Valider' },
+    { label: 'Refuser', icon: 'ri-close-line', action: 'reject', color: '#dc2626', show: (row: any) => (row?.statut ?? '') !== 'refusé', title: 'Refuser' },
+    { label: 'Télécharger', icon: 'ri-download-line', action: 'download', color: 'var(--blue-main)', show: (row: any) => (row?.statut ?? '') === 'validé', title: 'Télécharger' }
+  ];
+
+  searchTerm: string = '';
+  filtreStatut: '' | 'validé' | 'refusé' | 'en_attente' = '';
+
+  // Maître-détail
+  selectedUtilisateur: UtilisateurRow | null = null;
+
+  // Pagination
+  currentPage = 1;
+  readonly pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.utilisateursFiltres.length / this.pageSize);
+  }
+
+  get paginatedUtilisateurs(): UtilisateurRow[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.utilisateursFiltres.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    const total = this.totalPages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const cur = this.currentPage;
+    const result: number[] = [1];
+    if (cur > 3) result.push(0);
+    for (let i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) result.push(i);
+    if (cur < total - 2) result.push(0);
+    result.push(total);
+    return result;
+  }
+
+  selectUtilisateur(u: UtilisateurRow) {
+    this.selectedUtilisateur = u;
+  }
+
+  goToPage(p: number) {
+    if (p < 1 || p > this.totalPages) return;
+    this.currentPage = p;
+  }
   
     documentEnApercu: DocumentItem | null = null;
   
     constructor(
       private http: HttpClient,
-      private sanitizer: DomSanitizer
+      private sanitizer: DomSanitizer,
+      private authService: AuthService,
+      private toast: ToastService
     ) {}
   
     ngOnInit() {
@@ -228,7 +270,10 @@
   
     /* ===== Chargement & groupage ===== */
     loadDocuments() {
-      this.http.get<any[]>(`${this.API_BASE}/documents`).subscribe({
+      const user = this.authService.getUtilisateurConnecte();
+      const clubId = (user as any)?.clubId ?? null;
+      const qp = clubId ? `?clubId=${clubId}` : '';
+      this.http.get<any[]>(`${this.API_BASE}/documents${qp}`).subscribe({
         next: (docsRaw) => {
           const utilisateursMap = new Map<string | number, UtilisateurRow>();
           const enfantsByUser = new Map<string | number, Map<string, ChildItem>>();
@@ -301,10 +346,11 @@
             .sort((a, b) => `${a.nom} ${a.prenom}`.localeCompare(`${b.nom} ${b.prenom}`, 'fr', { sensitivity: 'base' }));
   
           this.utilisateursFiltres = [...this.utilisateurs];
-          this.computeFlatRows();
+          this.initTableColumnsOnce();
         },
         error: (err) => {
           console.error('Erreur lors du chargement des documents :', err);
+          this.toast.error('Erreur lors du chargement des documents.');
           this.utilisateurs = [];
           this.utilisateursFiltres = [];
         },
@@ -377,7 +423,7 @@
         const matchStat = !stat || u.documents.some(d => this.normalizeStatus(d.status) === stat);
         return matchText && matchStat;
       });
-      this.computeFlatRows();
+      this.currentPage = 1;
     }
   
     /* ===== Aperçu ===== */
@@ -418,8 +464,14 @@
     refuserDocument(doc: DocumentItem): void {
       this.http.put(`${this.API_BASE}/documents/${doc.id}/refuser`, null, { observe: 'response' })
         .subscribe({
-          next: () => { doc.status = 'refusé'; },
-          error: (err) => { console.error('Erreur refus document', err); }
+          next: () => {
+            doc.status = 'refusé';
+            this.toast.success('Document refusé.');
+          },
+          error: (err) => {
+            console.error('Erreur refus document', err);
+            this.toast.error('Erreur lors du refus du document.');
+          }
         });
     }
   
@@ -450,12 +502,10 @@
       return /\.(png|jpe?g|gif|bmp|webp)$/i.test(p);
     }
 
-    /* ===== Vue tableau: préparation colonnes + données ===== */
+    /* ===== Initialisation des colonnes (vue groupée) ===== */
     private initTableColumnsOnce() {
-      if (this.tableColumns.length) return;
-      this.tableColumns = [
-        { key: 'utilisateurNom', label: 'Utilisateur' },
-        { key: 'utilisateurEmail', label: 'Email' },
+      if (this.groupedTableColumns.length) return;
+      this.groupedTableColumns = [
         { key: 'enfantNom', label: 'Enfant' },
         { key: 'typeLabel', label: 'Type' },
         {
@@ -491,30 +541,6 @@
           }
         }
       ];
-      // Colonnes pour la vue groupée (on masque Utilisateur / Email redondants)
-      this.groupedTableColumns = this.tableColumns.filter(c => c.key !== 'utilisateurNom' && c.key !== 'utilisateurEmail');
-    }
-
-    computeFlatRows() {
-      this.initTableColumnsOnce();
-      const rows: any[] = [];
-      for (const u of this.utilisateursFiltres) {
-        const docs = this.filteredDocs(u);
-        for (const d of docs) {
-          const enfantNom = this.isParentRow(u) ? this.enfantLabelFor(d, u) : '—';
-          rows.push({
-            __doc: d,
-            utilisateurNom: `${u.prenom} ${u.nom}`.trim(),
-            utilisateurEmail: u.email,
-            enfantNom,
-            typeLabel: this.labelFor(d.typeDocument),
-            statut: this.normalizeStatus(d.status),
-            dateDepot: d.dateDepot,
-            cheminFichier: d.cheminFichier
-          });
-        }
-      }
-      this.flatRows = rows;
     }
 
     /* ===== Vue groupée: données par utilisateur pour ui-table ===== */

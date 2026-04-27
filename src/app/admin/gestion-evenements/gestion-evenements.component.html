@@ -6,8 +6,9 @@
   >
     <ng-container page-header-actions>
       <ui-button
-        label="Creer un evenement"
+        label="Créer un événement"
         icon="ri-add-line"
+        variant="primary"
         (clicked)="ouvrirFormulaireCreation()"
       ></ui-button>
     </ng-container>
@@ -203,8 +204,9 @@
         (clicked)="fermerFormulaire()"
       ></ui-button>
       <ui-button
-        [label]="isEditing ? 'Enregistrer' : 'Creer'"
+        [label]="isEditing ? 'Enregistrer' : 'Créer'"
         icon="ri-save-line"
+        variant="primary"
         type="submit"
         [loading]="isLoading"
       ></ui-button>

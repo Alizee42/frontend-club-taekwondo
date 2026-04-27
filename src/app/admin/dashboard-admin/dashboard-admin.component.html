@@ -69,23 +69,25 @@
         <span>Gestion du club</span>
       </div>
       <div class="dash-section__body">
-        <button class="nav-card" (click)="navigateToGestionEvenements()">
-          <i class="ri-calendar-event-line"></i>
-          <span>Événements</span>
-          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="evenementsAVenir > 0">{{ evenementsAVenir }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToGalerie()">
-          <i class="ri-image-line"></i>
-          <span>Galerie / Médias</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToHoraires()">
-          <i class="ri-time-line"></i>
-          <span>Horaires</span>
-          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="badge.horaires > 0">{{ badge.horaires }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
+        <app-dashboard-nav-card
+          label="Événements"
+          icon="ri-calendar-event-line"
+          badgeVariant="neutral"
+          [badge]="evenementsAVenir > 0 ? evenementsAVenir : null"
+          (pressed)="navigateToGestionEvenements()"
+        />
+        <app-dashboard-nav-card
+          label="Galerie / Médias"
+          icon="ri-image-line"
+          (pressed)="navigateToGalerie()"
+        />
+        <app-dashboard-nav-card
+          label="Horaires"
+          icon="ri-time-line"
+          badgeVariant="neutral"
+          [badge]="badge.horaires > 0 ? badge.horaires : null"
+          (pressed)="navigateToHoraires()"
+        />
       </div>
     </div>
 
@@ -95,23 +97,24 @@
         <span>Gestion des membres</span>
       </div>
       <div class="dash-section__body">
-        <button class="nav-card" (click)="navigateToMembresAdmin()">
-          <i class="ri-team-line"></i>
-          <span>Membres du club</span>
-          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="nbMembres > 0">{{ nbMembres }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToDocument()">
-          <i class="ri-file-list-line"></i>
-          <span>Documents</span>
-          <span class="nav-card__badge" *ngIf="badge.documents > 0">{{ badge.documents }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToProfesseurs()">
-          <i class="ri-user-star-line"></i>
-          <span>Professeurs</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
+        <app-dashboard-nav-card
+          label="Membres du club"
+          icon="ri-team-line"
+          badgeVariant="neutral"
+          [badge]="nbMembres > 0 ? nbMembres : null"
+          (pressed)="navigateToMembresAdmin()"
+        />
+        <app-dashboard-nav-card
+          label="Documents"
+          icon="ri-file-list-line"
+          [badge]="badge.documents > 0 ? badge.documents : null"
+          (pressed)="navigateToDocument()"
+        />
+        <app-dashboard-nav-card
+          label="Professeurs"
+          icon="ri-user-star-line"
+          (pressed)="navigateToProfesseurs()"
+        />
       </div>
     </div>
 
@@ -121,18 +124,18 @@
         <span>Gestion financière</span>
       </div>
       <div class="dash-section__body">
-        <button class="nav-card" (click)="navigateToPaiement()">
-          <i class="ri-money-euro-circle-line"></i>
-          <span>Paiements</span>
-          <span class="nav-card__badge" *ngIf="badge.paiements > 0">{{ badge.paiements }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToGestionCommande()">
-          <i class="ri-shopping-bag-3-line"></i>
-          <span>Commandes</span>
-          <span class="nav-card__badge" *ngIf="badge.commandes > 0">{{ badge.commandes }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
+        <app-dashboard-nav-card
+          label="Paiements"
+          icon="ri-money-euro-circle-line"
+          [badge]="badge.paiements > 0 ? badge.paiements : null"
+          (pressed)="navigateToPaiement()"
+        />
+        <app-dashboard-nav-card
+          label="Commandes"
+          icon="ri-shopping-bag-3-line"
+          [badge]="badge.commandes > 0 ? badge.commandes : null"
+          (pressed)="navigateToGestionCommande()"
+        />
       </div>
     </div>
 
@@ -142,23 +145,23 @@
         <span>Administration</span>
       </div>
       <div class="dash-section__body">
-        <button class="nav-card" (click)="navigateToavis()">
-          <i class="ri-star-line"></i>
-          <span>Avis</span>
-          <span class="nav-card__badge" *ngIf="badge.avis > 0">{{ badge.avis }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToActualites()">
-          <i class="ri-newspaper-line"></i>
-          <span>Actualités</span>
-          <span class="nav-card__badge" *ngIf="badge.actualites > 0">{{ badge.actualites }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToGestionUtilisateurs()">
-          <i class="ri-user-3-line"></i>
-          <span>Utilisateurs du club</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
+        <app-dashboard-nav-card
+          label="Avis"
+          icon="ri-star-line"
+          [badge]="badge.avis > 0 ? badge.avis : null"
+          (pressed)="navigateToavis()"
+        />
+        <app-dashboard-nav-card
+          label="Actualités"
+          icon="ri-newspaper-line"
+          [badge]="badge.actualites > 0 ? badge.actualites : null"
+          (pressed)="navigateToActualites()"
+        />
+        <app-dashboard-nav-card
+          label="Utilisateurs du club"
+          icon="ri-user-3-line"
+          (pressed)="navigateToGestionUtilisateurs()"
+        />
       </div>
     </div>
 

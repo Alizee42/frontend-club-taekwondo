@@ -8,8 +8,10 @@ import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/r
 import { DOC_CATALOG } from '../../shared/documents/doc-utils';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../shared/toast/toast.service';
 
 /* =========================
    Types & interfaces
@@ -74,7 +76,7 @@ function labelFor(code: string) {
   standalone: true,
   templateUrl: './documents.component.html',
   styleUrls: ['./documents.component.css'],
-  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, PageHeaderComponent]
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, PageHeaderComponent, UiButtonComponent]
 })
 export class DocumentsComponent implements OnInit {
     private readonly API_BASE = environment.apiUrl;
@@ -98,7 +100,7 @@ export class DocumentsComponent implements OnInit {
     { type: 'DOCUMENT_IDENTITE',  label: "Document d'identité",         uploaded: false, etat: 'non_envoyé' }
   ];
 
-  constructor(private http: HttpClient, private requiredSvc: RequiredDocsService, private sanitizer: DomSanitizer, private authService: AuthService) {}
+  constructor(private http: HttpClient, private requiredSvc: RequiredDocsService, private sanitizer: DomSanitizer, private authService: AuthService, private toast: ToastService) {}
 
   ngOnInit(): void {
     // Prépare la table tôt pour afficher la colonne Actions immédiatement
@@ -151,7 +153,7 @@ export class DocumentsComponent implements OnInit {
      ========================= */
   loadUtilisateurConnecte(): void {
     if (!this.authService.isConnecte()) {
-      alert('Utilisateur non connecté.');
+      this.toast.warning('Utilisateur non connecté.');
       return;
     }
 
@@ -165,7 +167,7 @@ export class DocumentsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erreur utilisateur :', err);
-        alert("Impossible de récupérer les informations de l'utilisateur connecté.");
+        this.toast.error("Impossible de récupérer les informations de l'utilisateur connecté.");
       }
     });
   }
@@ -200,7 +202,7 @@ export class DocumentsComponent implements OnInit {
   loadDocuments(): void {
     const utilisateurId = this.utilisateurConnecte?.id ?? this.authService.getUserIdFromToken();
     if (!utilisateurId) {
-      alert('Utilisateur non connecté.');
+      this.toast.warning('Utilisateur non connecté.');
       return;
     }
 
@@ -219,7 +221,7 @@ export class DocumentsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erreur chargement documents :', err);
-        alert('Erreur lors du chargement des documents.');
+        this.toast.error('Erreur lors du chargement des documents.');
         this.documents = [];
         this.rows = [];
         this.updateRequiredDocumentsStatus();
@@ -317,17 +319,17 @@ export class DocumentsComponent implements OnInit {
 
   onUploadDocument(): void {
     if (!this.selectedFile) {
-      alert('Veuillez sélectionner un fichier.');
+      this.toast.warning('Veuillez sélectionner un fichier.');
       return;
     }
     if (!this.isValidFile(this.selectedFile)) {
-      alert('Fichier invalide (format ou taille).');
+      this.toast.warning('Fichier invalide. Utilisez PNG, JPEG ou PDF, max 5 Mo.');
       return;
     }
 
     const utilisateurId = this.utilisateurConnecte?.id ?? this.authService.getUserIdFromToken();
     if (!utilisateurId) {
-      alert('Utilisateur non connecté.');
+      this.toast.warning('Utilisateur non connecté.');
       return;
     }
 
@@ -339,13 +341,13 @@ export class DocumentsComponent implements OnInit {
 
     this.http.post(`${this.API_BASE}/documents`, formData).subscribe({
       next: () => {
-        alert('Document téléversé avec succès.');
+        this.toast.success('Document téléversé avec succès.');
         this.selectedFile = null;
         this.loadDocuments(); // recharge la liste
       },
       error: (err) => {
         console.error('Erreur téléversement :', err);
-        alert('Erreur lors du téléversement du document.');
+        this.toast.error('Erreur lors du téléversement du document.');
       }
     });
   }
@@ -353,7 +355,7 @@ export class DocumentsComponent implements OnInit {
   // ✅ Ne pas ombrer l'objet global "document"
   onEditDocument(doc: DocumentItem): void {
     if (this.normalizeStatus(doc.status) === 'validé') {
-      alert('Document validé, non modifiable.');
+      this.toast.warning('Document validé, non modifiable.');
       return;
     }
 
@@ -371,12 +373,12 @@ export class DocumentsComponent implements OnInit {
       this.http.put(`${this.API_BASE}/documents/${doc.id}/file`, fd)
         .subscribe({
           next: () => {
-            alert('Document remplacé.');
+            this.toast.success('Document remplacé.');
             this.loadDocuments();
           },
           error: (err) => {
             console.error('Erreur remplacement :', err);
-            alert('Erreur lors du remplacement du document.');
+            this.toast.error('Erreur lors du remplacement du document.');
           }
         });
     };
@@ -386,19 +388,19 @@ export class DocumentsComponent implements OnInit {
 
   onDeleteDocument(doc: DocumentItem): void {
     if (this.normalizeStatus(doc.status) === 'validé') {
-      alert('Document validé, non supprimable.');
+      this.toast.warning('Document validé, non supprimable.');
       return;
     }
 
-    if (confirm(`Supprimer le document : ${doc.nomDocument} ?`)) {
+    if (confirm(`Supprimer le document "${doc.nomDocument}" ?`)) {
       this.http.delete(`${this.API_BASE}/documents/${doc.id}`).subscribe({
         next: () => {
-          alert('Document supprimé.');
+          this.toast.success('Document supprimé.');
           this.loadDocuments();
         },
         error: (err) => {
           console.error('Erreur suppression :', err);
-          alert('Erreur lors de la suppression du document.');
+          this.toast.error('Erreur lors de la suppression du document.');
         }
       });
     }

@@ -4,11 +4,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ActualiteService } from '../../services/actualite.service';
 import { environment } from '../../../environments/environment';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-actualite-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UiButtonComponent],
   templateUrl: './actualite-detail.component.html',
   styleUrls: ['./actualite-detail.component.css']
 })

@@ -7,11 +7,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { EvenementService, EvenementDTO } from '../../services/evenement.service';
 import { AuthService } from '../../services/auth.service';
 import { MembreService, Membre } from '../../services/membre.service';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-evenements',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiButtonComponent],
   templateUrl: './evenements.component.html',
   styleUrls: ['./evenements.component.css']
 })
@@ -31,6 +32,7 @@ export class EvenementsComponent implements OnInit {
   userRole = '';
   enfants: Membre[] = []; // Pour les parents
   membreSelectionne: Membre | null = null; // Pour inscription d'enfant
+  readonly confirmInscriptionLabel = "Confirmer l'inscription";
 
   constructor(
     private evenementService: EvenementService,

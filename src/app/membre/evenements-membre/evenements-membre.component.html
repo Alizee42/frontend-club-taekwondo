@@ -12,9 +12,13 @@
   <div class="error-message" *ngIf="errorMsg">
     <i class="ri-error-warning-line"></i>
     <p>{{ errorMsg }}</p>
-    <button (click)="chargerEvenements()" class="btn-retry">
-      <i class="ri-refresh-line"></i> Réessayer
-    </button>
+    <ui-button
+      type="button"
+      variant="primary"
+      icon="ri-refresh-line"
+      label="Réessayer"
+      (clicked)="chargerEvenements()"
+    />
   </div>
 
   <!-- Événements -->
@@ -70,30 +74,36 @@
 
         <!-- Actions -->
         <div class="evenement-actions">
-          <button *ngIf="!evenement.isInscrit && !isEvenementComplet(evenement)"
-                  (click)="sInscrire(evenement)"
-                  [disabled]="isInscribing"
-                  class="btn btn-primary">
-            <i class="ri-user-add-line" *ngIf="!isInscribing"></i>
-            <i class="ri-loader-4-line spinning" *ngIf="isInscribing"></i>
-            S'inscrire
-          </button>
+          <ui-button
+            *ngIf="!evenement.isInscrit && !isEvenementComplet(evenement)"
+            type="button"
+            variant="primary"
+            [icon]="isInscribing ? 'ri-loader-4-line spinning' : 'ri-user-add-line'"
+            label="S'inscrire"
+            (clicked)="sInscrire(evenement)"
+            [loading]="isInscribing"
+            [disabled]="isInscribing"
+          />
 
-          <button *ngIf="evenement.isInscrit"
-                  (click)="seDesinscrire(evenement)"
-                  [disabled]="isInscribing"
-                  class="btn btn-danger">
-            <i class="ri-user-unfollow-line" *ngIf="!isInscribing"></i>
-            <i class="ri-loader-4-line spinning" *ngIf="isInscribing"></i>
-            Se désinscrire
-          </button>
+          <ui-button
+            *ngIf="evenement.isInscrit"
+            type="button"
+            variant="danger"
+            [icon]="isInscribing ? 'ri-loader-4-line spinning' : 'ri-user-unfollow-line'"
+            label="Se désinscrire"
+            (clicked)="seDesinscrire(evenement)"
+            [loading]="isInscribing"
+            [disabled]="isInscribing"
+          />
 
-          <button *ngIf="isEvenementComplet(evenement) && !evenement.isInscrit"
-                  class="btn btn-disabled"
-                  disabled>
-            <i class="ri-close-circle-line"></i>
-            Complet
-          </button>
+          <ui-button
+            *ngIf="isEvenementComplet(evenement) && !evenement.isInscrit"
+            type="button"
+            variant="ghost"
+            icon="ri-close-circle-line"
+            label="Complet"
+            [disabled]="true"
+          />
         </div>
       </div>
     </div>
@@ -104,8 +114,12 @@
     <i class="ri-calendar-line"></i>
     <h3>Aucun événement disponible</h3>
     <p>Il n'y a actuellement aucun événement planifié. Revenez bientôt pour découvrir nos prochaines activités !</p>
-    <button class="btn btn-primary" (click)="chargerEvenements()">
-      <i class="ri-refresh-line"></i> Actualiser
-    </button>
+    <ui-button
+      type="button"
+      variant="primary"
+      icon="ri-refresh-line"
+      label="Actualiser"
+      (clicked)="chargerEvenements()"
+    />
   </div>
 </div>

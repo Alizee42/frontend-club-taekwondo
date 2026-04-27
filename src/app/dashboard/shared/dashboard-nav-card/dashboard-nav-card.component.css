@@ -1,0 +1,105 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.dashboard-nav-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 40px;
+  padding: var(--sp-2) var(--sp-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--t-fast),
+    transform var(--t-fast);
+}
+
+.dashboard-nav-card:hover {
+  background: var(--color-surface-2);
+}
+
+.dashboard-nav-card:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+.dashboard-nav-card__icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 18px;
+  color: var(--color-text-2);
+  font-size: 1rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.dashboard-nav-card__label {
+  min-width: 0;
+  flex: 1 1 auto;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-nav-card__badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.dashboard-nav-card__badge--primary {
+  background: var(--color-surface-2);
+  color: var(--color-text-2);
+}
+
+.dashboard-nav-card__badge--neutral {
+  background: color-mix(in srgb, var(--brand-primary) 10%, white);
+  color: var(--brand-primary);
+}
+
+.dashboard-nav-card__badge--danger {
+  background: var(--color-danger);
+  color: var(--color-text-inv);
+}
+
+.dashboard-nav-card__badge--warning {
+  background: var(--color-warning);
+  color: var(--color-text-inv);
+}
+
+.dashboard-nav-card__arrow {
+  flex: 0 0 auto;
+  color: var(--color-text-3);
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform var(--t-fast);
+}
+
+.dashboard-nav-card:hover .dashboard-nav-card__arrow {
+  transform: translateX(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-nav-card,
+  .dashboard-nav-card__arrow {
+    transition: none;
+  }
+}

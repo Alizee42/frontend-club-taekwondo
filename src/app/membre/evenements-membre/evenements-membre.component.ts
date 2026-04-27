@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { EvenementService, EvenementDTO } from '../../services/evenement.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-evenements-membre',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent],
+  imports: [CommonModule, PageHeaderComponent, UiButtonComponent],
   templateUrl: './evenements-membre.component.html',
   styleUrls: ['./evenements-membre.component.css']
 })

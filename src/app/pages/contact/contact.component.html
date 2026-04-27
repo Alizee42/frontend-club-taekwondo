@@ -77,10 +77,13 @@
             <small *ngIf="message.errors?.['minlength'] && (message.dirty || message.touched)" class="field-error">Minimum 10 caractères</small>
           </div>
           <div class="form-actions">
-            <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || sending">
-              <span *ngIf="!sending">Envoyer</span>
-              <span *ngIf="sending" class="loader-inline"></span>
-            </button>
+            <ui-button
+              type="submit"
+              variant="primary"
+              [label]="sending ? 'Envoi...' : 'Envoyer'"
+              [loading]="sending"
+              [disabled]="!!contactForm.invalid || sending"
+            />
           </div>
           <div class="form-status" aria-live="polite">
             <p *ngIf="successMessage" class="success-msg"><i class="ri-checkbox-circle-line"></i> {{ successMessage }}</p>

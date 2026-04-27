@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableColumn, UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-commandes-membre',
@@ -17,7 +18,8 @@ import { UiTableColumn, UiTableComponent } from '../../shared/components/ui-tabl
     CurrencyPipe,
     PageHeaderComponent,
     UiModalComponent,
-    UiTableComponent
+    UiTableComponent,
+    UiButtonComponent
   ],
   templateUrl: './commandes-membre.component.html',
   styleUrls: ['./commandes-membre.component.css']

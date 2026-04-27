@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UiButtonComponent } from '../buttons/ui-button/ui-button.component';
 
 @Component({
   selector: 'ui-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiButtonComponent],
   templateUrl: './ui-form.component.html',
   styleUrls: ['./ui-form.component.css']
 })

@@ -2,145 +2,172 @@
   <app-page-header
     title="Gestion des documents"
     icon="ri-file-text-line"
-    subtitle="Verifier, valider et consulter les documents transmis par les membres"
-  >
+    subtitle="Vérifier, valider et consulter les documents transmis par les membres">
     <ng-container page-header-actions>
-      <ui-button label="Rafraichir" icon="ri-refresh-line" (clicked)="loadDocuments()"></ui-button>
+      <ui-button label="Rafraîchir" icon="ri-refresh-line" (clicked)="loadDocuments()"></ui-button>
     </ng-container>
   </app-page-header>
 
-  <div class="filters-bar">
-    <input type="text"
-           class="form-input"
-           [(ngModel)]="searchTerm"
-           placeholder="Rechercher un membre..."
-           (input)="filtrerUtilisateurs()"
-           aria-label="Rechercher un membre" />
-    <select class="form-select"
-            [(ngModel)]="filtreStatut"
-            (change)="filtrerUtilisateurs()"
-            aria-label="Filtrer par statut">
-      <option value="">Tous les statuts</option>
-      <option value="validé">Validé</option>
-      <option value="refusé">Refusé</option>
-      <option value="en_attente">En attente</option>
-    </select>
-    <label class="filters-check">
-      <input type="checkbox" [(ngModel)]="groupByUser" (change)="computeFlatRows()" />
-      Vue groupée par utilisateur
-    </label>
-  </div>
+  <div class="master-detail">
 
-  <ng-container *ngIf="groupByUser; else flatView">
-    <div class="accordion">
-      <div class="accordion-item" *ngFor="let utilisateur of utilisateursFiltres">
-        <div class="accordion-header" [ngClass]="getGroupClass(filteredDocs(utilisateur))" (click)="toggleAccordion(utilisateur)">
-          <div class="user-main">
-            <div class="user-ident">
-              <strong>{{ utilisateur.prenom }} {{ utilisateur.nom }}</strong>
-              <span class="badge-pill" *ngIf="isParentRow(utilisateur)">Parent</span>
-              <span class="badge-pill" *ngIf="isMembreSeulRow(utilisateur)">Membre</span>
-              <div class="child-chips" *ngIf="isParentRow(utilisateur) && hasKids(utilisateur)">
-                <span class="child-chip" *ngFor="let kid of utilisateur.enfants">{{ childName(kid, utilisateur) }}</span>
-              </div>
-            </div>
-            <span>{{ utilisateur.email || '—' }}</span>
-            <span>{{ filteredDocs(utilisateur).length }} document(s)</span>
-            <div class="status-pills">
-              <span class="status-badge status--warning" *ngIf="countStatus(filteredDocs(utilisateur), 'en_attente') > 0">
-                {{ countStatus(filteredDocs(utilisateur), 'en_attente') }} en attente
-              </span>
-              <span class="status-badge status--success" *ngIf="countStatus(filteredDocs(utilisateur), 'validé') > 0">
-                {{ countStatus(filteredDocs(utilisateur), 'validé') }} validé(s)
-              </span>
-              <span class="status-badge status--danger" *ngIf="countStatus(filteredDocs(utilisateur), 'refusé') > 0">
-                {{ countStatus(filteredDocs(utilisateur), 'refusé') }} refusé(s)
-              </span>
-            </div>
-          </div>
-          <i class="ri-arrow-down-s-line accordion-arrow" [class.is-open]="utilisateur.isOpen"></i>
-        </div>
-
-        <div class="accordion-body" *ngIf="utilisateur.isOpen">
-          <div class="bulk-actions">
-            <ui-button label="Tout valider" variant="primary" (clicked)="validerTous(utilisateur)"></ui-button>
-            <ui-button label="Tout refuser" variant="danger" (clicked)="refuserTous(utilisateur)"></ui-button>
-          </div>
-
-          <div class="filter-by-child" *ngIf="isParentRow(utilisateur) && hasKids(utilisateur)">
-            <label for="childFilter-{{utilisateur.id}}">Filtrer par enfant :</label>
-            <select id="childFilter-{{utilisateur.id}}"
-                    class="form-select"
-                    [(ngModel)]="utilisateur.selectedChildFilter"
-                    aria-label="Filtrer par enfant">
-              <option [ngValue]="null">Tous</option>
-              <option *ngFor="let kid of utilisateur.enfants" [ngValue]="kid.id">
-                {{ childName(kid, utilisateur) }}
-              </option>
-            </select>
-          </div>
-
-          <div class="table-wrap">
-            <ui-table
-              [columns]="groupedTableColumns"
-              [data]="groupRows(utilisateur)"
-              [actions]="tableActions"
-              (actionClick)="onActionTable($event)"
-            ></ui-table>
-          </div>
-        </div>
+    <!-- ── Panneau gauche : liste des membres ── -->
+    <div class="master-panel">
+      <div class="master-search">
+        <input type="text" class="form-input"
+               [(ngModel)]="searchTerm"
+               placeholder="Rechercher un membre…"
+               (input)="filtrerUtilisateurs()"
+               aria-label="Rechercher un membre" />
+        <select class="form-select"
+                [(ngModel)]="filtreStatut"
+                (change)="filtrerUtilisateurs()"
+                aria-label="Filtrer par statut">
+          <option value="">Tous statuts</option>
+          <option value="validé">Validé</option>
+          <option value="refusé">Refusé</option>
+          <option value="en_attente">En attente</option>
+        </select>
       </div>
-    </div>
-  </ng-container>
 
-  <ng-template #flatView>
-    <div class="table-wrap">
-      <ui-table
-        [columns]="tableColumns"
-        [data]="flatRows"
-        [actions]="tableActions"
-        (actionClick)="onActionTable($event)"
-      ></ui-table>
+      <div class="master-count">{{ utilisateursFiltres.length }} membre(s)</div>
+
+      <div class="master-list" role="listbox" aria-label="Liste des membres">
+        <button class="user-item"
+                *ngFor="let u of paginatedUtilisateurs"
+                type="button"
+                role="option"
+                [attr.aria-selected]="selectedUtilisateur?.id === u.id"
+                [class.selected]="selectedUtilisateur?.id === u.id"
+                [class.item-warn]="getGlobalStatus(u.documents) === 'en_attente'"
+                [class.item-success]="getGlobalStatus(u.documents) === 'validé'"
+                [class.item-danger]="getGlobalStatus(u.documents) === 'refusé'"
+                (click)="selectUtilisateur(u)">
+          <div class="item-dot"></div>
+          <div class="item-body">
+            <div class="item-name">{{ u.prenom }} {{ u.nom }}</div>
+            <div class="item-meta">
+              <span class="role-badge role-parent" *ngIf="isParentRow(u)">Parent</span>
+              <span class="role-badge role-membre" *ngIf="isMembreSeulRow(u)">Membre</span>
+              <span class="item-count">{{ u.documents.length }} doc(s)</span>
+            </div>
+            <div class="item-pills">
+              <span class="pill pill-warn" *ngIf="countStatus(u.documents, 'en_attente') > 0">
+                {{ countStatus(u.documents, 'en_attente') }} en att.
+              </span>
+              <span class="pill pill-success" *ngIf="countStatus(u.documents, 'validé') > 0">
+                {{ countStatus(u.documents, 'validé') }} val.
+              </span>
+              <span class="pill pill-danger" *ngIf="countStatus(u.documents, 'refusé') > 0">
+                {{ countStatus(u.documents, 'refusé') }} ref.
+              </span>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Pagination -->
+      <nav class="pagination" *ngIf="totalPages > 1" aria-label="Pagination des membres">
+        <button class="page-btn" type="button"
+                (click)="goToPage(currentPage - 1)"
+                [disabled]="currentPage === 1"
+                aria-label="Page précédente">
+          <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
+        </button>
+        <ng-container *ngFor="let p of pages">
+          <span class="page-ellipsis" *ngIf="p === 0">…</span>
+          <button class="page-btn" *ngIf="p !== 0" type="button"
+                  (click)="goToPage(p)"
+                  [class.active]="p === currentPage"
+                  [attr.aria-current]="p === currentPage ? 'page' : null">
+            {{ p }}
+          </button>
+        </ng-container>
+        <button class="page-btn" type="button"
+                (click)="goToPage(currentPage + 1)"
+                [disabled]="currentPage === totalPages"
+                aria-label="Page suivante">
+          <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+        </button>
+      </nav>
     </div>
-  </ng-template>
+
+    <!-- ── Panneau droit : documents du membre sélectionné ── -->
+    <div class="detail-panel">
+
+      <!-- Aucun membre sélectionné -->
+      <div class="detail-empty" *ngIf="!selectedUtilisateur">
+        <i class="ri-user-search-line" aria-hidden="true"></i>
+        <p>Sélectionnez un membre<br>pour consulter ses documents</p>
+      </div>
+
+      <!-- Membre sélectionné -->
+      <ng-container *ngIf="selectedUtilisateur as u">
+        <div class="detail-header">
+          <div class="detail-user-info">
+            <div class="detail-name-row">
+              <h2 class="detail-name">{{ u.prenom }} {{ u.nom }}</h2>
+              <span class="role-badge role-parent" *ngIf="isParentRow(u)">Parent</span>
+              <span class="role-badge role-membre" *ngIf="isMembreSeulRow(u)">Membre</span>
+            </div>
+            <span class="detail-email">{{ u.email || '—' }}</span>
+            <div class="child-chips" *ngIf="isParentRow(u) && hasKids(u)">
+              <span class="child-chip" *ngFor="let kid of u.enfants">{{ childName(kid, u) }}</span>
+            </div>
+          </div>
+          <div class="detail-bulk" *ngIf="countStatus(filteredDocs(u), 'en_attente') > 0">
+            <ui-button label="Tout valider" variant="primary" (clicked)="validerTous(u)"></ui-button>
+            <ui-button label="Tout refuser" variant="danger" (clicked)="refuserTous(u)"></ui-button>
+          </div>
+        </div>
+
+        <div class="detail-child-filter" *ngIf="isParentRow(u) && hasKids(u)">
+          <label [for]="'childFilter-' + u.id" class="filter-label">Filtrer par enfant :</label>
+          <select [id]="'childFilter-' + u.id"
+                  class="form-select"
+                  [(ngModel)]="u.selectedChildFilter"
+                  aria-label="Filtrer par enfant">
+            <option [ngValue]="null">Tous</option>
+            <option *ngFor="let kid of u.enfants" [ngValue]="kid.id">
+              {{ childName(kid, u) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <ui-table
+            [columns]="groupedTableColumns"
+            [data]="groupRows(u)"
+            [actions]="tableActions"
+            (actionClick)="onActionTable($event)">
+          </ui-table>
+        </div>
+      </ng-container>
+
+    </div>
+  </div>
 </div>
 
 <ui-modal
   [open]="!!documentEnApercu"
-  [title]="documentEnApercu ? labelFor(documentEnApercu.typeDocument) : 'Apercu du document'"
+  [title]="documentEnApercu ? labelFor(documentEnApercu.typeDocument) : 'Aperçu du document'"
   size="xl"
-  (closed)="fermerApercu()"
->
+  (closed)="fermerApercu()">
   <div *ngIf="documentEnApercu as doc" class="preview-modal">
     <div class="modal-top-actions">
-      <a class="icon-btn"
-         title="Ouvrir dans un onglet"
-         aria-label="Ouvrir dans un onglet"
-         [href]="rawUrl(doc.cheminFichier)"
-         target="_blank"
-         rel="noopener">
+      <a class="icon-btn" title="Ouvrir dans un onglet" aria-label="Ouvrir dans un onglet"
+         [href]="rawUrl(doc.cheminFichier)" target="_blank" rel="noopener">
         <i class="ri-external-link-line" aria-hidden="true"></i>
       </a>
-      <a class="icon-btn"
-         title="Telecharger"
-         aria-label="Telecharger"
-         [href]="rawUrl(doc.cheminFichier)"
-         [attr.download]="''"
-         rel="noopener">
+      <a class="icon-btn" title="Télécharger" aria-label="Télécharger"
+         [href]="rawUrl(doc.cheminFichier)" [attr.download]="''" rel="noopener">
         <i class="ri-download-2-line" aria-hidden="true"></i>
       </a>
     </div>
-
     <ng-container *ngIf="estImagePath(doc.cheminFichier); else pdfBlock">
-      <img [src]="getSafeUrl(doc.cheminFichier)"
-           alt="Apercu image"
-           class="preview-image"
-           (error)="onImgError($event)" />
+      <img [src]="getSafeUrl(doc.cheminFichier)" alt="Aperçu image" class="preview-image" (error)="onImgError($event)" />
     </ng-container>
     <ng-template #pdfBlock>
-      <iframe [src]="getSafeUrl(doc.cheminFichier)"
-              class="preview-frame"
-              title="Apercu PDF"></iframe>
+      <iframe [src]="getSafeUrl(doc.cheminFichier)" class="preview-frame" title="Aperçu PDF"></iframe>
     </ng-template>
   </div>
 </ui-modal>

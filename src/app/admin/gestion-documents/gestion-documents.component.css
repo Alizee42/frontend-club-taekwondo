@@ -1,176 +1,273 @@
-:host {
-  display: block;
-}
+:host { display: block; }
 
-/* ── Barre de filtres ── */
-.filters-bar {
+/* ════════════════════════════════════════
+   Layout maître-détail
+════════════════════════════════════════ */
+.master-detail {
   display: flex;
-  gap: 12px;
-  margin: 12px 0;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.filters-bar .form-input {
-  max-width: 280px;
-}
-
-.filters-bar .form-select {
-  max-width: 200px;
-}
-
-.filters-check {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-  font-size: var(--text-sm);
-  color: var(--color-text-2);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* ── Accordéon ── */
-.accordion {
-  margin-top: 1rem;
-}
-
-.accordion-item {
-  margin-bottom: 1.5rem;
-}
-
-.accordion-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  background: var(--color-surface);
+  height: calc(100vh - 190px);
+  min-height: 520px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background var(--t-fast), border-color var(--t-fast);
-  margin-bottom: 0.5rem;
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  margin-top: 1rem;
+  background: var(--color-surface);
 }
 
-.accordion-header:hover {
+/* ─── Panneau gauche ─── */
+.master-panel {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border);
   background: var(--color-surface-2);
 }
 
-.accordion-header.status-success {
-  border-left: 4px solid var(--color-success);
-  background: color-mix(in srgb, var(--color-success) 4%, white);
-}
-
-.accordion-header.status-warn {
-  border-left: 4px solid var(--color-warning);
-  background: color-mix(in srgb, var(--color-warning) 4%, white);
-}
-
-.accordion-header.status-danger {
-  border-left: 4px solid var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger) 4%, white);
-}
-
-.accordion-arrow {
-  font-size: 1.25rem;
-  color: var(--color-text-2);
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.accordion-arrow.is-open {
-  transform: rotate(180deg);
-}
-
-.user-main {
-  display: grid;
-  grid-template-columns: 220px 1fr 1fr auto;
-  gap: 12px;
-  align-items: center;
-}
-
-.user-ident {
+.master-search {
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
+  border-bottom: 1px solid var(--color-border);
+}
+.master-search .form-input,
+.master-search .form-select { font-size: 0.82rem; }
+
+.master-count {
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  color: var(--color-text-2);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.user-ident strong {
+.master-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ─── Item utilisateur ─── */
+.user-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 11px;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+.user-item:hover { background: var(--color-surface); }
+.user-item.selected {
+  background: color-mix(in srgb, var(--brand-primary, #1E6091) 7%, white);
+  border-left: 3px solid var(--brand-primary, #1E6091);
+  padding-left: 8px;
+}
+
+/* Dot de statut */
+.item-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+  background: var(--color-border);
+}
+.item-warn    .item-dot { background: #f59e0b; }
+.item-success .item-dot { background: #22c55e; }
+.item-danger  .item-dot { background: #ef4444; }
+
+.item-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.item-name {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.item-count { font-size: 0.68rem; color: var(--color-text-2); }
+
+.item-pills { display: flex; gap: 3px; flex-wrap: wrap; }
+
+/* ─── Badges rôle ─── */
+.role-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  font-size: 0.65rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
+.role-parent { background: #e0f7e9; color: #166534; border: 1px solid #a7e7bf; }
+.role-membre { background: #e0efff; color: #1e3a8a; border: 1px solid #b9d2ff; }
 
-.child-chips {
+/* ─── Pilules statut ─── */
+.pill {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-size: 0.64rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pill-success { background: #dcfce7; color: #166534; }
+.pill-warn    { background: #fef9c3; color: #92400e; }
+.pill-danger  { background: #fee2e2; color: #991b1b; }
+
+/* ─── Pagination ─── */
+.pagination {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 6px;
+  border-top: 1px solid var(--color-border);
   flex-wrap: wrap;
-  gap: 0.4rem;
 }
 
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 5px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.page-btn:hover:not(:disabled) {
+  background: var(--color-surface-2);
+  border-color: var(--brand-primary, #1E6091);
+}
+.page-btn.active {
+  background: var(--brand-primary, #1E6091);
+  color: #fff;
+  border-color: var(--brand-primary, #1E6091);
+  font-weight: 600;
+}
+.page-btn:disabled { opacity: 0.35; cursor: default; }
+.page-ellipsis { font-size: 0.78rem; color: var(--color-text-2); line-height: 28px; padding: 0 2px; }
+
+/* ════════════════════════════════════════
+   Panneau droit (détail)
+════════════════════════════════════════ */
+.detail-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* État vide */
+.detail-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--color-text-2);
+}
+.detail-empty i { font-size: 3.5rem; opacity: 0.25; }
+.detail-empty p {
+  font-size: var(--text-sm);
+  text-align: center;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* En-tête du détail */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  background: var(--color-surface);
+}
+
+.detail-user-info { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+.detail-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.detail-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+.detail-email {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+
+.child-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
 .child-chip {
   background: var(--color-surface-2);
   color: var(--color-text-2);
   border: 1px solid var(--color-border);
-  padding: 1px 8px;
+  padding: 2px 9px;
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
-.status-pills {
+.detail-bulk {
   display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+  align-items: flex-start;
 }
 
-/* ── Corps de l'accordéon ── */
-.accordion-body {
+/* Filtre enfant */
+.detail-child-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 22px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
   background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  display: grid;
-  gap: 1rem;
+}
+.filter-label { font-size: var(--text-sm); color: var(--color-text-2); white-space: nowrap; }
+.detail-child-filter .form-select { max-width: 220px; }
+
+/* Tableau */
+.table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 22px;
 }
 
-.bulk-actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-.filter-by-child {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.75rem 0 1rem;
-}
-
-.filter-by-child label {
-  font-size: var(--text-sm);
-  color: var(--color-text-2);
-  white-space: nowrap;
-}
-
-.filter-by-child .form-select {
-  max-width: 240px;
-}
-
-/* ── Modale aperçu ── */
-.preview-modal {
-  display: grid;
-  gap: 12px;
-}
-
-.modal-top-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  align-items: center;
-}
-
+/* ════════════════════════════════════════
+   Modale aperçu
+════════════════════════════════════════ */
+.preview-modal { display: grid; gap: 12px; }
+.modal-top-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -186,18 +283,13 @@
   font-size: 1.1rem;
   transition: background var(--t-fast);
 }
-
-.icon-btn:hover {
-  background: var(--color-surface-2);
-}
-
+.icon-btn:hover { background: var(--color-surface-2); }
 .preview-image {
   max-width: 100%;
   max-height: 74vh;
   object-fit: contain;
   border-radius: var(--radius-md);
 }
-
 .preview-frame {
   width: 100%;
   height: 74vh;
@@ -205,17 +297,21 @@
   border-radius: var(--radius-md);
 }
 
-@media (max-width: 768px) {
-  .user-main {
-    grid-template-columns: 1fr;
+/* ════════════════════════════════════════
+   Responsive
+════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .master-detail {
+    flex-direction: column;
+    height: auto;
   }
-
-  .filters-bar .form-input,
-  .filters-bar .form-select {
-    max-width: 100%;
+  .master-panel {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
   }
-
-  .filters-check {
-    margin-left: 0;
-  }
+  .master-list { max-height: 260px; }
+  .detail-panel { min-height: 420px; }
+  .detail-header { flex-direction: column; }
+  .detail-bulk { width: 100%; }
 }

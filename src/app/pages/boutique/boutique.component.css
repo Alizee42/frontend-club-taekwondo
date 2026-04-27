@@ -115,23 +115,9 @@ input[type="number"] {
   color: #2c3e50;
 }
 
-/* Bouton pour ajouter au panier */
-.btn-ajouter-panier {
+/* Bouton panier — géré par ui-button */
+.produit-info ui-button {
   margin-top: 20px;
-  padding: 12px 25px;
-  font-size: 18px;
-  font-weight: bold;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.btn-ajouter-panier:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
 }
 
 /* Responsive design */
@@ -156,8 +142,4 @@ input[type="number"] {
     width: 100%;
   }
 
-  .btn-ajouter-panier {
-    width: 100%;
-    text-align: center;
-  }
 }

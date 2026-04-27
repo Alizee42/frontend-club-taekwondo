@@ -138,6 +138,8 @@ export const routes: Routes = [
   { path: 'gestion-horaires', component: GestionHorairesSuperAdminComponent },
   { path: 'utilisateurs', component: UtilisateursSuperAdminComponent },
   { path: 'documents', component: DocumentsSuperAdminComponent },
+  { path: 'commandes', component: GestionCommandeComponent },
+  { path: 'evenements', component: GestionEvenementsComponent },
   { path: 'avis', loadComponent: () => import('./super-admin/avis-super-admin/avis-super-admin.component').then(m => m.AvisSuperAdminComponent) },
   { path: 'enseignants', loadComponent: () => import('./super-admin/enseignants/enseignants-super-admin.component').then(m => m.EnseignantsSuperAdminComponent) },
  

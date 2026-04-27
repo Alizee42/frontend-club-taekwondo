@@ -7,6 +7,7 @@ import { map, catchError, takeUntil, switchMap, filter, timeout } from 'rxjs/ope
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 import { ClubService } from '../../services/club.service';
+import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
 
 interface DashboardStats {
   nbMembres: number;
@@ -35,7 +36,7 @@ const STATUS = {
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DashboardNavCardComponent],
   templateUrl: './dashboard-admin.component.html',
   styleUrls: ['./dashboard-admin.component.css']
 })

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';   // *ngIf, *ngFor
-import { FormsModule } from '@angular/forms';     // [(ngModel)]
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PanierService } from '../../services/panier.service';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -38,7 +39,7 @@ type CreerCommandeResponse = {
   selector: 'app-boutique',
   templateUrl: './boutique.component.html',
   styleUrls: ['./boutique.component.css'],
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiButtonComponent],
 })
 export class BoutiqueComponent implements OnInit {
   produits: Produit[] = [];

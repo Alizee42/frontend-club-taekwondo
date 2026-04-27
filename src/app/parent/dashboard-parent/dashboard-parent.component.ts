@@ -12,6 +12,7 @@ import { ActualiteService } from '../../services/actualite.service';
 import { ClubSelectionService } from '../../services/club-selection.service';
 import { MembreService, Membre } from '../../services/membre.service';
 import { EvenementService } from '../../services/evenement.service';
+import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
 
 interface Utilisateur {
   id: number;
@@ -27,7 +28,7 @@ interface Utilisateur {
   standalone: true,
   templateUrl: './dashboard-parent.component.html',
   styleUrls: ['./dashboard-parent.component.css'],
-  imports: [CommonModule, AgePipe],
+  imports: [CommonModule, AgePipe, DashboardNavCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardParentComponent implements OnInit, OnDestroy {

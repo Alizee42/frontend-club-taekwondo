@@ -10,13 +10,14 @@ import { PaiementService } from '../../services/paiement.service';
 import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 type TypePaiement = 'UNIQUE' | 'ECHELONNE';
 
 @Component({
   selector: 'app-paiement',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent, UiModalComponent],
+  imports: [CommonModule, FormsModule, PageHeaderComponent, UiModalComponent, UiButtonComponent],
   templateUrl: './paiement.component.html',
   styleUrls: ['./paiement.component.css']
 })

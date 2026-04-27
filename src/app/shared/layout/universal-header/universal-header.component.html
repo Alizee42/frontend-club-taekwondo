@@ -21,21 +21,53 @@
       <a class="uh-nav__link" routerLink="/contact"     routerLinkActive="uh-nav__link--active">Contact</a>
     </nav>
 
-    <!-- Actions publiques -->
+    <!-- Actions publiques / session -->
     <div class="uh-actions">
-      <button class="uh-btn-club" (click)="changeClub.emit()" title="Changer de club">
+      <button type="button" class="uh-btn-club" (click)="changeClub.emit()" title="Changer de club">
         <i class="ri-map-pin-line"></i>
         <span>{{ clubName || 'Choisir un club' }}</span>
         <i class="ri-arrow-down-s-line"></i>
       </button>
-      <a class="uh-btn-login" routerLink="/connexion">
-        <i class="ri-login-box-line"></i>
-        <span>Connexion</span>
-      </a>
+
+      <ng-container *ngIf="!isUserLoggedIn; else publicConnectedActions">
+        <a class="uh-btn-login" routerLink="/connexion">
+          <i class="ri-login-box-line"></i>
+          <span>Connexion</span>
+        </a>
+      </ng-container>
+
+      <ng-template #publicConnectedActions>
+        <a class="uh-btn-login" [routerLink]="dashboardRoute" (click)="goToDashboard.emit(); closeAll()">
+          <i class="ri-dashboard-line"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="uh-user" (click)="$event.stopPropagation()">
+          <button type="button" class="uh-user__btn" (click)="toggleUserDropdown()" [attr.aria-expanded]="userDropdownOpen">
+            <img class="uh-user__avatar uh-user__avatar--img" [src]="userAvatar" [alt]="getUserName()" *ngIf="userAvatar">
+            <div class="uh-user__avatar" *ngIf="!userAvatar">{{ getUserInitials() }}</div>
+            <span class="uh-user__name">{{ getUserName() }}</span>
+            <i class="ri-arrow-down-s-line uh-user__chevron" [class.uh-user__chevron--open]="userDropdownOpen"></i>
+          </button>
+          <div class="uh-user__dropdown" [class.is-open]="userDropdownOpen">
+            <button type="button" class="uh-user__item" (click)="goToProfil(); closeUserDropdown()">
+              <i class="ri-user-3-line"></i> Mon profil
+            </button>
+            <button type="button" class="uh-user__item" (click)="goToDashboard.emit(); closeUserDropdown()">
+              <i class="ri-dashboard-line"></i> Dashboard
+            </button>
+            <div class="uh-user__sep"></div>
+            <button type="button" class="uh-user__item uh-user__item--danger" (click)="handleLogout(); closeUserDropdown()">
+              <i class="ri-logout-box-r-line"></i> Se deconnecter
+            </button>
+          </div>
+        </div>
+      </ng-template>
+
     </div>
 
     <!-- Burger mobile -->
-    <button class="uh-burger" (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen" aria-label="Menu">
+    <button type="button" class="uh-burger" (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen" aria-label="Menu">
       <i [class]="mobileOpen ? 'ri-close-line' : 'ri-menu-line'"></i>
     </button>
 
@@ -43,7 +75,7 @@
 
   <!-- Drawer mobile -->
   <div class="uh-drawer" [class.uh-drawer--open]="mobileOpen" (click)="$event.stopPropagation()">
-    <button class="uh-drawer__link uh-drawer__link--club" (click)="changeClub.emit(); closeAll()">
+    <button type="button" class="uh-drawer__link uh-drawer__link--club" (click)="changeClub.emit(); closeAll()">
       <i class="ri-map-pin-line"></i> {{ clubName || 'Choisir un club' }}
     </button>
     <div class="uh-drawer__sep"></div>
@@ -53,9 +85,23 @@
     <a class="uh-drawer__link" routerLink="/boutique"    (click)="closeAll()">Boutique</a>
     <a class="uh-drawer__link" routerLink="/evenements"  (click)="closeAll()">Événements</a>
     <a class="uh-drawer__link" routerLink="/contact"     (click)="closeAll()">Contact</a>
-    <a class="uh-drawer__link uh-drawer__link--cta" routerLink="/connexion" (click)="closeAll()">
-      <i class="ri-login-box-line"></i> Connexion
-    </a>
+    <ng-container *ngIf="!isUserLoggedIn; else publicConnectedDrawer">
+      <a class="uh-drawer__link uh-drawer__link--cta" routerLink="/connexion" (click)="closeAll()">
+        <i class="ri-login-box-line"></i> Connexion
+      </a>
+    </ng-container>
+    <ng-template #publicConnectedDrawer>
+      <div class="uh-drawer__sep"></div>
+      <a class="uh-drawer__link" [routerLink]="dashboardRoute" (click)="goToDashboard.emit(); closeAll()">
+        <i class="ri-dashboard-line"></i> Dashboard
+      </a>
+      <button type="button" class="uh-drawer__link" (click)="goToProfil(); closeAll()">
+        <i class="ri-user-3-line"></i> Mon profil
+      </button>
+      <button type="button" class="uh-drawer__link uh-drawer__link--danger" (click)="handleLogout(); closeAll()">
+        <i class="ri-logout-box-r-line"></i> Se deconnecter
+      </button>
+    </ng-template>
   </div>
   <div class="uh-overlay" [class.uh-overlay--visible]="mobileOpen" (click)="closeAll()"></div>
 </header>
@@ -87,13 +133,13 @@
     <div class="uh-actions">
 
       <!-- Panier -->
-      <a class="uh-icon-btn" routerLink="/boutique/panier" title="Mon panier" *ngIf="cartCount > 0">
+      <a class="uh-icon-btn" routerLink="/boutique" title="Mon panier" *ngIf="cartCount > 0">
         <i class="ri-shopping-cart-line"></i>
         <span class="uh-badge">{{ cartCount }}</span>
       </a>
 
       <!-- Notifications -->
-      <button class="uh-icon-btn" title="Notifications" (click)="toggleNotif(); $event.stopPropagation()">
+      <button type="button" class="uh-icon-btn" title="Notifications" (click)="toggleNotif(); $event.stopPropagation()">
         <i class="ri-notification-3-line"></i>
         <span class="uh-badge" *ngIf="unreadNotifications > 0">{{ unreadNotifications }}</span>
       </button>
@@ -102,14 +148,14 @@
       <div class="uh-notif-panel" [class.is-open]="notifOpen" (click)="$event.stopPropagation()">
         <div class="uh-notif-panel__head">
           <span>Notifications</span>
-          <button class="uh-notif-panel__close" (click)="notifOpen=false">
+          <button type="button" class="uh-notif-panel__close" (click)="notifOpen=false">
             <i class="ri-close-line"></i>
           </button>
         </div>
         <div class="uh-notif-panel__body">
           <p *ngIf="unreadNotifications === 0" class="uh-notif-panel__empty">Aucune nouvelle notification.</p>
           <p *ngIf="unreadNotifications > 0"   class="uh-notif-panel__count">{{ unreadNotifications }} notification(s) non lue(s).</p>
-          <button class="uh-notif-panel__see-all" (click)="openNotifications.emit(); notifOpen=false">
+          <button type="button" class="uh-notif-panel__see-all" (click)="openNotifications.emit(); notifOpen=false">
             Voir toutes les notifications
           </button>
         </div>
@@ -117,21 +163,21 @@
 
       <!-- Avatar + dropdown user -->
       <div class="uh-user" (click)="$event.stopPropagation()">
-        <button class="uh-user__btn" (click)="toggleUserDropdown()" [attr.aria-expanded]="userDropdownOpen">
+        <button type="button" class="uh-user__btn" (click)="toggleUserDropdown()" [attr.aria-expanded]="userDropdownOpen">
           <img class="uh-user__avatar uh-user__avatar--img" [src]="userAvatar" [alt]="getUserName()" *ngIf="userAvatar">
           <div class="uh-user__avatar" *ngIf="!userAvatar">{{ getUserInitials() }}</div>
           <span class="uh-user__name">{{ getUserName() }}</span>
           <i class="ri-arrow-down-s-line uh-user__chevron" [class.uh-user__chevron--open]="userDropdownOpen"></i>
         </button>
         <div class="uh-user__dropdown" [class.is-open]="userDropdownOpen">
-          <button class="uh-user__item" (click)="goToProfil(); closeUserDropdown()">
+          <button type="button" class="uh-user__item" (click)="goToProfil(); closeUserDropdown()">
             <i class="ri-user-3-line"></i> Mon profil
           </button>
-          <button class="uh-user__item" (click)="goToDashboard.emit(); closeUserDropdown()">
+          <button type="button" class="uh-user__item" (click)="goToDashboard.emit(); closeUserDropdown()">
             <i class="ri-dashboard-line"></i> Dashboard
           </button>
           <div class="uh-user__sep"></div>
-          <button class="uh-user__item uh-user__item--danger" (click)="handleLogout(); closeUserDropdown()">
+          <button type="button" class="uh-user__item uh-user__item--danger" (click)="handleLogout(); closeUserDropdown()">
             <i class="ri-logout-box-r-line"></i> Se déconnecter
           </button>
         </div>
@@ -140,7 +186,7 @@
     </div>
 
     <!-- Burger mobile -->
-    <button class="uh-burger" (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen" aria-label="Menu">
+    <button type="button" class="uh-burger" (click)="toggleMobile()" [attr.aria-expanded]="mobileOpen" aria-label="Menu">
       <i [class]="mobileOpen ? 'ri-close-line' : 'ri-menu-line'"></i>
     </button>
 
@@ -155,10 +201,10 @@
       <i class="ri-home-4-line"></i> Accueil
     </a>
     <div class="uh-drawer__sep"></div>
-    <button class="uh-drawer__link" (click)="goToProfil(); closeAll()">
+    <button type="button" class="uh-drawer__link" (click)="goToProfil(); closeAll()">
       <i class="ri-user-3-line"></i> Mon profil
     </button>
-    <button class="uh-drawer__link uh-drawer__link--danger" (click)="handleLogout(); closeAll()">
+    <button type="button" class="uh-drawer__link uh-drawer__link--danger" (click)="handleLogout(); closeAll()">
       <i class="ri-logout-box-r-line"></i> Se déconnecter
     </button>
   </div>

@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { UiButtonComponent } from '../buttons/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-empty-state',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, UiButtonComponent],
   templateUrl: './empty-state.component.html',
   styleUrls: ['./empty-state.component.css']
 })

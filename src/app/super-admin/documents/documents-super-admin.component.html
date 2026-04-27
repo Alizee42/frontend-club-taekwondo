@@ -1,53 +1,126 @@
 <div class="page-shell">
-  <app-page-header title="Gestion des documents" icon="ri-file-text-line">
+  <app-page-header
+    title="Gestion des documents"
+    icon="ri-file-text-line"
+    subtitle="Consulter et valider les documents de tous les clubs">
     <ng-container page-header-actions>
       <ui-button label="Rafraîchir" icon="ri-refresh-line" variant="ghost" (clicked)="loadDocs()"></ui-button>
     </ng-container>
   </app-page-header>
-  <div class="filters-bar">
-    <select class="form-select" [(ngModel)]="selectedClubId" (change)="onSelectClub()">
-      <option [ngValue]="null">Tous les clubs</option>
-      <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
-    </select>
-    <select class="form-select" [(ngModel)]="statut" (change)="onStatutChange()">
-      <option value="">Tous statuts</option>
-      <option value="en_attente">En attente</option>
-      <option value="validé">Validé</option>
-      <option value="refusé">Refusé</option>
-    </select>
-    <input type="text" class="form-input" placeholder="Rechercher (nom, email, club, type)" [(ngModel)]="search" (input)="onSearchChange()" />
-    <label class="filters-check ms-auto">
-      <input type="checkbox" [(ngModel)]="groupByUser" /> Vue groupée par utilisateur
-    </label>
-  </div>
 
-  <ng-container *ngIf="groupByUser; else flatView">
-    <div *ngFor="let g of userGroups" class="user-block">
-      <div class="user-header" [ngClass]="getGroupClass(g.docs)" (click)="toggleGroup(g.key)">
-        <div class="user-main">
-          <div class="user-ident">
-            <strong>{{ g.utilisateurNom || '—' }}</strong>
-            <span class="role-badge role-parent" *ngIf="isParentGroup(g.docs)">Parent</span>
-            <span class="role-badge role-membre" *ngIf="!isParentGroup(g.docs)">Membre</span>
+  <div class="master-detail">
+
+    <!-- ── Panneau gauche : liste des membres ── -->
+    <div class="master-panel">
+      <div class="master-search">
+        <select class="form-select" [(ngModel)]="selectedClubId" (change)="onSelectClub()" aria-label="Filtrer par club">
+          <option [ngValue]="null">Tous les clubs</option>
+          <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
+        </select>
+        <select class="form-select" [(ngModel)]="statut" (change)="onStatutChange()" aria-label="Filtrer par statut">
+          <option value="">Tous statuts</option>
+          <option value="en_attente">En attente</option>
+          <option value="validé">Validé</option>
+          <option value="refusé">Refusé</option>
+        </select>
+        <input type="text" class="form-input"
+               [(ngModel)]="search"
+               placeholder="Rechercher…"
+               (input)="onSearchChange()"
+               aria-label="Rechercher" />
+      </div>
+
+      <div class="master-count">{{ userGroups.length }} membre(s)</div>
+
+      <div class="master-list" role="listbox" aria-label="Liste des membres">
+        <button class="user-item"
+                *ngFor="let g of paginatedGroups"
+                type="button"
+                role="option"
+                [attr.aria-selected]="selectedGroup?.key === g.key"
+                [class.selected]="selectedGroup?.key === g.key"
+                [class.item-warn]="getGroupStatus(g.docs) === 'en_attente'"
+                [class.item-success]="getGroupStatus(g.docs) === 'validé'"
+                [class.item-danger]="getGroupStatus(g.docs) === 'refusé'"
+                (click)="selectGroup(g)">
+          <div class="item-dot"></div>
+          <div class="item-body">
+            <div class="item-name">{{ g.utilisateurNom }}</div>
+            <div class="item-meta">
+              <span class="role-badge role-parent" *ngIf="isParentGroup(g.docs)">Parent</span>
+              <span class="role-badge role-membre" *ngIf="!isParentGroup(g.docs)">Membre</span>
+              <span class="item-count">{{ g.docs.length }} doc(s)</span>
+            </div>
+            <div class="item-club" *ngIf="g.clubNom && g.clubNom !== '—'">
+              <i class="ri-building-line" aria-hidden="true"></i> {{ g.clubNom }}
+            </div>
+            <div class="item-pills">
+              <span class="pill pill-warn"    *ngIf="countStatus(g.docs, 'en_attente') > 0">{{ countStatus(g.docs, 'en_attente') }} en att.</span>
+              <span class="pill pill-success" *ngIf="countStatus(g.docs, 'validé') > 0">{{ countStatus(g.docs, 'validé') }} val.</span>
+              <span class="pill pill-danger"  *ngIf="countStatus(g.docs, 'refusé') > 0">{{ countStatus(g.docs, 'refusé') }} ref.</span>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Pagination -->
+      <nav class="pagination" *ngIf="totalPages > 1" aria-label="Pagination des membres">
+        <button class="page-btn" type="button"
+                (click)="goToPage(currentPage - 1)"
+                [disabled]="currentPage === 1"
+                aria-label="Page précédente">
+          <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
+        </button>
+        <ng-container *ngFor="let p of pages">
+          <span class="page-ellipsis" *ngIf="p === 0">…</span>
+          <button class="page-btn" *ngIf="p !== 0" type="button"
+                  (click)="goToPage(p)"
+                  [class.active]="p === currentPage"
+                  [attr.aria-current]="p === currentPage ? 'page' : null">
+            {{ p }}
+          </button>
+        </ng-container>
+        <button class="page-btn" type="button"
+                (click)="goToPage(currentPage + 1)"
+                [disabled]="currentPage === totalPages"
+                aria-label="Page suivante">
+          <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ── Panneau droit : documents du membre sélectionné ── -->
+    <div class="detail-panel">
+
+      <!-- Aucun membre sélectionné -->
+      <div class="detail-empty" *ngIf="!selectedGroup">
+        <i class="ri-user-search-line" aria-hidden="true"></i>
+        <p>Sélectionnez un membre<br>pour consulter ses documents</p>
+      </div>
+
+      <!-- Membre sélectionné -->
+      <ng-container *ngIf="selectedGroup as g">
+        <div class="detail-header">
+          <div class="detail-user-info">
+            <div class="detail-name-row">
+              <h2 class="detail-name">{{ g.utilisateurNom }}</h2>
+              <span class="role-badge role-parent" *ngIf="isParentGroup(g.docs)">Parent</span>
+              <span class="role-badge role-membre" *ngIf="!isParentGroup(g.docs)">Membre</span>
+            </div>
+            <span class="detail-email">{{ g.utilisateurEmail || '—' }}</span>
+            <span class="detail-club" *ngIf="g.clubNom && g.clubNom !== '—'">
+              <i class="ri-building-line" aria-hidden="true"></i> {{ g.clubNom }}
+            </span>
             <div class="child-chips" *ngIf="hasKidsGroup(g.docs)">
               <span class="child-chip" *ngFor="let name of groupChildNames(g.docs)">{{ name }}</span>
             </div>
           </div>
-          <span>{{ g.utilisateurEmail || '—' }}</span>
-          <span>{{ g.docs.length }} document(s)</span>
-          <div class="status-pills">
-            <span class="pill pill-warn" *ngIf="countStatus(g.docs, 'en_attente') > 0">{{ countStatus(g.docs, 'en_attente') }} en attente</span>
-            <span class="pill pill-success" *ngIf="countStatus(g.docs, 'validé') > 0">{{ countStatus(g.docs, 'validé') }} validé(s)</span>
-            <span class="pill pill-danger" *ngIf="countStatus(g.docs, 'refusé') > 0">{{ countStatus(g.docs, 'refusé') }} refusé(s)</span>
+          <div class="detail-bulk" *ngIf="countStatus(g.docs, 'en_attente') > 0">
+            <ui-button label="Tout valider" variant="primary" (clicked)="validerTous(g.docs)"></ui-button>
+            <ui-button label="Tout refuser" variant="danger"  (clicked)="refuserTous(g.docs)"></ui-button>
           </div>
         </div>
-        <i class="ri-arrow-down-s-line" [style.transform]="g.isOpen ? 'rotate(180deg)' : 'none'"></i>
-      </div>
-      <div *ngIf="g.isOpen">
-        <div class="bulk-actions">
-          <ui-button label="Tout valider" variant="primary" (clicked)="validerTous(g.docs)"></ui-button>
-          <ui-button label="Tout refuser" variant="danger" (clicked)="refuserTous(g.docs)"></ui-button>
-        </div>
+
         <div class="table-wrap">
           <ui-table
             [columns]="groupedTableColumns"
@@ -56,31 +129,19 @@
             (actionClick)="handleAction($event)">
           </ui-table>
         </div>
-      </div>
-    </div>
-  </ng-container>
+      </ng-container>
 
-  <ng-template #flatView>
-    <div class="table-wrap">
-      <ui-table
-        [columns]="tableColumns"
-        [data]="filtered"
-        [actions]="tableActions"
-        (actionClick)="handleAction($event)">
-      </ui-table>
     </div>
-  </ng-template>
+  </div>
 </div>
 
 <ui-modal [open]="previewOpen" (closed)="closePreview()" [title]="previewName || 'Aperçu'" size="xl">
-  <div class="preview-wrapper">
-    <ng-container [ngSwitch]="previewType">
-      <img *ngSwitchCase="'image'" [src]="previewUrl" alt="aperçu" class="preview-image" />
-      <iframe *ngSwitchCase="'pdf'" [src]="previewUrl" class="preview-frame" title="aperçu PDF"></iframe>
-      <div *ngSwitchDefault>
-        <p>Prévisualisation non disponible pour ce type de fichier.</p>
-        <a [href]="previewUrl" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
-      </div>
-    </ng-container>
-  </div>
+  <ng-container [ngSwitch]="previewType">
+    <img *ngSwitchCase="'image'" [src]="previewUrl" alt="aperçu" class="preview-image" />
+    <iframe *ngSwitchCase="'pdf'" [src]="previewUrl" class="preview-frame" title="aperçu PDF"></iframe>
+    <div *ngSwitchDefault>
+      <p>Prévisualisation non disponible.</p>
+      <a [href]="previewUrl" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+    </div>
+  </ng-container>
 </ui-modal>

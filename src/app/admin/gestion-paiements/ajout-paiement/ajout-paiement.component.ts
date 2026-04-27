@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { PaymentAdminService } from '../../../services/payment-admin.service';
 import { debounce } from './utils/debounce';
+import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button/ui-button.component';
 
 type ModePaiement = 'especes' | 'virement' | 'stripe';
 type TypePaiement = 'unique' | 'echeances';
@@ -26,7 +27,7 @@ interface PersonResult {
 @Component({
   selector: 'app-ajout-paiement',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UiButtonComponent],
   templateUrl: './ajout-paiement.component.html',
   styleUrls: ['./ajout-paiement.component.css']
 })

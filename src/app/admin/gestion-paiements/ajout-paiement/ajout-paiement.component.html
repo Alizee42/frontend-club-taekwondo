@@ -105,10 +105,13 @@
             </div>
           }
 
-          <button class="btn-link" type="button" (click)="toggleCreationManuelle()">
-            <i [class]="creationManuelle ? 'ri-search-line' : 'ri-user-add-line'"></i>
-            {{ creationManuelle ? 'Rechercher un membre existant' : 'Créer une nouvelle fiche' }}
-          </button>
+          <ui-button
+            type="button"
+            variant="ghost"
+            [icon]="creationManuelle ? 'ri-search-line' : 'ri-user-add-line'"
+            [label]="creationManuelle ? 'Rechercher un membre existant' : 'Créer une nouvelle fiche'"
+            (clicked)="toggleCreationManuelle()"
+          />
         </section>
       }
 
@@ -153,7 +156,13 @@
                 <label class="field">Intervalle (jours)
                   <input type="number" [(ngModel)]="intervalDays" min="7" max="60" (change)="genererEcheances()" />
                 </label>
-                <button type="button" class="btn btn-soft-primary" (click)="genererEcheances()">Générer</button>
+                <ui-button
+                  type="button"
+                  variant="primary"
+                  customClass="btn-soft-primary"
+                  label="Générer"
+                  (clicked)="genererEcheances()"
+                />
               </div>
 
               @if (echeances.length) {
@@ -227,14 +236,30 @@
   </div>
 
   <div class="step-buttons">
-    <button class="btn btn-ghost" type="button" (click)="prev()" [disabled]="currentStep === 0">Précédent</button>
+    <ui-button
+      type="button"
+      variant="ghost"
+      label="Précédent"
+      (clicked)="prev()"
+      [disabled]="currentStep === 0"
+    />
     @if (!isLastStep()) {
-      <button class="btn btn-primary" type="button" (click)="next()">Suivant</button>
+      <ui-button
+        type="button"
+        variant="primary"
+        label="Suivant"
+        (clicked)="next()"
+      />
     }
     @if (isLastStep()) {
-      <button class="btn btn-success" type="button" (click)="validerPaiement()" [disabled]="loading">
-        {{ loading ? 'Envoi...' : 'Valider le paiement' }}
-      </button>
+      <ui-button
+        type="button"
+        variant="success"
+        [label]="loading ? 'Envoi...' : 'Valider le paiement'"
+        (clicked)="validerPaiement()"
+        [loading]="loading"
+        [disabled]="loading"
+      />
     }
   </div>
 

@@ -5,13 +5,14 @@ import { CommonModule } from '@angular/common';
 import { Router } from "@angular/router";
 import { environment } from '../../../environments/environment';
 import { AuthService, Utilisateur } from '../../services/auth.service';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-profil',
   templateUrl: './profil.component.html',
   styleUrls: ['./profil.component.css'],
   standalone: true,
-  imports: [FormsModule, CommonModule] // Supprimez Router des imports
+  imports: [FormsModule, CommonModule, UiButtonComponent] // Supprimez Router des imports
 })
 export class ProfilComponent implements OnInit {
   user: Utilisateur | any = {};

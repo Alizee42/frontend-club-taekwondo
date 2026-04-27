@@ -202,9 +202,7 @@
             </div>
           </div>
           <div class="accordion__footer">
-            <button type="button" class="btn btn-primary" (click)="nextSection('identite')">
-              Valider et continuer <i class="ri-arrow-right-line"></i>
-            </button>
+            <ui-button type="button" variant="primary" icon="ri-arrow-right-line" label="Valider et continuer" (clicked)="nextSection('identite')" />
           </div>
         </div>
       </div>
@@ -275,9 +273,7 @@
             </div>
           </div>
           <div class="accordion__footer">
-            <button type="button" class="btn btn-primary" (click)="nextSection('adresse')">
-              Valider et continuer <i class="ri-arrow-right-line"></i>
-            </button>
+            <ui-button type="button" variant="primary" icon="ri-arrow-right-line" label="Valider et continuer" (clicked)="nextSection('adresse')" />
           </div>
         </div>
       </div>
@@ -353,9 +349,7 @@
             <small class="strength-label">{{ passwordStrengthLabel }}</small>
           </div>
           <div class="accordion__footer">
-            <button type="button" class="btn btn-primary" (click)="nextSection('password')">
-              Valider <i class="ri-check-line"></i>
-            </button>
+            <ui-button type="button" variant="primary" icon="ri-check-line" label="Valider" (clicked)="nextSection('password')" />
           </div>
         </div>
       </div>
@@ -366,9 +360,7 @@
           <i class="ri-checkbox-circle-line" style="color:var(--color-success)"></i>
           Tout est rempli — vous pouvez passer à l'étape suivante.
         </p>
-        <button type="submit" class="btn btn-primary btn-block">
-          Étape suivante <i class="ri-arrow-right-line"></i>
-        </button>
+        <ui-button type="submit" variant="primary" [full]="true" icon="ri-arrow-right-line" label="Étape suivante" />
       </div>
 
     </form>
@@ -404,10 +396,16 @@
               </div>
               <div class="membre-card__actions">
                 <i class="ri-arrow-down-s-line membre-card__chevron" aria-hidden="true"></i>
-                <button type="button" class="btn btn-ghost btn-sm btn-danger-ghost"
-                        (click)="$event.stopPropagation(); removeMembre(i)" aria-label="Supprimer ce membre">
-                  <i class="ri-delete-bin-6-line"></i>
-                </button>
+                <ui-button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  icon="ri-delete-bin-6-line"
+                  [iconOnly]="true"
+                  customClass="btn-danger-ghost"
+                  aria-label="Supprimer ce membre"
+                  (clicked)="$event.stopPropagation(); removeMembre(i)"
+                />
               </div>
             </button>
 
@@ -456,16 +454,10 @@
         </div>
 
         <div class="insc-actions insc-actions--between">
-          <button type="button" class="btn btn-secondary" (click)="previousStep()">
-            <i class="ri-arrow-left-line"></i> Retour
-          </button>
+          <ui-button type="button" variant="secondary" icon="ri-arrow-left-line" label="Retour" (clicked)="previousStep()" />
           <div class="insc-actions__right">
-            <button type="button" class="btn btn-ghost" (click)="addMembre()">
-              <i class="ri-add-line"></i> Ajouter un membre
-            </button>
-            <button type="button" class="btn btn-primary" (click)="nextStep()">
-              Étape suivante <i class="ri-arrow-right-line"></i>
-            </button>
+            <ui-button type="button" variant="ghost" icon="ri-add-line" label="Ajouter un membre" (clicked)="addMembre()" />
+            <ui-button type="button" variant="primary" icon="ri-arrow-right-line" label="Étape suivante" (clicked)="nextStep()" />
           </div>
         </div>
 
@@ -529,12 +521,8 @@
 
         </div>
         <div class="card-footer insc-actions insc-actions--between">
-          <button class="btn btn-secondary" type="button" (click)="previousStep()">
-            <i class="ri-arrow-left-line"></i> Retour
-          </button>
-          <button class="btn btn-primary" type="button" (click)="onSubmit()">
-            <i class="ri-send-plane-2-line"></i> Finaliser l'inscription
-          </button>
+          <ui-button type="button" variant="secondary" icon="ri-arrow-left-line" label="Retour" (clicked)="previousStep()" />
+          <ui-button type="button" variant="primary" icon="ri-send-plane-2-line" label="Finaliser l'inscription" (clicked)="onSubmit()" />
         </div>
       </div>
     </div>
@@ -571,10 +559,8 @@
 
     <!-- Actions -->
     <div class="modal-actions">
-      <button class="btn btn-primary" (click)="redirectToLogin()">
-        <i class="ri-login-box-line"></i> Se connecter
-      </button>
-      <button class="btn btn-ghost" (click)="closeModal()">Fermer</button>
+      <ui-button type="button" variant="primary" icon="ri-login-box-line" label="Se connecter" (clicked)="redirectToLogin()" />
+      <ui-button type="button" variant="ghost" label="Fermer" (clicked)="closeModal()" />
     </div>
 
   </div>

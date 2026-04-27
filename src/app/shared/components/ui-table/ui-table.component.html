@@ -68,6 +68,7 @@
                 [variant]="act.variant ?? 'ghost'"
                 [disabled]="act.disabled ?? false"
                 [customColor]="act.variant ? undefined : (act.color ?? undefined)"
+                [ariaLabel]="act.title || act.label"
                 [title]="act.title || act.label"
                 (clicked)="onAction(act.action, row)">
               </ui-icon-button>

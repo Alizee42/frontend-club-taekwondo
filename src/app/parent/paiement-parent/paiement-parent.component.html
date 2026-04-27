@@ -28,7 +28,7 @@
         <h2 class="step-title">Pour qui souhaitez-vous payer ?</h2>
 
         <div class="child-grid">
-          <button class="child-card"
+          <button type="button" class="child-card"
                   *ngFor="let enfant of enfants"
                   [class.active]="enfantSelectionne === enfant.id"
                   (click)="selectMembre(enfant)"
@@ -44,11 +44,14 @@
         </div>
 
         <div class="actions center">
-          <button class="btn btn-primary full"
-                  [disabled]="!enfantSelectionne"
-                  (click)="nextStep()">
-            Continuer
-          </button>
+          <ui-button
+            type="button"
+            variant="primary"
+            [full]="true"
+            label="Continuer"
+            [disabled]="!enfantSelectionne"
+            (clicked)="nextStep()"
+          />
         </div>
       </div>
 
@@ -114,8 +117,8 @@
         </div>
 
         <div class="actions">
-          <button class="btn btn-ghost btn-sm" (click)="previousStep()">← Retour</button>
-          <button class="btn btn-primary" (click)="nextStep()">Continuer</button>
+          <ui-button type="button" variant="ghost" size="sm" icon="ri-arrow-left-line" label="Retour" (clicked)="previousStep()" />
+          <ui-button type="button" variant="primary" label="Continuer" (clicked)="nextStep()" />
         </div>
       </div>
 
@@ -161,8 +164,8 @@
         <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
 
         <div class="actions">
-          <button class="btn btn-ghost btn-sm" (click)="previousStep()" [disabled]="enCoursDePaiement">← Retour</button>
-          <button class="btn btn-primary" (click)="ouvrirModalCarte()" [disabled]="enCoursDePaiement || (envoyerRecuEmail && (!userEmail || !userEmail.includes('@')))">Payer maintenant</button>
+          <ui-button type="button" variant="ghost" size="sm" icon="ri-arrow-left-line" label="Retour" (clicked)="previousStep()" [disabled]="enCoursDePaiement" />
+          <ui-button type="button" variant="primary" label="Payer maintenant" (clicked)="ouvrirModalCarte()" [disabled]="enCoursDePaiement || (envoyerRecuEmail && (!userEmail || !userEmail.includes('@')))" />
         </div>
       </div>
 
@@ -180,7 +183,7 @@
             <a class="btn btn-primary" *ngIf="factureUrl" [href]="factureUrl" target="_blank" rel="noopener">
               <i class="ri-file-text-line"></i> Voir le reçu
             </a>
-            <button class="btn btn-outline" (click)="step = 1">Nouveau paiement</button>
+            <ui-button type="button" variant="secondary" label="Nouveau paiement" (clicked)="step = 1" />
           </div>
 
           <div class="confirm-email" *ngIf="envoyerRecuEmail && userEmail">
@@ -295,15 +298,19 @@
                     <span class="muted">{{ e.dateAffichable | date:'dd/MM/yyyy' }}</span>
                     <span class="grow">{{ e.montant | currency:'EUR' }}</span>
                     <span class="status-badge" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
-                    <button class="btn btn-soft-primary btn-sm" (click)="ouvrirModalPaiement(plan, e)">Payer</button>
+                    <ui-button type="button" variant="primary" customClass="btn-soft-primary" size="sm" label="Payer" (clicked)="ouvrirModalPaiement(plan, e)" />
                   </li>
                 </ul>
 
                 <!-- Payées -->
                 <div class="paid-toggle" *ngIf="paidEcheances(plan).length">
-                  <button class="btn btn-ghost btn-sm" (click)="toggleShowPaid(plan.id)">
-                    {{ isShowPaid(plan.id) ? 'Masquer' : 'Afficher' }} les payées ({{ paidEcheances(plan).length }})
-                  </button>
+                  <ui-button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    [label]="(isShowPaid(plan.id) ? 'Masquer' : 'Afficher') + ' les payées (' + paidEcheances(plan).length + ')'"
+                    (clicked)="toggleShowPaid(plan.id)"
+                  />
                 </div>
                 <ul class="list compact faded" *ngIf="isShowPaid(plan.id)">
                   <li class="item" *ngFor="let e of paidEcheances(plan)">
@@ -311,7 +318,7 @@
                     <span class="muted">{{ e.dateAffichable | date:'dd/MM/yyyy' }}</span>
                     <span class="grow">{{ e.montant | currency:'EUR' }}</span>
                     <span class="status-badge" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
-                    <button class="btn btn-soft-primary btn-sm" (click)="ouvrirRecuStripe(plan.id)">Reçu</button>
+                    <ui-button type="button" variant="primary" customClass="btn-soft-primary" size="sm" label="Reçu" (clicked)="ouvrirRecuStripe(plan.id)" />
                   </li>
                 </ul>
               </details>
@@ -325,7 +332,7 @@
                 <span class="muted">{{ (p.datePaiement || p.dateAffichable) | date:'dd/MM/yyyy' }}</span>
                 <span class="grow">{{ p.montantTotal | currency:'EUR' }}</span>
                 <span class="status-badge" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
-                <button class="btn btn-soft-primary btn-sm" *ngIf="p.statutCss==='status--success'" (click)="ouvrirRecuStripe(p.id)">Reçu</button>
+                <ui-button type="button" variant="primary" customClass="btn-soft-primary" size="sm" label="Reçu" *ngIf="p.statutCss==='status--success'" (clicked)="ouvrirRecuStripe(p.id)" />
               </li>
             </ul>
           </ng-container>
@@ -365,11 +372,8 @@
     <div *ngIf="paiementErreur" class="error" role="alert" aria-live="assertive">{{ erreurMessage }}</div>
 
     <div class="payment-modal__actions">
-      <button class="btn btn-primary btn-full" (click)="payerEcheances()" [disabled]="enCoursDePaiement">
-        <span *ngIf="enCoursDePaiement" class="btn-spinner"></span>
-        {{ enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement' }}
-      </button>
-      <button class="btn btn-ghost btn-full" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement">Annuler</button>
+      <ui-button type="button" variant="primary" [full]="true" [label]="enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement'" (clicked)="payerEcheances()" [loading]="enCoursDePaiement" [disabled]="enCoursDePaiement" />
+      <ui-button type="button" variant="ghost" [full]="true" label="Annuler" (clicked)="fermerModalPaiement()" [disabled]="enCoursDePaiement" />
     </div>
 
     <p class="payment-modal__stripe-badge">
@@ -416,11 +420,8 @@
 
     <!-- Actions -->
     <div class="payment-modal__actions">
-      <button class="btn btn-primary btn-full" (click)="validerCarte()" [disabled]="!stripeReady || enCoursDePaiement">
-        <span *ngIf="enCoursDePaiement" class="btn-spinner"></span>
-        {{ enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement' }}
-      </button>
-      <button class="btn btn-ghost btn-full" (click)="fermerModalCarte()" [disabled]="enCoursDePaiement">Annuler</button>
+      <ui-button type="button" variant="primary" [full]="true" [label]="enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement'" (clicked)="validerCarte()" [loading]="enCoursDePaiement" [disabled]="!stripeReady || enCoursDePaiement" />
+      <ui-button type="button" variant="ghost" [full]="true" label="Annuler" (clicked)="fermerModalCarte()" [disabled]="enCoursDePaiement" />
     </div>
 
     <p class="payment-modal__stripe-badge">

@@ -79,7 +79,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn btn-primary" (click)="nextStep()">Continuer</button>
+          <ui-button type="button" variant="primary" label="Continuer" (clicked)="nextStep()" />
         </div>
       </div>
 
@@ -125,8 +125,8 @@
         <div *ngIf="paiementErreur" class="error">{{ erreurMessage }}</div>
 
         <div class="actions">
-          <button class="btn btn-ghost" (click)="previousStep()" [disabled]="enCoursDePaiement"><i class="ri-arrow-left-line"></i> Retour</button>
-          <button class="btn btn-primary" (click)="ouvrirModalCarte()" [disabled]="enCoursDePaiement || (envoyerRecuEmail && (!userEmail || !userEmail.includes('@')))">Payer maintenant</button>
+          <ui-button type="button" variant="ghost" icon="ri-arrow-left-line" label="Retour" (clicked)="previousStep()" [disabled]="enCoursDePaiement" />
+          <ui-button type="button" variant="primary" label="Payer maintenant" (clicked)="ouvrirModalCarte()" [disabled]="enCoursDePaiement || (envoyerRecuEmail && (!userEmail || !userEmail.includes('@')))" />
         </div>
       </div>
 
@@ -141,10 +141,8 @@
           <div class="confirm-date">le {{ (paymentDate || today) | date:'dd/MM/yyyy' }} à {{ (paymentDate || today) | date:'HH:mm' }}</div>
 
           <div class="confirm-actions">
-            <button class="btn btn-primary" (click)="ouvrirRecuStripe()" [disabled]="!paiementIdEnCours">
-              <i class="ri-file-text-line"></i> Voir le reçu
-            </button>
-            <button class="btn btn-outline" (click)="nouveauPaiement()">Nouveau paiement</button>
+            <ui-button type="button" variant="primary" icon="ri-file-text-line" label="Voir le reçu" (clicked)="ouvrirRecuStripe()" [disabled]="!paiementIdEnCours" />
+            <ui-button type="button" variant="secondary" label="Nouveau paiement" (clicked)="nouveauPaiement()" />
           </div>
 
           <div class="confirm-email" *ngIf="userEmail && envoyerRecuEmail">
@@ -238,15 +236,19 @@
                   <span class="muted">{{ e.dateAffichable | date:'dd/MM/yyyy' }}</span>
                   <span class="grow">{{ e.montant | currency:'EUR' }}</span>
                   <span class="status-badge" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
-                  <button class="btn btn-soft-primary btn-sm" (click)="ouvrirModalPaiement(plan, e)">Payer</button>
+                  <ui-button type="button" variant="primary" customClass="btn-soft-primary" size="sm" label="Payer" (clicked)="ouvrirModalPaiement(plan, e)" />
                 </li>
               </ul>
 
               <!-- Payées -->
               <div class="paid-toggle" *ngIf="paidEcheances(plan).length">
-                <button class="btn btn-ghost btn-sm" (click)="toggleShowPaid(plan.id)">
-                  {{ isShowPaid(plan.id) ? 'Masquer' : 'Afficher' }} les payées ({{ paidEcheances(plan).length }})
-                </button>
+                <ui-button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  [label]="(isShowPaid(plan.id) ? 'Masquer' : 'Afficher') + ' les payées (' + paidEcheances(plan).length + ')'"
+                  (clicked)="toggleShowPaid(plan.id)"
+                />
               </div>
               <ul class="list compact faded" *ngIf="isShowPaid(plan.id)">
                 <li class="item" *ngFor="let e of paidEcheances(plan)">
@@ -254,7 +256,7 @@
                   <span class="muted">{{ e.dateAffichable | date:'dd/MM/yyyy' }}</span>
                   <span class="grow">{{ e.montant | currency:'EUR' }}</span>
                   <span class="status-badge" [ngClass]="e.statutCss">{{ e.statutDisplay }}</span>
-                  <button class="btn btn-soft-primary btn-sm" (click)="ouvrirRecuStripe(plan.id, e.id)">Reçu</button>
+                  <ui-button type="button" variant="primary" customClass="btn-soft-primary" size="sm" label="Reçu" (clicked)="ouvrirRecuStripe(plan.id, e.id)" />
                 </li>
               </ul>
             </details>
@@ -274,7 +276,7 @@
             <span class="muted">{{ (p.datePaiement || p.dateAffichable) | date:'dd/MM/yyyy' }}</span>
             <span class="grow">{{ p.montantTotal | currency:'EUR' }}</span>
             <span class="status-badge" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
-            <button class="btn btn-soft-primary btn-sm" *ngIf="p.statutCss==='status--success'" (click)="ouvrirRecuStripe(p.id)">Reçu</button>
+            <ui-button type="button" variant="primary" customClass="btn-soft-primary" size="sm" label="Reçu" *ngIf="p.statutCss==='status--success'" (clicked)="ouvrirRecuStripe(p.id)" />
           </li>
         </ul>
       </div>
@@ -311,11 +313,8 @@
     <div *ngIf="paiementErreur" class="error">{{ erreurMessage }}</div>
 
     <div class="modal-card__actions">
-      <button class="btn btn-primary btn-full" (click)="payerEcheances()" [disabled]="enCoursDePaiement">
-        <span *ngIf="enCoursDePaiement" class="btn-spinner"></span>
-        {{ enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement' }}
-      </button>
-      <button class="btn btn-ghost btn-full" (click)="fermerModalPaiement()" [disabled]="enCoursDePaiement">Annuler</button>
+      <ui-button type="button" variant="primary" [full]="true" [label]="enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement'" (clicked)="payerEcheances()" [loading]="enCoursDePaiement" [disabled]="enCoursDePaiement" />
+      <ui-button type="button" variant="ghost" [full]="true" label="Annuler" (clicked)="fermerModalPaiement()" [disabled]="enCoursDePaiement" />
     </div>
 
     <p class="modal-card__stripe-badge">
@@ -362,11 +361,8 @@
 
     <!-- Actions -->
     <div class="modal-card__actions">
-      <button class="btn btn-primary btn-full" (click)="validerCarte()" [disabled]="!stripeReady || enCoursDePaiement">
-        <span *ngIf="enCoursDePaiement" class="btn-spinner"></span>
-        {{ enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement' }}
-      </button>
-      <button class="btn btn-ghost btn-full" (click)="fermerModalCarte()" [disabled]="enCoursDePaiement">Annuler</button>
+      <ui-button type="button" variant="primary" [full]="true" [label]="enCoursDePaiement ? 'Paiement en cours...' : 'Confirmer le paiement'" (clicked)="validerCarte()" [loading]="enCoursDePaiement" [disabled]="!stripeReady || enCoursDePaiement" />
+      <ui-button type="button" variant="ghost" [full]="true" label="Annuler" (clicked)="fermerModalCarte()" [disabled]="enCoursDePaiement" />
     </div>
 
     <p class="modal-card__stripe-badge">

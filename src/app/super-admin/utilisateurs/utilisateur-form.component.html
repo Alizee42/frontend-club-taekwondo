@@ -27,7 +27,14 @@
       <option value="">Sélectionner un club</option>
       <option *ngFor="let c of clubs" [value]="c.id">{{ c.nom || c.name }}</option>
     </select>
-    <button type="button" (click)="refreshClubs()" style="margin-left:8px;">Rafraîchir la liste des clubs</button>
+    <ui-button
+      type="button"
+      variant="secondary"
+      size="sm"
+      customClass="ms-auto"
+      label="Rafraîchir la liste des clubs"
+      (clicked)="refreshClubs()"
+    />
   </div>
 
   <div *ngIf="mode === 'ajout'" class="form-group">
@@ -36,7 +43,7 @@
     <span style="font-size: 0.9em; color: #888;">Si laissé vide, l'utilisateur recevra un email pour définir son mot de passe avant sa première connexion.</span>
   </div>
   <div class="form-actions">
-    <button type="submit" [disabled]="form.invalid">Valider</button>
-    <button type="button" (click)="cancel.emit()">Annuler</button>
+    <ui-button type="submit" variant="primary" label="Valider" [disabled]="!!form.invalid" />
+    <ui-button type="button" variant="secondary" label="Annuler" (clicked)="cancel.emit()" />
   </div>
 </form>

@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth.service';
 import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
 import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { DOC_CATALOG } from '../../shared/documents/doc-utils';
+import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
 
 
 
@@ -28,7 +29,7 @@ interface Utilisateur {
   selector: 'app-dashboard-membre',
   templateUrl: './dashboard-membre.component.html',
   styleUrls: ['./dashboard-membre.component.css'],
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DashboardNavCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardMembreComponent implements OnInit {

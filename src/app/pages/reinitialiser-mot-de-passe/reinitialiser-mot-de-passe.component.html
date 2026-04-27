@@ -16,14 +16,8 @@
         <h2>Lien invalide ou expiré</h2>
         <p>Ce lien de réinitialisation n'est plus valide ou a déjà été utilisé.</p>
         <div class="action-buttons">
-          <button type="button" class="primary-btn" (click)="requestNewLink()">
-            <i class="ri-mail-line"></i>
-            Demander un nouveau lien
-          </button>
-          <button type="button" class="secondary-btn" (click)="goToLogin()">
-            <i class="ri-arrow-left-line"></i>
-            Retour à la connexion
-          </button>
+          <ui-button type="button" variant="primary" icon="ri-mail-line" label="Demander un nouveau lien" (clicked)="requestNewLink()" />
+          <ui-button type="button" variant="secondary" icon="ri-arrow-left-line" label="Retour à la connexion" (clicked)="goToLogin()" />
         </div>
       </ng-container>
       <ng-template #missingToken>
@@ -31,10 +25,7 @@
         <p>Vous avez accédé à la page de réinitialisation sans lien valide.<br>
         Veuillez utiliser le lien reçu par email ou retourner à la connexion.</p>
         <div class="action-buttons">
-          <button type="button" class="secondary-btn" (click)="goToLogin()">
-            <i class="ri-arrow-left-line"></i>
-            Retour à la connexion
-          </button>
+          <ui-button type="button" variant="secondary" icon="ri-arrow-left-line" label="Retour à la connexion" (clicked)="goToLogin()" />
         </div>
       </ng-template>
     </div>
@@ -150,15 +141,14 @@
           </ul>
         </div>
 
-        <button 
-          type="submit" 
-          class="submit-btn" 
-          [disabled]="resetForm.invalid || loading || !isPasswordStrong(password) || password !== confirmPassword"
-        >
-          <span *ngIf="loading" class="spinner"></span>
-          <span *ngIf="!loading">Réinitialiser le mot de passe</span>
-          <span *ngIf="loading">Mise à jour...</span>
-        </button>
+        <ui-button
+          type="submit"
+          variant="primary"
+          [full]="true"
+          [label]="loading ? 'Mise à jour...' : 'Réinitialiser le mot de passe'"
+          [loading]="loading"
+          [disabled]="!!resetForm.invalid || loading || !isPasswordStrong(password) || password !== confirmPassword"
+        />
       </form>
     </div>
 
@@ -179,10 +169,7 @@
 
     <!-- Bouton de connexion -->
     <div class="action-center" *ngIf="isSuccess">
-      <button type="button" class="primary-btn" (click)="goToLogin()">
-        <i class="ri-login-box-line"></i>
-        Se connecter
-      </button>
+      <ui-button type="button" variant="primary" icon="ri-login-box-line" label="Se connecter" (clicked)="goToLogin()" />
     </div>
   </div>
 </div>

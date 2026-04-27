@@ -13,6 +13,7 @@ import { HttpClient } from '@angular/common/http';
 import { ClubService } from '../../services/club.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { environment } from '../../../environments/environment';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 interface MembrePayload {
   nom: string;
@@ -26,7 +27,7 @@ interface MembrePayload {
 @Component({
   selector: 'app-inscription',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, UiButtonComponent],
   templateUrl: './inscription.component.html',
   styleUrls: ['./inscription.component.css']
 })

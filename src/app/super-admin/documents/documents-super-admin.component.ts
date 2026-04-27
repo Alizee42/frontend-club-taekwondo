@@ -7,6 +7,7 @@ import { ClubService, Club } from '../../services/club.service';
 import { labelFor as docLabelFor, normalizeStatus, unifyType } from '../../shared/documents/doc-utils';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { ToastService } from '../../shared/toast/toast.service';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 
@@ -41,6 +42,8 @@ interface Row {
   cheminFichier?: string;
 }
 
+type UserGroup = { key: string; utilisateurNom: string; utilisateurEmail: string; clubNom: string; docs: Row[] };
+
 @Component({
   selector: 'app-documents-super-admin',
   standalone: true,
@@ -60,9 +63,10 @@ export class DocumentsSuperAdminComponent implements OnInit {
   search = '';
   statut: '' | 'en_attente' | 'validé' | 'refusé' = '';
 
-  // Vue: groupée par utilisateur ou tableau plat
-  groupByUser = true;
-  openGroups = new Map<string, boolean>();
+  // Master-detail
+  selectedGroup: UserGroup | null = null;
+  currentPage = 1;
+  readonly pageSize = 12;
 
   // Aperçu modal
   previewOpen = false;
@@ -70,23 +74,18 @@ export class DocumentsSuperAdminComponent implements OnInit {
   previewName: string = '';
   previewType: 'image' | 'pdf' | 'other' = 'other';
 
-  // Colonnes pour <ui-table>
   tableColumns: UiTableColumn[] = [];
   groupedTableColumns: UiTableColumn[] = [];
 
-  // Actions pour <ui-table>
   tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [
-    { label: 'Valider', icon: 'ri-check-line', action: 'approve', color: '#16a34a', show: (row: any) => normalizeStatus(row.statut) !== 'validé', title: 'Valider' },
-    { label: 'Refuser', icon: 'ri-close-line', action: 'reject', color: '#dc2626', show: (row: any) => normalizeStatus(row.statut) !== 'refusé', title: 'Refuser' },
-    { label: 'Télécharger', icon: 'ri-download-line', action: 'download', color: 'var(--blue-main)', show: (row: any) => normalizeStatus(row.statut) === 'validé', title: 'Télécharger' }
+    { label: 'Valider',      icon: 'ri-check-line',    action: 'approve',   color: '#16a34a', show: (row: any) => normalizeStatus(row.statut) !== 'validé',  title: 'Valider' },
+    { label: 'Refuser',      icon: 'ri-close-line',    action: 'reject',    color: '#dc2626', show: (row: any) => normalizeStatus(row.statut) !== 'refusé',  title: 'Refuser' },
+    { label: 'Télécharger',  icon: 'ri-download-line', action: 'download',  color: 'var(--brand-primary)', show: (row: any) => !!row.cheminFichier,         title: 'Télécharger' }
   ];
 
-  // no templates required
-
-  constructor(private http: HttpClient, private clubService: ClubService) {}
+  constructor(private http: HttpClient, private clubService: ClubService, private toast: ToastService) {}
 
   ngOnInit(): void {
-    // Initialise colonnes une fois le composant prêt (nécessite this.rawUrl)
     this.tableColumns = [
       { key: 'clubNom', label: 'Club' },
       { key: 'utilisateurNom', label: 'Utilisateur' },
@@ -94,24 +93,15 @@ export class DocumentsSuperAdminComponent implements OnInit {
       { key: 'enfantNom', label: 'Enfant' },
       { key: 'typeLabel', label: 'Type' },
       {
-        key: 'nomDocument',
-        label: 'Nom du fichier',
-        type: 'button',
-        buttonLabel: '',
-        buttonIcon: 'ri-eye-line',
-        buttonVariant: 'primary',
+        key: 'nomDocument', label: 'Aperçu',
+        type: 'button', buttonLabel: '', buttonIcon: 'ri-eye-line', buttonVariant: 'primary',
         buttonCustomClass: 'btn-view btn-icon-only',
         buttonDisabled: (row: any) => !this.rawUrl(row.cheminFichier),
         buttonOnClick: (row: any) => this.openPreview(this.rawUrl(row.cheminFichier), row.nomDocument)
       },
       {
-        key: 'statut',
-        label: 'Statut',
-        type: 'text',
-        display: (row: any) => {
-          const s = normalizeStatus(row.statut);
-          return s === 'en_attente' ? 'en attente' : s;
-        },
+        key: 'statut', label: 'Statut', type: 'text',
+        display: (row: any) => { const s = normalizeStatus(row.statut); return s === 'en_attente' ? 'en attente' : s; },
         textClass: (row: any) => {
           const s = normalizeStatus(row.statut);
           if (s === 'validé') return 'badge-pill badge-success';
@@ -120,20 +110,17 @@ export class DocumentsSuperAdminComponent implements OnInit {
         }
       },
       {
-        key: 'dateDepot',
-        label: 'Date',
-        type: 'date',
+        key: 'dateDepot', label: 'Date', type: 'date',
         display: (row: any) => row?.dateDepot ? new Date(row.dateDepot).toLocaleDateString('fr-FR') : ''
       }
     ];
 
-    // colonnes pour vue groupée: masque Utilisateur/Email (déjà dans l'en-tête de groupe)
-    this.groupedTableColumns = this.tableColumns.filter(c => c.key !== 'utilisateurNom' && c.key !== 'utilisateurEmail');
+    this.groupedTableColumns = this.tableColumns.filter(
+      c => c.key !== 'utilisateurNom' && c.key !== 'utilisateurEmail' && c.key !== 'clubNom'
+    );
 
     this.loadClubs();
   }
-
-  // no AfterViewInit needed
 
   private loadClubs() {
     this.clubService.getClubs().subscribe({
@@ -158,8 +145,7 @@ export class DocumentsSuperAdminComponent implements OnInit {
           const utilisateurNom = `${(d.utilisateur?.prenom || '').trim()} ${(d.utilisateur?.nom || '').trim()}`.trim();
           const enfantNom = d.enfant ? `${d.enfant.prenom || ''} ${d.enfant.nom || ''}`.trim() : '';
           return {
-            id: d.id,
-            clubId,
+            id: d.id, clubId,
             clubNom: mapClubName(clubId),
             utilisateurNom: utilisateurNom || '—',
             utilisateurEmail: d.utilisateur?.email || '—',
@@ -175,7 +161,12 @@ export class DocumentsSuperAdminComponent implements OnInit {
         this.rows = (docs || []).map(toRow);
         this.applyFilters();
       },
-      error: (err) => { console.error('Erreur load docs', err); this.rows = []; this.filtered = []; }
+      error: (err) => {
+        console.error('Erreur load docs', err);
+        this.toast.error('Erreur lors du chargement des documents.');
+        this.rows = [];
+        this.filtered = [];
+      }
     });
   }
 
@@ -189,53 +180,125 @@ export class DocumentsSuperAdminComponent implements OnInit {
       const matchStatut = !stat || normalizeStatus(r.statut) === stat;
       return matchClub && matchText && matchStatut;
     });
-    // Réinitialise l'état des groupes ouverts quand on change le filtre
-    const keys = new Set(this.filtered.map(r => `${r.utilisateurNom}||${r.utilisateurEmail}`));
-    // Ferme les groupes qui n'existent plus
-    Array.from(this.openGroups.keys()).forEach(k => { if (!keys.has(k)) this.openGroups.delete(k); });
+    this.currentPage = 1;
+    // Met à jour le groupe sélectionné si encore présent, sinon le désélectionne
+    if (this.selectedGroup) {
+      const still = this.userGroups.find(g => g.key === this.selectedGroup!.key);
+      this.selectedGroup = still ?? null;
+    }
   }
 
   onSearchChange() { this.applyFilters(); }
   onStatutChange() { this.applyFilters(); }
 
-  // ====== URL helpers ======
-  private encodeLastSegment(p: string): string {
-    const parts = p.split('/');
-    const last = parts.pop() || '';
-    let decoded = last;
-    try { decoded = decodeURIComponent(last); } catch { /* ignore */ }
-    parts.push(encodeURIComponent(decoded));
-    return parts.join('/');
+  // ====== Groupes ======
+  get userGroups(): UserGroup[] {
+    const map = new Map<string, UserGroup>();
+    (this.filtered || []).forEach(r => {
+      const key = `${r.utilisateurNom}||${r.utilisateurEmail}`;
+      if (!map.has(key)) {
+        map.set(key, { key, utilisateurNom: r.utilisateurNom, utilisateurEmail: r.utilisateurEmail, clubNom: r.clubNom, docs: [] });
+      }
+      map.get(key)!.docs.push(r);
+    });
+    return Array.from(map.values());
   }
 
-  private buildUrl(path?: string): string {
-    if (!path) return '';
-    let p = String(path).trim();
-    if (/^https?:\/\//i.test(p)) return p; // direct URL (Drive, etc.)
-    p = p.replace(/^\.?\/+/, '');
-    if (!p.startsWith('documents/')) p = `documents/${p}`;
-    p = `/api/uploads/documents/${p.replace(/^documents\//, '')}`;
-    return this.encodeLastSegment(p);
+  // ====== Master-detail ======
+  get totalPages(): number { return Math.ceil(this.userGroups.length / this.pageSize); }
+
+  get paginatedGroups(): UserGroup[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.userGroups.slice(start, start + this.pageSize);
   }
 
-  rawUrl(path?: string): string { return this.buildUrl(path); }
+  get pages(): number[] {
+    const total = this.totalPages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const p = this.currentPage;
+    const result: number[] = [1];
+    if (p > 3) result.push(0);
+    for (let i = Math.max(2, p - 1); i <= Math.min(total - 1, p + 1); i++) result.push(i);
+    if (p < total - 2) result.push(0);
+    result.push(total);
+    return result;
+  }
+
+  selectGroup(g: UserGroup) { this.selectedGroup = g; }
+
+  goToPage(p: number) {
+    if (p < 1 || p > this.totalPages) return;
+    this.currentPage = p;
+  }
+
+  // ====== Statut groupe ======
+  getGroupStatus(docs: Row[]): 'en_attente' | 'validé' | 'refusé' {
+    if (!docs?.length) return 'validé';
+    if (docs.some(d => normalizeStatus(d.statut) === 'en_attente')) return 'en_attente';
+    if (docs.some(d => normalizeStatus(d.statut) === 'refusé')) return 'refusé';
+    return 'validé';
+  }
+
+  countStatus(docs: Row[], s: Statut): number {
+    return (docs || []).filter(d => normalizeStatus(d.statut) === s).length;
+  }
+
+  private normRole(v?: string): string { return (v || '').toString().trim().toUpperCase(); }
+
+  isParentGroup(docs: Row[]): boolean {
+    if (!docs?.length) return false;
+    if (docs.some(d => this.normRole(d.role) === 'PARENT')) return true;
+    return this.groupChildNames(docs).length > 0;
+  }
+
+  hasKidsGroup(docs: Row[]): boolean { return this.groupChildNames(docs).length > 0; }
+
+  groupChildNames(docs: Row[]): string[] {
+    const set = new Set<string>();
+    (docs || []).forEach(d => { const n = (d.enfantNom || '').trim(); if (n && n !== '—') set.add(n); });
+    return Array.from(set.values());
+  }
+
+  // ====== Actions groupées ======
+  validerTous(docs: Row[]) {
+    (docs || []).filter(d => normalizeStatus(d.statut) === 'en_attente').forEach(d => this.approve(d));
+  }
+
+  refuserTous(docs: Row[]) {
+    (docs || []).filter(d => normalizeStatus(d.statut) === 'en_attente').forEach(d => this.reject(d));
+  }
+
+  // ====== Validation / Refus ======
+  approve(row: Row) {
+    this.http.put(`${this.API_BASE}/documents/${row.id}/valider`, null, { observe: 'response' }).subscribe({
+      next: () => {
+        this.rows = this.rows.map(r => r.id === row.id ? { ...r, statut: 'validé' } : r);
+        this.applyFilters();
+        this.toast.success('Document validé.');
+      },
+      error: (err) => { console.error(err); this.toast.error('Erreur lors de la validation du document.'); }
+    });
+  }
+
+  reject(row: Row) {
+    this.http.put(`${this.API_BASE}/documents/${row.id}/refuser`, null, { observe: 'response' }).subscribe({
+      next: () => {
+        this.rows = this.rows.map(r => r.id === row.id ? { ...r, statut: 'refusé' } : r);
+        this.applyFilters();
+        this.toast.success('Document refusé.');
+      },
+      error: (err) => { console.error(err); this.toast.error('Erreur lors du refus du document.'); }
+    });
+  }
 
   handleAction(event: { action: string; row: Row }) {
     const { action, row } = event;
+    if (action === 'approve') { this.approve(row); return; }
+    if (action === 'reject')  { this.reject(row);  return; }
     if (action === 'download') {
-      if (normalizeStatus(row.statut) !== 'validé') return;
       const url = this.rawUrl(row.cheminFichier);
       if (url) window.open(url, '_blank');
-      return;
     }
-    if (action === 'approve') { this.approve(row); return; }
-    if (action === 'reject') { this.reject(row); return; }
-    if (action === 'view') { this.onDownload(row.id, row.cheminFichier); return; }
-  }
-
-  onDownload(id: number | string, cheminFichier?: string) {
-    const url = this.rawUrl(cheminFichier);
-    if (url) window.open(url, '_blank');
   }
 
   // ====== Aperçu modal ======
@@ -254,108 +317,27 @@ export class DocumentsSuperAdminComponent implements OnInit {
     this.previewOpen = true;
   }
 
-  closePreview() {
-    this.previewOpen = false;
-    this.previewUrl = '';
-    this.previewName = '';
-    this.previewType = 'other';
+  closePreview() { this.previewOpen = false; this.previewUrl = ''; this.previewName = ''; this.previewType = 'other'; }
+
+  // ====== URL helpers ======
+  private encodeLastSegment(p: string): string {
+    const parts = p.split('/');
+    const last = parts.pop() || '';
+    let decoded = last;
+    try { decoded = decodeURIComponent(last); } catch { /* ignore */ }
+    parts.push(encodeURIComponent(decoded));
+    return parts.join('/');
   }
 
-  // ====== Validation / Refus ======
-  approve(row: Row) {
-    this.http.put(`${this.API_BASE}/documents/${row.id}/valider`, null, { observe: 'response' })
-      .subscribe({
-        next: () => {
-          row.statut = 'validé';
-          // synchronise dans filtered/rows
-          this.rows = this.rows.map(r => r.id === row.id ? { ...r, statut: 'validé' } : r);
-          this.applyFilters();
-        },
-        error: (err) => console.error('Erreur validation document', err)
-      });
+  private buildUrl(path?: string): string {
+    if (!path) return '';
+    let p = String(path).trim();
+    if (/^https?:\/\//i.test(p)) return p;
+    p = p.replace(/^\.?\/+/, '');
+    if (!p.startsWith('documents/')) p = `documents/${p}`;
+    p = `/api/uploads/documents/${p.replace(/^documents\//, '')}`;
+    return this.encodeLastSegment(p);
   }
 
-  reject(row: Row) {
-    this.http.put(`${this.API_BASE}/documents/${row.id}/refuser`, null, { observe: 'response' })
-      .subscribe({
-        next: () => {
-          row.statut = 'refusé';
-          this.rows = this.rows.map(r => r.id === row.id ? { ...r, statut: 'refusé' } : r);
-          this.applyFilters();
-        },
-        error: (err) => console.error('Erreur refus document', err)
-      });
-  }
-
-  // ====== Groupement par utilisateur ======
-  get userGroups(): Array<{ key: string; utilisateurNom: string; utilisateurEmail: string; docs: Row[]; isOpen: boolean }>{
-    const map = new Map<string, { utilisateurNom: string; utilisateurEmail: string; docs: Row[] }>();
-    (this.filtered || []).forEach(r => {
-      const key = `${r.utilisateurNom}||${r.utilisateurEmail}`;
-      if (!map.has(key)) {
-        map.set(key, { utilisateurNom: r.utilisateurNom, utilisateurEmail: r.utilisateurEmail, docs: [] });
-      }
-      map.get(key)!.docs.push(r);
-    });
-    return Array.from(map.entries()).map(([key, v]) => ({ key, ...v, isOpen: this.openGroups.get(key) ?? false }));
-  }
-
-  toggleGroup(key: string) {
-    const curr = this.openGroups.get(key) ?? false;
-    this.openGroups.set(key, !curr);
-  }
-
-  // ====== Style et infos pour entête de groupe ======
-  getGroupClass(docs: Row[]): string {
-    if (!docs || !docs.length) return '';
-    const hasWaiting = docs.some(d => normalizeStatus(d.statut) === 'en_attente');
-    const hasRefused = docs.some(d => normalizeStatus(d.statut) === 'refusé');
-    if (hasWaiting) return 'status-warn';
-    if (hasRefused) return 'status-danger';
-    // tout validé (ou aucun statut particulier)
-    return 'status-success';
-  }
-
-  countStatus(docs: Row[], s: Statut): number {
-    return (docs || []).filter(d => normalizeStatus(d.statut) === s).length;
-  }
-
-  // ====== Rôle/Enfants pour rendu groupé (harmonisation Admin) ======
-  private normRole(v?: string): string {
-    return (v || '').toString().trim().toUpperCase();
-  }
-
-  isParentGroup(docs: Row[]): boolean {
-    if (!docs || !docs.length) return false;
-    // Si au moins un rôle PARENT, on considère le groupe comme Parent
-    const hasParentRole = docs.some(d => this.normRole(d.role) === 'PARENT');
-    if (hasParentRole) return true;
-    // fallback: s'il y a des enfants nommés
-    return this.groupChildNames(docs).length > 0;
-  }
-
-  hasKidsGroup(docs: Row[]): boolean { return this.groupChildNames(docs).length > 0; }
-
-  groupChildNames(docs: Row[]): string[] {
-    const set = new Set<string>();
-    (docs || []).forEach(d => {
-      const n = (d.enfantNom || '').trim();
-      if (n && n !== '—') set.add(n);
-    });
-    return Array.from(set.values());
-  }
-
-  // ====== Actions groupées (harmonisation avec Admin) ======
-  validerTous(docs: Row[]) {
-    (docs || [])
-      .filter(d => normalizeStatus(d.statut) === 'en_attente')
-      .forEach(d => this.approve(d));
-  }
-
-  refuserTous(docs: Row[]) {
-    (docs || [])
-      .filter(d => normalizeStatus(d.statut) === 'en_attente')
-      .forEach(d => this.reject(d));
-  }
+  rawUrl(path?: string): string { return this.buildUrl(path); }
 }
-

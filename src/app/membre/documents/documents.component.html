@@ -1,45 +1,44 @@
 <div class="page-shell">
   <app-page-header title="Mes documents" icon="ri-file-text-line"></app-page-header>
 
-  <div class="documents-grid">
-    <!-- Documents obligatoires -->
-    <div class="card">
-      <div class="card-header">
-        <h3>Documents obligatoires</h3>
+  <!-- Barre de progression (une seule ligne, scrollable) -->
+  <div class="docs-progress-bar" role="list" aria-label="Statut des documents obligatoires">
+    <div class="progress-chip"
+         role="listitem"
+         *ngFor="let doc of requiredDocuments"
+         [ngClass]="{
+           'chip-success': getDocumentStatusInfo(doc.type).state === 'validé',
+           'chip-warn':    getDocumentStatusInfo(doc.type).state === 'en_attente',
+           'chip-danger':  getDocumentStatusInfo(doc.type).state === 'refusé'
+         }">
+      <i class="ri-check-circle-fill" *ngIf="getDocumentStatusInfo(doc.type).state === 'validé'"     aria-hidden="true"></i>
+      <i class="ri-time-fill"          *ngIf="getDocumentStatusInfo(doc.type).state === 'en_attente'"  aria-hidden="true"></i>
+      <i class="ri-close-circle-fill"  *ngIf="getDocumentStatusInfo(doc.type).state === 'refusé'"      aria-hidden="true"></i>
+      <span>{{ doc.label }}</span>
+      <i *ngIf="getDocumentStatusInfo(doc.type).tooltip"
+         class="tooltip-icon"
+         [title]="getDocumentStatusInfo(doc.type).tooltip!"
+         aria-label="Info">i</i>
+    </div>
+  </div>
+
+  <!-- Card upload -->
+  <div class="upload-card">
+    <div class="upload-card-header">
+      <div class="upload-card-icon">
+        <i class="ri-upload-cloud-2-line" aria-hidden="true"></i>
       </div>
-      <div class="card-body">
-        <p class="section-desc">Ces documents sont nécessaires pour valider votre inscription.</p>
-        <ul class="required-list">
-          <li *ngFor="let doc of requiredDocuments">
-            <span>{{ doc.label }}</span>
-            <ng-container *ngIf="getDocumentStatusInfo(doc.type) as statusInfo">
-              <span class="status-badge"
-                    [class.status--success]="statusInfo.state === 'validé'"
-                    [class.status--warning]="statusInfo.state === 'en_attente'"
-                    [class.status--danger]="statusInfo.state === 'refusé'">
-                <i class="ri-check-line" *ngIf="statusInfo.state === 'validé'"></i>
-                <i class="ri-time-line" *ngIf="statusInfo.state === 'en_attente'"></i>
-                <i class="ri-close-line" *ngIf="statusInfo.state === 'refusé'"></i>
-                {{ statusInfo.text }}
-              </span>
-            </ng-container>
-          </li>
-        </ul>
+      <div>
+        <h3>Ajouter un document</h3>
+        <p>PDF, PNG ou JPEG · maximum 5 Mo</p>
       </div>
     </div>
-
-    <!-- Formulaire d'upload -->
-    <div class="card">
-      <div class="card-header">
-        <h3>Ajouter un document</h3>
-      </div>
-      <div class="card-body">
-        <p class="section-desc">Sélectionnez le type de document et téléversez le fichier correspondant.</p>
-        <form (ngSubmit)="onUploadDocument()" enctype="multipart/form-data">
+    <div class="upload-card-body">
+      <form (ngSubmit)="onUploadDocument()" enctype="multipart/form-data" novalidate class="upload-form">
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="documentType">Type de document</label>
-            <select id="documentType" class="form-select"
-                    [(ngModel)]="documentType" name="documentType" required>
+            <select id="documentType" class="form-select" [(ngModel)]="documentType" name="documentType" required>
               <option *ngFor="let doc of requiredDocuments" [value]="doc.type" [disabled]="doc.uploaded">
                 {{ doc.label }}
               </option>
@@ -48,33 +47,38 @@
           <div class="form-group">
             <label class="form-label" for="documentFile">Fichier</label>
             <div class="upload-zone">
-              <input type="file" id="documentFile"
-                     accept=".pdf,.png,.jpg,.jpeg"
+              <input id="documentFile" type="file"
                      (change)="onFileSelected($event)"
-                     required />
+                     accept=".pdf,.png,.jpg,.jpeg" />
             </div>
             <small class="field-error" *ngIf="selectedFile && !isValidFile(selectedFile)">
-              Type ou taille invalide. PNG, JPEG ou PDF, max 5 Mo.
+              Fichier invalide — PNG, JPEG ou PDF, max 5 Mo.
             </small>
           </div>
-          <button type="submit" class="btn btn-primary">
-            <i class="ri-upload-2-line"></i> Téléverser
-          </button>
-        </form>
-      </div>
+        </div>
+        <div class="form-actions">
+          <ui-button
+            type="submit"
+            variant="primary"
+            icon="ri-upload-2-line"
+            label="Téléverser"
+            [disabled]="!documentType || !selectedFile || !isValidFile(selectedFile)"
+          />
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Liste des documents -->
-    <div class="documents-list">
-      <h3 class="list-title">Vos documents</h3>
-      <div class="table-wrap">
-        <ui-table
-          [columns]="tableColumns"
-          [data]="rows"
-          [actions]="tableActions"
-          (actionClick)="onActionTable($event)">
-        </ui-table>
-      </div>
+  <!-- Tableau des documents -->
+  <div class="docs-table-section">
+    <h3 class="section-title">Documents envoyés</h3>
+    <div class="table-wrap">
+      <ui-table
+        [columns]="tableColumns"
+        [data]="rows"
+        [actions]="tableActions"
+        (actionClick)="onActionTable($event)">
+      </ui-table>
     </div>
   </div>
 </div>

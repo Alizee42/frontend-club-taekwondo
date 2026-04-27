@@ -101,9 +101,13 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" [disabled]="loginForm.invalid">
-          Se connecter
-        </button>
+        <ui-button
+          type="submit"
+          variant="primary"
+          [full]="true"
+          label="Se connecter"
+          [disabled]="!!loginForm.invalid"
+        />
 
       </form>
 

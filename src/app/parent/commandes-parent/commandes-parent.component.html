@@ -12,10 +12,14 @@
       placeholder="Rechercher une commande"
       [(ngModel)]="search" />
 
-    <button class="btn btn-secondary ms-auto" type="button" (click)="chargerCommandes()">
-      <i class="ri-refresh-line"></i>
-      Rafraichir
-    </button>
+    <ui-button
+      customClass="ms-auto"
+      type="button"
+      variant="secondary"
+      icon="ri-refresh-line"
+      label="Rafraichir"
+      (clicked)="chargerCommandes()"
+    />
   </div>
 
   <div class="loader" *ngIf="isLoading">Chargement...</div>
@@ -74,7 +78,12 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-secondary" type="button" (click)="fermerDetails()">Fermer</button>
+      <ui-button
+        type="button"
+        variant="secondary"
+        label="Fermer"
+        (clicked)="fermerDetails()"
+      />
     </div>
   </ng-container>
 </ui-modal>

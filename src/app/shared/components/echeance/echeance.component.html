@@ -30,7 +30,7 @@
           <span>{{ e.montant | currency:'EUR' }}</span>
         </div>
         <span [class]="classeBadge(e.statut)">{{ e.statut }}</span>
-        <button class="action-btn action-btn--success"
+        <button type="button" class="action-btn action-btn--success"
           *ngIf="!isPaye(e.statut)"
           (click)="onPayer(e)"
           title="Marquer payee"
@@ -57,7 +57,7 @@
             <td class="num">{{ e.montant | currency:'EUR' }}</td>
             <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
             <td>
-              <button class="action-btn action-btn--success"
+              <button type="button" class="action-btn action-btn--success"
                 *ngIf="(e.statut || '').toLowerCase() !== 'payé'"
                 (click)="onPayer(e)"
                 title="Marquer payée"
@@ -112,7 +112,7 @@
 
     <div class="modal-actions">
       <ui-button label="Fermer" variant="secondary" customClass="btn-inline" (clicked)="close()"></ui-button>
-      <ui-button *ngIf="paiement" label="Marquer tout payé" customClass="btn-inline success" (clicked)="onMarquerTout()"></ui-button>
+      <ui-button *ngIf="paiement" label="Marquer tout payé" variant="success" customClass="btn-inline" (clicked)="onMarquerTout()"></ui-button>
     </div>
   </div>
 </ui-modal>

@@ -22,15 +22,14 @@
         />
       </div>
 
-      <button 
-        type="submit" 
-        class="submit-btn" 
-        [disabled]="resetForm.invalid || loading"
-      >
-        <span *ngIf="loading" class="spinner"></span>
-        <span *ngIf="!loading">Envoyer le lien</span>
-        <span *ngIf="loading">Envoi en cours...</span>
-      </button>
+      <ui-button
+        type="submit"
+        variant="primary"
+        [full]="true"
+        [label]="loading ? 'Envoi en cours...' : 'Envoyer le lien'"
+        [loading]="loading"
+        [disabled]="!!resetForm.invalid || loading"
+      />
     </form>
 
     <!-- Message de succès simplifié -->
@@ -50,10 +49,13 @@
 
     <!-- Liens de navigation -->
     <div class="links-container">
-      <button type="button" class="link-btn" (click)="goToLogin()">
-        <i class="ri-arrow-left-line"></i>
-        Retour à la connexion
-      </button>
+      <ui-button
+        type="button"
+        variant="ghost"
+        icon="ri-arrow-left-line"
+        label="Retour à la connexion"
+        (clicked)="goToLogin()"
+      />
     </div>
   </div>
 </div>

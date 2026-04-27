@@ -2,8 +2,8 @@
 
   <!-- SWITCHER VUE -->
   <div *ngIf="showToolbar" class="tabs">
-    <button class="tab-btn" [class.active]="mode==='paiements'" (click)="setViewMode('paiements')">Par paiement</button>
-    <button class="tab-btn" [class.active]="mode==='utilisateurs'" (click)="setViewMode('utilisateurs')">Par utilisateur</button>
+    <button type="button" class="tab-btn" [class.active]="mode==='paiements'" (click)="setViewMode('paiements')">Par paiement</button>
+    <button type="button" class="tab-btn" [class.active]="mode==='utilisateurs'" (click)="setViewMode('utilisateurs')">Par utilisateur</button>
   </div>
 
   <!-- BARRE D'OUTILS -->
@@ -53,9 +53,15 @@
         <input type="checkbox" [(ngModel)]="groupByParent" (change)="buildGroups()" />
         Grouper par parent
       </label>
-      <button class="btn btn-ghost btn-sm ms-auto" (click)="resetFilters()">
-        <i class="ri-eraser-line"></i> Réinitialiser
-      </button>
+      <ui-button
+        customClass="ms-auto"
+        type="button"
+        variant="ghost"
+        size="sm"
+        icon="ri-eraser-line"
+        label="Réinitialiser"
+        (clicked)="resetFilters()"
+      />
     </div>
 
     <app-empty-state *ngIf="!paiementsFiltres.length && !error"
@@ -106,9 +112,9 @@
             <td><span [class]="classeBadge(p.statut)">{{ p.statut }}</span></td>
             <td class="actions-col">
               <div class="actions-wrap">
-                <button class="action-btn action-btn--primary" (click)="ouvrirEcheances(p)" title="Voir les échéances" aria-label="Voir les échéances"><i class="ri-calendar-event-line"></i></button>
-                <button class="action-btn action-btn--success" *ngIf="estPayable(p)" (click)="marquerPaiementPaye(p)" title="Marquer comme payé" aria-label="Marquer comme payé"><i class="ri-checkbox-circle-line"></i></button>
-                <button class="action-btn action-btn--danger" (click)="ouvrirAnnulation(p)" title="Annuler" aria-label="Annuler"><i class="ri-close-circle-line"></i></button>
+                <button type="button" class="action-btn action-btn--primary" (click)="ouvrirEcheances(p)" title="Voir les échéances" aria-label="Voir les échéances"><i class="ri-calendar-event-line"></i></button>
+                <button type="button" class="action-btn action-btn--success" *ngIf="estPayable(p)" (click)="marquerPaiementPaye(p)" title="Marquer comme payé" aria-label="Marquer comme payé"><i class="ri-checkbox-circle-line"></i></button>
+                <button type="button" class="action-btn action-btn--danger" (click)="ouvrirAnnulation(p)" title="Annuler" aria-label="Annuler"><i class="ri-close-circle-line"></i></button>
               </div>
             </td>
           </tr>
@@ -148,8 +154,8 @@
             <td class="num">{{ g.restant | currency:'EUR' }}</td>
             <td><span [class]="classeBadge(g.statut)">{{ g.statut }}</span></td>
             <td class="actions-col">
-              <button class="action-btn action-btn--primary" (click)="userVoirStats(g)" title="Statistiques" aria-label="Statistiques"><i class="ri-bar-chart-2-line"></i></button>
-              <button class="action-btn action-btn--primary" (click)="userVoirEcheances(g)" title="Échéances" aria-label="Échéances"><i class="ri-calendar-line"></i></button>
+              <button type="button" class="action-btn action-btn--primary" (click)="userVoirStats(g)" title="Statistiques" aria-label="Statistiques"><i class="ri-bar-chart-2-line"></i></button>
+              <button type="button" class="action-btn action-btn--primary" (click)="userVoirEcheances(g)" title="Échéances" aria-label="Échéances"><i class="ri-calendar-line"></i></button>
             </td>
           </tr>
         </tbody>
@@ -226,8 +232,8 @@
               <td class="num" [class.pay-kpi-val--danger]="u.restant > 0">{{ u.restant | currency:'EUR' }}</td>
               <td><span [class]="classeBadge(u.statut)">{{ u.statut }}</span></td>
               <td class="actions-col">
-                <button class="action-btn action-btn--primary" (click)="userVoirStats(u)" title="Statistiques" aria-label="Statistiques"><i class="ri-bar-chart-2-line"></i></button>
-                <button class="action-btn action-btn--primary" (click)="toggleUserExpansion(u)" title="Afficher / Masquer échéances" aria-label="Afficher échéances"><i [class]="isUserExpanded(u) ? 'ri-arrow-down-s-line' : 'ri-calendar-line'"></i></button>
+                <button type="button" class="action-btn action-btn--primary" (click)="userVoirStats(u)" title="Statistiques" aria-label="Statistiques"><i class="ri-bar-chart-2-line"></i></button>
+                <button type="button" class="action-btn action-btn--primary" (click)="toggleUserExpansion(u)" title="Afficher / Masquer échéances" aria-label="Afficher échéances"><i [class]="isUserExpanded(u) ? 'ri-arrow-down-s-line' : 'ri-calendar-line'"></i></button>
               </td>
             </tr>
             <tr *ngIf="isUserExpanded(u)" class="row-expanded">
@@ -244,7 +250,7 @@
                         </div>
                         <div class="pay-header-right">
                           <span class="pay-date text-muted">{{ p.datePaiement | date:'dd/MM/yyyy' }}</span>
-                          <button class="action-btn action-btn--success" *ngIf="estPayable(p)" (click)="marquerPaiementPaye(p)" title="Marquer payé" aria-label="Marquer payé"><i class="ri-checkbox-circle-line"></i></button>
+                          <button type="button" class="action-btn action-btn--success" *ngIf="estPayable(p)" (click)="marquerPaiementPaye(p)" title="Marquer payé" aria-label="Marquer payé"><i class="ri-checkbox-circle-line"></i></button>
                         </div>
                       </div>
                       <!-- Corps : membre + KPIs montants -->
@@ -284,7 +290,7 @@
                               <td class="num">{{ e.montant | currency:'EUR' }}</td>
                               <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
                               <td>
-                                <button class="action-btn action-btn--success" *ngIf="(e.statut || '').toLowerCase() !== 'payé'" (click)="marquerEcheancePayee(p, e)" title="Marquer payée" aria-label="Marquer payée"><i class="ri-check-line"></i></button>
+                                <button type="button" class="action-btn action-btn--success" *ngIf="(e.statut || '').toLowerCase() !== 'payé'" (click)="marquerEcheancePayee(p, e)" title="Marquer payée" aria-label="Marquer payée"><i class="ri-check-line"></i></button>
                               </td>
                             </tr>
                           </tbody>
@@ -398,7 +404,7 @@
                     <td class="num">{{ e.montant | currency:'EUR' }}</td>
                     <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
                     <td class="actions-col">
-                      <button class="action-btn action-btn--success" *ngIf="(e.statut || '').toLowerCase() !== 'payé'" (click)="marquerEcheancePayee(p, e)" title="Marquer payée" aria-label="Marquer payée"><i class="ri-check-line"></i></button>
+                      <button type="button" class="action-btn action-btn--success" *ngIf="(e.statut || '').toLowerCase() !== 'payé'" (click)="marquerEcheancePayee(p, e)" title="Marquer payée" aria-label="Marquer payée"><i class="ri-check-line"></i></button>
                     </td>
                   </tr>
                 </tbody>

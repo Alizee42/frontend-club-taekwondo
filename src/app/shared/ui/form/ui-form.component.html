@@ -23,5 +23,12 @@
 
   <div *ngIf="error" class="ui-form-error-global">{{ error }}</div>
 
-  <button type="submit" class="ui-form-submit" [disabled]="loading">{{ submitLabel }}</button>
+  <ui-button
+    [customClass]="'ui-form-submit'"
+    type="submit"
+    variant="primary"
+    [label]="submitLabel"
+    [disabled]="loading"
+    [loading]="loading"
+  />
 </form>

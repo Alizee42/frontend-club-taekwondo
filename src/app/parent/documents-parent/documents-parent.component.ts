@@ -7,9 +7,11 @@ import { environment } from '../../../environments/environment';
 import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
+import { ToastService } from '../../shared/toast/toast.service';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
+import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 
 
 type StatutDoc = 'validé' | 'refusé' | 'en_attente' | string;
@@ -57,7 +59,7 @@ interface RequiredDoc {
   selector: 'app-documents-parent',
   templateUrl: './documents-parent.component.html',
   styleUrls: ['./documents-parent.component.css'],
-  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, EmptyStateComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, EmptyStateComponent, PageHeaderComponent, UiButtonComponent],
 })
 export class DocumentsParentComponent implements OnInit {
   private readonly API_BASE = environment.apiUrl;
@@ -96,6 +98,7 @@ export class DocumentsParentComponent implements OnInit {
     private http: HttpClient,
     private sanitizer: DomSanitizer,
     private requiredSvc: RequiredDocsService,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -333,8 +336,11 @@ export class DocumentsParentComponent implements OnInit {
         this.selectedFile = null;
         this.computeRows();
         this.refreshRequiredUploaded();
+        this.toast.success('Document téléversé avec succès.');
       },
-      error: () => {}
+      error: () => {
+        this.toast.error('Erreur lors du téléversement du document.');
+      }
     });
   }
 
@@ -342,7 +348,7 @@ export class DocumentsParentComponent implements OnInit {
   onEditDocument(doc: DocumentItem): void {
     if (!doc) return;
     if (this.normalizeStatus(doc.status) === 'validé') {
-      alert('Document validé, non modifiable.');
+      this.toast.warning('Document validé, non modifiable.');
       return;
     }
 
@@ -362,8 +368,11 @@ export class DocumentsParentComponent implements OnInit {
           this.documents = this.documents.map(d => d.id === doc.id ? mapped : d);
           this.computeRows();
           this.refreshRequiredUploaded();
+          this.toast.success('Document mis à jour.');
         },
-        error: () => {}
+        error: () => {
+          this.toast.error('Erreur lors du remplacement du document.');
+        }
       });
     };
     input.click();
@@ -372,7 +381,7 @@ export class DocumentsParentComponent implements OnInit {
   onDeleteDocument(doc: DocumentItem): void {
     if (!doc) return;
     if (this.normalizeStatus(doc.status) === 'validé') {
-      alert('Document validé, non supprimable.');
+      this.toast.warning('Document validé, non supprimable.');
       return;
     }
     const ok = confirm(`Supprimer le document "${doc.nomDocument}" ?`);
@@ -383,9 +392,10 @@ export class DocumentsParentComponent implements OnInit {
         this.documents = this.documents.filter(d => d.id !== doc.id);
         this.computeRows();
         this.refreshRequiredUploaded();
+        this.toast.success('Document supprimé.');
       },
       error: () => {
-        // on retire quand même en cas d'erreur côté affichage
+        this.toast.error('Erreur lors de la suppression du document.');
         this.documents = this.documents.filter(d => d.id !== doc.id);
         this.computeRows();
         this.refreshRequiredUploaded();

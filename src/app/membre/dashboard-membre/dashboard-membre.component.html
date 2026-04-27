@@ -71,30 +71,34 @@
       <span>Mes services</span>
     </div>
     <div class="dash-section__body">
-      <button class="nav-card" type="button" (click)="navigateToPaiements()">
-        <i class="ri-wallet-3-line"></i>
-        <span>Paiements</span>
-        <span *ngIf="stats.paiementsEnRetard > 0" class="nav-card__badge nav-card__badge--danger">{{ stats.paiementsEnRetard }}</span>
-        <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-      </button>
-      <button class="nav-card" type="button" (click)="navigateToDocuments()">
-        <i class="ri-folder-upload-line"></i>
-        <span>Documents</span>
-        <span *ngIf="stats.documentsManquants > 0" class="nav-card__badge nav-card__badge--warning">{{ stats.documentsManquants }}</span>
-        <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-      </button>
-      <button class="nav-card" type="button" (click)="navigateToCommandes()">
-        <i class="ri-shopping-bag-line"></i>
-        <span>Commandes</span>
-        <span *ngIf="stats.commandesEnCours > 0" class="nav-card__badge nav-card__badge--neutral">{{ stats.commandesEnCours }}</span>
-        <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-      </button>
-      <button class="nav-card" type="button" (click)="navigateToEvenements()">
-        <i class="ri-calendar-event-line"></i>
-        <span>Evenements</span>
-        <span *ngIf="stats.evenementsAVenir > 0" class="nav-card__badge nav-card__badge--neutral">{{ stats.evenementsAVenir }}</span>
-        <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-      </button>
+      <app-dashboard-nav-card
+        label="Paiements"
+        icon="ri-wallet-3-line"
+        badgeVariant="danger"
+        [badge]="stats.paiementsEnRetard > 0 ? stats.paiementsEnRetard : null"
+        (pressed)="navigateToPaiements()"
+      />
+      <app-dashboard-nav-card
+        label="Documents"
+        icon="ri-folder-upload-line"
+        badgeVariant="warning"
+        [badge]="stats.documentsManquants > 0 ? stats.documentsManquants : null"
+        (pressed)="navigateToDocuments()"
+      />
+      <app-dashboard-nav-card
+        label="Commandes"
+        icon="ri-shopping-bag-line"
+        badgeVariant="neutral"
+        [badge]="stats.commandesEnCours > 0 ? stats.commandesEnCours : null"
+        (pressed)="navigateToCommandes()"
+      />
+      <app-dashboard-nav-card
+        label="Evenements"
+        icon="ri-calendar-event-line"
+        badgeVariant="neutral"
+        [badge]="stats.evenementsAVenir > 0 ? stats.evenementsAVenir : null"
+        (pressed)="navigateToEvenements()"
+      />
     </div>
   </nav>
 

@@ -14,13 +14,15 @@
 
     <!-- Navigation par onglets -->
     <div class="tabs-navigation">
-      <button 
+      <button
+        type="button"
         class="tab-button" 
         [class.active]="activeTab === 'informations'"
         (click)="setActiveTab('informations')">
         <i class="ri-user-line"></i> Informations
       </button>
-      <button 
+      <button
+        type="button"
         class="tab-button" 
         [class.active]="activeTab === 'securite'"
         (click)="setActiveTab('securite')">
@@ -35,12 +37,22 @@
         <div class="section-header">
           <h2 class="section-title">Informations personnelles</h2>
           <div class="section-actions">
-            <button *ngIf="!isEditing" type="button" class="btn btn-primary" (click)="startEdit()">
-              <i class="ri-edit-line"></i> Modifier
-            </button>
-            <button *ngIf="isEditing" type="button" class="btn btn-secondary" (click)="cancelEdit()">
-              <i class="ri-close-line"></i> Annuler
-            </button>
+            <ui-button
+              *ngIf="!isEditing"
+              type="button"
+              variant="primary"
+              icon="ri-edit-line"
+              label="Modifier"
+              (clicked)="startEdit()"
+            />
+            <ui-button
+              *ngIf="isEditing"
+              type="button"
+              variant="secondary"
+              icon="ri-close-line"
+              label="Annuler"
+              (clicked)="cancelEdit()"
+            />
           </div>
         </div>
         
@@ -138,9 +150,13 @@
           </div>
           
           <div class="form-actions">
-            <button type="submit" class="btn btn-success" [disabled]="!isEditing || profilForm.invalid">
-              <i class="ri-save-line"></i> Sauvegarder les modifications
-            </button>
+            <ui-button
+              type="submit"
+              variant="success"
+              icon="ri-save-line"
+              label="Sauvegarder les modifications"
+              [disabled]="!isEditing || !!profilForm.invalid"
+            />
           </div>
         </form>
       </div>
@@ -162,9 +178,13 @@
               <h4>Mot de passe</h4>
               <p title="{{ lastPwdExact }}">Dernière modification {{ lastPwdAgo || '—' }}</p>
             </div>
-            <button class="btn btn-primary" (click)="openPasswordModal()">
-              <i class="ri-lock-line"></i> Modifier
-            </button>
+            <ui-button
+              type="button"
+              variant="primary"
+              icon="ri-lock-line"
+              label="Modifier"
+              (clicked)="openPasswordModal()"
+            />
           </div>
         </div>
       </div>
@@ -178,7 +198,7 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Modifier le mot de passe</h2>
-        <button class="close-button" (click)="closePasswordModal()">
+        <button type="button" class="close-button" (click)="closePasswordModal()">
           <i class="ri-close-line"></i>
         </button>
       </div>
@@ -226,12 +246,19 @@
         </div>
         
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="closePasswordModal()">
-            <i class="ri-close-line"></i> Annuler
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <i class="ri-save-line"></i> Enregistrer
-          </button>
+          <ui-button
+            type="button"
+            variant="secondary"
+            icon="ri-close-line"
+            label="Annuler"
+            (clicked)="closePasswordModal()"
+          />
+          <ui-button
+            type="submit"
+            variant="primary"
+            icon="ri-save-line"
+            label="Enregistrer"
+          />
         </div>
       </form>
     </div>

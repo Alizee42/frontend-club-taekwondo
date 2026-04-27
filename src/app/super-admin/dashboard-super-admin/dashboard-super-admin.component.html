@@ -77,32 +77,33 @@
         <span>Gestion du club</span>
       </div>
       <div class="dash-section__body">
-        <button class="nav-card" (click)="navigateToClubs()">
-          <i class="ri-community-line"></i>
-          <span>Clubs</span>
-          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="clubsCount > 0">{{ clubsCount }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToEnseignants()">
-          <i class="ri-graduation-cap-line"></i>
-          <span>Enseignants</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToEvenements()">
-          <i class="ri-calendar-event-line"></i>
-          <span>Événements</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToGalerie()">
-          <i class="ri-image-line"></i>
-          <span>Galerie / Médias</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToHoraires()">
-          <i class="ri-time-line"></i>
-          <span>Horaires</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
+        <app-dashboard-nav-card
+          label="Clubs"
+          icon="ri-community-line"
+          badgeVariant="neutral"
+          [badge]="clubsCount > 0 ? clubsCount : null"
+          (pressed)="navigateToClubs()"
+        />
+        <app-dashboard-nav-card
+          label="Enseignants"
+          icon="ri-graduation-cap-line"
+          (pressed)="navigateToEnseignants()"
+        />
+        <app-dashboard-nav-card
+          label="Événements"
+          icon="ri-calendar-event-line"
+          (pressed)="navigateToEvenements()"
+        />
+        <app-dashboard-nav-card
+          label="Galerie / Médias"
+          icon="ri-image-line"
+          (pressed)="navigateToGalerie()"
+        />
+        <app-dashboard-nav-card
+          label="Horaires"
+          icon="ri-time-line"
+          (pressed)="navigateToHoraires()"
+        />
       </div>
     </div>
 
@@ -112,23 +113,25 @@
         <span>Gestion des membres</span>
       </div>
       <div class="dash-section__body">
-        <button class="nav-card" (click)="navigateToMembres()">
-          <i class="ri-team-line"></i>
-          <span>Membres</span>
-          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="membresCount > 0">{{ membresCount }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToDocuments()">
-          <i class="ri-file-list-line"></i>
-          <span>Documents</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToAdmins()">
-          <i class="ri-user-star-line"></i>
-          <span>Admins</span>
-          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="adminsCount > 0">{{ adminsCount }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
+        <app-dashboard-nav-card
+          label="Membres"
+          icon="ri-team-line"
+          badgeVariant="neutral"
+          [badge]="membresCount > 0 ? membresCount : null"
+          (pressed)="navigateToMembres()"
+        />
+        <app-dashboard-nav-card
+          label="Documents"
+          icon="ri-file-list-line"
+          (pressed)="navigateToDocuments()"
+        />
+        <app-dashboard-nav-card
+          label="Admins"
+          icon="ri-user-star-line"
+          badgeVariant="neutral"
+          [badge]="adminsCount > 0 ? adminsCount : null"
+          (pressed)="navigateToAdmins()"
+        />
       </div>
     </div>
 
@@ -138,17 +141,17 @@
         <span>Gestion financière</span>
       </div>
       <div class="dash-section__body">
-        <button class="nav-card" (click)="navigateToPaiement()">
-          <i class="ri-money-euro-circle-line"></i>
-          <span>Paiements</span>
-          <span class="nav-card__badge" *ngIf="paiementsAttente > 0">{{ paiementsAttente }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToCommandes()">
-          <i class="ri-shopping-bag-3-line"></i>
-          <span>Commandes</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
+        <app-dashboard-nav-card
+          label="Paiements"
+          icon="ri-money-euro-circle-line"
+          [badge]="paiementsAttente > 0 ? paiementsAttente : null"
+          (pressed)="navigateToPaiement()"
+        />
+        <app-dashboard-nav-card
+          label="Commandes"
+          icon="ri-shopping-bag-3-line"
+          (pressed)="navigateToCommandes()"
+        />
       </div>
     </div>
 
@@ -158,28 +161,30 @@
         <span>Administration</span>
       </div>
       <div class="dash-section__body">
-        <button class="nav-card" (click)="navigateToAvis()">
-          <i class="ri-star-line"></i>
-          <span>Avis</span>
-          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="avisCount > 0">{{ avisCount }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToActualites()">
-          <i class="ri-newspaper-line"></i>
-          <span>Actualités</span>
-          <span class="nav-card__badge nav-card__badge--neutral" *ngIf="actualitesCount > 0">{{ actualitesCount }}</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToUtilisateurs()">
-          <i class="ri-user-3-line"></i>
-          <span>Utilisateurs</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
-        <button class="nav-card" (click)="navigateToLogs()">
-          <i class="ri-shield-check-line"></i>
-          <span>Logs sécurité</span>
-          <i class="ri-arrow-right-s-line nav-card__arrow"></i>
-        </button>
+        <app-dashboard-nav-card
+          label="Avis"
+          icon="ri-star-line"
+          badgeVariant="neutral"
+          [badge]="avisCount > 0 ? avisCount : null"
+          (pressed)="navigateToAvis()"
+        />
+        <app-dashboard-nav-card
+          label="Actualités"
+          icon="ri-newspaper-line"
+          badgeVariant="neutral"
+          [badge]="actualitesCount > 0 ? actualitesCount : null"
+          (pressed)="navigateToActualites()"
+        />
+        <app-dashboard-nav-card
+          label="Utilisateurs"
+          icon="ri-user-3-line"
+          (pressed)="navigateToUtilisateurs()"
+        />
+        <app-dashboard-nav-card
+          label="Logs sécurité"
+          icon="ri-shield-check-line"
+          (pressed)="navigateToLogs()"
+        />
       </div>
     </div>
 

@@ -69,29 +69,29 @@ export class ConnectedHeaderComponent implements OnInit {
     switch (this.getStoredRole()) {
       case 'ADMIN': return [
         { label: 'Dashboard',   route: '/admin/dashboard-admin',       icon: 'ri-dashboard-line' },
-        { label: 'Membres',     route: '/admin/membres-admin',         icon: 'ri-team-line' },
-        { label: 'Paiements',   route: '/admin/gestion-paiements',     icon: 'ri-money-euro-circle-line' },
-        { label: 'Documents',   route: '/admin/gestion-documents',     icon: 'ri-file-list-line' },
-        { label: 'Événements',  route: '/admin/gestion-evenements',    icon: 'ri-calendar-event-line' },
+        { label: 'Membres',     route: '/admin/membres',               icon: 'ri-team-line' },
+        { label: 'Paiements',   route: '/admin/paiements',             icon: 'ri-money-euro-circle-line' },
+        { label: 'Documents',   route: '/admin/documents',             icon: 'ri-file-list-line' },
+        { label: 'Événements',  route: '/admin/gestion-evenement',     icon: 'ri-calendar-event-line' },
       ];
       case 'PARENT': return [
         { label: 'Dashboard',   route: '/parent/dashboard-parent',     icon: 'ri-dashboard-line' },
-        { label: 'Paiements',   route: '/parent/paiement-parent',      icon: 'ri-wallet-3-line' },
-        { label: 'Documents',   route: '/parent/documents-parent',     icon: 'ri-folder-line' },
-        { label: 'Événements',  route: '/parent/evenements-parent',    icon: 'ri-calendar-event-line' },
-        { label: 'Commandes',   route: '/parent/commandes-parent',     icon: 'ri-shopping-bag-line' },
+        { label: 'Paiements',   route: '/parent/paiements',            icon: 'ri-wallet-3-line' },
+        { label: 'Documents',   route: '/parent/documents',            icon: 'ri-folder-line' },
+        { label: 'Événements',  route: '/parent/evenements',           icon: 'ri-calendar-event-line' },
+        { label: 'Commandes',   route: '/parent/commandes',            icon: 'ri-shopping-bag-line' },
       ];
       case 'MEMBRE': return [
         { label: 'Dashboard',   route: '/membre/dashboard-membre',     icon: 'ri-dashboard-line' },
-        { label: 'Paiements',   route: '/membre/paiement',             icon: 'ri-wallet-3-line' },
+        { label: 'Paiements',   route: '/membre/paiements',            icon: 'ri-wallet-3-line' },
         { label: 'Documents',   route: '/membre/documents',            icon: 'ri-folder-line' },
-        { label: 'Événements',  route: '/membre/evenements-membre',    icon: 'ri-calendar-event-line' },
-        { label: 'Commandes',   route: '/membre/commandes-membre',     icon: 'ri-shopping-bag-line' },
+        { label: 'Événements',  route: '/membre/evenements',           icon: 'ri-calendar-event-line' },
+        { label: 'Commandes',   route: '/membre/commandes',            icon: 'ri-shopping-bag-line' },
       ];
       case 'SUPER_ADMIN': return [
         { label: 'Dashboard',   route: '/super-admin/dashboard-super-admin', icon: 'ri-dashboard-line' },
-        { label: 'Clubs',       route: '/super-admin/gestion-clubs',         icon: 'ri-building-line' },
-        { label: 'Utilisateurs',route: '/super-admin/gestion-utilisateurs',  icon: 'ri-user-settings-line' },
+        { label: 'Clubs',       route: '/super-admin/clubs',                 icon: 'ri-building-line' },
+        { label: 'Utilisateurs',route: '/super-admin/utilisateurs',          icon: 'ri-user-settings-line' },
         { label: 'Paiements',   route: '/super-admin/gestion-paiements',     icon: 'ri-money-euro-circle-line' },
       ];
       default: return [];
