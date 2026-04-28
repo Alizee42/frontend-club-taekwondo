@@ -7,13 +7,17 @@
   node_bundler = "esbuild"
   directory = "netlify/functions"
 
-# Redirection des APIs vers Railway
 [[redirects]]
   from = "/api/*"
-  to = "https://backend-club-taekwondo.onrender.com/api/:splat"
+  to = "http://217.160.69.180:8080/api/:splat"
   status = 200
   force = true
-  headers = {X-From = "Netlify"}
+
+[[redirects]]
+  from = "/uploads/*"
+  to = "http://217.160.69.180:8080/uploads/:splat"
+  status = 200
+  force = true
 
 # Redirection SPA pour Angular
 [[redirects]]
