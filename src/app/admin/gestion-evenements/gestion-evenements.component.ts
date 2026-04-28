@@ -111,7 +111,7 @@ export class GestionEvenementsComponent implements OnInit {
       icon: 'ri-checkbox-circle-line',
       action: 'approve',
       color: '#16a34a',
-      title: 'Valider',
+      title: 'Valider cette inscription',
       show: (row: any) => row.statut === 'EN_ATTENTE'
     },
     {
@@ -119,7 +119,7 @@ export class GestionEvenementsComponent implements OnInit {
       icon: 'ri-close-circle-line',
       action: 'reject',
       color: '#dc2626',
-      title: 'Refuser',
+      title: 'Refuser cette inscription',
       show: (row: any) => row.statut === 'EN_ATTENTE'
     }
   ];
@@ -151,16 +151,12 @@ export class GestionEvenementsComponent implements OnInit {
     return futurs.length ? futurs[0].titre : 'Aucun evenement a venir';
   }
 
+  get inscriptionsActives(): Inscription[] {
+    return this.inscriptions.filter((inscription) => inscription.statut !== 'ANNULEE');
+  }
+
   get nbInscritsAttente(): number {
     return this.inscriptions.filter((inscription) => inscription.statut === 'EN_ATTENTE').length;
-  }
-
-  get nbInscritsValide(): number {
-    return this.inscriptions.filter((inscription) => inscription.statut === 'VALIDEE').length;
-  }
-
-  get nbInscritsRefuse(): number {
-    return this.inscriptions.filter((inscription) => inscription.statut === 'REFUSEE').length;
   }
 
   get filteredEvenements(): EvenementDTO[] {
@@ -196,7 +192,7 @@ export class GestionEvenementsComponent implements OnInit {
   }
 
   get inscriptionTableRows(): any[] {
-    return this.inscriptions.map((inscription) => ({
+    return this.inscriptionsActives.map((inscription) => ({
       __inscription: inscription,
       nom: this.resolveNom(inscription),
       prenom: this.resolvePrenom(inscription),
@@ -211,16 +207,7 @@ export class GestionEvenementsComponent implements OnInit {
     this.isLoading = true;
     this.clearMessages();
 
-    const utilisateur = this.authService.getUtilisateurConnecte();
-    const clubId = utilisateur?.['club']?.id;
-
-    if (!clubId) {
-      this.errorMsg = 'Impossible de recuperer le club de l utilisateur.';
-      this.isLoading = false;
-      return;
-    }
-
-    this.evenementService.getEvenementsByClub(clubId).subscribe({
+    this.evenementService.getEvenementsMonClub().subscribe({
       next: (evenements) => {
         this.evenements = evenements;
 
@@ -234,8 +221,8 @@ export class GestionEvenementsComponent implements OnInit {
 
         this.isLoading = false;
       },
-      error: () => {
-        this.errorMsg = 'Erreur lors du chargement des evenements.';
+      error: (error) => {
+        this.errorMsg = error?.error?.error || 'Erreur lors du chargement des evenements.';
         this.isLoading = false;
       }
     });
@@ -549,11 +536,15 @@ export class GestionEvenementsComponent implements OnInit {
   }
 
   private resolveNom(inscription: Inscription): string {
-    return inscription.membreNom?.trim() || inscription.utilisateurNom?.trim() || 'Nom non disponible';
+    return inscription.membreNom?.trim()
+      || inscription.utilisateurNom?.trim()
+      || (inscription.membreId ? `Membre #${inscription.membreId}` : 'Nom non disponible');
   }
 
   private resolvePrenom(inscription: Inscription): string {
-    return inscription.membrePrenom?.trim() || inscription.utilisateurPrenom?.trim() || 'Prenom non disponible';
+    return inscription.membrePrenom?.trim()
+      || inscription.utilisateurPrenom?.trim()
+      || '';
   }
 
   private resolveEmail(inscription: Inscription): string {

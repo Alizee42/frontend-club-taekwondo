@@ -102,6 +102,7 @@ export const routes: Routes = [
       { path: 'documents', component: DocumentsComponent },
       { path: 'paiements', component: PaiementComponent },
       { path: 'commandes', component: CommandesMembreComponent },
+      { path: 'bon-de-commande', loadComponent: () => import('./membre/bon-de-commande/bon-de-commande-membre.component').then(m => m.BonDeCommandeMembreComponent) },
       { path: 'evenements', component: EvenementsMembre }
     ]
   },
@@ -116,6 +117,7 @@ export const routes: Routes = [
       { path: 'paiements', component: PaiementParentComponent },
       { path: 'documents', component: DocumentsParentComponent },
       { path: 'commandes', component: CommandesParentComponent },
+      { path: 'bon-de-commande', loadComponent: () => import('./membre/bon-de-commande/bon-de-commande-membre.component').then(m => m.BonDeCommandeMembreComponent) },
       { path: 'evenements', component: EvenementsParent }
     ]
   },

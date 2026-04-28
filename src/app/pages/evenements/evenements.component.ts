@@ -8,11 +8,12 @@ import { EvenementService, EvenementDTO } from '../../services/evenement.service
 import { AuthService } from '../../services/auth.service';
 import { MembreService, Membre } from '../../services/membre.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-evenements',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, EmptyStateComponent],
   templateUrl: './evenements.component.html',
   styleUrls: ['./evenements.component.css']
 })
@@ -33,6 +34,7 @@ export class EvenementsComponent implements OnInit {
   enfants: Membre[] = []; // Pour les parents
   membreSelectionne: Membre | null = null; // Pour inscription d'enfant
   readonly confirmInscriptionLabel = "Confirmer l'inscription";
+  readonly fallbackEventImage = 'assets/images/default-event.jpg.jpg';
 
   constructor(
     private evenementService: EvenementService,
@@ -40,6 +42,21 @@ export class EvenementsComponent implements OnInit {
     private membreService: MembreService,
     private router: Router
   ) {}
+
+  get evenementsTries(): EvenementDTO[] {
+    return [...this.evenements].sort((a, b) =>
+      new Date(a.dateDebut).getTime() - new Date(b.dateDebut).getTime()
+    );
+  }
+
+  get evenementVedette(): EvenementDTO | null {
+    return this.evenementsTries.find(evenement => !this.isEvenementPasse(evenement)) ?? this.evenementsTries[0] ?? null;
+  }
+
+  get autresEvenements(): EvenementDTO[] {
+    const vedetteId = this.evenementVedette?.id;
+    return this.evenementsTries.filter(evenement => evenement.id !== vedetteId);
+  }
 
   ngOnInit(): void {
     this.detectUserContext();
@@ -229,6 +246,15 @@ export class EvenementsComponent implements OnInit {
            !evenement.isInscrit;
   }
 
+  placesRestantes(evenement: EvenementDTO): number {
+    return Math.max((evenement.capacite || 0) - (evenement.nbInscrits || 0), 0);
+  }
+
+  progressionInscription(evenement: EvenementDTO): number {
+    if (!evenement.capacite) return 0;
+    return Math.min(Math.round(((evenement.nbInscrits || 0) / evenement.capacite) * 100), 100);
+  }
+
   clearMessages(): void {
     setTimeout(() => {
       this.successMessage = '';
@@ -241,7 +267,13 @@ export class EvenementsComponent implements OnInit {
   }
 
   onImageError(event: any): void {
-    // Cache l'image en cas d'erreur de chargement
-    event.target.style.display = 'none';
+    const img = event.target as HTMLImageElement;
+
+    if (img.src.includes(this.fallbackEventImage)) {
+      img.style.display = 'none';
+      return;
+    }
+
+    img.src = this.fallbackEventImage;
   }
 }

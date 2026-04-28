@@ -6,6 +6,7 @@ import { EvenementService, EvenementDTO } from '../../services/evenement.service
 import { MembreService } from '../../services/membre.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 
 interface Enfant {
   id: number;
@@ -18,7 +19,7 @@ interface Enfant {
 @Component({
   selector: 'app-evenements-parent',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent],
+  imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent, EmptyStateComponent],
   templateUrl: './evenements-parent.component.html',
   styleUrls: ['./evenements-parent.component.css']
 })
@@ -27,10 +28,13 @@ export class EvenementsParent implements OnInit {
   enfants: Enfant[] = [];
   enfantSelectionne: Enfant | null = null;
   inscriptionsEnfants: any[] = [];
+  readonly fallbackEventImage = 'assets/images/default-event.jpg.jpg';
   
   isLoading = false;
   errorMsg = '';
   isInscribing = false;
+  currentPage = 1;
+  readonly pageSize = 4;
   successMsg = ''; // ✅ Ajout d'un message de succès
 
   constructor(
@@ -117,6 +121,7 @@ export class EvenementsParent implements OnInit {
       this.evenementService.getEvenementsActifs().subscribe({
         next: (evenements) => {
           this.evenements = evenements || [];
+          this.currentPage = 1;
           resolve();
         },
         error: (error) => {
@@ -158,6 +163,7 @@ export class EvenementsParent implements OnInit {
 
   selectionnerEnfant(enfant: Enfant): void {
     this.enfantSelectionne = enfant;
+    this.currentPage = 1;
   }
 
   inscrireEnfant(evenement: EvenementDTO): void {
@@ -235,7 +241,7 @@ export class EvenementsParent implements OnInit {
         
         // ✅ Afficher un message de succès
         if (this.enfantSelectionne) {
-          this.showSuccessMessage(`${this.enfantSelectionne.prenom} a été inscrit(e) à l'événement "${evenement.titre}"`);
+          this.showSuccessMessage(`Demande d'inscription envoyee pour ${this.enfantSelectionne.prenom} sur "${evenement.titre}"`);
         }
       },
       error: (error: any) => {
@@ -304,11 +310,7 @@ export class EvenementsParent implements OnInit {
     if (!this.enfantSelectionne || this.isInscribing) return;
     
     // ✅ Trouver l'inscription de l'enfant pour cet événement
-    const inscription = this.inscriptionsEnfants.find(
-      i => i.evenementId === evenement.id && 
-           i.membreId === this.enfantSelectionne?.id &&
-           i.statut !== 'ANNULEE'
-    );
+    const inscription = this.getInscriptionEnfant(evenement);
     
     if (!inscription) {
       console.warn('❌ Aucune inscription trouvée pour cet enfant et cet événement');
@@ -418,37 +420,75 @@ export class EvenementsParent implements OnInit {
   }
 
   isEnfantInscrit(evenement: EvenementDTO): boolean {
-    if (!this.enfantSelectionne) {
-      console.log('🔍 isEnfantInscrit: Aucun enfant sélectionné');
-      return false;
-    }
-    
-    // ✅ Vérification stricte des inscriptions
-    const inscription = this.inscriptionsEnfants.find(
-      i => i.evenementId === evenement.id && 
-           i.membreId === this.enfantSelectionne?.id &&
-           i.statut && i.statut !== 'ANNULEE' // ✅ Exclure les inscriptions annulées
+    return !!this.getInscriptionEnfant(evenement);
+  }
+
+  getInscriptionEnfant(evenement: EvenementDTO): any | undefined {
+    if (!this.enfantSelectionne) return undefined;
+
+    return this.inscriptionsEnfants.find(
+      inscription => inscription.evenementId === evenement.id &&
+        inscription.membreId === this.enfantSelectionne?.id &&
+        inscription.statut &&
+        inscription.statut !== 'ANNULEE'
     );
-    
-    const isInscrit = !!inscription;
-    
-    // ✅ Logs détaillés pour le débogage
-    console.log('🔍 Vérification inscription:', {
-      enfantId: this.enfantSelectionne.id,
-      enfantNom: `${this.enfantSelectionne.prenom} ${this.enfantSelectionne.nom}`,
-      evenementId: evenement.id,
-      evenementTitre: evenement.titre,
-      inscriptionTrouvee: inscription,
-      inscriptionId: inscription?.id,
-      inscriptionStatut: inscription?.statut,
-      isInscrit,
-      totalInscriptions: this.inscriptionsEnfants.length,
-      toutesLesInscriptionsPourCetEvenement: this.inscriptionsEnfants
-        .filter(i => i.evenementId === evenement.id)
-        .map(i => ({ id: i.id, membreId: i.membreId, statut: i.statut }))
-    });
-    
-    return isInscrit;
+  }
+
+  getInscriptionEnfantLabel(evenement: EvenementDTO): string {
+    const statut = this.getInscriptionEnfant(evenement)?.statut;
+
+    switch (statut) {
+      case 'VALIDEE':
+        return 'Validee';
+      case 'REFUSEE':
+        return 'Refusee';
+      case 'EN_ATTENTE':
+      default:
+        return 'En attente';
+    }
+  }
+
+  getInscriptionEnfantBadgeClass(evenement: EvenementDTO): string {
+    const statut = this.getInscriptionEnfant(evenement)?.statut;
+
+    switch (statut) {
+      case 'VALIDEE':
+        return 'status--success';
+      case 'REFUSEE':
+        return 'status--danger';
+      case 'EN_ATTENTE':
+      default:
+        return 'status--warning';
+    }
+  }
+
+  getDesinscriptionEnfantLabel(evenement: EvenementDTO): string {
+    return this.getInscriptionEnfant(evenement)?.statut === 'EN_ATTENTE'
+      ? 'Annuler la demande'
+      : 'Desinscrire';
+  }
+
+  get totalPages(): number {
+    return Math.max(Math.ceil(this.evenements.length / this.pageSize), 1);
+  }
+
+  get evenementsPage(): EvenementDTO[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.evenements.slice(start, start + this.pageSize);
+  }
+
+  get paginationStart(): number {
+    if (this.evenements.length === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get paginationEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.evenements.length);
+  }
+
+  changerPage(direction: number): void {
+    const prochainePage = this.currentPage + direction;
+    this.currentPage = Math.min(Math.max(prochainePage, 1), this.totalPages);
   }
 
   isEvenementComplet(evenement: EvenementDTO): boolean {
@@ -496,7 +536,14 @@ export class EvenementsParent implements OnInit {
   }
 
   onImageError(event: any): void {
-    event.target.src = '/assets/images/default-event.jpg';
+    const img = event.target as HTMLImageElement;
+
+    if (img.src.includes(this.fallbackEventImage)) {
+      img.style.display = 'none';
+      return;
+    }
+
+    img.src = this.fallbackEventImage;
   }
 
   allerVersEnfants(): void {
@@ -572,3 +619,4 @@ export class EvenementsParent implements OnInit {
     });
   }
 }
+

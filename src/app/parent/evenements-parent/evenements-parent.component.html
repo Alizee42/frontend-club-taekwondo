@@ -17,13 +17,14 @@
   </app-page-header>
 
   <!-- Loading -->
-  <div class="empty-state" *ngIf="isLoading">
-    <i class="ri-loader-4-line spinning"></i>
-    <h3>Chargement...</h3>
-    <p>Récupération des données en cours</p>
-  </div>
+  <app-empty-state
+    *ngIf="isLoading"
+    icon="ri-loader-4-line spinning"
+    title="Chargement..."
+    description="Récupération des données en cours"
+  />
 
-  <!-- Messages d'erreur et de succès avec classes responsive -->
+  <!-- Messages d'erreur et de succès -->
   <div class="error-message" *ngIf="errorMsg">
     <i class="ri-error-warning-line"></i>
     <span>{{ errorMsg }}</span>
@@ -36,21 +37,23 @@
 
   <!-- Contenu principal -->
   <div class="main-content" *ngIf="!isLoading && !errorMsg">
-    
+
     <!-- Sidebar enfants -->
     <div class="sidebar">
       <h3>Mes enfants</h3>
-      
+
       <!-- Message si aucun enfant -->
-      <div class="empty-state" *ngIf="enfants.length === 0">
-        <i class="ri-user-line"></i>
-        <h3>Aucun enfant</h3>
-        <p>Ajoutez un enfant pour commencer</p>
-      </div>
+      <app-empty-state
+        *ngIf="enfants.length === 0"
+        icon="ri-user-line"
+        title="Aucun enfant"
+        description="Ajoutez un enfant pour commencer"
+        [compact]="true"
+      />
 
       <!-- Liste des enfants -->
       <div class="enfants-liste" *ngIf="enfants.length > 0">
-        <div class="enfant-card" 
+        <div class="enfant-card"
              *ngFor="let enfant of enfants"
              [class.selected]="enfantSelectionne?.id === enfant.id"
              (click)="selectionnerEnfant(enfant)">
@@ -82,13 +85,12 @@
         </div>
       </div>
 
-      <!-- Message d'erreur spécifique aux inscriptions -->
+      <!-- Messages spécifiques aux inscriptions -->
       <div class="error-message" *ngIf="errorMsg && enfantSelectionne">
         <i class="ri-error-warning-line"></i>
         <span>{{ errorMsg }}</span>
       </div>
 
-      <!-- Message de succès -->
       <div class="success-message" *ngIf="successMsg && enfantSelectionne">
         <i class="ri-check-line"></i>
         <span>{{ successMsg }}</span>
@@ -102,27 +104,52 @@
       </div>
 
       <!-- Aucun événement -->
-      <div class="empty-state" *ngIf="enfantSelectionne && evenements.length === 0">
-        <i class="ri-calendar-line"></i>
-        <h3>Aucun événement</h3>
-        <p>Il n'y a pas d'événements disponibles pour le moment</p>
-      </div>
+      <app-empty-state
+        *ngIf="enfantSelectionne && evenements.length === 0"
+        icon="ri-calendar-line"
+        title="Aucun événement"
+        description="Il n'y a pas d'événements disponibles pour le moment"
+        [compact]="true"
+      />
 
       <!-- Grille des événements -->
+      <div class="list-toolbar" *ngIf="enfantSelectionne && evenements.length > 0">
+        <span>{{ paginationStart }}-{{ paginationEnd }} sur {{ evenements.length }} evenement(s)</span>
+        <div class="pagination-actions">
+          <button type="button" class="page-button" (click)="changerPage(-1)" [disabled]="currentPage === 1">
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          <span class="page-indicator">{{ currentPage }} / {{ totalPages }}</span>
+          <button type="button" class="page-button" (click)="changerPage(1)" [disabled]="currentPage === totalPages">
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+        </div>
+      </div>
+
       <div class="events-grid" *ngIf="enfantSelectionne && evenements.length > 0">
-        <div class="event-card" *ngFor="let evenement of evenements">
-          
+        <div class="event-card" *ngFor="let evenement of evenementsPage">
+
           <!-- Image -->
           <div class="event-image">
-            <img [src]="evenement.imageUrl || '/assets/images/default-event.jpg'" 
+            <img [src]="evenement.imageUrl || fallbackEventImage"
                  [alt]="evenement.titre"
-                 (error)="onImageError($event)">
+                 (error)="onImageError($event)"
+                 loading="lazy">
+            <span
+              class="status-badge event-status-badge"
+              *ngIf="isEnfantInscrit(evenement)"
+              [ngClass]="getInscriptionEnfantBadgeClass(evenement)"
+            >
+              <i class="ri-time-line" *ngIf="getInscriptionEnfant(evenement)?.statut === 'EN_ATTENTE'"></i>
+              <i class="ri-check-line" *ngIf="getInscriptionEnfant(evenement)?.statut !== 'EN_ATTENTE'"></i>
+              {{ getInscriptionEnfantLabel(evenement) }}
+            </span>
           </div>
 
           <!-- Contenu -->
           <div class="event-content">
             <h3 class="event-title">{{ evenement.titre }}</h3>
-            
+
             <div class="event-meta">
               <div class="event-date">
                 <i class="ri-calendar-line"></i>
@@ -131,6 +158,20 @@
               <div class="event-location" *ngIf="evenement.lieu">
                 <i class="ri-map-pin-line"></i>
                 {{ evenement.lieu }}
+              </div>
+              <div class="event-date" *ngIf="evenement.capacite > 0">
+                <i class="ri-group-line"></i>
+                <ng-container *ngIf="(evenement.nbInscrits || 0) >= evenement.capacite; else placesParent">
+                  <span>Complet ({{ evenement.capacite }} places)</span>
+                </ng-container>
+                <ng-template #placesParent>
+                  <span>{{ evenement.capacite - (evenement.nbInscrits || 0) }} places libres</span>
+                  <span
+                    *ngIf="(evenement.capacite - (evenement.nbInscrits || 0)) < 5"
+                    class="status-badge status--warning"
+                    style="margin-left: 0.4rem;"
+                  >Plus que {{ evenement.capacite - (evenement.nbInscrits || 0) }} place(s) !</span>
+                </ng-template>
               </div>
             </div>
 
@@ -152,9 +193,10 @@
               <ui-button
                 *ngIf="isEnfantInscrit(evenement)"
                 type="button"
-                variant="secondary"
+                variant="danger"
+                customClass="btn-sm"
                 [icon]="isInscribing ? 'ri-loader-4-line spinning' : 'ri-user-unfollow-line'"
-                label="Désinscrire"
+                [label]="getDesinscriptionEnfantLabel(evenement)"
                 (clicked)="desinscrireEnfant(evenement)"
                 [loading]="isInscribing"
                 [disabled]="isInscribing"
@@ -166,3 +208,5 @@
     </div>
   </div>
 </div>
+
+

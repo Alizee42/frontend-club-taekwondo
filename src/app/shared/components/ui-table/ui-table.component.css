@@ -127,6 +127,11 @@
   font-size: var(--text-sm);
 }
 
+.no-row-action {
+  color: var(--color-text-3);
+  font-size: var(--text-sm);
+}
+
 /* ── Bouton "Voir" en cellule (utilisé via buttonCustomClass) ── */
 .btn-icon-only {
   padding: 0 !important;

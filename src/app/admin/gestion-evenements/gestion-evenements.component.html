@@ -99,6 +99,7 @@
 <ui-modal
   [open]="afficherFormulaire"
   [title]="isEditing ? 'Modifier un evenement' : 'Creer un evenement'"
+  size="lg"
   (closed)="fermerFormulaire()"
 >
   <form class="event-form" (ngSubmit)="soumettreEvenement()">
@@ -217,25 +218,18 @@
 <ui-modal
   [open]="!!evenementSelectionne"
   [title]="evenementSelectionne ? 'Inscriptions - ' + evenementSelectionne.titre : 'Inscriptions'"
+  size="xl"
   (closed)="fermerInscriptions()"
 >
   <div *ngIf="evenementSelectionne as evenement" class="registrations-panel">
     <div class="registration-summary">
       <span class="summary-chip">
         <i class="ri-group-line" aria-hidden="true"></i>
-        {{ inscriptions.length }} total
+        {{ inscriptionsActives.length }} participant(s)
       </span>
-      <span class="summary-chip summary-chip--warning">
+      <span class="summary-chip summary-chip--warning" *ngIf="nbInscritsAttente > 0">
         <i class="ri-time-line" aria-hidden="true"></i>
-        {{ nbInscritsAttente }} en attente
-      </span>
-      <span class="summary-chip summary-chip--success">
-        <i class="ri-checkbox-circle-line" aria-hidden="true"></i>
-        {{ nbInscritsValide }} validees
-      </span>
-      <span class="summary-chip summary-chip--danger">
-        <i class="ri-close-circle-line" aria-hidden="true"></i>
-        {{ nbInscritsRefuse }} refusees
+        {{ nbInscritsAttente }} a valider
       </span>
     </div>
 

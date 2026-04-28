@@ -101,8 +101,51 @@
 ======================== */
 .evenements-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+  justify-items: stretch;
+  align-items: stretch;
+}
+
+.list-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: white;
+  color: #1e293b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-indicator {
+  min-width: 54px;
+  text-align: center;
+  color: #334155;
 }
 
 @media (max-width: 768px) {
@@ -115,21 +158,24 @@
 /* ========================
    CARTE ÉVÉNEMENT
 ======================== */
-.evenement-card {
+.event-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.evenement-card:hover {
+.event-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.evenement-card.inscrit {
+.event-card.inscrit {
   border-color: #10b981;
   background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
 }
@@ -139,7 +185,7 @@
 ======================== */
 .evenement-image {
   position: relative;
-  height: 200px;
+  height: 132px;
   overflow: hidden;
 }
 
@@ -150,45 +196,29 @@
   transition: transform 0.3s ease;
 }
 
-.evenement-card:hover .evenement-image img {
+.event-card:hover .evenement-image img {
   transform: scale(1.05);
 }
 
-/* Badges */
-.inscription-badge,
-.complet-badge {
+/* Badges — positionnement absolu sur l'image */
+.evenement-image .status-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.875rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  backdrop-filter: blur(8px);
-}
-
-.inscription-badge {
-  background: rgba(16, 185, 129, 0.9);
-  color: white;
-}
-
-.complet-badge {
-  background: rgba(239, 68, 68, 0.9);
-  color: white;
 }
 
 /* ========================
    CONTENU D'ÉVÉNEMENT
 ======================== */
 .evenement-content {
-  padding: 1.5rem;
+  padding: 1rem;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 .evenement-content h3 {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 0.75rem;
@@ -198,27 +228,22 @@
 .description {
   color: #64748b;
   line-height: 1.6;
-  margin-bottom: 1.5rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin-bottom: 1rem;
 }
 
 /* ========================
    INFORMATIONS PRATIQUES
 ======================== */
 .evenement-infos {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .info-item {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.84rem;
   color: #374151;
 }
 
@@ -237,7 +262,8 @@
    ACTIONS
 ======================== */
 .evenement-actions {
-  margin-top: 1.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -312,7 +338,7 @@
   }
 }
 
-.evenement-card {
+.event-card {
   animation: fadeIn 0.5s ease-out;
 }
 
@@ -325,7 +351,7 @@
   }
   
   .evenements-grid {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -335,12 +361,17 @@
     gap: 1.5rem;
   }
   
-  .evenement-card {
+  .event-card {
     margin: 0;
   }
   
   .evenement-image {
-    height: 180px;
+    height: 130px;
+  }
+
+  .list-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 

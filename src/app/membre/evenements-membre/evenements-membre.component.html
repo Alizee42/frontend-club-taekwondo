@@ -22,45 +22,65 @@
   </div>
 
   <!-- Événements -->
+  <div class="list-toolbar" *ngIf="!isLoading && !errorMsg && evenements.length > 0">
+    <span>{{ paginationStart }}-{{ paginationEnd }} sur {{ evenements.length }} evenement(s)</span>
+    <div class="pagination-actions">
+      <button type="button" class="page-button" (click)="changerPage(-1)" [disabled]="currentPage === 1">
+        <i class="ri-arrow-left-s-line"></i>
+      </button>
+      <span class="page-indicator">{{ currentPage }} / {{ totalPages }}</span>
+      <button type="button" class="page-button" (click)="changerPage(1)" [disabled]="currentPage === totalPages">
+        <i class="ri-arrow-right-s-line"></i>
+      </button>
+    </div>
+  </div>
+
   <div class="evenements-grid" *ngIf="!isLoading && !errorMsg && evenements.length > 0">
-    <div class="evenement-card" 
-         *ngFor="let evenement of evenements; trackBy: trackByEvenement"
+    <div class="event-card"
+         *ngFor="let evenement of evenementsPage; trackBy: trackByEvenement"
          [class.inscrit]="evenement.isInscrit">
-      
+
       <!-- Image -->
       <div class="evenement-image">
-        <img [src]="evenement.imageUrl || '/assets/images/default-event.jpg'" 
+        <img [src]="evenement.imageUrl || fallbackEventImage"
              [alt]="evenement.titre"
-             (error)="onImageError($event)">
-        
+             (error)="onImageError($event)"
+             loading="lazy">
+
         <!-- Badge inscription -->
-        <div class="inscription-badge" *ngIf="evenement.isInscrit">
-          <i class="ri-check-line"></i> Inscrit
-        </div>
-        
+        <span
+          class="status-badge"
+          *ngIf="evenement.isInscrit"
+          [ngClass]="getInscriptionBadgeClass(evenement)"
+        >
+          <i class="ri-time-line" *ngIf="evenement.inscriptionStatut === 'EN_ATTENTE'"></i>
+          <i class="ri-check-line" *ngIf="evenement.inscriptionStatut !== 'EN_ATTENTE'"></i>
+          {{ getInscriptionLabel(evenement) }}
+        </span>
+
         <!-- Badge complet -->
-        <div class="complet-badge" *ngIf="isEvenementComplet(evenement)">
+        <span class="status-badge status--danger" *ngIf="isEvenementComplet(evenement)">
           <i class="ri-close-line"></i> Complet
-        </div>
+        </span>
       </div>
 
       <!-- Contenu -->
       <div class="evenement-content">
         <h3>{{ evenement.titre }}</h3>
         <p class="description">{{ evenement.description }}</p>
-        
+
         <!-- Infos pratiques -->
         <div class="evenement-infos">
           <div class="info-item">
             <i class="ri-calendar-line"></i>
             <span>{{ formatDateRange(evenement.dateDebut, evenement.dateFin) }}</span>
           </div>
-          
+
           <div class="info-item">
             <i class="ri-map-pin-line"></i>
             <span>{{ evenement.lieu }}</span>
           </div>
-          
+
           <div class="info-item" *ngIf="evenement.capacite > 0">
             <i class="ri-group-line"></i>
             <ng-container *ngIf="(evenement.nbInscrits || 0) >= evenement.capacite; else placesDisponibles">
@@ -68,6 +88,11 @@
             </ng-container>
             <ng-template #placesDisponibles>
               <span>🎫 {{ evenement.nbInscrits || 0 }} inscrits • {{ evenement.capacite - (evenement.nbInscrits || 0) }} places libres</span>
+              <span
+                *ngIf="(evenement.capacite - (evenement.nbInscrits || 0)) < 5"
+                class="status-badge status--warning"
+                style="margin-left: 0.4rem;"
+              >Plus que {{ evenement.capacite - (evenement.nbInscrits || 0) }} place(s) !</span>
             </ng-template>
           </div>
         </div>
@@ -89,8 +114,9 @@
             *ngIf="evenement.isInscrit"
             type="button"
             variant="danger"
+            customClass="btn-sm"
             [icon]="isInscribing ? 'ri-loader-4-line spinning' : 'ri-user-unfollow-line'"
-            label="Se désinscrire"
+            [label]="getDesinscriptionLabel(evenement)"
             (clicked)="seDesinscrire(evenement)"
             [loading]="isInscribing"
             [disabled]="isInscribing"
@@ -110,16 +136,13 @@
   </div>
 
   <!-- Aucun événement -->
-  <div class="empty-state" *ngIf="!isLoading && !errorMsg && evenements.length === 0">
-    <i class="ri-calendar-line"></i>
-    <h3>Aucun événement disponible</h3>
-    <p>Il n'y a actuellement aucun événement planifié. Revenez bientôt pour découvrir nos prochaines activités !</p>
-    <ui-button
-      type="button"
-      variant="primary"
-      icon="ri-refresh-line"
-      label="Actualiser"
-      (clicked)="chargerEvenements()"
-    />
-  </div>
+  <app-empty-state
+    *ngIf="!isLoading && !errorMsg && evenements.length === 0"
+    icon="ri-calendar-line"
+    title="Aucun événement disponible"
+    description="Il n'y a actuellement aucun événement planifié. Revenez bientôt pour découvrir nos prochaines activités !"
+    actionLabel="Actualiser"
+    (actionClicked)="chargerEvenements()"
+  />
 </div>
+

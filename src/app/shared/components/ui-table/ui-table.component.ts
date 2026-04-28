@@ -76,6 +76,10 @@ export class UiTableComponent {
     return typeof tc === 'function' ? tc(row) : tc;
   }
 
+  hasVisibleActions(row: any): boolean {
+    return this.actions.some(act => act.show ? act.show(row) : true);
+  }
+
   onCellButtonClick(col: UiTableColumn, row: any, evt?: Event) {
     if (evt) { try { evt.preventDefault(); evt.stopPropagation(); } catch {} }
     if (col.buttonOnClick) {

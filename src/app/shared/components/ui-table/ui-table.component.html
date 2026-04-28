@@ -61,19 +61,24 @@
 
       <td *ngIf="actions.length" class="col-actions">
         <div class="actions-cell">
-          <ng-container *ngFor="let act of actions">
-            <ng-container *ngIf="(act.show ? act.show(row) : true)">
-              <ui-icon-button
-                [icon]="act.icon ?? ''"
-                [variant]="act.variant ?? 'ghost'"
-                [disabled]="act.disabled ?? false"
-                [customColor]="act.variant ? undefined : (act.color ?? undefined)"
-                [ariaLabel]="act.title || act.label"
-                [title]="act.title || act.label"
-                (clicked)="onAction(act.action, row)">
-              </ui-icon-button>
+          <ng-container *ngIf="hasVisibleActions(row); else noRowAction">
+            <ng-container *ngFor="let act of actions">
+              <ng-container *ngIf="(act.show ? act.show(row) : true)">
+                <ui-icon-button
+                  [icon]="act.icon ?? ''"
+                  [variant]="act.variant ?? 'ghost'"
+                  [disabled]="act.disabled ?? false"
+                  [customColor]="act.variant ? undefined : (act.color ?? undefined)"
+                  [ariaLabel]="act.title || act.label"
+                  [title]="act.title || act.label"
+                  (clicked)="onAction(act.action, row)">
+                </ui-icon-button>
+              </ng-container>
             </ng-container>
           </ng-container>
+          <ng-template #noRowAction>
+            <span class="no-row-action">-</span>
+          </ng-template>
         </div>
       </td>
     </tr>

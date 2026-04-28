@@ -9,6 +9,7 @@ export interface Inscription {
   statut?: string;       // EN_ATTENTE, VALIDE, REFUSE, etc.
   evenementId?: number;
   utilisateurId?: number;
+  membreId?: number;
   dateInscription?: string;
   commentaire?: string;
 

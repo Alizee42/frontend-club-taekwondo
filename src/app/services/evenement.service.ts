@@ -15,8 +15,10 @@ export interface EvenementDTO {
   lieu: string;
   capacite: number;
   imageUrl?: string;
+  imageFilename?: string;
   actif: boolean;
   nbInscrits?: number;
+  inscriptionStatut?: string;
   isInscrit?: boolean;     // Pour savoir si l'utilisateur connecté est inscrit
   inscriptionId?: number;  // <-- 🔹 Ajout pour gérer la désinscription
 }
@@ -97,21 +99,25 @@ export class EvenementService {
     );
   }
 
+  getEvenementsMonClub(): Observable<EvenementDTO[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/mon-club`).pipe(
+      map(events => events.map(e => this.mapToEvenementDTO(e)))
+    );
+  }
+
   // ======================== INSCRIPTIONS ========================
 
   /** S'inscrire à un événement (utilise la vraie route backend) */
   inscrireMembreEvenement(evenementId: number, commentaire?: string): Observable<InscriptionEvenementDTO> {
-    const utilisateurId = this.getUserId();
     
     // ✅ CORRECTION : Format attendu par le backend (même pour un seul membre)
     const body = { 
       evenementId, 
-      enfantsIds: [utilisateurId], // ✅ LISTE d'IDs même pour un seul membre
       commentaire: commentaire || ''
     };
     
   // ...log supprimé...
-    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body);
+    return this.http.post<any>(`${environment.apiUrl}/inscriptions/me`, body);
   }
 
   /** Inscrire un enfant à un événement - ✅ CORRIGÉ : utilise le bon format backend */
@@ -131,7 +137,7 @@ export class EvenementService {
 
     const body = { 
       evenementId: evenementIdNum, 
-      enfantsIds: [membreIdNum], // ✅ LISTE d'IDs comme attendu par le backend
+      membreIds: [membreIdNum],
       commentaire: commentaire || '',
       parentId: this.getUserId() // ✅ Ajout du parentId si nécessaire
     };
@@ -140,7 +146,9 @@ export class EvenementService {
   // ...log supprimé...
   // ...log supprimé...
     
-    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body);
+    return this.http.post<any>(`${environment.apiUrl}/inscriptions`, body).pipe(
+      map(response => Array.isArray(response) ? response[0] : response)
+    );
   }
 
   /** Se désinscrire d'un événement */
@@ -159,7 +167,7 @@ export class EvenementService {
 
   /** Récupérer mes inscriptions */
   getMesInscriptions(): Observable<InscriptionEvenementDTO[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/mes-inscriptions`);
+    return this.http.get<any[]>(`${environment.apiUrl}/inscriptions/me`);
   }
 
   /** Récupérer les inscriptions de mes enfants (parent) */
@@ -184,11 +192,52 @@ export class EvenementService {
       dateFin: api.dateFin || '',
       lieu: api.lieu || '',
       capacite: Number(api.capacite) || 0,
-      imageUrl: api.imageUrl || null,
+      imageUrl: this.resolveEventImageUrl(api.imageUrl, api.imageFilename),
+      imageFilename: api.imageFilename || null,
       actif: api.actif !== false,
       nbInscrits: Number(api.nbInscrits) || 0,
       isInscrit: Boolean(api.isInscrit),
-      inscriptionId: api.inscriptionId ?? null  // <-- 🔹 mapping ajouté
+      inscriptionId: api.inscriptionId ?? null,
+      inscriptionStatut: api.inscriptionStatut ?? null
     };
   }
+
+  private resolveEventImageUrl(imageUrl?: string | null, imageFilename?: string | null): string | undefined {
+    const apiBase = environment.apiUrl.replace(/\/api\/?$/i, '');
+    const raw = (imageUrl || imageFilename || '').trim();
+
+    if (!raw) return undefined;
+    if (raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
+
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const url = new URL(raw);
+        const apiUrl = new URL(apiBase);
+
+        if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+          url.protocol = apiUrl.protocol;
+          url.hostname = apiUrl.hostname;
+          url.port = apiUrl.port;
+        }
+
+        return url.toString();
+      } catch {
+        return raw;
+      }
+    }
+
+    const normalized = raw.replace(/^\/+/, '');
+
+    if (normalized.startsWith('uploads/')) {
+      return `${apiBase}/${normalized}`;
+    }
+
+    if (normalized.startsWith('evenements/')) {
+      return `${apiBase}/uploads/${normalized}`;
+    }
+
+    return `${apiBase}/uploads/evenements/${encodeURIComponent(normalized)}`;
+  }
 }
+
+

@@ -170,7 +170,7 @@
   color: #991b1b;
 }
 
-.status-chip {
+:host ::ng-deep .status-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -182,25 +182,25 @@
   font-weight: 700;
 }
 
-.status-chip--success {
+:host ::ng-deep .status-chip--success {
   background: color-mix(in srgb, var(--color-success) 10%, white);
   border-color: color-mix(in srgb, var(--color-success) 25%, white);
   color: #166534;
 }
 
-.status-chip--warning {
+:host ::ng-deep .status-chip--warning {
   background: color-mix(in srgb, var(--color-warning) 12%, white);
   border-color: color-mix(in srgb, var(--color-warning) 26%, white);
   color: #92400e;
 }
 
-.status-chip--danger {
+:host ::ng-deep .status-chip--danger {
   background: color-mix(in srgb, var(--color-danger) 10%, white);
   border-color: color-mix(in srgb, var(--color-danger) 24%, white);
   color: #991b1b;
 }
 
-.status-chip--neutral {
+:host ::ng-deep .status-chip--neutral {
   background: var(--color-surface-2);
   border-color: var(--color-border);
   color: var(--color-text-2);
