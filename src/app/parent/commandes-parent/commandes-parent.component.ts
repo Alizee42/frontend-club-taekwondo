@@ -130,7 +130,11 @@ export class CommandesParentComponent implements OnInit {
       const full = `${l.beneficiairePrenom ?? ''} ${l.beneficiaireNom ?? ''}`.trim();
       if (full) set.add(full);
     }
-    return Array.from(set);
+    const names = Array.from(set);
+    if (names.length) return names;
+
+    const utilisateur = `${c?.utilisateurPrenom ?? c?.utilisateur?.prenom ?? ''} ${c?.utilisateurNom ?? c?.utilisateur?.nom ?? ''}`.trim();
+    return utilisateur ? [utilisateur] : [];
   }
 
   articlesResume(c: CommandeDTO): string {
@@ -214,8 +218,26 @@ export class CommandesParentComponent implements OnInit {
   }
 
   private renderStatut(statut: string): string {
-    const label = statut || '-';
+    const label = this.formatStatut(statut);
     return `<span class="${this.classeBadgeCommande(label)}">${label}</span>`;
+  }
+
+  private formatStatut(statut: string): string {
+    const normalized = (statut || '').trim().toUpperCase();
+    switch (normalized) {
+      case 'EN_ATTENTE':
+        return 'En attente';
+      case 'PAYEE':
+      case 'PAYE':
+        return 'Payée';
+      case 'A_RETIRER':
+        return 'À retirer';
+      case 'ANNULEE':
+      case 'ANNULE':
+        return 'Annulée';
+      default:
+        return statut ? statut.replace(/_/g, ' ') : '-';
+    }
   }
 
   private renderBeneficiaires(commande: CommandeDTO): string {

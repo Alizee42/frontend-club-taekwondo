@@ -12,6 +12,7 @@ export interface Club {
   adresse?: string;
   telephone?: string;
   email?: string;
+  rib?: string;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -353,6 +353,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/gestion-commande']);
   }
 
+  navigateToGestionProduits(): void {
+    this.router.navigate(['/admin/gestion-produits']);
+  }
+
   navigateToavis(): void {
     this.router.navigate(['/admin/avis']);
   }

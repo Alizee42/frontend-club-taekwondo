@@ -31,6 +31,7 @@ import { PaiementComponent } from './membre/paiement/paiement.component';
 import { GestionPaiementsComponent } from './admin/gestion-paiements/gestion-paiements.component';
 import { BoutiqueComponent } from './pages/boutique/boutique.component';
 import { GestionCommandeComponent } from './admin/gestion-commande/gestion-commande.component';
+import { GestionProduitsComponent } from './admin/gestion-produits/gestion-produits.component';
 import { EvenementsComponent } from './pages/evenements/evenements.component';
 import { GestionEvenementsComponent } from './admin/gestion-evenements/gestion-evenements.component';
 import { DashboardParentComponent } from './parent/dashboard-parent/dashboard-parent.component';
@@ -86,6 +87,7 @@ export const routes: Routes = [
       { path: 'documents', component: GestionDocumentsComponent },
       { path: 'paiements', component: GestionPaiementsComponent },
       { path: 'gestion-commande', component: GestionCommandeComponent },
+      { path: 'gestion-produits', component: GestionProduitsComponent },
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
       { path: 'membres', loadComponent: () => import('./admin/membres-admin/membres-admin.component').then(m => m.MembresAdminComponent) },
       { path: 'gestion-utilisateurs', component: GestionUtilisateursComponent }

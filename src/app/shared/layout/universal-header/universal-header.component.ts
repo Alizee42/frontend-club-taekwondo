@@ -25,8 +25,6 @@ export class UniversalHeaderComponent implements OnChanges {
   @Output() changeClub       = new EventEmitter<void>();
   @Output() logout            = new EventEmitter<void>();
   @Output() goToDashboard     = new EventEmitter<void>();
-  @Output() goToProfile       = new EventEmitter<void>();
-  @Output() openNotifications = new EventEmitter<void>();
 
   userDropdownOpen = false;
   notifOpen        = false;
@@ -34,6 +32,10 @@ export class UniversalHeaderComponent implements OnChanges {
   dashboardRoute   = '/dashboard';
 
   constructor(private router: Router) {}
+
+  get showCart(): boolean {
+    return this.cartCount > 0 && !this.isDashboardRoute;
+  }
 
   ngOnChanges(): void {
     const r = (this.role ?? '').toString().toUpperCase();

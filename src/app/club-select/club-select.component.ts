@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
 import { EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UiButtonComponent } from '../shared/ui/buttons/ui-button/ui-button.component';
 import { Club, ClubService } from '../services/club.service';
 import { ClubSelectionService } from '../services/club-selection.service';
 
 @Component({
   selector: 'app-club-select',
   standalone: true,
-  imports: [CommonModule, UiButtonComponent],
+  imports: [CommonModule],
   templateUrl: './club-select.component.html',
   styleUrls: ['./club-select.component.css']
 })

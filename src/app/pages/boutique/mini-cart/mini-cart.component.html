@@ -1,0 +1,156 @@
+<div class="mc-backdrop" [class.mc-backdrop--visible]="open" (click)="close()"></div>
+
+<aside class="mc-drawer" [class.mc-drawer--open]="open" role="dialog" aria-label="Panier">
+
+  <!-- Header -->
+  <div class="mc-header">
+    <span class="mc-header__title">
+      <i class="ri-shopping-cart-2-line"></i> Mon panier
+    </span>
+    <button class="mc-header__close" (click)="close()" aria-label="Fermer le panier">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+
+  <!-- Succès -->
+  <div *ngIf="success" class="mc-success">
+    <div class="mc-success__icon"><i class="ri-checkbox-circle-line"></i></div>
+    <p class="mc-success__title">Commande enregistrée !</p>
+    <p *ngIf="commandeId" class="mc-success__ref">Référence : <strong>#{{ commandeId }}</strong></p>
+
+    <!-- ESPÈCES -->
+    <div *ngIf="modePaiementSucces === 'ESPECES'" class="mc-success__info">
+      <div class="mc-info-badge">
+        <i class="ri-money-euro-circle-line"></i>
+        <span>Paiement en espèces</span>
+      </div>
+      <p>Réglez en cash lors du retrait de votre commande au club.</p>
+      <p *ngIf="club?.adresse" class="mc-success__detail"><i class="ri-map-pin-line"></i> {{ club!.adresse }}</p>
+    </div>
+
+    <!-- CHÈQUE -->
+    <div *ngIf="modePaiementSucces === 'CHEQUE'" class="mc-success__info">
+      <div class="mc-info-badge">
+        <i class="ri-file-text-line"></i>
+        <span>Paiement par chèque</span>
+      </div>
+      <p>Remettez votre chèque <strong>à l'ordre de {{ club?.name || 'du club' }}</strong> lors du retrait.</p>
+      <p *ngIf="club?.adresse" class="mc-success__detail"><i class="ri-map-pin-line"></i> {{ club!.adresse }}</p>
+    </div>
+
+    <!-- VIREMENT -->
+    <div *ngIf="modePaiementSucces === 'VIREMENT'" class="mc-success__info">
+      <div class="mc-info-badge">
+        <i class="ri-bank-line"></i>
+        <span>Paiement par virement</span>
+      </div>
+      <p>Effectuez un virement bancaire avec votre référence de commande en motif.</p>
+      <div *ngIf="club?.rib" class="mc-rib">
+        <span class="mc-rib__label">RIB du club</span>
+        <span class="mc-rib__value">{{ club!.rib }}</span>
+      </div>
+      <div *ngIf="!club?.rib" class="mc-rib mc-rib--missing">
+        <i class="ri-information-line"></i>
+        <span>Le club vous communiquera ses coordonnées bancaires.</span>
+      </div>
+      <p *ngIf="commandeId" class="mc-success__detail"><i class="ri-hashtag"></i> Motif du virement : <strong>Commande #{{ commandeId }}</strong></p>
+    </div>
+
+    <!-- CB -->
+    <div *ngIf="modePaiementSucces === 'CB'" class="mc-success__info">
+      <div class="mc-info-badge">
+        <i class="ri-bank-card-line"></i>
+        <span>Paiement par carte</span>
+      </div>
+      <p>Réglez par carte bancaire lors du retrait de votre commande au club.</p>
+      <p *ngIf="club?.adresse" class="mc-success__detail"><i class="ri-map-pin-line"></i> {{ club!.adresse }}</p>
+    </div>
+
+    <button class="mc-btn mc-btn--ghost mc-btn--full" (click)="fermerSucces()">
+      <i class="ri-close-line"></i> Fermer
+    </button>
+  </div>
+
+  <!-- Corps -->
+  <div class="mc-body" *ngIf="!success">
+
+    <!-- Vide -->
+    <div *ngIf="isEmpty" class="mc-empty">
+      <i class="ri-shopping-bag-line"></i>
+      <p>Votre panier est vide</p>
+      <button class="mc-btn mc-btn--primary" (click)="close()">Parcourir la boutique</button>
+    </div>
+
+    <!-- Items -->
+    <ul *ngIf="!isEmpty" class="mc-items">
+      <li *ngFor="let item of items" class="mc-item">
+        <div class="mc-item__info">
+          <p class="mc-item__name">{{ item.nom }}</p>
+          <div class="mc-item__meta">
+            <span *ngIf="item.taille" class="mc-chip">{{ item.taille }}</span>
+            <span *ngIf="item.flocageActif" class="mc-chip mc-chip--accent">Flocage</span>
+          </div>
+          <p class="mc-item__price">{{ item.prix | number:'1.2-2' }} € / unité</p>
+        </div>
+
+        <div class="mc-item__controls">
+          <button class="mc-qty-btn" (click)="dec(item)" [attr.aria-label]="'Diminuer quantité de ' + item.nom">
+            <i class="ri-subtract-line"></i>
+          </button>
+          <span class="mc-qty-val">{{ item.quantite }}</span>
+          <button class="mc-qty-btn" (click)="inc(item)" [attr.aria-label]="'Augmenter quantité de ' + item.nom">
+            <i class="ri-add-line"></i>
+          </button>
+          <button class="mc-remove-btn" (click)="remove(item)" [attr.aria-label]="'Retirer ' + item.nom + ' du panier'">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </div>
+
+        <p class="mc-item__subtotal">{{ item.prix * (item.quantite ?? 1) | number:'1.2-2' }} €</p>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Footer -->
+  <div class="mc-footer" *ngIf="!isEmpty && !success">
+
+    <div class="mc-total">
+      <span>Total</span>
+      <span class="mc-total__amount">{{ total | number:'1.2-2' }} €</span>
+    </div>
+
+    <!-- Mode paiement -->
+    <div class="mc-modes">
+      <p class="mc-modes__label">Mode de paiement</p>
+      <div class="mc-modes__grid">
+        <button
+          *ngFor="let m of modes"
+          class="mc-mode-btn"
+          [class.mc-mode-btn--active]="modePaiement === m.value"
+          (click)="modePaiement = m.value"
+          type="button">
+          <i [class]="m.icon"></i>
+          <span>{{ m.label }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Non connecté -->
+    <div *ngIf="!isConnecte" class="mc-auth-warn">
+      <i class="ri-lock-line"></i>
+      <span>Connectez-vous pour valider votre commande</span>
+      <button class="mc-btn mc-btn--primary" (click)="goToConnexion()">Se connecter</button>
+    </div>
+
+    <!-- Connecté -->
+    <button
+      *ngIf="isConnecte"
+      class="mc-btn mc-btn--primary mc-btn--full"
+      (click)="commander()"
+      [disabled]="loading">
+      <span *ngIf="!loading"><i class="ri-check-line"></i> Valider la commande</span>
+      <span *ngIf="loading" class="mc-spinner"></span>
+    </button>
+  </div>
+
+</aside>

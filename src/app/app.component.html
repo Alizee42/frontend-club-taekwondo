@@ -7,26 +7,36 @@
     [userAvatar]="userAvatar"
     [unreadNotifications]="unreadNotifications"
     [role]="role"
+    [cartCount]="cartCount"
     (logout)="onLogout()"
     (changeClub)="onChangeClub()"
     (goToDashboard)="onGoToDashboard()"
   ></universal-header>
 
-  <div *ngIf="showSelectClubModal">
-    <div class="club-modal-overlay" (click)="showSelectClubModal = false"></div>
-    <div class="club-modal-premium">
-      <button class="close-modal-btn" (click)="showSelectClubModal = false" title="Fermer">x</button>
-      <div class="club-modal-premium-logo-wrap"></div>
-      <div class="club-modal-premium-title">Bienvenue sur le portail olympique Taekwondo</div>
-      <div class="club-modal-premium-slogan">Maitrise, Respect, Depassement de soi</div>
-      <div class="club-modal-premium-desc">
-        Ce portail regroupe tous les clubs partenaires et permet a chaque membre d'acceder a son espace personnel, suivre l'actualite, gerer ses inscriptions et profiter de services exclusifs.<br><br>
-        <b>Merci de selectionner votre club pour acceder a votre espace personnalise et profiter pleinement de l'experience Taekwondo.</b>
+  <div class="club-picker-backdrop" *ngIf="showSelectClubModal" (click)="showSelectClubModal = false">
+    <section class="club-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="clubPickerTitle" (click)="$event.stopPropagation()">
+      <button class="club-picker-close" type="button" (click)="showSelectClubModal = false" aria-label="Fermer">
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
+
+      <header class="club-picker-header">
+        <span class="club-picker-mark">OT</span>
+        <div>
+          <p class="club-picker-kicker">Olympique Taekwondo</p>
+          <h2 id="clubPickerTitle">Choisissez votre ville</h2>
+          <p class="club-picker-text">
+            Votre club Olympique Taekwondo, dans votre ville.
+          </p>
+        </div>
+      </header>
+
+      <div class="club-picker-body">
+        <app-club-select
+          (clubSelected)="onClubSelected($event)"
+          (closeModal)="showSelectClubModal = false">
+        </app-club-select>
       </div>
-      <div class="club-modal-premium-select">
-        <app-club-select (clubSelected)="onClubSelected($event)"></app-club-select>
-      </div>
-    </div>
+    </section>
   </div>
 
   <router-outlet></router-outlet>

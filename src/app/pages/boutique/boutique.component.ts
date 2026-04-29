@@ -1,227 +1,175 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
-import { PanierService } from '../../services/panier.service';
-import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AuthService } from '../../services/auth.service';
-import { environment } from '../../../environments/environment';
+import { Subscription } from 'rxjs';
 
-interface Produit {
+import { PanierService } from '../../services/panier.service';
+import { ProduitService, Produit as ProduitApi } from '../../services/produit.service';
+import { AuthService } from '../../services/auth.service';
+import { ClubSelectionService } from '../../services/club-selection.service';
+import { ToastService } from '../../shared/toast/toast.service';
+import { MiniCartComponent } from './mini-cart/mini-cart.component';
+
+interface ProduitUI {
   id: number;
   nom: string;
   description: string;
   prixBase: number;
-  prix: number;
   imageUrl: string;
-  taille?: string;
-  couleur?: string;
-  flocageActif?: boolean;
-  flocage?: string;
-  quantite?: number;
-  paiementId?: number;
+  tailles: string[];
+  couleurs: string[];
+  flocageDisponible: boolean;
+  flocageTexte: string;
 }
 
-type Selection = {
+interface Selection {
   taille: string | null;
+  couleur: string;
   flocageActif: boolean;
   quantite: number;
-};
-
-type CreerCommandeResponse = {
-  paiementId: number;
-  [k: string]: any;
-};
+}
 
 @Component({
   standalone: true,
   selector: 'app-boutique',
   templateUrl: './boutique.component.html',
   styleUrls: ['./boutique.component.css'],
-  imports: [CommonModule, FormsModule, UiButtonComponent],
+  imports: [CommonModule, FormsModule, MiniCartComponent],
 })
-export class BoutiqueComponent implements OnInit {
-  produits: Produit[] = [];
-  tailles: string[] = [];
-  couleurs: string[] = ['Blanc'];
-  confirmationMessage = '';
-
+export class BoutiqueComponent implements OnInit, OnDestroy {
+  produits: ProduitUI[] = [];
   selections: Record<number, Selection> = {};
-  private readonly creerCommandeUrl = `${environment.apiUrl}/paiements/from-cart`;
+  loading = true;
+  error = false;
+  cartOpen = false;
+  confirmations: Record<number, boolean> = {};
+
+  private sub = new Subscription();
 
   constructor(
     private panierService: PanierService,
-    private router: Router,
-    private http: HttpClient,
-    private authService: AuthService
+    private produitService: ProduitService,
+    private auth: AuthService,
+    private clubSelection: ClubSelectionService,
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
+    this.sub.add(this.panierService.openCart$.subscribe(() => (this.cartOpen = true)));
 
-    this.tailles = Array.from(
-      { length: (210 - 120) / 10 + 1 },
-      (_, i) => `${120 + i * 10} cm`
-    );
-    
+    const clubId = this.getClubId();
+    if (clubId) {
+      this.chargerProduits(clubId);
+    } else {
+      this.sub.add(
+        this.clubSelection.selectedClubId$.subscribe(id => {
+          if (id) { this.chargerProduits(id); }
+          else { this.loading = false; }
+        })
+      );
+    }
+  }
 
-    this.produits = [
-      {
-        id: 1,
-        nom: 'Dobok Taekwondo',
-        description: 'Tenue blanche officielle',
-        prixBase: 30,
-        prix: 30,
-        imageUrl: 'assets/images/dobok.jpg',
-        taille: '',
-        couleur: 'Blanc',
-        flocageActif: false,
-        flocage: '',
+  ngOnDestroy(): void { this.sub.unsubscribe(); }
+
+  private getClubId(): number | null {
+    const user = this.auth.getUtilisateurConnecte();
+    if (user?.['clubId']) return Number(user['clubId']);
+    return this.clubSelection.getSelectedClubId();
+  }
+
+  private chargerProduits(clubId: number): void {
+    this.loading = true;
+    this.error = false;
+    this.produitService.getProduitsByClub(clubId).subscribe({
+      next: (produits: ProduitApi[]) => {
+        this.produits = produits.map(p => this.toProduitUI(p));
+        for (const p of this.produits) {
+          this.selections[p.id] = {
+            taille: p.tailles[0] ?? null,
+            couleur: p.couleurs[0] ?? 'Blanc',
+            flocageActif: false,
+            quantite: 1,
+          };
+        }
+        this.loading = false;
       },
-    ];
+      error: () => {
+        this.error = true;
+        this.loading = false;
+      }
+    });
+  }
 
-    for (const p of this.produits) {
-      this.selections[p.id] = { taille: null, flocageActif: false, quantite: 1 };
+  private toProduitUI(p: ProduitApi): ProduitUI {
+    return {
+      id: p.id,
+      nom: p.nom,
+      description: p.description,
+      prixBase: p.prix,
+      imageUrl: p.imageUrl ?? 'assets/images/produit-placeholder.png',
+      tailles: this.genererTailles(),
+      couleurs: ['Blanc'],
+      flocageDisponible: true,
+      flocageTexte: 'Olympique Taekwondo',
+    };
+  }
+
+  private genererTailles(): string[] {
+    return Array.from({ length: (210 - 120) / 10 + 1 }, (_, i) => `${120 + i * 10} cm`);
+  }
+
+  private sel(id: number): Selection {
+    if (!this.selections[id]) {
+      this.selections[id] = { taille: null, couleur: 'Blanc', flocageActif: false, quantite: 1 };
     }
+    return this.selections[id];
   }
 
-  private ensureSelection(productId: number): Selection {
-    if (!this.selections[productId]) {
-      this.selections[productId] = { taille: null, flocageActif: false, quantite: 1 };
-    }
-    return this.selections[productId];
+  getPrixUnitaire(p: ProduitUI): number {
+    return p.prixBase + (this.sel(p.id).flocageActif ? 10 : 0);
   }
 
-  getPrixUnitaire(p: Produit): number {
-    const sel = this.ensureSelection(p.id);
-    let total = p.prixBase;
-    if (sel.flocageActif) total += 10;
-    return total;
+  getPrixTotal(p: ProduitUI): number {
+    return this.getPrixUnitaire(p) * Math.max(1, this.sel(p.id).quantite);
   }
 
-  getPrixTotal(p: Produit): number {
-    const sel = this.ensureSelection(p.id);
-    return this.getPrixUnitaire(p) * Math.max(1, sel.quantite);
+  getTaille(p: ProduitUI): string | null { return this.sel(p.id).taille; }
+  getCouleur(p: ProduitUI): string { return this.sel(p.id).couleur; }
+  getFlocageActif(p: ProduitUI): boolean { return this.sel(p.id).flocageActif; }
+  getQuantite(p: ProduitUI): number { return this.sel(p.id).quantite; }
+
+  onChangeTaille(p: ProduitUI, v: string): void { this.sel(p.id).taille = v || null; }
+  onChangeCouleur(p: ProduitUI, v: string): void { this.sel(p.id).couleur = v; }
+  onToggleFlocage(p: ProduitUI, v: boolean): void { this.sel(p.id).flocageActif = !!v; }
+  onChangeQuantite(p: ProduitUI, v: string | number): void {
+    this.sel(p.id).quantite = Math.max(1, Number(v) || 1);
   }
 
-  ajouterAuPanier(p: Produit): void {
-    const sel = this.ensureSelection(p.id);
-    if (!sel.taille) {
-      alert('Veuillez sélectionner une taille.');
-      console.warn('[Boutique] ajout refusé: taille manquante pour produit', p.id);
+  ajouterAuPanier(p: ProduitUI): void {
+    const s = this.sel(p.id);
+    if (!s.taille) {
+      this.toast.error('Veuillez sélectionner une taille.');
       return;
     }
 
-    const quantite = Math.max(1, Number(sel.quantite || 1));
-    const prixUnitaire = this.getPrixUnitaire(p);
-
-    const item: Produit = {
-      ...p,
-      taille: sel.taille!,
-      flocageActif: sel.flocageActif,
-      quantite,
-      prix: prixUnitaire,
-    };
-
-    this.panierService.ajouterAuPanier(item);
-    this.panierService.openCart();
-
-    this.confirmationMessage = 'Produit ajouté au panier !';
-    setTimeout(() => (this.confirmationMessage = ''), 2000);
-  }
-
-  onChangeTaille(p: Produit, taille: string) {
-    this.ensureSelection(p.id).taille = taille || null;
-  }
-
-  onToggleFloquage(p: Produit, checked: boolean) {
-    this.ensureSelection(p.id).flocageActif = !!checked;
-  }
-
-  onChangeQuantite(p: Produit, val: string | number) {
-    const q = Math.max(1, Number(val || 1));
-    this.ensureSelection(p.id).quantite = q;
-  }
-
-  private buildCommandePayload() {
-    const panier = this.panierService.getPanier();
-
-    const items = panier.map((it) => {
-      const quantite = Math.max(1, Number(it.quantite || 1));
-
-      return {
-        produitId: it.id,
-        quantite,
-        taille: it.taille ?? null,
-        couleur: it.couleur ?? null,
-        flocageActif: !!it.flocageActif,
-        flocage: it.flocage ?? null,
-        // Ne pas envoyer prixUnitaire - laisser le backend calculer automatiquement
-      };
+    this.panierService.ajouterAuPanier({
+      id: p.id,
+      nom: p.nom,
+      description: p.description,
+      prixBase: p.prixBase,
+      prix: this.getPrixUnitaire(p),
+      imageUrl: p.imageUrl,
+      taille: s.taille,
+      couleur: s.couleur,
+      flocageActif: s.flocageActif,
+      flocage: s.flocageActif ? p.flocageTexte : '',
+      quantite: s.quantite,
     });
 
-    const payload = {
-      modePaiement: 'stripe', // Par défaut pour la boutique
-      items,
-    };
-    return payload;
-  }
+    this.panierService.openCart();
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = this.authService.getToken() ?? '';
-    if (token) {
-    } else {
-      console.warn('[Boutique] Aucun token trouvé pour la création de commande');
-    }
-    return this.authService.getAuthHeaders();
-  }
-
-  private async createCommandeOnServer(): Promise<number> {
-    const payload = this.buildCommandePayload();
-    try {
-      const res = await this.http
-        .post<CreerCommandeResponse>(this.creerCommandeUrl, payload, { headers: this.getAuthHeaders() })
-        .toPromise();
-
-      const paiementId = res?.paiementId;
-      if (!paiementId || !Number.isFinite(paiementId)) {
-        throw new Error("Réponse backend invalide : 'paiementId' manquant.");
-      }
-
-      // Stockage du paiementId dans localStorage pour un accès futur
-      localStorage.setItem('paiementId', String(paiementId));
-
-      return paiementId;
-    } catch (e: any) {
-      console.error('Erreur création commande:', e);
-      alert(e?.message || 'Impossible de créer la commande.');
-      throw e;
-    }
-  }
-
-  async payerMaintenant(): Promise<void> {
-    const panier = this.panierService.getPanier();
-
-    if (!panier || panier.length === 0) {
-      alert('Votre panier est vide.');
-      console.warn('[Boutique] paiement annulé: panier vide');
-      return;
-    }
-
-    try {
-      const paiementId = await this.createCommandeOnServer();
-
-      localStorage.setItem('paiementId', String(paiementId));
-
-      await this.router.navigate([], {
-        queryParams: { startPay: 1, paiementId },
-        queryParamsHandling: 'merge',
-      });
-
-      this.panierService.openCart();
-    } catch (e: any) {
-      console.error('[Boutique] Erreur création commande:', e);
-      alert(e?.message || 'Impossible de créer la commande.');
-    }
+    this.confirmations[p.id] = true;
+    setTimeout(() => { this.confirmations[p.id] = false; }, 2000);
   }
 }

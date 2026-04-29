@@ -59,8 +59,6 @@
           </div>
 
           <h2>{{ evenement.titre }}</h2>
-          <p class="featured-event__description">{{ evenement.description }}</p>
-
           <div class="event-meta event-meta--featured">
             <span>
               <i class="ri-time-line"></i>
@@ -73,25 +71,26 @@
             </span>
           </div>
 
-          <div class="capacity">
-            <div class="capacity__header">
-              <span>{{ evenement.nbInscrits || 0 }} inscrit(s)</span>
-              <strong>{{ placesRestantes(evenement) }} place(s) libre(s)</strong>
+          <div class="featured-event__aside">
+            <div class="capacity">
+              <div class="capacity__header">
+                <span>{{ evenement.nbInscrits || 0 }} inscrit(s)</span>
+                <strong>{{ placesRestantes(evenement) }} place(s) libre(s)</strong>
+              </div>
+              <div class="capacity__track" aria-hidden="true">
+                <span [style.width.%]="progressionInscription(evenement)"></span>
+              </div>
             </div>
-            <div class="capacity__track" aria-hidden="true">
-              <span [style.width.%]="progressionInscription(evenement)"></span>
-            </div>
-          </div>
 
-          <div class="event-actions">
-            <ui-button
-              *ngIf="canInscribe(evenement)"
-              type="button"
-              variant="primary"
-              icon="ri-user-add-line"
-              label="S'inscrire"
-              (clicked)="inscrire(evenement)"
-            />
+            <div class="event-actions">
+              <ui-button
+                *ngIf="canInscribe(evenement)"
+                type="button"
+                variant="primary"
+                icon="ri-user-add-line"
+                label="S'inscrire"
+                (clicked)="inscrire(evenement)"
+              />
 
             <ui-button
               *ngIf="evenement.isInscrit"
@@ -111,6 +110,7 @@
               <i class="ri-time-line"></i>
               Événement terminé
             </span>
+            </div>
           </div>
         </div>
       </section>

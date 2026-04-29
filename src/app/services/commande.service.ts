@@ -5,6 +5,17 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 // ==== Types frontend ====
+export interface CartLignePayload {
+  produitId: number;
+  produitNom: string;
+  quantite: number;
+  prixUnitaire: number;
+  sousTotal: number;
+  taille?: string | null;
+  couleur?: string | null;
+  flocage?: string | null;
+}
+
 export interface LigneCommandeDTO {
   produitId: number;
   produitNom: string;
@@ -25,6 +36,12 @@ export interface CommandeDTO {
   utilisateurNom: string;
   utilisateurPrenom: string;
   utilisateurEmail: string;
+  utilisateur?: {
+    id?: number;
+    nom?: string;
+    prenom?: string;
+    email?: string;
+  };
   montantTotal: number;
   modePaiement: string;
   statut: string;
@@ -51,6 +68,12 @@ export class CommandeService {
   creerCommandeEnAttente(commandeDTO: any): Observable<any> {
     const commandeAvecStatut = { ...commandeDTO, statut: this.STATUT_ATTENTE };
     return this.creerCommandeAvecLignes(commandeAvecStatut);
+  }
+
+  passerCommandeDepuisPanier(modePaiement: string, lignes: CartLignePayload[]): Observable<any> {
+    const body = { modePaiement, lignes };
+    return this.http.post(`${this.apiUrl}/from-cart`, body, { headers: this.jsonHeaders })
+      .pipe(catchError(this.handleError));
   }
 
   /** ========================
@@ -136,6 +159,7 @@ export class CommandeService {
       utilisateurNom: api.utilisateur?.nom ?? '',
       utilisateurPrenom: api.utilisateur?.prenom ?? '',
       utilisateurEmail: api.utilisateur?.email ?? '',
+      utilisateur: api.utilisateur ?? undefined,
       montantTotal: Number(api.montantTotal ?? 0),
       modePaiement: api.modePaiement || '',
       statut: api.statut || '',

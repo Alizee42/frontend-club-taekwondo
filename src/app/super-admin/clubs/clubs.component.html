@@ -1,9 +1,28 @@
-<div class="page-shell">
-  <app-page-header title="Gestion des clubs" icon="ri-building-4-line">
+<div class="page-shell clubs-page">
+  <app-page-header title="Gestion des clubs" icon="ri-building-4-line" subtitle="Creer, modifier et administrer les clubs de la plateforme">
     <ng-container page-header-actions>
-      <ui-button variant="primary" (clicked)="openClubModal = true" label="Créer un club"></ui-button>
+      <ui-button variant="primary" icon="ri-add-line" (clicked)="openCreateModal()" label="Creer un club"></ui-button>
     </ng-container>
   </app-page-header>
+
+  <div class="status-line success" *ngIf="successMessage">
+    <i class="ri-checkbox-circle-line"></i>
+    {{ successMessage }}
+  </div>
+
+  <div class="status-line error" *ngIf="errorMessage">
+    <i class="ri-error-warning-line"></i>
+    {{ errorMessage }}
+  </div>
+
+  <div class="clubs-toolbar">
+    <div>
+      <strong>{{ clubs.length }}</strong>
+      <span>{{ clubs.length > 1 ? 'clubs enregistres' : 'club enregistre' }}</span>
+    </div>
+    <ui-button variant="ghost" icon="ri-refresh-line" label="Actualiser" [loading]="loading" (clicked)="loadClubs()"></ui-button>
+  </div>
+
   <div class="table-wrap">
     <ui-table
       [columns]="clubColumns"
@@ -14,11 +33,141 @@
   </div>
 </div>
 
-<ui-modal [open]="openClubModal" [title]="selectedClub ? 'Modifier le club' : 'Créer un nouveau club'" (closed)="closeClubModal()">
-  <ui-form
-    [fields]="clubFormFields"
-    [model]="selectedClub || newClub"
-    [submitLabel]="selectedClub ? 'Enregistrer' : 'Créer'"
-    (submitted)="onClubFormSubmit($event)">
-  </ui-form>
+<ui-modal
+  [open]="openClubModal"
+  [title]="modalTitle"
+  [subtitle]="modalSubtitle"
+  size="lg"
+  [closeOnBackdrop]="!saving"
+  [closeOnEscape]="!saving"
+  (closed)="closeClubModal()">
+  <form class="club-form" #clubNgForm="ngForm" (ngSubmit)="saveClub(clubNgForm)" novalidate>
+    <div class="club-form__grid">
+      <label class="field">
+        <span>Nom du club *</span>
+        <input
+          name="name"
+          type="text"
+          required
+          [(ngModel)]="clubForm.name"
+          #name="ngModel"
+          [class.is-invalid]="name.invalid && (name.dirty || name.touched)"
+          placeholder="Ex: Villeurbanne">
+        <small *ngIf="name.invalid && (name.dirty || name.touched)">Nom obligatoire</small>
+      </label>
+
+      <label class="field">
+        <span>Email *</span>
+        <input
+          name="email"
+          type="email"
+          required
+          email
+          [(ngModel)]="clubForm.email"
+          #email="ngModel"
+          [class.is-invalid]="email.invalid && (email.dirty || email.touched)"
+          placeholder="club@example.fr">
+        <small *ngIf="email.invalid && (email.dirty || email.touched)">Email invalide</small>
+      </label>
+
+      <label class="field">
+        <span>Telephone *</span>
+        <input
+          name="telephone"
+          type="tel"
+          required
+          [(ngModel)]="clubForm.telephone"
+          #telephone="ngModel"
+          [class.is-invalid]="telephone.invalid && (telephone.dirty || telephone.touched)"
+          placeholder="06 00 00 00 00">
+        <small *ngIf="telephone.invalid && (telephone.dirty || telephone.touched)">Telephone obligatoire</small>
+      </label>
+
+      <label class="field">
+        <span>Logo URL</span>
+        <input
+          name="logo"
+          type="url"
+          [(ngModel)]="clubForm.logo"
+          placeholder="https://...">
+      </label>
+
+      <label class="field field--full">
+        <span>Adresse *</span>
+        <input
+          name="adresse"
+          type="text"
+          required
+          [(ngModel)]="clubForm.adresse"
+          #adresse="ngModel"
+          [class.is-invalid]="adresse.invalid && (adresse.dirty || adresse.touched)"
+          placeholder="Adresse complete du club">
+        <small *ngIf="adresse.invalid && (adresse.dirty || adresse.touched)">Adresse obligatoire</small>
+      </label>
+
+      <label class="field field--full">
+        <span>RIB / IBAN</span>
+        <textarea
+          name="rib"
+          rows="3"
+          [(ngModel)]="clubForm.rib"
+          placeholder="Coordonnees bancaires du club"></textarea>
+      </label>
+    </div>
+
+    <div class="club-preview" *ngIf="clubForm.logo || clubForm.name || clubForm.adresse">
+      <div class="club-preview__logo">
+        <img *ngIf="clubForm.logo" [src]="clubForm.logo" alt="Logo du club">
+        <i *ngIf="!clubForm.logo" class="ri-building-4-line"></i>
+      </div>
+      <div>
+        <strong>{{ clubForm.name || 'Nom du club' }}</strong>
+        <span>{{ clubForm.adresse || 'Adresse du club' }}</span>
+      </div>
+    </div>
+
+    <div class="status-line error" *ngIf="modalError">
+      <i class="ri-error-warning-line"></i>
+      {{ modalError }}
+    </div>
+
+    <div class="modal-actions">
+      <ui-button type="button" variant="ghost" label="Annuler" [disabled]="saving" (clicked)="closeClubModal()"></ui-button>
+      <ui-button
+        type="submit"
+        variant="primary"
+        icon="ri-save-line"
+        [label]="selectedClub ? 'Enregistrer' : 'Creer'"
+        [loading]="saving"
+        [disabled]="saving">
+      </ui-button>
+    </div>
+  </form>
+</ui-modal>
+
+<ui-modal
+  [open]="openDeleteModal"
+  title="Supprimer le club"
+  subtitle="Cette action est definitive."
+  size="sm"
+  [closeOnBackdrop]="!deleting"
+  [closeOnEscape]="!deleting"
+  (closed)="closeDeleteModal()">
+  <div class="delete-confirm">
+    <div class="delete-confirm__icon">
+      <i class="ri-delete-bin-line"></i>
+    </div>
+    <p>
+      Voulez-vous vraiment supprimer
+      <strong>{{ clubToDelete?.name || clubToDelete?.nom }}</strong> ?
+    </p>
+    <div class="status-line error" *ngIf="deleteError">
+      <i class="ri-error-warning-line"></i>
+      {{ deleteError }}
+    </div>
+    <div class="modal-actions">
+      <ui-button type="button" variant="ghost" label="Annuler" [disabled]="deleting" (clicked)="closeDeleteModal()"></ui-button>
+      <ui-button type="button" variant="danger" icon="ri-delete-bin-line" label="Supprimer" [loading]="deleting" [disabled]="deleting" (clicked)="confirmDelete()"></ui-button>
+    </div>
+  </div>
 </ui-modal>

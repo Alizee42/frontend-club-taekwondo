@@ -1,79 +1,132 @@
-<div class="page-wrapper-standard">
-  <header class="page-head" style="text-align:center; margin-bottom:2.5rem;">
-    <h1 class="page-title" style="font-size:2.5rem; font-weight:700; letter-spacing:1px; color:var(--blue-main); margin-bottom:.5rem; position:relative; display:inline-block;">
-      Boutique
-      <span style="display:block; height:5px; width:60px; background:linear-gradient(90deg,#e63946 0%,#ff7b7b 100%); border-radius:3px; margin:0.5rem auto 0;"></span>
-    </h1>
-    <p class="page-subtitle" style="font-size:1.15rem; color:#334155; margin-bottom:0;">Equipements officiels & tenues du club</p>
-  </header>
-  <div class="boutique-container">
-  <h2 class="visually-hidden">Catalogue</h2>
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section class="bq-hero">
+  <div class="bq-hero__inner">
+    <span class="bq-hero__eyebrow">
+      <i class="ri-shopping-bag-line"></i> Boutique officielle
+    </span>
+    <h1 class="bq-hero__title">Équipements Taekwondo</h1>
+    <p class="bq-hero__desc">Doboks, protections et accessoires officiels du club. Choisissez votre équipement et commandez en ligne.</p>
+  </div>
+</section>
 
-  <div class="produit" *ngFor="let p of produits">
-    <div class="produit-image-container">
-      <img [src]="p.imageUrl" [alt]="p.nom" class="produit-image" />
-    </div>
+<!-- ═══════════════════════════════ CONTENU ══════════════════════════════ -->
+<div class="bq-page">
 
-    <div class="produit-info">
-      <h3>{{ p.nom }}</h3>
-      <p>{{ p.description }}</p>
-      <p class="prix-base">Prix : <strong>{{ p.prixBase | number:'1.2-2' }} €</strong></p>
+  <div *ngIf="loading" class="bq-state">
+    <span class="bq-spinner"></span>
+    <p>Chargement des produits…</p>
+  </div>
 
-      <div class="options">
-        <!-- Taille -->
-        <div class="option">
-          <label [for]="'taille-' + p.id">Taille :</label>
-          <select
-            [id]="'taille-' + p.id"
-            [(ngModel)]="selections[p.id].taille"
-            (ngModelChange)="onChangeTaille(p, $event)">
-            <option [ngValue]="null">-- Sélectionnez --</option>
-            <option *ngFor="let t of tailles" [value]="t">{{ t }}</option>
-          </select>
+  <div *ngIf="!loading && error" class="bq-state bq-state--error">
+    <i class="ri-error-warning-line"></i>
+    <p>Impossible de charger les produits. Réessayez plus tard.</p>
+  </div>
+
+  <div *ngIf="!loading && !error && produits.length === 0" class="bq-state">
+    <i class="ri-box-3-line"></i>
+    <p>Aucun produit disponible pour le moment.</p>
+  </div>
+
+  <!-- ═══════════════════════════════ GRILLE ═════════════════════════════ -->
+  <div *ngIf="!loading && !error && produits.length > 0" class="bq-grid">
+
+    <article *ngFor="let produit of produits" class="bq-card">
+
+      <!-- Image -->
+      <div class="bq-card__img-wrap">
+        <img [src]="produit.imageUrl" [alt]="produit.nom" class="bq-card__img" loading="lazy" />
+        <div *ngIf="confirmations[produit.id]" class="bq-card__confirm" aria-live="polite">
+          <i class="ri-checkbox-circle-line"></i> Ajouté !
         </div>
-
-        <!-- Flocage -->
-        <div class="option flocage-option">
-          <input
-            type="checkbox"
-            [id]="'flocage-' + p.id"
-            [(ngModel)]="selections[p.id].flocageActif"
-            (ngModelChange)="onToggleFloquage(p, $event)" />
-          <label [for]="'flocage-' + p.id">Flocage "TKT Villeurbannais" (+10 €)</label>
-        </div>
-
-        <!-- Quantité -->
-        <div class="option">
-          <label [for]="'quantite-' + p.id">Quantité :</label>
-          <input
-            [id]="'quantite-' + p.id"
-            type="number"
-            min="1"
-            [(ngModel)]="selections[p.id].quantite"
-            (ngModelChange)="onChangeQuantite(p, $event)" />
-        </div>
-
-        <!-- Prix live -->
-        <p class="prix-total">
-          Prix unitaire :
-          <strong>{{ getPrixUnitaire(p) | number:'1.2-2' }} €</strong><br>
-          Prix total :
-          <strong>{{ getPrixTotal(p) | number:'1.2-2' }} €</strong>
-        </p>
       </div>
 
-      <ui-button
-        type="button"
-        variant="primary"
-        icon="ri-shopping-cart-line"
-        label="Ajouter au panier"
-        [full]="true"
-        [disabled]="!selections[p.id].taille"
-        (clicked)="ajouterAuPanier(p)"
-      />
+      <!-- Infos -->
+      <div class="bq-card__body">
 
-      <p class="confirmation" *ngIf="confirmationMessage">{{ confirmationMessage }}</p>
-    </div>
+        <!-- En-tête : nom + prix -->
+        <div class="bq-card__top">
+          <div>
+            <h2 class="bq-card__name">{{ produit.nom }}</h2>
+            <p class="bq-card__desc">{{ produit.description }}</p>
+          </div>
+          <div class="bq-card__price-col">
+            <span class="bq-card__price">{{ getPrixUnitaire(produit) | number:'1.2-2' }} €</span>
+            <span *ngIf="getFlocageActif(produit)" class="bq-card__price-note">flocage +10 €</span>
+          </div>
+        </div>
+
+        <!-- Contrôles : taille + flocage + qté + bouton -->
+        <div class="bq-card__controls">
+
+          <!-- Taille -->
+          <div class="bq-form-group">
+            <label class="bq-label" [for]="'taille-' + produit.id">Taille</label>
+            <select
+              class="bq-select"
+              [id]="'taille-' + produit.id"
+              [ngModel]="getTaille(produit)"
+              (ngModelChange)="onChangeTaille(produit, $event)">
+              <option value="">— Choisir —</option>
+              <option *ngFor="let t of produit.tailles" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+
+          <!-- Flocage -->
+          <div *ngIf="produit.flocageDisponible" class="bq-form-group">
+            <label class="bq-label">Flocage</label>
+            <label class="bq-toggle" [for]="'flocage-' + produit.id">
+              <input
+                type="checkbox"
+                [id]="'flocage-' + produit.id"
+                [ngModel]="getFlocageActif(produit)"
+                (ngModelChange)="onToggleFlocage(produit, $event)" />
+              <span class="bq-toggle__track"></span>
+              <span class="bq-toggle__label">{{ produit.flocageTexte }}</span>
+            </label>
+          </div>
+
+          <!-- Quantité -->
+          <div class="bq-form-group">
+            <label class="bq-label" [for]="'qty-' + produit.id">Qté</label>
+            <div class="bq-qty">
+              <button type="button" class="bq-qty__btn"
+                (click)="onChangeQuantite(produit, getQuantite(produit) - 1)"
+                [disabled]="getQuantite(produit) <= 1" aria-label="Diminuer">
+                <i class="ri-subtract-line"></i>
+              </button>
+              <input class="bq-qty__input" type="number" min="1" max="99"
+                [id]="'qty-' + produit.id"
+                [ngModel]="getQuantite(produit)"
+                (ngModelChange)="onChangeQuantite(produit, $event)" />
+              <button type="button" class="bq-qty__btn"
+                (click)="onChangeQuantite(produit, getQuantite(produit) + 1)" aria-label="Augmenter">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Total + Bouton -->
+          <div class="bq-card__footer">
+            <span class="bq-card__total">
+              Total : <strong>{{ getPrixTotal(produit) | number:'1.2-2' }} €</strong>
+            </span>
+            <button
+              type="button"
+              class="bq-btn-add"
+              (click)="ajouterAuPanier(produit)"
+              [disabled]="!getTaille(produit)">
+              <i class="ri-shopping-cart-line"></i>
+              Ajouter
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </article>
+
   </div>
-  </div>
+
 </div>
+
+<!-- ═══════════════════════════════ MINI-CART ════════════════════════════ -->
+<app-mini-cart [open]="cartOpen" (closed)="cartOpen = false"></app-mini-cart>

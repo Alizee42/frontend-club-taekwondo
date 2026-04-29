@@ -5,6 +5,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { Club, ClubService } from './services/club.service';
 import { ClubSelectionService } from './services/club-selection.service';
 import { AuthService } from './services/auth.service';
+import { PanierService } from './services/panier.service';
 import { ToastContainerComponent } from './shared/toast/toast-container/toast-container.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { UniversalHeaderComponent } from './shared/layout/universal-header/universal-header.component';
@@ -29,7 +30,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private clubService: ClubService,
     public auth: AuthService,
     private router: Router,
-    private clubSelectionService: ClubSelectionService
+    private clubSelectionService: ClubSelectionService,
+    private panierService: PanierService
   ) {
     // eslint-disable-next-line no-console
     console.log('[AppComponent] constructed');
@@ -51,10 +53,12 @@ export class AppComponent implements OnInit, OnDestroy {
   userName: string | undefined;
   userAvatar: string | undefined;
   unreadNotifications = 0;
+  cartCount = 0;
 
   private clubSub?: any;
   private authSub?: any;
   private routerSub?: any;
+  private cartSub?: any;
 
   onChangeClub(): void {
     this.showSelectClubModal = true;
@@ -104,6 +108,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.cartSub = this.panierService.count$.subscribe(n => (this.cartCount = n));
+
     // eslint-disable-next-line no-console
     console.log('[AppComponent] ngOnInit start');
 
@@ -203,5 +209,6 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.clubSub) this.clubSub.unsubscribe();
     if (this.authSub) this.authSub.unsubscribe();
     if (this.routerSub) this.routerSub.unsubscribe();
+    if (this.cartSub) this.cartSub.unsubscribe();
   }
 }

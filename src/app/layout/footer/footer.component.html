@@ -1,44 +1,33 @@
-<footer>
-    <div class="container footer-container">
-      <div class="footer-about">
-        <h3>À propos de nous</h3>
-        <p>
-          Olympique Taekwondo {{ selectedClub?.name || selectedClub?.nom || '' }} est dédié à l'excellence en Taekwondo.
-          Rejoignez-nous pour découvrir cet art martial et développer vos compétences.
-        </p>
-      </div>
-      <div class="footer-links">
-        <h3>Liens rapides</h3>
-        <ul>
-          <li><a href="index.html">Accueil</a></li>
-          <li><a href="inscription.html">Inscriptions</a></li>
-          <li><a href="tarifs.html">Tarifs</a></li>
-          <li><a href="galerie.html">Galerie</a></li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </div>
-      <div class="footer-contact">
-        <h3>Contact</h3>
-        <p><i class="fas fa-map-marker-alt"></i> {{ selectedClub?.adresse || 'Adresse du club' }}</p>
-        <p><i class="fas fa-phone-alt"></i> {{ selectedClub?.telephone || 'Téléphone du club' }}</p>
-        <p>
-            <i class="fas fa-envelope"></i>
-            <a [href]="'mailto:' + (selectedClub?.email || 'contact@club-taekwondo.fr')">{{ selectedClub?.email || 'contact@club-taekwondo.fr' }}</a>
-          </p>
-      </div>
-      <div class="footer-social">
-        <h3>Suivez-nous</h3>
-        <a href="https://www.facebook.com/groups/127724277248941/"><i class="fab fa-facebook-f"></i></a>
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
+<footer class="site-footer">
+  <div class="footer-main">
+    <div class="footer-brand">
+      <span class="footer-mark">OT</span>
+      <div>
+        <strong>Olympique Taekwondo {{ selectedClub?.name || selectedClub?.nom || '' }}</strong>
+      <span>Club de taekwondo et pratique sportive encadree.</span>
       </div>
     </div>
-    <div class="footer-bottom">
-  <p>&copy; {{ currentYear }} Olympique Taekwondo {{ selectedClub?.name || selectedClub?.nom || '' }}. Tous droits réservés.</p>
-      <ul>
-        <li><a routerLink="/mentions-legales">Mentions légales</a></li>
-        <li><a routerLink="/politique-confidentialite">Politique de confidentialité</a></li>
-      </ul>
+
+    <nav class="footer-nav" aria-label="Liens rapides">
+      <a routerLink="/">Accueil</a>
+      <a routerLink="/inscription">Inscriptions</a>
+      <a routerLink="/galerie">Galerie</a>
+      <a routerLink="/contact">Contact</a>
+    </nav>
+
+    <div class="footer-contact">
+      <span *ngIf="selectedClub?.telephone"><i class="ri-phone-line"></i>{{ selectedClub?.telephone }}</span>
+      <a *ngIf="selectedClub?.email" [href]="'mailto:' + selectedClub?.email">
+        <i class="ri-mail-line"></i>{{ selectedClub?.email }}
+      </a>
     </div>
-    <a href="#top" class="back-to-top"><i class="fas fa-chevron-up"></i></a>
-  </footer>
+  </div>
+
+  <div class="footer-bottom">
+    <span>&copy; {{ currentYear }} Tous droits reserves.</span>
+    <div class="footer-legal">
+      <a routerLink="/mentions-legales">Mentions legales</a>
+      <a routerLink="/politique-confidentialite">Politique de confidentialite</a>
+    </div>
+  </div>
+</footer>
