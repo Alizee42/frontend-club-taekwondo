@@ -37,6 +37,7 @@ export class GestionActualitesComponent implements OnInit {
   actualites: Actualite[] = [];
   featuredNews: Actualite | null = null;
   imageUrl: string | ArrayBuffer | null = null;
+  imageFile: File | null = null;
   imageError = '';
   searchTerm = '';
   typeFilter = '';
@@ -155,13 +156,20 @@ export class GestionActualitesComponent implements OnInit {
         : new Date().toISOString()
     };
 
-    const request$ = payload.id
-      ? this.actualiteService.update(payload.id, payload)
-      : this.actualiteService.create(payload);
+    const request$ = this.imageFile
+      ? this.saveWithImage(payload)
+      : payload.id
+        ? this.actualiteService.update(payload.id, payload)
+        : this.actualiteService.create(payload);
 
-    request$.subscribe(() => {
-      this.loadActualites();
-      this.closeModal();
+    request$.subscribe({
+      next: () => {
+        this.loadActualites();
+        this.closeModal();
+      },
+      error: () => {
+        this.imageError = 'Erreur lors de l\'enregistrement de l\'actualite.';
+      }
     });
   }
 
@@ -171,19 +179,21 @@ export class GestionActualitesComponent implements OnInit {
 
     if (!file) {
       this.imageError = '';
+      this.imageFile = null;
       return;
     }
 
     if (!file.type.startsWith('image/')) {
       this.imageError = 'Veuillez selectionner une image valide.';
       this.imageUrl = null;
+      this.imageFile = null;
       return;
     }
 
+    this.imageFile = file;
     const reader = new FileReader();
     reader.onload = () => {
       this.imageUrl = reader.result;
-      this.actualite.imageUrl = typeof reader.result === 'string' ? reader.result : '';
       this.imageError = '';
     };
     reader.readAsDataURL(file);
@@ -245,7 +255,26 @@ export class GestionActualitesComponent implements OnInit {
   private resetForm(): void {
     this.actualite = this.getEmptyActualite();
     this.imageUrl = null;
+    this.imageFile = null;
     this.imageError = '';
+  }
+
+  private saveWithImage(payload: Actualite) {
+    const formData = new FormData();
+
+    formData.append('titre', payload.titre);
+    formData.append('contenu', payload.contenu);
+    formData.append('typeActu', payload.typeActu);
+    formData.append('isFeatured', String(!!payload.isFeatured));
+    formData.append('clubId', String(payload.clubId ?? this.getClubId() ?? ''));
+
+    if (this.imageFile) {
+      formData.append('image', this.imageFile);
+    }
+
+    return payload.id
+      ? this.actualiteService.updateMultipart(payload.id, formData)
+      : this.actualiteService.createMultipart(formData);
   }
 
   private getEmptyActualite(): Actualite {

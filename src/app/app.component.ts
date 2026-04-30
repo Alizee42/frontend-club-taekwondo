@@ -32,10 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private router: Router,
     private clubSelectionService: ClubSelectionService,
     private panierService: PanierService
-  ) {
-    // eslint-disable-next-line no-console
-    console.log('[AppComponent] constructed');
-  }
+  ) {}
 
   get isAccueilRoute(): boolean {
     return window.location.pathname === '/';
@@ -110,16 +107,11 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.cartSub = this.panierService.count$.subscribe(n => (this.cartCount = n));
 
-    // eslint-disable-next-line no-console
-    console.log('[AppComponent] ngOnInit start');
-
     this.clubSub = this.clubService.selectedClub$.subscribe(
       club => {
         this.selectedClub = club;
-        // eslint-disable-next-line no-console
-        console.log('[AppComponent] selectedClub$', club);
       },
-      err => console.error('[AppComponent] clubService.selectedClub$ error', err)
+      () => {}
     );
 
     const initial = this.clubService.getSelectedClub();
@@ -178,7 +170,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.showSelectClubModal = false;
         }
       },
-      err => console.error('[AppComponent] auth.authState$ error', err)
+      () => {}
     );
 
     this.routerSub = this.router.events.subscribe(
@@ -194,15 +186,11 @@ export class AppComponent implements OnInit, OnDestroy {
             this.unreadNotifications = this.currentUser ? this.currentUser['unreadNotifications'] || 0 : 0;
             this.selectedClub = this.clubService.getSelectedClub();
           }
-        } catch (e) {
-          console.error('[AppComponent] router.events handler error', e);
+        } catch {
         }
       },
-      err => console.error('[AppComponent] router.events error', err)
+      () => {}
     );
-
-    // eslint-disable-next-line no-console
-    console.log('[AppComponent] ngOnInit end');
   }
 
   ngOnDestroy(): void {

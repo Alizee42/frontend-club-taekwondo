@@ -29,7 +29,6 @@ export class ActualiteService {
         this.actualitesSubject.next(data);
       }),
       catchError(error => {
-        console.error('❌ Erreur lors du rechargement des actualités :', error);
         return throwError(() => error);
       })
     ).subscribe();
@@ -37,12 +36,11 @@ export class ActualiteService {
 
   /** 🔹 Crée une nouvelle actualité */
   create(actualite: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, actualite).pipe(
+    return this.http.post<any>(this.apiUrl, this.toApiPayload(actualite)).pipe(
       tap(() => {
         this.reloadActualites();
       }),
       catchError(error => {
-        console.error('❌ Erreur lors de la création de l\'actualité :', error);
         return throwError(() => error);
       })
     );
@@ -50,12 +48,11 @@ export class ActualiteService {
 
   /** 🔹 Met à jour une actualité */
   update(id: string, actualite: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, actualite).pipe(
+    return this.http.put<any>(`${this.apiUrl}/${id}`, this.toApiPayload(actualite)).pipe(
       tap(() => {
         this.reloadActualites();
       }),
       catchError(error => {
-        console.error('❌ Erreur lors de la mise à jour de l\'actualité :', error);
         return throwError(() => error);
       })
     );
@@ -68,7 +65,6 @@ export class ActualiteService {
         this.reloadActualites();
       }),
       catchError(error => {
-        console.error('❌ Erreur lors de la suppression de l\'actualité :', error);
         return throwError(() => error);
       })
     );
@@ -79,7 +75,6 @@ export class ActualiteService {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
   tap(data => {}),
       catchError(error => {
-        console.error('❌ Erreur lors de la récupération de l\'actualité :', error);
         return throwError(() => error);
       })
     );
@@ -92,7 +87,6 @@ export class ActualiteService {
         this.reloadActualites();
       }),
       catchError(error => {
-        console.error('❌ Erreur lors de la mise à la une :', error);
         return throwError(() => error);
       })
     );
@@ -103,7 +97,6 @@ export class ActualiteService {
     return this.http.get<any[]>(`${this.apiUrl}/featured`).pipe(
   tap(data => {}),
       catchError(error => {
-        console.error('❌ Erreur lors de la récupération des actualités à la une :', error);
         return throwError(() => error);
       })
     );
@@ -114,7 +107,6 @@ export class ActualiteService {
     return this.http.get<any[]>(`${this.apiUrl}/club/${clubId}`).pipe(
       tap(data => this.actualitesSubject.next(data)),
       catchError(error => {
-        console.error('❌ Erreur lors du chargement des actualités du club :', error);
         return throwError(() => error);
       })
     );
@@ -127,7 +119,6 @@ export class ActualiteService {
         this.reloadActualites();
       }),
       catchError(error => {
-        console.error('❌ Erreur lors de la création (multipart) :', error);
         return throwError(() => error);
       })
     );
@@ -135,14 +126,38 @@ export class ActualiteService {
 
   /** 🔹 Met à jour une actualité avec image (multipart) */
   updateMultipart(id: string, formData: FormData): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, formData).pipe(
+    return this.http.put<any>(`${this.apiUrl}/${id}/with-image`, formData).pipe(
       tap(() => {
         this.reloadActualites();
       }),
       catchError(error => {
-        console.error('❌ Erreur lors de la mise à jour (multipart) :', error);
         return throwError(() => error);
       })
     );
+  }
+
+  private toApiPayload(actualite: any): any {
+    const payload = { ...actualite };
+
+    if (payload.clubId !== undefined && payload.clubId !== null) {
+      payload.clubId = String(payload.clubId);
+    }
+
+    if (payload.datePublication) {
+      payload.datePublication = this.toLocalDateTime(payload.datePublication);
+    }
+
+    return payload;
+  }
+
+  private toLocalDateTime(value: string | Date): string {
+    const date = value instanceof Date ? value : new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
+
+    const pad = (part: number) => String(part).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   }
 }

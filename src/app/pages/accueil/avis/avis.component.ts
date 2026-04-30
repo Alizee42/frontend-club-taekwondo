@@ -61,8 +61,6 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Construction du FormData pour l'envoi au backend
-    // DEBUG: log des données reçues pour vérifier typeAvis
-    console.debug('[Avis] données formulaire avant envoi:', data);
     const formData = new FormData();
     formData.append('pseudoVisiteur', data.pseudoVisiteur || '');
     formData.append('contenu', data.contenu || '');
@@ -85,24 +83,14 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
       formData.append('utilisateurId', String(utilisateur.id));
     }
 
-    // DEBUG: log FormData entries
-    try {
-      for (const pair of (formData as any).entries()) {
-        console.debug('[Avis] formData', pair[0], pair[1]);
-      }
-    } catch (e) {
-      // certains navigateurs/stack ne permettent pas l'itération, ignorer
-    }
-
     this.avisService.ajouterAvis(formData).subscribe({
       next: () => {
         this.toast.success('Merci, votre avis a bien été envoyé !', 4000);
         this.modaleOuverte = false;
         this.messageConfirmation = 'Merci ! Votre avis sera publié après validation.';
       },
-      error: (err) => {
+      error: () => {
         this.toast.error("Erreur lors de l'envoi de l'avis.");
-        console.error(err);
       }
     });
   }
@@ -165,19 +153,14 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 0);
   }
 
-  /** Charge TOUS les avis du club sélectionné (approuvés ou non) pour debug */
+  /** Charge les avis du club selectionne. */
   chargerAvisClub(clubId: number): void {
-    // On ne filtre plus sur approuve pour debug
     this.avisService.getAvisParClub(clubId).subscribe({
       next: (avis: Avis[]) => {
         this.avisApprouves = avis || [];
-        console.log('[Avis] chargés (TOUS) depuis API, count =', this.avisApprouves.length, 'pour clubId=', clubId);
-        console.log('[Avis] payload complet:', this.avisApprouves);
         this.initOrUpdateSwiper();
       },
-      error: (err: any) => {
-        console.error('Erreur de chargement des avis du club :', err);
-      }
+      error: () => {}
     });
   }
 

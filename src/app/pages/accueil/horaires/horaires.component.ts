@@ -22,10 +22,8 @@ export class HorairesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.clubIdSubscription = this.clubSelectionService.selectedClubId$.subscribe(clubId => {
-      console.log('[HorairesComponent] clubId reçu =', clubId);
       if (clubId) {
         this.horairesService.getHorairesByClub(clubId).subscribe(horaires => {
-          console.log('[HorairesComponent] horaires reçus =', horaires);
           // Regrouper par jour
           const map = new Map<string, any[]>();
           horaires.forEach(h => {

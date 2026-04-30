@@ -53,7 +53,7 @@
               <span *ngIf="!col.render && col.type !== 'image'" [ngClass]="getTextClass(col, row)">
                 {{ col.display ? col.display(row) : row[col.key] }}
               </span>
-              <span *ngIf="col.render" [innerHTML]="col.render(row)"></span>
+              <span *ngIf="col.render">{{ col.render(row) }}</span>
             </ng-container>
           </ng-container>
         </ng-template>

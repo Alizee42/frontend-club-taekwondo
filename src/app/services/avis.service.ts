@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface Avis {
@@ -58,9 +58,6 @@ export class AvisService {
     // global endpoint with approuve=true and filter by clubId client-side.
     if (approuve === true) {
       return this.getAvis(true).pipe(
-        tap(list => console.log('[AvisService] getAvis(true) returned', (list || []).length, 'items')),
-        // log a small JSON sample to inspect shape
-        tap(list => console.log('[AvisService] payload sample', JSON.stringify((list || []).slice(0,5)))),
         map(list => (list || []).filter(a => {
           const anyA = a as any;
           const candidate = anyA?.clubId ?? anyA?.club?.id ?? anyA?.club ?? anyA?.club_id ?? anyA?.clubID ?? null;
@@ -68,7 +65,6 @@ export class AvisService {
           const cid = candidate == null ? null : Number(candidate);
           return cid != null && !Number.isNaN(cid) && Number(cid) === Number(clubId);
         })),
-        tap(filtered => console.log('[AvisService] filtered by clubId', clubId, '->', (filtered || []).length, 'items')),
         catchError(this.handleError)
       );
     }
@@ -129,7 +125,6 @@ export class AvisService {
     const msg = error.error instanceof ErrorEvent
       ? `Erreur: ${error.error.message}`
       : `Erreur serveur ${error.status}: ${error.message}`;
-    console.error('[AvisService]', msg, error);
     return throwError(() => new Error(msg));
   }
 }

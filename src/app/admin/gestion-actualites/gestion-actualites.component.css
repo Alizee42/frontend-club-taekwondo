@@ -2,36 +2,6 @@
   display: block;
 }
 
-:host ::ng-deep ui-table .col-image {
-  width: 96px !important;
-  min-width: 96px !important;
-  max-width: 96px !important;
-}
-
-:host ::ng-deep ui-table .col-title {
-  width: 320px !important;
-  min-width: 320px !important;
-  max-width: 320px !important;
-}
-
-:host ::ng-deep ui-table .col-type {
-  width: 150px !important;
-  min-width: 150px !important;
-  max-width: 150px !important;
-}
-
-:host ::ng-deep ui-table .col-date {
-  width: 140px !important;
-  min-width: 140px !important;
-  max-width: 140px !important;
-}
-
-:host ::ng-deep ui-table .col-featured {
-  width: 140px !important;
-  min-width: 140px !important;
-  max-width: 140px !important;
-}
-
 .actualite-form {
   display: grid;
   gap: var(--sp-4);

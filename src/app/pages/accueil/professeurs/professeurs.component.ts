@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClubService } from '../../../services/club.service';
 import { EnseignantService, Enseignant } from '../../../services/enseignant.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-professeurs',
@@ -11,6 +12,8 @@ import { EnseignantService, Enseignant } from '../../../services/enseignant.serv
   styleUrls: ['./professeurs.component.css'],
 })
 export class ProfesseursComponent implements OnInit {
+  readonly fallbackPhoto = 'assets/images/dobok.jpg';
+
   // On conserve la forme utilisée par le template (photo, nom, prenom...)
   professeurs: Array<{
     id?: number;
@@ -44,7 +47,7 @@ export class ProfesseursComponent implements OnInit {
           prenom: e.prenom,
           specialite: e.specialite,
           description: e.description,
-          photo: e.photoUrl || 'assets/images/default-teacher.jpg',
+          photo: this.resolvePhotoUrl(e.photoUrl),
           facebook: e.facebook,
           instagram: e.instagram,
           linkedin: e.linkedin,
@@ -54,5 +57,32 @@ export class ProfesseursComponent implements OnInit {
         this.professeurs = [];
       }
     });
+  }
+
+  onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = this.fallbackPhoto;
+  }
+
+  private resolvePhotoUrl(photoUrl?: string): string {
+    const raw = (photoUrl || '').trim();
+    const apiBase = environment.apiUrl.replace(/\/api\/?$/, '');
+
+    if (!raw) {
+      return this.fallbackPhoto;
+    }
+
+    if (raw.startsWith('http') || raw.startsWith('data:image') || raw.startsWith('assets/')) {
+      return raw;
+    }
+
+    if (raw.startsWith('uploads/')) {
+      return `${apiBase}/${raw}`;
+    }
+
+    if (raw.startsWith('enseignants/')) {
+      return `${apiBase}/uploads/${raw}`;
+    }
+
+    return `${apiBase}/uploads/enseignants/${encodeURIComponent(raw)}`;
   }
 }

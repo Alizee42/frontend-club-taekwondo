@@ -10,8 +10,9 @@
       <article *ngFor="let professeur of professeurs" class="teacher-card">
         <div class="teacher-card__photo-wrap">
           <img
-            [src]="professeur.photo || 'assets/images/default-teacher.jpg'"
+            [src]="professeur.photo || fallbackPhoto"
             [attr.alt]="professeur.nom + ' ' + professeur.prenom"
+            (error)="onImageError($event)"
             loading="lazy" decoding="async"
           >
           <div class="teacher-card__overlay">

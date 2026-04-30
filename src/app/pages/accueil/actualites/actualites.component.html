@@ -8,7 +8,7 @@
 
     <div class="actu-grid">
       <div
-        *ngFor="let actu of news.slice(0, 3); trackBy: trackById"
+        *ngFor="let actu of filteredNews; trackBy: trackById"
         class="actu-card"
         [routerLink]="['/actualite', actu.id]"
       >
@@ -34,6 +34,13 @@
           </span>
         </div>
       </div>
+    </div>
+
+    <div class="actu-actions" *ngIf="hasMore">
+      <button type="button" class="actu-more-btn" (click)="loadMore()">
+        Voir plus d'actualites
+        <i class="ri-arrow-down-line"></i>
+      </button>
     </div>
 
   </div>
