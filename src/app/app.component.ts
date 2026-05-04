@@ -150,14 +150,8 @@ export class AppComponent implements OnInit, OnDestroy {
             if (!selectedClub) {
               this.clubService.getClubs().subscribe(clubs => {
                 const club = clubs.find(c => c.id === clubId);
-                if (club && state.user) {
-                  this.clubService.setSelectedClub({
-                    id: state.user['clubId'],
-                    name: state.user['clubName'] || '',
-                    nom: state.user['clubName'] || '',
-                    ville: '',
-                    logo: ''
-                  });
+                if (club) {
+                  this.clubService.setSelectedClub(club);
                   this.showSelectClubModal = false;
                 }
               });

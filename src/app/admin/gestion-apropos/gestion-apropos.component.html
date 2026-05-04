@@ -1,0 +1,213 @@
+<div class="page-shell apropos-page">
+
+  <app-page-header
+    title="À propos"
+    icon="ri-information-line"
+    subtitle="Textes, image et cartes Mission / Vision / Valeurs de la section À propos"
+  >
+    <ng-container page-header-actions>
+      <ui-button
+        label="Enregistrer"
+        icon="ri-save-line"
+        variant="primary"
+        [loading]="saving"
+        [disabled]="loading || saving"
+        (clicked)="save()"
+      />
+    </ng-container>
+  </app-page-header>
+
+  @if (loading) {
+    <div class="empty-state">
+      <i class="ri-loader-4-line spin"></i>
+      <p>Chargement...</p>
+    </div>
+  } @else {
+
+  <div class="apropos-editor">
+
+    <!-- Colonne gauche : image + badge -->
+    <div class="image-panel">
+      <p class="panel-label">Image principale</p>
+      @if (imagePreviewUrl) {
+        <img class="img-preview" [src]="imagePreviewUrl" alt="Aperçu">
+      } @else {
+        <div class="img-empty"><i class="ri-image-line"></i></div>
+      }
+      <label class="upload-label" [class.uploading]="uploadingImage">
+        <input type="file" accept="image/*" (change)="onImageSelected($event)" hidden>
+        <i class="ri-upload-cloud-line"></i>
+        {{ uploadingImage ? 'Upload en cours…' : 'Changer l\'image' }}
+      </label>
+
+      <div class="badge-fields">
+        <p class="panel-label" style="margin-top: var(--sp-4)">Badge sur la photo</p>
+        <div class="form-group">
+          <label class="form-label">Libellé <span class="hint-inline">ex : Fondé en</span></label>
+          <input class="form-input" type="text" [(ngModel)]="config.badgeLabel" name="badgeLabel" placeholder="Fondé en">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Année</label>
+          <input class="form-input" type="text" [(ngModel)]="config.foundedYear" name="foundedYear" placeholder="1995">
+        </div>
+        <div class="badge-preview">
+          <span class="badge-preview__year">{{ config.foundedYear || '1995' }}</span>
+          <span class="badge-preview__label">{{ config.badgeLabel || 'Fondé en' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne droite : onglets -->
+    <div class="content-panel">
+
+      <div class="tabs" role="tablist">
+        <button role="tab" class="tab" [class.tab--active]="activeTab === 'general'" (click)="setTab('general')">
+          <i class="ri-file-text-line"></i> Présentation
+        </button>
+        <button role="tab" class="tab" [class.tab--active]="activeTab === 'cartes'" (click)="setTab('cartes')">
+          <i class="ri-layout-grid-line"></i> Mission & Valeurs
+        </button>
+      </div>
+
+      <div class="tab-content">
+
+        <!-- Onglet Présentation -->
+        @if (activeTab === 'general') {
+          <div class="fields-col fields-col--general">
+
+            <!-- Titre : aperçu en temps réel -->
+            <div class="form-section form-section--title">
+              <p class="section-label">Titre de la section</p>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Ligne normale</label>
+                  <input class="form-input" type="text" [(ngModel)]="config.headingLine1"
+                         name="headingLine1" placeholder="Un club fondé sur">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Ligne en italique <span class="hint-inline">(mise en évidence)</span></label>
+                  <input class="form-input" type="text" [(ngModel)]="config.headingLine2"
+                         name="headingLine2" placeholder="l'excellence et le respect">
+                </div>
+              </div>
+              <div class="heading-preview">
+                <span class="heading-preview__normal">{{ config.headingLine1 || 'Un club fondé sur' }}</span>
+                <em class="heading-preview__italic">{{ config.headingLine2 || "l'excellence et le respect" }}</em>
+              </div>
+            </div>
+
+            <!-- Phrase d'introduction -->
+            <div class="form-group form-group--lead">
+              <label class="form-label">
+                Phrase d'introduction
+                <span class="hint-inline">Affichée en gros sous le titre</span>
+              </label>
+              <div class="lead-prefix-row">
+                <span class="lead-prefix">Olympique Taekwondo {{ clubVille }}</span>
+                <textarea class="form-input form-textarea lead-textarea" [(ngModel)]="config.leadText" name="leadText" rows="2"
+                          placeholder=", fondé en 1995, accueille des pratiquants de tous niveaux…"></textarea>
+              </div>
+              <p class="hint-block">Le nom du club est ajouté automatiquement au début.</p>
+            </div>
+
+            <!-- Paragraphe descriptif -->
+            <div class="form-group form-group--description">
+              <label class="form-label">
+                Paragraphe descriptif
+                <span class="hint-inline">Affiché sous la phrase d'introduction</span>
+              </label>
+              <textarea class="form-input form-textarea" [(ngModel)]="config.descriptionText" name="descriptionText" rows="3"
+                        placeholder="Notre mission est de former des athlètes sur le plan physique et mental…"></textarea>
+            </div>
+
+            <!-- Mots-clés -->
+            <div class="form-group form-group--chips">
+              <label class="form-label">
+                Mots-clés
+                <span class="hint-inline">Petites étiquettes affichées sous le texte ({{ config.chips?.length ?? 0 }})</span>
+              </label>
+              <ul class="editable-list">
+                @for (chip of config.chips; track trackByIndex($index)) {
+                  <li class="editable-row">
+                    <input class="form-input" type="text" [(ngModel)]="config.chips![$index]"
+                           [name]="'chip_' + $index" placeholder="ex : Respect">
+                    <button type="button" class="btn-remove" (click)="removeChip($index)" aria-label="Supprimer">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </li>
+                }
+              </ul>
+              <button type="button" class="btn-add" (click)="addChip()">
+                <i class="ri-add-line"></i> Ajouter un mot-clé
+              </button>
+            </div>
+
+          </div>
+        }
+
+        <!-- Onglet Mission & Valeurs -->
+        @if (activeTab === 'cartes') {
+          <div class="fields-col fields-col--cards">
+
+            <div class="card-section card-section--mission">
+              <p class="card-label"><i class="ri-focus-3-line"></i> Carte Mission</p>
+              <div class="form-group">
+                <label class="form-label">Titre de la carte</label>
+                <input class="form-input" type="text" [(ngModel)]="config.missionTitle" name="missionTitle" placeholder="Notre Mission">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Texte</label>
+                <textarea class="form-input form-textarea" [(ngModel)]="config.missionText" name="missionText" rows="3"
+                          placeholder="Accompagner chaque pratiquant…"></textarea>
+              </div>
+            </div>
+
+            <div class="card-section card-section--vision">
+              <p class="card-label"><i class="ri-eye-line"></i> Carte Vision</p>
+              <div class="form-group">
+                <label class="form-label">Titre de la carte</label>
+                <input class="form-input" type="text" [(ngModel)]="config.visionTitle" name="visionTitle" placeholder="Notre Vision">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Texte</label>
+                <textarea class="form-input form-textarea" [(ngModel)]="config.visionText" name="visionText" rows="3"
+                          placeholder="Inspirer et transmettre les valeurs du Taekwondo…"></textarea>
+              </div>
+            </div>
+
+            <div class="card-section card-section--values">
+              <p class="card-label"><i class="ri-heart-line"></i> Carte Valeurs</p>
+              <div class="form-group">
+                <label class="form-label">Titre de la carte</label>
+                <input class="form-input" type="text" [(ngModel)]="config.valuesTitle" name="valuesTitle" placeholder="Nos Valeurs">
+              </div>
+              <p class="hint-block">Chaque ligne : un mot en gras + une courte description</p>
+              <ul class="editable-list">
+                @for (val of config.values; track trackByIndex($index)) {
+                  <li class="editable-row">
+                    <input class="form-input value-bold" type="text" [(ngModel)]="config.values![$index].bold"
+                           [name]="'val_bold_' + $index" placeholder="Respect">
+                    <span class="sep">—</span>
+                    <input class="form-input" type="text" [(ngModel)]="config.values![$index].description"
+                           [name]="'val_desc_' + $index" placeholder="chaque individu est valorisé">
+                    <button type="button" class="btn-remove" (click)="removeValue($index)" aria-label="Supprimer">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </li>
+                }
+              </ul>
+              <button type="button" class="btn-add" (click)="addValue()">
+                <i class="ri-add-line"></i> Ajouter une valeur
+              </button>
+            </div>
+
+          </div>
+        }
+
+      </div>
+    </div>
+
+  </div>
+  }
+
+</div>

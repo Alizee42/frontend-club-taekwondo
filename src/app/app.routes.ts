@@ -1,3 +1,5 @@
+import { GestionHeroComponent } from './admin/gestion-hero/gestion-hero.component';
+import { GestionAProposComponent } from './admin/gestion-apropos/gestion-apropos.component';
 import { GestionHorairesSuperAdminComponent } from './super-admin/gestion-horaires/gestion-horaires-super-admin.component';
 import { UtilisateursSuperAdminComponent } from './super-admin/utilisateurs/utilisateurs-super-admin.component';
 import { GestionUtilisateursComponent } from './admin/gestion-utilisateurs/gestion-utilisateurs.component';
@@ -90,7 +92,9 @@ export const routes: Routes = [
       { path: 'gestion-produits', component: GestionProduitsComponent },
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
       { path: 'membres', loadComponent: () => import('./admin/membres-admin/membres-admin.component').then(m => m.MembresAdminComponent) },
-      { path: 'gestion-utilisateurs', component: GestionUtilisateursComponent }
+      { path: 'gestion-utilisateurs', component: GestionUtilisateursComponent },
+      { path: 'hero', component: GestionHeroComponent },
+      { path: 'apropos', component: GestionAProposComponent }
     ]
   },
 
@@ -146,7 +150,8 @@ export const routes: Routes = [
   { path: 'evenements', component: GestionEvenementsComponent },
   { path: 'avis', loadComponent: () => import('./super-admin/avis-super-admin/avis-super-admin.component').then(m => m.AvisSuperAdminComponent) },
   { path: 'enseignants', loadComponent: () => import('./super-admin/enseignants/enseignants-super-admin.component').then(m => m.EnseignantsSuperAdminComponent) },
- 
+      { path: 'hero', component: GestionHeroComponent },
+      { path: 'apropos', component: GestionAProposComponent },
     ]
     },
   // 🧭 Redirection inconnue

@@ -1,0 +1,181 @@
+<div class="page-shell">
+
+  <app-page-header
+    title="Bannière principale"
+    icon="ri-layout-top-line"
+    subtitle="Vidéo, textes, slogans et chiffres clés affichés sur la page d'accueil"
+  >
+    <ng-container page-header-actions>
+      <ui-button
+        label="Enregistrer"
+        icon="ri-save-line"
+        variant="primary"
+        [loading]="saving"
+        [disabled]="loading || saving"
+        (clicked)="save()"
+      />
+    </ng-container>
+  </app-page-header>
+
+  @if (loading) {
+    <div class="empty-state">
+      <i class="ri-loader-4-line spin"></i>
+      <p>Chargement...</p>
+    </div>
+  } @else {
+
+  <div class="hero-editor">
+
+    <!-- Colonne gauche : vidéo -->
+    <div class="video-panel">
+      <p class="panel-label">Vidéo de fond</p>
+      @if (videoPreviewUrl) {
+        <video class="video-preview" [src]="videoPreviewUrl" muted playsinline autoplay loop></video>
+      } @else {
+        <div class="video-empty"><i class="ri-video-off-line"></i></div>
+      }
+      <label class="upload-label" [class.uploading]="uploadingVideo">
+        <input type="file" accept="video/*" (change)="onVideoSelected($event)" hidden>
+        <i class="ri-upload-cloud-line"></i>
+        {{ uploadingVideo ? 'Upload en cours…' : 'Changer la vidéo' }}
+      </label>
+      @if (config.videoPath) {
+        <span class="file-hint">{{ config.videoPath }}</span>
+      }
+    </div>
+
+    <!-- Colonne droite : onglets -->
+    <div class="content-panel">
+
+      <div class="tabs" role="tablist">
+        <button role="tab" class="tab" [class.tab--active]="activeTab === 'identite'"
+                (click)="setTab('identite')">
+          <i class="ri-text"></i> Identité
+        </button>
+        <button role="tab" class="tab" [class.tab--active]="activeTab === 'slogans'"
+                (click)="setTab('slogans')">
+          <i class="ri-refresh-line"></i> Slogans
+          <span class="tab-badge">{{ config.slogans?.length ?? 0 }}</span>
+        </button>
+        <button role="tab" class="tab" [class.tab--active]="activeTab === 'stats'"
+                (click)="setTab('stats')">
+          <i class="ri-bar-chart-2-line"></i> Chiffres clés
+          <span class="tab-badge">{{ config.stats?.length ?? 0 }}</span>
+        </button>
+      </div>
+
+      <div class="tab-content">
+
+        <!-- Onglet Identité -->
+        @if (activeTab === 'identite') {
+          <div class="fields-grid">
+            <div class="form-group form-group--full">
+              <label class="form-label">Texte d'accroche</label>
+              <input class="form-input" type="text" [(ngModel)]="config.eyebrowText"
+                     name="eyebrowText" placeholder="Club de Taekwondo · Lyon">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ligne principale (gras)</label>
+              <input class="form-input" type="text" [(ngModel)]="config.identityStrong"
+                     name="identityStrong" placeholder="Olympique">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ligne secondaire</label>
+              <input class="form-input" type="text" [(ngModel)]="config.identityMid"
+                     name="identityMid" placeholder="Taekwondo">
+            </div>
+          </div>
+        }
+
+        <!-- Onglet Slogans -->
+        @if (activeTab === 'slogans') {
+          <div class="list-section">
+            <ul class="editable-list">
+              @for (slogan of config.slogans; track trackByIndex($index)) {
+                <li class="editable-row">
+                  <span class="row-num">{{ $index + 1 }}</span>
+                  <input class="form-input" type="text"
+                         [(ngModel)]="config.slogans![$index]"
+                         [name]="'slogan_' + $index"
+                         placeholder="Ex : Discipline">
+                  <button type="button" class="btn-remove"
+                          (click)="removeSlogan($index)"
+                          aria-label="Supprimer">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </li>
+              }
+            </ul>
+            <button type="button" class="btn-add" (click)="addSlogan()">
+              <i class="ri-add-line"></i> Ajouter un slogan
+            </button>
+          </div>
+        }
+
+        <!-- Onglet Chiffres clés -->
+        @if (activeTab === 'stats') {
+          <div class="stats-section">
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Valeur <span class="th-hint">ex : 30+</span></th>
+                  <th>ou Icône</th>
+                  <th>Libellé <span class="th-hint">affiché sous</span></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (stat of config.stats; track trackByIndex($index)) {
+                  <tr>
+                    <td class="td-num">{{ $index + 1 }}</td>
+                    <td>
+                      <input class="form-input" type="text"
+                             [(ngModel)]="config.stats![$index].value"
+                             [name]="'val_' + $index"
+                             placeholder="30+">
+                    </td>
+                    <td class="td-icon">
+                      <div class="icon-cell">
+                        @if (stat.icon) {
+                          <i [class]="stat.icon" class="icon-preview"></i>
+                        }
+                        <select class="form-input form-select"
+                                [(ngModel)]="config.stats![$index].icon"
+                                [name]="'icon_' + $index">
+                          <option [ngValue]="null">— aucune —</option>
+                          @for (item of availableIcons; track item.icon) {
+                            <option [value]="item.icon">{{ item.label }}</option>
+                          }
+                        </select>
+                      </div>
+                    </td>
+                    <td>
+                      <input class="form-input" type="text"
+                             [(ngModel)]="config.stats![$index].label"
+                             [name]="'lbl_' + $index"
+                             placeholder="ans d'expérience">
+                    </td>
+                    <td>
+                      <button type="button" class="btn-remove"
+                              (click)="removeStat($index)" aria-label="Supprimer">
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <button type="button" class="btn-add" (click)="addStat()">
+              <i class="ri-add-line"></i> Ajouter un chiffre clé
+            </button>
+          </div>
+        }
+
+      </div>
+    </div>
+
+  </div>
+  }
+
+</div>

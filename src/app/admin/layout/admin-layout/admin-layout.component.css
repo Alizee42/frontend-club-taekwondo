@@ -14,10 +14,9 @@
   flex: 1;
   padding: 2rem;
   max-width: 100%;
-  overflow-x: hidden; /* Empêche le débordement horizontal */
+  overflow-x: auto;
 }
 
-/* 📱 RESPONSIVE: Layout admin mobile */
 @media (max-width: 768px) {
   .admin-content {
     padding: 1rem;
@@ -29,4 +28,3 @@
     padding: 0.75rem;
   }
 }
-  

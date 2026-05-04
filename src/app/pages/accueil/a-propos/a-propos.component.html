@@ -1,68 +1,66 @@
 <section id="about" class="about-section">
   <div class="about-container">
 
-    <!-- Bloc principal 2 colonnes -->
     <div class="about-main">
       <div class="about-text">
         <span class="section-eyebrow">À propos de nous</span>
         <h2 class="about-heading">
-          Un club fondé sur<br>
-          <em>l'excellence et le respect</em>
+          {{ config.headingLine1 }}<br>
+          <em>{{ config.headingLine2 }}</em>
         </h2>
         <p class="about-lead">
-          <strong>{{ selectedClub?.name || 'Olympique Taekwondo Villeurbannais' }}</strong>, fondé en 1995, accueille des pratiquants de tous niveaux dans un environnement de
-          <strong>respect</strong> et de <strong>discipline</strong>.
+          <strong>Olympique Taekwondo {{ clubVille }}</strong>{{ config.leadText }}
         </p>
-        <p>
-          Notre mission est de former des athlètes sur le plan physique et mental, en mettant l'accent sur le
-          <strong>développement personnel</strong> et la <strong>maîtrise de soi</strong>.
-        </p>
+        <p>{{ config.descriptionText }}</p>
 
-        <!-- Chips de valeurs -->
         <div class="about-chips">
-          <span class="about-chip"><i class="ri-shield-check-line" aria-hidden="true"></i> Respect</span>
-          <span class="about-chip"><i class="ri-mental-health-line" aria-hidden="true"></i> Discipline</span>
-          <span class="about-chip"><i class="ri-trophy-line" aria-hidden="true"></i> Excellence</span>
-          <span class="about-chip"><i class="ri-team-line" aria-hidden="true"></i> Esprit d'équipe</span>
+          @for (chip of config.chips; track $index) {
+            <span class="about-chip">
+              <i class="ri-shield-check-line" aria-hidden="true"></i>
+              {{ chip }}
+            </span>
+          }
         </div>
       </div>
 
       <div class="about-visual">
-        <img src="assets/images/image2.JPG"
+        <img [src]="imageUrl"
              alt="Salle d'entraînement du club de Taekwondo"
              loading="lazy" decoding="async">
         <div class="about-visual__badge">
-          <span class="about-visual__badge-year">1995</span>
-          <span class="about-visual__badge-label">Fondé en</span>
+          <span class="about-visual__badge-year">{{ config.foundedYear }}</span>
+          <span class="about-visual__badge-label">{{ config.badgeLabel }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Cards Mission / Vision / Valeurs -->
     <div class="about-cards">
       <div class="about-card">
         <div class="about-card__icon">
           <i class="ri-focus-3-line" aria-hidden="true"></i>
         </div>
-        <h3>Notre Mission</h3>
-        <p>Accompagner chaque pratiquant dans un environnement sûr et stimulant, pour progresser et s'épanouir à travers le Taekwondo.</p>
+        <h3>{{ config.missionTitle }}</h3>
+        <p>{{ config.missionText }}</p>
       </div>
       <div class="about-card">
         <div class="about-card__icon">
           <i class="ri-eye-line" aria-hidden="true"></i>
         </div>
-        <h3>Notre Vision</h3>
-        <p>Inspirer et transmettre les valeurs du Taekwondo, pour bâtir une communauté forte et ouverte à toutes les générations.</p>
+        <h3>{{ config.visionTitle }}</h3>
+        <p>{{ config.visionText }}</p>
       </div>
       <div class="about-card">
         <div class="about-card__icon">
           <i class="ri-heart-line" aria-hidden="true"></i>
         </div>
-        <h3>Nos Valeurs</h3>
+        <h3>{{ config.valuesTitle }}</h3>
         <ul>
-          <li><i class="ri-check-line" aria-hidden="true"></i> <strong>Respect</strong> — chaque individu est valorisé</li>
-          <li><i class="ri-check-line" aria-hidden="true"></i> <strong>Discipline</strong> — excellence par persévérance</li>
-          <li><i class="ri-check-line" aria-hidden="true"></i> <strong>Maîtrise</strong> — aller plus loin chaque jour</li>
+          @for (val of config.values; track $index) {
+            <li>
+              <i class="ri-check-line" aria-hidden="true"></i>
+              <strong>{{ val.bold }}</strong> — {{ val.description }}
+            </li>
+          }
         </ul>
       </div>
     </div>

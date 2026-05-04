@@ -55,6 +55,11 @@
   margin-bottom: var(--sp-3);
 }
 
+.about-lead strong {
+  display: inline-block;
+  margin-right: var(--sp-1);
+}
+
 .about-text p:not(.about-lead) {
   font-size: var(--text-sm);
   color: var(--color-text-2);

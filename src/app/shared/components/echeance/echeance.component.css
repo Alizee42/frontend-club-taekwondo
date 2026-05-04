@@ -160,6 +160,12 @@
   text-align: center;
 }
 
+.echeances-modal > .table {
+  display: block;
+  min-width: 540px;
+  overflow-x: auto;
+}
+
 .modal .close {
   position: absolute;
   right: var(--sp-4);
@@ -179,6 +185,16 @@
   gap: var(--sp-2);
   justify-content: flex-end;
   margin-top: var(--sp-4);
+}
+
+@media (max-width: 700px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-summary {
+    flex-direction: column;
+  }
 }
 
 .modal-summary {

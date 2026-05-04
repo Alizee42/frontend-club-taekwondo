@@ -58,6 +58,11 @@ export class ClubService {
     }
   }
 
+  getClubVilleLabel(club: Club | null | undefined): string {
+    const label = (club?.ville || club?.name || club?.nom || '').trim();
+    return label.replace(/^Olympique\s+Taekwondo\s+/i, '').trim();
+  }
+
   setSelectedClub(club: Club): void {
     localStorage.setItem('selectedClub', JSON.stringify(club));
     this.selectedClubSubject.next(club);

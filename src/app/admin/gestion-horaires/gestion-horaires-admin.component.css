@@ -73,7 +73,7 @@
 /* ── Grille semaine ───────────────────────────── */
 .week-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 0.85rem;
   align-items: start;
 }
@@ -356,17 +356,7 @@
 }
 
 /* ── Responsive ───────────────────────────────── */
-@media (max-width: 1280px) {
-  .week-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 860px) {
-  .week-grid {
-    grid-template-columns: 1fr;
-  }
-
   .kpi-grid {
     grid-template-columns: repeat(3, minmax(150px, 1fr));
     overflow-x: auto;

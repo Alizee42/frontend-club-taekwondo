@@ -326,13 +326,17 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .bq-hero__title { font-size: var(--text-xl); }
   .bq-card { flex-direction: column; }
-  .bq-card__img-wrap { width: 100%; min-width: 0; height: 160px; border-right: none; border-bottom: 1px solid var(--color-border); }
+  .bq-card__img-wrap { width: 100%; min-width: 0; height: 180px; border-right: none; border-bottom: 1px solid var(--color-border); }
   .bq-card__top { flex-direction: column; }
   .bq-card__price-col { align-items: flex-start; }
   .bq-card__controls { gap: var(--sp-3); }
   .bq-card__footer { margin-left: 0; width: 100%; }
   .bq-btn-add { flex: 1; justify-content: center; }
+}
+
+@media (max-width: 640px) {
+  .bq-card__img-wrap { height: 160px; }
 }

@@ -830,17 +830,54 @@ details.accordion summary {
 }
 
 @media (max-width: 640px) {
+  .payment-page {
+    padding: var(--sp-3);
+    gap: var(--sp-3);
+  }
+
+  .panel,
+  .history-panel {
+    padding: var(--sp-4);
+  }
+
   .steps {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+  }
+
+  .steps li {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .split-line,
+  .figures,
+  .actions,
+  .confirm-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .field select,
+  .figure,
+  .actions .btn,
+  .confirm-actions .btn {
+    width: 100%;
+    min-width: 0;
   }
 
   .list .item,
-  .list.compact .item {
-    grid-template-columns: 50px 1fr auto;
+  .list.uniques .item {
+    min-width: 420px;
   }
 
-  .figure {
-    min-width: 110px;
+  .list {
+    overflow-x: auto;
+  }
+
+  .payment-modal__header,
+  .payment-modal__amount {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 

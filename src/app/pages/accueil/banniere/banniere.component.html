@@ -1,20 +1,18 @@
 <section class="hero">
   <!-- Vidéo de fond -->
-  <video autoplay muted loop playsinline class="hero-video" aria-hidden="true">
-    <source src="assets/videos/video1.MOV" type="video/mp4">
-  </video>
+  <video autoplay muted loop playsinline class="hero-video" aria-hidden="true" [src]="videoUrl"></video>
   <div class="hero-overlay" aria-hidden="true"></div>
 
   <!-- Contenu principal -->
   <div class="hero-body">
     <div class="hero-eyebrow">
       <span class="hero-eyebrow__dot" aria-hidden="true"></span>
-      Club de Taekwondo · Lyon
+      {{ config.eyebrowText }}
     </div>
 
     <div class="hero-identity">
-      <span class="hero-identity__strong">Olympique</span>
-      <span class="hero-identity__mid">Taekwondo</span>
+      <span class="hero-identity__strong">{{ config.identityStrong }}</span>
+      <span class="hero-identity__mid">{{ config.identityMid }}</span>
       <span class="hero-identity__thin">{{ selectedClub?.name || 'Villeurbannais' }}</span>
     </div>
 
@@ -34,21 +32,16 @@
 
   <!-- Stats strip -->
   <div class="hero-stats" aria-label="Chiffres clés du club">
-    <div class="hero-stat">
-      <span class="hero-stat__value">30+</span>
-      <span class="hero-stat__label">ans d'expérience</span>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat__value">200+</span>
-      <span class="hero-stat__label">membres actifs</span>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat__value">50+</span>
-      <span class="hero-stat__label">médailles</span>
-    </div>
-    <div class="hero-stat">
-      <i class="ri-shield-star-line hero-stat__icon" aria-hidden="true"></i>
-      <span class="hero-stat__label">Club FFT affilié</span>
-    </div>
+    @for (stat of config.stats; track $index) {
+      <div class="hero-stat">
+        @if (stat.value) {
+          <span class="hero-stat__value">{{ stat.value }}</span>
+        }
+        @if (stat.icon) {
+          <i [class]="stat.icon + ' hero-stat__icon'" aria-hidden="true"></i>
+        }
+        <span class="hero-stat__label">{{ stat.label }}</span>
+      </div>
+    }
   </div>
 </section>

@@ -705,3 +705,65 @@ details.accordion summary {
     min-width: 140px;
   }
 }
+
+@media (max-width: 640px) {
+  .page {
+    margin: 12px 0;
+    padding: 0 var(--sp-3, 12px);
+  }
+
+  .panel,
+  .payment-panel {
+    padding: var(--sp-4, 16px);
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .steps li {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .actions,
+  .confirm-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions .btn,
+  .confirm-actions .btn {
+    width: 100%;
+    max-width: none;
+  }
+
+  .figures,
+  .plan-summary .stats {
+    flex-direction: column;
+  }
+
+  .figure,
+  .plan-summary .stat {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .list,
+  .list.compact {
+    overflow-x: auto;
+  }
+
+  .list .item,
+  .list.compact .item {
+    min-width: 420px;
+  }
+
+  .modal-card__header,
+  .modal-card__amount {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

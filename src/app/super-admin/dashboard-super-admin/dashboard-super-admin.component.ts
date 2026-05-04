@@ -224,4 +224,12 @@ export class DashboardSuperAdminComponent implements OnInit {
   navigateToEnseignants() {
     this.router.navigate(['super-admin/enseignants']);
   }
+
+  navigateToHero() {
+    this.router.navigate(['super-admin/hero']);
+  }
+
+  navigateToAPropos() {
+    this.router.navigate(['super-admin/apropos']);
+  }
 }
