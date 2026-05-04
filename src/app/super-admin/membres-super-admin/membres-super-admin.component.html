@@ -4,6 +4,12 @@
       <ui-button label="Ajouter un membre" (clicked)="openAjoutModal()" variant="primary" [disabled]="!selectedClubId"></ui-button>
     </ng-container>
   </app-page-header>
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-group-line"       label="Membres"            [value]="nbMembres" tone="primary" [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-building-4-line"  label="Clubs disponibles"  [value]="nbClubs"   tone="blue"   [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-filter-line"      label="Club sélectionné"   [value]="selectedClubId ? 1 : 0" [tone]="selectedClubId ? 'success' : 'neutral'"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="filters-bar">
     <select class="form-select" [(ngModel)]="selectedClubId" (ngModelChange)="onSelectClub($event)">
       <option [ngValue]="null">-- Choisir un club --</option>

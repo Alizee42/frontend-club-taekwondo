@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { CommandeService, CommandeDTO } from '../../services/commande.service';
 import { AuthService } from '../../services/auth.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableColumn, UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -17,6 +19,8 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
     NgIf, NgFor,
     CurrencyPipe,
     PageHeaderComponent,
+    KpiCardComponent,
+    KpiGridComponent,
     UiModalComponent,
     UiTableComponent,
     UiButtonComponent
@@ -30,6 +34,10 @@ export class CommandesMembreComponent implements OnInit {
   isLoading = false;
   errorMsg = '';
   search = '';
+
+  get nbCommandes()   { return this.commandes.length; }
+  get nbEnAttente()   { return this.commandes.filter(c => c.statut === 'EN_ATTENTE').length; }
+  get montantTotal()  { return this.commandes.reduce((s, c) => s + (c.montantTotal || 0), 0); }
   columns: UiTableColumn[] = [
     {
       key: 'dateCommande',

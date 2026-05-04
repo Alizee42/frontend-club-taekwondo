@@ -4,11 +4,13 @@ import { EvenementService, EvenementDTO, InscriptionEvenementDTO } from '../../s
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 @Component({
   selector: 'app-evenements-membre',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, UiButtonComponent, EmptyStateComponent],
+  imports: [CommonModule, PageHeaderComponent, UiButtonComponent, EmptyStateComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './evenements-membre.component.html',
   styleUrls: ['./evenements-membre.component.css']
 })
@@ -16,6 +18,17 @@ export class EvenementsMembre implements OnInit {
   evenements: EvenementDTO[] = [];
   isLoading = false;
   errorMsg = '';
+
+  get nbEvenements()    { return this.evenements.length; }
+  get mesInscriptions() { return this.evenements.filter(e => (e as any).isInscrit).length; }
+  get prochainLabel()   {
+    const now = Date.now();
+    const prochain = this.evenements
+      .filter(e => new Date(e.dateDebut).getTime() > now)
+      .sort((a, b) => new Date(a.dateDebut).getTime() - new Date(b.dateDebut).getTime())[0];
+    if (!prochain) return 'Aucun';
+    return new Date(prochain.dateDebut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  }
   isInscribing = false;
   currentPage = 1;
   readonly pageSize = 4;

@@ -7,11 +7,13 @@ import { UiTableComponent } from '../../shared/components/ui-table/ui-table.comp
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 @Component({
   selector: 'app-utilisateurs-super-admin',
   standalone: true,
-  imports: [CommonModule, UtilisateurFormComponent, UiTableComponent, UiButtonComponent, UiModalComponent, PageHeaderComponent],
+  imports: [CommonModule, UtilisateurFormComponent, UiTableComponent, UiButtonComponent, UiModalComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './utilisateurs-super-admin.component.html',
   styleUrls: ['./utilisateurs-super-admin.component.css']
 })
@@ -35,6 +37,10 @@ export class UtilisateursSuperAdminComponent implements OnInit {
   }
   utilisateurs: any[] = [];
   clubs: Club[] = [];
+
+  get nbUtilisateurs() { return this.utilisateurs.length; }
+  get nbAdmins()       { return this.utilisateurs.filter(u => u.role === 'ADMIN').length; }
+  get nbMembres()      { return this.utilisateurs.filter(u => u.role === 'MEMBRE').length; }
 
   showModal = false;
   mode: 'ajout' | 'edition' = 'ajout';

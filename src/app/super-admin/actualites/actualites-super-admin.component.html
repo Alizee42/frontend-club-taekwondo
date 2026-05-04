@@ -4,6 +4,12 @@
       <ui-button label="Ajouter une actualité" (clicked)="openModal()" variant="primary" [disabled]="!clubIdSelectionne"></ui-button>
     </ng-container>
   </app-page-header>
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-newspaper-line"  label="Actualités"   [value]="nbActualites" tone="primary" [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-star-line"       label="À la une"     [value]="nbALaUne"     tone="amber"   [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-calendar-line"   label="Événements"   [value]="nbEvenements" tone="purple"  [loading]="loading"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="filters-bar">
     <select class="form-select" [(ngModel)]="clubIdSelectionne" (ngModelChange)="onClubChange()">
       <option [ngValue]="null">-- Choisir un club --</option>

@@ -5,6 +5,12 @@
     subtitle="Consultez les commandes et les articles associes a vos enfants">
   </app-page-header>
 
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-shopping-bag-3-line"   label="Commandes"     [value]="nbCommandes"                                        tone="primary" [loading]="isLoading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-time-line"             label="En attente"    [value]="nbEnAttente"                                        [tone]="nbEnAttente > 0 ? 'warning' : 'neutral'" [loading]="isLoading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-money-euro-circle-line" label="Total dépensé" [value]="montantTotal | currency:'EUR':'symbol':'1.0-0'"     tone="blue" [loading]="isLoading"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="filters-bar">
     <input
       class="form-input"

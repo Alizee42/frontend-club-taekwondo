@@ -13,6 +13,8 @@ import { ClubSelectionService } from '../../services/club-selection.service';
 import { MembreService, Membre } from '../../services/membre.service';
 import { EvenementService } from '../../services/evenement.service';
 import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 interface Utilisateur {
   id: number;
@@ -28,7 +30,7 @@ interface Utilisateur {
   standalone: true,
   templateUrl: './dashboard-parent.component.html',
   styleUrls: ['./dashboard-parent.component.css'],
-  imports: [CommonModule, AgePipe, DashboardNavCardComponent],
+  imports: [CommonModule, AgePipe, DashboardNavCardComponent, KpiCardComponent, KpiGridComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardParentComponent implements OnInit, OnDestroy {

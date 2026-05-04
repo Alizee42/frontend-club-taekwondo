@@ -7,6 +7,8 @@ import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-tabl
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 interface Actualite {
   id?: string;
@@ -30,12 +32,18 @@ interface Actualite {
     UiTableComponent,
     UiButtonComponent,
     UiModalComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    KpiCardComponent,
+    KpiGridComponent
   ]
 })
 export class GestionActualitesComponent implements OnInit {
   actualites: Actualite[] = [];
   featuredNews: Actualite | null = null;
+
+  get nbActualites()   { return this.actualites.length; }
+  get nbALaUne()       { return this.actualites.filter(a => a.isFeatured).length; }
+  get nbEvenements()   { return this.actualites.filter(a => a.typeActu === 'evenement').length; }
   imageUrl: string | ArrayBuffer | null = null;
   imageFile: File | null = null;
   imageError = '';

@@ -7,6 +7,8 @@ import { MembreService } from '../../services/membre.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 interface Enfant {
   id: number;
@@ -19,7 +21,7 @@ interface Enfant {
 @Component({
   selector: 'app-evenements-parent',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent, EmptyStateComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './evenements-parent.component.html',
   styleUrls: ['./evenements-parent.component.css']
 })
@@ -29,8 +31,19 @@ export class EvenementsParent implements OnInit {
   enfantSelectionne: Enfant | null = null;
   inscriptionsEnfants: any[] = [];
   readonly fallbackEventImage = 'assets/images/default-event.jpg.jpg';
-  
+
   isLoading = false;
+
+  get nbEvenements()    { return this.evenements.length; }
+  get nbInscriptions()  { return this.inscriptionsEnfants.length; }
+  get prochainLabel()   {
+    const now = Date.now();
+    const prochain = this.evenements
+      .filter(e => new Date(e.dateDebut).getTime() > now)
+      .sort((a, b) => new Date(a.dateDebut).getTime() - new Date(b.dateDebut).getTime())[0];
+    if (!prochain) return 'Aucun';
+    return new Date(prochain.dateDebut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  }
   errorMsg = '';
   isInscribing = false;
   currentPage = 1;

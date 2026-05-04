@@ -13,57 +13,22 @@
     </a>
   </div>
 
-  <div class="kpi-grid" aria-label="Indicateurs membre">
-    <article class="kpi-card kpi-card--documents card card-accent-left">
-      <div class="kpi-card__top">
-        <span class="kpi-card__icon"><i class="ri-folder-warning-line"></i></span>
-      </div>
-      <div class="kpi-card__body">
-        <strong class="kpi-card__value">{{ stats.documentsManquants }}</strong>
-        <span class="kpi-card__label">Documents manquants</span>
-      </div>
-      <span class="kpi-card__badge status-badge" [ngClass]="stats.documentsManquants > 0 ? 'status--warning' : 'status--success'">
-        {{ stats.documentsManquants > 0 ? 'A traiter' : 'Complet' }}
-      </span>
-    </article>
+  <ui-kpi-grid [cols]="4" aria-label="Indicateurs membre">
+    <ui-kpi-card icon="ri-folder-warning-line" label="Documents manquants" [value]="stats.documentsManquants" tone="warning"
+      [badge]="stats.documentsManquants > 0 ? 'A traiter' : 'Complet'"
+      [badgeTone]="stats.documentsManquants > 0 ? 'warning' : 'success'"></ui-kpi-card>
 
-    <article class="kpi-card kpi-card--payments card card-accent-left">
-      <div class="kpi-card__top">
-        <span class="kpi-card__icon"><i class="ri-wallet-3-line"></i></span>
-      </div>
-      <div class="kpi-card__body">
-        <strong class="kpi-card__value">{{ stats.paiementsEnRetard }}</strong>
-        <span class="kpi-card__label">Paiements en retard</span>
-      </div>
-      <span class="kpi-card__badge status-badge" [ngClass]="stats.paiementsEnRetard > 0 ? 'status--danger' : 'status--success'">
-        {{ stats.paiementsEnRetard > 0 ? 'Urgent' : 'OK' }}
-      </span>
-    </article>
+    <ui-kpi-card icon="ri-wallet-3-line" label="Paiements en retard" [value]="stats.paiementsEnRetard" tone="danger"
+      [badge]="stats.paiementsEnRetard > 0 ? 'Urgent' : 'OK'"
+      [badgeTone]="stats.paiementsEnRetard > 0 ? 'danger' : 'success'"></ui-kpi-card>
 
-    <article class="kpi-card kpi-card--orders card card-accent-left">
-      <div class="kpi-card__top">
-        <span class="kpi-card__icon"><i class="ri-shopping-bag-line"></i></span>
-      </div>
-      <div class="kpi-card__body">
-        <strong class="kpi-card__value">{{ stats.commandesEnCours }}</strong>
-        <span class="kpi-card__label">Commandes en cours</span>
-      </div>
-      <span class="kpi-card__badge status-badge" [ngClass]="stats.commandesEnCours > 0 ? 'status--info' : 'status--success'">
-        {{ stats.commandesEnCours > 0 ? 'En cours' : 'Calme' }}
-      </span>
-    </article>
+    <ui-kpi-card icon="ri-shopping-bag-line" label="Commandes en cours" [value]="stats.commandesEnCours" tone="primary"
+      [badge]="stats.commandesEnCours > 0 ? 'En cours' : 'Calme'"
+      [badgeTone]="stats.commandesEnCours > 0 ? 'info' : 'success'"></ui-kpi-card>
 
-    <article class="kpi-card kpi-card--events card card-accent-left">
-      <div class="kpi-card__top">
-        <span class="kpi-card__icon"><i class="ri-calendar-event-line"></i></span>
-      </div>
-      <div class="kpi-card__body">
-        <strong class="kpi-card__value">{{ stats.evenementsAVenir }}</strong>
-        <span class="kpi-card__label">Evenements a venir</span>
-      </div>
-      <span class="kpi-card__badge status-badge status--info">Agenda</span>
-    </article>
-  </div>
+    <ui-kpi-card icon="ri-calendar-event-line" label="Evenements a venir" [value]="stats.evenementsAVenir" tone="green"
+      badge="Agenda" badgeTone="info"></ui-kpi-card>
+  </ui-kpi-grid>
 
   <nav class="dash-section" aria-label="Raccourcis membre">
     <div class="dash-section__head dash-section__head--blue">

@@ -5,11 +5,13 @@ import { Professeur, ProfesseurService } from '../../services/professeur.service
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 @Component({
   selector: 'app-gestion-professeurs',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './gestion-professeurs.component.html',
   styleUrls: ['./gestion-professeurs.component.css']
 })
@@ -24,9 +26,9 @@ export class GestionProfesseursComponent {
     this.loadProfesseurs();
   }
 
-  get totalProfesseurs(): number {
-    return this.professeurs.length;
-  }
+  get totalProfesseurs(): number { return this.professeurs.length; }
+  get avecPhoto(): number { return this.professeurs.filter(p => !!p.photo).length; }
+  get avecReseaux(): number { return this.professeurs.filter(p => !!(p.facebook || p.instagram || p.linkedin)).length; }
 
   loadProfesseurs(): void {
     this.professeurs = this.professeurService.getProfesseurs();

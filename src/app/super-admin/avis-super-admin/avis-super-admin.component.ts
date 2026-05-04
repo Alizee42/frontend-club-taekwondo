@@ -9,11 +9,13 @@ import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 @Component({
   selector: 'app-avis-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './avis-super-admin.component.html',
   styleUrls: ['./avis-super-admin.component.css']
 })
@@ -23,6 +25,14 @@ export class AvisSuperAdminComponent implements OnInit {
   selectedClubId: number|null = null;
   loading = false;
   error: string|null = null;
+
+  get nbAvis()      { return this.avis.length; }
+  get nbApprouves() { return this.avis.filter(a => a.approuve === true).length; }
+  get nbEnAttente() { return this.avis.filter(a => a.approuve !== true).length; }
+  get noteMoyenne() {
+    if (!this.avis.length) return '—';
+    return (this.avis.reduce((s, a) => s + (a.note || 0), 0) / this.avis.length).toFixed(1) + ' / 5';
+  }
   showModal = false;
   modalMode: 'ajout'|'edition' = 'ajout';
   avisEnCours: Partial<Avis> = {};

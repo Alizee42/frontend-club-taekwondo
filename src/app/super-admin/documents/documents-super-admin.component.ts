@@ -7,6 +7,8 @@ import { ClubService, Club } from '../../services/club.service';
 import { labelFor as docLabelFor, normalizeStatus, unifyType } from '../../shared/documents/doc-utils';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 import { ToastService } from '../../shared/toast/toast.service';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
@@ -47,7 +49,7 @@ type UserGroup = { key: string; utilisateurNom: string; utilisateurEmail: string
 @Component({
   selector: 'app-documents-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiTableComponent, UiModalComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiTableComponent, UiModalComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './documents-super-admin.component.html',
   styleUrls: ['./documents-super-admin.component.css']
 })
@@ -62,6 +64,11 @@ export class DocumentsSuperAdminComponent implements OnInit {
 
   search = '';
   statut: '' | 'en_attente' | 'validé' | 'refusé' = '';
+
+  get totalDocs()     { return this.rows.length; }
+  get docsValides()   { return this.rows.filter(r => normalizeStatus((r as any).statut) === 'validé').length; }
+  get docsEnAttente() { return this.rows.filter(r => normalizeStatus((r as any).statut) === 'en_attente').length; }
+  get docsRefuses()   { return this.rows.filter(r => normalizeStatus((r as any).statut) === 'refusé').length; }
 
   // Master-detail
   selectedGroup: UserGroup | null = null;

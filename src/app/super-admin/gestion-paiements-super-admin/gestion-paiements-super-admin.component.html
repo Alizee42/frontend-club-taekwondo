@@ -20,51 +20,13 @@
     </ng-container>
   </app-page-header>
 
-  <section class="kpi-grid">
-    <article class="kpi-card kpi-card--primary">
-      <span class="kpi-icon"><i class="ri-safe-2-line"></i></span>
-      <div>
-        <span class="kpi-label">Encaisse</span>
-        <strong class="kpi-value">{{ stats.encaisse | currency:'EUR':'symbol':'1.0-0' }}</strong>
-        <span class="kpi-meta">sur {{ stats.total | currency:'EUR':'symbol':'1.0-0' }}</span>
-      </div>
-    </article>
-
-    <article class="kpi-card kpi-card--warning">
-      <span class="kpi-icon"><i class="ri-hourglass-2-line"></i></span>
-      <div>
-        <span class="kpi-label">A encaisser</span>
-        <strong class="kpi-value">{{ stats.restant | currency:'EUR':'symbol':'1.0-0' }}</strong>
-        <span class="kpi-meta">{{ paiementsEnAttenteLabel }}</span>
-      </div>
-    </article>
-
-    <article class="kpi-card" [class.kpi-card--danger]="stats.retards > 0">
-      <span class="kpi-icon"><i class="ri-alarm-warning-line"></i></span>
-      <div>
-        <span class="kpi-label">Retards</span>
-        <strong class="kpi-value">{{ stats.retards }}</strong>
-        <span class="kpi-meta">{{ retardsLabel }}</span>
-      </div>
-    </article>
-
-    <article class="kpi-card kpi-card--success">
-      <span class="kpi-icon"><i class="ri-pie-chart-2-line"></i></span>
-      <div>
-        <span class="kpi-label">Taux encaisse</span>
-        <strong class="kpi-value">{{ stats.tauxEncaisse | number:'1.0-1' }}%</strong>
-        <span class="kpi-meta">{{ paiementsSoldesLabel }}</span>
-      </div>
-    </article>
-
-    <article class="kpi-card kpi-card--info">
-        <span class="kpi-icon"><i class="ri-building-4-line"></i></span>
-      <div>
-        <span class="kpi-label">Clubs visibles</span>
-        <strong class="kpi-value">{{ totalClubs }}</strong>
-      </div>
-    </article>
-  </section>
+  <ui-kpi-grid [cols]="5">
+    <ui-kpi-card icon="ri-safe-2-line"        label="Total reçu"    [value]="stats.encaisse | currency:'EUR':'symbol':'1.0-0'"  tone="primary"></ui-kpi-card>
+    <ui-kpi-card icon="ri-hourglass-2-line"  label="À percevoir"   [value]="stats.restant  | currency:'EUR':'symbol':'1.0-0'"  tone="warning"></ui-kpi-card>
+    <ui-kpi-card icon="ri-alarm-warning-line" label="En retard"     [value]="stats.retards"                                     [tone]="stats.retards > 0 ? 'danger' : 'neutral'"></ui-kpi-card>
+    <ui-kpi-card icon="ri-pie-chart-2-line"  label="% encaissé"    [value]="(stats.tauxEncaisse | number:'1.0-1') + '%'"        tone="success"></ui-kpi-card>
+    <ui-kpi-card icon="ri-building-4-line"   label="Clubs visibles" [value]="totalClubs"                                         tone="info"></ui-kpi-card>
+  </ui-kpi-grid>
 
   <div class="filters-bar">
     <select

@@ -6,6 +6,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/required-docs.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
@@ -59,7 +61,7 @@ interface RequiredDoc {
   selector: 'app-documents-parent',
   templateUrl: './documents-parent.component.html',
   styleUrls: ['./documents-parent.component.css'],
-  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, EmptyStateComponent, PageHeaderComponent, UiButtonComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, EmptyStateComponent, PageHeaderComponent, UiButtonComponent, KpiCardComponent, KpiGridComponent],
 })
 export class DocumentsParentComponent implements OnInit {
   private readonly API_BASE = environment.apiUrl;
@@ -68,6 +70,10 @@ export class DocumentsParentComponent implements OnInit {
 
   // Enfants liés
   enfants: Enfant[] = [];
+
+  get totalDocs()     { return this.requiredDocuments.length; }
+  get docsValides()   { return this.documents.filter(d => normalizeStatus(d.status) === 'validé').length; }
+  get docsEnAttente() { return this.documents.filter(d => normalizeStatus(d.status) === 'en_attente').length; }
   selectedKidId: string | number | null = null;
 
   // Référentiel des documents requis

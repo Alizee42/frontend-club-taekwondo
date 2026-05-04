@@ -7,11 +7,13 @@ import { AvisService, Avis } from '../../services/avis.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 @Component({
   selector: 'app-dashboard-super-admin',
   templateUrl: './dashboard-super-admin.component.html',
   styleUrls: ['./dashboard-super-admin.component.css'],
-  imports: [CommonModule, FormsModule, DashboardNavCardComponent]
+  imports: [CommonModule, FormsModule, DashboardNavCardComponent, KpiCardComponent, KpiGridComponent]
 })
 export class DashboardSuperAdminComponent implements OnInit {
   // Champs du formulaire club pour <ui-form>

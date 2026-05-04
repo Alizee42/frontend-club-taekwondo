@@ -7,13 +7,15 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 @Component({
   standalone: true,
   selector: 'app-super-admin-admins',
   templateUrl: './admins.component.html',
   styleUrls: ['./admins.component.css'],
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, PageHeaderComponent]
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent]
 })
 export class AdminsComponent {
   getClubName(clubId: any): string {
@@ -38,6 +40,9 @@ export class AdminsComponent {
   message = '';
   admins: any[] = [];
   adminsTable: any[] = [];
+
+  get nbAdmins()        { return this.admins.length; }
+  get clubsCouvertIds() { return new Set(this.admins.map(a => a.clubId).filter(Boolean)).size; }
   showModal = false;
 
   constructor(private http: HttpClient) {

@@ -7,6 +7,8 @@ import { UiTableComponent } from '../../shared/components/ui-table/ui-table.comp
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 type ClubFormModel = Pick<Club, 'name' | 'adresse' | 'telephone' | 'email'> & {
   id?: number;
@@ -26,7 +28,7 @@ const EMPTY_CLUB_FORM: ClubFormModel = {
 @Component({
   selector: 'app-super-admin-clubs',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiButtonComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiButtonComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './clubs.component.html',
   styleUrls: ['./clubs.component.css']
 })
@@ -46,6 +48,10 @@ export class ClubsComponent implements OnInit {
   deleteError = '';
 
   clubs: Club[] = [];
+
+  get nbClubs()     { return this.clubs.length; }
+  get avecLogo()    { return this.clubs.filter(c => !!c.logo).length; }
+  get avecRib()     { return this.clubs.filter(c => !!c.rib).length; }
 
   clubColumns = [
     { key: 'name', label: 'Nom', display: (club: Club) => club.name || club.nom || '-' },

@@ -5,6 +5,12 @@
     </ng-container>
   </app-page-header>
 
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-building-4-line"  label="Clubs"         [value]="nbClubs"   tone="primary"></ui-kpi-card>
+    <ui-kpi-card icon="ri-image-line"       label="Avec logo"     [value]="avecLogo"  tone="success"></ui-kpi-card>
+    <ui-kpi-card icon="ri-bank-line"        label="Avec RIB"      [value]="avecRib"   tone="blue"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="status-line success" *ngIf="successMessage">
     <i class="ri-checkbox-circle-line"></i>
     {{ successMessage }}

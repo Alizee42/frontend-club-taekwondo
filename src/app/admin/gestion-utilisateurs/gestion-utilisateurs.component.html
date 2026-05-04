@@ -4,6 +4,13 @@
       <ui-button label="Ajouter un utilisateur" icon="ri-user-add-line" variant="primary" (clicked)="openAddModal()"></ui-button>
     </ng-container>
   </app-page-header>
+
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-group-line"   label="Utilisateurs"  [value]="nbUtilisateurs" tone="primary"></ui-kpi-card>
+    <ui-kpi-card icon="ri-user-line"    label="Membres"        [value]="nbMembresRole"  tone="blue"></ui-kpi-card>
+    <ui-kpi-card icon="ri-parent-line"  label="Parents"        [value]="nbParents"      tone="teal"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="table-wrap">
     <ui-table
       [columns]="columns"

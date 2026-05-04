@@ -16,57 +16,14 @@
   </div>
 
   <!-- KPI -->
-  <div class="kpi-grid">
-
-    <div class="kpi-card kpi-card--blue">
-      <div class="kpi-card__icon"><i class="ri-community-line"></i></div>
-      <div class="kpi-card__body">
-        <div class="kpi-card__value">{{ clubsCount }}</div>
-        <div class="kpi-card__label">Clubs</div>
-      </div>
-    </div>
-
-    <div class="kpi-card kpi-card--purple">
-      <div class="kpi-card__icon"><i class="ri-user-star-line"></i></div>
-      <div class="kpi-card__body">
-        <div class="kpi-card__value">{{ adminsCount }}</div>
-        <div class="kpi-card__label">Admins</div>
-      </div>
-    </div>
-
-    <div class="kpi-card kpi-card--green">
-      <div class="kpi-card__icon"><i class="ri-team-line"></i></div>
-      <div class="kpi-card__body">
-        <div class="kpi-card__value">{{ membresCount }}</div>
-        <div class="kpi-card__label">Membres</div>
-      </div>
-    </div>
-
-    <div class="kpi-card kpi-card--teal">
-      <div class="kpi-card__icon"><i class="ri-hand-coin-line"></i></div>
-      <div class="kpi-card__body">
-        <div class="kpi-card__value">{{ paiementsTotal | currency:'EUR':'symbol':'1.0-0' }}</div>
-        <div class="kpi-card__label">Paiements reçus</div>
-      </div>
-    </div>
-
-    <div class="kpi-card kpi-card--amber">
-      <div class="kpi-card__icon"><i class="ri-time-line"></i></div>
-      <div class="kpi-card__body">
-        <div class="kpi-card__value">{{ paiementsAttente }}</div>
-        <div class="kpi-card__label">En attente</div>
-      </div>
-    </div>
-
-    <div class="kpi-card kpi-card--red">
-      <div class="kpi-card__icon"><i class="ri-shield-check-line"></i></div>
-      <div class="kpi-card__body">
-        <div class="kpi-card__value">{{ logsCount }}</div>
-        <div class="kpi-card__label">Logs sécurité</div>
-      </div>
-    </div>
-
-  </div>
+  <ui-kpi-grid [cols]="6">
+    <ui-kpi-card icon="ri-community-line"   label="Clubs"               [value]="clubsCount"                                         tone="blue"   ></ui-kpi-card>
+    <ui-kpi-card icon="ri-user-star-line"   label="Admins"              [value]="adminsCount"                                        tone="purple" ></ui-kpi-card>
+    <ui-kpi-card icon="ri-team-line"        label="Membres"             [value]="membresCount"                                       tone="green"  ></ui-kpi-card>
+    <ui-kpi-card icon="ri-hand-coin-line"   label="Paiements reçus"     [value]="paiementsTotal | currency:'EUR':'symbol':'1.0-0'"   tone="teal"   ></ui-kpi-card>
+    <ui-kpi-card icon="ri-time-line"        label="Paiements en attente" [value]="paiementsAttente"                                  tone="amber"  ></ui-kpi-card>
+    <ui-kpi-card icon="ri-shield-check-line" label="Logs sécurité"      [value]="logsCount"                                         tone="red"    ></ui-kpi-card>
+  </ui-kpi-grid>
 
   <!-- Sections de navigation -->
   <div class="dash-sections">

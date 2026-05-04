@@ -10,6 +10,8 @@ import { RequiredDocsService, RequiredDocConfig } from '../../shared/documents/r
 import { UiTitleComponent } from '../../shared/ui/title/ui-title.component';
 import { DOC_CATALOG } from '../../shared/documents/doc-utils';
 import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 
 
@@ -29,7 +31,7 @@ interface Utilisateur {
   selector: 'app-dashboard-membre',
   templateUrl: './dashboard-membre.component.html',
   styleUrls: ['./dashboard-membre.component.css'],
-  imports: [CommonModule, FormsModule, DashboardNavCardComponent],
+  imports: [CommonModule, FormsModule, DashboardNavCardComponent, KpiCardComponent, KpiGridComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardMembreComponent implements OnInit {

@@ -28,6 +28,7 @@ export class BanniereComponent implements OnInit, OnDestroy {
 
   config: HeroConfig = { ...DEFAULTS };
   videoUrl = 'assets/videos/video1.MOV';
+  private hasVideoFallback = false;
   currentSlogan = DEFAULTS.slogans[0];
   private sloganIndex = 0;
   private intervalId: ReturnType<typeof setInterval> | null = null;
@@ -48,6 +49,7 @@ export class BanniereComponent implements OnInit, OnDestroy {
           stats: c.stats?.length ? c.stats : DEFAULTS.stats,
           videoPath: c.videoPath
         };
+        this.hasVideoFallback = false;
         this.videoUrl = this.heroConfigService.videoUrl(c.videoPath);
         this.currentSlogan = this.config.slogans![0];
         this.startRotation();
@@ -64,6 +66,12 @@ export class BanniereComponent implements OnInit, OnDestroy {
 
   get selectedClub(): Club | null {
     return this.clubService.getSelectedClub();
+  }
+
+  onVideoError(): void {
+    if (this.hasVideoFallback) return;
+    this.hasVideoFallback = true;
+    this.videoUrl = 'assets/videos/video1.MOV';
   }
 
   private startRotation(): void {

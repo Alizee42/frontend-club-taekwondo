@@ -9,6 +9,8 @@ import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 interface Actualite {
   id?: string;
@@ -26,7 +28,7 @@ interface Actualite {
   standalone: true,
   templateUrl: './actualites-super-admin.component.html',
   styleUrls: ['./actualites-super-admin.component.css'],
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, PageHeaderComponent]
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, UiFormComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent]
 })
 export class ActualitesSuperAdminComponent implements OnInit {
   actualites: Actualite[] = [];
@@ -34,6 +36,10 @@ export class ActualitesSuperAdminComponent implements OnInit {
   clubIdSelectionne: number | null = null;
   loading = false;
   error: string | null = null;
+
+  get nbActualites() { return this.actualites.length; }
+  get nbALaUne()     { return this.actualites.filter(a => a.isFeatured).length; }
+  get nbEvenements() { return this.actualites.filter(a => a.typeActu === 'evenement').length; }
   isModalOpen = false;
   searchTerm: string = '';
   actualite: Actualite = this.getEmptyActualite();

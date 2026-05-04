@@ -1,4 +1,4 @@
-<app-page-header title="Gestion des produits" subtitle="Ajoutez et gérez les produits disponibles dans la boutique du club.">
+<app-page-header title="Gestion des produits" icon="ri-price-tag-3-line" subtitle="Ajoutez et gérez les produits disponibles dans la boutique du club.">
   <ng-container page-header-actions>
     <ui-button
       variant="primary"
@@ -8,6 +8,12 @@
     </ui-button>
   </ng-container>
 </app-page-header>
+
+<ui-kpi-grid [cols]="3">
+  <ui-kpi-card icon="ri-price-tag-3-line" label="Produits"   [value]="nbProduits" tone="primary" [loading]="loading"></ui-kpi-card>
+  <ui-kpi-card icon="ri-checkbox-circle-line" label="En stock" [value]="nbEnStock" tone="success" [loading]="loading"></ui-kpi-card>
+  <ui-kpi-card icon="ri-error-warning-line" label="En rupture" [value]="nbRupture" [tone]="nbRupture > 0 ? 'danger' : 'neutral'" [loading]="loading"></ui-kpi-card>
+</ui-kpi-grid>
 
 <div class="gp-page">
 

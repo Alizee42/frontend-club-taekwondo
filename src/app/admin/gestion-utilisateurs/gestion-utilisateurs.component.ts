@@ -8,17 +8,23 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { FormsModule } from '@angular/forms';
 import { ClubService } from '../../services/club.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 @Component({
   selector: 'app-gestion-utilisateurs',
   standalone: true,
-  imports: [CommonModule, UiTableComponent, UiModalComponent, UiButtonComponent, FormsModule, PageHeaderComponent],
+  imports: [CommonModule, UiTableComponent, UiModalComponent, UiButtonComponent, FormsModule, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './gestion-utilisateurs.component.html',
   styleUrls: ['./gestion-utilisateurs.component.css']
 })
 export class GestionUtilisateursComponent implements OnInit {
   utilisateurs: any[] = [];
   clubId: number | null = null;
+
+  get nbUtilisateurs() { return this.utilisateurs.length; }
+  get nbMembresRole()  { return this.utilisateurs.filter(u => u.role === 'MEMBRE').length; }
+  get nbParents()      { return this.utilisateurs.filter(u => u.role === 'PARENT').length; }
   columns: UiTableColumn[] = [
     { key: 'prenom', label: 'Prénom' },
     { key: 'nom', label: 'Nom' },

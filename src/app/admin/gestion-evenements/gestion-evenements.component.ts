@@ -8,6 +8,8 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 type EventStatusFilter = '' | 'actif' | 'inactif';
 type SortField = 'dateDebut' | 'titre' | 'nbInscrits';
@@ -34,7 +36,9 @@ interface EventFormModel {
     UiButtonComponent,
     UiTableComponent,
     UiModalComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    KpiCardComponent,
+    KpiGridComponent
   ],
   templateUrl: './gestion-evenements.component.html',
   styleUrls: ['./gestion-evenements.component.css']
@@ -142,13 +146,27 @@ export class GestionEvenementsComponent implements OnInit {
     return this.evenements.reduce((acc, evenement) => acc + (evenement.nbInscrits || 0), 0);
   }
 
-  get prochainEvenementTitre(): string {
-    const now = new Date().getTime();
-    const futurs = this.evenements
-      .filter((evenement) => new Date(evenement.dateDebut).getTime() > now)
-      .sort((a, b) => new Date(a.dateDebut).getTime() - new Date(b.dateDebut).getTime());
+  get totalActifs(): number {
+    return this.evenements.filter(e => e.actif).length;
+  }
 
-    return futurs.length ? futurs[0].titre : 'Aucun evenement a venir';
+  get prochainEvenementDate(): string {
+    const prochain = this.prochainEvenement;
+    if (!prochain) return 'Aucun';
+    return new Date(prochain.dateDebut).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short'
+    });
+  }
+
+  get prochainEvenementMeta(): string {
+    const prochain = this.prochainEvenement;
+    return prochain ? prochain.titre : 'evenement a venir le plus proche';
+  }
+
+  get prochainEvenementTitre(): string {
+    const prochain = this.prochainEvenement;
+    return prochain ? prochain.titre : 'Aucun evenement a venir';
   }
 
   get inscriptionsActives(): Inscription[] {
@@ -505,6 +523,15 @@ export class GestionEvenementsComponent implements OnInit {
   clearMessages(): void {
     this.errorMsg = '';
     this.successMsg = '';
+  }
+
+  private get prochainEvenement(): EvenementDTO | null {
+    const now = new Date().getTime();
+    const futurs = this.evenements
+      .filter((evenement) => new Date(evenement.dateDebut).getTime() > now)
+      .sort((a, b) => new Date(a.dateDebut).getTime() - new Date(b.dateDebut).getTime());
+
+    return futurs.length ? futurs[0] : null;
   }
 
   private compareEvenements(a: EvenementDTO, b: EvenementDTO): number {

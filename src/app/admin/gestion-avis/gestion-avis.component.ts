@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 import { AvisService, Avis } from '../../services/avis.service';
 import { ClubService, Club } from '../../services/club.service';
 
@@ -11,7 +13,7 @@ import { ClubService, Club } from '../../services/club.service';
   templateUrl: './gestion-avis.component.html',
   styleUrls: ['./gestion-avis.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTableComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
 })
 export class GestionAvisComponent implements OnInit {
   avis: Avis[] = [];
@@ -33,6 +35,14 @@ export class GestionAvisComponent implements OnInit {
     { label: 'Refuser', icon: 'ri-close-line', action: 'refuse', color: '#d32f2f', variant: "danger" as const }
   ];
   selectedClub: Club | null = null;
+
+  get nbAvis()      { return this.avis.length; }
+  get nbApprouves() { return this.avis.filter(a => a.approuve === true).length; }
+  get nbEnAttente() { return this.avis.filter(a => a.approuve !== true).length; }
+  get noteMoyenne() {
+    if (!this.avis.length) return '—';
+    return (this.avis.reduce((s, a) => s + (a.note || 0), 0) / this.avis.length).toFixed(1) + ' / 5';
+  }
 
   constructor(private avisService: AvisService, private clubService: ClubService) {}
 

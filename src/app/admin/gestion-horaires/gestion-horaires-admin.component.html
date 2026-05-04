@@ -14,31 +14,11 @@
     </ng-container>
   </app-page-header>
 
-  <section class="kpi-grid">
-    <article class="kpi-card kpi-card--primary">
-      <span class="kpi-icon"><i class="ri-calendar-schedule-line"></i></span>
-      <div>
-        <strong class="kpi-value">{{ totalHoraires }}</strong>
-        <span class="kpi-label">Créneaux</span>
-      </div>
-    </article>
-
-    <article class="kpi-card kpi-card--success">
-      <span class="kpi-icon"><i class="ri-calendar-check-line"></i></span>
-      <div>
-        <strong class="kpi-value">{{ totalJoursActifs }}/7</strong>
-        <span class="kpi-label">Jours actifs</span>
-      </div>
-    </article>
-
-    <article class="kpi-card kpi-card--info">
-      <span class="kpi-icon"><i class="ri-group-line"></i></span>
-      <div>
-        <strong class="kpi-value">{{ totalGroupes }}</strong>
-        <span class="kpi-label">Groupes</span>
-      </div>
-    </article>
-  </section>
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-calendar-schedule-line" label="Créneaux"    [value]="totalHoraires"       tone="primary"></ui-kpi-card>
+    <ui-kpi-card icon="ri-calendar-check-line"    label="Jours actifs" [value]="totalJoursActifs + '/7'" tone="success"></ui-kpi-card>
+    <ui-kpi-card icon="ri-group-line"             label="Groupes"     [value]="totalGroupes"         tone="info"></ui-kpi-card>
+  </ui-kpi-grid>
 
   <section class="week-grid">
     @for (jourBlock of horairesParJour; track jourBlock.jour) {

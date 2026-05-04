@@ -6,6 +6,8 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { HorairesService } from '../../services/horaires.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 type PlageForm = {
   plage: string;
@@ -19,7 +21,7 @@ type PlageForm = {
 @Component({
   selector: 'app-gestion-horaires-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './gestion-horaires-admin.component.html',
   styleUrls: ['./gestion-horaires-admin.component.css']
 })

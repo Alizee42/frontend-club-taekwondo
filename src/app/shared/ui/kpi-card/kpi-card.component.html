@@ -1,0 +1,30 @@
+<article class="kpi-card" [ngClass]="toneClass">
+
+  <ng-container *ngIf="!loading; else skeletonTpl">
+
+    <span class="kpi-card__icon" *ngIf="icon">
+      <i [class]="icon"></i>
+    </span>
+
+    <div class="kpi-card__body">
+      <span class="kpi-card__label">{{ label }}</span>
+      <strong class="kpi-card__value">{{ value }}</strong>
+      <span class="kpi-card__meta" *ngIf="meta">{{ meta }}</span>
+      <span *ngIf="trend" [ngClass]="trendClass">
+        <i [class]="trendIcon"></i>{{ trend }}
+      </span>
+    </div>
+
+    <span *ngIf="badge" [ngClass]="badgeClass">{{ badge }}</span>
+
+  </ng-container>
+
+  <ng-template #skeletonTpl>
+    <span class="kpi-card__icon kpi-card__icon--skel"></span>
+    <div class="kpi-card__body">
+      <span class="kpi-skel kpi-skel--sm"></span>
+      <span class="kpi-skel kpi-skel--lg"></span>
+    </div>
+  </ng-template>
+
+</article>

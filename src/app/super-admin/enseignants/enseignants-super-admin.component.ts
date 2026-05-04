@@ -9,11 +9,13 @@ import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 @Component({
   selector: 'app-enseignants-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiFormComponent, UiButtonComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, UiFormComponent, UiButtonComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './enseignants-super-admin.component.html',
   styleUrls: ['./enseignants-super-admin.component.css']
 })
@@ -22,6 +24,9 @@ export class EnseignantsSuperAdminComponent implements OnInit {
   selectedClubId: number | null = null;
   enseignants: Enseignant[] = [];
   loading = false;
+
+  get nbEnseignants() { return this.enseignants.length; }
+  get nbClubs()       { return this.clubs.length; }
 
   form: Partial<Enseignant> = {
     clubId: 0,

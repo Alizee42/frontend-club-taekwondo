@@ -4,6 +4,12 @@
       <ui-button icon="ri-user-add-line" label="Ajouter un utilisateur" (clicked)="onAddUtilisateur()" variant="primary"></ui-button>
     </ng-container>
   </app-page-header>
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-group-line"       label="Utilisateurs"  [value]="nbUtilisateurs" tone="primary"></ui-kpi-card>
+    <ui-kpi-card icon="ri-shield-user-line" label="Admins"        [value]="nbAdmins"       tone="purple"></ui-kpi-card>
+    <ui-kpi-card icon="ri-user-line"        label="Membres"       [value]="nbMembres"      tone="blue"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="table-wrap">
     <ui-table
       [columns]="columns"

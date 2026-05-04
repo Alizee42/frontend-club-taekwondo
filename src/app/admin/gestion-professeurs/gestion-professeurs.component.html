@@ -13,13 +13,11 @@
     </ng-container>
   </app-page-header>
 
-  <section class="stats-strip">
-    <article class="stat-card">
-      <span class="stat-label">Professeurs actifs</span>
-      <strong class="stat-value">{{ totalProfesseurs }}</strong>
-      <span class="stat-copy">cartes visibles dans la gestion</span>
-    </article>
-  </section>
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-user-star-line"   label="Professeurs"     [value]="totalProfesseurs"    tone="primary" meta="équipe pédagogique"></ui-kpi-card>
+    <ui-kpi-card icon="ri-image-line"       label="Avec photo"      [value]="avecPhoto"           tone="success"></ui-kpi-card>
+    <ui-kpi-card icon="ri-share-line"       label="Avec réseaux"    [value]="avecReseaux"         tone="info"></ui-kpi-card>
+  </ui-kpi-grid>
 
   <section class="professeurs-list" *ngIf="professeurs.length; else emptyState">
     <div class="professeurs-grid">

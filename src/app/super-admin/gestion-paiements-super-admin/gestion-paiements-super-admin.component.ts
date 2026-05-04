@@ -7,6 +7,8 @@ import { SuperAdminPaiementService } from '../../services/super-admin-paiement.s
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 import { AjoutPaiementComponent } from '../../admin/gestion-paiements/ajout-paiement/ajout-paiement.component';
 
 @Component({
@@ -19,7 +21,9 @@ import { AjoutPaiementComponent } from '../../admin/gestion-paiements/ajout-paie
     UiButtonComponent,
     UiModalComponent,
     PageHeaderComponent,
-    AjoutPaiementComponent
+    AjoutPaiementComponent,
+    KpiCardComponent,
+    KpiGridComponent
   ],
   templateUrl: './gestion-paiements-super-admin.component.html',
   styleUrls: ['./gestion-paiements-super-admin.component.css']

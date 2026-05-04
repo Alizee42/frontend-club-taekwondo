@@ -16,49 +16,12 @@
   </div>
 
   <!-- KPI -->
-  <div class="kpi-grid">
-
-    <ng-container *ngIf="loading">
-      <div class="kpi-card skeleton" *ngFor="let i of [1,2,3,4]"></div>
-    </ng-container>
-
-    <ng-container *ngIf="!loading">
-
-      <div class="kpi-card kpi-card--blue">
-        <div class="kpi-card__icon"><i class="ri-team-line"></i></div>
-        <div class="kpi-card__body">
-          <div class="kpi-card__value">{{ nbMembres }}</div>
-          <div class="kpi-card__label">Membres inscrits</div>
-        </div>
-      </div>
-
-      <div class="kpi-card kpi-card--green">
-        <div class="kpi-card__icon"><i class="ri-hand-coin-line"></i></div>
-        <div class="kpi-card__body">
-          <div class="kpi-card__value">{{ totalPaiements | currency:'EUR':'symbol':'1.0-0' }}</div>
-          <div class="kpi-card__label">Paiements reçus</div>
-        </div>
-      </div>
-
-      <div class="kpi-card kpi-card--amber">
-        <div class="kpi-card__icon"><i class="ri-time-line"></i></div>
-        <div class="kpi-card__body">
-          <div class="kpi-card__value">{{ paiementsAttente }}</div>
-          <div class="kpi-card__label">En attente</div>
-        </div>
-      </div>
-
-      <div class="kpi-card kpi-card--purple">
-        <div class="kpi-card__icon"><i class="ri-calendar-event-line"></i></div>
-        <div class="kpi-card__body">
-          <div class="kpi-card__value">{{ evenementsAVenir }}</div>
-          <div class="kpi-card__label">Événements à venir</div>
-        </div>
-      </div>
-
-    </ng-container>
-
-  </div>
+  <ui-kpi-grid [cols]="4">
+    <ui-kpi-card icon="ri-team-line"         label="Membres inscrits"      [value]="nbMembres"                                         tone="blue"   [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-hand-coin-line"    label="Paiements reçus"       [value]="totalPaiements | currency:'EUR':'symbol':'1.0-0'"   tone="green"  [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-time-line"         label="Paiements en attente"  [value]="paiementsAttente"                                   tone="amber"  [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-calendar-event-line" label="Événements à venir"  [value]="evenementsAVenir"                                   tone="purple" [loading]="loading"></ui-kpi-card>
+  </ui-kpi-grid>
 
   <!-- Sections de navigation -->
   <div class="dash-sections">

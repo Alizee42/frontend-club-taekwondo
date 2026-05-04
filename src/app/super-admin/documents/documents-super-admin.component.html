@@ -8,6 +8,13 @@
     </ng-container>
   </app-page-header>
 
+  <ui-kpi-grid [cols]="4">
+    <ui-kpi-card icon="ri-file-list-3-line"     label="Documents total"  [value]="totalDocs"     tone="primary"></ui-kpi-card>
+    <ui-kpi-card icon="ri-checkbox-circle-line" label="Validés"          [value]="docsValides"   tone="success"></ui-kpi-card>
+    <ui-kpi-card icon="ri-time-line"            label="En attente"       [value]="docsEnAttente" [tone]="docsEnAttente > 0 ? 'warning' : 'neutral'"></ui-kpi-card>
+    <ui-kpi-card icon="ri-close-circle-line"    label="Refusés"          [value]="docsRefuses"   [tone]="docsRefuses   > 0 ? 'danger'  : 'neutral'"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="master-detail">
 
     <!-- ── Panneau gauche : liste des membres ── -->

@@ -16,6 +16,12 @@
     </ng-container>
   </app-page-header>
 
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-calendar-event-line"  label="Événements"     [value]="nbEvenements"   tone="primary"  [loading]="isLoading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-user-add-line"        label="Inscriptions"   [value]="nbInscriptions" tone="success"  [loading]="isLoading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-map-pin-time-line"    label="Prochain"       [value]="prochainLabel"  tone="purple"   [loading]="isLoading"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <!-- Loading -->
   <app-empty-state
     *ngIf="isLoading"

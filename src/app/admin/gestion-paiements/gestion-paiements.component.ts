@@ -9,6 +9,8 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { AlertBannerComponent } from '../../shared/ui/alert-banner/alert-banner.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 import { PaymentAdminService } from '../../services/payment-admin.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
 import { ClubService } from '../../services/club.service';
@@ -29,7 +31,9 @@ import { MembreRetard } from '../../models/membre-retard';
     UiButtonComponent,
     UiModalComponent,
     PageHeaderComponent,
-    AlertBannerComponent
+    AlertBannerComponent,
+    KpiCardComponent,
+    KpiGridComponent
   ],
   templateUrl: './gestion-paiements.component.html',
   styleUrls: ['./gestion-paiements.component.css']

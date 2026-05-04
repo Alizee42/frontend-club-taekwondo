@@ -1,6 +1,13 @@
 <div class="page-shell">
   <app-page-header title="Gestion des avis" icon="ri-star-line"></app-page-header>
 
+  <ui-kpi-grid [cols]="4">
+    <ui-kpi-card icon="ri-star-line"         label="Total avis"    [value]="nbAvis"       tone="primary"></ui-kpi-card>
+    <ui-kpi-card icon="ri-checkbox-circle-line" label="Approuvés"  [value]="nbApprouves"  tone="success"></ui-kpi-card>
+    <ui-kpi-card icon="ri-time-line"         label="En attente"    [value]="nbEnAttente"  [tone]="nbEnAttente > 0 ? 'warning' : 'neutral'"></ui-kpi-card>
+    <ui-kpi-card icon="ri-star-half-line"    label="Note moyenne"  [value]="noteMoyenne"  tone="amber"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="filters-bar">
     <input
       type="text"

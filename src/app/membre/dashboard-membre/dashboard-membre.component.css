@@ -142,8 +142,9 @@
   flex: 1;
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--sp-2);
 }
 
 .kpi-card__value {
@@ -158,8 +159,6 @@
   color: var(--color-text-2);
   font-weight: 500;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .kpi-card__badge {

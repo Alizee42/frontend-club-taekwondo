@@ -9,11 +9,13 @@ import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { MembresSuperAdminFormComponent } from './membres-super-admin-form.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 @Component({
   selector: 'app-membres-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, MembresSuperAdminFormComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiModalComponent, UiTableComponent, MembresSuperAdminFormComponent, PageHeaderComponent, KpiCardComponent, KpiGridComponent],
   templateUrl: './membres-super-admin.component.html',
   styleUrls: ['./membres-super-admin.component.css']
 })
@@ -23,6 +25,9 @@ export class MembresSuperAdminComponent implements OnInit {
   error: string | null = null;
   clubs: Club[] = [];
   selectedClubId: number | null = null;
+
+  get nbMembres() { return this.membres.length; }
+  get nbClubs()   { return this.clubs.length; }
   showModal = false;
   modalMode: 'ajout' | 'edition' = 'ajout';
   membreEnCours: Partial<Membre> = {};

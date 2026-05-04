@@ -4,6 +4,12 @@
       <ui-button label="Créer un admin" variant="primary" (clicked)="showModal = true"></ui-button>
     </ng-container>
   </app-page-header>
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-shield-user-line"  label="Administrateurs"   [value]="nbAdmins"        tone="primary" [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-building-4-line"   label="Clubs couverts"    [value]="clubsCouvertIds" tone="blue"    [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-community-line"    label="Clubs total"       [value]="clubs.length"    tone="neutral" [loading]="loading"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="table-wrap">
     <ui-table
       [columns]="[

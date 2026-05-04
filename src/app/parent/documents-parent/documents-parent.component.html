@@ -17,6 +17,12 @@
     </ng-container>
   </app-page-header>
 
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-file-list-3-line"     label="Documents requis" [value]="totalDocs"     tone="primary"></ui-kpi-card>
+    <ui-kpi-card icon="ri-checkbox-circle-line" label="Validés"          [value]="docsValides"   tone="success"></ui-kpi-card>
+    <ui-kpi-card icon="ri-time-line"            label="En attente"       [value]="docsEnAttente" [tone]="docsEnAttente > 0 ? 'warning' : 'neutral'"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <app-empty-state
     *ngIf="!enfants?.length"
     icon="ri-file-text-line"

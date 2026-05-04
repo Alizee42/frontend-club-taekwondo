@@ -4,6 +4,12 @@
       <ui-button label="Ajouter un enseignant" icon="ri-add-line" variant="primary" (clicked)="openCreateModal()" [disabled]="!selectedClubId"></ui-button>
     </ng-container>
   </app-page-header>
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-user-star-line"   label="Enseignants"       [value]="nbEnseignants" tone="primary" [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-building-4-line"  label="Clubs disponibles" [value]="nbClubs"       tone="blue"   [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-filter-line"      label="Club sélectionné"  [value]="selectedClubId ? 1 : 0" [tone]="selectedClubId ? 'success' : 'neutral'"></ui-kpi-card>
+  </ui-kpi-grid>
+
   <div class="filters-bar">
     <select class="form-select" [(ngModel)]="selectedClubId" (change)="onClubChange()">
       <option *ngFor="let c of clubs" [value]="c.id">{{ c.name || c.nom }}</option>

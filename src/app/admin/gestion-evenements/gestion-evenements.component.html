@@ -14,25 +14,12 @@
     </ng-container>
   </app-page-header>
 
-  <div class="stats-grid">
-    <article class="stat-card">
-      <span class="stat-label">Evenements</span>
-      <strong class="stat-value">{{ totalEvenements }}</strong>
-      <span class="stat-meta">tous statuts confondus</span>
-    </article>
-
-    <article class="stat-card">
-      <span class="stat-label">Inscriptions</span>
-      <strong class="stat-value">{{ totalInscrits }}</strong>
-      <span class="stat-meta">cumulees sur tous les evenements</span>
-    </article>
-
-    <article class="stat-card">
-      <span class="stat-label">Prochain rendez-vous</span>
-      <strong class="stat-value stat-value--small">{{ prochainEvenementTitre }}</strong>
-      <span class="stat-meta">evenement a venir le plus proche</span>
-    </article>
-  </div>
+  <ui-kpi-grid [cols]="4">
+    <ui-kpi-card icon="ri-calendar-event-line"  label="Événements"         [value]="totalEvenements"         tone="primary" [loading]="isLoading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-team-line"            label="Inscriptions totales" [value]="totalInscrits"          tone="info"    [loading]="isLoading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-calendar-check-line"  label="Événements actifs"   [value]="totalActifs"             tone="success" [loading]="isLoading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-map-pin-time-line"    label="Prochain rendez-vous" [value]="prochainEvenementDate" [meta]="prochainEvenementMeta" tone="purple" [loading]="isLoading"></ui-kpi-card>
+  </ui-kpi-grid>
 
   <div class="feedback-stack" *ngIf="successMsg || errorMsg">
     <div class="feedback feedback--success" *ngIf="successMsg">{{ successMsg }}</div>

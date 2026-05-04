@@ -10,6 +10,8 @@ import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-tabl
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../shared/toast/toast.service';
 
@@ -76,7 +78,7 @@ function labelFor(code: string) {
   standalone: true,
   templateUrl: './documents.component.html',
   styleUrls: ['./documents.component.css'],
-  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, PageHeaderComponent, UiButtonComponent]
+  imports: [CommonModule, FormsModule, UiTableComponent, UiModalComponent, PageHeaderComponent, UiButtonComponent, KpiCardComponent, KpiGridComponent]
 })
 export class DocumentsComponent implements OnInit {
     private readonly API_BASE = environment.apiUrl;
@@ -88,6 +90,10 @@ export class DocumentsComponent implements OnInit {
   selectedFile: File | null = null;
 
   documents: DocumentItem[] = [];
+
+  get totalDocs()     { return this.requiredDocuments.length; }
+  get docsValides()   { return this.requiredDocuments.filter(d => d.etat === 'validé').length; }
+  get docsEnAttente() { return this.requiredDocuments.filter(d => d.etat === 'en_attente').length; }
   // ui-table configuration
   tableColumns: UiTableColumn[] = [];
   tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [];

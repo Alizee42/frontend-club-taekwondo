@@ -8,6 +8,8 @@
   import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
   import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
   import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+  import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+  import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
   import { DOC_CATALOG, labelFor as docLabelFor, unifyType, normalizeStatus } from '../../shared/documents/doc-utils';
   import { AuthService } from '../../services/auth.service';
   import { ToastService } from '../../shared/toast/toast.service';
@@ -75,11 +77,17 @@
     templateUrl: './gestion-documents.component.html',
     styleUrls: ['./gestion-documents.component.css'],
     standalone: true,
-  imports: [CommonModule, FormsModule, UiButtonComponent, UiTableComponent, UiModalComponent, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, UiButtonComponent, UiTableComponent, UiModalComponent, PageHeaderComponent,
+    KpiCardComponent, KpiGridComponent],
   })
   export class GestionDocumentsComponent implements OnInit {
   // labelFor accessible dans le template (via util partagé)
   labelFor(code: string) { return docLabelFor(code); }
+
+  get totalDocs()     { return this.utilisateurs.reduce((s, u) => s + u.documents.length, 0); }
+  get docsValides()   { return this.utilisateurs.reduce((s, u) => s + u.documents.filter(d => d.status === 'validé').length, 0); }
+  get docsEnAttente() { return this.utilisateurs.reduce((s, u) => s + u.documents.filter(d => d.status === 'en_attente').length, 0); }
+  get docsRefuses()   { return this.utilisateurs.reduce((s, u) => s + u.documents.filter(d => d.status === 'refusé').length, 0); }
 
   // Méthode pour l'accordéon
   toggleAccordion(utilisateur: UtilisateurRow) {

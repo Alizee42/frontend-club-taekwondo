@@ -22,6 +22,7 @@ export interface HeroConfig {
 export class HeroConfigService {
 
   private url = `${environment.apiUrl}/hero-config`;
+  private backendBaseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
 
   constructor(private http: HttpClient) {}
 
@@ -40,8 +41,35 @@ export class HeroConfigService {
   }
 
   videoUrl(path: string | undefined): string {
-    if (!path) return 'assets/videos/video1.MOV';
-    if (path.startsWith('http') || path.startsWith('/')) return path;
-    return `${environment.apiUrl.replace('/api', '')}/uploads/${path}`;
+    if (!path || !path.trim()) return 'assets/videos/video1.MOV';
+
+    const raw = path.trim();
+    if (/^https?:\/\//i.test(raw)) return raw;
+
+    if (raw.startsWith('/api/uploads/')) {
+      return `${this.backendBaseUrl}${this.encodePath(raw.replace(/^\/api/, ''))}`;
+    }
+
+    if (raw.startsWith('/uploads/')) {
+      return `${this.backendBaseUrl}${this.encodePath(raw)}`;
+    }
+
+    const relative = raw.startsWith('uploads/') ? raw.substring('uploads/'.length) : raw;
+    return `${this.backendBaseUrl}/uploads/${this.encodePath(relative)}`;
+  }
+
+  private encodePath(path: string): string {
+    return path
+      .split('/')
+      .filter((part, index) => index === 0 || part.length > 0)
+      .map((part) => {
+        if (part === '') return part;
+        try {
+          return encodeURIComponent(decodeURIComponent(part));
+        } catch {
+          return encodeURIComponent(part);
+        }
+      })
+      .join('/');
   }
 }

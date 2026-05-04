@@ -9,6 +9,8 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 interface ProduitDTO {
   id?: number;
@@ -30,7 +32,7 @@ const VIDE: ProduitDTO = {
   standalone: true,
   templateUrl: './gestion-produits.component.html',
   styleUrls: ['./gestion-produits.component.css'],
-  imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent, UiModalComponent],
+  imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent, UiModalComponent, KpiCardComponent, KpiGridComponent],
 })
 export class GestionProduitsComponent implements OnInit {
 
@@ -40,6 +42,10 @@ export class GestionProduitsComponent implements OnInit {
   filtered: ProduitDTO[] = [];
   search = '';
   loading = false;
+
+  get nbProduits()  { return this.produits.length; }
+  get nbEnStock()   { return this.produits.filter(p => p.stock > 0).length; }
+  get nbRupture()   { return this.produits.filter(p => p.stock === 0).length; }
   error = '';
 
   modalOpen = false;

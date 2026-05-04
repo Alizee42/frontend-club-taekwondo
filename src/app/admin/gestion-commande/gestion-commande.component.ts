@@ -7,6 +7,8 @@ import { UiTableColumn, UiTableComponent } from '../../shared/components/ui-tabl
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
+import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 const API_BASE = environment.apiUrl;
 
@@ -81,7 +83,9 @@ interface ApiCommande {
     UiTableComponent,
     UiButtonComponent,
     UiModalComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    KpiCardComponent,
+    KpiGridComponent
   ],
   templateUrl: './gestion-commande.component.html',
   styleUrls: ['./gestion-commande.component.css']
@@ -95,6 +99,11 @@ export class GestionCommandeComponent implements OnInit {
   commandeSelectionnee: CommandeDTO | null = null;
   isLoading = false;
   errorMsg = '';
+
+  get nbCommandes()  { return this.commandes.length; }
+  get montantCA()    { return this.commandes.reduce((s, c) => s + (c.montantTotal || 0), 0); }
+  get nbEnAttente()  { return this.commandes.filter(c => c.statut === 'en attente').length; }
+  get nbAnnulees()   { return this.commandes.filter(c => c.statut === 'annule').length; }
 
   readonly textHeaders = new HttpHeaders({ 'Content-Type': 'text/plain; charset=utf-8' });
 
