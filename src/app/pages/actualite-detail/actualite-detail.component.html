@@ -1,25 +1,39 @@
-<section class="actualite-detail" *ngIf="!loading && actualite">
+<section class="actualite-detail" *ngIf="!loading && !error && actualite">
   <div class="detail-image-wrapper">
     <img [src]="imageUrl" [alt]="actualite.titre" class="detail-image" />
     <div class="detail-title-overlay">
       <h2>{{ actualite.titre }}</h2>
     </div>
   </div>
+
   <div class="infos">
-    <div class="type">Type : {{ actualite.typeActu }}</div>
-    <div class="date">Publié le {{ actualite.datePublication | date:'medium' }}</div>
+    <span class="type">{{ actualite.typeActu }}</span>
+    <span class="date">Publié le {{ actualite.datePublication | date:'d MMMM yyyy' }}</span>
   </div>
+
   <div class="contenu">{{ actualite.contenu }}</div>
+
   <div *ngIf="actualite.complement" class="complement">
     <strong>Complément :</strong> {{ actualite.complement }}
   </div>
-  <ui-button
-    type="button"
-    variant="ghost"
-    icon="ri-arrow-left-line"
-    label="Retour aux actualités"
-    (clicked)="retourActualites()"
-  />
+
+  <div class="detail-actions">
+    <ui-button
+      type="button"
+      variant="ghost"
+      icon="ri-arrow-left-line"
+      label="Retour aux actualités"
+      (clicked)="retourActualites()"
+    />
+  </div>
 </section>
-<div *ngIf="loading">Chargement...</div>
-<div *ngIf="error">{{ error }}</div>
+
+<div *ngIf="loading" class="loading-state">
+  <i class="ri-loader-4-line spinning"></i>
+  Chargement…
+</div>
+
+<div *ngIf="!loading && error" class="error-state">
+  <i class="ri-error-warning-line"></i>
+  {{ error }}
+</div>

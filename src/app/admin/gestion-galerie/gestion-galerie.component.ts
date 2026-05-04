@@ -99,10 +99,10 @@ export class GestionGalerieComponent implements OnInit {
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
+      (this.formImage as any)._file = file;
       const reader = new FileReader();
       reader.onload = () => {
-        this.imageUrl = reader.result as string;
-        this.newImage.imageUrl = this.imageUrl;
+        this.formImage.imageUrl = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -131,7 +131,8 @@ export class GestionGalerieComponent implements OnInit {
   isSubmitting = false;
 
   submitImage() {
-    if (!this.formImage.titre || !this.formImage.imageUrl || this.isSubmitting) return;
+    const hasImage = !!(this.formImage.imageUrl || (this.formImage as any)._file);
+    if (!this.formImage.titre || !hasImage || this.isSubmitting) return;
     this.isSubmitting = true;
     this.formImage.clubId = this.formImage.clubId ?? this.authService.getUtilisateurConnecte()?.['clubId'];
     const payload: any = {

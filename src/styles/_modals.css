@@ -188,6 +188,31 @@
   background-color: #dc2626
 }
 
+/* ── Responsive modales ──────────────────────────────────── */
+@media (max-width: 639px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .modal-content {
+    padding: 20px 16px 24px;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalInMobile .25s cubic-bezier(.2, .8, .2, 1);
+  }
+  @keyframes modalInMobile {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);   opacity: 1; }
+  }
+}
+
+@media (max-width: 479px) {
+  .modal-overlay { padding: 0; }
+  .modal-content { padding: 16px 12px 20px; }
+}
+
 .paiement-securite p {
   font-size: .9rem;
   color: #475569;

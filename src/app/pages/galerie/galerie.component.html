@@ -1,15 +1,74 @@
-<div class="page-wrapper-standard">
-  <section class="gallery-container">
-    <div class="grid-gallery">
-      <div class="grid-item" *ngFor="let image of images">
-        <div class="img-wrapper">
-          <img [src]="image.imageUrl" [alt]="image.titre" (error)="handleImgError($event, image)" />
-        </div>
-        <div class="card-body">
+<!-- ═══ HERO ═══ -->
+<section class="page-hero">
+  <div class="page-hero__inner">
+    <span class="page-hero__eyebrow">La vie du club</span>
+    <h1>Galerie photos</h1>
+    <p>Découvrez les moments forts du club en images.</p>
+  </div>
+</section>
+
+<!-- ═══ GALERIE ═══ -->
+<div class="gal-page">
+
+  <!-- Skeleton chargement -->
+  <div *ngIf="isLoading" class="gal-skeleton">
+    <div class="gal-skeleton__item" *ngFor="let i of [1,2,3,4,5,6]"></div>
+  </div>
+
+  <!-- État vide -->
+  <div *ngIf="!isLoading && images.length === 0" class="gal-empty">
+    <i class="ri-image-line"></i>
+    <h2>Aucune photo pour le moment</h2>
+    <p>Les photos du club apparaîtront ici dès qu'elles seront publiées.</p>
+  </div>
+
+  <!-- Grille masonry -->
+  <div *ngIf="!isLoading && images.length > 0" class="gal-masonry">
+    <div
+      class="gal-item"
+      *ngFor="let image of images; let i = index"
+      (click)="openLightbox(i)"
+      role="button"
+      [attr.aria-label]="'Agrandir : ' + image.titre"
+      tabindex="0"
+      (keydown.enter)="openLightbox(i)">
+      <img
+        [src]="image.imageUrl"
+        [alt]="image.titre"
+        loading="lazy"
+        (error)="handleImgError($event, image)" />
+      <div class="gal-item__overlay">
+        <div class="gal-item__info">
           <h3>{{ image.titre }}</h3>
-          <p>{{ image.description | slice: 0:100 }}...</p>
+          <p *ngIf="image.description">{{ image.description | slice:0:80 }}{{ image.description.length > 80 ? '…' : '' }}</p>
         </div>
+        <span class="gal-item__zoom"><i class="ri-zoom-in-line"></i></span>
       </div>
     </div>
-  </section>
+  </div>
+
+</div>
+
+<!-- ═══ LIGHTBOX ═══ -->
+<div class="lightbox" *ngIf="lightboxImage" (click)="closeLightbox()" role="dialog" aria-modal="true" [attr.aria-label]="lightboxImage.titre">
+  <button class="lightbox__close" (click)="closeLightbox()" aria-label="Fermer">
+    <i class="ri-close-line"></i>
+  </button>
+
+  <button class="lightbox__nav lightbox__nav--prev" (click)="$event.stopPropagation(); prevImage()" aria-label="Image précédente" [style.display]="images.length > 1 ? '' : 'none'">
+    <i class="ri-arrow-left-s-line"></i>
+  </button>
+
+  <div class="lightbox__content" (click)="$event.stopPropagation()">
+    <img [src]="lightboxImage.imageUrl" [alt]="lightboxImage.titre" (error)="handleImgError($event, lightboxImage)" />
+    <div class="lightbox__caption" *ngIf="lightboxImage.titre">
+      <h3>{{ lightboxImage.titre }}</h3>
+      <p *ngIf="lightboxImage.description">{{ lightboxImage.description }}</p>
+      <span class="lightbox__counter">{{ lightboxIndex + 1 }} / {{ images.length }}</span>
+    </div>
+  </div>
+
+  <button class="lightbox__nav lightbox__nav--next" (click)="$event.stopPropagation(); nextImage()" aria-label="Image suivante" [style.display]="images.length > 1 ? '' : 'none'">
+    <i class="ri-arrow-right-s-line"></i>
+  </button>
 </div>

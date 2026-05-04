@@ -479,6 +479,21 @@
   }
 }
 
+@media (max-width: 479px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-section__body {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-panel,
+  .kids-panel {
+    padding: var(--sp-3);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .kpi-card,
   .nav-card,

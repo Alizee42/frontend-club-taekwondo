@@ -1,38 +1,6 @@
 /* ── Hero ── */
-.bq-hero {
-  background: var(--brand-gradient);
-  padding: var(--sp-8) var(--container-padding);
-  text-align: center;
-}
-.bq-hero__inner {
-  max-width: var(--container-max);
-  margin: 0 auto;
-}
-.bq-hero__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: rgba(255,255,255,.75);
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  margin-bottom: var(--sp-4);
-}
-.bq-hero__title {
-  font-size: var(--text-2xl);
-  font-weight: 800;
-  color: var(--color-text-inv);
-  margin: 0 0 var(--sp-2);
-  line-height: var(--leading-tight);
-  font-family: var(--font-sans);
-}
-.bq-hero__desc {
-  font-size: var(--text-sm);
-  color: rgba(255,255,255,.8);
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: var(--leading-base);
+.page-hero {
+  --hero-bg-img: url('https://images.unsplash.com/photo-1544717297-fa95b6ee9643?auto=format&fit=crop&w=1800&q=80');
 }
 
 /* ── Page wrapper ── */

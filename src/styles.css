@@ -6,6 +6,9 @@
 /* 1. Tokens de design & variables CSS */
 @import './styles/_variables.css';
 
+/* 1b. Breakpoints & utilitaires responsive */
+@import './styles/_breakpoints.css';
+
 /* 2. Reset & base */
 @import './styles/_reset.css';
 

@@ -393,7 +393,7 @@
   position: fixed;
   top: 64px;
   left: 0;
-  width: 280px;
+  width: min(280px, 85vw);
   height: calc(100vh - 64px);
   background: var(--brand-primary-dark, #0E1F3B);
   z-index: calc(var(--z-sticky, 50) + 1);

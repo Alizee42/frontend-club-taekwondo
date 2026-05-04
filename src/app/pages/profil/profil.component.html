@@ -1,170 +1,102 @@
-<div class="profile-container">
-  <div class="profile-card">
-    <!-- Header avec bannière -->
-    <div class="profile-header">
-      <div class="initials-circle">
+<div class="profil-page">
+  <div class="profil-grid">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="profil-sidebar">
+      <div class="profil-avatar">
         {{ getInitiales(user.prenomParent || user.prenom, user.nomParent || user.nom) }}
       </div>
-      <h1>
-        {{ (user.prenomParent || user.prenom) || 'Prénom' }} {{ (user.nomParent || user.nom) || 'Nom' }}
-        <span class="role-badge">{{ (user.role || '') | uppercase }}</span>
+      <h1 class="profil-name">
+        {{ (user.prenomParent || user.prenom) || 'Prénom' }}
+        {{ (user.nomParent || user.nom) || 'Nom' }}
       </h1>
-      <p>{{ user.email || 'email@example.com' }}</p>
-    </div>
+      <span class="profil-role">{{ (user.role || '') | uppercase }}</span>
+      <p class="profil-email">{{ user.email || 'email@example.com' }}</p>
 
-    <!-- Navigation par onglets -->
-    <div class="tabs-navigation">
-      <button
-        type="button"
-        class="tab-button" 
-        [class.active]="activeTab === 'informations'"
-        (click)="setActiveTab('informations')">
-        <i class="ri-user-line"></i> Informations
-      </button>
-      <button
-        type="button"
-        class="tab-button" 
-        [class.active]="activeTab === 'securite'"
-        (click)="setActiveTab('securite')">
-        <i class="ri-shield-line"></i> Sécurité
-      </button>
-    </div>
+      <div class="profil-sidebar__divider"></div>
 
-    <!-- Contenu des onglets -->
-    <div class="tab-content">
+      <nav class="profil-nav" aria-label="Navigation profil">
+        <button type="button" class="profil-nav__item" [class.active]="activeTab === 'informations'" (click)="setActiveTab('informations')">
+          <i class="ri-user-3-line"></i>
+          <span>Informations</span>
+        </button>
+        <button type="button" class="profil-nav__item" [class.active]="activeTab === 'securite'" (click)="setActiveTab('securite')">
+          <i class="ri-shield-keyhole-line"></i>
+          <span>Sécurité</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- ══ PANEL PRINCIPAL ══ -->
+    <main class="profil-panel">
+
       <!-- Onglet Informations -->
-      <div *ngIf="activeTab === 'informations'" class="profile-section">
-        <div class="section-header">
-          <h2 class="section-title">Informations personnelles</h2>
-          <div class="section-actions">
-            <ui-button
-              *ngIf="!isEditing"
-              type="button"
-              variant="primary"
-              icon="ri-edit-line"
-              label="Modifier"
-              (clicked)="startEdit()"
-            />
-            <ui-button
-              *ngIf="isEditing"
-              type="button"
-              variant="secondary"
-              icon="ri-close-line"
-              label="Annuler"
-              (clicked)="cancelEdit()"
-            />
+      <section *ngIf="activeTab === 'informations'" class="profil-section">
+        <div class="panel-header">
+          <div>
+            <h2>Informations personnelles</h2>
+            <p>Consultez et modifiez vos données de profil.</p>
+          </div>
+          <div class="panel-actions">
+            <ui-button *ngIf="!isEditing" type="button" variant="primary" icon="ri-edit-line" label="Modifier" (clicked)="startEdit()" />
+            <ui-button *ngIf="isEditing" type="button" variant="secondary" icon="ri-close-line" label="Annuler" (clicked)="cancelEdit()" />
           </div>
         </div>
-        
-        <!-- Feedback -->
+
         <div *ngIf="saveSuccess" class="info-banner success">
           <i class="ri-checkbox-circle-line"></i> {{ saveSuccess }}
         </div>
         <div *ngIf="saveError" class="info-banner error">
           <i class="ri-error-warning-line"></i> {{ saveError }}
         </div>
-        
+
         <form #profilForm="ngForm" (ngSubmit)="saveProfile()">
           <div class="form-grid">
             <div class="form-group">
               <label for="nom">Nom</label>
-              <input 
-                type="text" 
-                id="nom" 
-                name="nom"
-                [(ngModel)]="user.nom"
-                [disabled]="!isEditing"
-                class="form-control"
-                required
-                placeholder="Votre nom">
-              <small class="field-error" *ngIf="profilForm.submitted && !user.nom">Le nom est requis.</small>
+              <input type="text" id="nom" name="nom" [(ngModel)]="user.nom" [disabled]="!isEditing" class="form-control" required placeholder="Votre nom">
+              <small class="field-error" *ngIf="profilForm.submitted && !user.nom">Requis</small>
             </div>
-            
             <div class="form-group">
               <label for="prenom">Prénom</label>
-              <input 
-                type="text" 
-                id="prenom" 
-                name="prenom"
-                [(ngModel)]="user.prenom"
-                [disabled]="!isEditing"
-                class="form-control"
-                required
-                placeholder="Votre prénom">
-              <small class="field-error" *ngIf="profilForm.submitted && !user.prenom">Le prénom est requis.</small>
+              <input type="text" id="prenom" name="prenom" [(ngModel)]="user.prenom" [disabled]="!isEditing" class="form-control" required placeholder="Votre prénom">
+              <small class="field-error" *ngIf="profilForm.submitted && !user.prenom">Requis</small>
             </div>
-            
             <div class="form-group">
               <label for="email">Email</label>
-              <input 
-                type="email" 
-                id="email" 
-                name="email"
-                [(ngModel)]="user.email"
-                [disabled]="!isEditing"
-                class="form-control"
-                required
-                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-                placeholder="votre@email.com"
-                #email="ngModel">
-              <small class="field-error" *ngIf="profilForm.submitted && (!user.email || email.invalid)">Email invalide.</small>
+              <input type="email" id="email" name="email" [(ngModel)]="user.email" [disabled]="!isEditing" class="form-control" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" placeholder="votre@email.com" #email="ngModel">
+              <small class="field-error" *ngIf="profilForm.submitted && (!user.email || email.invalid)">Email invalide</small>
             </div>
-            
             <div class="form-group">
               <label for="telephone">Téléphone</label>
-              <input 
-                type="tel" 
-                id="telephone" 
-                name="telephone"
-                [(ngModel)]="user.telephone"
-                [disabled]="!isEditing"
-                class="form-control"
-                pattern="^\s*0\d(?:[\s\.-]?\d{2}){4}\s*$"
-                placeholder="06 12 34 56 78"
-                #telephone="ngModel">
-              <small class="field-error" *ngIf="profilForm.submitted && user.telephone && telephone.invalid">Téléphone invalide.</small>
+              <input type="tel" id="telephone" name="telephone" [(ngModel)]="user.telephone" [disabled]="!isEditing" class="form-control" pattern="^\s*0\d(?:[\s\.-]?\d{2}){4}\s*$" placeholder="06 12 34 56 78" #telephone="ngModel">
+              <small class="field-error" *ngIf="profilForm.submitted && user.telephone && telephone.invalid">Format invalide</small>
             </div>
-
             <div class="form-group">
               <label for="adresse">Adresse</label>
-              <input
-                type="text"
-                id="adresse"
-                name="adresse"
-                [(ngModel)]="user.adresse"
-                [disabled]="!isEditing"
-                class="form-control"
-                placeholder="Votre adresse">
+              <input type="text" id="adresse" name="adresse" [(ngModel)]="user.adresse" [disabled]="!isEditing" class="form-control" placeholder="Votre adresse">
             </div>
-
             <div class="form-group">
               <label for="dateNaissance">Date de naissance</label>
-              <input
-                type="date"
-                id="dateNaissance"
-                name="dateNaissance"
-                [(ngModel)]="user.dateNaissance"
-                [disabled]="!isEditing"
-                class="form-control">
+              <input type="date" id="dateNaissance" name="dateNaissance" [(ngModel)]="user.dateNaissance" [disabled]="!isEditing" class="form-control">
             </div>
           </div>
-          
+
           <div class="form-actions">
-            <ui-button
-              type="submit"
-              variant="success"
-              icon="ri-save-line"
-              label="Sauvegarder les modifications"
-              [disabled]="!isEditing || !!profilForm.invalid"
-            />
+            <ui-button type="submit" variant="success" icon="ri-save-line" label="Sauvegarder" [disabled]="!isEditing || !!profilForm.invalid" />
           </div>
         </form>
-      </div>
+      </section>
 
       <!-- Onglet Sécurité -->
-      <div *ngIf="activeTab === 'securite'" class="profile-section">
-        <h2 class="section-title">Sécurité du compte</h2>
-        
+      <section *ngIf="activeTab === 'securite'" class="profil-section">
+        <div class="panel-header">
+          <div>
+            <h2>Sécurité du compte</h2>
+            <p>Gérez votre mot de passe et la sécurité de votre accès.</p>
+          </div>
+        </div>
+
         <div *ngIf="pwdSuccess" class="info-banner success">
           <i class="ri-checkbox-circle-line"></i> {{ pwdSuccess }}
         </div>
@@ -172,95 +104,52 @@
           <i class="ri-error-warning-line"></i> {{ pwdError }}
         </div>
 
-        <div class="security-section">
-          <div class="security-item">
-            <div class="security-info">
-              <h4>Mot de passe</h4>
-              <p title="{{ lastPwdExact }}">Dernière modification {{ lastPwdAgo || '—' }}</p>
-            </div>
-            <ui-button
-              type="button"
-              variant="primary"
-              icon="ri-lock-line"
-              label="Modifier"
-              (clicked)="openPasswordModal()"
-            />
+        <div class="security-item">
+          <div class="security-item__icon"><i class="ri-lock-password-line"></i></div>
+          <div class="security-item__info">
+            <h4>Mot de passe</h4>
+            <p title="{{ lastPwdExact }}">Dernière modification {{ lastPwdAgo || '—' }}</p>
           </div>
+          <ui-button type="button" variant="primary" icon="ri-lock-line" label="Modifier" (clicked)="openPasswordModal()" />
         </div>
-      </div>
+      </section>
 
-      <!-- (onglet Préférences supprimé) -->
-    </div>
+    </main>
   </div>
+</div>
 
-  <!-- Modal pour changer le mot de passe -->
-  <div class="modal" *ngIf="showPasswordModal" (click)="closePasswordModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Modifier le mot de passe</h2>
-        <button type="button" class="close-button" (click)="closePasswordModal()">
-          <i class="ri-close-line"></i>
-        </button>
-      </div>
-      
-      <form (ngSubmit)="updatePassword()">
-        <div class="form-group">
-          <label for="currentPassword">Mot de passe actuel</label>
-          <input 
-            type="password" 
-            id="currentPassword" 
-            name="currentPassword"
-            [(ngModel)]="passwordData.currentPassword" 
-            class="form-control"
-            placeholder="Entrez votre mot de passe actuel"
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="newPassword">Nouveau mot de passe</label>
-          <input 
-            type="password" 
-            id="newPassword" 
-            name="newPassword"
-            [(ngModel)]="passwordData.newPassword" 
-            class="form-control"
-            placeholder="Entrez votre nouveau mot de passe"
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="confirmPassword">Confirmer le nouveau mot de passe</label>
-          <input 
-            type="password" 
-            id="confirmPassword" 
-            name="confirmPassword"
-            [(ngModel)]="passwordData.confirmPassword" 
-            class="form-control"
-            placeholder="Confirmez votre nouveau mot de passe"
-            required>
-        </div>
-        
-        <div *ngIf="passwordError" class="error-message">
-          <i class="ri-error-warning-line"></i>
-          {{ passwordError }}
-        </div>
-        
-        <div class="form-actions">
-          <ui-button
-            type="button"
-            variant="secondary"
-            icon="ri-close-line"
-            label="Annuler"
-            (clicked)="closePasswordModal()"
-          />
-          <ui-button
-            type="submit"
-            variant="primary"
-            icon="ri-save-line"
-            label="Enregistrer"
-          />
-        </div>
-      </form>
+<!-- ══ MODAL MOT DE PASSE ══ -->
+<div class="modal" *ngIf="showPasswordModal" (click)="closePasswordModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="ri-lock-line"></i> Modifier le mot de passe</h2>
+      <button type="button" class="close-button" (click)="closePasswordModal()" aria-label="Fermer">
+        <i class="ri-close-line"></i>
+      </button>
     </div>
+
+    <form (ngSubmit)="updatePassword()">
+      <div class="form-group">
+        <label for="currentPassword">Mot de passe actuel</label>
+        <input type="password" id="currentPassword" name="currentPassword" [(ngModel)]="passwordData.currentPassword" class="form-control" placeholder="Mot de passe actuel" required>
+      </div>
+      <div class="form-group">
+        <label for="newPassword">Nouveau mot de passe</label>
+        <input type="password" id="newPassword" name="newPassword" [(ngModel)]="passwordData.newPassword" class="form-control" placeholder="Nouveau mot de passe" required>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" [(ngModel)]="passwordData.confirmPassword" class="form-control" placeholder="Confirmer le mot de passe" required>
+      </div>
+
+      <div *ngIf="passwordError" class="error-message">
+        <i class="ri-error-warning-line"></i> {{ passwordError }}
+      </div>
+
+      <div class="form-actions">
+        <ui-button type="button" variant="secondary" icon="ri-close-line" label="Annuler" (clicked)="closePasswordModal()" />
+        <ui-button type="submit" variant="primary" icon="ri-save-line" label="Enregistrer" />
+      </div>
+    </form>
   </div>
 </div>

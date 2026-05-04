@@ -8,47 +8,8 @@
   padding-bottom: var(--sp-12);
 }
 
-.contact-hero {
-  background:
-    linear-gradient(120deg, rgba(14, 31, 59, 0.92), rgba(26, 92, 168, 0.86)),
-    url('https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&w=1800&q=80') center/cover;
-  color: var(--color-text-inv);
-}
-
-.contact-hero__content {
-  width: min(1120px, calc(100% - 32px));
-  margin: 0 auto;
-  padding: clamp(34px, 5vw, 58px) 0 clamp(38px, 5vw, 62px);
-}
-
-.contact-kicker {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 var(--sp-3);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.12);
-  font-size: var(--text-sm);
-  font-weight: 800;
-}
-
-.contact-hero h1 {
-  max-width: 760px;
-  margin: var(--sp-3) 0 var(--sp-2);
-  color: var(--color-text-inv);
-  font-size: clamp(1.85rem, 3.4vw, 3rem);
-  line-height: 1.12;
-  letter-spacing: 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
-}
-
-.contact-hero p {
-  max-width: 660px;
-  margin: 0;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: var(--text-base);
-  line-height: var(--leading-base);
+.page-hero {
+  --hero-bg-img: url('https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&w=1800&q=80');
 }
 
 .contact-layout {

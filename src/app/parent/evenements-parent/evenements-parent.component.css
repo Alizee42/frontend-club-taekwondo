@@ -15,7 +15,7 @@
 }
 
 /* 📱 RESPONSIVE: Layout mobile */
-@media (max-width: 968px) {
+@media (max-width: 768px) {
   .main-content {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -32,7 +32,7 @@
 }
 
 /* 📱 RESPONSIVE: Sidebar mobile */
-@media (max-width: 968px) {
+@media (max-width: 768px) {
   .sidebar {
     order: -1; /* Sidebar en premier sur mobile */
     padding: 20px;
@@ -54,7 +54,7 @@
 }
 
 /* 📱 RESPONSIVE: Liste d'enfants mobile */
-@media (max-width: 968px) {
+@media (max-width: 768px) {
   .enfants-liste {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

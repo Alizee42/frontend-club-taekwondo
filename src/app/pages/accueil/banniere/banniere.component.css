@@ -6,7 +6,7 @@
 
 .hero {
   position: relative;
-  min-height: 80vh;
+  min-height: 65vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -43,7 +43,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: var(--sp-16) var(--container-padding);
+  padding: var(--sp-10) var(--container-padding);
   max-width: 860px;
   width: 100%;
   margin-bottom: 5rem; /* espace pour la stats strip */
@@ -86,7 +86,7 @@
 }
 
 .hero-identity__strong {
-  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 900;
   color: var(--color-text-inv);
   letter-spacing: -0.03em;
@@ -94,7 +94,7 @@
 }
 
 .hero-identity__mid {
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: clamp(1.6rem, 3.2vw, 2.8rem);
   font-weight: 300;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.25em;

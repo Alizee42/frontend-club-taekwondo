@@ -264,6 +264,10 @@
   .dash-sections { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 479px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .kpi-card, .nav-card, .nav-card__arrow { transition: none; }
 }

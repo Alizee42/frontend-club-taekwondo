@@ -13,6 +13,10 @@
 	margin: 12px 0 20px;
 }
 .form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
 table { width: 100%; border-collapse: collapse; }
 th, td { border: 1px solid #ddd; padding: 8px; }
 th { background: #f3f4f6; text-align: left; }

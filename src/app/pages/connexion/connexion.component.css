@@ -317,3 +317,18 @@
     padding: var(--sp-12) var(--sp-10);
   }
 }
+
+@media (max-width: 479px) {
+  .login-form-panel {
+    padding: var(--sp-5) var(--sp-4);
+    align-items: flex-start;
+  }
+
+  .login-title {
+    font-size: 1.4rem;
+  }
+
+  .login-form-inner {
+    gap: var(--sp-4);
+  }
+}

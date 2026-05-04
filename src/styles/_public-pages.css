@@ -2,6 +2,49 @@
    PAGES PUBLIQUES — UNIFORMISATION
    ============================================= */
 
+/* ── Hero partagé — toutes pages publiques sauf Accueil ─────────────────── */
+.page-hero {
+  background:
+    linear-gradient(120deg, rgba(14, 31, 59, 0.92), rgba(26, 92, 168, 0.86)),
+    var(--hero-bg-img, url('https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&w=1800&q=80'))
+    center / cover no-repeat;
+  color: var(--color-text-inv);
+}
+
+.page-hero__inner {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: clamp(34px, 5vw, 58px) 0 clamp(38px, 5vw, 62px);
+}
+
+.page-hero__eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--brand-accent);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.page-hero h1 {
+  max-width: 720px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.85rem, 3.4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.12;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .28);
+}
+
+.page-hero p {
+  max-width: 660px;
+  margin: 16px 0 0;
+  color: rgba(255, 255, 255, .88);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
 /* ================= UNIFORMISATION PAGES PUBLIQUES (hors Accueil) ================= */
 body.public-page-standard {
   /* Fond légèrement nuancé pour distinguer de l'accueil si plus visuel */

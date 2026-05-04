@@ -77,3 +77,37 @@
   white-space: nowrap;
   vertical-align: middle;
 }
+
+/* ── Responsive tables ───────────────────────────────────── */
+@media (max-width: 767px) {
+  .table-wrap,
+  .table-wrapper {
+    border-radius: var(--radius-sm);
+  }
+
+  /* Force le scroll horizontal sur les tables larges */
+  .table-wrap ui-table,
+  .table-wrapper ui-table,
+  .table-wrap > table,
+  .table-wrapper > table {
+    min-width: 540px;
+  }
+
+  /* Réduit le padding des cellules sur mobile */
+  .table th,
+  .table td,
+  .table-wrap > table th,
+  .table-wrap > table td {
+    padding: var(--sp-2) var(--sp-3);
+    font-size: var(--text-xs);
+  }
+}
+
+@media (max-width: 479px) {
+  .table-wrap ui-table,
+  .table-wrapper ui-table,
+  .table-wrap > table,
+  .table-wrapper > table {
+    min-width: 480px;
+  }
+}

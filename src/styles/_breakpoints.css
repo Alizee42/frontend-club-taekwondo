@@ -1,0 +1,70 @@
+/* =============================================
+   BREAKPOINTS — Stratégie unifiée
+   xs: 480px | sm: 640px | md: 768px | lg: 1024px
+   Utiliser UNIQUEMENT ces 4 valeurs dans toute l'app.
+   ============================================= */
+
+/* ── Utilitaires visibilité ─────────────────── */
+@media (max-width: 479px)  { .hide-xs { display: none !important; } }
+@media (max-width: 639px)  { .hide-sm { display: none !important; } }
+@media (max-width: 767px)  { .hide-md { display: none !important; } }
+@media (min-width: 480px)  { .show-xs-only { display: none !important; } }
+@media (min-width: 768px)  { .show-mobile  { display: none !important; } }
+@media (max-width: 767px)  { .show-desktop { display: none !important; } }
+
+/* ── Grille auto-responsive ─────────────────── */
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--card-gap, 1rem);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--card-gap, 1rem);
+}
+
+@media (max-width: 639px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ── Stack sur mobile ───────────────────────── */
+@media (max-width: 767px) {
+  .stack-md {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .full-md { width: 100% !important; max-width: 100% !important; }
+}
+
+@media (max-width: 639px) {
+  .stack-sm {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .full-sm { width: 100% !important; max-width: 100% !important; }
+}
+
+/* ── Tables scrollables ─────────────────────── */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-md);
+}
+
+/* ── Padding page adaptatif ─────────────────── */
+@media (max-width: 767px) {
+  .page-shell,
+  .dash-shell {
+    padding: var(--sp-4) var(--container-padding);
+  }
+}
+
+@media (max-width: 479px) {
+  .page-shell,
+  .dash-shell {
+    padding: var(--sp-3) var(--container-padding);
+  }
+}

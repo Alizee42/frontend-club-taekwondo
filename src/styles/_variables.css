@@ -143,11 +143,28 @@
   --section-spacing: var(--sp-8);
 }
 
+/* ── Breakpoints standardisés ───────────────────────────── */
+:root {
+  --bp-xs:  480px;
+  --bp-sm:  640px;
+  --bp-md:  768px;
+  --bp-lg:  1024px;
+  --bp-xl:  1280px;
+}
+
 @media (max-width: 767px) {
   :root {
     --container-padding: var(--container-padding-mob);
     --card-gap:          0.75rem;
     --section-spacing:   var(--sp-6);
-    --control-h:         48px;
+    /* --control-h reste 44px : taille tactile minimum recommandée */
+  }
+}
+
+@media (max-width: 479px) {
+  :root {
+    --container-padding: 0.75rem;
+    --card-gap:          0.5rem;
+    --section-spacing:   var(--sp-5);
   }
 }
