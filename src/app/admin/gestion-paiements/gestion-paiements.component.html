@@ -10,12 +10,14 @@
         label="Rafraichir"
         icon="ri-refresh-line"
         variant="secondary"
+        size="sm"
         (clicked)="refreshStats(); loadPaiements()"
       ></ui-button>
       <ui-button
         label="Ajouter un paiement"
         icon="ri-add-line"
         variant="primary"
+        size="sm"
         (clicked)="ouvrirModalAjout()"
       ></ui-button>
     </ng-container>
@@ -24,7 +26,7 @@
   <ui-kpi-grid [cols]="4">
     <ui-kpi-card icon="ri-safe-2-line"        label="Total reçu"    [value]="totalEncaisse | currency:'EUR':'symbol':'1.0-0'"  tone="primary"></ui-kpi-card>
     <ui-kpi-card icon="ri-hourglass-2-line"  label="À percevoir"   [value]="totalRestant  | currency:'EUR':'symbol':'1.0-0'"  tone="warning"></ui-kpi-card>
-    <ui-kpi-card icon="ri-alarm-warning-line" label="En retard"     [value]="nbRetards"                                         [tone]="nbRetards > 0 ? 'danger' : 'neutral'"></ui-kpi-card>
+    <ui-kpi-card icon="ri-alarm-warning-line" label="En retard"     [value]="nbRetards"                                         tone="danger"></ui-kpi-card>
     <ui-kpi-card icon="ri-pie-chart-2-line"  label="% encaissé"    [value]="(tauxEncaissement | number:'1.0-1') + '%'"          tone="success"></ui-kpi-card>
   </ui-kpi-grid>
 
@@ -130,6 +132,7 @@
         <ui-button
           label="Sauvegarder"
           variant="primary"
+          size="sm"
           [loading]="paramsSaving"
           (clicked)="sauvegarderParametres()"
           [full]="true"

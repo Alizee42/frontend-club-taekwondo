@@ -1,0 +1,264 @@
+<div class="page-shell">
+
+  <app-page-header title="Membres & Comptes" icon="ri-people-line" subtitle="Gérez les comptes de connexion et les profils sportifs du club">
+    <ng-container page-header-actions>
+      <ui-button
+        *ngIf="activeTab === 'comptes'"
+        label="Ajouter un compte"
+        icon="ri-user-add-line"
+        variant="primary"
+        (clicked)="openAddCompte()">
+      </ui-button>
+      <ui-button
+        *ngIf="activeTab === 'pratiquants'"
+        label="Ajouter un pratiquant"
+        icon="ri-user-add-line"
+        variant="primary"
+        (clicked)="openAddPratiquant()">
+      </ui-button>
+    </ng-container>
+  </app-page-header>
+
+  <!-- ── Onglets ── -->
+  <div class="gm-tabs">
+    <button
+      type="button"
+      class="gm-tab"
+      [class.gm-tab--active]="activeTab === 'comptes'"
+      (click)="setTab('comptes')">
+      <i class="ri-login-box-line"></i>
+      Comptes
+      <span class="gm-tab__count">{{ nbComptes }}</span>
+    </button>
+    <button
+      type="button"
+      class="gm-tab"
+      [class.gm-tab--active]="activeTab === 'pratiquants'"
+      (click)="setTab('pratiquants')">
+      <i class="ri-run-line"></i>
+      Pratiquants
+      <span class="gm-tab__count">{{ nbPratiquants }}</span>
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════
+       ONGLET COMPTES
+       ════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'comptes'">
+
+    <ui-kpi-grid [cols]="3">
+      <ui-kpi-card icon="ri-group-line"   label="Comptes total"   [value]="nbComptes"     tone="primary" [loading]="loadingComptes"></ui-kpi-card>
+      <ui-kpi-card icon="ri-parent-line"  label="Parents"         [value]="nbParents"     tone="teal"    [loading]="loadingComptes"></ui-kpi-card>
+      <ui-kpi-card icon="ri-user-line"    label="Membres adultes" [value]="nbMembresRole" tone="blue"    [loading]="loadingComptes"></ui-kpi-card>
+    </ui-kpi-grid>
+
+    <div class="gm-info-box">
+      <i class="ri-information-line"></i>
+      <p>Un <strong>compte</strong> est créé lors de l'inscription (email + mot de passe). Un parent inscrit ses enfants depuis son espace. Un membre adulte a son propre compte.</p>
+    </div>
+
+    <div class="gm-error" *ngIf="errorComptes">
+      <i class="ri-error-warning-line"></i> {{ errorComptes }}
+    </div>
+
+    <div class="gm-loading" *ngIf="loadingComptes">
+      <div class="gm-spinner"></div>
+      <p>Chargement des comptes…</p>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loadingComptes">
+      <ui-table
+        [columns]="comptesColumns"
+        [data]="pagedComptes"
+        [actions]="comptesActions"
+        (actionClick)="onComptesAction($event)">
+      </ui-table>
+
+      <div class="gm-pagination" *ngIf="totalPagesComptes > 1">
+        <button class="gm-page-btn" [disabled]="pageComptes === 1" (click)="goToPageComptes(pageComptes - 1)">
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        <span class="gm-page-info">Page {{ pageComptes }} / {{ totalPagesComptes }}</span>
+        <button class="gm-page-btn" [disabled]="pageComptes === totalPagesComptes" (click)="goToPageComptes(pageComptes + 1)">
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════
+       ONGLET PRATIQUANTS
+       ════════════════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'pratiquants'">
+
+    <ui-kpi-grid [cols]="3">
+      <ui-kpi-card icon="ri-team-line"     label="Pratiquants total" [value]="nbPratiquants" tone="primary" [loading]="loadingPratiquants"></ui-kpi-card>
+      <ui-kpi-card icon="ri-user-star-line" label="Adultes"          [value]="nbAdultes"     tone="blue"    [loading]="loadingPratiquants"></ui-kpi-card>
+      <ui-kpi-card icon="ri-user-smile-line" label="Enfants"         [value]="nbEnfants"     tone="amber"   [loading]="loadingPratiquants"></ui-kpi-card>
+    </ui-kpi-grid>
+
+    <div class="gm-info-box">
+      <i class="ri-information-line"></i>
+      <p>Un <strong>pratiquant</strong> est un profil sportif (ceinture, licence…). Les <strong>adultes</strong> ont un compte de connexion. Les <strong>enfants</strong> sont rattachés au compte de leur parent.</p>
+    </div>
+
+    <div class="gm-error" *ngIf="errorPratiquants">
+      <i class="ri-error-warning-line"></i> {{ errorPratiquants }}
+    </div>
+
+    <div class="gm-loading" *ngIf="loadingPratiquants">
+      <div class="gm-spinner"></div>
+      <p>Chargement des pratiquants…</p>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loadingPratiquants">
+      <ui-table
+        [columns]="pratiquantsColumns"
+        [data]="pagedPratiquants"
+        [actions]="pratiquantsActions"
+        (actionClick)="onPratiquantsAction($event)">
+      </ui-table>
+
+      <div class="gm-pagination" *ngIf="totalPagesPratiquants > 1">
+        <button class="gm-page-btn" [disabled]="pagePratiquants === 1" (click)="goToPagePratiquants(pagePratiquants - 1)">
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        <span class="gm-page-info">Page {{ pagePratiquants }} / {{ totalPagesPratiquants }}</span>
+        <button class="gm-page-btn" [disabled]="pagePratiquants === totalPagesPratiquants" (click)="goToPagePratiquants(pagePratiquants + 1)">
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL COMPTE
+     ═══════════════════════════════════════════ -->
+<ui-modal [open]="modalOpen && isCompteModal()" [title]="modalTitle" (closed)="closeModal()">
+  <form *ngIf="editItem" class="gm-form" (ngSubmit)="saveCompte()" #compteForm="ngForm">
+    <div class="gm-form__row">
+      <div class="gm-form__field">
+        <label>Nom <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="editItem.nom" name="nom" required placeholder="Dupont" />
+      </div>
+      <div class="gm-form__field">
+        <label>Prénom <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="editItem.prenom" name="prenom" required placeholder="Jean" />
+      </div>
+    </div>
+    <div class="gm-form__field">
+      <label>Email <span class="required">*</span></label>
+      <input type="email" [(ngModel)]="editItem.email" name="email" required placeholder="jean.dupont@email.com" />
+    </div>
+    <div class="gm-form__row">
+      <div class="gm-form__field">
+        <label>Rôle <span class="required">*</span></label>
+        <select [(ngModel)]="editItem.role" name="role" required>
+          <option value="">Sélectionner…</option>
+          <option value="MEMBRE">Membre</option>
+          <option value="PARENT">Parent</option>
+        </select>
+      </div>
+      <div class="gm-form__field">
+        <label>Genre</label>
+        <select [(ngModel)]="editItem.genre" name="genre">
+          <option value="">Non précisé</option>
+          <option *ngFor="let g of genreOptions" [value]="g.value">{{ g.label }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="gm-form__field">
+      <label>Téléphone</label>
+      <input type="tel" [(ngModel)]="editItem.telephone" name="telephone" placeholder="06 00 00 00 00" />
+    </div>
+    <div class="gm-form__hint" *ngIf="modalMode === 'add-compte'">
+      <i class="ri-mail-send-line"></i> Un email avec un mot de passe temporaire sera envoyé.
+    </div>
+    <div class="gm-form__footer">
+      <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
+      <ui-button label="Enregistrer" variant="primary" type="submit" [disabled]="isSaveDisabled()"></ui-button>
+    </div>
+  </form>
+</ui-modal>
+
+<!-- ═══════════════════════════════════════════
+     MODAL PRATIQUANT
+     ═══════════════════════════════════════════ -->
+<ui-modal [open]="modalOpen && !isCompteModal()" [title]="modalTitle" (closed)="closeModal()">
+  <form *ngIf="editItem" class="gm-form" (ngSubmit)="savePratiquant()" #pratiquantForm="ngForm">
+    <div class="gm-form__row">
+      <div class="gm-form__field">
+        <label>Nom <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="editItem.nom" name="nom" required placeholder="Dupont" />
+      </div>
+      <div class="gm-form__field">
+        <label>Prénom <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="editItem.prenom" name="prenom" required placeholder="Jean" />
+      </div>
+    </div>
+    <div class="gm-form__row">
+      <div class="gm-form__field">
+        <label>Date de naissance</label>
+        <input type="date" [(ngModel)]="editItem.dateNaissance" name="dateNaissance" />
+      </div>
+      <div class="gm-form__field">
+        <label>Genre</label>
+        <select [(ngModel)]="editItem.genre" name="genre">
+          <option value="">Non précisé</option>
+          <option *ngFor="let g of genreOptions" [value]="g.value">{{ g.label }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="gm-form__field">
+      <label>Type</label>
+      <select [(ngModel)]="editItem.estAdulte" name="estAdulte">
+        <option [ngValue]="true">Adulte</option>
+        <option [ngValue]="false">Enfant</option>
+      </select>
+    </div>
+    <div class="gm-form__row">
+      <div class="gm-form__field">
+        <label>Ceinture</label>
+        <select [(ngModel)]="editItem.ceinture" name="ceinture">
+          <option value="">—</option>
+          <option *ngFor="let c of ceintureOptions" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+      <div class="gm-form__field">
+        <label>N° Licence</label>
+        <input type="text" [(ngModel)]="editItem.numeroLicence" name="numeroLicence" placeholder="123456" />
+      </div>
+    </div>
+    <div class="gm-form__footer">
+      <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
+      <ui-button label="Enregistrer" variant="primary" type="submit" [disabled]="isSaveDisabled()"></ui-button>
+    </div>
+  </form>
+</ui-modal>
+
+<!-- ═══════════════════════════════════════════
+     MODAL CONFIRMATION SUPPRESSION
+     ═══════════════════════════════════════════ -->
+<ui-modal [open]="confirmDeleteOpen" title="Confirmer la suppression" (closed)="closeDeleteConfirm()">
+  <div class="gm-confirm" *ngIf="deleteItem">
+    <div class="gm-confirm__icon">
+      <i class="ri-delete-bin-6-line"></i>
+    </div>
+    <p *ngIf="deleteType === 'compte'">
+      Supprimer le compte de <strong>{{ deleteItem.prenom }} {{ deleteItem.nom }}</strong> ({{ deleteItem.email }}) ?
+      <br><span class="gm-confirm__warn">Cette action est irréversible.</span>
+    </p>
+    <p *ngIf="deleteType === 'pratiquant'">
+      Supprimer le pratiquant <strong>{{ deleteItem.prenom }} {{ deleteItem.nom }}</strong> ?
+      <br><span class="gm-confirm__warn">Cette action est irréversible.</span>
+    </p>
+    <div class="gm-form__footer">
+      <ui-button label="Annuler" variant="ghost" (clicked)="closeDeleteConfirm()"></ui-button>
+      <ui-button label="Supprimer" variant="danger" [loading]="deleteLoading" (clicked)="confirmDelete()"></ui-button>
+    </div>
+  </div>
+</ui-modal>

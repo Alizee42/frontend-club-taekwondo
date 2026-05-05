@@ -384,15 +384,15 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/actualites']);
   }
 
-    navigateToGestionUtilisateurs(): void {
-      this.router.navigate(['/admin/gestion-utilisateurs']);
-    }
+  navigateToGestionMembres(): void {
+    this.router.navigate(['/admin/membres']);
+  }
 
-    navigateToMembresAdmin() {
-      this.router.navigate(['/admin/membres']);
-    }
+  navigateToAccueilSite(): void {
+    this.router.navigate(['/admin/accueil-site']);
+  }
 
-    navigateToHero(): void {
+  navigateToHero(): void {
       this.router.navigate(['/admin/hero']);
     }
 

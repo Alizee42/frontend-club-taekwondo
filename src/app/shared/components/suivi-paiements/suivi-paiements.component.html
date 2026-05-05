@@ -16,8 +16,8 @@
     </ng-container>
     <input class="form-input" placeholder="Rechercher..." [(ngModel)]="filters.q" (input)="applyFilters()" />
     <div class="ms-auto actions-inline">
-      <ui-button icon="ri-refresh-line" label="Rafraîchir" (clicked)="refresh()" variant="secondary"></ui-button>
-      <ui-button icon="ri-add-line" label="Ajouter un paiement" (clicked)="ouvrirAjoutPaiement()" variant="primary"></ui-button>
+      <ui-button icon="ri-refresh-line" label="Rafraîchir" size="sm" (clicked)="refresh()" variant="secondary"></ui-button>
+      <ui-button icon="ri-add-line" label="Ajouter un paiement" size="sm" (clicked)="ouvrirAjoutPaiement()" variant="primary"></ui-button>
     </div>
   </div>
 
@@ -84,7 +84,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of paiementsFiltres; trackBy: trackByPaiement">
+          <tr *ngFor="let p of paiementsFiltres; trackBy: trackByPaiement" [class.row-late]="isPaiementLate(p)">
             <td *ngIf="showClub">{{ getClubName(p) }}</td>
             <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
             <td>
@@ -109,7 +109,7 @@
                 </div>
               </div>
             </td>
-            <td><span [class]="classeBadge(p.statut)">{{ p.statut }}</span></td>
+            <td><span [class]="classeBadge(statutPaiement(p))">{{ statutPaiement(p) }}</span></td>
             <td class="actions-col">
               <div class="actions-wrap">
                 <button type="button" class="action-btn action-btn--primary" (click)="ouvrirEcheances(p)" title="Voir les échéances" aria-label="Voir les échéances"><i class="ri-calendar-event-line"></i></button>
@@ -181,8 +181,8 @@
       </div>
       <app-alert-banner *ngIf="annulationError" type="error" [message]="annulationError"></app-alert-banner>
       <div class="modal-footer">
-        <ui-button label="Fermer" variant="secondary" (clicked)="fermerAnnulation()" [disabled]="annulationLoading"></ui-button>
-        <ui-button label="Confirmer l'annulation" variant="danger" (clicked)="confirmerAnnulation()" [loading]="annulationLoading" [disabled]="annulationLoading"></ui-button>
+        <ui-button label="Fermer" variant="secondary" size="sm" (clicked)="fermerAnnulation()" [disabled]="annulationLoading"></ui-button>
+        <ui-button label="Confirmer l'annulation" variant="danger" size="sm" (clicked)="confirmerAnnulation()" [loading]="annulationLoading" [disabled]="annulationLoading"></ui-button>
       </div>
     </ui-modal>
 
@@ -244,7 +244,7 @@
                       <!-- En-tête : statut + type + mode · date + action -->
                       <div class="pay-header">
                         <div class="pay-header-left">
-                          <span [class]="classeBadge(p.statut)">{{ p.statut }}</span>
+                          <span [class]="classeBadge(statutPaiement(p))">{{ statutPaiement(p) }}</span>
                           <span class="pay-chip">{{ libelleType(p.type, p.echeances) }}</span>
                           <span class="pay-chip">{{ libelleMode(p.modePaiement) }}</span>
                         </div>
@@ -284,13 +284,13 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <tr *ngFor="let e of p.echeances; trackBy: trackByEcheance">
+                            <tr *ngFor="let e of p.echeances; trackBy: trackByEcheance" [class.row-late]="isEcheanceLate(e)">
                               <td>#{{ e.numero }}</td>
                               <td>{{ e.dateEcheance | date:'dd/MM/yyyy' }}</td>
                               <td class="num">{{ e.montant | currency:'EUR' }}</td>
-                              <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
+                              <td><span [class]="classeBadge(statutEcheance(e))">{{ statutEcheance(e) }}</span></td>
                               <td>
-                                <button type="button" class="action-btn action-btn--success" *ngIf="(e.statut || '').toLowerCase() !== 'payé'" (click)="marquerEcheancePayee(p, e)" title="Marquer payée" aria-label="Marquer payée"><i class="ri-check-line"></i></button>
+                                <button type="button" class="action-btn action-btn--success" *ngIf="isEcheancePayable(e)" (click)="marquerEcheancePayee(p, e)" title="Marquer payée" aria-label="Marquer payée"><i class="ri-check-line"></i></button>
                               </td>
                             </tr>
                           </tbody>
@@ -355,7 +355,7 @@
                 <td class="num">{{ p.montantTotal | currency:'EUR' }}</td>
                 <td class="num">{{ montantPaye(p) | currency:'EUR' }}</td>
                 <td class="num">{{ montantRestant(p) | currency:'EUR' }}</td>
-                <td><span [class]="classeBadge(p.statut)">{{ p.statut }}</span></td>
+                <td><span [class]="classeBadge(statutPaiement(p))">{{ statutPaiement(p) }}</span></td>
               </tr>
             </tbody>
           </table>
@@ -398,13 +398,13 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let e of p.echeances; trackBy: trackByEcheance">
+                  <tr *ngFor="let e of p.echeances; trackBy: trackByEcheance" [class.row-late]="isEcheanceLate(e)">
                     <td>#{{ e.numero }}</td>
                     <td>{{ e.dateEcheance | date:'dd/MM/yyyy' }}</td>
                     <td class="num">{{ e.montant | currency:'EUR' }}</td>
-                    <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
+                    <td><span [class]="classeBadge(statutEcheance(e))">{{ statutEcheance(e) }}</span></td>
                     <td class="actions-col">
-                      <button type="button" class="action-btn action-btn--success" *ngIf="(e.statut || '').toLowerCase() !== 'payé'" (click)="marquerEcheancePayee(p, e)" title="Marquer payée" aria-label="Marquer payée"><i class="ri-check-line"></i></button>
+                      <button type="button" class="action-btn action-btn--success" *ngIf="isEcheancePayable(e)" (click)="marquerEcheancePayee(p, e)" title="Marquer payée" aria-label="Marquer payée"><i class="ri-check-line"></i></button>
                     </td>
                   </tr>
                 </tbody>
@@ -412,7 +412,7 @@
             </div>
             <ng-template #noEchUser>
               <div class="single-pay-summary">
-                <span [class]="classeBadge(p.statut)">{{ p.statut }}</span>
+                <span [class]="classeBadge(statutPaiement(p))">{{ statutPaiement(p) }}</span>
                 <span class="single-pay-detail">
                   <i class="ri-money-euro-circle-line"></i>
                   {{ p.montantTotal | currency:'EUR' }} · {{ libelleMode(p.modePaiement) }}

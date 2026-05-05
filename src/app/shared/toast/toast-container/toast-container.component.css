@@ -7,7 +7,7 @@
 
 .toast-stack {
   position: fixed;
-  top: var(--sp-5);
+  top: 5rem;
   right: var(--sp-5);
   display: flex;
   flex-direction: column;
@@ -17,63 +17,65 @@
 }
 
 .message-box {
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-4);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-left-width: 4px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
   pointer-events: auto;
   animation: toast-enter var(--t-slow) both;
 }
 
-.icon-circle {
+/* ——— Icône ——————————————————————————————— */
+.toast-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
+  font-size: 1.4rem;
   flex-shrink: 0;
-}
-
-.icon-circle i {
-  font-size: 1.1rem;
   line-height: 1;
 }
 
+/* ——— Texte ——————————————————————————————— */
 .message-text {
   min-width: 0;
   font-size: var(--text-sm);
+  font-weight: 500;
   line-height: var(--leading-base);
 }
 
+/* ——— Bouton fermer ——————————————————————— */
 .exit-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border: 0;
   border-radius: 50%;
   background: transparent;
   color: inherit;
   cursor: pointer;
-  opacity: 0.72;
+  opacity: 0.6;
   transition:
     opacity var(--t-fast),
     background-color var(--t-fast),
     transform var(--t-fast);
+  flex-shrink: 0;
 }
 
 .exit-button:hover {
   opacity: 1;
   background: rgba(15, 23, 42, 0.08);
-  transform: scale(1.04);
+  transform: scale(1.08);
 }
 
 .exit-button i {
@@ -81,67 +83,97 @@
   line-height: 1;
 }
 
-.message-box-success {
-  background: var(--color-success-bg);
-  border-color: color-mix(in srgb, var(--color-success) 24%, white);
-  color: var(--color-success-ink);
+/* ——— Barre de progression ——————————————— */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  animation: toast-progress linear forwards;
+  transform-origin: left;
 }
 
-.message-box-success .icon-circle {
-  background: var(--color-success);
-  color: var(--color-text-inv);
+/* ——— Variantes par type ————————————————— */
+.message-box-success {
+  background: var(--color-success-bg);
+  border-color: var(--color-success);
+  color: var(--color-success-ink);
 }
+.message-box-success .toast-icon  { color: var(--color-success); }
+.message-box-success .toast-progress { background: var(--color-success); }
 
 .message-box-error {
   background: var(--color-danger-bg);
-  border-color: color-mix(in srgb, var(--color-danger) 24%, white);
+  border-color: var(--color-danger);
   color: var(--color-danger-ink);
 }
-
-.message-box-error .icon-circle {
-  background: var(--color-danger);
-  color: var(--color-text-inv);
-}
+.message-box-error .toast-icon  { color: var(--color-danger); }
+.message-box-error .toast-progress { background: var(--color-danger); }
 
 .message-box-warning {
   background: var(--color-warning-bg);
-  border-color: color-mix(in srgb, var(--color-warning) 24%, white);
+  border-color: var(--color-warning);
   color: var(--color-warning-ink);
 }
-
-.message-box-warning .icon-circle {
-  background: var(--color-warning);
-  color: var(--color-text-inv);
-}
+.message-box-warning .toast-icon  { color: var(--color-warning); }
+.message-box-warning .toast-progress { background: var(--color-warning); }
 
 .message-box-info {
   background: var(--color-info-bg);
-  border-color: color-mix(in srgb, var(--color-info) 24%, white);
+  border-color: var(--color-info);
   color: var(--color-info-ink);
 }
+.message-box-info .toast-icon  { color: var(--color-info); }
+.message-box-info .toast-progress { background: var(--color-info); }
 
-.message-box-info .icon-circle {
-  background: var(--color-info);
-  color: var(--color-text-inv);
-}
-
+/* ——— Animations ————————————————————————— */
 @keyframes toast-enter {
   from {
     opacity: 0;
-    transform: translate3d(24px, 0, 0);
+    transform: translateX(24px);
   }
-
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: translateX(0);
   }
 }
 
+@keyframes toast-leave {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(110%);
+  }
+}
+
+@keyframes toast-progress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+.message-box.leaving {
+  animation: toast-leave 300ms ease-in forwards !important;
+}
+
+/* ——— Responsive ————————————————————————— */
 @media (max-width: 768px) {
   .toast-stack {
     top: var(--sp-4);
     right: var(--sp-4);
     left: var(--sp-4);
     width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-box,
+  .message-box.leaving,
+  .toast-progress {
+    animation: none !important;
+    transition: none !important;
   }
 }

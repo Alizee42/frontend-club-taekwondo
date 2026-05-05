@@ -6,7 +6,7 @@ import { ClubService, Club } from '../../services/club.service';
 import { Subscription } from 'rxjs';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
-import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
+import { UiTableColumn, UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiFormComponent } from '../../shared/ui/form/ui-form.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
@@ -27,8 +27,8 @@ export class AvisSuperAdminComponent implements OnInit {
   error: string|null = null;
 
   get nbAvis()      { return this.avis.length; }
-  get nbApprouves() { return this.avis.filter(a => a.approuve === true).length; }
-  get nbEnAttente() { return this.avis.filter(a => a.approuve !== true).length; }
+  get nbApprouves() { return this.avis.filter(a => this.isAvisApproved(a)).length; }
+  get nbEnAttente() { return this.avis.filter(a => !this.isAvisApproved(a)).length; }
   get noteMoyenne() {
     if (!this.avis.length) return '—';
     return (this.avis.reduce((s, a) => s + (a.note || 0), 0) / this.avis.length).toFixed(1) + ' / 5';
@@ -40,20 +40,21 @@ export class AvisSuperAdminComponent implements OnInit {
     { name: 'pseudoVisiteur', label: 'Nom', type: 'text', required: true, placeholder: "Nom du visiteur" },
     { name: 'contenu', label: 'Contenu', type: 'text', required: true, placeholder: "Votre avis" }
   ];
-  columns = [
+  columns: UiTableColumn[] = [
     { key: 'pseudoVisiteur', label: 'Nom' },
     { key: 'contenu', label: 'Contenu' },
     { key: 'note', label: 'Note' },
     { key: 'typeAvis', label: 'Sujet' },
-    { key: 'approuve', label: 'Approuvé', render: (row: any) => {
-        if (row == null || row.approuve == null) return 'En attente';
-        return row.approuve ? 'Oui' : 'Non';
-      }
+    { key: 'approuve', label: 'Statut',
+      display: (row: Avis) => this.isAvisApproved(row) ? 'Approuve' : 'En attente',
+      textClass: (row: Avis) => this.isAvisApproved(row)
+        ? 'status-badge status--success'
+        : 'status-badge status--warning'
     }
   ];
 
   actions: Array<{ label: string; icon?: string; action: string; color?: string; variant?: 'primary'|'secondary'|'danger'|'ghost'; disabled?: boolean; customClass?: string; show?: (row: any) => boolean }> = [
-    { label: 'Approuver', icon: 'ri-check-line', action: 'approve', color: '#16a34a', variant: 'primary', show: (r: any) => !r?.approuve },
+    { label: 'Approuver', icon: 'ri-check-line', action: 'approve', color: '#16a34a', variant: 'primary', show: (r: any) => !this.isAvisApproved(r) },
     // Le bouton 'Refuser' reste toujours disponible (possibilité de suppression future)
     { label: 'Refuser', icon: 'ri-close-line', action: 'refuse', color: '#d32f2f', variant: 'danger' }
   ];
@@ -195,6 +196,7 @@ export class AvisSuperAdminComponent implements OnInit {
     this.avisService.approuverAvis(id).subscribe({
       next: (res) => {
         console.debug('[AvisSuperAdmin] approuverAvis success', res);
+        this.avis = this.avis.map(a => a.id === id ? { ...a, approuve: true } : a);
         if (this.selectedClubId) this.loadAvisForClub(this.selectedClubId);
       },
       error: (err) => {
@@ -218,6 +220,11 @@ export class AvisSuperAdminComponent implements OnInit {
         this.error = 'Impossible de refuser cet avis. Veuillez réessayer.';
       }
     });
+  }
+
+  private isAvisApproved(avis: Avis | null | undefined): boolean {
+    const value = (avis as any)?.approuve;
+    return value === true || String(value).toLowerCase() === 'true';
   }
 
   // Gestion des événements DOM natifs pour ui-table

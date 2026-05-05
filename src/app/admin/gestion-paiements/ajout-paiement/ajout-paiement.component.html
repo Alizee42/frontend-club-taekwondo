@@ -108,6 +108,7 @@
           <ui-button
             type="button"
             variant="ghost"
+            size="sm"
             [icon]="creationManuelle ? 'ri-search-line' : 'ri-user-add-line'"
             [label]="creationManuelle ? 'Rechercher un membre existant' : 'Créer une nouvelle fiche'"
             (clicked)="toggleCreationManuelle()"
@@ -160,6 +161,7 @@
                   type="button"
                   variant="primary"
                   customClass="btn-soft-primary"
+                  size="sm"
                   label="Générer"
                   (clicked)="genererEcheances()"
                 />
@@ -239,6 +241,7 @@
     <ui-button
       type="button"
       variant="ghost"
+      size="sm"
       label="Précédent"
       (clicked)="prev()"
       [disabled]="currentStep === 0"
@@ -247,6 +250,7 @@
       <ui-button
         type="button"
         variant="primary"
+        size="sm"
         label="Suivant"
         (clicked)="next()"
       />
@@ -255,6 +259,7 @@
       <ui-button
         type="button"
         variant="success"
+        size="sm"
         [label]="loading ? 'Envoi...' : 'Valider le paiement'"
         (clicked)="validerPaiement()"
         [loading]="loading"

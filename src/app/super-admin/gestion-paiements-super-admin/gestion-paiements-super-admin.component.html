@@ -9,12 +9,14 @@
         label="Ajouter un paiement"
         icon="ri-add-line"
         variant="primary"
+        size="sm"
         (clicked)="ouvrirAjoutPaiement()"
       ></ui-button>
       <ui-button
         label="Rafraichir"
         icon="ri-refresh-line"
         variant="secondary"
+        size="sm"
         (clicked)="refresh()"
       ></ui-button>
     </ng-container>
@@ -103,6 +105,7 @@
       label="Exporter"
       icon="ri-file-download-line"
       variant="secondary"
+      size="sm"
       (clicked)="exportCSV()"
     ></ui-button>
 
@@ -110,6 +113,7 @@
       label="Effacer"
       icon="ri-eraser-line"
       variant="ghost"
+      size="sm"
       (clicked)="resetFilters()"
     ></ui-button>
   </div>

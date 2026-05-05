@@ -1,0 +1,118 @@
+<main class="notif-page">
+
+  <!-- Hero — même pattern que contact & événements -->
+  <section class="page-hero" aria-labelledby="notifTitle">
+    <div class="page-hero__inner">
+      <span class="page-hero__eyebrow">Votre espace personnel</span>
+      <h1 id="notifTitle">Notifications</h1>
+      <p>Retrouvez tous vos messages, rappels de paiement, actualités du club et mises à jour en un seul endroit.</p>
+    </div>
+  </section>
+
+  <div class="notif-shell">
+    <div class="notif-layout">
+
+    <!-- Sidebar filtres -->
+    <aside class="notif-sidebar">
+      <div class="card notif-sidebar__inner">
+        <h3 class="notif-sidebar__title">
+          <i class="ri-filter-3-line"></i> Filtres
+        </h3>
+        <ul class="notif-filter-list">
+          <li>
+            <button type="button" class="notif-filter-btn"
+              [class.is-active]="filter === 'all'"
+              (click)="setFilter('all')">
+              <i class="ri-list-unordered"></i>
+              <span>Toutes</span>
+              <span class="notif-filter-btn__count">{{ notifications.length }}</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="notif-filter-btn"
+              [class.is-active]="filter === 'unread'"
+              (click)="setFilter('unread')">
+              <i class="ri-mail-unread-line"></i>
+              <span>Non lues</span>
+              <span class="notif-filter-btn__count notif-filter-btn__count--accent" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="notif-filter-btn"
+              [class.is-active]="filter === 'read'"
+              (click)="setFilter('read')">
+              <i class="ri-mail-check-line"></i>
+              <span>Lues</span>
+            </button>
+          </li>
+        </ul>
+
+        <div class="notif-sidebar__actions" *ngIf="unreadCount > 0">
+          <button type="button" class="btn btn--sm btn--primary w-full" (click)="markAllAsRead()">
+            <i class="ri-check-double-line"></i>
+            Tout marquer comme lu
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="notif-main">
+
+      <!-- Loading -->
+      <div class="notif-empty card" *ngIf="loading">
+        <div class="notif-empty__icon">
+          <i class="ri-loader-4-line notif-spin"></i>
+        </div>
+        <p class="notif-empty__text">Chargement des notifications...</p>
+      </div>
+
+      <!-- Vide -->
+      <div class="notif-empty card" *ngIf="!loading && filteredNotifications.length === 0">
+        <div class="notif-empty__icon">
+          <i class="ri-notification-off-line"></i>
+        </div>
+        <p class="notif-empty__text">
+          {{ filter === 'all' ? 'Aucune notification.' : filter === 'unread' ? 'Aucune notification non lue.' : 'Aucune notification lue.' }}
+        </p>
+      </div>
+
+      <!-- Liste -->
+      <div class="notif-list" *ngIf="!loading && filteredNotifications.length > 0">
+        <div
+          class="notif-card card"
+          *ngFor="let n of filteredNotifications"
+          [class.notif-card--unread]="!n.lu">
+
+          <div class="notif-card__icon-wrap notif-card__icon-wrap--{{ n.type || 'general' }}">
+            <i [class]="getNotificationIcon(n.type)"></i>
+          </div>
+
+          <div class="notif-card__body">
+            <div class="notif-card__header">
+              <h3 class="notif-card__title">{{ n.titre }}</h3>
+              <div class="notif-card__meta">
+                <span class="notif-card__badge notif-card__badge--{{ n.type || 'general' }}">{{ n.type || 'general' }}</span>
+                <span class="notif-card__date">{{ formatDate(n.date) }}</span>
+                <span class="notif-card__dot" *ngIf="!n.lu"></span>
+              </div>
+            </div>
+            <p class="notif-card__message">{{ n.message }}</p>
+            <div class="notif-card__footer">
+              <button type="button" class="btn btn--xs btn--outline" (click)="navigateToAction(n)" *ngIf="n.lienAction">
+                <i class="ri-arrow-right-line"></i> Voir détail
+              </button>
+              <button type="button" class="btn btn--xs btn--ghost" (click)="markAsRead(n)" *ngIf="!n.lu">
+                <i class="ri-check-line"></i> Marquer comme lu
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+    </div>
+  </div>
+
+</main>

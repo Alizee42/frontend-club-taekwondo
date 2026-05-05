@@ -3,10 +3,11 @@
     *ngFor="let toast of (toasts$ | async); trackBy: trackById"
     class="message-box"
     [ngClass]="'message-box-' + normalizeType(toast.type)"
+    [class.leaving]="toast.leaving"
     [attr.role]="normalizeType(toast.type) === 'error' ? 'alert' : 'status'"
     [attr.aria-live]="normalizeType(toast.type) === 'error' ? 'assertive' : 'polite'"
   >
-    <div class="icon-circle" aria-hidden="true">
+    <div class="toast-icon" aria-hidden="true">
       <i [class]="getIconClass(toast.type)"></i>
     </div>
 
@@ -21,5 +22,11 @@
     >
       <i class="ri-close-line" aria-hidden="true"></i>
     </button>
+
+    <div
+      *ngIf="toast.duration > 0"
+      class="toast-progress"
+      [style.animation-duration]="getProgressDuration(toast)"
+    ></div>
   </div>
 </div>

@@ -22,6 +22,7 @@ interface MembrePayload {
   ceinture?: string;
   numeroLicence?: string;
   utilisateurId?: number;
+  genre?: string;
 }
 
 @Component({
@@ -130,6 +131,7 @@ export class InscriptionComponent implements OnInit {
 
         // Profil
         dateNaissance: ['', Validators.required],
+        genre: [''],
         role: ['', Validators.required],
 
         // Adresse
@@ -241,6 +243,7 @@ export class InscriptionComponent implements OnInit {
       nom: [values?.nom || '', Validators.required],
       prenom: [values?.prenom || '', Validators.required],
       dateNaissance: [values?.dateNaissance || '', Validators.required],
+      genre: [values?.genre ?? ''],
       ceinture: [values?.ceinture ?? ''],
       numeroLicence: [values?.numeroLicence ?? '']
     });
@@ -261,6 +264,14 @@ export class InscriptionComponent implements OnInit {
       while (this.membres.length) this.membres.removeAt(0);
       this.step = 1;
     }
+    // Club obligatoire pour PARENT et MEMBRE
+    const clubControl = this.utilisateurForm.get('clubId');
+    if (role === 'PARENT' || role === 'MEMBRE') {
+      clubControl?.setValidators([Validators.required]);
+    } else {
+      clubControl?.clearValidators();
+    }
+    clubControl?.updateValueAndValidity();
   }
 
   nextStep(): void {
@@ -344,8 +355,10 @@ export class InscriptionComponent implements OnInit {
     };
     const num = (m.numeroLicence || '').trim();
     const cei = (m.ceinture || '').trim();
+    const gen = (m.genre || '').trim();
     if (num) obj.numeroLicence = num;
     if (cei) obj.ceinture = cei;
+    if (gen) obj.genre = gen;
     return obj;
   }
 
@@ -375,6 +388,7 @@ export class InscriptionComponent implements OnInit {
       telephone: String(f.telephone || '').trim(),
       adresse: adresseComposee,
       dateNaissance: f.dateNaissance,
+      genre: f.genre || null,
       role: String(f.role || '').toUpperCase(),
       clubId: f.clubId || null,
       password: f.password
@@ -411,7 +425,7 @@ export class InscriptionComponent implements OnInit {
               this.finaliser();
             },
             error: () => {
-              this.toastService.error('❌ Erreur lors de l\'ajout du membre');
+              this.toastService.error('Erreur lors de l\'ajout du membre.');
               this.loading = false;
             }
           });
@@ -443,9 +457,9 @@ export class InscriptionComponent implements OnInit {
             error: (err) => {
               erreurs++;
               if (err.status === 409 || (err.status === 400 && err.error?.message?.includes('licence'))) {
-                this.toastService.error(`⚠️ Numéro de licence ${membre.numeroLicence ?? ''} déjà utilisé`);
+                this.toastService.error(`Numéro de licence ${membre.numeroLicence ?? ''} déjà utilisé.`);
               } else {
-                this.toastService.error('❌ Erreur lors de l\'ajout des membres');
+                this.toastService.error('Erreur lors de l\'ajout des membres.');
               }
               if (count + erreurs === membres.length) this.loading = false;
             }
@@ -454,7 +468,7 @@ export class InscriptionComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.toastService.error('❌ Erreur lors de l\'inscription');
+        this.toastService.error('Erreur lors de l\'inscription.');
       }
     });
   }
@@ -463,7 +477,7 @@ export class InscriptionComponent implements OnInit {
     this.loading = false;
     this.clearLocal();
     this.step = 3;
-    this.toastService.success('🥋 Inscription réussie ! Bienvenue dans notre dojo !');
+    this.toastService.success('Inscription réussie ! Bienvenue dans notre dojo !');
     this.showConfirmationModal = true;
   }
 

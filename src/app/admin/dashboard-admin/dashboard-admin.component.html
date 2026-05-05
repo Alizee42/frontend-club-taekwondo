@@ -28,8 +28,8 @@
 
     <div class="dash-section">
       <div class="dash-section__head dash-section__head--blue">
-        <i class="ri-community-line"></i>
-        <span>Gestion du club</span>
+        <i class="ri-calendar-check-line"></i>
+        <span>Vie du club</span>
       </div>
       <div class="dash-section__body">
         <app-dashboard-nav-card
@@ -40,48 +40,11 @@
           (pressed)="navigateToGestionEvenements()"
         />
         <app-dashboard-nav-card
-          label="Galerie / Médias"
-          icon="ri-image-line"
-          (pressed)="navigateToGalerie()"
-        />
-        <app-dashboard-nav-card
-          label="Bannière principale"
-          icon="ri-layout-top-line"
-          (pressed)="navigateToHero()"
-        />
-        <app-dashboard-nav-card
-          label="À propos"
-          icon="ri-information-line"
-          (pressed)="navigateToAPropos()"
-        />
-        <app-dashboard-nav-card
           label="Horaires"
           icon="ri-time-line"
           badgeVariant="neutral"
           [badge]="badge.horaires > 0 ? badge.horaires : null"
           (pressed)="navigateToHoraires()"
-        />
-      </div>
-    </div>
-
-    <div class="dash-section">
-      <div class="dash-section__head dash-section__head--green">
-        <i class="ri-user-line"></i>
-        <span>Gestion des membres</span>
-      </div>
-      <div class="dash-section__body">
-        <app-dashboard-nav-card
-          label="Membres du club"
-          icon="ri-team-line"
-          badgeVariant="neutral"
-          [badge]="nbMembres > 0 ? nbMembres : null"
-          (pressed)="navigateToMembresAdmin()"
-        />
-        <app-dashboard-nav-card
-          label="Documents"
-          icon="ri-file-list-line"
-          [badge]="badge.documents > 0 ? badge.documents : null"
-          (pressed)="navigateToDocument()"
         />
         <app-dashboard-nav-card
           label="Professeurs"
@@ -92,9 +55,37 @@
     </div>
 
     <div class="dash-section">
+      <div class="dash-section__head dash-section__head--green">
+        <i class="ri-user-line"></i>
+        <span>Adhérents</span>
+      </div>
+      <div class="dash-section__body">
+        <app-dashboard-nav-card
+          label="Membres & Comptes"
+          icon="ri-team-line"
+          badgeVariant="neutral"
+          [badge]="nbMembres > 0 ? nbMembres : null"
+          (pressed)="navigateToGestionMembres()"
+        />
+        <app-dashboard-nav-card
+          label="Documents"
+          icon="ri-file-list-line"
+          [badge]="badge.documents > 0 ? badge.documents : null"
+          (pressed)="navigateToDocument()"
+        />
+        <app-dashboard-nav-card
+          label="Avis"
+          icon="ri-star-line"
+          [badge]="badge.avis > 0 ? badge.avis : null"
+          (pressed)="navigateToavis()"
+        />
+      </div>
+    </div>
+
+    <div class="dash-section">
       <div class="dash-section__head dash-section__head--amber">
         <i class="ri-wallet-3-line"></i>
-        <span>Gestion financière</span>
+        <span>Boutique et paiements</span>
       </div>
       <div class="dash-section__body">
         <app-dashboard-nav-card
@@ -119,15 +110,14 @@
 
     <div class="dash-section">
       <div class="dash-section__head dash-section__head--purple">
-        <i class="ri-settings-3-line"></i>
-        <span>Administration</span>
+        <i class="ri-megaphone-line"></i>
+        <span>Site public</span>
       </div>
       <div class="dash-section__body">
         <app-dashboard-nav-card
-          label="Avis"
-          icon="ri-star-line"
-          [badge]="badge.avis > 0 ? badge.avis : null"
-          (pressed)="navigateToavis()"
+          label="Accueil du site"
+          icon="ri-home-4-line"
+          (pressed)="navigateToAccueilSite()"
         />
         <app-dashboard-nav-card
           label="Actualités"
@@ -136,9 +126,9 @@
           (pressed)="navigateToActualites()"
         />
         <app-dashboard-nav-card
-          label="Utilisateurs du club"
-          icon="ri-user-3-line"
-          (pressed)="navigateToGestionUtilisateurs()"
+          label="Galerie / Médias"
+          icon="ri-image-line"
+          (pressed)="navigateToGalerie()"
         />
       </div>
     </div>

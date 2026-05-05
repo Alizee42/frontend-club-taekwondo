@@ -47,8 +47,14 @@ export class ToastService {
   }
 
   remove(id: string): void {
-    this.toasts = this.toasts.filter(t => t.id !== id);
+    const toast = this.toasts.find(t => t.id === id);
+    if (!toast || toast.leaving) return;
+    toast.leaving = true;
     this.toastsSub.next([...this.toasts]);
+    setTimeout(() => {
+      this.toasts = this.toasts.filter(t => t.id !== id);
+      this.toastsSub.next([...this.toasts]);
+    }, 300);
   }
 
   clear(): void {

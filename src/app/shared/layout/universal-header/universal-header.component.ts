@@ -1,6 +1,7 @@
 import { Component, EventEmitter, HostListener, Input, OnChanges, Output } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Notification } from '../../../services/notification.service';
 
 type RoleStr = 'ADMIN' | 'SUPER_ADMIN' | 'MEMBRE' | 'PARENT' | string;
 
@@ -19,12 +20,15 @@ export class UniversalHeaderComponent implements OnChanges {
   @Input() userName?: string;
   @Input() userAvatar?: string;
   @Input() unreadNotifications: number = 0;
+  @Input() notifications: Notification[] = [];
   @Input() role: RoleStr = '';
   @Input() cartCount: number = 0;
 
-  @Output() changeClub       = new EventEmitter<void>();
-  @Output() logout            = new EventEmitter<void>();
-  @Output() goToDashboard     = new EventEmitter<void>();
+  @Output() changeClub            = new EventEmitter<void>();
+  @Output() logout                = new EventEmitter<void>();
+  @Output() goToDashboard         = new EventEmitter<void>();
+  @Output() markNotifRead         = new EventEmitter<number>();
+  @Output() markAllNotifsRead     = new EventEmitter<void>();
 
   userDropdownOpen = false;
   notifOpen        = false;
@@ -90,5 +94,22 @@ export class UniversalHeaderComponent implements OnChanges {
 
   goToProfil(): void { this.router.navigate(['/profil']); }
 
+  goToNotifications(): void { 
+    this.notifOpen = false;
+    this.router.navigate(['/notifications']); 
+  }
+
   handleLogout(): void { this.logout.emit(); }
+
+  onNotifClick(notif: Notification): void {
+    this.markNotifRead.emit(notif.id);
+    if (notif.lienAction) {
+      this.router.navigate([notif.lienAction]);
+    }
+    this.notifOpen = false;
+  }
+
+  onMarkAllRead(): void {
+    this.markAllNotifsRead.emit();
+  }
 }

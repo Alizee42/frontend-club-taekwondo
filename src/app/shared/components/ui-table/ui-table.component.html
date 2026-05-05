@@ -50,10 +50,14 @@
               ></ui-button>
             </ng-container>
             <ng-container *ngSwitchDefault>
-              <span *ngIf="!col.render && col.type !== 'image'" [ngClass]="getTextClass(col, row)">
-                {{ col.display ? col.display(row) : row[col.key] }}
+              <span class="cell-with-icon" *ngIf="!col.render && col.type !== 'image'">
+                <i *ngIf="col.iconClass" [ngClass]="col.iconClass(row)" class="cell-lead-icon" aria-hidden="true"></i>
+                <span [ngClass]="getTextClass(col, row)">{{ col.display ? col.display(row) : row[col.key] }}</span>
               </span>
-              <span *ngIf="col.render">{{ col.render(row) }}</span>
+              <span class="cell-with-icon" *ngIf="col.render">
+                <i *ngIf="col.iconClass" [ngClass]="col.iconClass(row)" class="cell-lead-icon" aria-hidden="true"></i>
+                <span [ngClass]="getTextClass(col, row)">{{ col.render(row) }}</span>
+              </span>
             </ng-container>
           </ng-container>
         </ng-template>

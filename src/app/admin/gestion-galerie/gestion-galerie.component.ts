@@ -8,6 +8,7 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-gestion-galerie',
@@ -35,7 +36,7 @@ export class GestionGalerieComponent implements OnInit {
   formImage: Partial<Galerie> = {};
   editMode = false;
 
-  constructor(private galerieService: GalerieService, private authService: AuthService) {}
+  constructor(private galerieService: GalerieService, private authService: AuthService, private readonly toast: ToastService) {}
 
 
   ngOnInit(): void {
@@ -142,19 +143,31 @@ export class GestionGalerieComponent implements OnInit {
       _file: (this.formImage as any)._file
     };
     if (this.editMode && this.formImage.id) {
-      this.galerieService.update(this.formImage.id, this.formImage as any).subscribe(() => {
-        this.loadImages(this.formImage.clubId as number);
-        this.closeModal();
-        this.isSubmitting = false;
+      this.galerieService.update(this.formImage.id, this.formImage as any).subscribe({
+        next: () => {
+          this.toast.success('Photo modifiée avec succès.');
+          this.loadImages(this.formImage.clubId as number);
+          this.closeModal();
+          this.isSubmitting = false;
+        },
+        error: () => {
+          this.toast.error('Erreur lors de la modification de la photo.');
+          this.isSubmitting = false;
+        }
       });
     } else {
-      this.galerieService.create(payload).subscribe(() => {
-        this.loadImages(this.formImage.clubId as number);
-        this.closeModal();
-        this.isSubmitting = false;
-      }, (err) => {
-        console.error('[DEBUG][FRONT] Erreur backend:', err);
-        this.isSubmitting = false;
+      this.galerieService.create(payload).subscribe({
+        next: () => {
+          this.toast.success('Photo ajoutée avec succès.');
+          this.loadImages(this.formImage.clubId as number);
+          this.closeModal();
+          this.isSubmitting = false;
+        },
+        error: (err) => {
+          console.error('[DEBUG][FRONT] Erreur backend:', err);
+          this.toast.error('Erreur lors de l\'ajout de la photo.');
+          this.isSubmitting = false;
+        }
       });
     }
   }
@@ -194,16 +207,18 @@ export class GestionGalerieComponent implements OnInit {
       return;
     }
   
-    this.galerieService.delete(id).subscribe(
-      () => {
+    this.galerieService.delete(id).subscribe({
+      next: () => {
+        this.toast.success('Photo supprimée.');
         const user = this.authService.getUtilisateurConnecte();
         const clubId = user?.['clubId'] ?? null;
         if (clubId) this.loadImages(clubId);
       },
-      (error) => {
+      error: (error) => {
         console.error('Erreur lors de la suppression de l\'image :', error);
+        this.toast.error('Erreur lors de la suppression de la photo.');
       }
-    );
+    });
   }
   editImage(image: any): void {
     // Pré-remplir le formulaire avec les données de l'image à modifier

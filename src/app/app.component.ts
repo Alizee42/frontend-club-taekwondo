@@ -6,6 +6,7 @@ import { Club, ClubService } from './services/club.service';
 import { ClubSelectionService } from './services/club-selection.service';
 import { AuthService } from './services/auth.service';
 import { PanierService } from './services/panier.service';
+import { NotificationService, Notification } from './services/notification.service';
 import { ToastContainerComponent } from './shared/toast/toast-container/toast-container.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { UniversalHeaderComponent } from './shared/layout/universal-header/universal-header.component';
@@ -31,7 +32,8 @@ export class AppComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     private router: Router,
     private clubSelectionService: ClubSelectionService,
-    private panierService: PanierService
+    private panierService: PanierService,
+    private notificationService: NotificationService
   ) {}
 
   get isAccueilRoute(): boolean {
@@ -50,12 +52,14 @@ export class AppComponent implements OnInit, OnDestroy {
   userName: string | undefined;
   userAvatar: string | undefined;
   unreadNotifications = 0;
+  notifications: Notification[] = [];
   cartCount = 0;
 
   private clubSub?: any;
   private authSub?: any;
   private routerSub?: any;
   private cartSub?: any;
+  private notifSub?: any;
 
   onChangeClub(): void {
     this.showSelectClubModal = true;
@@ -80,8 +84,18 @@ export class AppComponent implements OnInit, OnDestroy {
     this.userName = undefined;
     this.userAvatar = undefined;
     this.unreadNotifications = 0;
+    this.notifications = [];
+    this.notificationService.stopPolling();
     this.showSelectClubModal = false;
     this.router.navigate(['/']);
+  }
+
+  onMarkNotifRead(id: number): void {
+    this.notificationService.markAsRead(id).subscribe(() => this.notificationService.refresh());
+  }
+
+  onMarkAllNotifsRead(): void {
+    this.notificationService.markAllAsRead().subscribe(() => this.notificationService.refresh());
   }
 
   get role(): string {
@@ -106,6 +120,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.cartSub = this.panierService.count$.subscribe(n => (this.cartCount = n));
+
+    // Abonnement aux notifications
+    this.notifSub = this.notificationService.notifications$.subscribe(list => {
+      this.notifications = list;
+      this.unreadNotifications = list.filter(n => !n.lu).length;
+    });
 
     this.clubSub = this.clubService.selectedClub$.subscribe(
       club => {
@@ -134,7 +154,9 @@ export class AppComponent implements OnInit, OnDestroy {
         if (state.user) {
           this.userName = `${state.user.prenom ?? ''} ${state.user.nom ?? ''}`.trim();
           this.userAvatar = state.user['avatarUrl'] || '';
-          this.unreadNotifications = state.user['unreadNotifications'] || 0;
+
+          // Démarrer le polling notifications
+          this.notificationService.startPolling();
 
           const selectedClub = this.clubService.getSelectedClub();
           const userRole = state.role ? state.role.toString().toUpperCase() : '';
@@ -161,6 +183,8 @@ export class AppComponent implements OnInit, OnDestroy {
           this.userName = undefined;
           this.userAvatar = undefined;
           this.unreadNotifications = 0;
+          this.notifications = [];
+          this.notificationService.stopPolling();
           this.showSelectClubModal = false;
         }
       },
@@ -177,7 +201,6 @@ export class AppComponent implements OnInit, OnDestroy {
               ? `${this.currentUser.prenom ?? ''} ${this.currentUser.nom ?? ''}`.trim()
               : undefined;
             this.userAvatar = this.currentUser ? this.currentUser['avatarUrl'] || '' : undefined;
-            this.unreadNotifications = this.currentUser ? this.currentUser['unreadNotifications'] || 0 : 0;
             this.selectedClub = this.clubService.getSelectedClub();
           }
         } catch {
@@ -192,5 +215,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.authSub) this.authSub.unsubscribe();
     if (this.routerSub) this.routerSub.unsubscribe();
     if (this.cartSub) this.cartSub.unsubscribe();
+    if (this.notifSub) this.notifSub.unsubscribe();
+    this.notificationService.stopPolling();
   }
 }

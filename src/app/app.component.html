@@ -6,11 +6,14 @@
     [userName]="userName"
     [userAvatar]="userAvatar"
     [unreadNotifications]="unreadNotifications"
+    [notifications]="notifications"
     [role]="role"
     [cartCount]="cartCount"
     (logout)="onLogout()"
     (changeClub)="onChangeClub()"
     (goToDashboard)="onGoToDashboard()"
+    (markNotifRead)="onMarkNotifRead($event)"
+    (markAllNotifsRead)="onMarkAllNotifsRead()"
   ></universal-header>
 
   <div class="club-picker-backdrop" *ngIf="showSelectClubModal" (click)="showSelectClubModal = false">

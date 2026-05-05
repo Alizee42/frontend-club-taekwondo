@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { ToastService } from '../../shared/toast/toast.service';
 
 type TypePaiement = 'UNIQUE' | 'ECHELONNE';
 
@@ -87,7 +88,8 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     private parametresService: ParametresPaiementService,
     private auth: AuthService,
     private membreService: MembreService,
-    private paiementService: PaiementService
+    private paiementService: PaiementService,
+    private toast: ToastService
   ) {}
 
   // ===== Utils =====
@@ -99,6 +101,15 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     const i = clientSecret.indexOf('_secret_'); return i > 0 ? clientSecret.substring(0, i) : null;
   }
   private buildFactureUrl(paiementId: number) { return `${environment.apiUrl}/paiements/${paiementId}/facture`; }
+
+  private appliquerParametresPaiement(p: any): void {
+    if (!p) return;
+    this.montantInitial = Number(p.montantCotisation || 0);
+    const maxEch = Math.max(1, Number(p.echeancesAutorisees || 1));
+    const full = Array.from({ length: maxEch }, (_, i) => i + 1);
+    this.echeancesOptions = full.filter(n => n > 1);
+    if (!this.echeancesOptions.length) this.echeancesOptions = [2, 3, 4];
+  }
 
   telechargerFacture(): void {
     const pid = this.paiementIdEnCours;
@@ -175,16 +186,9 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   // ===== Cycle =====
   ngOnInit(): void {
     // Récupère montants/échelonnage
-    this.parametresService.parametres$.subscribe((p) => {
+    this.parametresService.chargerParametresUtilisateurConnecte().subscribe((p) => {
       this.log('parametres$', p);
-      if (p) {
-        this.montantInitial = Number(p.montantCotisation || 0);
-        const maxEch = Math.max(1, Number(p.echeancesAutorisees || 1));
-        const full = Array.from({ length: maxEch }, (_, i) => i + 1);
-        // Retire 1 : on ne propose que 2+
-        this.echeancesOptions = full.filter(n => n > 1);
-        if (!this.echeancesOptions.length) this.echeancesOptions = [2,3,4];
-      }
+      this.appliquerParametresPaiement(p);
       this.loadMembre();
     });
   }
@@ -200,6 +204,10 @@ export class PaiementComponent implements OnInit, AfterViewInit {
         const authUser = this.auth.getUtilisateurConnecte();
         if (me) {
           this.membreId = Number(me?.id ?? me?.membreId ?? me?.userId ?? 0) || null;
+          const clubId = Number(me?.clubId ?? me?.club?.id ?? 0);
+          if (clubId) {
+            this.parametresService.chargerParametresParClub(clubId).subscribe(p => this.appliquerParametresPaiement(p));
+          }
           const prenom = me?.prenom || me?.firstName || authUser?.prenom || '';
           const nom = me?.nom || me?.lastName || authUser?.nom || '';
           this.userEmail = me?.email || me?.utilisateur?.email || authUser?.email || null;
@@ -458,6 +466,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
 
       if (fromModal) this.modalCarteOuverte = false;
       this.paiementReussi = true; this.enCoursDePaiement = false; this.confirming = false;
+      this.toast.success('Paiement effectué avec succès.');
       this.step = 3;
 
       this.resetStripeMainElement();
@@ -527,6 +536,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
       if (result?.error) { this.paiementErreur = true; this.erreurMessage = result.error.message || 'Erreur de paiement'; this.confirming = false; return; }
 
       await this.syncPaymentIntentOnce();
+      this.toast.success('Échéance réglée avec succès.');
       this.paiementReussi = true; this.fermerModalPaiement(); this.loadPaiements(); this.confirming = false;
     } catch (e) {
       this.failPaiement('Exception lors de la confirmation Stripe');

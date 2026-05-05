@@ -65,8 +65,51 @@ export class EcheanceComponent {
     return 'status-badge status--info';
   }
 
+  statutEcheance(e: EcheanceModel): string {
+    return this.isLate(e) ? 'en retard' : (e?.statut || 'en attente');
+  }
+
+  isLate(e: EcheanceModel): boolean {
+    if (!e || this.isPaye(e.statut) || !e.dateEcheance) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(e.dateEcheance);
+    due.setHours(0, 0, 0, 0);
+    return due < today;
+  }
+
+  dateLabel(e: EcheanceModel): string {
+    if (!e?.dateEcheance) return 'Aucune date';
+    const date = new Date(e.dateEcheance);
+    if (Number.isNaN(date.getTime())) return 'Date invalide';
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(date);
+  }
+
+  dateHint(e: EcheanceModel): string {
+    if (!e?.dateEcheance) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(e.dateEcheance);
+    due.setHours(0, 0, 0, 0);
+    if (Number.isNaN(due.getTime())) return '';
+    const days = Math.round((due.getTime() - today.getTime()) / 86400000);
+    if (this.isPaye(e.statut)) return 'Reglee';
+    if (days < 0) return `${Math.abs(days)} j de retard`;
+    if (days === 0) return 'A regler aujourd hui';
+    if (days === 1) return 'A regler demain';
+    return `Dans ${days} jours`;
+  }
+
   isPaye(statut?: string): boolean {
-    return this.sansAccents(statut || '') === 'paye';
+    return this.sansAccents(statut || '').includes('paye');
+  }
+
+  hasUnpaidEcheances(): boolean {
+    return (this.echeances || []).some((e: any) => !this.isPaye(e?.statut));
   }
 
   paidCount(g: any): number {

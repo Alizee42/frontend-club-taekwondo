@@ -1,18 +1,18 @@
 <!-- Inline table mode (page) -->
 <div *ngIf="inline">
-  <app-empty-state *ngIf="!groupedEcheances?.length" icon="ri-calendar-line" title="Aucune échéance"></app-empty-state>
+  <app-empty-state *ngIf="!groupedEcheances?.length" icon="ri-calendar-line" title="Aucune echeance"></app-empty-state>
 
   <div *ngFor="let g of groupedEcheances" class="paiement-block">
     <div class="paiement-head">
       <div>
         <strong>{{ g.parentPrenom }} {{ g.parentNom }}</strong>
-        <div class="text-muted">{{ g.membrePrenom }} {{ g.membreNom }}{{ g.club ? ' · ' + g.club : '' }}</div>
-        <div class="text-muted">{{ g.paiementDate ? (g.paiementDate | date:'dd/MM/yyyy') : '—' }}</div>
+        <div class="text-muted">{{ g.membrePrenom }} {{ g.membreNom }}{{ g.club ? ' - ' + g.club : '' }}</div>
+        <div class="text-muted">{{ g.paiementDate ? (g.paiementDate | date:'dd/MM/yyyy') : '-' }}</div>
       </div>
       <div class="paiement-amounts" *ngIf="g.montantTotal != null">
-        <span>Total&nbsp;: <strong>{{ g.montantTotal | currency:'EUR' }}</strong></span>
-        <span>Payé&nbsp;: <strong>{{ g.montantPaye | currency:'EUR' }}</strong></span>
-        <span>Restant&nbsp;: <strong>{{ g.montantRestant | currency:'EUR' }}</strong></span>
+        <span>Total : <strong>{{ g.montantTotal | currency:'EUR' }}</strong></span>
+        <span>Paye : <strong>{{ g.montantPaye | currency:'EUR' }}</strong></span>
+        <span>Restant : <strong>{{ g.montantRestant | currency:'EUR' }}</strong></span>
       </div>
     </div>
     <div class="echeance-progress">
@@ -23,13 +23,13 @@
       <span>echeances payees</span>
     </div>
     <div class="echeance-list">
-      <div class="echeance-item" *ngFor="let e of g.echeances">
+      <div class="echeance-item" *ngFor="let e of g.echeances" [class.echeance-item--late]="isLate(e)">
         <div class="echeance-num">#{{ e.numero }}</div>
         <div class="echeance-main">
-          <strong>{{ e.dateEcheance ? (e.dateEcheance | date:'dd/MM/yyyy') : 'Aucune date' }}</strong>
+          <strong>{{ dateLabel(e) }}</strong>
           <span>{{ e.montant | currency:'EUR' }}</span>
         </div>
-        <span [class]="classeBadge(e.statut)">{{ e.statut }}</span>
+        <span [class]="classeBadge(statutEcheance(e))">{{ statutEcheance(e) }}</span>
         <button type="button" class="action-btn action-btn--success"
           *ngIf="!isPaye(e.statut)"
           (click)="onPayer(e)"
@@ -51,17 +51,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let e of g.echeances">
+          <tr *ngFor="let e of g.echeances" [class.row-late]="isLate(e)">
             <td>#{{ e.numero }}</td>
-            <td>{{ e.dateEcheance ? (e.dateEcheance | date:'dd/MM/yyyy') : '—' }}</td>
+            <td>{{ dateLabel(e) }}</td>
             <td class="num">{{ e.montant | currency:'EUR' }}</td>
-            <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
+            <td><span [class]="classeBadge(statutEcheance(e))">{{ statutEcheance(e) }}</span></td>
             <td>
               <button type="button" class="action-btn action-btn--success"
-                *ngIf="(e.statut || '').toLowerCase() !== 'payé'"
+                *ngIf="!isPaye(e.statut)"
                 (click)="onPayer(e)"
-                title="Marquer payée"
-                aria-label="Marquer payée">
+                title="Marquer payee"
+                aria-label="Marquer payee">
                 <i class="ri-check-line"></i>
               </button>
             </td>
@@ -75,44 +75,59 @@
 <!-- Modal mode -->
 <ui-modal [open]="showModal && !inline" title="Echeances" size="lg" (closed)="close()">
   <div class="echeances-modal">
-    <h3>Échéances</h3>
-
-    <!-- Summary: total for this payment -->
     <div class="modal-summary" *ngIf="paiement">
-      <div class="summary-card small">
+      <div class="summary-card">
         <div class="summary-title">Total</div>
         <div class="summary-value">{{ (paiement?.montantTotal || paiement?.montant) | currency:'EUR' }}</div>
       </div>
+      <div class="summary-card" *ngIf="echeances?.length">
+        <div class="summary-title">Echeances</div>
+        <div class="summary-value">{{ paidCount({ echeances: echeances }) }} / {{ echeances?.length }}</div>
+      </div>
+      <div class="summary-card" *ngIf="echeances?.length">
+        <div class="summary-title">Restant</div>
+        <div class="summary-value">{{ montantRestantGroupe({ echeances: echeances, montantTotal: paiement?.montantTotal || paiement?.montant }) | currency:'EUR' }}</div>
+      </div>
     </div>
 
-    <div *ngIf="!echeances || !echeances.length" class="empty">Aucune échéance.</div>
+    <div *ngIf="!echeances || !echeances.length" class="empty">Aucune echeance.</div>
 
-    <table *ngIf="echeances?.length" class="table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Date</th>
-          <th>Montant</th>
-          <th>Statut</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let e of echeances">
-          <td>{{ e.numero }}</td>
-          <td>{{ e.dateEcheance ? (e.dateEcheance | date:'shortDate') : '—' }}</td>
-          <td>{{ e.montant | number:'1.2-2' }}</td>
-          <td><span [class]="classeBadge(e.statut)">{{ e.statut }}</span></td>
-          <td>
-            <ui-button *ngIf="e.statut !== 'payé'" icon="ri-check-line" customClass="btn-vert btn-icon-only" (clicked)="onPayer(e)"></ui-button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div *ngIf="echeances?.length" class="modal-echeance-list">
+      <article
+        class="modal-echeance-card"
+        *ngFor="let e of echeances"
+        [class.modal-echeance-card--late]="isLate(e)"
+        [class.modal-echeance-card--paid]="isPaye(e.statut)"
+      >
+        <div class="modal-echeance-rank">#{{ e.numero || '-' }}</div>
+        <div class="modal-echeance-date">
+          <span class="modal-echeance-label">Date d'echeance</span>
+          <strong>{{ dateLabel(e) }}</strong>
+          <small [class.modal-echeance-hint--late]="isLate(e)">{{ dateHint(e) }}</small>
+        </div>
+        <div class="modal-echeance-amount">
+          <span class="modal-echeance-label">Montant</span>
+          <strong>{{ e.montant | currency:'EUR':'symbol':'1.0-0' }}</strong>
+        </div>
+        <div class="modal-echeance-status">
+          <span [class]="classeBadge(statutEcheance(e))">{{ statutEcheance(e) }}</span>
+        </div>
+        <div class="modal-echeance-action">
+          <ui-button
+            *ngIf="!isPaye(e.statut)"
+            [label]="payLabel"
+            icon="ri-check-line"
+            variant="success"
+            size="xs"
+            (clicked)="onPayer(e)">
+          </ui-button>
+        </div>
+      </article>
+    </div>
 
     <div class="modal-actions">
-      <ui-button label="Fermer" variant="secondary" customClass="btn-inline" (clicked)="close()"></ui-button>
-      <ui-button *ngIf="paiement" label="Marquer tout payé" variant="success" customClass="btn-inline" (clicked)="onMarquerTout()"></ui-button>
+      <ui-button label="Fermer" variant="secondary" size="sm" customClass="btn-inline" (clicked)="close()"></ui-button>
+      <ui-button *ngIf="paiement && hasUnpaidEcheances()" label="Marquer tout paye" variant="success" size="sm" customClass="btn-inline" (clicked)="onMarquerTout()"></ui-button>
     </div>
   </div>
 </ui-modal>

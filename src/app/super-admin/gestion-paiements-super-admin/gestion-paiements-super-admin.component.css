@@ -112,26 +112,39 @@
 .view-switch {
   display: inline-flex;
   align-items: center;
-  padding: 0.22rem;
+  gap: var(--sp-1);
+  padding: 4px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
-  background: var(--color-surface);
+  background: var(--color-surface-2);
 }
 
 .view-switch__btn {
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-h-sm);
+  border: 1px solid transparent;
   background: transparent;
   color: var(--color-text-2);
   border-radius: var(--radius-full);
-  padding: 0.48rem 0.8rem;
-  font-size: var(--text-sm);
+  padding: 0 var(--sp-4);
+  font-size: var(--text-xs);
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background var(--t-fast), color var(--t-fast);
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.view-switch__btn:hover:not(.is-active) {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--brand-primary);
 }
 
 .view-switch__btn.is-active {
   background: var(--brand-primary);
+  border-color: var(--brand-primary);
   color: var(--color-text-inv);
   box-shadow: 0 8px 18px -14px var(--brand-primary);
 }

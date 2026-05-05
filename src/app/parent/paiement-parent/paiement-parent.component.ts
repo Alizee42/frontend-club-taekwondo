@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { ToastService } from '../../shared/toast/toast.service';
 
 type TypePaiement = 'UNIQUE' | 'ECHELONNE';
 type HistoryFilter = 'AUTO' | 'ECHELONNE' | 'UNIQUE';
@@ -107,7 +108,8 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     private parametresService: ParametresPaiementService,
     private authService: AuthService,
     private membreService: MembreService,
-    private paiementService: PaiementService
+    private paiementService: PaiementService,
+    private toast: ToastService
   ) {}
 
   // ===== Utils
@@ -119,6 +121,24 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   }
   private refreshUserEmail(): void {
     this.userEmail = (this.authService.getUtilisateurConnecte()?.email ?? '').trim();
+  }
+  private appliquerParametresPaiement(p: any): void {
+    if (!p) return;
+    this.montantInitial = Number(p.montantCotisation || 0);
+    const maxEch = Math.max(1, Number(p.echeancesAutorisees || 1));
+    this.echeancesOptions = maxEch > 1
+      ? Array.from({ length: maxEch - 1 }, (_, i) => i + 2)
+      : [];
+    if (this.typeChoisi === 'ECHELONNE') {
+      if (this.echeancesOptions.length) {
+        if (this.nombreEcheances < 2) this.nombreEcheances = this.echeancesOptions[0];
+      } else {
+        this.typeChoisi = 'UNIQUE';
+        this.nombreEcheances = 1;
+      }
+    } else {
+      this.nombreEcheances = 1;
+    }
   }
   // private log supprimé
   private isPaid(s: any) { return /pay[eé]e?/i.test(String(s ?? '')); }
@@ -169,7 +189,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   // ===== Cycle de vie
   ngOnInit(): void {
     this.refreshUserEmail();
-    this.parametresService.parametres$.subscribe((p) => {
+    this.parametresService.chargerParametresUtilisateurConnecte().subscribe((p) => {
   // ...log supprimé...
       if (p) {
         this.montantInitial = Number(p.montantCotisation || 0);
@@ -215,6 +235,10 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     this.membreService.getMembresPourParentConnecte().subscribe({
       next: (data: any) => {
         this.enfants = data || [];
+        const clubId = Number((this.enfants[0] as any)?.clubId ?? (this.enfants[0] as any)?.club?.id ?? 0);
+        if (clubId) {
+          this.parametresService.chargerParametresParClub(clubId).subscribe(p => this.appliquerParametresPaiement(p));
+        }
         if (this.enfants.length === 1) this.selectMembre(this.enfants[0]);
         this.loadPaiements();
       },
@@ -514,6 +538,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
       this.paiementReussi = true;
       this.enCoursDePaiement = false;
       this.confirming = false;
+      this.toast.success('Paiement effectué avec succès.');
       this.step = 4;
       this.loadPaiements();
       this.resetStripeMainElement();
@@ -578,6 +603,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
       if (result?.error) { this.paiementErreur = true; this.erreurMessage = result.error.message || 'Erreur de paiement'; return; }
 
       await this.syncPaymentIntentOnce();
+      this.toast.success('Échéance réglée avec succès.');
       this.paiementReussi = true;
       this.fermerModalPaiement();
       this.loadPaiements();

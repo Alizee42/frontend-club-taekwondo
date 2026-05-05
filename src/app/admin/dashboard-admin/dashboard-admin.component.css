@@ -164,6 +164,7 @@
 .dash-sections {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  align-items: start;
   gap: var(--sp-3);
 }
 
@@ -175,6 +176,11 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.dash-section:nth-child(3),
+.dash-section:nth-child(4) {
+  align-self: stretch;
 }
 
 /* En-tête : fond très légèrement teinté + icone colorée */
@@ -206,6 +212,7 @@
 .dash-section__body {
   display: flex;
   flex-direction: column;
+  flex: 1;
   padding: var(--sp-2);
 }
 

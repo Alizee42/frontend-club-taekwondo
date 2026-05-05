@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
+import { UiTableColumn, UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
 import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
@@ -19,28 +19,31 @@ export class GestionAvisComponent implements OnInit {
   avis: Avis[] = [];
   searchTerm = '';
   approvalFilter: '' | 'approved' | 'pending' = '';
-  columns = [
+  columns: UiTableColumn[] = [
     { key: 'pseudoVisiteur', label: 'Nom' },
     { key: 'contenu', label: 'Contenu' },
     { key: 'note', label: 'Note' },
     { key: 'typeAvis', label: 'Sujet' },
-    { key: 'approuve', label: 'Approuvé', render: (row: any) => {
-        if (row == null || row.approuve == null) return 'En attente';
-        return row.approuve ? 'Oui' : 'Non';
-      }
+    {
+      key: 'approuve',
+      label: 'Statut',
+      display: (row: Avis) => this.isAvisApproved(row) ? 'Approuve' : 'En attente',
+      textClass: (row: Avis) => this.isAvisApproved(row)
+        ? 'status-badge status--success'
+        : 'status-badge status--warning'
     }
   ];
   actions = [
-    { label: 'Approuver', icon: 'ri-check-line', action: 'approve', color: '#16a34a', variant: "primary" as const, show: (r: any) => !r?.approuve },
-    { label: 'Refuser', icon: 'ri-close-line', action: 'refuse', color: '#d32f2f', variant: "danger" as const }
+    { label: 'Approuver', icon: 'ri-check-line', action: 'approve', color: '#16a34a', variant: 'primary' as const, show: (r: any) => !this.isAvisApproved(r) },
+    { label: 'Refuser', icon: 'ri-close-line', action: 'refuse', color: '#d32f2f', variant: 'danger' as const }
   ];
   selectedClub: Club | null = null;
 
   get nbAvis()      { return this.avis.length; }
-  get nbApprouves() { return this.avis.filter(a => a.approuve === true).length; }
-  get nbEnAttente() { return this.avis.filter(a => a.approuve !== true).length; }
+  get nbApprouves() { return this.avis.filter(a => this.isAvisApproved(a)).length; }
+  get nbEnAttente() { return this.avis.filter(a => !this.isAvisApproved(a)).length; }
   get noteMoyenne() {
-    if (!this.avis.length) return '—';
+    if (!this.avis.length) return '-';
     return (this.avis.reduce((s, a) => s + (a.note || 0), 0) / this.avis.length).toFixed(1) + ' / 5';
   }
 
@@ -68,8 +71,8 @@ export class GestionAvisComponent implements OnInit {
       ].some((value) => String(value || '').toLowerCase().includes(term));
 
       const matchesApproval = !this.approvalFilter
-        || (this.approvalFilter === 'approved' && avis.approuve === true)
-        || (this.approvalFilter === 'pending' && avis.approuve !== true);
+        || (this.approvalFilter === 'approved' && this.isAvisApproved(avis))
+        || (this.approvalFilter === 'pending' && !this.isAvisApproved(avis));
 
       return matchesSearch && matchesApproval;
     });
@@ -86,5 +89,10 @@ export class GestionAvisComponent implements OnInit {
         this.avis = this.avis.filter(a => a.id !== id);
       });
     }
+  }
+
+  private isAvisApproved(avis: Avis | null | undefined): boolean {
+    const value = (avis as any)?.approuve;
+    return value === true || String(value).toLowerCase() === 'true';
   }
 }

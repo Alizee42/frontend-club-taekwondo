@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { EvenementDTO, EvenementService } from '../../services/evenement.service';
 import { AuthService } from '../../services/auth.service';
 import { Inscription, InscriptionsService } from '../../services/inscriptions.service';
+import { ToastService } from '../../shared/toast/toast.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
@@ -53,8 +54,6 @@ export class GestionEvenementsComponent implements OnInit {
   editingEventId: number | null = null;
   nouvelEvenement: EventFormModel = this.createEmptyEventForm();
 
-  errorMsg = '';
-  successMsg = '';
   isLoading = false;
 
   searchTerm = '';
@@ -131,7 +130,8 @@ export class GestionEvenementsComponent implements OnInit {
   constructor(
     private evenementService: EvenementService,
     private inscriptionsService: InscriptionsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private readonly toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -240,7 +240,7 @@ export class GestionEvenementsComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMsg = error?.error?.error || 'Erreur lors du chargement des evenements.';
+        this.toast.error(error?.error?.error || 'Erreur lors du chargement des événements.');
         this.isLoading = false;
       }
     });
@@ -288,12 +288,12 @@ export class GestionEvenementsComponent implements OnInit {
     }
 
     if (!file.type.startsWith('image/')) {
-      this.errorMsg = 'Veuillez selectionner une image valide.';
+      this.toast.warning('Veuillez sélectionner une image valide.');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      this.errorMsg = 'L image ne doit pas depasser 5 MB.';
+      this.toast.warning('L\'image ne doit pas dépasser 5 Mo.');
       return;
     }
 
@@ -334,16 +334,12 @@ export class GestionEvenementsComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
-        this.successMsg = this.isEditing
-          ? 'Evenement modifie avec succes.'
-          : 'Evenement cree avec succes.';
+        this.toast.success(this.isEditing ? 'Événement modifié avec succès.' : 'Événement créé avec succès.');
         this.fermerFormulaire();
         this.chargerEvenements();
       },
       error: () => {
-        this.errorMsg = this.isEditing
-          ? 'Erreur lors de la modification de l evenement.'
-          : 'Erreur lors de la creation de l evenement.';
+        this.toast.error(this.isEditing ? 'Erreur lors de la modification de l\'événement.' : 'Erreur lors de la création de l\'événement.');
         this.isLoading = false;
       }
     });
@@ -357,17 +353,13 @@ export class GestionEvenementsComponent implements OnInit {
     this.clearMessages();
     this.evenementService.supprimerEvenement(id).subscribe({
       next: () => {
-        this.successMsg = 'Evenement supprime avec succes.';
-
+        this.toast.success('Événement supprimé.');
         if (this.evenementSelectionne?.id === id) {
           this.fermerInscriptions();
         }
-
         this.chargerEvenements();
       },
-      error: () => {
-        this.errorMsg = 'Erreur lors de la suppression de l evenement.';
-      }
+      error: () => this.toast.error('Erreur lors de la suppression de l\'événement.')
     });
   }
 
@@ -395,7 +387,7 @@ export class GestionEvenementsComponent implements OnInit {
 
     this.inscriptionsService.updateStatut(inscription.id, 'VALIDEE').subscribe({
       next: () => {
-        this.successMsg = 'Inscription validee.';
+        this.toast.success('Inscription validée.');
         this.chargerInscriptions(this.evenementSelectionne!.id);
         this.chargerEvenements();
       }
@@ -409,7 +401,7 @@ export class GestionEvenementsComponent implements OnInit {
 
     this.inscriptionsService.updateStatut(inscription.id, 'REFUSEE').subscribe({
       next: () => {
-        this.successMsg = 'Inscription refusee.';
+        this.toast.success('Inscription refusée.');
         this.chargerInscriptions(this.evenementSelectionne!.id);
         this.chargerEvenements();
       }
@@ -460,32 +452,32 @@ export class GestionEvenementsComponent implements OnInit {
 
   validerFormulaire(): boolean {
     if (!this.nouvelEvenement.titre.trim()) {
-      this.errorMsg = 'Le titre est requis.';
+      this.toast.warning('Le titre est requis.');
       return false;
     }
 
     if (!this.nouvelEvenement.dateDebut) {
-      this.errorMsg = 'La date de debut est requise.';
+      this.toast.warning('La date de début est requise.');
       return false;
     }
 
     if (!this.nouvelEvenement.dateFin) {
-      this.errorMsg = 'La date de fin est requise.';
+      this.toast.warning('La date de fin est requise.');
       return false;
     }
 
     if (new Date(this.nouvelEvenement.dateDebut) >= new Date(this.nouvelEvenement.dateFin)) {
-      this.errorMsg = 'La date de fin doit etre apres la date de debut.';
+      this.toast.warning('La date de fin doit être après la date de début.');
       return false;
     }
 
     if (!this.nouvelEvenement.lieu.trim()) {
-      this.errorMsg = 'Le lieu est requis.';
+      this.toast.warning('Le lieu est requis.');
       return false;
     }
 
     if (this.nouvelEvenement.capacite < 1) {
-      this.errorMsg = 'La capacite doit etre superieure a 0.';
+      this.toast.warning('La capacité doit être supérieure à 0.');
       return false;
     }
 
@@ -520,10 +512,7 @@ export class GestionEvenementsComponent implements OnInit {
     });
   }
 
-  clearMessages(): void {
-    this.errorMsg = '';
-    this.successMsg = '';
-  }
+  clearMessages(): void {}
 
   private get prochainEvenement(): EvenementDTO | null {
     const now = new Date().getTime();

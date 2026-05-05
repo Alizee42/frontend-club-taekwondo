@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { ActualiteService } from '../../services/actualite.service';
+import { ToastService } from '../../shared/toast/toast.service';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
@@ -104,7 +105,8 @@ export class GestionActualitesComponent implements OnInit {
 
   constructor(
     private readonly actualiteService: ActualiteService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly toast: ToastService
   ) {
     this.actualite = this.getEmptyActualite();
   }
@@ -172,11 +174,12 @@ export class GestionActualitesComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
+        this.toast.success(payload.id ? 'Actualité modifiée avec succès.' : 'Actualité créée avec succès.');
         this.loadActualites();
         this.closeModal();
       },
       error: () => {
-        this.imageError = 'Erreur lors de l\'enregistrement de l\'actualite.';
+        this.toast.error('Erreur lors de l\'enregistrement de l\'actualité.');
       }
     });
   }
@@ -216,22 +219,27 @@ export class GestionActualitesComponent implements OnInit {
       return;
     }
 
-    this.actualiteService.delete(id).subscribe(() => {
-      this.loadActualites();
+    this.actualiteService.delete(id).subscribe({
+      next: () => {
+        this.toast.success('Actualité supprimée.');
+        this.loadActualites();
+      },
+      error: () => this.toast.error('Erreur lors de la suppression de l\'actualité.')
     });
   }
 
   setFeatured(actu: Actualite): void {
     if (this.featuredNews?.id === actu.id) {
-      alert('Cette actualite est deja a la une.');
+      this.toast.info('Cette actualité est déjà à la une.');
       return;
     }
 
     this.actualiteService.setFeatured(actu).subscribe({
-      next: () => this.loadActualites(),
-      error: () => {
-        alert('Une erreur est survenue lors de la mise a la une.');
-      }
+      next: () => {
+        this.toast.success('Actualité mise à la une.');
+        this.loadActualites();
+      },
+      error: () => this.toast.error('Erreur lors de la mise à la une.')
     });
   }
 

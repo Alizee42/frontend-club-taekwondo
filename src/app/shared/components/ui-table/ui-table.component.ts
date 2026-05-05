@@ -17,6 +17,8 @@ export interface UiTableColumn {
   render?: (row: any) => string;
   width?: string;
   headerClass?: string;
+  // Icône de tête de cellule (ex: genre, statut)
+  iconClass?: (row: any) => string;
   // Configuration optionnelle pour un bouton dans la cellule
   buttonLabel?: string;
   buttonIcon?: string;

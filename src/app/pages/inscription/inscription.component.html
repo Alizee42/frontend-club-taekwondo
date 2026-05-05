@@ -185,6 +185,14 @@
               <span class="field-error" *ngIf="isInvalid('dateNaissance')">Date obligatoire.</span>
             </div>
             <div class="form-group">
+              <label class="form-label" for="genre">Genre</label>
+              <select class="form-input" formControlName="genre" id="genre">
+                <option value="">Non précisé</option>
+                <option value="MASCULIN">Homme</option>
+                <option value="FEMININ">Femme</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label class="form-label" for="role">Vous êtes *</label>
               <select class="form-input" [class.is-invalid]="isInvalid('role')"
                       formControlName="role" id="role" (change)="onRoleChange()">
@@ -438,6 +446,14 @@
                   <input class="form-input"
                          [class.is-invalid]="membre.get('dateNaissance')?.invalid && (membre.get('dateNaissance')?.touched || membre.get('dateNaissance')?.dirty)"
                          formControlName="dateNaissance" type="date" [max]="today" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Genre</label>
+                  <select class="form-input" formControlName="genre">
+                    <option value="">Non précisé</option>
+                    <option value="MASCULIN">Garçon / Homme</option>
+                    <option value="FEMININ">Fille / Femme</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Ceinture</label>

@@ -32,7 +32,7 @@
   <nav class="dash-section" aria-label="Raccourcis parent">
     <div class="dash-section__head dash-section__head--blue">
       <i class="ri-flashlight-line"></i>
-      <span>Mes services</span>
+      <span>Mes raccourcis</span>
     </div>
     <div class="dash-section__body">
       <app-dashboard-nav-card
@@ -50,16 +50,16 @@
         (pressed)="navigateToDocuments()"
       />
       <app-dashboard-nav-card
-        label="Commandes"
-        icon="ri-shopping-bag-line"
-        (pressed)="navigateToCommandes()"
-      />
-      <app-dashboard-nav-card
         label="Evenements"
         icon="ri-calendar-event-line"
         badgeVariant="neutral"
         [badge]="stats.evenementsAVenir > 0 ? stats.evenementsAVenir : null"
         (pressed)="navigateToEvenements()"
+      />
+      <app-dashboard-nav-card
+        label="Commandes"
+        icon="ri-shopping-bag-line"
+        (pressed)="navigateToCommandes()"
       />
     </div>
   </nav>

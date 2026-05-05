@@ -144,6 +144,8 @@
 .dash-sections {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
+  align-items: stretch;
   gap: var(--sp-3);
 }
 
@@ -183,6 +185,7 @@
 .dash-section__body {
   display: flex;
   flex-direction: column;
+  flex: 1;
   padding: var(--sp-2);
 }
 

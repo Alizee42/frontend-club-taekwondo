@@ -5,7 +5,8 @@ export interface Toast {
   id: string;
   type: ToastType;
   message: string;
-  duration: number;        // ms (0 = ne se ferme pas)
-  position: ToastPosition; // ex: 'top-right'
-  dismissible: boolean;    // bouton × visible
+  duration: number;
+  position: ToastPosition;
+  dismissible: boolean;
+  leaving?: boolean;
 }

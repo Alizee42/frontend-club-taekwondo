@@ -43,13 +43,6 @@
           </div>
         </div>
 
-        <div *ngIf="saveSuccess" class="info-banner success">
-          <i class="ri-checkbox-circle-line"></i> {{ saveSuccess }}
-        </div>
-        <div *ngIf="saveError" class="info-banner error">
-          <i class="ri-error-warning-line"></i> {{ saveError }}
-        </div>
-
         <form #profilForm="ngForm" (ngSubmit)="saveProfile()">
           <div class="form-grid">
             <div class="form-group">
@@ -95,13 +88,6 @@
             <h2>Sécurité du compte</h2>
             <p>Gérez votre mot de passe et la sécurité de votre accès.</p>
           </div>
-        </div>
-
-        <div *ngIf="pwdSuccess" class="info-banner success">
-          <i class="ri-checkbox-circle-line"></i> {{ pwdSuccess }}
-        </div>
-        <div *ngIf="pwdError" class="info-banner error">
-          <i class="ri-error-warning-line"></i> {{ pwdError }}
         </div>
 
         <div class="security-item">

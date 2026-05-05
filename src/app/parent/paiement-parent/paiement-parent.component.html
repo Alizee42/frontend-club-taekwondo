@@ -25,29 +25,40 @@
 
       <!-- Étape 1 : Enfant -->
       <div class="step-body" *ngIf="step === 1">
-        <h2 class="step-title">Pour qui souhaitez-vous payer ?</h2>
+        <div class="step-choice-layout">
+          <div class="step-head step-head--side">
+            <h2 class="step-title">Pour qui souhaitez-vous payer ?</h2>
+            <p class="step-subtitle">Sélectionnez l'enfant concerné par cette cotisation.</p>
+          </div>
 
-        <div class="child-grid">
-          <button type="button" class="child-card"
-                  *ngFor="let enfant of enfants"
-                  [class.active]="enfantSelectionne === enfant.id"
-                  (click)="selectMembre(enfant)"
-                  [attr.aria-label]="'Sélectionner ' + enfant.prenom + ' ' + enfant.nom">
-            <div class="avatar">
-              <span *ngIf="enfant.prenom">{{ enfant.prenom[0] }}</span>
-              <i *ngIf="!enfant.prenom" class="ri-user-line"></i>
-            </div>
-            <div class="meta">
-              <div class="name">{{ enfant.prenom }} {{ enfant.nom }}</div>
-            </div>
-          </button>
+          <div class="child-grid">
+            <button type="button" class="child-card"
+                    *ngFor="let enfant of enfants"
+                    [class.active]="enfantSelectionne === enfant.id"
+                    (click)="selectMembre(enfant)"
+                    [attr.aria-label]="'Sélectionner ' + enfant.prenom + ' ' + enfant.nom">
+              <div class="avatar">
+                <span *ngIf="enfant.prenom">{{ enfant.prenom[0] }}</span>
+                <i *ngIf="!enfant.prenom" class="ri-user-line"></i>
+              </div>
+              <div class="meta">
+                <div class="name">{{ enfant.prenom }} {{ enfant.nom }}</div>
+                <div class="hint">{{ enfantSelectionne === enfant.id ? 'Sélectionné' : 'Choisir cet enfant' }}</div>
+              </div>
+              <i class="ri-check-line child-check" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
 
-        <div class="actions center">
+        <div class="step-footer">
+          <span class="step-footer__hint">
+            {{ enfantSelectionneNom || 'Aucun enfant sélectionné' }}
+          </span>
           <ui-button
             type="button"
             variant="primary"
-            [full]="true"
+            size="sm"
+            icon="ri-arrow-right-line"
             label="Continuer"
             [disabled]="!enfantSelectionne"
             (clicked)="nextStep()"

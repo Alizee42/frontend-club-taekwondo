@@ -7,6 +7,7 @@ import { ContactService } from '../../services/contact.service';
 import { ClubService } from '../../services/club.service';
 import type { Club } from '../../services/club.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-contact',
@@ -27,10 +28,8 @@ export class ContactComponent implements OnDestroy {
   };
 
   sending = false;
-  successMessage: string | null = null;
-  errorMessage: string | null = null;
 
-  constructor(private contactService: ContactService, private clubService: ClubService) {
+  constructor(private contactService: ContactService, private clubService: ClubService, private toast: ToastService) {
     this.club = this.clubService.getSelectedClub();
     this.clubSub = this.clubService.selectedClub$.subscribe((club: Club | null) => {
       this.club = club;
@@ -60,18 +59,15 @@ export class ContactComponent implements OnDestroy {
 
   async onSubmit(contactForm?: NgForm): Promise<void> {
     if (this.sending) return;
-
-    this.successMessage = null;
-    this.errorMessage = null;
     this.sending = true;
 
     try {
       await this.contactService.envoyer(this.form);
-      this.successMessage = 'Votre message a ete envoye. Merci !';
+      this.toast.success('Votre message a été envoyé. Merci !');
       this.form = { name: '', email: '', objet: '', message: '' };
       contactForm?.resetForm(this.form);
     } catch {
-      this.errorMessage = 'Une erreur est survenue. Reessayez.';
+      this.toast.error('Une erreur est survenue. Veuillez réessayer.');
     } finally {
       this.sending = false;
     }

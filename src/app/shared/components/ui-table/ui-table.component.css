@@ -5,6 +5,23 @@
   min-width: 0;
 }
 
+/* ── Icône de tête de cellule ── */
+.cell-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.cell-lead-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.cell-icon--male    { color: #1A5CA8; }
+.cell-icon--female  { color: #D4307A; }
+.cell-icon--neutral { color: #9CA3AF; }
+
 .ui-table {
   width: 100%;
   min-width: 100%;

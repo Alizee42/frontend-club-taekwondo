@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 import { environment } from '../../../environments/environment';
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-profil',
@@ -23,11 +24,6 @@ export class ProfilComponent implements OnInit {
   passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' }; // Données pour le mot de passe
   passwordError = ''; // Message d'erreur pour le mot de passe
   role: string | null = null; // Stocke le rôle de l'utilisateur
-  // Feedback UI
-  saveSuccess = '';
-  saveError = '';
-  pwdSuccess = '';
-  pwdError = '';
   // Edition
   isEditing = false;
   private originalUser: Utilisateur | any = null;
@@ -35,7 +31,7 @@ export class ProfilComponent implements OnInit {
   lastPwdAgo = '';
   lastPwdExact = '';
 
-  constructor(private http: HttpClient, private router: Router, private auth: AuthService) {}
+  constructor(private http: HttpClient, private router: Router, private auth: AuthService, private toast: ToastService) {}
 
   ngOnInit(): void {
     // Rôle courant via AuthService
@@ -87,12 +83,10 @@ export class ProfilComponent implements OnInit {
   }
 
   saveProfile(): void {
-    this.saveSuccess = '';
-    this.saveError = '';
     const current = this.user as any;
     const id = current?.id;
     if (!id) {
-      this.saveError = 'Impossible de mettre à jour: identifiant manquant.';
+      this.toast.error('Impossible de mettre à jour: identifiant manquant.');
       return;
     }
     // Construire un DTO complet pour éviter d’écraser avec des null
@@ -116,14 +110,14 @@ export class ProfilComponent implements OnInit {
           this.auth.updateUtilisateurConnecte(this.user);
         } catch {}
         this.editMode = {};
-        this.saveSuccess = 'Profil mis à jour avec succès.';
+        this.toast.success('Profil mis à jour avec succès.');
         this.isEditing = false;
         this.originalUser = null;
         this.updateLastPwdAgo();
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du profil :', err);
-        this.saveError = "Une erreur est survenue lors de la mise à jour du profil.";
+        this.toast.error('Une erreur est survenue lors de la mise à jour du profil.');
       }
     });
   }
@@ -132,8 +126,6 @@ export class ProfilComponent implements OnInit {
     this.showPasswordModal = true;
     this.passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' };
     this.passwordError = '';
-    this.pwdSuccess = '';
-    this.pwdError = '';
   }
 
   closePasswordModal(): void {
@@ -142,9 +134,6 @@ export class ProfilComponent implements OnInit {
 
   updatePassword(): void {
     const { newPassword, confirmPassword } = this.passwordData;
-
-    this.pwdSuccess = '';
-    this.pwdError = '';
 
     if (newPassword !== confirmPassword) {
       this.passwordError = 'Les mots de passe ne correspondent pas.';
@@ -159,7 +148,7 @@ export class ProfilComponent implements OnInit {
 
     const id = (this.user as any)?.id;
     if (!id) {
-      this.pwdError = 'Impossible de mettre à jour le mot de passe: identifiant manquant.';
+      this.toast.error('Impossible de mettre à jour le mot de passe: identifiant manquant.');
       return;
     }
 
@@ -185,14 +174,14 @@ export class ProfilComponent implements OnInit {
         try {
           this.auth.updateUtilisateurConnecte(this.user);
         } catch {}
-        this.pwdSuccess = 'Mot de passe mis à jour avec succès.';
+        this.toast.success('Mot de passe mis à jour avec succès.');
         this.passwordError = '';
         this.closePasswordModal();
         this.updateLastPwdAgo();
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du mot de passe :', err);
-        this.pwdError = 'Une erreur est survenue lors de la mise à jour du mot de passe.';
+        this.toast.error('Une erreur est survenue lors de la mise à jour du mot de passe.');
       }
     });
   }
@@ -206,11 +195,8 @@ export class ProfilComponent implements OnInit {
     this.editMode[field] = !this.editMode[field];
   }
   startEdit(): void {
-    // Deep clone simple
     this.originalUser = JSON.parse(JSON.stringify(this.user || {}));
     this.isEditing = true;
-    this.saveSuccess = '';
-    this.saveError = '';
   }
 
   private updateLastPwdAgo(): void {
@@ -248,7 +234,6 @@ export class ProfilComponent implements OnInit {
     }
     this.isEditing = false;
     this.originalUser = null;
-    this.saveError = '';
   }
   getInitiales(nom: string, prenom: string): string {
     const initialeNom = nom ? nom.charAt(0) : '';

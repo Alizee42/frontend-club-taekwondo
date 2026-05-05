@@ -1,4 +1,4 @@
-// src/app/pages/connexion/connexion.component.ts
+﻿// src/app/pages/connexion/connexion.component.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -87,7 +87,7 @@ export class ConnexionComponent {
               } else {
                 // Si un club a été sélectionné, vérifier l'appartenance
                 if (userClubId !== undefined && userClubId !== null && userClubId !== this.clubId) {
-                  this.toastService.error('❌ Ce compte n’appartient pas au club sélectionné.');
+                  this.toastService.error("Ce compte n'appartient pas au club sélectionné.");
                   return;
                 }
               }
@@ -103,7 +103,7 @@ export class ConnexionComponent {
               }
               return;
             }
-            this.toastService.success('🎉 Connexion réussie ! Bienvenue !');
+            this.toastService.success('Connexion réussie ! Bienvenue !');
             this.redirectBasedOnRole(role.toString().toUpperCase());
           },
           error: (err) => {
@@ -128,15 +128,15 @@ export class ConnexionComponent {
         this.router.navigate(['/parent/dashboard-parent']);
         break;
       default:
-        this.toastService.error('⚠️ Accès non autorisé. Contactez l\'administrateur.');
+        this.toastService.error('Accès non autorisé. Contactez l\'administrateur.');
     }
   }
 
   private handleError(err: any): void {
     if (err?.status === 401) {
-      this.toastService.error('❌ Identifiants incorrects');
+      this.toastService.error('Identifiants incorrects.');
     } else {
-      this.toastService.error('⚠️ Erreur de connexion. Veuillez réessayer.');
+      this.toastService.error('Erreur de connexion. Veuillez réessayer.');
     }
   }
 

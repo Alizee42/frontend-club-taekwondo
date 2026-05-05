@@ -49,14 +49,14 @@ export class ToastContainerComponent implements OnInit {
 
   getIconClass(type: string | undefined | null): string {
     switch (this.normalizeType(type)) {
-      case 'success':
-        return 'ri-check-line';
-      case 'error':
-        return 'ri-close-line';
-      case 'warning':
-        return 'ri-alert-line';
-      default:
-        return 'ri-information-line';
+      case 'success': return 'ri-checkbox-circle-fill';
+      case 'error':   return 'ri-close-circle-fill';
+      case 'warning': return 'ri-error-warning-fill';
+      default:        return 'ri-information-fill';
     }
+  }
+
+  getProgressDuration(toast: Toast): string {
+    return toast.duration > 0 ? `${toast.duration}ms` : '0ms';
   }
 }

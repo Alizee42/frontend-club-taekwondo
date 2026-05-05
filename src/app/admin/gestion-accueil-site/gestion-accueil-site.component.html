@@ -1,0 +1,59 @@
+<div class="page-shell accueil-site-page">
+  <app-page-header
+    title="Accueil du site"
+    icon="ri-home-4-line"
+    subtitle="Gérez les contenus visibles en haut de la page d'accueil du club"
+  >
+    <ng-container page-header-actions>
+      <ui-button
+        label="Enregistrer"
+        icon="ri-save-line"
+        variant="primary"
+        [loading]="activeSaving"
+        [disabled]="activeLoading || activeSaving"
+        (clicked)="saveActive()"
+      />
+    </ng-container>
+  </app-page-header>
+
+  <div class="content-tabs" role="tablist" aria-label="Sections de l'accueil du site">
+    <button
+      type="button"
+      class="content-tab"
+      [class.active]="activeTab === 'banniere'"
+      role="tab"
+      [attr.aria-selected]="activeTab === 'banniere'"
+      (click)="setTab('banniere')"
+    >
+      <i class="ri-layout-top-line" aria-hidden="true"></i>
+      <span>Bannière</span>
+    </button>
+    <button
+      type="button"
+      class="content-tab"
+      [class.active]="activeTab === 'apropos'"
+      role="tab"
+      [attr.aria-selected]="activeTab === 'apropos'"
+      (click)="setTab('apropos')"
+    >
+      <i class="ri-information-line" aria-hidden="true"></i>
+      <span>À propos</span>
+    </button>
+  </div>
+
+  <div class="section-intro">
+    <div class="section-intro__icon">
+      <i [class]="sectionIcon" aria-hidden="true"></i>
+    </div>
+    <div class="section-intro__body">
+      <h2>{{ sectionTitle }}</h2>
+      <p>{{ sectionDescription }}</p>
+    </div>
+  </div>
+
+  @if (activeTab === 'banniere') {
+    <app-gestion-hero />
+  } @else {
+    <app-gestion-apropos />
+  }
+</div>

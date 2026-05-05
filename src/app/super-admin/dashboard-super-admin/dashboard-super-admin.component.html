@@ -31,7 +31,7 @@
     <div class="dash-section">
       <div class="dash-section__head dash-section__head--blue">
         <i class="ri-community-line"></i>
-        <span>Gestion du club</span>
+        <span>Administration plateforme</span>
       </div>
       <div class="dash-section__body">
         <app-dashboard-nav-card
@@ -42,34 +42,21 @@
           (pressed)="navigateToClubs()"
         />
         <app-dashboard-nav-card
-          label="Enseignants"
-          icon="ri-graduation-cap-line"
-          (pressed)="navigateToEnseignants()"
+          label="Admins"
+          icon="ri-user-star-line"
+          badgeVariant="neutral"
+          [badge]="adminsCount > 0 ? adminsCount : null"
+          (pressed)="navigateToAdmins()"
         />
         <app-dashboard-nav-card
-          label="Événements"
-          icon="ri-calendar-event-line"
-          (pressed)="navigateToEvenements()"
+          label="Utilisateurs"
+          icon="ri-user-3-line"
+          (pressed)="navigateToUtilisateurs()"
         />
         <app-dashboard-nav-card
-          label="Galerie / Médias"
-          icon="ri-image-line"
-          (pressed)="navigateToGalerie()"
-        />
-        <app-dashboard-nav-card
-          label="Bannière principale"
-          icon="ri-layout-top-line"
-          (pressed)="navigateToHero()"
-        />
-        <app-dashboard-nav-card
-          label="À propos"
-          icon="ri-information-line"
-          (pressed)="navigateToAPropos()"
-        />
-        <app-dashboard-nav-card
-          label="Horaires"
-          icon="ri-time-line"
-          (pressed)="navigateToHoraires()"
+          label="Logs sécurité"
+          icon="ri-shield-check-line"
+          (pressed)="navigateToLogs()"
         />
       </div>
     </div>
@@ -77,7 +64,7 @@
     <div class="dash-section">
       <div class="dash-section__head dash-section__head--green">
         <i class="ri-user-line"></i>
-        <span>Gestion des membres</span>
+        <span>Encadrement des clubs</span>
       </div>
       <div class="dash-section__body">
         <app-dashboard-nav-card
@@ -93,11 +80,14 @@
           (pressed)="navigateToDocuments()"
         />
         <app-dashboard-nav-card
-          label="Admins"
-          icon="ri-user-star-line"
-          badgeVariant="neutral"
-          [badge]="adminsCount > 0 ? adminsCount : null"
-          (pressed)="navigateToAdmins()"
+          label="Enseignants"
+          icon="ri-graduation-cap-line"
+          (pressed)="navigateToEnseignants()"
+        />
+        <app-dashboard-nav-card
+          label="Horaires"
+          icon="ri-time-line"
+          (pressed)="navigateToHoraires()"
         />
       </div>
     </div>
@@ -105,7 +95,7 @@
     <div class="dash-section">
       <div class="dash-section__head dash-section__head--amber">
         <i class="ri-wallet-3-line"></i>
-        <span>Gestion financière</span>
+        <span>Activité et suivi</span>
       </div>
       <div class="dash-section__body">
         <app-dashboard-nav-card
@@ -119,21 +109,31 @@
           icon="ri-shopping-bag-3-line"
           (pressed)="navigateToCommandes()"
         />
-      </div>
-    </div>
-
-    <div class="dash-section">
-      <div class="dash-section__head dash-section__head--purple">
-        <i class="ri-settings-3-line"></i>
-        <span>Administration</span>
-      </div>
-      <div class="dash-section__body">
+        <app-dashboard-nav-card
+          label="Événements"
+          icon="ri-calendar-event-line"
+          (pressed)="navigateToEvenements()"
+        />
         <app-dashboard-nav-card
           label="Avis"
           icon="ri-star-line"
           badgeVariant="neutral"
           [badge]="avisCount > 0 ? avisCount : null"
           (pressed)="navigateToAvis()"
+        />
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--purple">
+        <i class="ri-megaphone-line"></i>
+        <span>Site public</span>
+      </div>
+      <div class="dash-section__body">
+        <app-dashboard-nav-card
+          label="Accueil du site"
+          icon="ri-home-4-line"
+          (pressed)="navigateToAccueilSite()"
         />
         <app-dashboard-nav-card
           label="Actualités"
@@ -143,14 +143,9 @@
           (pressed)="navigateToActualites()"
         />
         <app-dashboard-nav-card
-          label="Utilisateurs"
-          icon="ri-user-3-line"
-          (pressed)="navigateToUtilisateurs()"
-        />
-        <app-dashboard-nav-card
-          label="Logs sécurité"
-          icon="ri-shield-check-line"
-          (pressed)="navigateToLogs()"
+          label="Galerie / Médias"
+          icon="ri-image-line"
+          (pressed)="navigateToGalerie()"
         />
       </div>
     </div>

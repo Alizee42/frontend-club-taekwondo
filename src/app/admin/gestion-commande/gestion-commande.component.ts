@@ -9,6 +9,7 @@ import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
 import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
+import { ToastService } from '../../shared/toast/toast.service';
 
 const API_BASE = environment.apiUrl;
 
@@ -185,7 +186,7 @@ export class GestionCommandeComponent implements OnInit {
     { label: 'Annuler', icon: 'ri-close-circle-line', action: 'cancel', variant: 'danger' as const, title: 'Annuler la commande', show: (row: CommandeDTO) => this.normalize(row.statut) === 'en attente' }
   ];
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient, private readonly toast: ToastService) {}
 
   ngOnInit(): void {
     this.chargerCommandes();
@@ -281,16 +282,18 @@ export class GestionCommandeComponent implements OnInit {
           next: () => {
             commande.statut = 'paye';
             this.syncSelectedCommande(commande);
+            this.toast.success('Commande marquée comme payée.');
           },
           error: () => {
             this.http.put<void>(`${API_BASE}/commandes/${id}/statut`, 'PAYEE', { headers: this.textHeaders }).subscribe({
               next: () => {
                 commande.statut = 'paye';
                 this.syncSelectedCommande(commande);
+                this.toast.success('Commande marquée comme payée.');
               },
               error: (innerErr) => {
                 console.error('[API ERR] /statut PAYEE', innerErr);
-                alert("Echec du marquage en 'paye'.");
+                this.toast.error('Échec du marquage en payée.');
               }
             });
           }
@@ -310,10 +313,11 @@ export class GestionCommandeComponent implements OnInit {
       next: () => {
         commande.statut = 'retire';
         this.syncSelectedCommande(commande);
+        this.toast.success('Commande marquée comme retirée.');
       },
       error: (err) => {
         console.error('Erreur marquer retire', err);
-        alert("Echec du marquage en 'retire'.");
+        this.toast.error('Échec du marquage en retirée.');
       }
     });
   }
@@ -329,10 +333,11 @@ export class GestionCommandeComponent implements OnInit {
       next: () => {
         commande.statut = 'annule';
         this.syncSelectedCommande(commande);
+        this.toast.success('Commande annulée.');
       },
       error: (err) => {
         console.error('Erreur annulation', err);
-        alert("Echec de l'annulation.");
+        this.toast.error('Échec de l\'annulation de la commande.');
       }
     });
   }
@@ -387,7 +392,7 @@ export class GestionCommandeComponent implements OnInit {
         },
         error: (err) => {
           console.error('[ERR] mise a jour modePaiement', err);
-          alert("Impossible de definir le mode de paiement a 'CLUB'.");
+          this.toast.error('Impossible de définir le mode de paiement au club.');
           reject(err);
         }
       });

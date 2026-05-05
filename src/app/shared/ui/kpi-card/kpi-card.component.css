@@ -160,6 +160,7 @@
   background: color-mix(in srgb, var(--color-danger) 12%, white);
   color: var(--color-danger);
 }
+.kpi-card--danger .kpi-card__value { color: var(--color-danger-ink, var(--color-danger)); }
 
 /* teal / info */
 .kpi-card--teal,
@@ -171,6 +172,7 @@
 }
 
 /* neutral */
+.kpi-card--neutral { border-top-color: var(--color-border); }
 .kpi-card--neutral .kpi-card__icon {
   background: var(--color-surface-2);
   color: var(--color-text-2);

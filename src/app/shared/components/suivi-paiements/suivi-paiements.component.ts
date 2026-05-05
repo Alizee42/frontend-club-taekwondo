@@ -198,11 +198,30 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
     if (v.includes('paypal')) return 'PayPal';
     return 'Autre';
   }
-  classeBadge(statut?: string): string { const s = this.sansAccents(statut); if (s === 'paye') return 'status-badge status--success'; if (s === 'annule') return 'status-badge'; if (s.includes('retard')) return 'status-badge status--danger'; if (s.includes('attente')) return 'status-badge status--warning'; return 'status-badge status--info'; }
+  isPaidStatus(statut: any): boolean { return this.sansAccents(statut || '').includes('paye'); }
+  isEcheancePayable(e: Echeance): boolean { return !!e && !this.isPaidStatus(e.statut); }
+  classeBadge(statut?: string): string { const s = this.sansAccents(statut); if (this.isPaidStatus(statut)) return 'status-badge status--success'; if (s.includes('annul')) return 'status-badge'; if (s.includes('retard')) return 'status-badge status--danger'; if (s.includes('attente')) return 'status-badge status--warning'; return 'status-badge status--info'; }
+  statutPaiement(p: Paiement): string { return this.isPaiementLate(p) ? 'en retard' : (p.statut || 'en attente'); }
+  statutEcheance(e: Echeance): string { return this.isEcheanceLate(e) ? 'en retard' : (e.statut || 'en attente'); }
 
-  montantPaye(p: Paiement): number { const total = p.montantTotal || 0; if (Array.isArray(p.echeances) && p.echeances.length) { return p.echeances.reduce((s, e) => { const st = this.sansAccents(e.statut); const m = e.montant || 0; return st === 'paye' ? s + m : s; }, 0); } const st = this.sansAccents(p.statut); return st === 'paye' ? total : 0; }
+  montantPaye(p: Paiement): number { const total = p.montantTotal || 0; if (Array.isArray(p.echeances) && p.echeances.length) { return p.echeances.reduce((s, e) => { const m = e.montant || 0; return this.isPaidStatus(e.statut) ? s + m : s; }, 0); } return this.isPaidStatus(p.statut) ? total : 0; }
   montantRestant(p: Paiement): number { const restant = (p.montantTotal || 0) - this.montantPaye(p); return Math.max(0, Number.isFinite(restant) ? restant : 0); }
   montantParEcheance(p: Paiement): number { const typeLisible = this.libelleType(p.type, p.echeances); if (typeLisible !== 'Échelonné') return 0; const ech = p.echeances || []; if (ech.length > 0) return ech[0].montant || 0; const n = (p as any).nombreEcheances || 0; return n > 0 && p.montantTotal ? p.montantTotal / n : 0; }
+
+  isEcheanceLate(e: Echeance): boolean {
+    if (!e || this.isPaidStatus(e.statut) || !e.dateEcheance) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(e.dateEcheance);
+    due.setHours(0, 0, 0, 0);
+    return due < today;
+  }
+
+  isPaiementLate(p: Paiement): boolean {
+    if (!p) return false;
+    if (this.sansAccents(p.statut).includes('retard')) return true;
+    return (Array.isArray(p.echeances) ? p.echeances : []).some(e => this.isEcheanceLate(e));
+  }
 
   applyFilters(): void {
     const q = (this.filtres.q || '').trim().toLowerCase(); const statutF = this.sansAccents(this.filtres.statut); const typeF = this.sansAccents(this.filtres.type); const modeF = this.sansAccents(this.filtres.mode);
@@ -281,13 +300,13 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
   isUserFull(u: GroupeParent): boolean { return !!u && u.id != null && this.expandedFullUsers.has(u.id); }
   userFermerModales(): void { this.utilisateurSelectionne = null; this.modalUserStatsVisible = false; this.modalUserEcheancesVisible = false; }
 
-  estPayable(p: Paiement): boolean { const s = this.sansAccents(p.statut); return s !== 'annule' && s !== 'paye' && this.montantRestant(p) > 0; }
+  estPayable(p: Paiement): boolean { const s = this.sansAccents(p.statut); return !s.includes('annul') && !this.isPaidStatus(p.statut) && this.montantRestant(p) > 0; }
 
   marquerPaiementPaye(p: Paiement): void { if (!p?.id) return; if (!confirm('Confirmer : marquer ce paiement comme entièrement payé ?')) return;
     this.http.post(`${this.API_BASE}/paiements/${p.id}/valider`, {}).subscribe({ next: () => { p.statut = 'payé'; if (Array.isArray(p.echeances)) p.echeances = p.echeances.map(e => ({ ...e, statut: 'payé' as Statut })); this.applyFilters(); this.modalEcheancesVisible = false; }, error: (err) => { console.error('[Suivi] marquerPaiementPaye error', err); const serverMsg = err?.error?.message || err?.message || `Erreur ${err?.status || 'inconnue'}`; alert('Impossible de marquer le paiement comme payé.\n' + serverMsg); } }); }
 
-  marquerEcheancePayee(p: Paiement, e: Echeance): void { if (!p?.id || !e?.id) return; const body = [{ id: e.id }];
-    this.http.post(`${this.API_BASE}/paiements/${p.id}/payer-echeance`, body).subscribe({ next: () => { e.statut = 'payé'; const restant = this.montantRestant(p); if (restant <= 0) { p.statut = 'payé'; } else { const aDuRetard = (p.echeances || []).some(x => { const st = this.sansAccents(x.statut); return st !== 'paye' && x.dateEcheance && new Date(x.dateEcheance) < new Date(); }); p.statut = aDuRetard ? 'en retard' : 'en attente'; } this.applyFilters(); }, error: (err) => { console.error('[Suivi] marquerEcheancePayee error', err); const serverMsg = err?.error?.message || err?.error || err?.message || `Erreur ${err?.status || 'inconnue'}`; alert('Impossible de marquer l’échéance comme payée.\n' + serverMsg); } }); }
+  marquerEcheancePayee(p: Paiement, e: Echeance): void { if (!p?.id || !e?.id) return;
+    this.http.post(`${this.API_BASE}/echeances/${e.id}/payer`, {}).subscribe({ next: () => { e.statut = 'payé'; const restant = this.montantRestant(p); if (restant <= 0) { p.statut = 'payé'; } else { const aDuRetard = (p.echeances || []).some(x => this.isEcheanceLate(x)); p.statut = aDuRetard ? 'en retard' : 'en attente'; } this.applyFilters(); }, error: (err) => { console.error('[Suivi] marquerEcheancePayee error', err); const serverMsg = err?.error?.message || err?.error || err?.message || `Erreur ${err?.status || 'inconnue'}`; alert('Impossible de marquer l’échéance comme payée.\n' + serverMsg); } }); }
 
   
   confirmerAnnulation(): void {
@@ -319,3 +338,4 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
   trackByEcheance: TrackByFunction<Echeance> = (_, e) => e.id ?? e.numero ?? 0;
   trackByUtilisateur: TrackByFunction<GroupeParent> = (_, u) => u.id;
 }
+

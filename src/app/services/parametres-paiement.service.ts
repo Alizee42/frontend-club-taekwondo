@@ -1,7 +1,7 @@
 // src/app/services/parametres-paiement.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { ParametresPaiement } from '../models/parametres-paiement';
 import { AuthService } from './auth.service';
@@ -27,6 +27,26 @@ export class ParametresPaiementService {
         return this.getParametresPaiementPublicByClub(clubId);
       })
     );
+  }
+
+  chargerParametresParClub(clubId: number, admin = false): Observable<ParametresPaiement> {
+    const source$ = admin
+      ? this.getParametresPaiementByClub(clubId)
+      : this.getParametresPaiementPublicByClub(clubId);
+
+    return source$.pipe(
+      tap(p => this.parametresSubject.next(p || this.defaultParametres))
+    );
+  }
+
+  chargerParametresUtilisateurConnecte(): Observable<ParametresPaiement> {
+    const clubId = this.resolveClubId();
+    if (!clubId) {
+      this.parametresSubject.next(this.defaultParametres);
+      return of(this.defaultParametres);
+    }
+
+    return this.chargerParametresParClub(clubId, this.auth.getRole() === 'ADMIN');
   }
 
   /** Sauvegarde des paramètres de paiement pour un club (admin) */
@@ -63,6 +83,12 @@ export class ParametresPaiementService {
   chargerParametres(): void {
     const role = this.auth.getRole();
     const isAdmin = role === 'ADMIN';
+    const clubId = this.resolveClubId();
+
+    if (clubId) {
+      this.chargerParametresParClub(clubId, isAdmin).subscribe();
+      return;
+    }
 
     const public$ = this.http.get<ParametresPaiement>(this.publicUrl).pipe(
   tap(() => {/* ...log supprimé... */}),
@@ -96,6 +122,19 @@ export class ParametresPaiementService {
 
   getParametres(): ParametresPaiement {
     return this.parametresSubject.value;
+  }
+
+  private resolveClubId(): number {
+    const user = this.auth.getUtilisateurConnecte();
+    const fromUser = Number(user?.['clubId'] ?? user?.['club']?.id ?? 0);
+    if (fromUser) return fromUser;
+
+    try {
+      const selectedClub = JSON.parse(localStorage.getItem('selectedClub') || 'null');
+      return Number(selectedClub?.id ?? 0) || 0;
+    } catch {
+      return 0;
+    }
   }
 
 sauvegarder(parametres: ParametresPaiement) {
