@@ -14,6 +14,8 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   const validToken = auth.isConnecte() ? auth.getToken() : null;
   const isOnAdmin = window.location.pathname.startsWith('/admin');
   const isPublicEndpoint = req.url.includes('/public/')
+    || (req.method === 'GET' && req.url.includes('/hero-config'))
+    || (req.method === 'GET' && req.url.includes('/about-config'))
     || (req.method === 'GET' && req.url.match(/\/galerie(\?|$|\/[^a-zA-Z])/) && !isOnAdmin)
     || (req.method === 'GET' && req.url.match(/\/api\/galeries\/club\/[0-9]+$/));
   const isOptionalEndpoint = req.url.includes('/parametres-paiement');
