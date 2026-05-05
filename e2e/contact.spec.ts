@@ -7,7 +7,7 @@ test.describe('Page Contact', () => {
   });
 
   test('la page contact se charge', async ({ page }) => {
-    await expect(page.locator('form, app-contact')).toBeVisible();
+    await expect(page.locator('app-contact')).toBeVisible();
   });
 
   test('les champs nom, email, message sont présents', async ({ page }) => {

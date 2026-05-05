@@ -5,7 +5,7 @@ test.describe('Navigation publique', () => {
   test('la page accueil se charge', async ({ page }) => {
     await page.goto('/');
     await expect(page).not.toHaveURL('/connexion');
-    await expect(page.locator('universal-header, app-root')).toBeVisible();
+    await expect(page.locator('app-root')).toBeVisible();
   });
 
   test('le header affiche le bouton connexion quand non connecté', async ({ page }) => {

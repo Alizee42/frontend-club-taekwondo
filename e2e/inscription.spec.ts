@@ -7,7 +7,7 @@ test.describe('Page Inscription', () => {
   });
 
   test('la page inscription se charge', async ({ page }) => {
-    await expect(page.locator('form, app-inscription')).toBeVisible();
+    await expect(page.locator('app-inscription')).toBeVisible();
   });
 
   test('impossible de passer à l\'étape 2 avec champs vides', async ({ page }) => {
