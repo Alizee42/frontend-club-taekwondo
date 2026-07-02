@@ -16,6 +16,7 @@ import { Subscription } from 'rxjs';
 export class GalerieComponent implements OnInit, OnDestroy {
   images: Galerie[] = [];
   isLoading = true;
+  apiError = false;
   selectedClubId: number | null = null;
 
   lightboxImage: Galerie | null = null;
@@ -81,6 +82,7 @@ export class GalerieComponent implements OnInit, OnDestroy {
 
   loadImages(clubId: number): void {
     this.isLoading = true;
+    this.apiError = false;
     this.galerieService.getGaleriesByClub(clubId).subscribe({
       next: (data) => {
         this.images = (data || []).map(img => this.buildUrl(img));
@@ -88,6 +90,7 @@ export class GalerieComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.images = [];
+        this.apiError = true;
         this.isLoading = false;
       }
     });
@@ -95,6 +98,7 @@ export class GalerieComponent implements OnInit, OnDestroy {
 
   loadAll(): void {
     this.isLoading = true;
+    this.apiError = false;
     this.galerieService.getAll().subscribe({
       next: (data) => {
         this.images = (data || []).map(img => this.buildUrl(img));
@@ -102,6 +106,7 @@ export class GalerieComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.images = [];
+        this.apiError = true;
         this.isLoading = false;
       }
     });

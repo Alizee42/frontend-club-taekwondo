@@ -9,7 +9,12 @@
       {{ messageConfirmation }}
     </div>
 
-    <div class="swiper avis-swiper" aria-label="Avis des visiteurs">
+    <div *ngIf="error" class="section-error" role="alert">
+      <i class="ri-wifi-off-line" aria-hidden="true"></i>
+      {{ error }}
+    </div>
+
+    <div class="swiper avis-swiper" aria-label="Avis des visiteurs" *ngIf="!error">
       <div class="swiper-wrapper">
 
         <div *ngIf="(avisApprouves?.length || 0) === 0" class="swiper-slide">

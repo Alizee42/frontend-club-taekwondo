@@ -29,11 +29,11 @@
 
         <ng-container *ngIf="isEditing(row, col.key); else viewCell">
           <input [(ngModel)]="editValue" class="cell-edit-input" />
-          <button type="button" (click)="saveEdit(row, col.key)" class="cell-edit-btn cell-edit-confirm">
-            <i class="ri-check-line"></i>
+          <button type="button" (click)="saveEdit(row, col.key)" class="cell-edit-btn cell-edit-confirm" aria-label="Confirmer">
+            <i class="ri-check-line" aria-hidden="true"></i>
           </button>
-          <button type="button" (click)="cancelEdit()" class="cell-edit-btn cell-edit-cancel">
-            <i class="ri-close-line"></i>
+          <button type="button" (click)="cancelEdit()" class="cell-edit-btn cell-edit-cancel" aria-label="Annuler">
+            <i class="ri-close-line" aria-hidden="true"></i>
           </button>
         </ng-container>
 

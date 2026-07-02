@@ -227,7 +227,7 @@
 .notif-card__icon-wrap--paiement  { background: var(--color-info-bg);    color: var(--brand-primary); }
 .notif-card__icon-wrap--evenement { background: var(--color-success-bg);  color: var(--color-success); }
 .notif-card__icon-wrap--commande  { background: var(--color-warning-bg);  color: var(--color-warning); }
-.notif-card__icon-wrap--utilisateur { background: #F3E8FF; color: #7C3AED; }
+.notif-card__icon-wrap--utilisateur { background: var(--color-purple-bg); color: var(--color-purple); }
 .notif-card__icon-wrap--general   { background: var(--color-surface-2);   color: var(--color-text-2); }
 
 /* ── Contenu ── */
@@ -273,7 +273,7 @@
 .notif-card__badge--paiement   { background: var(--color-info-bg);    color: var(--color-info-ink); }
 .notif-card__badge--evenement  { background: var(--color-success-bg);  color: var(--color-success-ink); }
 .notif-card__badge--commande   { background: var(--color-warning-bg);  color: var(--color-warning-ink); }
-.notif-card__badge--utilisateur { background: #F3E8FF; color: #7C3AED; }
+.notif-card__badge--utilisateur { background: var(--color-purple-bg); color: var(--color-purple); }
 .notif-card__badge--general    { background: var(--color-surface-2);   color: var(--color-text-2); }
 
 .notif-card__date {

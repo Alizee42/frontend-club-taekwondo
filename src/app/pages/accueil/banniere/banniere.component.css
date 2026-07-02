@@ -23,7 +23,7 @@
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  opacity: 0.45;
+  opacity: var(--hero-video-opacity, 0.45);
 }
 
 /* ── Overlay gradient ─── */
@@ -46,7 +46,7 @@
   padding: var(--sp-10) var(--container-padding);
   max-width: 860px;
   width: 100%;
-  margin-bottom: 5rem; /* espace pour la stats strip */
+  margin-bottom: var(--sp-20); /* espace pour la stats strip */
 }
 
 /* ── Eyebrow ─── */

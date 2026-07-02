@@ -5,7 +5,7 @@
 
 /* ----- Page wrapper --------------------------------------- */
 .insc-page {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - var(--header-h, 64px));
   background: var(--color-bg);
 }
 
@@ -21,10 +21,10 @@
 
 /* ----- Sidebar -------------------------------------------- */
 .insc-sidebar {
-  width: 300px;
+  width: var(--insc-sidebar-w, 300px);
   flex-shrink: 0;
   position: sticky;
-  top: calc(64px + var(--sp-4));
+  top: calc(var(--header-h, 64px) + var(--sp-4));
 }
 
 .insc-sidebar__inner {
@@ -580,6 +580,12 @@
   border-top: 1px solid var(--color-border);
   --strength-color: var(--color-border);
 }
+
+/* Couleurs par niveau de force */
+.password-strength-block.strength-1 { --strength-color: var(--color-danger); }
+.password-strength-block.strength-2 { --strength-color: var(--color-warning); }
+.password-strength-block.strength-3 { --strength-color: #f1c40f; }
+.password-strength-block.strength-4 { --strength-color: var(--color-success); }
 
 .password-strength-block .bar {
   width: 32px;

@@ -93,7 +93,6 @@
               class="toggle-password"
               (click)="togglePassword()"
               [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
-              [attr.aria-pressed]="showPassword"
             >
               <i class="ri-eye-line" *ngIf="!showPassword" aria-hidden="true"></i>
               <i class="ri-eye-off-line" *ngIf="showPassword" aria-hidden="true"></i>
@@ -105,8 +104,9 @@
           type="submit"
           variant="primary"
           [full]="true"
-          label="Se connecter"
-          [disabled]="!!loginForm.invalid"
+          [label]="isLoading ? 'Connexion...' : 'Se connecter'"
+          [disabled]="!!loginForm.invalid || isLoading"
+          [loading]="isLoading"
         />
 
       </form>

@@ -111,7 +111,7 @@
 }
 
 .kpi-card--blue   .kpi-card__icon { background: color-mix(in srgb, var(--brand-primary) 10%, white); color: var(--brand-primary); }
-.kpi-card--purple .kpi-card__icon { background: color-mix(in srgb, #7C3AED 10%, white); color: #7C3AED; }
+.kpi-card--purple .kpi-card__icon { background: color-mix(in srgb, var(--color-purple) 10%, white); color: var(--color-purple); }
 .kpi-card--green  .kpi-card__icon { background: color-mix(in srgb, var(--color-success) 10%, white); color: var(--color-success); }
 .kpi-card--teal   .kpi-card__icon { background: color-mix(in srgb, #0891B2 10%, white); color: #0891B2; }
 .kpi-card--amber  .kpi-card__icon { background: color-mix(in srgb, var(--color-warning) 12%, white); color: var(--color-warning); }
@@ -173,12 +173,12 @@
 .dash-section__head--blue   { background: color-mix(in srgb, var(--brand-primary) 5%, white); }
 .dash-section__head--green  { background: color-mix(in srgb, var(--color-success)  5%, white); }
 .dash-section__head--amber  { background: color-mix(in srgb, var(--color-warning)  6%, white); }
-.dash-section__head--purple { background: color-mix(in srgb, #7C3AED 5%, white); }
+.dash-section__head--purple { background: color-mix(in srgb, var(--color-purple) 5%, white); }
 
 .dash-section__head--blue   i { color: var(--brand-primary); }
 .dash-section__head--green  i { color: var(--color-success); }
 .dash-section__head--amber  i { color: var(--color-warning); }
-.dash-section__head--purple i { color: #7C3AED; }
+.dash-section__head--purple i { color: var(--color-purple); }
 
 .dash-section__head i { font-size: 1.1rem; }
 

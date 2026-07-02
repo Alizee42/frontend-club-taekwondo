@@ -76,7 +76,14 @@
           </div>
 
           <div class="form-actions">
-            <ui-button type="submit" variant="success" icon="ri-save-line" label="Sauvegarder" [disabled]="!isEditing || !!profilForm.invalid" />
+            <ui-button
+              type="submit"
+              variant="success"
+              icon="ri-save-line"
+              [label]="isSaving ? 'Sauvegarde...' : 'Sauvegarder'"
+              [loading]="isSaving"
+              [disabled]="!isEditing || !!profilForm.invalid || isSaving"
+            />
           </div>
         </form>
       </section>
@@ -122,6 +129,13 @@
       <div class="form-group">
         <label for="newPassword">Nouveau mot de passe</label>
         <input type="password" id="newPassword" name="newPassword" [(ngModel)]="passwordData.newPassword" class="form-control" placeholder="Nouveau mot de passe" required>
+        <div class="pwd-strength-bar" *ngIf="passwordData.newPassword.length > 0" [class]="'pwd-strength-bar ' + pwdStrengthClass">
+          <span class="bar" [class.filled]="pwdStrength >= 1"></span>
+          <span class="bar" [class.filled]="pwdStrength >= 2"></span>
+          <span class="bar" [class.filled]="pwdStrength >= 3"></span>
+          <span class="bar" [class.filled]="pwdStrength >= 4"></span>
+          <small class="strength-label">{{ pwdStrengthLabel }}</small>
+        </div>
       </div>
       <div class="form-group">
         <label for="confirmPassword">Confirmer</label>
@@ -133,8 +147,15 @@
       </div>
 
       <div class="form-actions">
-        <ui-button type="button" variant="secondary" icon="ri-close-line" label="Annuler" (clicked)="closePasswordModal()" />
-        <ui-button type="submit" variant="primary" icon="ri-save-line" label="Enregistrer" />
+        <ui-button type="button" variant="secondary" icon="ri-close-line" label="Annuler" [disabled]="isSavingPassword" (clicked)="closePasswordModal()" />
+        <ui-button
+          type="submit"
+          variant="primary"
+          icon="ri-save-line"
+          [label]="isSavingPassword ? 'Enregistrement...' : 'Enregistrer'"
+          [loading]="isSavingPassword"
+          [disabled]="isSavingPassword"
+        />
       </div>
     </form>
   </div>

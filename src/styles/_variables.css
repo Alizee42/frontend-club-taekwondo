@@ -3,6 +3,9 @@
    ============================================= */
 :root {
 
+  /* ── Layout ─────────────────────────────────── */
+  --header-h: 64px;
+
   /* ── Brand ─────────────────────────────────── */
   --brand-primary:      #1A5CA8;   /* bleu acier — boutons, liens */
   --brand-primary-dark: #0E1F3B;   /* navy profond — header, hero  */
@@ -29,6 +32,10 @@
   --color-border:       #E5E7EB;
   --color-border-2:     #D1D5DB;
   --color-border-focus: var(--brand-primary);
+
+  /* ── Extra palette ─────────────────────────── */
+  --color-purple:       #7C3AED;
+  --color-purple-bg:    #F3E8FF;
 
   /* ── Status ─────────────────────────────────── */
   --color-success:      #059669;

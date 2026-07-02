@@ -1,6 +1,6 @@
 <section class="hero">
   <!-- Vidéo de fond -->
-  <video autoplay muted loop playsinline class="hero-video" aria-hidden="true" [src]="videoUrl" (error)="onVideoError()"></video>
+  <video #heroVideo autoplay muted loop playsinline class="hero-video" aria-hidden="true" [src]="videoUrl" (error)="onVideoError()" (canplay)="heroVideo.play()"></video>
   <div class="hero-overlay" aria-hidden="true"></div>
 
   <!-- Contenu principal -->

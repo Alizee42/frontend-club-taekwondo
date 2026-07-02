@@ -53,6 +53,7 @@ export class AppComponent implements OnInit, OnDestroy {
   userAvatar: string | undefined;
   unreadNotifications = 0;
   notifications: Notification[] = [];
+  loadingNotifs = false;
   cartCount = 0;
 
   private clubSub?: any;
@@ -125,6 +126,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.notifSub = this.notificationService.notifications$.subscribe(list => {
       this.notifications = list;
       this.unreadNotifications = list.filter(n => !n.lu).length;
+      this.loadingNotifs = false;
     });
 
     this.clubSub = this.clubService.selectedClub$.subscribe(
@@ -156,6 +158,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.userAvatar = state.user['avatarUrl'] || '';
 
           // Démarrer le polling notifications
+          this.loadingNotifs = true;
           this.notificationService.startPolling();
 
           const selectedClub = this.clubService.getSelectedClub();

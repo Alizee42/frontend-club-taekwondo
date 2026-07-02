@@ -3,7 +3,7 @@
 }
 
 .apropos-page {
-  min-height: calc(100vh - 88px);
+  min-height: calc(100vh - var(--header-h, 88px));
   gap: var(--sp-3);
   overflow: visible;
   padding: var(--sp-3) var(--sp-5);
@@ -42,7 +42,7 @@
 
 @media (min-width: 1025px) {
   .apropos-page {
-    height: calc(100vh - 88px);
+    height: calc(100vh - var(--header-h, 88px));
     overflow: hidden;
   }
 }

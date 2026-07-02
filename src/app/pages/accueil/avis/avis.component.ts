@@ -158,9 +158,13 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
     this.avisService.getAvisParClub(clubId).subscribe({
       next: (avis: Avis[]) => {
         this.avisApprouves = avis || [];
+        this.error = null;
         this.initOrUpdateSwiper();
       },
-      error: () => {}
+      error: () => {
+        this.avisApprouves = [];
+        this.error = 'Impossible de charger les avis pour le moment.';
+      }
     });
   }
 

@@ -78,3 +78,23 @@
 .ui-form-submit:hover:not(:disabled) {
   background: var(--blue-hover);
 }
+
+.ui-form-checkbox-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sp-4, 16px);
+  max-width: 100%;
+}
+
+.ui-form-checkbox-label {
+  min-width: 100px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.ui-form-checkbox-input {
+  width: auto;
+  margin: 0;
+  align-self: flex-start;
+}

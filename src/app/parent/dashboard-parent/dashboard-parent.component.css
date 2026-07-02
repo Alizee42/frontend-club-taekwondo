@@ -24,14 +24,14 @@
 }
 
 .dash-header__panel {
-  width: 68px;
+  width: var(--dash-panel-w, 68px);
   background: var(--brand-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: rgba(255,255,255,.85);
-  font-size: 1.6rem;
+  font-size: var(--text-lg, 1.0625rem);
 }
 
 .dash-header__body {

@@ -24,13 +24,8 @@ export class ConnexionComponent {
   email: string = '';
   password: string = '';
   clubId: number | undefined = undefined;
-  clubs: Array<{ id: number; nom: string }> = [
-    { id: 1, nom: 'Club 1' },
-    { id: 2, nom: 'Club 2' },
-    { id: 3, nom: 'Club 3' },
-    { id: 4, nom: 'Club 4' }
-  ];
   showPassword: boolean = false;
+  isLoading: boolean = false;
 
   constructor(
     private router: Router,
@@ -49,25 +44,22 @@ export class ConnexionComponent {
   }
 
   onSubmit(): void {
-    if (!this.email || !this.password) { 
-      return; 
+    if (!this.email || !this.password) {
+      return;
     }
-    // NOTE: La sélection de club est volontairement facultative ici.
-    // Le rôle SUPER_ADMIN doit pouvoir se connecter même si aucun club
-    // n'est sélectionné (c'est le super-admin qui crée les clubs).
-    if (!this.isValidEmail(this.email)) { 
+    if (!this.isValidEmail(this.email)) {
       this.toastService.error('Adresse email invalide');
-      return; 
+      return;
     }
-      // Envoie le clubId sélectionné avec l'email et le mot de passe (un seul appel)
-      const payload = {
-        email: this.email,
-        password: this.password,
-        clubId: this.clubId !== undefined ? this.clubId : undefined
-      };
-      this.authService.login(payload)
-        .subscribe({
-          next: (response) => {
+    this.isLoading = true;
+    const payload = {
+      email: this.email,
+      password: this.password,
+      clubId: this.clubId !== undefined ? this.clubId : undefined
+    };
+    this.authService.login(payload)
+      .subscribe({
+        next: (response) => {
             const userClubId = response.utilisateur?.['clubId'];
             const role = (response.role || response.utilisateur?.role || '').toString().toUpperCase();
 
@@ -108,6 +100,7 @@ export class ConnexionComponent {
           },
           error: (err) => {
             console.error('[CONNEXION] ❌ Login échoué', err);
+            this.isLoading = false;
             this.handleError(err);
           }
         });

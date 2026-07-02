@@ -7,8 +7,8 @@
   overflow: hidden;
   border-top: 1px solid color-mix(in srgb, var(--brand-primary) 22%, var(--color-border));
   background:
-    radial-gradient(circle at 12% 0%, rgba(26, 92, 168, 0.36), transparent 32%),
-    linear-gradient(135deg, #0b1830 0%, #0e1f3b 52%, #132a4f 100%);
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--brand-primary) 36%, transparent), transparent 32%),
+    linear-gradient(135deg, var(--brand-primary-dark, #0e1f3b) 0%, var(--brand-primary-dark, #0e1f3b) 52%, color-mix(in srgb, var(--brand-primary-dark) 85%, #fff) 100%);
   color: rgba(255, 255, 255, 0.84);
 }
 
@@ -17,7 +17,7 @@
   position: absolute;
   inset: 0 0 auto;
   height: 3px;
-  background: linear-gradient(90deg, var(--brand-accent), var(--brand-primary), #8cc8ff);
+  background: linear-gradient(90deg, var(--brand-accent), var(--brand-primary), color-mix(in srgb, var(--brand-primary) 40%, #fff));
 }
 
 .footer-main,
@@ -137,7 +137,7 @@
 }
 
 .footer-contact i {
-  color: #8cc8ff;
+  color: color-mix(in srgb, var(--brand-primary) 40%, #fff);
 }
 
 .footer-bottom {

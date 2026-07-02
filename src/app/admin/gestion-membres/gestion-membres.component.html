@@ -75,12 +75,12 @@
       </ui-table>
 
       <div class="gm-pagination" *ngIf="totalPagesComptes > 1">
-        <button class="gm-page-btn" [disabled]="pageComptes === 1" (click)="goToPageComptes(pageComptes - 1)">
-          <i class="ri-arrow-left-s-line"></i>
+        <button class="gm-page-btn" [disabled]="pageComptes === 1" (click)="goToPageComptes(pageComptes - 1)" aria-label="Page précédente">
+          <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
         </button>
         <span class="gm-page-info">Page {{ pageComptes }} / {{ totalPagesComptes }}</span>
-        <button class="gm-page-btn" [disabled]="pageComptes === totalPagesComptes" (click)="goToPageComptes(pageComptes + 1)">
-          <i class="ri-arrow-right-s-line"></i>
+        <button class="gm-page-btn" [disabled]="pageComptes === totalPagesComptes" (click)="goToPageComptes(pageComptes + 1)" aria-label="Page suivante">
+          <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
         </button>
       </div>
     </div>
@@ -121,12 +121,12 @@
       </ui-table>
 
       <div class="gm-pagination" *ngIf="totalPagesPratiquants > 1">
-        <button class="gm-page-btn" [disabled]="pagePratiquants === 1" (click)="goToPagePratiquants(pagePratiquants - 1)">
-          <i class="ri-arrow-left-s-line"></i>
+        <button class="gm-page-btn" [disabled]="pagePratiquants === 1" (click)="goToPagePratiquants(pagePratiquants - 1)" aria-label="Page précédente">
+          <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
         </button>
         <span class="gm-page-info">Page {{ pagePratiquants }} / {{ totalPagesPratiquants }}</span>
-        <button class="gm-page-btn" [disabled]="pagePratiquants === totalPagesPratiquants" (click)="goToPagePratiquants(pagePratiquants + 1)">
-          <i class="ri-arrow-right-s-line"></i>
+        <button class="gm-page-btn" [disabled]="pagePratiquants === totalPagesPratiquants" (click)="goToPagePratiquants(pagePratiquants + 1)" aria-label="Page suivante">
+          <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
         </button>
       </div>
     </div>

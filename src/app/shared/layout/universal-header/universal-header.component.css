@@ -265,6 +265,20 @@
   max-height: 360px;
   overflow-y: auto;
 }
+.uh-notif-panel__loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--sp-6, 1.5rem);
+  color: var(--color-text-muted, #718096);
+}
+.uh-spin {
+  animation: uh-spin 0.8s linear infinite;
+  font-size: 1.5rem;
+}
+@keyframes uh-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 .uh-notif-panel__empty {
   font-size: var(--text-sm, .875rem);
   color: var(--color-text-muted, #718096);
@@ -303,7 +317,7 @@
   justify-content: center;
   gap: var(--sp-2, .5rem);
   padding: var(--sp-2, .5rem) var(--sp-3, .75rem);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--brand-primary, #1A5CA8);
   color: #fff;
   border: none;
   border-radius: var(--radius-md, .5rem);
@@ -314,7 +328,7 @@
 }
 .uh-notif-panel__view-all:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(26, 92, 168, 0.4);
 }
 
 /* ── Notification items ──────────────────────────────────── */
@@ -467,7 +481,7 @@
   top: 64px;
   left: 0;
   width: min(280px, 85vw);
-  height: calc(100vh - 64px);
+  height: calc(100vh - var(--header-h, 64px));
   background: var(--brand-primary-dark, #0E1F3B);
   z-index: calc(var(--z-sticky, 50) + 1);
   transform: translateX(-100%);

@@ -10,9 +10,15 @@
 <!-- ═══════════════════════════════ CONTENU ══════════════════════════════ -->
 <div class="bq-page">
 
-  <div *ngIf="loading" class="bq-state">
-    <span class="bq-spinner"></span>
-    <p>Chargement des produits…</p>
+  <div *ngIf="loading" class="bq-skeleton" aria-busy="true" aria-label="Chargement des produits">
+    <div class="bq-skeleton__card" *ngFor="let i of [1,2,3]">
+      <div class="bq-skeleton__img"></div>
+      <div class="bq-skeleton__body">
+        <div class="bq-skeleton__line bq-skeleton__line--title"></div>
+        <div class="bq-skeleton__line bq-skeleton__line--desc"></div>
+        <div class="bq-skeleton__line bq-skeleton__line--short"></div>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="!loading && error" class="bq-state bq-state--error">

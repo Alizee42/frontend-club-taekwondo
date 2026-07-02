@@ -358,7 +358,7 @@
 
           <!-- Indicateur de force — hors grille pour éviter le décalage -->
           <div class="password-strength-block" *ngIf="passwordValue.length > 0"
-               [style.--strength-color]="passwordStrengthColor">
+               [class]="'password-strength-block ' + passwordStrengthClass">
             <span class="bar" [class.filled]="passwordStrength >= 1"></span>
             <span class="bar" [class.filled]="passwordStrength >= 2"></span>
             <span class="bar" [class.filled]="passwordStrength >= 3"></span>
@@ -547,7 +547,15 @@
         </div>
         <div class="card-footer insc-actions insc-actions--between">
           <ui-button type="button" variant="secondary" icon="ri-arrow-left-line" label="Retour" (clicked)="previousStep()" />
-          <ui-button type="button" variant="primary" icon="ri-send-plane-2-line" label="Finaliser l'inscription" (clicked)="onSubmit()" />
+          <ui-button
+            type="button"
+            variant="primary"
+            icon="ri-send-plane-2-line"
+            [label]="loading ? 'Inscription en cours...' : 'Finaliser l\'inscription'"
+            [loading]="loading"
+            [disabled]="loading"
+            (clicked)="onSubmit()"
+          />
         </div>
       </div>
     </div>
@@ -561,8 +569,8 @@
 <!-- ═══════════════════════════════════════════
      Modale succès
 ════════════════════════════════════════════ -->
-<div class="modal-overlay" *ngIf="showConfirmationModal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-  <div class="modal-content">
+<div class="modal-overlay" *ngIf="showConfirmationModal" role="dialog" aria-modal="true" aria-labelledby="modal-title" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
 
     <!-- Icône + titre -->
     <div class="modal-header">

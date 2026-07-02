@@ -43,30 +43,36 @@
         </a>
 
         <!-- Notifications (header public connecté) -->
-        <button type="button" class="uh-icon-btn" title="Notifications" (click)="toggleNotif(); $event.stopPropagation()">
-          <i class="ri-notification-3-line"></i>
-          <span class="uh-badge" *ngIf="unreadNotifications > 0">{{ unreadNotifications }}</span>
+        <button type="button" class="uh-icon-btn"
+          [attr.aria-label]="unreadNotifications > 0 ? unreadNotifications + ' notifications non lues' : 'Notifications'"
+          [attr.aria-expanded]="notifOpen"
+          (click)="toggleNotif(); $event.stopPropagation()">
+          <i class="ri-notification-3-line" aria-hidden="true"></i>
+          <span class="uh-badge" *ngIf="unreadNotifications > 0" aria-hidden="true">{{ unreadNotifications }}</span>
         </button>
 
         <!-- Panel Notifs -->
-        <div class="uh-notif-panel" [class.is-open]="notifOpen" (click)="$event.stopPropagation()">
+        <div class="uh-notif-panel" [class.is-open]="notifOpen" (click)="$event.stopPropagation()" role="dialog" aria-label="Notifications">
           <div class="uh-notif-panel__head">
             <span>Notifications</span>
             <div class="uh-notif-panel__actions">
-              <button type="button" class="uh-notif-panel__mark-all" (click)="onMarkAllRead()" *ngIf="unreadNotifications > 0" title="Tout marquer comme lu">
-                <i class="ri-check-double-line"></i>
+              <button type="button" class="uh-notif-panel__mark-all" (click)="onMarkAllRead()" *ngIf="unreadNotifications > 0" aria-label="Tout marquer comme lu">
+                <i class="ri-check-double-line" aria-hidden="true"></i>
               </button>
-              <button type="button" class="uh-notif-panel__close" (click)="notifOpen=false">
-                <i class="ri-close-line"></i>
+              <button type="button" class="uh-notif-panel__close" (click)="notifOpen=false" aria-label="Fermer les notifications">
+                <i class="ri-close-line" aria-hidden="true"></i>
               </button>
             </div>
           </div>
-          <div class="uh-notif-panel__body">
-            <p *ngIf="notifications.length === 0" class="uh-notif-panel__empty">
-              <i class="ri-notification-off-line"></i> Aucune notification.
+          <div class="uh-notif-panel__body" aria-live="polite" aria-atomic="false">
+            <div *ngIf="loadingNotifs" class="uh-notif-panel__loading" aria-label="Chargement des notifications">
+              <i class="ri-loader-4-line uh-spin" aria-hidden="true"></i>
+            </div>
+            <p *ngIf="!loadingNotifs && notifications.length === 0" class="uh-notif-panel__empty">
+              <i class="ri-notification-off-line" aria-hidden="true"></i> Aucune notification.
             </p>
-            <div *ngFor="let n of notifications" class="uh-notif-item" [class.uh-notif-item--unread]="!n.lu" (click)="onNotifClick(n)" [class.uh-notif-item--clickable]="!!n.lienAction">
-              <div class="uh-notif-item__icon">
+            <div *ngFor="let n of notifications" class="uh-notif-item" [class.uh-notif-item--unread]="!n.lu" (click)="onNotifClick(n)" [class.uh-notif-item--clickable]="!!n.lienAction" role="listitem">
+              <div class="uh-notif-item__icon" aria-hidden="true">
                 <i [class]="'ri-' + (n.type === 'paiement' ? 'bank-card-line' : n.type === 'evenement' ? 'calendar-event-line' : n.type === 'commande' ? 'shopping-bag-3-line' : 'notification-3-line')"></i>
               </div>
               <div class="uh-notif-item__content">
@@ -74,12 +80,12 @@
                 <p class="uh-notif-item__msg">{{ n.message }}</p>
                 <span class="uh-notif-item__date">{{ n.date | date:'dd/MM/yyyy HH:mm' }}</span>
               </div>
-              <span class="uh-notif-item__dot" *ngIf="!n.lu"></span>
+              <span class="uh-notif-item__dot" *ngIf="!n.lu" aria-label="Non lu"></span>
             </div>
           </div>
           <div class="uh-notif-panel__footer">
             <button type="button" class="uh-notif-panel__view-all" (click)="goToNotifications()">
-              <i class="ri-arrow-right-line"></i>
+              <i class="ri-arrow-right-line" aria-hidden="true"></i>
               Voir toutes les notifications
             </button>
           </div>
@@ -195,30 +201,36 @@
       </a>
 
       <!-- Notifications -->
-      <button type="button" class="uh-icon-btn" title="Notifications" (click)="toggleNotif(); $event.stopPropagation()">
-        <i class="ri-notification-3-line"></i>
-        <span class="uh-badge" *ngIf="unreadNotifications > 0">{{ unreadNotifications }}</span>
+      <button type="button" class="uh-icon-btn"
+        [attr.aria-label]="unreadNotifications > 0 ? unreadNotifications + ' notifications non lues' : 'Notifications'"
+        [attr.aria-expanded]="notifOpen"
+        (click)="toggleNotif(); $event.stopPropagation()">
+        <i class="ri-notification-3-line" aria-hidden="true"></i>
+        <span class="uh-badge" *ngIf="unreadNotifications > 0" aria-hidden="true">{{ unreadNotifications }}</span>
       </button>
 
       <!-- Panel Notifs -->
-      <div class="uh-notif-panel" [class.is-open]="notifOpen" (click)="$event.stopPropagation()">
+      <div class="uh-notif-panel" [class.is-open]="notifOpen" (click)="$event.stopPropagation()" role="dialog" aria-label="Notifications">
         <div class="uh-notif-panel__head">
           <span>Notifications</span>
           <div class="uh-notif-panel__actions">
-            <button type="button" class="uh-notif-panel__mark-all" (click)="onMarkAllRead()" *ngIf="unreadNotifications > 0" title="Tout marquer comme lu">
-              <i class="ri-check-double-line"></i>
+            <button type="button" class="uh-notif-panel__mark-all" (click)="onMarkAllRead()" *ngIf="unreadNotifications > 0" aria-label="Tout marquer comme lu">
+              <i class="ri-check-double-line" aria-hidden="true"></i>
             </button>
-            <button type="button" class="uh-notif-panel__close" (click)="notifOpen=false">
-              <i class="ri-close-line"></i>
+            <button type="button" class="uh-notif-panel__close" (click)="notifOpen=false" aria-label="Fermer les notifications">
+              <i class="ri-close-line" aria-hidden="true"></i>
             </button>
           </div>
         </div>
-        <div class="uh-notif-panel__body">
-          <p *ngIf="notifications.length === 0" class="uh-notif-panel__empty">
-            <i class="ri-notification-off-line"></i> Aucune notification.
+        <div class="uh-notif-panel__body" aria-live="polite" aria-atomic="false">
+          <div *ngIf="loadingNotifs" class="uh-notif-panel__loading" aria-label="Chargement des notifications">
+            <i class="ri-loader-4-line uh-spin" aria-hidden="true"></i>
+          </div>
+          <p *ngIf="!loadingNotifs && notifications.length === 0" class="uh-notif-panel__empty">
+            <i class="ri-notification-off-line" aria-hidden="true"></i> Aucune notification.
           </p>
-          <div *ngFor="let n of notifications" class="uh-notif-item" [class.uh-notif-item--unread]="!n.lu" (click)="onNotifClick(n)" [class.uh-notif-item--clickable]="!!n.lienAction">
-            <div class="uh-notif-item__icon">
+          <div *ngFor="let n of notifications" class="uh-notif-item" [class.uh-notif-item--unread]="!n.lu" (click)="onNotifClick(n)" [class.uh-notif-item--clickable]="!!n.lienAction" role="listitem">
+            <div class="uh-notif-item__icon" aria-hidden="true">
               <i [class]="'ri-' + (n.type === 'paiement' ? 'bank-card-line' : n.type === 'evenement' ? 'calendar-event-line' : n.type === 'commande' ? 'shopping-bag-3-line' : 'notification-3-line')"></i>
             </div>
             <div class="uh-notif-item__content">
@@ -226,13 +238,13 @@
               <p class="uh-notif-item__msg">{{ n.message }}</p>
               <span class="uh-notif-item__date">{{ n.date | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
-            <span class="uh-notif-item__dot" *ngIf="!n.lu"></span>
+            <span class="uh-notif-item__dot" *ngIf="!n.lu" aria-label="Non lu"></span>
           </div>
         </div>
         <!-- Footer -->
         <div class="uh-notif-panel__footer">
           <button type="button" class="uh-notif-panel__view-all" (click)="goToNotifications()">
-            <i class="ri-arrow-right-line"></i>
+            <i class="ri-arrow-right-line" aria-hidden="true"></i>
             Voir toutes les notifications
           </button>
         </div>

@@ -21,6 +21,7 @@ export class UniversalHeaderComponent implements OnChanges {
   @Input() userAvatar?: string;
   @Input() unreadNotifications: number = 0;
   @Input() notifications: Notification[] = [];
+  @Input() loadingNotifs: boolean = false;
   @Input() role: RoleStr = '';
   @Input() cartCount: number = 0;
 

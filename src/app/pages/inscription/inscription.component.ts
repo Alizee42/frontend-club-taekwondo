@@ -510,13 +510,8 @@ export class InscriptionComponent implements OnInit {
     return ['Très faible', 'Faible', 'Correct', 'Bon', 'Fort'][s] || 'Très faible';
   }
 
-  get passwordStrengthColor(): string {
-    switch (this.passwordStrength) {
-      case 1: return '#e74c3c';
-      case 2: return '#f39c12';
-      case 3: return '#f1c40f';
-      case 4: return '#2ecc71';
-      default: return '#e0e0e0';
-    }
+  get passwordStrengthClass(): string {
+    const s = this.passwordStrength;
+    return s > 0 ? `strength-${s}` : '';
   }
 }

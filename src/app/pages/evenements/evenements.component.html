@@ -25,7 +25,7 @@
     </div>
 
     <app-empty-state
-      *ngIf="!isLoading && evenements.length === 0"
+      *ngIf="!isLoading && !errorMessage && evenements.length === 0"
       icon="ri-calendar-line"
       title="Aucun événement prévu"
       description="Il n'y a pas d'événement programmé pour le moment. Revenez bientôt pour découvrir nos prochaines activités."

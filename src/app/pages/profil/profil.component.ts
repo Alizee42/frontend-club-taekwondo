@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from "@angular/router";
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -13,42 +13,51 @@ import { ToastService } from '../../shared/toast/toast.service';
   templateUrl: './profil.component.html',
   styleUrls: ['./profil.component.css'],
   standalone: true,
-  imports: [FormsModule, CommonModule, UiButtonComponent] // Supprimez Router des imports
+  imports: [FormsModule, CommonModule, UiButtonComponent]
 })
 export class ProfilComponent implements OnInit {
   user: Utilisateur | any = {};
   apiUrl = `${environment.apiUrl}/utilisateurs`;
   editMode: any = {};
-  activeTab = 'informations'; // Onglet actif par défaut
-  showPasswordModal = false; // Contrôle l'affichage de la modale
-  passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' }; // Données pour le mot de passe
-  passwordError = ''; // Message d'erreur pour le mot de passe
-  role: string | null = null; // Stocke le rôle de l'utilisateur
+  activeTab = 'informations';
+  showPasswordModal = false;
+  passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' };
+  passwordError = '';
+  role: string | null = null;
   // Edition
   isEditing = false;
+  isSaving = false;
+  isSavingPassword = false;
   private originalUser: Utilisateur | any = null;
-  // Sécurité - affichage
+  // Securite - affichage
   lastPwdAgo = '';
   lastPwdExact = '';
 
-  constructor(private http: HttpClient, private router: Router, private auth: AuthService, private toast: ToastService) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private auth: AuthService,
+    private toast: ToastService
+  ) {}
 
   ngOnInit(): void {
-    // Rôle courant via AuthService
     this.role = this.auth.getRole() ? String(this.auth.getRole()) : null;
     if (!this.auth.isConnecte()) {
       this.logout();
       return;
     }
-
-    // Pré-charger depuis état courant si dispo
     const authUser = this.auth.getUtilisateurConnecte();
     if (authUser) {
       this.user = { ...authUser };
     }
-    // Toujours rafraîchir depuis le backend pour avoir les derniers champs (nom/prenom parent, etc.)
     this.loadUserData();
-    
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isEditing) {
+      event.preventDefault();
+    }
   }
 
   logout(): void {
@@ -57,27 +66,20 @@ export class ProfilComponent implements OnInit {
     this.router.navigate(['/connexion']);
   }
 
-  // Méthode pour changer d'onglet
   setActiveTab(tab: string): void {
     this.activeTab = tab;
   }
-
-  // Méthode pour activer/désactiver les notifications email
-  // (préférences/notifications email supprimées)
 
   loadUserData(): void {
     const headers = this.auth.getAuthHeaders();
     this.http.get<any>(`${this.apiUrl}/me`, { headers }).subscribe({
       next: (response) => {
         this.user = response;
-        // Mettez à jour les deux clés pour compatibilité
-        try {
-          this.auth.updateUtilisateurConnecte(this.user);
-        } catch {}
+        try { this.auth.updateUtilisateurConnecte(this.user); } catch {}
         this.updateLastPwdAgo();
       },
       error: (err) => {
-        console.error('Erreur lors de la récupération des données utilisateur :', err);
+        console.error('Erreur chargement profil :', err);
       }
     });
   }
@@ -86,10 +88,9 @@ export class ProfilComponent implements OnInit {
     const current = this.user as any;
     const id = current?.id;
     if (!id) {
-      this.toast.error('Impossible de mettre à jour: identifiant manquant.');
+      this.toast.error('Identifiant manquant, impossible de sauvegarder.');
       return;
     }
-    // Construire un DTO complet pour éviter d’écraser avec des null
     const dto: any = {
       id,
       nom: current.nom ?? '',
@@ -102,22 +103,23 @@ export class ProfilComponent implements OnInit {
       clubId: current.clubId ?? null
     };
 
+    this.isSaving = true;
     const headers = this.auth.getAuthHeaders();
     this.http.put<any>(`${this.apiUrl}/${id}`, dto, { headers }).subscribe({
       next: (updated) => {
         this.user = updated || dto;
-        try {
-          this.auth.updateUtilisateurConnecte(this.user);
-        } catch {}
+        try { this.auth.updateUtilisateurConnecte(this.user); } catch {}
         this.editMode = {};
-        this.toast.success('Profil mis à jour avec succès.');
+        this.toast.success('Profil mis a jour avec succes.');
         this.isEditing = false;
         this.originalUser = null;
+        this.isSaving = false;
         this.updateLastPwdAgo();
       },
       error: (err) => {
-        console.error('Erreur lors de la mise à jour du profil :', err);
-        this.toast.error('Une erreur est survenue lors de la mise à jour du profil.');
+        console.error('Erreur mise a jour profil :', err);
+        this.toast.error('Erreur lors de la mise a jour du profil.');
+        this.isSaving = false;
       }
     });
   }
@@ -126,6 +128,26 @@ export class ProfilComponent implements OnInit {
     this.showPasswordModal = true;
     this.passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' };
     this.passwordError = '';
+  }
+
+  get pwdStrength(): number {
+    const v = this.passwordData.newPassword;
+    if (!v) return 0;
+    let s = 0;
+    if (v.length >= 8) s++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
+    if (/\d/.test(v)) s++;
+    if (/[^A-Za-z0-9]/.test(v)) s++;
+    return s;
+  }
+
+  get pwdStrengthClass(): string {
+    const s = this.pwdStrength;
+    return s > 0 ? `strength-${s}` : '';
+  }
+
+  get pwdStrengthLabel(): string {
+    return ['', 'Faible', 'Correct', 'Bon', 'Fort'][this.pwdStrength] || '';
   }
 
   closePasswordModal(): void {
@@ -141,18 +163,16 @@ export class ProfilComponent implements OnInit {
     }
 
     if (!this.validatePassword(newPassword)) {
-      this.passwordError =
-        'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.';
+      this.passwordError = 'Minimum 8 caracteres, une majuscule, une minuscule, un chiffre et un caractere special.';
       return;
     }
 
     const id = (this.user as any)?.id;
     if (!id) {
-      this.toast.error('Impossible de mettre à jour le mot de passe: identifiant manquant.');
+      this.toast.error('Identifiant manquant, impossible de mettre a jour le mot de passe.');
       return;
     }
 
-    // On envoie un DTO complet + password (service encodera et mettra passwordTemporaire=false)
     const current = this.user as any;
     const dto: any = {
       id,
@@ -167,21 +187,22 @@ export class ProfilComponent implements OnInit {
       password: newPassword
     };
 
+    this.isSavingPassword = true;
     const headers = this.auth.getAuthHeaders();
     this.http.put<any>(`${this.apiUrl}/${id}`, dto, { headers }).subscribe({
       next: (updated) => {
         this.user = updated || dto;
-        try {
-          this.auth.updateUtilisateurConnecte(this.user);
-        } catch {}
-        this.toast.success('Mot de passe mis à jour avec succès.');
+        try { this.auth.updateUtilisateurConnecte(this.user); } catch {}
+        this.toast.success('Mot de passe mis a jour avec succes.');
         this.passwordError = '';
+        this.isSavingPassword = false;
         this.closePasswordModal();
         this.updateLastPwdAgo();
       },
       error: (err) => {
-        console.error('Erreur lors de la mise à jour du mot de passe :', err);
-        this.toast.error('Une erreur est survenue lors de la mise à jour du mot de passe.');
+        console.error('Erreur mise a jour mot de passe :', err);
+        this.toast.error('Erreur lors de la mise a jour du mot de passe.');
+        this.isSavingPassword = false;
       }
     });
   }
@@ -194,9 +215,24 @@ export class ProfilComponent implements OnInit {
   toggleEdit(field: string): void {
     this.editMode[field] = !this.editMode[field];
   }
+
   startEdit(): void {
     this.originalUser = JSON.parse(JSON.stringify(this.user || {}));
     this.isEditing = true;
+  }
+
+  cancelEdit(): void {
+    if (this.originalUser) {
+      this.user = JSON.parse(JSON.stringify(this.originalUser));
+    }
+    this.isEditing = false;
+    this.originalUser = null;
+  }
+
+  getInitiales(nom: string, prenom: string): string {
+    const initialeNom = nom ? nom.charAt(0) : '';
+    const initialePrenom = prenom ? prenom.charAt(0) : '';
+    return (initialeNom + initialePrenom).toUpperCase();
   }
 
   private updateLastPwdAgo(): void {
@@ -220,25 +256,11 @@ export class ProfilComponent implements OnInit {
           this.lastPwdAgo = `il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
         } else {
           const diffMin = Math.floor(diffMs / (1000 * 60));
-          this.lastPwdAgo = diffMin <= 1 ? "à l'instant" : `il y a ${diffMin} minutes`;
+          this.lastPwdAgo = diffMin <= 1 ? 'instant' : `il y a ${diffMin} minutes`;
         }
       }
     } catch {
       this.lastPwdAgo = '';
     }
   }
-
-  cancelEdit(): void {
-    if (this.originalUser) {
-      this.user = JSON.parse(JSON.stringify(this.originalUser));
-    }
-    this.isEditing = false;
-    this.originalUser = null;
-  }
-  getInitiales(nom: string, prenom: string): string {
-    const initialeNom = nom ? nom.charAt(0) : '';
-    const initialePrenom = prenom ? prenom.charAt(0) : '';
-    return (initialeNom + initialePrenom).toUpperCase();
-  }
-  
 }

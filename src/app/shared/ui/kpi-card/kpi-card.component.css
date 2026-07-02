@@ -146,10 +146,10 @@
 .kpi-card--warning .kpi-card__value { color: var(--color-warning-ink, var(--color-warning)); }
 
 /* purple */
-.kpi-card--purple { border-top-color: #7C3AED; }
+.kpi-card--purple { border-top-color: var(--color-purple); }
 .kpi-card--purple .kpi-card__icon {
-  background: color-mix(in srgb, #7C3AED 12%, white);
-  color: #7C3AED;
+  background: color-mix(in srgb, var(--color-purple) 12%, white);
+  color: var(--color-purple);
 }
 
 /* red / danger */

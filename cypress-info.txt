@@ -1,0 +1,11 @@
+
+Proxy Settings: none detected
+Environment Variables: none detected
+
+Application Data: C:\Users\ag\AppData\Roaming\cypress\cy\development
+Browser Profiles: C:\Users\ag\AppData\Roaming\cypress\cy\development\browsers
+Binary Caches: C:\Users\ag\AppData\Local\Cypress\Cache
+
+Cypress Version: 15.18.0 (stable)
+System Platform: win32 (Microsoft Windows 11 Professionnel - 10.0.22631)
+System Memory: 16.8 GB free 1.86 GB

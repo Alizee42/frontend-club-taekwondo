@@ -2,6 +2,38 @@
    COMPOSANTS UI GLOBAUX (overrides & utilitaires)
    ============================================= */
 
+/* ── États erreur / vide dans les sections ── */
+.section-error,
+.section-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-8) var(--sp-4);
+  text-align: center;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.section-error {
+  color: var(--color-danger-ink);
+  background: var(--color-danger-bg);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 20%, transparent);
+}
+
+.section-empty {
+  color: var(--color-text-3);
+  background: var(--color-surface-2);
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.section-empty i,
+.section-error i {
+  font-size: var(--text-xl);
+  flex-shrink: 0;
+}
+
 .ui-title::after {
   content: "";
   display: block;

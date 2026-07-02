@@ -18,6 +18,8 @@ export class ActualitesComponent implements OnInit, OnDestroy {
   filteredNews: any[] = [];
   currentPage = 1;
   readonly pageSize = 3;
+  loading = false;
+  apiError = false;
 
   private clubIdSubscription?: Subscription;
 
@@ -38,6 +40,8 @@ export class ActualitesComponent implements OnInit, OnDestroy {
 
   loadActualitesClub(clubId: number): void {
     const apiBase = environment.apiUrl.replace(/\/api\/?$/, '');
+    this.loading = true;
+    this.apiError = false;
     this.actualiteService.getActualitesByClub(clubId).subscribe({
       next: (data) => {
         this.news = (Array.isArray(data) ? data : []).map(actu => {
@@ -54,11 +58,14 @@ export class ActualitesComponent implements OnInit, OnDestroy {
           return { ...actu, imageUrl: full };
         });
         this.currentPage = 1;
+        this.loading = false;
         this.updateFilteredNews();
       },
       error: () => {
         this.news = [];
         this.filteredNews = [];
+        this.apiError = true;
+        this.loading = false;
       }
     });
   }

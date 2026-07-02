@@ -15,15 +15,21 @@
     <div class="gal-skeleton__item" *ngFor="let i of [1,2,3,4,5,6]"></div>
   </div>
 
+  <!-- État erreur -->
+  <div *ngIf="!isLoading && apiError" class="section-error" role="alert">
+    <i class="ri-wifi-off-line" aria-hidden="true"></i>
+    Impossible de charger la galerie pour le moment. Veuillez réessayer plus tard.
+  </div>
+
   <!-- État vide -->
-  <div *ngIf="!isLoading && images.length === 0" class="gal-empty">
+  <div *ngIf="!isLoading && !apiError && images.length === 0" class="gal-empty">
     <i class="ri-image-line"></i>
     <h2>Aucune photo pour le moment</h2>
     <p>Les photos du club apparaîtront ici dès qu'elles seront publiées.</p>
   </div>
 
   <!-- Grille masonry -->
-  <div *ngIf="!isLoading && images.length > 0" class="gal-masonry">
+  <div *ngIf="!isLoading && !apiError && images.length > 0" class="gal-masonry">
     <div
       class="gal-item"
       *ngFor="let image of images; let i = index"

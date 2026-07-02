@@ -7,7 +7,7 @@
 /* ----- Split container ------------------------------------ */
 .login-split {
   display: flex;
-  min-height: calc(100vh - 64px); /* 64px = hauteur du header */
+  min-height: calc(100vh - var(--header-h, 64px));
 }
 
 /* ----- Panel gauche : identité visuelle ------------------- */
@@ -80,7 +80,7 @@
 }
 
 .login-brand__icon {
-  font-size: 4rem;
+  font-size: clamp(2.5rem, 5vw, 4rem);
   color: #fff;
   opacity: 0.92;
   flex-shrink: 0;
@@ -93,7 +93,7 @@
 }
 
 .login-brand__strong {
-  font-size: 2rem;
+  font-size: var(--text-3xl, 1.875rem);
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.02em;
@@ -116,7 +116,7 @@
 
 /* Séparateur */
 .login-brand__divider {
-  width: 60px;
+  width: var(--login-divider-w, 60px);
   height: 3px;
   background: rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-full);
@@ -125,7 +125,7 @@
 
 /* Tagline */
 .login-brand__tagline {
-  font-size: 1.35rem;
+  font-size: var(--text-xl, 1.25rem);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.55;

@@ -13,6 +13,8 @@ import { ClubSelectionService } from '../../../services/club-selection.service';
 })
 export class HorairesComponent implements OnInit, OnDestroy {
   horairesParJour: any[] = [];
+  loading = false;
+  apiError = false;
   private clubIdSubscription: any;
 
   constructor(
@@ -23,17 +25,23 @@ export class HorairesComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.clubIdSubscription = this.clubSelectionService.selectedClubId$.subscribe(clubId => {
       if (clubId) {
-        this.horairesService.getHorairesByClub(clubId).subscribe(horaires => {
-          // Regrouper par jour
-          const map = new Map<string, any[]>();
-          horaires.forEach(h => {
-            if (!map.has(h.jour)) map.set(h.jour, []);
-            map.get(h.jour)!.push(h);
-          });
-          this.horairesParJour = Array.from(map.entries()).map(([jour, items]) => ({
-            jour,
-            horaires: items
-          }));
+        this.loading = true;
+        this.apiError = false;
+        this.horairesService.getHorairesByClub(clubId).subscribe({
+          next: (horaires) => {
+            const map = new Map<string, any[]>();
+            horaires.forEach(h => {
+              if (!map.has(h.jour)) map.set(h.jour, []);
+              map.get(h.jour)!.push(h);
+            });
+            this.horairesParJour = Array.from(map.entries()).map(([jour, items]) => ({ jour, horaires: items }));
+            this.loading = false;
+          },
+          error: () => {
+            this.horairesParJour = [];
+            this.apiError = true;
+            this.loading = false;
+          }
         });
       } else {
         this.horairesParJour = [];

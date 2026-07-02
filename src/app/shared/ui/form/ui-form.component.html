@@ -4,9 +4,9 @@
 
   <div *ngFor="let field of fields" class="ui-form-group">
     <ng-container *ngIf="field.type === 'checkbox'; else notCheckbox">
-      <div style="display: flex; flex-direction: row; align-items: center; width: 320px; gap: 16px;">
-        <label [for]="field.name" style="min-width: 100px; font-weight: 500; margin: 0;">{{ field.label }}</label>
-        <input type="checkbox" [id]="field.name" [(ngModel)]="formData[field.name]" [name]="field.name" style="margin-left:0; align-self: flex-start; justify-self: flex-start;" />
+      <div class="ui-form-checkbox-row">
+        <label [for]="field.name" class="ui-form-checkbox-label">{{ field.label }}</label>
+        <input type="checkbox" [id]="field.name" [(ngModel)]="formData[field.name]" [name]="field.name" class="ui-form-checkbox-input" />
       </div>
     </ng-container>
     <ng-template #notCheckbox>

@@ -1,15 +1,15 @@
 /* ── Page wrapper ───────────────────────────────────────────── */
 .profil-page {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - var(--header-h, 64px));
   background: var(--color-bg);
-  padding: 2rem var(--container-padding, 1.5rem);
+  padding: var(--sp-8, 2rem) var(--container-padding, 1.5rem);
 }
 
 /* ── Grid 2 colonnes ────────────────────────────────────────── */
 .profil-grid {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 1.5rem;
+  grid-template-columns: var(--profil-sidebar-w, 260px) 1fr;
+  gap: var(--sp-6, 1.5rem);
   max-width: 1040px;
   margin: 0 auto;
   align-items: start;
@@ -23,16 +23,16 @@
   text-align: center;
   color: var(--color-text-inv);
   position: sticky;
-  top: 80px;
+  top: calc(var(--header-h, 64px) + var(--sp-4, 1rem));
 }
 
 .profil-avatar {
-  width: 84px;
-  height: 84px;
+  width: var(--avatar-sz, 84px);
+  height: var(--avatar-sz, 84px);
   background: var(--brand-accent);
   color: #fff;
   border-radius: 50%;
-  font-size: 2rem;
+  font-size: var(--text-2xl, 2rem);
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -44,7 +44,7 @@
 }
 
 .profil-name {
-  font-size: 1.1rem;
+  font-size: var(--text-lg, 1.125rem);
   font-weight: 700;
   color: #fff;
   margin: 0 0 .4rem;
@@ -53,7 +53,7 @@
 
 .profil-role {
   display: inline-block;
-  font-size: .68rem;
+  font-size: var(--text-xs, .75rem);
   font-weight: 800;
   background: rgba(255, 255, 255, .15);
   color: #fff;
@@ -65,7 +65,7 @@
 }
 
 .profil-email {
-  font-size: .82rem;
+  font-size: var(--text-sm, .875rem);
   color: rgba(255, 255, 255, .65);
   margin: 0;
   word-break: break-all;
@@ -197,7 +197,7 @@
 
 .form-group label {
   font-weight: 600;
-  font-size: .78rem;
+  font-size: var(--text-xs, .75rem);
   color: var(--color-text-2);
   text-transform: uppercase;
   letter-spacing: .05em;
@@ -356,6 +356,37 @@
   align-items: center;
   gap: .5rem;
   font-size: .88rem;
+}
+
+/* ── Indicateur force mot de passe (modal) ──────────────────── */
+.pwd-strength-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+  --strength-color: var(--color-border);
+}
+
+.pwd-strength-bar.strength-1 { --strength-color: var(--color-danger); }
+.pwd-strength-bar.strength-2 { --strength-color: var(--color-warning); }
+.pwd-strength-bar.strength-3 { --strength-color: #f1c40f; }
+.pwd-strength-bar.strength-4 { --strength-color: var(--color-success); }
+
+.pwd-strength-bar .bar {
+  width: 28px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  transition: background var(--t-base);
+}
+
+.pwd-strength-bar .bar.filled { background: var(--strength-color); }
+
+.pwd-strength-bar .strength-label {
+  margin-left: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--strength-color);
+  font-weight: 600;
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */

@@ -6,7 +6,12 @@
       <p class="section-subtitle">Des passionnés dédiés à votre progression</p>
     </div>
 
-    <div class="teachers-grid" *ngIf="professeurs.length > 0">
+    <div *ngIf="apiError" class="section-error" role="alert">
+      <i class="ri-wifi-off-line" aria-hidden="true"></i>
+      Les informations sur les enseignants sont temporairement indisponibles.
+    </div>
+
+    <div class="teachers-grid" *ngIf="!apiError && professeurs.length > 0">
       <article *ngFor="let professeur of professeurs" class="teacher-card">
         <div class="teacher-card__photo-wrap">
           <img
@@ -37,7 +42,7 @@
       </article>
     </div>
 
-    <div class="no-teachers" *ngIf="professeurs.length === 0">
+    <div class="no-teachers" *ngIf="!apiError && professeurs.length === 0">
       <i class="ri-user-3-line" aria-hidden="true"></i>
       <p>Aucun enseignant disponible pour ce club.</p>
     </div>

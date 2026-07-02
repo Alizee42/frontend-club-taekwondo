@@ -26,6 +26,8 @@ export class ProfesseursComponent implements OnInit {
     instagram?: string;
     linkedin?: string;
   }> = [];
+  loading = false;
+  apiError = false;
 
   constructor(
     private clubService: ClubService,
@@ -39,6 +41,8 @@ export class ProfesseursComponent implements OnInit {
       // Pas de club sélectionné: garder la liste vide
       return;
     }
+    this.loading = true;
+    this.apiError = false;
     this.enseignantService.getByClub(clubId).subscribe({
       next: (list: Enseignant[]) => {
         this.professeurs = list.map((e) => ({
@@ -52,9 +56,12 @@ export class ProfesseursComponent implements OnInit {
           instagram: e.instagram,
           linkedin: e.linkedin,
         }));
+        this.loading = false;
       },
       error: () => {
         this.professeurs = [];
+        this.apiError = true;
+        this.loading = false;
       }
     });
   }

@@ -6,7 +6,17 @@
       <h2 class="section-title">Actualités</h2>
     </div>
 
-    <div class="actu-grid">
+    <div *ngIf="apiError" class="section-error" role="alert">
+      <i class="ri-wifi-off-line" aria-hidden="true"></i>
+      Les actualités sont temporairement indisponibles.
+    </div>
+
+    <div *ngIf="!apiError && !loading && filteredNews.length === 0" class="section-empty">
+      <i class="ri-newspaper-line" aria-hidden="true"></i>
+      Aucune actualité pour le moment.
+    </div>
+
+    <div class="actu-grid" *ngIf="!apiError">
       <div
         *ngFor="let actu of filteredNews; trackBy: trackById"
         class="actu-card"

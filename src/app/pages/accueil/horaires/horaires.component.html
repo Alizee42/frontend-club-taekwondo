@@ -6,11 +6,16 @@
       <h2 class="section-title">Horaires des Cours</h2>
     </div>
 
-    <div *ngIf="!horairesParJour || horairesParJour.length === 0" class="no-horaires-message">
+    <div *ngIf="apiError" class="section-error" role="alert">
+      <i class="ri-wifi-off-line" aria-hidden="true"></i>
+      Les horaires sont temporairement indisponibles.
+    </div>
+
+    <div *ngIf="!apiError && !loading && (!horairesParJour || horairesParJour.length === 0)" class="no-horaires-message">
       Aucun horaire disponible pour ce club.
     </div>
 
-    <div class="schedule-grid" *ngIf="horairesParJour && horairesParJour.length > 0">
+    <div class="schedule-grid" *ngIf="!apiError && horairesParJour && horairesParJour.length > 0">
       <div *ngFor="let jourBlock of horairesParJour" class="schedule-card">
         <div class="schedule-card__header">
           <i class="ri-calendar-line" aria-hidden="true"></i>
