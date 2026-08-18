@@ -11,13 +11,41 @@
         icon="ri-save-line"
         variant="primary"
         [loading]="saving"
-        [disabled]="loading || saving"
+        [disabled]="loading || saving || !selectedClubId"
         (clicked)="save()"
       />
     </ng-container>
   </app-page-header>
 
-  @if (loading) {
+  <div class="club-context-bar">
+    @if (isClubLocked) {
+      <div class="club-context-bar__locked">
+        <i class="ri-building-4-line"></i>
+        Tu modifies le contenu du club <strong>{{ selectedClubName || '…' }}</strong>
+      </div>
+    } @else {
+      <div class="club-context-bar__picker">
+        <i class="ri-building-4-line"></i>
+        <label class="form-label" for="apropos-club-select">Club à modifier</label>
+        <select id="apropos-club-select" class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
+          <option [ngValue]="null">-- Choisir un club --</option>
+          @for (c of clubs; track c.id) {
+            <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
+          }
+        </select>
+        @if (!selectedClubId) {
+          <span class="hint-inline">Choisis un club pour charger et modifier son contenu « À propos ».</span>
+        }
+      </div>
+    }
+  </div>
+
+  @if (!selectedClubId && !loading) {
+    <div class="empty-state">
+      <i class="ri-building-4-line"></i>
+      <p>Choisis un club ci-dessus pour afficher et modifier son contenu « À propos ».</p>
+    </div>
+  } @else if (loading) {
     <div class="empty-state">
       <i class="ri-loader-4-line spin"></i>
       <p>Chargement...</p>
@@ -103,7 +131,7 @@
                 <span class="hint-inline">Affichée en gros sous le titre</span>
               </label>
               <div class="lead-prefix-row">
-                <span class="lead-prefix">Olympique Taekwondo {{ clubVille }}</span>
+                <span class="lead-prefix">Olympique Taekwondo {{ selectedClubName }}</span>
                 <textarea class="form-input form-textarea lead-textarea" [(ngModel)]="config.leadText" name="leadText" rows="2"
                           placeholder=", fondé en 1995, accueille des pratiquants de tous niveaux…"></textarea>
               </div>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -9,6 +9,7 @@ export interface AboutValue {
 }
 
 export interface AboutConfig {
+  clubId?: number;
   headingLine1?: string;
   headingLine2?: string;
   leadText?: string;
@@ -32,17 +33,19 @@ export class AboutConfigService {
 
   constructor(private http: HttpClient) {}
 
-  getConfig(): Observable<AboutConfig> {
-    return this.http.get<AboutConfig>(this.url);
+  getConfig(clubId: number): Observable<AboutConfig> {
+    const params = new HttpParams().set('clubId', clubId);
+    return this.http.get<AboutConfig>(this.url, { params });
   }
 
   updateConfig(dto: AboutConfig): Observable<AboutConfig> {
     return this.http.put<AboutConfig>(this.url, dto);
   }
 
-  uploadImage(file: File): Observable<AboutConfig> {
+  uploadImage(file: File, clubId?: number): Observable<AboutConfig> {
     const form = new FormData();
     form.append('image', file);
+    if (clubId != null) form.append('clubId', String(clubId));
     return this.http.post<AboutConfig>(`${this.url}/image`, form);
   }
 

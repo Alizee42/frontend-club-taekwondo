@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { ClubService } from '../../../services/club.service';
 import { AboutConfigService, AboutConfig } from '../../../services/about-config.service';
 
-const DEFAULTS: Required<AboutConfig> = {
+const DEFAULTS: Required<Omit<AboutConfig, 'clubId'>> = {
   headingLine1: 'Un club fondé sur',
   headingLine2: "l'excellence et le respect",
   leadText: ", fondé en 1995, accueille des pratiquants de tous niveaux dans un environnement de respect et de discipline.",
@@ -34,7 +34,7 @@ const DEFAULTS: Required<AboutConfig> = {
 })
 export class AProposComponent implements OnInit, OnDestroy {
 
-  config: Required<AboutConfig> = { ...DEFAULTS };
+  config: Required<Omit<AboutConfig, 'clubId'>> = { ...DEFAULTS };
   imageUrl = 'assets/images/image2.JPG';
   clubVille = '';
   private clubSub?: Subscription;
@@ -50,22 +50,30 @@ export class AProposComponent implements OnInit, OnDestroy {
       if (ville) this.clubVille = ville;
     });
 
-    // Ville depuis localStorage si dispo, sinon depuis l'API (visiteur non connecté)
+    // Ville + club depuis localStorage si dispo, sinon depuis l'API (visiteur non connecté)
     const selected = this.clubService.getSelectedClub();
     const selectedVille = this.clubService.getClubVilleLabel(selected);
     if (selectedVille) {
       this.clubVille = selectedVille;
+    }
+
+    if (selected?.id) {
+      this.loadAboutConfig(selected.id);
     } else {
       this.clubService.getClubs().subscribe({
         next: (clubs) => {
-          const ville = this.clubService.getClubVilleLabel(clubs?.[0]);
+          const club = clubs?.[0];
+          const ville = this.clubService.getClubVilleLabel(club);
           if (ville) this.clubVille = ville;
+          if (club?.id) this.loadAboutConfig(club.id);
         },
         error: () => {}
       });
     }
+  }
 
-    this.aboutConfigService.getConfig().subscribe({
+  private loadAboutConfig(clubId: number): void {
+    this.aboutConfigService.getConfig(clubId).subscribe({
       next: (c) => {
         this.config = {
           headingLine1: c.headingLine1 || DEFAULTS.headingLine1,

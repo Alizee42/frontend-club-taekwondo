@@ -123,21 +123,14 @@
 .upload-label:hover { border-color: var(--brand-accent); color: var(--brand-accent); }
 .upload-label.uploading { opacity: 0.6; pointer-events: none; }
 
-.badge-fields { display: flex; flex-direction: column; gap: var(--sp-2); }
-
 .badge-fields {
-  display: grid;
-  grid-template-columns: 1fr 72px;
+  display: flex;
+  flex-direction: column;
   gap: var(--sp-2);
 }
 
 .badge-fields .panel-label {
-  grid-column: 1 / -1;
   margin-top: var(--sp-2) !important;
-}
-
-.badge-preview {
-  grid-column: 1 / -1;
 }
 
 .badge-preview {
@@ -455,6 +448,33 @@
   width: fit-content;
 }
 .btn-add:hover { color: var(--brand-accent); border-color: var(--brand-accent); }
+
+/* Bandeau de contexte club */
+.club-context-bar {
+  margin-bottom: var(--sp-3);
+}
+.club-context-bar__locked {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft, rgba(37, 99, 235, 0.08));
+  color: var(--color-text-1);
+  font-size: 0.9rem;
+}
+.club-context-bar__picker {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border, #d0d5dd);
+  flex-wrap: wrap;
+}
+.club-context-bar__picker .form-label {
+  margin: 0;
+}
 
 /* État chargement */
 .empty-state {
