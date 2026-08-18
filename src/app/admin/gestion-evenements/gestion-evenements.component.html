@@ -5,10 +5,27 @@
     subtitle="Creer, suivre et administrer les evenements du club"
   >
     <ng-container page-header-actions>
+      @if (isClubLocked) {
+        <span class="club-chip">
+          <i class="ri-building-4-line"></i>
+          {{ selectedClubName || '…' }}
+        </span>
+      } @else {
+        <span class="club-picker-inline">
+          <span class="club-picker-inline__label">Club</span>
+          <select class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
+            <option [ngValue]="null">Choisir un club…</option>
+            @for (c of clubs; track c.id) {
+              <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
+            }
+          </select>
+        </span>
+      }
       <ui-button
         label="Créer un événement"
         icon="ri-add-line"
         variant="primary"
+        [disabled]="!selectedClubId"
         (clicked)="ouvrirFormulaireCreation()"
       ></ui-button>
     </ng-container>
@@ -68,14 +85,21 @@
     ></ui-button>
   </div>
 
-  <div class="table-wrap">
-    <ui-table
-      [columns]="eventColumns"
-      [data]="eventTableRows"
-      [actions]="eventActions"
-      (actionClick)="onEventAction($event)"
-    ></ui-table>
-  </div>
+  @if (!selectedClubId) {
+    <div class="gp-state">
+      <i class="ri-building-4-line"></i>
+      <span>Choisis un club ci-dessus pour afficher et gérer ses événements.</span>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <ui-table
+        [columns]="eventColumns"
+        [data]="eventTableRows"
+        [actions]="eventActions"
+        (actionClick)="onEventAction($event)"
+      ></ui-table>
+    </div>
+  }
 </div>
 
 <ui-modal

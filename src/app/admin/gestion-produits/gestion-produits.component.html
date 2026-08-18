@@ -1,5 +1,21 @@
 <app-page-header title="Gestion des produits" icon="ri-price-tag-3-line" subtitle="Ajoutez et gérez les produits disponibles dans la boutique du club.">
   <ng-container page-header-actions>
+    @if (isClubLocked) {
+      <span class="club-chip">
+        <i class="ri-building-4-line"></i>
+        {{ selectedClubName || '…' }}
+      </span>
+    } @else {
+      <span class="club-picker-inline">
+        <span class="club-picker-inline__label">Club</span>
+        <select class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
+          <option [ngValue]="null">Choisir un club…</option>
+          @for (c of clubs; track c.id) {
+            <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
+          }
+        </select>
+      </span>
+    }
     <ui-button
       variant="primary"
       icon="ri-add-line"
@@ -9,29 +25,6 @@
     </ui-button>
   </ng-container>
 </app-page-header>
-
-<div class="club-context-bar">
-  @if (isClubLocked) {
-    <div class="club-context-bar__locked">
-      <i class="ri-building-4-line"></i>
-      Tu gères les produits du club <strong>{{ selectedClubName || '…' }}</strong>
-    </div>
-  } @else {
-    <div class="club-context-bar__picker">
-      <i class="ri-building-4-line"></i>
-      <label class="form-label" for="produits-club-select">Club à gérer</label>
-      <select id="produits-club-select" class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
-        <option [ngValue]="null">-- Choisir un club --</option>
-        @for (c of clubs; track c.id) {
-          <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
-        }
-      </select>
-      @if (!selectedClubId) {
-        <span class="hint-inline">Choisis un club pour voir et gérer ses produits.</span>
-      }
-    </div>
-  }
-</div>
 
 <ui-kpi-grid [cols]="3">
   <ui-kpi-card icon="ri-price-tag-3-line" label="Produits"   [value]="nbProduits" tone="primary" [loading]="loading"></ui-kpi-card>

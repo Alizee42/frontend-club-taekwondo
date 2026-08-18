@@ -449,31 +449,31 @@
 }
 .btn-add:hover { color: var(--brand-accent); border-color: var(--brand-accent); }
 
-/* Bandeau de contexte club */
-.club-context-bar {
-  margin-bottom: var(--sp-3);
-}
-.club-context-bar__locked {
-  display: flex;
+/* Contexte club — intégré au header, à côté du bouton principal */
+.club-chip {
+  display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
   padding: var(--sp-2) var(--sp-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full, 999px);
   background: var(--color-primary-soft, rgba(37, 99, 235, 0.08));
   color: var(--color-text-1);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
-.club-context-bar__picker {
-  display: flex;
+.club-picker-inline {
+  display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-3);
-  border-radius: var(--radius-md);
-  border: 1px dashed var(--color-border, #d0d5dd);
-  flex-wrap: wrap;
 }
-.club-context-bar__picker .form-label {
-  margin: 0;
+.club-picker-inline__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+.club-picker-inline .form-select {
+  min-width: 160px;
 }
 
 /* État chargement */

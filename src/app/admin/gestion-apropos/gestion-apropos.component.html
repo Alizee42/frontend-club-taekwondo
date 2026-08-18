@@ -6,6 +6,22 @@
     subtitle="Textes, image et cartes Mission / Vision / Valeurs de la section À propos"
   >
     <ng-container page-header-actions>
+      @if (isClubLocked) {
+        <span class="club-chip">
+          <i class="ri-building-4-line"></i>
+          {{ selectedClubName || '…' }}
+        </span>
+      } @else {
+        <span class="club-picker-inline">
+          <span class="club-picker-inline__label">Club</span>
+          <select class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
+            <option [ngValue]="null">Choisir un club…</option>
+            @for (c of clubs; track c.id) {
+              <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
+            }
+          </select>
+        </span>
+      }
       <ui-button
         label="Enregistrer"
         icon="ri-save-line"
@@ -16,29 +32,6 @@
       />
     </ng-container>
   </app-page-header>
-
-  <div class="club-context-bar">
-    @if (isClubLocked) {
-      <div class="club-context-bar__locked">
-        <i class="ri-building-4-line"></i>
-        Tu modifies le contenu du club <strong>{{ selectedClubName || '…' }}</strong>
-      </div>
-    } @else {
-      <div class="club-context-bar__picker">
-        <i class="ri-building-4-line"></i>
-        <label class="form-label" for="apropos-club-select">Club à modifier</label>
-        <select id="apropos-club-select" class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
-          <option [ngValue]="null">-- Choisir un club --</option>
-          @for (c of clubs; track c.id) {
-            <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
-          }
-        </select>
-        @if (!selectedClubId) {
-          <span class="hint-inline">Choisis un club pour charger et modifier son contenu « À propos ».</span>
-        }
-      </div>
-    }
-  </div>
 
   @if (!selectedClubId && !loading) {
     <div class="empty-state">

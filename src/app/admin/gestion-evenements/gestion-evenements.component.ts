@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EvenementDTO, EvenementService } from '../../services/evenement.service';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, Utilisateur } from '../../services/auth.service';
+import { ClubService, Club } from '../../services/club.service';
 import { Inscription, InscriptionsService } from '../../services/inscriptions.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -55,6 +56,12 @@ export class GestionEvenementsComponent implements OnInit {
   nouvelEvenement: EventFormModel = this.createEmptyEventForm();
 
   isLoading = false;
+
+  // ADMIN : club fixe (son propre club). SUPER_ADMIN : doit choisir un club dans la liste.
+  isClubLocked = false;
+  clubs: Club[] = [];
+  selectedClubId: number | null = null;
+  selectedClubName = '';
 
   searchTerm = '';
   statusFilter: EventStatusFilter = '';
@@ -131,11 +138,44 @@ export class GestionEvenementsComponent implements OnInit {
     private evenementService: EvenementService,
     private inscriptionsService: InscriptionsService,
     private authService: AuthService,
+    private clubService: ClubService,
     private readonly toast: ToastService
   ) {}
 
   ngOnInit(): void {
-    this.chargerEvenements();
+    const utilisateur: Utilisateur | null = this.authService.getUtilisateurConnecte();
+    const clubId = utilisateur?.['clubId'];
+
+    if (clubId) {
+      this.isClubLocked = true;
+      this.selectedClubId = clubId;
+      this.clubService.getClubs().subscribe({
+        next: (clubs) => {
+          const club = clubs?.find(c => c.id === clubId);
+          this.selectedClubName = club ? (club.nom || club.name) : '';
+        },
+        error: () => {}
+      });
+      this.chargerEvenements();
+      return;
+    }
+
+    // SUPER_ADMIN : pas de club propre, doit en choisir un explicitement.
+    this.clubService.getClubs().subscribe({
+      next: (clubs) => { this.clubs = clubs || []; },
+      error: () => this.toast.error('Impossible de charger la liste des clubs.')
+    });
+  }
+
+  onSelectClub(clubId: number | null): void {
+    this.selectedClubId = clubId;
+    const club = this.clubs.find(c => c.id === clubId);
+    this.selectedClubName = club ? (club.nom || club.name) : '';
+    if (clubId) {
+      this.chargerEvenements();
+    } else {
+      this.evenements = [];
+    }
   }
 
   get totalEvenements(): number {
@@ -222,10 +262,11 @@ export class GestionEvenementsComponent implements OnInit {
   }
 
   chargerEvenements(): void {
+    if (!this.selectedClubId) return;
     this.isLoading = true;
     this.clearMessages();
 
-    this.evenementService.getEvenementsMonClub().subscribe({
+    this.evenementService.getEvenementsByClub(this.selectedClubId).subscribe({
       next: (evenements) => {
         this.evenements = evenements;
 
@@ -308,11 +349,16 @@ export class GestionEvenementsComponent implements OnInit {
   }
 
   soumettreEvenement(): void {
+    if (!this.selectedClubId) {
+      this.toast.error('Choisis un club avant d\'enregistrer.');
+      return;
+    }
     if (!this.validerFormulaire()) {
       return;
     }
 
     const formData = new FormData();
+    formData.append('clubId', String(this.selectedClubId));
     formData.append('titre', this.nouvelEvenement.titre);
     formData.append('description', this.nouvelEvenement.description);
     formData.append('dateDebut', this.nouvelEvenement.dateDebut);
