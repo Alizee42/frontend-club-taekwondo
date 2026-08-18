@@ -80,12 +80,10 @@ export class ReinitialiserMotDePasseComponent implements OnInit {
   private updatePassword(): void {
     // Utiliser l'endpoint de réinitialisation de mot de passe
     const url = `${environment.apiUrl}/reinitialisation/reinitialiser-mot-de-passe`;
-    
-    this.http.post<{ message: string }>(url, null, {
-      params: {
-        token: this.token,
-        newPassword: this.password
-      }
+
+    this.http.post<{ message: string }>(url, {
+      token: this.token,
+      newPassword: this.password
     }).subscribe({
       next: (response) => {
         this.loading = false;

@@ -35,10 +35,8 @@ export class MotDePasseOublieComponent {
     this.resetMessages();
 
     const url = `${environment.apiUrl}/reinitialisation/demander`;
-    
-    this.http.post<{ message: string }>(url, null, {
-      params: { email: this.email }
-    }).subscribe({
+
+    this.http.post<{ message: string }>(url, { email: this.email }).subscribe({
       next: (response) => {
         this.loading = false;
         this.showSuccess('Un email de réinitialisation a été envoyé à votre adresse. Vérifiez votre boîte de réception.');
