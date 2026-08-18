@@ -41,7 +41,8 @@
       <img
         [src]="image.imageUrl"
         [alt]="image.titre"
-        loading="lazy"
+        [attr.loading]="i === 0 ? 'eager' : 'lazy'"
+        [attr.fetchpriority]="i === 0 ? 'high' : null"
         (error)="handleImgError($event, image)" />
       <div class="gal-item__overlay">
         <div class="gal-item__info">
