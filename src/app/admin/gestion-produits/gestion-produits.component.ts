@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, Utilisateur } from '../../services/auth.service';
+import { ClubService, Club } from '../../services/club.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -62,6 +63,12 @@ export class GestionProduitsComponent implements OnInit {
 
   readonly categories = ['TENUE', 'PROTECTION', 'ACCESSOIRE', 'AUTRE'];
 
+  // ADMIN : club fixe (son propre club). SUPER_ADMIN : doit choisir un club dans la liste.
+  isClubLocked = false;
+  clubs: Club[] = [];
+  selectedClubId: number | null = null;
+  selectedClubName = '';
+
   private get headers(): HttpHeaders {
     return this.auth.getAuthHeaders();
   }
@@ -73,20 +80,49 @@ export class GestionProduitsComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private auth: AuthService,
+    private clubService: ClubService,
     private toast: ToastService,
   ) {}
 
-  ngOnInit(): void { this.charger(); }
+  ngOnInit(): void {
+    const utilisateur: Utilisateur | null = this.auth.getUtilisateurConnecte();
+    const clubId = utilisateur?.['clubId'];
+
+    if (clubId) {
+      this.isClubLocked = true;
+      this.selectedClubId = clubId;
+      this.clubService.getClubs().subscribe({
+        next: (clubs) => {
+          const club = clubs?.find(c => c.id === clubId);
+          this.selectedClubName = club ? (club.nom || club.name) : '';
+        },
+        error: () => {}
+      });
+      this.charger();
+      return;
+    }
+
+    // SUPER_ADMIN : pas de club propre, doit en choisir un explicitement.
+    this.clubService.getClubs().subscribe({
+      next: (clubs) => { this.clubs = clubs || []; },
+      error: () => this.toast.error('Impossible de charger la liste des clubs.')
+    });
+  }
+
+  onSelectClub(clubId: number | null): void {
+    this.selectedClubId = clubId;
+    const club = this.clubs.find(c => c.id === clubId);
+    this.selectedClubName = club ? (club.nom || club.name) : '';
+    if (clubId) this.charger();
+    else { this.produits = []; this.filtrer(); }
+  }
 
   charger(): void {
+    if (!this.selectedClubId) return;
     this.loading = true;
     this.error = '';
-    const user = this.auth.getUtilisateurConnecte();
-    const clubId = user?.['clubId'];
 
-    const url = clubId ? `${this.api}/club/${clubId}` : this.api;
-
-    this.http.get<ProduitDTO[]>(url, { headers: this.headers }).subscribe({
+    this.http.get<ProduitDTO[]>(`${this.api}/club/${this.selectedClubId}`, { headers: this.headers }).subscribe({
       next: data => {
         this.produits = data;
         this.filtrer();
@@ -161,12 +197,13 @@ export class GestionProduitsComponent implements OnInit {
   }
 
   sauvegarder(): void {
+    if (!this.selectedClubId) { this.toast.error('Choisis un club avant d\'enregistrer.'); return; }
     if (!this.form.nom?.trim()) { this.toast.error('Le nom est obligatoire.'); return; }
     if (!this.form.prix || this.form.prix <= 0) { this.toast.error('Le prix doit être supérieur à 0.'); return; }
     if (this.form.stock < 0) { this.toast.error('Le stock ne peut pas être négatif.'); return; }
 
     this.saving = true;
-    const payload = { ...this.form };
+    const payload = { ...this.form, clubId: this.selectedClubId };
 
     const req = this.modalMode === 'add'
       ? this.http.post<ProduitDTO>(this.api, payload, { headers: this.headers })

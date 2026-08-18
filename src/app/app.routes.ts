@@ -154,6 +154,7 @@ export const routes: Routes = [
   { path: 'documents', component: DocumentsSuperAdminComponent },
   { path: 'commandes', component: GestionCommandeComponent },
   { path: 'evenements', component: GestionEvenementsComponent },
+  { path: 'gestion-produits', component: GestionProduitsComponent },
   { path: 'avis', loadComponent: () => import('./super-admin/avis-super-admin/avis-super-admin.component').then(m => m.AvisSuperAdminComponent) },
   { path: 'enseignants', loadComponent: () => import('./super-admin/enseignants/enseignants-super-admin.component').then(m => m.EnseignantsSuperAdminComponent) },
       { path: 'accueil-site', component: GestionAccueilSiteComponent },

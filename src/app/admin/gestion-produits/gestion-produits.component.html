@@ -4,10 +4,34 @@
       variant="primary"
       icon="ri-add-line"
       label="Nouveau produit"
+      [disabled]="!selectedClubId"
       (clicked)="ouvrirAjout()">
     </ui-button>
   </ng-container>
 </app-page-header>
+
+<div class="club-context-bar">
+  @if (isClubLocked) {
+    <div class="club-context-bar__locked">
+      <i class="ri-building-4-line"></i>
+      Tu gères les produits du club <strong>{{ selectedClubName || '…' }}</strong>
+    </div>
+  } @else {
+    <div class="club-context-bar__picker">
+      <i class="ri-building-4-line"></i>
+      <label class="form-label" for="produits-club-select">Club à gérer</label>
+      <select id="produits-club-select" class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
+        <option [ngValue]="null">-- Choisir un club --</option>
+        @for (c of clubs; track c.id) {
+          <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
+        }
+      </select>
+      @if (!selectedClubId) {
+        <span class="hint-inline">Choisis un club pour voir et gérer ses produits.</span>
+      }
+    </div>
+  }
+</div>
 
 <ui-kpi-grid [cols]="3">
   <ui-kpi-card icon="ri-price-tag-3-line" label="Produits"   [value]="nbProduits" tone="primary" [loading]="loading"></ui-kpi-card>
@@ -15,7 +39,7 @@
   <ui-kpi-card icon="ri-error-warning-line" label="En rupture" [value]="nbRupture" [tone]="nbRupture > 0 ? 'danger' : 'neutral'" [loading]="loading"></ui-kpi-card>
 </ui-kpi-grid>
 
-<div class="gp-page">
+<div class="gp-page" *ngIf="selectedClubId; else noClubSelected">
 
   <!-- Barre de recherche -->
   <div class="gp-toolbar">
@@ -101,6 +125,13 @@
   </div>
 
 </div>
+
+<ng-template #noClubSelected>
+  <div class="gp-state">
+    <i class="ri-building-4-line"></i>
+    <span>Choisis un club ci-dessus pour afficher et gérer ses produits.</span>
+  </div>
+</ng-template>
 
 <!-- ══════════════════ MODAL AJOUT / ÉDITION ══════════════════ -->
 <ui-modal [open]="modalOpen" [title]="modalMode === 'add' ? 'Nouveau produit' : 'Modifier le produit'" (closed)="fermerModal()">

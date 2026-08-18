@@ -1,5 +1,32 @@
 :host { display: block; }
 
+/* Bandeau de contexte club */
+.club-context-bar {
+  margin: 0 var(--sp-8);
+}
+.club-context-bar__locked {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft, rgba(37, 99, 235, 0.08));
+  color: var(--color-text-1);
+  font-size: 0.9rem;
+}
+.club-context-bar__picker {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border, #d0d5dd);
+  flex-wrap: wrap;
+}
+.club-context-bar__picker .form-label {
+  margin: 0;
+}
+
 .gp-page {
   padding: var(--sp-6) var(--sp-8);
   display: flex;
