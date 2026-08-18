@@ -19,6 +19,9 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
     || (req.method === 'GET' && req.url.match(/\/galerie(\?|$|\/[^a-zA-Z])/) && !isOnAdmin)
     || (req.method === 'GET' && req.url.match(/\/api\/galeries\/club\/[0-9]+$/));
   const isOptionalEndpoint = req.url.includes('/parametres-paiement');
+  // La page de connexion affiche déjà son propre message d'erreur, plus précis
+  // ("Identifiants incorrects") — éviter le doublon avec le toast générique ci-dessous.
+  const isLoginEndpoint = req.url.includes('/utilisateurs/login');
 
   if (validToken && !isPublicEndpoint) {
     req = req.clone({
@@ -30,7 +33,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
 
   return next(req).pipe(
     catchError((error: any) => {
-      if (!isOptionalEndpoint) {
+      if (!isOptionalEndpoint && !isLoginEndpoint) {
         if (error.status === 0) {
           toastService.error('Connexion au serveur impossible. Verifiez le backend ou votre reseau.');
         } else if (error.status === 401) {

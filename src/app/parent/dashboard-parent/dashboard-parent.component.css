@@ -296,7 +296,7 @@
 
 .bottom-grid {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: var(--sp-4);
   align-items: start;
 }
