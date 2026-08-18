@@ -5,8 +5,10 @@
 
 /* ── Base header ─────────────────────────────────────────── */
 .uh {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: var(--z-sticky, 50);
   height: 64px;
   background: var(--brand-primary-dark, #0E1F3B);

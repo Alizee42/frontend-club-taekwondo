@@ -4,8 +4,11 @@
   min-height: 100vh;
 }
 
+/* Le header est passé en position: fixed (sticky cassait dans les conteneurs
+   flex imbriqués body/app-root/:host) — on compense l'espace qu'il occupait. */
 ::ng-deep router-outlet + * {
   flex: 1;
+  margin-top: 64px;
 }
 
 app-footer {
