@@ -40,11 +40,19 @@ export class AvisSuperAdminComponent implements OnInit {
     { name: 'pseudoVisiteur', label: 'Nom', type: 'text', required: true, placeholder: "Nom du visiteur" },
     { name: 'contenu', label: 'Contenu', type: 'text', required: true, placeholder: "Votre avis" }
   ];
+  private readonly typeAvisLabels: Record<string, string> = {
+    cours: 'Cours',
+    entraineurs: 'Entraîneurs',
+    evenements: 'Événements',
+    organisation: 'Organisation',
+    competitions: 'Compétitions'
+  };
+
   columns: UiTableColumn[] = [
     { key: 'pseudoVisiteur', label: 'Nom' },
     { key: 'contenu', label: 'Contenu' },
     { key: 'note', label: 'Note' },
-    { key: 'typeAvis', label: 'Sujet' },
+    { key: 'typeAvis', label: 'Sujet', display: (row: Avis) => this.typeAvisLabels[row.typeAvis || ''] || '—' },
     { key: 'approuve', label: 'Statut',
       display: (row: Avis) => this.isAvisApproved(row) ? 'Approuve' : 'En attente',
       textClass: (row: Avis) => this.isAvisApproved(row)

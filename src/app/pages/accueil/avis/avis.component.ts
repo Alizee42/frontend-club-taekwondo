@@ -85,9 +85,8 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.avisService.ajouterAvis(formData).subscribe({
       next: () => {
-        this.toast.success('Merci, votre avis a bien été envoyé !', 4000);
+        this.toast.success('Merci ! Votre avis sera publié après validation.', 4000);
         this.modaleOuverte = false;
-        this.messageConfirmation = 'Merci ! Votre avis sera publié après validation.';
       },
       error: () => {
         this.toast.error("Erreur lors de l'envoi de l'avis.");
@@ -96,7 +95,6 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   avisApprouves: Avis[] = [];
   modaleOuverte = false;
-  messageConfirmation: string | null = null;
   swiper: Swiper | null = null;
 
   // ✅ typeAvis optionnel (aucune valeur par défaut)
@@ -213,20 +211,18 @@ export class AvisComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.avisService.ajouterAvis(formData).subscribe({
       next: () => {
-        this.toast.success('Votre avis a été envoyé avec succès');
-        this.messageConfirmation = 'Merci ! Votre avis sera publié après validation par notre équipe.';
+        this.toast.success('Merci ! Votre avis sera publié après validation par notre équipe.', 5000);
         this.fermerModale();
 
         // ✅ Reset sans valeur par défaut pour typeAvis
         this.nouvelAvis = { contenu: '', pseudoVisiteur: '', note: 5, typeAvis: '' };
-        this.photoPreview = null; 
+        this.photoPreview = null;
         this.photoFichier = null;
 
         const clubId = this.clubSelectionService.getSelectedClubId();
         if (clubId) {
           this.chargerAvisClub(clubId);
         }
-        setTimeout(() => this.messageConfirmation = null, 5000);
       },
       error: () => this.toast.error('Une erreur est survenue lors de l’envoi. Veuillez réessayer plus tard.')
     });

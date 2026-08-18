@@ -19,11 +19,19 @@ export class GestionAvisComponent implements OnInit {
   avis: Avis[] = [];
   searchTerm = '';
   approvalFilter: '' | 'approved' | 'pending' = '';
+  private readonly typeAvisLabels: Record<string, string> = {
+    cours: 'Cours',
+    entraineurs: 'Entraîneurs',
+    evenements: 'Événements',
+    organisation: 'Organisation',
+    competitions: 'Compétitions'
+  };
+
   columns: UiTableColumn[] = [
     { key: 'pseudoVisiteur', label: 'Nom' },
     { key: 'contenu', label: 'Contenu' },
     { key: 'note', label: 'Note' },
-    { key: 'typeAvis', label: 'Sujet' },
+    { key: 'typeAvis', label: 'Sujet', display: (row: Avis) => this.typeAvisLabels[row.typeAvis || ''] || '—' },
     {
       key: 'approuve',
       label: 'Statut',
