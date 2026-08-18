@@ -38,7 +38,7 @@
             {{ actu.datePublication | date:'d MMM yyyy' }}
           </span>
           <h3 class="actu-card__title">{{ actu.titre }}</h3>
-          <p class="actu-card__excerpt">{{ actu.contenu | slice:0:110 }}…</p>
+          <p class="actu-card__excerpt">{{ actu.extrait || (actu.contenu | slice:0:110) }}{{ actu.extrait ? '' : '…' }}</p>
           <span class="actu-card__link">
             Lire la suite <i class="ri-arrow-right-line"></i>
           </span>

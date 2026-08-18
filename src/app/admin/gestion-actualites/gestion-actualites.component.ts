@@ -15,6 +15,7 @@ interface Actualite {
   id?: string;
   titre: string;
   contenu: string;
+  extrait?: string;
   typeActu: string;
   datePublication: string;
   isFeatured?: boolean;
@@ -55,6 +56,7 @@ export class GestionActualitesComponent implements OnInit {
   actualite: Actualite = {
     titre: '',
     contenu: '',
+    extrait: '',
     typeActu: '',
     datePublication: new Date().toISOString(),
     isFeatured: false,
@@ -280,6 +282,7 @@ export class GestionActualitesComponent implements OnInit {
 
     formData.append('titre', payload.titre);
     formData.append('contenu', payload.contenu);
+    formData.append('extrait', payload.extrait ?? '');
     formData.append('typeActu', payload.typeActu);
     formData.append('isFeatured', String(!!payload.isFeatured));
     formData.append('clubId', String(payload.clubId ?? this.getClubId() ?? ''));
@@ -297,6 +300,7 @@ export class GestionActualitesComponent implements OnInit {
     return {
       titre: '',
       contenu: '',
+      extrait: '',
       typeActu: '',
       datePublication: new Date().toISOString(),
       isFeatured: false,

@@ -82,7 +82,16 @@
       </div>
 
       <div class="form-group form-group--full">
-        <label for="contenu">Contenu</label>
+        <label for="extrait">
+          Extrait
+          <span class="hint-inline">Résumé court affiché sur la carte d'accueil (220 caractères max)</span>
+        </label>
+        <textarea id="extrait" [(ngModel)]="actualite.extrait" name="extrait" maxlength="220" rows="2"
+                  placeholder="Une phrase d'accroche qui donne envie de lire la suite…"></textarea>
+      </div>
+
+      <div class="form-group form-group--full">
+        <label for="contenu">Contenu complet</label>
         <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
       </div>
 

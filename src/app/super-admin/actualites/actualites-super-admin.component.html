@@ -38,4 +38,8 @@
     [submitLabel]="actualite.id ? 'Mettre à jour' : 'Ajouter'">
   </ui-form>
   <img *ngIf="imageFile" [src]="imagePreviewUrl" alt="Aperçu de l'image" class="upload-preview" />
+  <ng-container *ngIf="!imageFile && existingImagePreviewUrl">
+    <p class="upload-preview-label">Image actuelle</p>
+    <img [src]="existingImagePreviewUrl" alt="Image actuelle" class="upload-preview" />
+  </ng-container>
 </ui-modal>

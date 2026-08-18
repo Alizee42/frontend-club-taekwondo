@@ -16,10 +16,14 @@ interface Actualite {
   id?: string;
   titre: string;
   contenu: string;
+  extrait?: string;
   typeActu: string;
   datePublication: string;
   isFeatured?: boolean;
   imageUrl?: string;
+  /** Chemin relatif d'origine renvoyé par l'API (ex: "actualites/xxx.png"), jamais réécrit —
+   * c'est cette valeur qu'il faut renvoyer au backend, pas `imageUrl` qui est retravaillé pour l'affichage. */
+  imageUrlBrut?: string;
   clubId?: string;
 }
 
@@ -57,6 +61,7 @@ export class ActualitesSuperAdminComponent implements OnInit {
       { value: 'competition', label: 'Compétition' },
       { value: 'annonce', label: 'Annonce' }
     ] },
+    { name: 'extrait', label: 'Extrait (résumé court, 220 car. max)', type: 'textarea', required: false, placeholder: 'Une phrase d\'accroche affichée sur la carte d\'accueil' },
     { name: 'contenu', label: 'Contenu', type: 'textarea', required: true, placeholder: 'Contenu de l\'actualité' },
     { name: 'complement', label: 'Complément (lien, info, PDF...)', type: 'text', required: false, placeholder: 'Lien, info ou document complémentaire' },
     { name: 'image', label: 'Image', type: 'file', required: false, onChange: this.onImageChange.bind(this) },
@@ -65,6 +70,8 @@ export class ActualitesSuperAdminComponent implements OnInit {
 
   imageFile: File | null = null;
   imagePreviewUrl: string | null = null;
+  /** Aperçu de l'image déjà enregistrée (URL affichable, distincte du chemin relatif renvoyé au backend). */
+  existingImagePreviewUrl: string | null = null;
 
   onImageChange(event: any) {
     const file = event.target.files && event.target.files[0];
@@ -135,7 +142,8 @@ export class ActualitesSuperAdminComponent implements OnInit {
       next: (data: Actualite[]) => {
         const apiBase = environment.apiUrl.replace(/\/api\/?$/, '');
         this.actualites = (Array.isArray(data) ? data : []).map(actu => {
-          let raw = actu.imageUrl || '';
+          const imageUrlBrut = actu.imageUrl || '';
+          let raw = imageUrlBrut;
           if (raw.startsWith('actualites/')) raw = raw.replace(/^actualites\//, '');
           let full = '';
           if (!raw) {
@@ -145,7 +153,7 @@ export class ActualitesSuperAdminComponent implements OnInit {
           } else {
             full = `${apiBase}/uploads/actualites/${encodeURIComponent(raw)}`;
           }
-          return { ...actu, imageUrl: full };
+          return { ...actu, imageUrl: full, imageUrlBrut };
         });
         this.loading = false;
       },
@@ -171,7 +179,11 @@ export class ActualitesSuperAdminComponent implements OnInit {
   }
 
   openModal(actu?: Actualite): void {
-    this.actualite = actu ? { ...actu } : this.getEmptyActualite();
+    // imageUrl est réécrit en URL absolue pour l'affichage du tableau (loadActualitesClub) —
+    // on restaure ici le chemin relatif d'origine (imageUrlBrut) pour ne pas le renvoyer cassé au backend,
+    // et on garde l'URL affichable à part pour l'aperçu dans la modale.
+    this.existingImagePreviewUrl = actu?.imageUrl || null;
+    this.actualite = actu ? { ...actu, imageUrl: actu.imageUrlBrut ?? actu.imageUrl } : this.getEmptyActualite();
     this.isModalOpen = true;
   }
 
@@ -180,6 +192,7 @@ export class ActualitesSuperAdminComponent implements OnInit {
     this.actualite = this.getEmptyActualite();
     this.imageFile = null;
     this.imagePreviewUrl = null;
+    this.existingImagePreviewUrl = null;
   }
 
   onTableAction(event: { action: string; row: Actualite }): void {
@@ -237,6 +250,7 @@ export class ActualitesSuperAdminComponent implements OnInit {
     return {
       titre: '',
       contenu: '',
+      extrait: '',
       typeActu: '',
       datePublication: new Date().toISOString(),
       isFeatured: false,
