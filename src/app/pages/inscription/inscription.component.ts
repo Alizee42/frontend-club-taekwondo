@@ -302,7 +302,13 @@ export class InscriptionComponent implements OnInit {
   }
 
   // ===== UI helpers =====
-  closeModal(): void { this.showConfirmationModal = false; }
+  closeModal(): void {
+    this.showConfirmationModal = false;
+    // Après une inscription réussie, on ne laisse pas l'utilisateur bloqué sur le récapitulatif.
+    if (this.step === 3) {
+      this.goToSite();
+    }
+  }
   togglePassword(): void { this.togglePasswordVisibility = !this.togglePasswordVisibility; }
   toggleConfirmPassword(): void { this.toggleConfirmPasswordVisibility = !this.toggleConfirmPasswordVisibility; }
   isInvalid(field: string): boolean {
