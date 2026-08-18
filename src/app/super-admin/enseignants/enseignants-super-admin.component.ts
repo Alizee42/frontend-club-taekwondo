@@ -61,11 +61,8 @@ export class EnseignantsSuperAdminComponent implements OnInit {
   formFields = [
     { name: 'nom', label: 'Nom', type: 'text', required: true, placeholder: 'Nom' },
     { name: 'prenom', label: 'Prénom', type: 'text', required: true, placeholder: 'Prénom' },
-    { name: 'specialite', label: 'Spécialité', type: 'text', required: false, placeholder: 'Spécialité' },
+    { name: 'specialite', label: 'Spécialité', type: 'text', required: false, placeholder: 'ex : 5ème Dan – Instructeur' },
     { name: '_photo', label: 'Photo (upload)', type: 'file', required: false, onChange: this.onPhotoSelected.bind(this) },
-    { name: 'facebook', label: 'Facebook', type: 'text', required: false, placeholder: 'https://facebook.com/...' },
-    { name: 'instagram', label: 'Instagram', type: 'text', required: false, placeholder: 'https://instagram.com/...' },
-    { name: 'linkedin', label: 'LinkedIn', type: 'text', required: false, placeholder: 'https://linkedin.com/in/...' },
     { name: 'description', label: 'Description', type: 'text', required: false, placeholder: 'Description courte' }
   ];
 
@@ -137,9 +134,6 @@ export class EnseignantsSuperAdminComponent implements OnInit {
       specialite: model.specialite,
       description: model.description,
       photoUrl,
-      facebook: model.facebook,
-      instagram: model.instagram,
-      linkedin: model.linkedin,
       id: this.selected?.id
     };
 
@@ -198,7 +192,8 @@ export class EnseignantsSuperAdminComponent implements OnInit {
     if (!raw) return '';
     if (raw.startsWith('http') || raw.startsWith('/')) return raw;
     // si le chemin commence déjà par 'enseignants/' => /uploads/<raw>
-    if (raw.startsWith('enseignants/')) return `${apiBase}/uploads/${encodeURIComponent(raw)}`;
+    // (ne pas encoder le '/' du chemin, seulement le nom de fichier — sinon l'URL casse)
+    if (raw.startsWith('enseignants/')) return `${apiBase}/uploads/${raw}`;
     return `${apiBase}/uploads/enseignants/${encodeURIComponent(raw)}`;
   }
 

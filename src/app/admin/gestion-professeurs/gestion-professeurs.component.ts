@@ -28,7 +28,6 @@ export class GestionProfesseursComponent {
 
   get totalProfesseurs(): number { return this.professeurs.length; }
   get avecPhoto(): number { return this.professeurs.filter(p => !!p.photo).length; }
-  get avecReseaux(): number { return this.professeurs.filter(p => !!(p.facebook || p.instagram || p.linkedin)).length; }
 
   loadProfesseurs(): void {
     this.professeurs = this.professeurService.getProfesseurs();

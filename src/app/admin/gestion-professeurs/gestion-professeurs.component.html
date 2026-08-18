@@ -13,10 +13,9 @@
     </ng-container>
   </app-page-header>
 
-  <ui-kpi-grid [cols]="3">
+  <ui-kpi-grid [cols]="2">
     <ui-kpi-card icon="ri-user-star-line"   label="Professeurs"     [value]="totalProfesseurs"    tone="primary" meta="équipe pédagogique"></ui-kpi-card>
     <ui-kpi-card icon="ri-image-line"       label="Avec photo"      [value]="avecPhoto"           tone="success"></ui-kpi-card>
-    <ui-kpi-card icon="ri-share-line"       label="Avec réseaux"    [value]="avecReseaux"         tone="info"></ui-kpi-card>
   </ui-kpi-grid>
 
   <section class="professeurs-list" *ngIf="professeurs.length; else emptyState">
@@ -91,7 +90,7 @@
 
       <label class="field field--full">
         <span class="field-label">Specialite</span>
-        <input type="text" class="form-input" [(ngModel)]="newProfesseur.specialite" name="specialite">
+        <input type="text" class="form-input" [(ngModel)]="newProfesseur.specialite" name="specialite" placeholder="ex : 5ème Dan – Instructeur">
       </label>
 
       <label class="field field--full">
