@@ -9,28 +9,28 @@
 
   <article class="bloc" aria-labelledby="editeur">
     <h2 id="editeur">1. Éditeur du site</h2>
-    <p>
-      <strong>Dénomination :</strong> Association Olympique Taekwondo Villeurbannais (exemple à adapter)<br>
-      <strong>Statut :</strong> Association déclarée loi 1901<br>
-      <strong>Adresse :</strong> 00 rue Exemple, 69100 Villeurbanne, France<br>
-      <strong>Email :</strong> <a href="mailto:contact@example.org">contact@example.org</a><br>
-      <strong>Téléphone :</strong> 00 00 00 00 00<br>
-      <strong>Responsable de publication :</strong> Président / Présidente de l'association<br>
-      <strong>Numéro RNA (si disponible) :</strong> WXXXXXXXX<br>
-      <strong>Numéro SIREN (si applicable) :</strong> 000 000 000
+    <p *ngIf="loaded">
+      <strong>Dénomination :</strong> {{ config.nomAssociation || 'Non renseigné' }}<br>
+      <strong>Statut :</strong> {{ config.statutJuridique || 'Non renseigné' }}<br>
+      <strong>Adresse :</strong> {{ config.adresse || 'Non renseignée' }}<br>
+      <strong>Email :</strong> <a *ngIf="config.email" [href]="'mailto:' + config.email">{{ config.email }}</a><span *ngIf="!config.email">Non renseigné</span><br>
+      <strong>Téléphone :</strong> {{ config.telephone || 'Non renseigné' }}<br>
+      <strong>Responsable de publication :</strong> {{ config.representantLegal || 'Non renseigné' }}<br>
+      <strong>Numéro RNA :</strong> {{ config.numeroRna || 'Non renseigné' }}<br>
+      <strong>Numéro SIREN :</strong> {{ config.numeroSiren || 'Non renseigné' }}
     </p>
-    <p class="note">Remplacer les informations ci-dessus par les données officielles réelles de l'association.</p>
   </article>
 
   <article class="bloc" aria-labelledby="hebergeur">
     <h2 id="hebergeur">2. Hébergeur</h2>
-    <p>
-      <strong>Nom :</strong> [Hébergeur]<br>
-      <strong>Adresse :</strong> [Adresse postale]<br>
-      <strong>Site web :</strong> <a href="https://www.exemple-hebergeur.tld" target="_blank" rel="noopener noreferrer">https://www.exemple-hebergeur.tld</a><br>
-      <strong>Téléphone :</strong> [Numéro]
+    <p *ngIf="loaded">
+      <strong>Nom :</strong> {{ config.hebergeurNom || 'Non renseigné' }}<br>
+      <strong>Adresse :</strong> {{ config.hebergeurAdresse || 'Non renseignée' }}<br>
+      <strong>Site web :</strong>
+      <a *ngIf="config.hebergeurSiteWeb" [href]="config.hebergeurSiteWeb" target="_blank" rel="noopener noreferrer">{{ config.hebergeurSiteWeb }}</a>
+      <span *ngIf="!config.hebergeurSiteWeb">Non renseigné</span>
     </p>
-    <p>Les infrastructures techniques (serveur applicatif, base de données, stockage) sont hébergées dans des centres de données situés dans l'Union européenne (à confirmer / préciser).</p>
+    <p>Les infrastructures techniques (serveur applicatif, base de données, stockage) sont hébergées dans des centres de données situés dans l'Union européenne.</p>
   </article>
 
   <article class="bloc" aria-labelledby="propriete">
@@ -52,22 +52,23 @@
 
   <article class="bloc" aria-labelledby="cookies">
     <h2 id="cookies">6. Cookies</h2>
-    <p>Seuls des cookies strictement nécessaires au fonctionnement technique du site peuvent être déposés par défaut (ex. maintien de session). Aucun cookie de profilage marketing ou publicitaire n'est activé sans consentement préalable. (Adapter si un outil de mesure d'audience ou un CMP est intégré.)</p>
+    <p>Seuls des cookies strictement nécessaires au fonctionnement technique du site peuvent être déposés par défaut (ex. maintien de session). Aucun cookie de profilage marketing ou publicitaire n'est activé sans consentement préalable.</p>
   </article>
 
   <article class="bloc" aria-labelledby="litiges">
     <h2 id="litiges">7. Médiation & litiges</h2>
-    <p>En cas de différend, l'utilisateur est invité à contacter l'association afin de rechercher une solution amiable. Si votre structure relève d'un dispositif de médiation à la consommation, mentionnez ici le médiateur désigné. À défaut, indiquer clairement l'absence de médiateur conventionné.</p>
+    <p *ngIf="loaded && config.mediateurNom">
+      En cas de différend, l'utilisateur peut recourir au médiateur suivant : <strong>{{ config.mediateurNom }}</strong><span *ngIf="config.mediateurContact"> ({{ config.mediateurContact }})</span>.
+    </p>
+    <p *ngIf="loaded && !config.mediateurNom">
+      En cas de différend, l'utilisateur est invité à contacter l'association afin de rechercher une solution amiable. Aucun médiateur conventionné n'est désigné à ce jour.
+    </p>
   </article>
 
   <article class="bloc" aria-labelledby="droit">
     <h2 id="droit">8. Droit applicable</h2>
-    <p>Les présentes mentions légales sont régies par le droit français. En cas de litige et à défaut d'accord amiable, les tribunaux compétents seront ceux du ressort du siège de l'association (sauf dispositions légales impératives contraires).</p>
+    <p>Les présentes mentions légales sont régies par le droit français. En cas de litige et à défaut d'accord amiable, les tribunaux compétents seront ceux du ressort du siège de l'association, sauf dispositions légales impératives contraires.</p>
   </article>
-
-  <aside class="alert-info" role="note">
-    <strong>Important :</strong> Certaines rubriques (hébergeur, identification légale, médiation) doivent impérativement être personnalisées avant mise en production.
-  </aside>
 
   <footer class="legal-meta" aria-label="Mise à jour">Dernière mise à jour : {{ derniereMiseAJour }}</footer>
 </section>

@@ -1,0 +1,170 @@
+<div class="page-shell ml-page">
+
+  <app-page-header
+    title="Pages légales"
+    icon="ri-file-shield-2-line"
+    subtitle="Mentions légales et politique de confidentialité spécifiques à ce club"
+  >
+    <ng-container page-header-actions>
+      @if (isClubLocked) {
+        <span class="club-chip">
+          <i class="ri-building-4-line"></i>
+          {{ selectedClubName || '…' }}
+        </span>
+      } @else {
+        <span class="club-picker-inline">
+          <span class="club-picker-inline__label">Club</span>
+          <select class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
+            <option [ngValue]="null">Choisir un club…</option>
+            @for (c of clubs; track c.id) {
+              <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
+            }
+          </select>
+        </span>
+      }
+      <ui-button
+        label="Enregistrer"
+        icon="ri-save-line"
+        variant="primary"
+        [loading]="saving"
+        [disabled]="loading || saving || !selectedClubId"
+        (clicked)="save()"
+      />
+    </ng-container>
+  </app-page-header>
+
+  @if (!selectedClubId && !loading) {
+    <div class="empty-state">
+      <i class="ri-building-4-line"></i>
+      <p>Choisis un club ci-dessus pour afficher et modifier ses pages légales.</p>
+    </div>
+  } @else if (loading) {
+    <div class="empty-state">
+      <i class="ri-loader-4-line spin"></i>
+      <p>Chargement...</p>
+    </div>
+  } @else {
+
+  <div class="tabs" role="tablist">
+    <button role="tab" class="tab" [class.tab--active]="activeTab === 'mentions'" (click)="setTab('mentions')">
+      <i class="ri-file-shield-2-line"></i> Mentions légales
+    </button>
+    <button role="tab" class="tab" [class.tab--active]="activeTab === 'confidentialite'" (click)="setTab('confidentialite')">
+      <i class="ri-shield-user-line"></i> Confidentialité
+    </button>
+  </div>
+
+  <div class="tab-content">
+
+    @if (activeTab === 'mentions') {
+      <div class="ml-form">
+
+        <section class="ml-section">
+          <h2>Éditeur du site</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nom de l'association</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.nomAssociation" name="nomAssociation" placeholder="Olympique Taekwondo Villeurbanne">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Statut juridique</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.statutJuridique" name="statutJuridique" placeholder="Association loi 1901">
+            </div>
+            <div class="form-group form-group--full">
+              <label class="form-label">Adresse du siège</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.adresse" name="adresseMentions" placeholder="12 rue du Sport, 69100 Villeurbanne">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Numéro RNA</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.numeroRna" name="numeroRna" placeholder="W691234567">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Numéro SIREN <span class="hint-inline">(si applicable)</span></label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.numeroSiren" name="numeroSiren" placeholder="123 456 789">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Représentant légal</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.representantLegal" name="representantLegalMentions" placeholder="Nom du/de la président·e">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email de contact</label>
+              <input class="form-input" type="email" [(ngModel)]="mentionsLegales.email" name="email" placeholder="contact@club.fr">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Téléphone</label>
+              <input class="form-input" type="tel" [(ngModel)]="mentionsLegales.telephone" name="telephone" placeholder="04 00 00 00 00">
+            </div>
+          </div>
+        </section>
+
+        <section class="ml-section">
+          <h2>Hébergeur</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nom de l'hébergeur</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.hebergeurNom" name="hebergeurNom" placeholder="IONOS SARL">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Site web de l'hébergeur</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.hebergeurSiteWeb" name="hebergeurSiteWeb" placeholder="https://www.ionos.fr">
+            </div>
+            <div class="form-group form-group--full">
+              <label class="form-label">Adresse de l'hébergeur</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.hebergeurAdresse" name="hebergeurAdresse" placeholder="Adresse postale de l'hébergeur">
+            </div>
+          </div>
+        </section>
+
+        <section class="ml-section">
+          <h2>Médiation</h2>
+          <p class="hint-block">Laisse ces champs vides si le club n'a pas de médiateur désigné — la page affichera automatiquement la mention par défaut.</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nom du médiateur</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.mediateurNom" name="mediateurNom" placeholder="Optionnel">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact du médiateur</label>
+              <input class="form-input" type="text" [(ngModel)]="mentionsLegales.mediateurContact" name="mediateurContact" placeholder="Optionnel">
+            </div>
+          </div>
+        </section>
+
+      </div>
+    }
+
+    @if (activeTab === 'confidentialite') {
+      <div class="ml-form">
+        <section class="ml-section">
+          <h2>Responsable du traitement</h2>
+          <p class="hint-block">Le reste du contenu (finalités, durées de conservation, droits RGPD, cookies…) est commun à tous les clubs et n'est pas modifiable ici.</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nom de l'association</label>
+              <input class="form-input" type="text" [(ngModel)]="politiqueConfidentialite.nomAssociation" name="nomAssociationConf" placeholder="Olympique Taekwondo Villeurbanne">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Représentant légal</label>
+              <input class="form-input" type="text" [(ngModel)]="politiqueConfidentialite.representantLegal" name="representantLegalConf" placeholder="Nom du/de la président·e">
+            </div>
+            <div class="form-group form-group--full">
+              <label class="form-label">Adresse</label>
+              <input class="form-input" type="text" [(ngModel)]="politiqueConfidentialite.adresse" name="adresseConf" placeholder="12 rue du Sport, 69100 Villeurbanne">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email de contact</label>
+              <input class="form-input" type="email" [(ngModel)]="politiqueConfidentialite.emailContact" name="emailContact" placeholder="contact@club.fr">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email RGPD <span class="hint-inline">(si différent)</span></label>
+              <input class="form-input" type="email" [(ngModel)]="politiqueConfidentialite.emailRgpd" name="emailRgpd" placeholder="Optionnel">
+            </div>
+          </div>
+        </section>
+      </div>
+    }
+
+  </div>
+  }
+
+</div>

@@ -1,5 +1,6 @@
 import { GestionHeroComponent } from './admin/gestion-hero/gestion-hero.component';
 import { GestionAProposComponent } from './admin/gestion-apropos/gestion-apropos.component';
+import { GestionPagesLegalesComponent } from './admin/gestion-pages-legales/gestion-pages-legales.component';
 import { GestionAccueilSiteComponent } from './admin/gestion-accueil-site/gestion-accueil-site.component';
 import { GestionHorairesSuperAdminComponent } from './super-admin/gestion-horaires/gestion-horaires-super-admin.component';
 import { UtilisateursSuperAdminComponent } from './super-admin/utilisateurs/utilisateurs-super-admin.component';
@@ -100,7 +101,8 @@ export const routes: Routes = [
       { path: 'membres', loadComponent: () => import('./admin/gestion-membres/gestion-membres.component').then(m => m.GestionMembresComponent) },
       { path: 'accueil-site', component: GestionAccueilSiteComponent },
       { path: 'hero', component: GestionHeroComponent },
-      { path: 'apropos', component: GestionAProposComponent }
+      { path: 'apropos', component: GestionAProposComponent },
+      { path: 'pages-legales', component: GestionPagesLegalesComponent }
     ]
   },
 
@@ -160,6 +162,7 @@ export const routes: Routes = [
       { path: 'accueil-site', component: GestionAccueilSiteComponent },
       { path: 'hero', component: GestionHeroComponent },
       { path: 'apropos', component: GestionAProposComponent },
+      { path: 'pages-legales', component: GestionPagesLegalesComponent },
     ]
     },
   // 🧭 Redirection inconnue

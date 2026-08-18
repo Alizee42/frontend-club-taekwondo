@@ -310,4 +310,8 @@ export class DashboardSuperAdminComponent implements OnInit {
   navigateToAPropos() {
     this.router.navigate(['super-admin/apropos']);
   }
+
+  navigateToPagesLegales() {
+    this.router.navigate(['super-admin/pages-legales']);
+  }
 }

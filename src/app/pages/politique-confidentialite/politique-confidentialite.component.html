@@ -9,11 +9,13 @@
 
   <article class="bloc" aria-labelledby="responsable">
     <h2 id="responsable">1. Responsable du traitement</h2>
-    <p>
-      <strong>Association :</strong> Association Olympique Taekwondo Villeurbannais (à adapter)<br>
-      <strong>Adresse :</strong> 00 rue Exemple, 69100 Villeurbanne<br>
-      <strong>Email de contact :</strong> <a href="mailto:privacy@example.org">privacy@example.org</a><br>
-      <strong>Représentant légal :</strong> Président(e) de l'association
+    <p *ngIf="loaded">
+      <strong>Association :</strong> {{ config.nomAssociation || 'Non renseigné' }}<br>
+      <strong>Adresse :</strong> {{ config.adresse || 'Non renseignée' }}<br>
+      <strong>Email de contact :</strong>
+      <a *ngIf="config.emailRgpd || config.emailContact" [href]="'mailto:' + (config.emailRgpd || config.emailContact)">{{ config.emailRgpd || config.emailContact }}</a>
+      <span *ngIf="!config.emailRgpd && !config.emailContact">Non renseigné</span><br>
+      <strong>Représentant légal :</strong> {{ config.representantLegal || 'Non renseigné' }}
     </p>
   </article>
 
@@ -76,7 +78,12 @@
   <article class="bloc" aria-labelledby="droits">
     <h2 id="droits">8. Vos droits</h2>
     <p>Vous disposez des droits suivants : accès, rectification, effacement, limitation, opposition pour motifs légitimes, portabilité (le cas échéant), retrait du consentement à tout moment (pour les traitements basés sur celui-ci) et réclamation auprès de la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>).</p>
-    <p>Exercice des droits : écrire à <a href="mailto:privacy@example.org">privacy@example.org</a> en précisant l'objet de la demande et un justificatif d'identité si nécessaire.</p>
+    <p *ngIf="loaded">
+      Exercice des droits : écrire à
+      <a *ngIf="config.emailRgpd || config.emailContact" [href]="'mailto:' + (config.emailRgpd || config.emailContact)">{{ config.emailRgpd || config.emailContact }}</a>
+      <span *ngIf="!config.emailRgpd && !config.emailContact">l'adresse de contact du club</span>
+      en précisant l'objet de la demande et un justificatif d'identité si nécessaire.
+    </p>
   </article>
 
   <article class="bloc" aria-labelledby="securite">
