@@ -16,17 +16,44 @@
   </div>
 
   <!-- KPI -->
-  <ui-kpi-grid [cols]="6">
+  <ui-kpi-grid [cols]="5">
     <ui-kpi-card icon="ri-community-line"   label="Clubs"               [value]="clubsCount"                                         tone="blue"   ></ui-kpi-card>
     <ui-kpi-card icon="ri-user-star-line"   label="Admins"              [value]="adminsCount"                                        tone="purple" ></ui-kpi-card>
     <ui-kpi-card icon="ri-team-line"        label="Membres"             [value]="membresCount"                                       tone="green"  ></ui-kpi-card>
     <ui-kpi-card icon="ri-hand-coin-line"   label="Paiements reçus"     [value]="paiementsTotal | currency:'EUR':'symbol':'1.0-0'"   tone="teal"   ></ui-kpi-card>
     <ui-kpi-card icon="ri-time-line"        label="Paiements en attente" [value]="paiementsAttente"                                  tone="amber"  ></ui-kpi-card>
-    <ui-kpi-card icon="ri-shield-check-line" label="Logs sécurité"      [value]="logsCount"                                         tone="red"    ></ui-kpi-card>
   </ui-kpi-grid>
 
   <!-- Sections de navigation -->
   <div class="dash-sections">
+
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--purple">
+        <i class="ri-megaphone-line"></i>
+        <span>Site public</span>
+      </div>
+      <div class="dash-section__body">
+        <app-dashboard-nav-card
+          label="Accueil du site"
+          icon="ri-home-4-line"
+          (pressed)="navigateToAccueilSite()"
+        />
+        <app-dashboard-nav-card
+          label="Actualités"
+          icon="ri-newspaper-line"
+          badgeVariant="neutral"
+          [badge]="actualitesCount > 0 ? actualitesCount : null"
+          (pressed)="navigateToActualites()"
+        />
+        <app-dashboard-nav-card
+          label="Galerie / Médias"
+          icon="ri-image-line"
+          badgeVariant="neutral"
+          [badge]="galeriesCount > 0 ? galeriesCount : null"
+          (pressed)="navigateToGalerie()"
+        />
+      </div>
+    </div>
 
     <div class="dash-section">
       <div class="dash-section__head dash-section__head--blue">
@@ -51,12 +78,16 @@
         <app-dashboard-nav-card
           label="Utilisateurs"
           icon="ri-user-3-line"
+          badgeVariant="neutral"
+          [badge]="utilisateursActifs > 0 ? utilisateursActifs : null"
           (pressed)="navigateToUtilisateurs()"
         />
         <app-dashboard-nav-card
-          label="Logs sécurité"
-          icon="ri-shield-check-line"
-          (pressed)="navigateToLogs()"
+          label="Documents"
+          icon="ri-file-list-line"
+          badgeVariant="neutral"
+          [badge]="documentsCount > 0 ? documentsCount : null"
+          (pressed)="navigateToDocuments()"
         />
       </div>
     </div>
@@ -75,19 +106,25 @@
           (pressed)="navigateToMembres()"
         />
         <app-dashboard-nav-card
-          label="Documents"
-          icon="ri-file-list-line"
-          (pressed)="navigateToDocuments()"
-        />
-        <app-dashboard-nav-card
           label="Enseignants"
           icon="ri-graduation-cap-line"
+          badgeVariant="neutral"
+          [badge]="enseignantsCount > 0 ? enseignantsCount : null"
           (pressed)="navigateToEnseignants()"
         />
         <app-dashboard-nav-card
           label="Horaires"
           icon="ri-time-line"
+          badgeVariant="neutral"
+          [badge]="horairesCount > 0 ? horairesCount : null"
           (pressed)="navigateToHoraires()"
+        />
+        <app-dashboard-nav-card
+          label="Événements"
+          icon="ri-calendar-event-line"
+          badgeVariant="neutral"
+          [badge]="evenementsAVenir > 0 ? evenementsAVenir : null"
+          (pressed)="navigateToEvenements()"
         />
       </div>
     </div>
@@ -105,14 +142,18 @@
           (pressed)="navigateToPaiement()"
         />
         <app-dashboard-nav-card
-          label="Commandes"
-          icon="ri-shopping-bag-3-line"
-          (pressed)="navigateToCommandes()"
+          label="Produits"
+          icon="ri-price-tag-3-line"
+          badgeVariant="neutral"
+          [badge]="produitsCount > 0 ? produitsCount : null"
+          (pressed)="navigateToProduits()"
         />
         <app-dashboard-nav-card
-          label="Événements"
-          icon="ri-calendar-event-line"
-          (pressed)="navigateToEvenements()"
+          label="Commandes"
+          icon="ri-shopping-bag-3-line"
+          badgeVariant="neutral"
+          [badge]="commandesCount > 0 ? commandesCount : null"
+          (pressed)="navigateToCommandes()"
         />
         <app-dashboard-nav-card
           label="Avis"
@@ -120,32 +161,6 @@
           badgeVariant="neutral"
           [badge]="avisCount > 0 ? avisCount : null"
           (pressed)="navigateToAvis()"
-        />
-      </div>
-    </div>
-
-    <div class="dash-section">
-      <div class="dash-section__head dash-section__head--purple">
-        <i class="ri-megaphone-line"></i>
-        <span>Site public</span>
-      </div>
-      <div class="dash-section__body">
-        <app-dashboard-nav-card
-          label="Accueil du site"
-          icon="ri-home-4-line"
-          (pressed)="navigateToAccueilSite()"
-        />
-        <app-dashboard-nav-card
-          label="Actualités"
-          icon="ri-newspaper-line"
-          badgeVariant="neutral"
-          [badge]="actualitesCount > 0 ? actualitesCount : null"
-          (pressed)="navigateToActualites()"
-        />
-        <app-dashboard-nav-card
-          label="Galerie / Médias"
-          icon="ri-image-line"
-          (pressed)="navigateToGalerie()"
         />
       </div>
     </div>

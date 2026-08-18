@@ -4,6 +4,14 @@ import { ClubService, Club } from '../../services/club.service';
 import { PaiementService, Paiement } from '../../services/paiement.service';
 import { ActualiteService } from '../../services/actualite.service';
 import { AvisService, Avis } from '../../services/avis.service';
+import { EnseignantService } from '../../services/enseignant.service';
+import { GalerieService } from '../../services/galerie.service';
+import { UtilisateurService } from '../../services/utilisateur.service';
+import { HorairesService } from '../../services/horaires.service';
+import { CommandeService } from '../../services/commande.service';
+import { EvenementService } from '../../services/evenement.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
@@ -94,21 +102,19 @@ export class DashboardSuperAdminComponent implements OnInit {
   documentsCount = 0;
   actualitesCount = 0;
   avisCount = 0;
+  enseignantsCount = 0;
+  galeriesCount = 0;
+  horairesCount = 0;
+  commandesCount = 0;
+  evenementsActifsCount = 0;
+  produitsCount = 0;
   utilisateursActifs = 0;
-  logsCount = 0;
 
   // Liste des clubs
   clubs: Club[] = [];
 
   // Liste des admins
   admins: Array<{ id: number; nom: string; club: string; email: string }> = [];
-
-  // Logs de sécurité
-  logs: Array<{ id: number; type: string; date: string; utilisateur: string; details: string }> = [
-    { id: 1, type: 'Connexion', date: '2025-10-07', utilisateur: 'admin1', details: 'Connexion réussie' },
-    { id: 2, type: 'Suppression', date: '2025-10-06', utilisateur: 'superadmin', details: 'Suppression d’un club' },
-    { id: 3, type: 'Modification', date: '2025-10-05', utilisateur: 'admin2', details: 'Changement d’email' }
-  ];
 
   // Actions rapides
   creerClub() { alert('Créer un club (fonction à implémenter)'); }
@@ -122,7 +128,14 @@ export class DashboardSuperAdminComponent implements OnInit {
     private router: Router,
     private paiementService: PaiementService,
     private actualiteService: ActualiteService,
-    private avisService: AvisService
+    private avisService: AvisService,
+    private enseignantService: EnseignantService,
+    private galerieService: GalerieService,
+    private utilisateurService: UtilisateurService,
+    private horairesService: HorairesService,
+    private commandeService: CommandeService,
+    private evenementService: EvenementService,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -154,6 +167,30 @@ export class DashboardSuperAdminComponent implements OnInit {
           }
         });
       });
+
+      // Enseignants : agrégation par club (pas d'endpoint global)
+      let enseignantsTotal = 0;
+      let clubsEnseignantsLoaded = 0;
+      if (clubs.length === 0) {
+        this.enseignantsCount = 0;
+      }
+      clubs.forEach(club => {
+        this.enseignantService.getByClub(club.id).subscribe({
+          next: (enseignants) => {
+            enseignantsTotal += enseignants.length;
+            clubsEnseignantsLoaded++;
+            if (clubsEnseignantsLoaded === clubs.length) {
+              this.enseignantsCount = enseignantsTotal;
+            }
+          },
+          error: () => {
+            clubsEnseignantsLoaded++;
+            if (clubsEnseignantsLoaded === clubs.length) {
+              this.enseignantsCount = enseignantsTotal;
+            }
+          }
+        });
+      });
     });
 
     // Membres (à adapter pour global)
@@ -175,8 +212,43 @@ export class DashboardSuperAdminComponent implements OnInit {
       this.avisCount = avis.length;
     });
 
-    // Logs (statique ou à brancher sur un service)
-    this.logsCount = this.logs.length;
+    // Galerie / Médias
+    this.galerieService.getAll().subscribe((galeries) => {
+      this.galeriesCount = galeries.length;
+    });
+
+    // Utilisateurs (tous rôles, tous clubs)
+    this.utilisateurService.getAll().subscribe((utilisateurs: any[]) => {
+      this.utilisateursActifs = utilisateurs.length;
+    });
+
+    // Documents (endpoint global, pas de service dédié)
+    this.http.get<any[]>(`${environment.apiUrl}/documents/all`).subscribe({
+      next: (documents) => { this.documentsCount = documents.length; },
+      error: () => { this.documentsCount = 0; }
+    });
+
+    // Horaires (tous clubs)
+    this.horairesService.getAllHoraires().subscribe((horaires) => {
+      this.horairesCount = horaires.length;
+    });
+
+    // Commandes (tous clubs)
+    this.commandeService.getCommandes().subscribe((commandes) => {
+      this.commandesCount = commandes.length;
+    });
+
+    // Événements actifs (tous clubs)
+    this.evenementService.getEvenementsActifs().subscribe((evenements) => {
+      this.evenementsActifsCount = evenements.length;
+      this.evenementsAVenir = evenements.length;
+    });
+
+    // Produits (endpoint global, pas de méthode dédiée dans ProduitService)
+    this.http.get<any[]>(`${environment.apiUrl}/produits`).subscribe({
+      next: (produits) => { this.produitsCount = produits.length; },
+      error: () => { this.produitsCount = 0; }
+    });
   }
 
   // Méthodes de chargement (à connecter à tes services)
@@ -204,8 +276,8 @@ export class DashboardSuperAdminComponent implements OnInit {
   navigateToCommandes() {
     this.router.navigate(['super-admin/commandes']);
   }
-  navigateToLogs() {
-    this.router.navigate(['super-admin/logs']);
+  navigateToProduits() {
+    this.router.navigate(['super-admin/gestion-produits']);
   }
   navigateToActualites() {
     this.router.navigate(['super-admin/actualites']);
