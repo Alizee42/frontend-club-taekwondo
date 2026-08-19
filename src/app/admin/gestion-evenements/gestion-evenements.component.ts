@@ -93,10 +93,10 @@ export class GestionEvenementsComponent implements OnInit {
 
   readonly eventColumns: UiTableColumn[] = [
     { key: 'titre', label: 'Titre' },
-    { key: 'dateDebut', label: 'Date debut' },
+    { key: 'dateDebut', label: 'Date début' },
     { key: 'dateFin', label: 'Date fin' },
     { key: 'lieu', label: 'Lieu' },
-    { key: 'capacite', label: 'Capacite' },
+    { key: 'capacite', label: 'Capacité' },
     { key: 'imageUrl', label: 'Image', type: 'image', width: '112px' },
     {
       key: 'statutLabel',
@@ -227,12 +227,12 @@ export class GestionEvenementsComponent implements OnInit {
 
   get prochainEvenementMeta(): string {
     const prochain = this.prochainEvenement;
-    return prochain ? prochain.titre : 'evenement a venir le plus proche';
+    return prochain ? prochain.titre : 'événement à venir le plus proche';
   }
 
   get prochainEvenementTitre(): string {
     const prochain = this.prochainEvenement;
-    return prochain ? prochain.titre : 'Aucun evenement a venir';
+    return prochain ? prochain.titre : 'Aucun événement à venir';
   }
 
   get inscriptionsActives(): Inscription[] {

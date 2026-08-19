@@ -1,8 +1,8 @@
 <div class="page-shell">
   <app-page-header
-    title="Gestion des evenements"
+    title="Gestion des événements"
     icon="ri-calendar-event-line"
-    subtitle="Creer, suivre et administrer les evenements du club"
+    subtitle="Créer, suivre et administrer les événements du club"
   >
     <ng-container page-header-actions>
       @if (isClubLocked) {
@@ -43,8 +43,8 @@
       type="text"
       class="form-input"
       [(ngModel)]="searchTerm"
-      placeholder="Rechercher un evenement..."
-      aria-label="Rechercher un evenement"
+      placeholder="Rechercher un événement..."
+      aria-label="Rechercher un événement"
     />
 
     <select
@@ -133,7 +133,7 @@
       </label>
 
       <label class="field">
-        <span class="field-label">Date debut</span>
+        <span class="field-label">Date début</span>
         <div class="field-date-heure">
           <input
             type="date"
@@ -175,7 +175,7 @@
       </label>
 
       <label class="field">
-        <span class="field-label">Capacite</span>
+        <span class="field-label">Capacité</span>
         <input
           type="number"
           min="1"
