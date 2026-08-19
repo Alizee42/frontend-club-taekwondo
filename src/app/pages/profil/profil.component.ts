@@ -23,6 +23,9 @@ export class ProfilComponent implements OnInit {
   showPasswordModal = false;
   passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' };
   passwordError = '';
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
   role: string | null = null;
   // Edition
   isEditing = false;
@@ -92,20 +95,17 @@ export class ProfilComponent implements OnInit {
       return;
     }
     const dto: any = {
-      id,
       nom: current.nom ?? '',
       prenom: current.prenom ?? '',
       email: current.email ?? '',
       telephone: current.telephone ?? current.tel ?? '',
       adresse: current.adresse ?? '',
-      dateNaissance: current.dateNaissance ?? null,
-      role: current.role ?? null,
-      clubId: current.clubId ?? null
+      dateNaissance: current.dateNaissance ?? null
     };
 
     this.isSaving = true;
     const headers = this.auth.getAuthHeaders();
-    this.http.put<any>(`${this.apiUrl}/${id}`, dto, { headers }).subscribe({
+    this.http.put<any>(`${this.apiUrl}/me`, dto, { headers }).subscribe({
       next: (updated) => {
         this.user = updated || dto;
         try { this.auth.updateUtilisateurConnecte(this.user); } catch {}
@@ -152,10 +152,13 @@ export class ProfilComponent implements OnInit {
 
   closePasswordModal(): void {
     this.showPasswordModal = false;
+    this.showCurrentPassword = false;
+    this.showNewPassword = false;
+    this.showConfirmPassword = false;
   }
 
   updatePassword(): void {
-    const { newPassword, confirmPassword } = this.passwordData;
+    const { currentPassword, newPassword, confirmPassword } = this.passwordData;
 
     if (newPassword !== confirmPassword) {
       this.passwordError = 'Les mots de passe ne correspondent pas.';
@@ -173,26 +176,10 @@ export class ProfilComponent implements OnInit {
       return;
     }
 
-    const current = this.user as any;
-    const dto: any = {
-      id,
-      nom: current.nom ?? '',
-      prenom: current.prenom ?? '',
-      email: current.email ?? '',
-      telephone: current.telephone ?? current.tel ?? '',
-      adresse: current.adresse ?? '',
-      dateNaissance: current.dateNaissance ?? null,
-      role: current.role ?? null,
-      clubId: current.clubId ?? null,
-      password: newPassword
-    };
-
     this.isSavingPassword = true;
     const headers = this.auth.getAuthHeaders();
-    this.http.put<any>(`${this.apiUrl}/${id}`, dto, { headers }).subscribe({
-      next: (updated) => {
-        this.user = updated || dto;
-        try { this.auth.updateUtilisateurConnecte(this.user); } catch {}
+    this.http.put<any>(`${this.apiUrl}/me/mot-de-passe`, { currentPassword, newPassword }, { headers }).subscribe({
+      next: () => {
         this.toast.success('Mot de passe mis a jour avec succes.');
         this.passwordError = '';
         this.isSavingPassword = false;
@@ -201,7 +188,9 @@ export class ProfilComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erreur mise a jour mot de passe :', err);
-        this.toast.error('Erreur lors de la mise a jour du mot de passe.');
+        this.passwordError = err?.error?.message === 'Mot de passe actuel incorrect.'
+          ? 'Mot de passe actuel incorrect.'
+          : 'Erreur lors de la mise a jour du mot de passe.';
         this.isSavingPassword = false;
       }
     });

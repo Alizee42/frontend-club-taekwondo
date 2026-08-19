@@ -233,6 +233,44 @@
   border-color: var(--brand-accent);
 }
 
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper .form-control {
+  padding-right: 2.75rem;
+}
+
+/* Spécificité renforcée : neutralise la règle globale .modal-content button:last-child
+   (fond rouge pensé pour un bouton "annuler/danger" en fin de modale) qui visait
+   aussi ce bouton icône puisqu'il est le dernier <button> de son .form-group. */
+.password-wrapper .toggle-password {
+  position: absolute;
+  top: 50%;
+  right: .6rem;
+  transform: translateY(-50%);
+  margin-top: 0;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--color-text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .25rem;
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  transition: color .15s, background .15s;
+}
+
+.password-wrapper .toggle-password:hover,
+.password-wrapper .toggle-password:focus-visible {
+  color: var(--brand-primary);
+  background-color: var(--color-surface-2);
+  outline: none;
+}
+
 .field-error {
   color: var(--brand-accent);
   font-size: .78rem;
@@ -242,6 +280,7 @@
 .form-actions {
   display: flex;
   justify-content: flex-end;
+  gap: .75rem;
   margin-top: 1.5rem;
 }
 

@@ -62,7 +62,7 @@
             </div>
             <div class="form-group">
               <label for="telephone">Téléphone</label>
-              <input type="tel" id="telephone" name="telephone" [(ngModel)]="user.telephone" [disabled]="!isEditing" class="form-control" pattern="^\s*0\d(?:[\s\.-]?\d{2}){4}\s*$" placeholder="06 12 34 56 78" #telephone="ngModel">
+              <input type="tel" id="telephone" name="telephone" [(ngModel)]="user.telephone" [disabled]="!isEditing" class="form-control" pattern="^\s*0\d(?:[\s.-]?\d{2}){4}\s*$" placeholder="06 12 34 56 78" #telephone="ngModel">
               <small class="field-error" *ngIf="profilForm.submitted && user.telephone && telephone.invalid">Format invalide</small>
             </div>
             <div class="form-group">
@@ -124,11 +124,23 @@
     <form (ngSubmit)="updatePassword()">
       <div class="form-group">
         <label for="currentPassword">Mot de passe actuel</label>
-        <input type="password" id="currentPassword" name="currentPassword" [(ngModel)]="passwordData.currentPassword" class="form-control" placeholder="Mot de passe actuel" required>
+        <div class="password-wrapper">
+          <input [type]="showCurrentPassword ? 'text' : 'password'" id="currentPassword" name="currentPassword" [(ngModel)]="passwordData.currentPassword" class="form-control" placeholder="Mot de passe actuel" required>
+          <button type="button" class="toggle-password" (click)="showCurrentPassword = !showCurrentPassword" [attr.aria-label]="showCurrentPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <i class="ri-eye-line" *ngIf="!showCurrentPassword" aria-hidden="true"></i>
+            <i class="ri-eye-off-line" *ngIf="showCurrentPassword" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
       <div class="form-group">
         <label for="newPassword">Nouveau mot de passe</label>
-        <input type="password" id="newPassword" name="newPassword" [(ngModel)]="passwordData.newPassword" class="form-control" placeholder="Nouveau mot de passe" required>
+        <div class="password-wrapper">
+          <input [type]="showNewPassword ? 'text' : 'password'" id="newPassword" name="newPassword" [(ngModel)]="passwordData.newPassword" class="form-control" placeholder="Nouveau mot de passe" required>
+          <button type="button" class="toggle-password" (click)="showNewPassword = !showNewPassword" [attr.aria-label]="showNewPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <i class="ri-eye-line" *ngIf="!showNewPassword" aria-hidden="true"></i>
+            <i class="ri-eye-off-line" *ngIf="showNewPassword" aria-hidden="true"></i>
+          </button>
+        </div>
         <div class="pwd-strength-bar" *ngIf="passwordData.newPassword.length > 0" [class]="'pwd-strength-bar ' + pwdStrengthClass">
           <span class="bar" [class.filled]="pwdStrength >= 1"></span>
           <span class="bar" [class.filled]="pwdStrength >= 2"></span>
@@ -139,7 +151,13 @@
       </div>
       <div class="form-group">
         <label for="confirmPassword">Confirmer</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" [(ngModel)]="passwordData.confirmPassword" class="form-control" placeholder="Confirmer le mot de passe" required>
+        <div class="password-wrapper">
+          <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword" name="confirmPassword" [(ngModel)]="passwordData.confirmPassword" class="form-control" placeholder="Confirmer le mot de passe" required>
+          <button type="button" class="toggle-password" (click)="showConfirmPassword = !showConfirmPassword" [attr.aria-label]="showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <i class="ri-eye-line" *ngIf="!showConfirmPassword" aria-hidden="true"></i>
+            <i class="ri-eye-off-line" *ngIf="showConfirmPassword" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
       <div *ngIf="passwordError" class="error-message">
