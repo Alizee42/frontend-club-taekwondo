@@ -22,9 +22,16 @@
 .cell-icon--female  { color: #D4307A; }
 .cell-icon--neutral { color: #9CA3AF; }
 
+/* Défilement horizontal propre au tableau plutôt que des colonnes écrasées
+   quand le viewport est plus étroit que le contenu (mobile, tableaux larges). */
+.ui-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .ui-table {
   width: 100%;
-  min-width: 100%;
+  min-width: 560px;
   border-collapse: collapse;
   background: transparent;
   font-size: var(--text-sm);
