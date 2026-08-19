@@ -119,13 +119,15 @@ export class GestionCommandeComponent implements OnInit {
       key: 'client',
       label: 'Client',
       width: '220px',
-      render: (row: CommandeDTO) => this.renderClient(row)
+      render: (row: CommandeDTO) => this.renderClient(row),
+      renderHtml: true
     },
     {
       key: 'beneficiaires',
       label: 'Membres',
       width: '250px',
-      render: (row: CommandeDTO) => this.renderBeneficiaires(row)
+      render: (row: CommandeDTO) => this.renderBeneficiaires(row),
+      renderHtml: true
     },
     {
       key: 'modePaiement',
@@ -145,7 +147,8 @@ export class GestionCommandeComponent implements OnInit {
       key: 'statut',
       label: 'Statut',
       width: '150px',
-      render: (row: CommandeDTO) => this.renderStatut(row.statut)
+      render: (row: CommandeDTO) => this.renderStatut(row.statut),
+      renderHtml: true
     }
   ];
 
@@ -154,12 +157,14 @@ export class GestionCommandeComponent implements OnInit {
       key: 'produitNom',
       label: 'Produit',
       width: '220px',
-      render: (row: LigneCommandeDTO) => this.renderProduit(row)
+      render: (row: LigneCommandeDTO) => this.renderProduit(row),
+      renderHtml: true
     },
     {
       key: 'options',
       label: 'Options',
-      render: (row: LigneCommandeDTO) => this.renderOptions(row)
+      render: (row: LigneCommandeDTO) => this.renderOptions(row),
+      renderHtml: true
     },
     {
       key: 'quantite',

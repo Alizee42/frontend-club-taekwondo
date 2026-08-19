@@ -298,6 +298,12 @@ export class DocumentsParentComponent implements OnInit {
 
   private normalizeStatus(s: any): StatutDoc { return normalizeStatus(s); }
 
+  isTypeDejaUploaded(type: string | null): boolean {
+    if (!type) return false;
+    const req = this.requiredDocuments.find(d => d.type === type);
+    return !!req?.uploaded;
+  }
+
   private refreshRequiredUploaded(): void {
     const set = new Set(this.documents.map(d => unifyType(d.typeDocument)));
     this.requiredDocuments = DOC_CATALOG.map(t => ({

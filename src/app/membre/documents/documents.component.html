@@ -53,12 +53,15 @@
           <div class="form-group">
             <label class="form-label" for="documentFile">Fichier</label>
             <div class="upload-zone">
-              <input id="documentFile" type="file"
+              <input id="documentFile" type="file" #documentFileInput
                      (change)="onFileSelected($event)"
                      accept=".pdf,.png,.jpg,.jpeg" />
             </div>
             <small class="field-error" *ngIf="selectedFile && !isValidFile(selectedFile)">
               Fichier invalide — PNG, JPEG ou PDF, max 5 Mo.
+            </small>
+            <small class="field-error" *ngIf="isTypeDejaUploaded(documentType)">
+              Un document de ce type a déjà été déposé. Modifiez-le depuis le tableau ci-dessous si besoin.
             </small>
           </div>
         </div>
@@ -68,7 +71,7 @@
             variant="primary"
             icon="ri-upload-2-line"
             label="Téléverser"
-            [disabled]="!documentType || !selectedFile || !isValidFile(selectedFile)"
+            [disabled]="!documentType || !selectedFile || !isValidFile(selectedFile) || isTypeDejaUploaded(documentType)"
           />
         </div>
       </form>

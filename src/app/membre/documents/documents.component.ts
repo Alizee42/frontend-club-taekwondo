@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -88,6 +88,8 @@ export class DocumentsComponent implements OnInit {
   // ⚠️ Valeur envoyée au backend : utiliser les CODES du catalogue
   documentType: string = 'CERTIFICAT_MEDICAL';
   selectedFile: File | null = null;
+
+  @ViewChild('documentFileInput') documentFileInput?: ElementRef<HTMLInputElement>;
 
   documents: DocumentItem[] = [];
 
@@ -266,6 +268,11 @@ export class DocumentsComponent implements OnInit {
     });
   }
 
+  isTypeDejaUploaded(type: string): boolean {
+    const req = this.requiredDocuments.find(d => d.type === type);
+    return !!req?.uploaded;
+  }
+
   isUploaded(type: string): boolean {
     const code = unifyType(type);
     const docs = this.documents.filter(d => unifyType(d.typeDocument) === code);
@@ -349,6 +356,9 @@ export class DocumentsComponent implements OnInit {
       next: () => {
         this.toast.success('Document téléversé avec succès.');
         this.selectedFile = null;
+        if (this.documentFileInput) {
+          this.documentFileInput.nativeElement.value = '';
+        }
         this.loadDocuments(); // recharge la liste
       },
       error: (err) => {

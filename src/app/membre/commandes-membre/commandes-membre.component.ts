@@ -47,11 +47,6 @@ export class CommandesMembreComponent implements OnInit {
       display: (row: CommandeDTO) => this.formatDate(row.dateCommande)
     },
     {
-      key: 'parent',
-      label: 'Parent',
-      display: (row: CommandeDTO) => `${row.utilisateurPrenom ?? ''} ${row.utilisateurNom ?? ''}`.trim() || '-'
-    },
-    {
       key: 'modePaiement',
       label: 'Mode',
       width: '170px',
@@ -71,7 +66,8 @@ export class CommandesMembreComponent implements OnInit {
       width: '150px',
       cellClass: 'td-center',
       headerClass: 'th-center',
-      render: (row: CommandeDTO) => this.renderStatut(row.statut)
+      render: (row: CommandeDTO) => this.renderStatut(row.statut),
+      renderHtml: true
     }
   ];
   actions = [
@@ -215,7 +211,25 @@ export class CommandesMembreComponent implements OnInit {
   }
 
   private renderStatut(statut: string): string {
-    const label = statut || '-';
+    const label = this.formatStatut(statut);
     return `<span class="${this.classeBadgeCommande(label)}">${label}</span>`;
+  }
+
+  private formatStatut(statut: string): string {
+    const normalized = (statut || '').trim().toUpperCase();
+    switch (normalized) {
+      case 'EN_ATTENTE':
+        return 'En attente';
+      case 'PAYEE':
+      case 'PAYE':
+        return 'Payée';
+      case 'A_RETIRER':
+        return 'À retirer';
+      case 'ANNULEE':
+      case 'ANNULE':
+        return 'Annulée';
+      default:
+        return statut ? statut.replace(/_/g, ' ') : '-';
+    }
   }
 }
