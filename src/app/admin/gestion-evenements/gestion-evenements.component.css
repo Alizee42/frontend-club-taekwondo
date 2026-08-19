@@ -133,6 +133,12 @@
   align-content: start;
 }
 
+.field-date-heure {
+  display: grid;
+  grid-template-columns: 160px 100px 100px;
+  gap: 0.5rem;
+}
+
 .checkbox-line {
   display: inline-flex;
   align-items: center;

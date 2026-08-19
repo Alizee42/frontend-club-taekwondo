@@ -35,6 +35,7 @@ interface DocumentItem {
   status: StatutDoc;
   dateDepot: string;
   cheminFichier?: string;
+  motifRefus?: string;
 }
 
 interface RequiredDoc {
@@ -128,17 +129,8 @@ export class DocumentsComponent implements OnInit {
       {
         key: 'statut',
         label: 'Statut',
-        type: 'text',
-        display: (row: any) => {
-          const s = this.normalizeStatus(row.statut);
-          return s === 'en_attente' ? 'en attente' : s;
-        },
-        textClass: (row: any) => {
-          const s = this.normalizeStatus(row.statut);
-          if (s === 'validé') return 'badge-pill badge-success';
-          if (s === 'refusé') return 'badge-pill badge-danger';
-          return 'badge-pill badge-warn';
-        }
+        render: (row: any) => this.renderStatutDocument(row),
+        renderHtml: true
       },
       {
         key: 'dateDepot',
@@ -248,6 +240,28 @@ export class DocumentsComponent implements OnInit {
     return 'en_attente';
   }
 
+  private escapeHtml(value: string): string {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  private renderStatutDocument(row: any): string {
+    const s = this.normalizeStatus(row.statut);
+    const label = s === 'en_attente' ? 'en attente' : s;
+    const badgeClass = s === 'validé' ? 'badge-pill badge-success'
+      : s === 'refusé' ? 'badge-pill badge-danger'
+      : 'badge-pill badge-warn';
+    let html = `<span class="${badgeClass}">${this.escapeHtml(label)}</span>`;
+    if (s === 'refusé' && row.motifRefus) {
+      html += `<div class="statut-motif">${this.escapeHtml(row.motifRefus)}</div>`;
+    }
+    return html;
+  }
+
   updateRequiredDocumentsStatus(): void {
     this.requiredDocuments = this.requiredDocuments.map(req => {
       const code = req.type;
@@ -306,12 +320,19 @@ export class DocumentsComponent implements OnInit {
     if (hasValid) return { state: 'validé', text: 'Validé' };
     if (hasRefused) {
       const refused = docs.find(d => this.normalizeStatus(d.status) === 'refusé');
-      return { state: 'refusé', text: 'Refusé', tooltip: refused ? 'Document refusé' : undefined };
+      return { state: 'refusé', text: 'Refusé', tooltip: refused?.motifRefus || 'Document refusé' };
     }
     if (hasPending) return { state: 'en_attente', text: 'En attente' };
 
     // Aucun document fourni -> "Non transmis" (état rouge côté style)
     return { state: 'refusé', text: 'Non transmis' };
+  }
+
+  get documentsRefuses(): { label: string; motif: string }[] {
+    return this.requiredDocuments
+      .map(doc => ({ doc, info: this.getDocumentStatusInfo(doc.type) }))
+      .filter(({ info }) => info.state === 'refusé' && info.text === 'Refusé')
+      .map(({ doc, info }) => ({ label: doc.label, motif: info.tooltip || 'Document refusé.' }));
   }
 
   /* =========================
@@ -437,6 +458,7 @@ export class DocumentsComponent implements OnInit {
       typeLabel: labelFor(d.typeDocument),
       nomDocument: d.nomDocument,
       statut: d.status,
+      motifRefus: d.motifRefus,
       dateDepot: (d as any).dateDepot ?? (d as any).date,
       cheminFichier: d.cheminFichier
     }));

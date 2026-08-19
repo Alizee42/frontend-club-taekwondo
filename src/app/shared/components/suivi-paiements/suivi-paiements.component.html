@@ -93,7 +93,10 @@
                 <span *ngIf="p.membrePrenom" class="cell-pour">↳ {{ p.membrePrenom }} {{ p.membreNom }}</span>
               </div>
             </td>
-            <td class="col-type">{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</td>
+            <td class="col-type">
+              <span class="origine-chip" [class.origine-chip--boutique]="p.commandeId">{{ libelleOrigine(p) }}</span>
+              <div class="col-type-detail">{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</div>
+            </td>
             <td class="col-progress">
               <div class="progress-cell">
                 <div class="progress-amounts">
@@ -245,6 +248,7 @@
                       <div class="pay-header">
                         <div class="pay-header-left">
                           <span [class]="classeBadge(statutPaiement(p))">{{ statutPaiement(p) }}</span>
+                          <span class="origine-chip" [class.origine-chip--boutique]="p.commandeId">{{ libelleOrigine(p) }}</span>
                           <span class="pay-chip">{{ libelleType(p.type, p.echeances) }}</span>
                           <span class="pay-chip">{{ libelleMode(p.modePaiement) }}</span>
                         </div>
@@ -351,7 +355,10 @@
             <tbody>
               <tr *ngFor="let p of utilisateurSelectionne?.paiements; trackBy: trackByPaiement">
                 <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
-                <td class="col-type">{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</td>
+                <td class="col-type">
+                  <span class="origine-chip" [class.origine-chip--boutique]="p.commandeId">{{ libelleOrigine(p) }}</span>
+                  <div class="col-type-detail">{{ libelleType(p.type) }} – {{ libelleMode(p.modePaiement) }}</div>
+                </td>
                 <td class="num">{{ p.montantTotal | currency:'EUR' }}</td>
                 <td class="num">{{ montantPaye(p) | currency:'EUR' }}</td>
                 <td class="num">{{ montantRestant(p) | currency:'EUR' }}</td>

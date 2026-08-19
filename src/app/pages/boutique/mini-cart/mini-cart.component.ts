@@ -208,6 +208,9 @@ export class MiniCartComponent implements OnInit, OnDestroy {
       const result = await this.stripeService.confirmerPaiement();
 
       if (result.success) {
+        if (result.paymentIntentId) {
+          try { await this.stripeService.syncPayment(result.paymentIntentId); } catch { /* ignore */ }
+        }
         this.commandeId = commande?.id ?? null;
         this.success = true;
         this.modalPaiementOuverte = false;

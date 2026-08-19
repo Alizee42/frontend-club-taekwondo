@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
@@ -14,7 +14,7 @@ import { ToastService } from '../../shared/toast/toast.service';
 const API_BASE = environment.apiUrl;
 
 type StatutCommande = 'en attente' | 'paye' | 'retire' | 'annule';
-type ModePaiement = 'cb' | 'club';
+type ModePaiement = 'cb' | 'club' | 'cheque' | 'virement' | 'especes';
 
 export interface LigneCommandeDTO {
   produitId: number;
@@ -97,6 +97,7 @@ export class GestionCommandeComponent implements OnInit {
   modeFilter: '' | ModePaiement = '';
 
   commandes: CommandeDTO[] = [];
+  private toutesLesCommandes: CommandeDTO[] = [];
   commandeSelectionnee: CommandeDTO | null = null;
   isLoading = false;
   errorMsg = '';
@@ -105,8 +106,6 @@ export class GestionCommandeComponent implements OnInit {
   get montantCA()    { return this.commandes.reduce((s, c) => s + (c.montantTotal || 0), 0); }
   get nbEnAttente()  { return this.commandes.filter(c => c.statut === 'en attente').length; }
   get nbAnnulees()   { return this.commandes.filter(c => c.statut === 'annule').length; }
-
-  readonly textHeaders = new HttpHeaders({ 'Content-Type': 'text/plain; charset=utf-8' });
 
   readonly columns: UiTableColumn[] = [
     {
@@ -202,14 +201,28 @@ export class GestionCommandeComponent implements OnInit {
   }
 
   onFiltersChange(): void {
-    this.chargerCommandes();
+    this.appliquerFiltres();
   }
 
   resetFilters(): void {
     this.search = '';
     this.statutFilter = '';
     this.modeFilter = '';
-    this.chargerCommandes();
+    this.appliquerFiltres();
+  }
+
+  private appliquerFiltres(): void {
+    const q = this.normalize(this.search.trim());
+    const statutVoulu = this.statutFilter ? this.uiStatutToApi(this.statutFilter) : '';
+    const modeVoulu = this.modeFilter ? this.uiModeToApi(this.modeFilter) : '';
+
+    this.commandes = this.toutesLesCommandes.filter((c) => {
+      const okStatut = !statutVoulu || this.normalize(c.statut) === this.normalize(statutVoulu);
+      const okMode = !modeVoulu || this.normalize(c.modePaiement || '') === this.normalize(modeVoulu);
+      const hay = this.normalize(`${c.utilisateurPrenom} ${c.utilisateurNom} ${c.utilisateurEmail} ${c.id}`);
+      const okQ = !q || hay.includes(q);
+      return okStatut && okMode && okQ;
+    });
   }
 
   onTableAction(event: { action: string; row: CommandeDTO }): void {
@@ -237,27 +250,13 @@ export class GestionCommandeComponent implements OnInit {
     this.isLoading = true;
     this.errorMsg = '';
 
-    let params = new HttpParams();
-    const query = this.search.trim();
-
-    if (query) {
-      params = params.set('q', query);
-    }
-
-    if (this.statutFilter) {
-      params = params.set('statut', this.uiStatutToApi(this.statutFilter));
-    }
-
-    if (this.modeFilter) {
-      params = params.set('mode', this.uiModeToApi(this.modeFilter));
-    }
-
-    this.http.get<ApiCommande[]>(`${API_BASE}/commandes`, { params }).subscribe({
+    this.http.get<ApiCommande[]>(`${API_BASE}/commandes`).subscribe({
       next: (res) => {
         const list = Array.isArray(res) ? res : [];
-        this.commandes = list
+        this.toutesLesCommandes = list
           .map((commande) => this.mapApiToUi(commande))
           .sort((a, b) => new Date(b.dateCommande).getTime() - new Date(a.dateCommande).getTime());
+        this.appliquerFiltres();
         this.isLoading = false;
       },
       error: (err) => {
@@ -275,36 +274,23 @@ export class GestionCommandeComponent implements OnInit {
       return;
     }
 
-    this.ensureModeClubIfMissing(commande)
-      .then(() => {
-        const payload = {
-          statut: 'PAYEE',
-          modePaiement: 'CLUB',
-          datePaiement: new Date().toISOString().slice(0, 10)
-        };
+    const payload = {
+      statut: 'PAYEE',
+      modePaiement: this.uiModeToApi(commande.modePaiement || 'club'),
+      datePaiement: new Date().toISOString().slice(0, 10)
+    };
 
-        this.http.put<void>(`${API_BASE}/commandes/${id}/valider`, payload).subscribe({
-          next: () => {
-            commande.statut = 'paye';
-            this.syncSelectedCommande(commande);
-            this.toast.success('Commande marquée comme payée.');
-          },
-          error: () => {
-            this.http.put<void>(`${API_BASE}/commandes/${id}/statut`, 'PAYEE', { headers: this.textHeaders }).subscribe({
-              next: () => {
-                commande.statut = 'paye';
-                this.syncSelectedCommande(commande);
-                this.toast.success('Commande marquée comme payée.');
-              },
-              error: (innerErr) => {
-                console.error('[API ERR] /statut PAYEE', innerErr);
-                this.toast.error('Échec du marquage en payée.');
-              }
-            });
-          }
-        });
-      })
-      .catch(() => undefined);
+    this.http.put<void>(`${API_BASE}/commandes/${id}/valider`, payload).subscribe({
+      next: () => {
+        commande.statut = 'paye';
+        this.syncSelectedCommande(commande);
+        this.toast.success('Commande marquée comme payée.');
+      },
+      error: (err) => {
+        console.error('[API ERR] /valider', err);
+        this.toast.error('Échec du marquage en payée.');
+      }
+    });
   }
 
   marquerRetiree(id: number): void {
@@ -314,7 +300,7 @@ export class GestionCommandeComponent implements OnInit {
       return;
     }
 
-    this.http.put<void>(`${API_BASE}/commandes/${id}/statut`, 'RETIRE', { headers: this.textHeaders }).subscribe({
+    this.http.put<void>(`${API_BASE}/commandes/${id}/a-retirer`, {}).subscribe({
       next: () => {
         commande.statut = 'retire';
         this.syncSelectedCommande(commande);
@@ -334,7 +320,7 @@ export class GestionCommandeComponent implements OnInit {
       return;
     }
 
-    this.http.put<void>(`${API_BASE}/commandes/${id}/statut`, 'ANNULE', { headers: this.textHeaders }).subscribe({
+    this.http.put<void>(`${API_BASE}/commandes/${id}/annuler`, { motif: 'Annulée par un administrateur' }).subscribe({
       next: () => {
         commande.statut = 'annule';
         this.syncSelectedCommande(commande);
@@ -358,7 +344,7 @@ export class GestionCommandeComponent implements OnInit {
   canGoPaid(commande: CommandeDTO): boolean {
     const statut = this.normalize(commande.statut);
     const mode = this.normalize(commande.modePaiement);
-    return statut === 'en attente' && (mode === 'club' || mode === '');
+    return statut === 'en attente' && mode !== 'cb';
   }
 
   canGoRetired(commande: CommandeDTO): boolean {
@@ -382,26 +368,6 @@ export class GestionCommandeComponent implements OnInit {
     if (this.commandeSelectionnee?.id === commande.id) {
       this.commandeSelectionnee = { ...commande };
     }
-  }
-
-  private ensureModeClubIfMissing(commande: CommandeDTO): Promise<void> {
-    if (commande.modePaiement === 'club') {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve, reject) => {
-      this.http.put<void>(`${API_BASE}/commandes/${commande.id}`, { modePaiement: 'CLUB' }).subscribe({
-        next: () => {
-          commande.modePaiement = 'club';
-          resolve();
-        },
-        error: (err) => {
-          console.error('[ERR] mise a jour modePaiement', err);
-          this.toast.error('Impossible de définir le mode de paiement au club.');
-          reject(err);
-        }
-      });
-    });
   }
 
   private mapApiToUi(api: ApiCommande): CommandeDTO {
@@ -462,12 +428,22 @@ export class GestionCommandeComponent implements OnInit {
   private apiModeToUi(mode?: string | null): ModePaiement | '' {
     const value = String(mode || '').toUpperCase();
     if (value === 'CB' || value === 'STRIPE' || value === 'CARTE' || value === 'CARTE_BANCAIRE') return 'cb';
-    if (value === 'CLUB' || value === 'ESPECES' || value === 'ESPÈCES' || value === 'VIREMENT') return 'club';
+    if (value === 'CLUB') return 'club';
+    if (value === 'CHEQUE') return 'cheque';
+    if (value === 'VIREMENT') return 'virement';
+    if (value === 'ESPECES' || value === 'ESPÈCES') return 'especes';
     return '';
   }
 
   private uiModeToApi(mode: ModePaiement): string {
-    return mode === 'cb' ? 'CB' : 'CLUB';
+    switch (mode) {
+      case 'cb': return 'CB';
+      case 'club': return 'CLUB';
+      case 'cheque': return 'CHEQUE';
+      case 'virement': return 'VIREMENT';
+      case 'especes': return 'ESPECES';
+      default: return 'CB';
+    }
   }
 
   private normalize(value?: string): string {
@@ -488,9 +464,13 @@ export class GestionCommandeComponent implements OnInit {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Number(value || 0));
   }
 
-  formatMode(mode: ModePaiement | ''): string {
-    if (mode === 'cb') return 'CB';
-    if (mode === 'club') return 'Paiement au club';
+  formatMode(mode: ModePaiement | '' | string | null): string {
+    const m = String(mode || '').toUpperCase();
+    if (m === 'CB' || m === 'STRIPE' || m === 'CARTE' || m === 'CARTE_BANCAIRE') return 'CB';
+    if (m === 'CLUB' || m === 'PAIEMENT_CLUB') return 'Paiement au club';
+    if (m === 'CHEQUE') return 'Chèque';
+    if (m === 'VIREMENT') return 'Virement';
+    if (m === 'ESPECES' || m === 'CASH') return 'Espèces';
     return '-';
   }
 

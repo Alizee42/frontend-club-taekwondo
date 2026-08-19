@@ -134,24 +134,44 @@
 
       <label class="field">
         <span class="field-label">Date debut</span>
-        <input
-          type="datetime-local"
-          class="form-input"
-          [(ngModel)]="nouvelEvenement.dateDebut"
-          name="dateDebut"
-          required
-        />
+        <div class="field-date-heure">
+          <input
+            type="date"
+            class="form-input"
+            [(ngModel)]="dateDebutJour"
+            name="dateDebutJour"
+            required
+          />
+          <select class="form-select" [(ngModel)]="dateDebutH" name="dateDebutH" required>
+            <option value="" disabled selected hidden>Heure</option>
+            <option *ngFor="let h of heuresDisponibles" [value]="h">{{ h }}</option>
+          </select>
+          <select class="form-select" [(ngModel)]="dateDebutMin" name="dateDebutMin" required>
+            <option value="" disabled selected hidden>Min</option>
+            <option *ngFor="let m of minutesDisponibles" [value]="m">{{ m }}</option>
+          </select>
+        </div>
       </label>
 
       <label class="field">
         <span class="field-label">Date fin</span>
-        <input
-          type="datetime-local"
-          class="form-input"
-          [(ngModel)]="nouvelEvenement.dateFin"
-          name="dateFin"
-          required
-        />
+        <div class="field-date-heure">
+          <input
+            type="date"
+            class="form-input"
+            [(ngModel)]="dateFinJour"
+            name="dateFinJour"
+            required
+          />
+          <select class="form-select" [(ngModel)]="dateFinH" name="dateFinH" required>
+            <option value="" disabled selected hidden>Heure</option>
+            <option *ngFor="let h of heuresDisponibles" [value]="h">{{ h }}</option>
+          </select>
+          <select class="form-select" [(ngModel)]="dateFinMin" name="dateFinMin" required>
+            <option value="" disabled selected hidden>Min</option>
+            <option *ngFor="let m of minutesDisponibles" [value]="m">{{ m }}</option>
+          </select>
+        </div>
       </label>
 
       <label class="field">

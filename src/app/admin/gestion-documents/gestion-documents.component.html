@@ -178,3 +178,27 @@
     </ng-template>
   </div>
 </ui-modal>
+
+<ui-modal
+  [open]="!!documentARefuser"
+  title="Refuser le document"
+  (closed)="fermerRefus()">
+  <div class="refus-modal" *ngIf="documentARefuser as doc">
+    <p>Indiquez le motif du refus pour <strong>{{ labelFor(doc.typeDocument) }}</strong>. Il sera visible par la personne qui a déposé le document.</p>
+    <select class="refus-motif-select" [(ngModel)]="motifRefusChoisi">
+      <option value="" disabled selected hidden>Choisir un motif…</option>
+      <option *ngFor="let m of motifsRefusCourants" [value]="m">{{ m }}</option>
+    </select>
+    <textarea
+      *ngIf="motifRefusChoisi === 'Autre'"
+      class="refus-motif-input"
+      rows="3"
+      placeholder="Précisez le motif du refus…"
+      [(ngModel)]="motifRefusAutre">
+    </textarea>
+    <div class="modal-actions">
+      <ui-button label="Annuler" variant="ghost" (clicked)="fermerRefus()"></ui-button>
+      <ui-button label="Confirmer le refus" variant="danger" [disabled]="!motifRefusValide" (clicked)="confirmerRefus()"></ui-button>
+    </div>
+  </div>
+</ui-modal>

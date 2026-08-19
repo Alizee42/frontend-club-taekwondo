@@ -28,6 +28,17 @@
     </div>
   </div>
 
+  <!-- Motifs de refus (visibles, pas juste au survol) -->
+  <div class="refus-banner" *ngIf="documentsRefuses.length">
+    <div class="refus-item" *ngFor="let r of documentsRefuses">
+      <i class="ri-close-circle-fill" aria-hidden="true"></i>
+      <div>
+        <strong>{{ r.label }} refusé</strong>
+        <p>{{ r.motif }}</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Card upload -->
   <div class="upload-card">
     <div class="upload-card-header">

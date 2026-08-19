@@ -55,6 +55,29 @@ export class GestionEvenementsComponent implements OnInit {
   editingEventId: number | null = null;
   nouvelEvenement: EventFormModel = this.createEmptyEventForm();
 
+  readonly heuresDisponibles: string[] = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+  readonly minutesDisponibles: string[] = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
+
+  get dateDebutJour(): string { return this.nouvelEvenement.dateDebut.split('T')[0] || ''; }
+  set dateDebutJour(v: string) { this.setDateEtHeure('dateDebut', v, this.dateDebutH, this.dateDebutMin); }
+  get dateDebutH(): string { return (this.nouvelEvenement.dateDebut.split('T')[1] || '').split(':')[0] || ''; }
+  set dateDebutH(v: string) { this.setDateEtHeure('dateDebut', this.dateDebutJour, v, this.dateDebutMin); }
+  get dateDebutMin(): string { return (this.nouvelEvenement.dateDebut.split('T')[1] || '').split(':')[1] || ''; }
+  set dateDebutMin(v: string) { this.setDateEtHeure('dateDebut', this.dateDebutJour, this.dateDebutH, v); }
+
+  get dateFinJour(): string { return this.nouvelEvenement.dateFin.split('T')[0] || ''; }
+  set dateFinJour(v: string) { this.setDateEtHeure('dateFin', v, this.dateFinH, this.dateFinMin); }
+  get dateFinH(): string { return (this.nouvelEvenement.dateFin.split('T')[1] || '').split(':')[0] || ''; }
+  set dateFinH(v: string) { this.setDateEtHeure('dateFin', this.dateFinJour, v, this.dateFinMin); }
+  get dateFinMin(): string { return (this.nouvelEvenement.dateFin.split('T')[1] || '').split(':')[1] || ''; }
+  set dateFinMin(v: string) { this.setDateEtHeure('dateFin', this.dateFinJour, this.dateFinH, v); }
+
+  private setDateEtHeure(champ: 'dateDebut' | 'dateFin', jour: string, heure: string, minute: string): void {
+    const h = heure || '00';
+    const m = minute || '00';
+    this.nouvelEvenement[champ] = jour ? `${jour}T${h}:${m}` : '';
+  }
+
   isLoading = false;
 
   // ADMIN : club fixe (son propre club). SUPER_ADMIN : doit choisir un club dans la liste.

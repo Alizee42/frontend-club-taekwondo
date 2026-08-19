@@ -121,8 +121,9 @@
   utilisateursFiltres: UtilisateurRow[] = [];
   groupedTableColumns: UiTableColumn[] = [];
   tableActions: Array<{ label: string; icon?: string; action: string; color?: string; show?: (row: any) => boolean; title?: string }> = [
-    { label: 'Valider', icon: 'ri-check-line', action: 'approve', color: '#16a34a', show: (row: any) => (row?.statut ?? '') !== 'validé', title: 'Valider' },
-    { label: 'Refuser', icon: 'ri-close-line', action: 'reject', color: '#dc2626', show: (row: any) => (row?.statut ?? '') !== 'refusé', title: 'Refuser' },
+    { label: 'Valider', icon: 'ri-check-line', action: 'approve', color: '#16a34a', show: (row: any) => (row?.statut ?? '') === 'en_attente', title: 'Valider' },
+    { label: 'Refuser', icon: 'ri-close-line', action: 'reject', color: '#dc2626', show: (row: any) => (row?.statut ?? '') === 'en_attente', title: 'Refuser' },
+    { label: 'Annuler la validation', icon: 'ri-arrow-go-back-line', action: 'reject', color: '#dc2626', show: (row: any) => (row?.statut ?? '') === 'validé', title: 'Annuler la validation' },
     { label: 'Télécharger', icon: 'ri-download-line', action: 'download', color: 'var(--blue-main)', show: (row: any) => (row?.statut ?? '') === 'validé', title: 'Télécharger' }
   ];
 
@@ -167,6 +168,18 @@
   }
   
     documentEnApercu: DocumentItem | null = null;
+    documentARefuser: DocumentItem | null = null;
+    motifRefusChoisi = '';
+    motifRefusAutre = '';
+
+    readonly motifsRefusCourants: string[] = [
+      'Document illisible',
+      'Document incomplet',
+      'Certificat médical périmé',
+      'Photo non conforme (mauvaise qualité, ancienne)',
+      'Document ne correspondant pas à la personne',
+      'Autre'
+    ];
   
     constructor(
       private http: HttpClient,
@@ -366,9 +379,10 @@
     }
   
     refuserTous(utilisateur: UtilisateurRow) {
+      const motif = 'Refus groupé par un administrateur.';
       utilisateur.documents
         .filter(d => this.normalizeStatus(d.status) === 'en_attente')
-        .forEach(d => this.refuserDocument(d));
+        .forEach(d => this.envoyerRefus(d, motif));
     }
   
     estFinalise(doc: DocumentItem): boolean {
@@ -468,12 +482,40 @@
       return this.encodeLastSegment(p);
     }
   
-    /** Refus d'un document (appel backend) */
+    /** Ouvre la modale de saisie du motif avant de refuser un document */
     refuserDocument(doc: DocumentItem): void {
-      this.http.put(`${this.API_BASE}/documents/${doc.id}/refuser`, null, { observe: 'response' })
+      this.documentARefuser = doc;
+      this.motifRefusChoisi = '';
+      this.motifRefusAutre = '';
+    }
+
+    fermerRefus(): void {
+      this.documentARefuser = null;
+      this.motifRefusChoisi = '';
+      this.motifRefusAutre = '';
+    }
+
+    get motifRefusValide(): boolean {
+      if (!this.motifRefusChoisi) return false;
+      if (this.motifRefusChoisi === 'Autre') return this.motifRefusAutre.trim().length > 0;
+      return true;
+    }
+
+    /** Confirme le refus avec le motif choisi (appel backend) */
+    confirmerRefus(): void {
+      const doc = this.documentARefuser;
+      if (!doc || !this.motifRefusValide) return;
+      const motif = this.motifRefusChoisi === 'Autre' ? this.motifRefusAutre.trim() : this.motifRefusChoisi;
+      this.envoyerRefus(doc, motif);
+      this.fermerRefus();
+    }
+
+    private envoyerRefus(doc: DocumentItem, motif: string): void {
+      this.http.put(`${this.API_BASE}/documents/${doc.id}/refuser`, { motifRefus: motif }, { observe: 'response' })
         .subscribe({
           next: () => {
             doc.status = 'refusé';
+            (doc as any).motifRefus = motif;
             this.toast.success('Document refusé.');
           },
           error: (err) => {

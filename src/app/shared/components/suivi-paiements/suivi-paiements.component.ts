@@ -36,6 +36,7 @@ export interface Paiement {
   clubName?: string;
   membreNom?: string;
   membrePrenom?: string;
+  commandeId?: number;
   type?: 'unique' | 'échelonné' | string;
   modePaiement?: 'stripe' | 'virement' | 'espèces' | string;
   montantTotal: number;
@@ -184,6 +185,11 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
     if (Array.isArray(ech) && ech.length > 0) return 'Échelonné';
     // Valeur par défaut
     return 'Unique';
+  }
+
+  /** Distingue une cotisation d'un achat boutique (paiement lié à une commande) */
+  libelleOrigine(p: Paiement): string {
+    return p.commandeId ? 'Achat boutique' : 'Cotisation';
   }
 
   /** Normalise et renvoie un libellé de mode de paiement cohérent */

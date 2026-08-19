@@ -34,6 +34,9 @@
       <option value="">Tous les modes</option>
       <option value="cb">CB</option>
       <option value="club">Paiement au club</option>
+      <option value="cheque">Chèque</option>
+      <option value="virement">Virement</option>
+      <option value="especes">Espèces</option>
     </select>
 
     <select class="form-select" [(ngModel)]="statutFilter" (ngModelChange)="onFiltersChange()">
@@ -99,7 +102,7 @@
     <div class="modal-footer">
       <ui-button label="Fermer" variant="ghost" (clicked)="fermerDetails()"></ui-button>
       <ui-button
-        *ngIf="commandeSelectionnee.modePaiement === 'club' && commandeSelectionnee.statut === 'en attente'"
+        *ngIf="commandeSelectionnee.modePaiement !== 'cb' && commandeSelectionnee.statut === 'en attente'"
         label="Marquer paye"
         variant="primary"
         (clicked)="marquerPaye(commandeSelectionnee.id)"

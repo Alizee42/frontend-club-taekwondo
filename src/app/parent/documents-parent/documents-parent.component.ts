@@ -42,6 +42,7 @@ interface DocumentItem {
   dateDepot: string | Date;
   cheminFichier: string;
   commentaire?: string;
+  motifRefus?: string;
   utilisateurId?: number | string;
   membreId?: number | string;
 }
@@ -126,17 +127,8 @@ export class DocumentsParentComponent implements OnInit {
       {
         key: 'statut',
         label: 'Statut',
-        type: 'text',
-        display: (row: any) => {
-          const s = this.normalizeStatus(row.statut);
-          return s === 'en_attente' ? 'en attente' : s;
-        },
-        textClass: (row: any) => {
-          const s = this.normalizeStatus(row.statut);
-          if (s === 'validé') return 'badge-pill badge-success';
-          if (s === 'refusé') return 'badge-pill badge-danger';
-          return 'badge-pill badge-warn';
-        }
+        render: (row: any) => this.renderStatutDocument(row),
+        renderHtml: true
       },
       {
         key: 'dateDepot',
@@ -291,6 +283,7 @@ export class DocumentsParentComponent implements OnInit {
       dateDepot: d?.dateDepot ?? d?.createdAt ?? new Date().toISOString(),
       cheminFichier: d?.cheminFichier ?? d?.url ?? '',
       commentaire: d?.commentaire ?? d?.message ?? undefined,
+      motifRefus: d?.motifRefus ?? undefined,
       utilisateurId: d?.utilisateurId ?? d?.userId ?? undefined,
       membreId: d?.membreId ?? undefined,
     };
@@ -428,6 +421,28 @@ export class DocumentsParentComponent implements OnInit {
     }
   }
 
+  private escapeHtml(value: string): string {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  private renderStatutDocument(row: any): string {
+    const s = this.normalizeStatus(row.statut);
+    const label = s === 'en_attente' ? 'en attente' : s;
+    const badgeClass = s === 'validé' ? 'badge-pill badge-success'
+      : s === 'refusé' ? 'badge-pill badge-danger'
+      : 'badge-pill badge-warn';
+    let html = `<span class="${badgeClass}">${this.escapeHtml(label)}</span>`;
+    if (s === 'refusé' && row.motifRefus) {
+      html += `<div class="statut-motif">${this.escapeHtml(row.motifRefus)}</div>`;
+    }
+    return html;
+  }
+
   getDocumentStatusInfo(type: string): { state: 'validé' | 'refusé' | 'en_attente', text: string, tooltip?: string } {
     const code = unifyType(type);
     const docs = this.documents.filter(d => unifyType(d.typeDocument) === code);
@@ -439,7 +454,7 @@ export class DocumentsParentComponent implements OnInit {
     if (hasValid) return { state: 'validé', text: 'Validé' };
     if (hasRefused) {
       const refused = docs.find(d => this.normalizeStatus(d.status) === 'refusé');
-      return { state: 'refusé', text: 'Refusé', tooltip: refused?.commentaire || 'Document refusé' };
+      return { state: 'refusé', text: 'Refusé', tooltip: refused?.motifRefus || 'Document refusé' };
     }
     if (hasPending) return { state: 'en_attente', text: 'En attente' };
 
@@ -506,6 +521,7 @@ export class DocumentsParentComponent implements OnInit {
       __doc: d,
       typeLabel: this.labelFor(d.typeDocument),
       statut: this.normalizeStatus(d.status),
+      motifRefus: d.motifRefus,
       dateDepot: d.dateDepot,
       cheminFichier: d.cheminFichier
     }));
