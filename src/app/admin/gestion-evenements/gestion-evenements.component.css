@@ -270,3 +270,11 @@
     width: 100%;
   }
 }
+
+@media (max-width: 480px) {
+  /* Les 3 colonnes en pixels fixes (160+100+100) depassent deja la largeur
+     d'un mobile etroit avant meme le padding de la modale : on empile. */
+  .field-date-heure {
+    grid-template-columns: 1fr;
+  }
+}

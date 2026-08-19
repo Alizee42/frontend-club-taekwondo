@@ -4,6 +4,17 @@
   gap: var(--sp-4);
 }
 
+/* Le tableau (large : 6 colonnes) doit defiler dans son propre cadre sur
+   mobile plutot que de faire deborder toute la page. */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-wrap .table {
+  min-width: 640px;
+}
+
 .num { text-align: right; }
 
 .col-type {
