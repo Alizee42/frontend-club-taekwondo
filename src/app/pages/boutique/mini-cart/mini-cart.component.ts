@@ -190,7 +190,7 @@ export class MiniCartComponent implements OnInit, OnDestroy {
         this.commandeService.passerCommandeDepuisPanier(this.modePaiement, lignes)
       );
 
-      const paiementBody: any = { montantTotal: this.total, modePaiement: 'CB' };
+      const paiementBody: any = { montantTotal: this.total, modePaiement: 'CB', commandeId: commande?.id };
       if (this.isParent && this.enfantSelectionneId) {
         paiementBody.membreId = this.enfantSelectionneId;
       }

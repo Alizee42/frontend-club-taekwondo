@@ -341,6 +341,7 @@
             <ul class="list uniques">
               <li class="item" *ngFor="let p of getPaiementsUniquesPourEnfant(enfant.id)">
                 <span class="muted">{{ (p.datePaiement || p.dateAffichable) | date:'dd/MM/yyyy' }}</span>
+                <span class="tag" [class.tag--boutique]="p.commandeId">{{ libellePaiement(p) }}</span>
                 <span class="grow">{{ p.montantTotal | currency:'EUR' }}</span>
                 <span class="status-badge" [ngClass]="p.statutCss">{{ p.statutDisplay }}</span>
                 <ui-button type="button" variant="primary" customClass="btn-soft-primary" size="sm" label="Reçu" *ngIf="p.statutCss==='status--success'" (clicked)="ouvrirRecuStripe(p.id)" />

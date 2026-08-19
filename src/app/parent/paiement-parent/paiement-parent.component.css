@@ -728,7 +728,24 @@
 }
 
 .list.uniques .item {
-  grid-template-columns: 110px 1fr auto auto;
+  grid-template-columns: 110px auto 1fr auto auto;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--color-surface-2, #eef2f7);
+  color: var(--color-text-2);
+}
+
+.tag--boutique {
+  background: #e6f4ea;
+  color: #1e7a34;
 }
 
 /* Accordion */

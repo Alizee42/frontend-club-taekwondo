@@ -281,6 +281,10 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     });
   }
 
+  libellePaiement(p: any): string {
+    return p?.commandeId ? 'Achat boutique' : 'Cotisation';
+  }
+
   private normalizeStatut(raw: any) {
     const s = String(raw ?? '')
       .normalize('NFD').replace(/\p{Diacritic}/gu, '')
