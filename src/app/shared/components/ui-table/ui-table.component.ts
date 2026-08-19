@@ -15,6 +15,10 @@ export interface UiTableColumn {
   // Classe(s) appliquées sur le span intérieur qui entoure le contenu texte
   textClass?: string | ((row: any) => string | string[]);
   render?: (row: any) => string;
+  // Si true, le résultat de render() est injecté comme HTML (ex: chips construits en chaîne).
+  // Par défaut le résultat de render() est affiché comme texte brut (échappé) — ne pas activer
+  // pour du contenu non maîtrisé (saisi par un utilisateur) sans l'échapper soi-même au préalable.
+  renderHtml?: boolean;
   width?: string;
   headerClass?: string;
   // Icône de tête de cellule (ex: genre, statut)

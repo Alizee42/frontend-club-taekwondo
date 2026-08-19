@@ -62,7 +62,7 @@
         <i class="ri-bank-card-line"></i>
         <span>Paiement par carte</span>
       </div>
-      <p>Réglez par carte bancaire lors du retrait de votre commande au club.</p>
+      <p>Votre paiement a été accepté. Votre commande vous attend au club.</p>
       <p *ngIf="club?.adresse" class="mc-success__detail"><i class="ri-map-pin-line"></i> {{ club!.adresse }}</p>
     </div>
 
@@ -146,11 +146,49 @@
     <button
       *ngIf="isConnecte"
       class="mc-btn mc-btn--primary mc-btn--full"
-      (click)="commander()"
+      (click)="onValiderClick()"
       [disabled]="loading">
-      <span *ngIf="!loading"><i class="ri-check-line"></i> Valider la commande</span>
+      <span *ngIf="!loading"><i class="ri-check-line"></i> {{ modePaiement === 'CB' ? 'Payer ' + (total | number:'1.2-2') + ' €' : 'Valider la commande' }}</span>
       <span *ngIf="loading" class="mc-spinner"></span>
     </button>
   </div>
+
+  <!-- Modale de paiement CB -->
+  <ui-modal
+    [open]="modalPaiementOuverte"
+    title="Paiement par carte"
+    [subtitle]="(total | number:'1.2-2') + ' € — paiement sécurisé via Stripe'"
+    size="sm"
+    (closed)="fermerModalPaiement()">
+
+    <div class="mc-modal-paiement">
+      <!-- Sélection de l'enfant (parent uniquement) -->
+      <div class="mc-enfant" *ngIf="isParent">
+        <label class="mc-enfant__label" for="mc-enfant-select">Pour quel enfant ?</label>
+        <select id="mc-enfant-select" class="mc-enfant__select" [(ngModel)]="enfantSelectionneId">
+          <option [ngValue]="null">Choisir un enfant…</option>
+          <option *ngFor="let e of enfants" [ngValue]="e.id">{{ e.prenom }} {{ e.nom }}</option>
+        </select>
+        <p *ngIf="!enfants.length" class="mc-enfant__empty">Aucun enfant rattaché à ton compte.</p>
+      </div>
+
+      <!-- Carte Stripe -->
+      <div class="mc-stripe">
+        <p class="mc-stripe__hint"><i class="ri-lock-line"></i> Paiement sécurisé via Stripe</p>
+        <div id="mini-cart-stripe-card-element" class="mc-stripe__card"></div>
+        <div class="mc-stripe__error" *ngIf="stripeError">
+          <i class="ri-error-warning-line"></i> {{ stripeError }}
+        </div>
+      </div>
+
+      <button
+        class="mc-btn mc-btn--primary mc-btn--full"
+        (click)="commander()"
+        [disabled]="loading">
+        <span *ngIf="!loading"><i class="ri-bank-card-line"></i> Payer {{ total | number:'1.2-2' }} €</span>
+        <span *ngIf="loading" class="mc-spinner"></span>
+      </button>
+    </div>
+  </ui-modal>
 
 </aside>

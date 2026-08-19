@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -86,6 +86,7 @@ export class DocumentsParentComponent implements OnInit {
   // Formulaire d’upload
   documentType: string | null = null;
   selectedFile: File | null = null;
+  @ViewChild('documentFileInput') documentFileInput?: ElementRef<HTMLInputElement>;
 
   // Liste des documents de l’enfant sélectionné
   documents: DocumentItem[] = [];
@@ -340,6 +341,9 @@ export class DocumentsParentComponent implements OnInit {
         this.documents = [doc, ...this.documents];
         this.documentType = null;
         this.selectedFile = null;
+        if (this.documentFileInput) {
+          this.documentFileInput.nativeElement.value = '';
+        }
         this.computeRows();
         this.refreshRequiredUploaded();
         this.toast.success('Document téléversé avec succès.');

@@ -56,7 +56,8 @@
               </span>
               <span class="cell-with-icon" *ngIf="col.render">
                 <i *ngIf="col.iconClass" [ngClass]="col.iconClass(row)" class="cell-lead-icon" aria-hidden="true"></i>
-                <span [ngClass]="getTextClass(col, row)">{{ col.render(row) }}</span>
+                <span *ngIf="!col.renderHtml" [ngClass]="getTextClass(col, row)">{{ col.render(row) }}</span>
+                <span *ngIf="col.renderHtml" [ngClass]="getTextClass(col, row)" [innerHTML]="col.render(row)"></span>
               </span>
             </ng-container>
           </ng-container>

@@ -79,7 +79,7 @@
             <div class="form-group">
               <label class="form-label" for="documentFile">Fichier</label>
               <div class="upload-zone">
-                <input id="documentFile" type="file"
+                <input id="documentFile" type="file" #documentFileInput
                        (change)="onFileSelected($event)"
                        accept=".pdf,.png,.jpg,.jpeg" />
               </div>

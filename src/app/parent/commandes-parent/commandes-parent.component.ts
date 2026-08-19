@@ -37,7 +37,8 @@ export class CommandesParentComponent implements OnInit {
     {
       key: 'beneficiaires',
       label: 'Membre(s)',
-      render: (row: CommandeDTO) => this.renderBeneficiaires(row)
+      render: (row: CommandeDTO) => this.renderBeneficiaires(row),
+      renderHtml: true
     },
     {
       key: 'modePaiement',
@@ -59,7 +60,8 @@ export class CommandesParentComponent implements OnInit {
       width: '150px',
       cellClass: 'td-center',
       headerClass: 'th-center',
-      render: (row: CommandeDTO) => this.renderStatut(row.statut)
+      render: (row: CommandeDTO) => this.renderStatut(row.statut),
+      renderHtml: true
     }
   ];
   actions = [

@@ -298,7 +298,13 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   // ===== Sélecteurs / helpers historique
   getPaiementsUniquesPourEnfant(enfantId: number){ return this.paiementsUniques.filter(p => p.membreId === enfantId); }
   getPaiementsEcheancesPourEnfant(enfantId: number){ return this.paiementsEcheances.filter(p => p.membreId === enfantId); }
-  getFirstPlan(enfantId: number){ const list = this.getPaiementsEcheancesPourEnfant(enfantId); return list?.[0] || null; }
+  getFirstPlan(enfantId: number){
+    // Le plus récent en premier : sinon un ancien plan de paiement (jamais soldé) reste
+    // affiché indéfiniment même après la création d'un nouveau plan réglé.
+    const list = this.getPaiementsEcheancesPourEnfant(enfantId);
+    if (!list?.length) return null;
+    return [...list].sort((a: any, b: any) => (b?.id ?? 0) - (a?.id ?? 0))[0];
+  }
   hasPlans(enfantId: number){ return this.getPaiementsEcheancesPourEnfant(enfantId).length > 0; }
   hasUniques(enfantId: number){ return this.getPaiementsUniquesPourEnfant(enfantId).length > 0; }
 

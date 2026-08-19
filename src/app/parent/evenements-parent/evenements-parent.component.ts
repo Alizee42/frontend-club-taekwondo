@@ -559,10 +559,6 @@ export class EvenementsParent implements OnInit {
     img.src = this.fallbackEventImage;
   }
 
-  allerVersEnfants(): void {
-    this.router.navigate(['/parent/enfants']);
-  }
-
   // Méthodes pour le tableau récapitulatif
   getInscriptionsAvecDetails(): any[] {
     const inscriptionsDetails: any[] = [];
