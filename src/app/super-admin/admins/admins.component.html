@@ -1,7 +1,7 @@
 <div class="page-shell">
   <app-page-header title="Administrateurs de clubs" icon="ri-shield-user-line">
     <ng-container page-header-actions>
-      <ui-button label="Créer un admin" variant="primary" (clicked)="showModal = true"></ui-button>
+      <ui-button label="Créer un admin" variant="primary" (clicked)="openCreateModal()"></ui-button>
     </ng-container>
   </app-page-header>
   <ui-kpi-grid [cols]="3">
@@ -25,7 +25,7 @@
   </div>
 </div>
 
-<ui-modal [open]="showModal" (closed)="showModal = false" title="Créer un administrateur de club">
+<ui-modal [open]="showModal" (closed)="closeModal()" [title]="editingId ? 'Modifier l administrateur' : 'Créer un administrateur de club'">
   <form (ngSubmit)="createAdmin()" class="admin-form">
     <div class="form-group">
       <label>Nom *</label>
@@ -41,7 +41,7 @@
     </div>
     <div class="form-group">
       <label>Mot de passe</label>
-      <input [(ngModel)]="newAdmin.password" name="password" type="password" placeholder="(optionnel) sera défini par email" />
+      <input [(ngModel)]="newAdmin.password" name="password" type="password" [placeholder]="editingId ? '(optionnel) laisser vide pour ne pas changer' : '(optionnel) sera défini par email'" />
     </div>
     <div class="form-group">
       <label>Club *</label>
@@ -51,10 +51,10 @@
       </select>
       <small *ngIf="clubs.length === 0" class="hint">Aucun club disponible — créez d'abord un club.</small>
     </div>
-    <p class="hint">Un email sera envoyé au nouvel administrateur pour définir son mot de passe.</p>
+    <p class="hint" *ngIf="!editingId">Un email sera envoyé au nouvel administrateur pour définir son mot de passe.</p>
     <p class="message" *ngIf="message">{{ message }}</p>
     <div class="modal-footer">
-      <ui-button [type]="'submit'" [disabled]="loading" [label]="loading ? 'En cours...' : 'Créer'" variant="primary"></ui-button>
+      <ui-button [type]="'submit'" [disabled]="loading" [label]="loading ? 'En cours...' : (editingId ? 'Enregistrer' : 'Créer')" variant="primary"></ui-button>
     </div>
   </form>
 </ui-modal>

@@ -15,98 +15,42 @@
     </div>
   </div>
 
-  <!-- KPI -->
-  <ui-kpi-grid [cols]="4">
-    <ui-kpi-card icon="ri-team-line"         label="Membres inscrits"      [value]="nbMembres"                                         tone="blue"   [loading]="loading"></ui-kpi-card>
-    <ui-kpi-card icon="ri-hand-coin-line"    label="Paiements reçus"       [value]="totalPaiements | currency:'EUR':'symbol':'1.0-0'"   tone="green"  [loading]="loading"></ui-kpi-card>
-    <ui-kpi-card icon="ri-time-line"         label="Paiements en attente"  [value]="paiementsAttente"                                   tone="amber"  [loading]="loading"></ui-kpi-card>
-    <ui-kpi-card icon="ri-calendar-event-line" label="Événements à venir"  [value]="evenementsAVenir"                                   tone="purple" [loading]="loading"></ui-kpi-card>
-  </ui-kpi-grid>
+  <!-- 3 KPI généraux, avec le détail en petit -->
+  <div class="kpi-trio">
+
+    <div class="kpi-trio__card kpi-trio__card--blue">
+      <div class="kpi-trio__head"><i class="ri-team-line"></i><span>Vue d'ensemble</span></div>
+      <div class="kpi-trio__main">{{ nbMembres }}<small>membres</small></div>
+      <ul class="kpi-trio__details">
+        <li>{{ evenementsAVenir }} événements à venir</li>
+        <li>{{ badge.horaires }} créneaux horaires</li>
+      </ul>
+    </div>
+
+    <div class="kpi-trio__card kpi-trio__card--amber">
+      <div class="kpi-trio__head"><i class="ri-todo-line"></i><span>À traiter</span></div>
+      <div class="kpi-trio__main">{{ badge.documents + badge.avis + badge.commandes }}<small>en attente</small></div>
+      <ul class="kpi-trio__details">
+        <li [class.kpi-trio__details--warn]="badge.documents > 0">{{ badge.documents }} documents</li>
+        <li [class.kpi-trio__details--warn]="badge.avis > 0">{{ badge.avis }} avis</li>
+        <li [class.kpi-trio__details--warn]="badge.commandes > 0">{{ badge.commandes }} commandes</li>
+      </ul>
+    </div>
+
+    <div class="kpi-trio__card kpi-trio__card--green">
+      <div class="kpi-trio__head"><i class="ri-wallet-3-line"></i><span>Finances</span></div>
+      <div class="kpi-trio__main">{{ totalPaiements | currency:'EUR':'symbol':'1.0-0' }}<small>reçus</small></div>
+      <ul class="kpi-trio__details">
+        <li [class.kpi-trio__details--warn]="paiementsAttente > 0">{{ paiementsAttente | currency:'EUR':'symbol':'1.0-0' }} en attente</li>
+        <li [class.kpi-trio__details--alert]="paiementsEnRetard > 0">{{ paiementsEnRetard }} paiement(s) en retard</li>
+        <li [class.kpi-trio__details--warn]="paiementsEnAttenteSeul > 0">{{ paiementsEnAttenteSeul }} paiement(s) pas encore échu(s)</li>
+      </ul>
+    </div>
+
+  </div>
 
   <!-- Sections de navigation -->
   <div class="dash-sections">
-
-    <div class="dash-section">
-      <div class="dash-section__head dash-section__head--blue">
-        <i class="ri-calendar-check-line"></i>
-        <span>Vie du club</span>
-      </div>
-      <div class="dash-section__body">
-        <app-dashboard-nav-card
-          label="Événements"
-          icon="ri-calendar-event-line"
-          badgeVariant="neutral"
-          [badge]="evenementsAVenir > 0 ? evenementsAVenir : null"
-          (pressed)="navigateToGestionEvenements()"
-        />
-        <app-dashboard-nav-card
-          label="Horaires"
-          icon="ri-time-line"
-          badgeVariant="neutral"
-          [badge]="badge.horaires > 0 ? badge.horaires : null"
-          (pressed)="navigateToHoraires()"
-        />
-        <app-dashboard-nav-card
-          label="Professeurs"
-          icon="ri-user-star-line"
-          (pressed)="navigateToProfesseurs()"
-        />
-      </div>
-    </div>
-
-    <div class="dash-section">
-      <div class="dash-section__head dash-section__head--green">
-        <i class="ri-user-line"></i>
-        <span>Adhérents</span>
-      </div>
-      <div class="dash-section__body">
-        <app-dashboard-nav-card
-          label="Membres & Comptes"
-          icon="ri-team-line"
-          badgeVariant="neutral"
-          [badge]="nbMembres > 0 ? nbMembres : null"
-          (pressed)="navigateToGestionMembres()"
-        />
-        <app-dashboard-nav-card
-          label="Documents"
-          icon="ri-file-list-line"
-          [badge]="badge.documents > 0 ? badge.documents : null"
-          (pressed)="navigateToDocument()"
-        />
-        <app-dashboard-nav-card
-          label="Avis"
-          icon="ri-star-line"
-          [badge]="badge.avis > 0 ? badge.avis : null"
-          (pressed)="navigateToavis()"
-        />
-      </div>
-    </div>
-
-    <div class="dash-section">
-      <div class="dash-section__head dash-section__head--amber">
-        <i class="ri-wallet-3-line"></i>
-        <span>Boutique et paiements</span>
-      </div>
-      <div class="dash-section__body">
-        <app-dashboard-nav-card
-          label="Paiements"
-          icon="ri-money-euro-circle-line"
-          [badge]="badge.paiements > 0 ? badge.paiements : null"
-          (pressed)="navigateToPaiement()"
-        />
-        <app-dashboard-nav-card
-          label="Commandes"
-          icon="ri-shopping-bag-3-line"
-          [badge]="badge.commandes > 0 ? badge.commandes : null"
-          (pressed)="navigateToGestionCommande()"
-        />
-        <app-dashboard-nav-card
-          label="Produits boutique"
-          icon="ri-price-tag-3-line"
-          (pressed)="navigateToGestionProduits()"
-        />
-      </div>
-    </div>
 
     <div class="dash-section">
       <div class="dash-section__head dash-section__head--purple">
@@ -129,6 +73,92 @@
           label="Galerie / Médias"
           icon="ri-image-line"
           (pressed)="navigateToGalerie()"
+        />
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--blue">
+        <i class="ri-calendar-check-line"></i>
+        <span>Vie du club</span>
+      </div>
+      <div class="dash-section__body">
+        <app-dashboard-nav-card
+          label="Événements"
+          icon="ri-calendar-event-line"
+          badgeVariant="neutral"
+          [badge]="evenementsAVenir > 0 ? evenementsAVenir : null"
+          (pressed)="navigateToGestionEvenements()"
+        />
+        <app-dashboard-nav-card
+          label="Horaires"
+          icon="ri-time-line"
+          badgeVariant="neutral"
+          [badge]="badge.horaires > 0 ? badge.horaires : null"
+          (pressed)="navigateToHoraires()"
+        />
+        <app-dashboard-nav-card
+          label="Enseignants"
+          icon="ri-user-star-line"
+          (pressed)="navigateToProfesseurs()"
+        />
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--green">
+        <i class="ri-user-line"></i>
+        <span>Adhérents</span>
+      </div>
+      <div class="dash-section__body">
+        <app-dashboard-nav-card
+          label="Membres & Comptes"
+          icon="ri-team-line"
+          badgeVariant="neutral"
+          [badge]="nbMembres > 0 ? nbMembres : null"
+          (pressed)="navigateToGestionMembres()"
+        />
+        <app-dashboard-nav-card
+          label="Documents"
+          icon="ri-file-list-line"
+          [badgeVariant]="badge.documents > 0 ? 'warning' : 'neutral'"
+          [badge]="badge.documents > 0 ? badge.documents : null"
+          (pressed)="navigateToDocument()"
+        />
+        <app-dashboard-nav-card
+          label="Avis"
+          icon="ri-star-line"
+          [badgeVariant]="badge.avis > 0 ? 'warning' : 'neutral'"
+          [badge]="badge.avis > 0 ? badge.avis : null"
+          (pressed)="navigateToavis()"
+        />
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section__head dash-section__head--amber">
+        <i class="ri-wallet-3-line"></i>
+        <span>Boutique et paiements</span>
+      </div>
+      <div class="dash-section__body">
+        <app-dashboard-nav-card
+          label="Paiements"
+          icon="ri-money-euro-circle-line"
+          [badgeVariant]="paiementsBadgeVariant"
+          [badge]="paiementsBadgeLabel"
+          (pressed)="navigateToPaiement()"
+        />
+        <app-dashboard-nav-card
+          label="Commandes"
+          icon="ri-shopping-bag-3-line"
+          [badgeVariant]="badge.commandes > 0 ? 'warning' : 'neutral'"
+          [badge]="badge.commandes > 0 ? badge.commandes : null"
+          (pressed)="navigateToGestionCommande()"
+        />
+        <app-dashboard-nav-card
+          label="Produits boutique"
+          icon="ri-price-tag-3-line"
+          (pressed)="navigateToGestionProduits()"
         />
       </div>
     </div>

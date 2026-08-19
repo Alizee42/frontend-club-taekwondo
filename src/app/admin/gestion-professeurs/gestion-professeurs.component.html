@@ -1,12 +1,12 @@
 <div class="page-shell">
   <app-page-header
-    title="Gestion des professeurs"
+    title="Gestion des enseignants"
     icon="ri-team-line"
     subtitle="Presenter l equipe pedagogique et gerer les fiches enseignants"
   >
     <ng-container page-header-actions>
       <ui-button
-        label="Ajouter un professeur"
+        label="Ajouter un enseignant"
         icon="ri-add-line"
         (clicked)="openModal()"
       ></ui-button>
@@ -14,7 +14,7 @@
   </app-page-header>
 
   <ui-kpi-grid [cols]="2">
-    <ui-kpi-card icon="ri-user-star-line"   label="Professeurs"     [value]="totalProfesseurs"    tone="primary" meta="équipe pédagogique"></ui-kpi-card>
+    <ui-kpi-card icon="ri-user-star-line"   label="Enseignants"     [value]="totalProfesseurs"    tone="primary" meta="équipe pédagogique"></ui-kpi-card>
     <ui-kpi-card icon="ri-image-line"       label="Avec photo"      [value]="avecPhoto"           tone="success"></ui-kpi-card>
   </ui-kpi-grid>
 
@@ -25,8 +25,8 @@
         class="professeur-card"
       >
         <div class="professeur-card-header">
-          <div class="professeur-avatar" *ngIf="professeur.photo; else avatarFallback">
-            <img [src]="professeur.photo" alt="Photo de {{ professeur.nom }} {{ professeur.prenom }}">
+          <div class="professeur-avatar" *ngIf="professeur.photoUrl; else avatarFallback">
+            <img [src]="professeur.photoUrl" alt="Photo de {{ professeur.nom }} {{ professeur.prenom }}">
           </div>
           <ng-template #avatarFallback>
             <div class="professeur-avatar professeur-avatar--fallback">
@@ -41,10 +41,16 @@
         </div>
 
         <p class="professeur-description">
-          {{ professeur.description || 'Aucune description renseignee pour ce professeur.' }}
+          {{ professeur.description || 'Aucune description renseignee pour cet enseignant.' }}
         </p>
 
         <div class="professeur-card-footer">
+          <ui-button
+            label="Modifier"
+            icon="ri-edit-line"
+            variant="ghost"
+            (clicked)="openEditModal(professeur)"
+          ></ui-button>
           <ui-button
             label="Supprimer"
             icon="ri-delete-bin-7-line"
@@ -59,7 +65,7 @@
   <ng-template #emptyState>
     <section class="empty-state">
       <i class="ri-user-star-line" aria-hidden="true"></i>
-      <h3>Aucun professeur pour le moment</h3>
+      <h3>Aucun enseignant pour le moment</h3>
       <p>Ajoute une premiere fiche pour commencer a construire la presentation de l equipe.</p>
       <ui-button
         label="Créer la première fiche"
@@ -73,7 +79,7 @@
 
 <ui-modal
   [open]="showModal"
-  title="Ajouter un professeur"
+  [title]="selected ? 'Modifier l enseignant' : 'Ajouter un enseignant'"
   (closed)="resetForm()"
 >
   <form class="professeur-form" (ngSubmit)="addProfesseur()">
@@ -95,11 +101,12 @@
 
       <label class="field field--full">
         <span class="field-label">Photo</span>
-        <input type="file" class="form-input" name="photo" accept="image/*" (change)="onPhotoSelected($event)">
+        <input type="file" class="form-input" name="photo" #photoFileInput accept="image/*" (change)="onPhotoSelected($event)">
       </label>
 
       <div class="photo-preview" *ngIf="photoPreview">
-        <img [src]="photoPreview" alt="Apercu du professeur">
+        <img [src]="photoPreview" alt="Apercu de l enseignant">
+        <div class="uploading" *ngIf="uploadingPhoto">Téléversement…</div>
       </div>
     </div>
 
@@ -121,7 +128,7 @@
         (clicked)="resetForm()"
       ></ui-button>
       <ui-button
-        label="Ajouter le professeur"
+        [label]="selected ? 'Enregistrer les modifications' : 'Ajouter l enseignant'"
         icon="ri-check-line"
         variant="primary"
         type="submit"

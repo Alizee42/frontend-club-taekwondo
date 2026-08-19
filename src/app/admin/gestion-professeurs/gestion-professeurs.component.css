@@ -129,6 +129,7 @@
 .professeur-card-footer {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .empty-state {
@@ -200,6 +201,11 @@
   object-fit: cover;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
+}
+
+.photo-preview .uploading {
+  font-size: 0.9rem;
+  color: #2563eb;
 }
 
 .modal-actions {

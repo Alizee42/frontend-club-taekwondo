@@ -10,18 +10,18 @@ import { UtilisateurService } from '../../services/utilisateur.service';
 import { HorairesService } from '../../services/horaires.service';
 import { CommandeService } from '../../services/commande.service';
 import { EvenementService } from '../../services/evenement.service';
+import { MembreService } from '../../services/membre.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { normalizeStatus } from '../../shared/documents/doc-utils';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
-import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
-import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 @Component({
   selector: 'app-dashboard-super-admin',
   templateUrl: './dashboard-super-admin.component.html',
   styleUrls: ['./dashboard-super-admin.component.css'],
-  imports: [CommonModule, FormsModule, DashboardNavCardComponent, KpiCardComponent, KpiGridComponent]
+  imports: [CommonModule, FormsModule, DashboardNavCardComponent]
 })
 export class DashboardSuperAdminComponent implements OnInit {
   // Champs du formulaire club pour <ui-form>
@@ -110,6 +110,14 @@ export class DashboardSuperAdminComponent implements OnInit {
   produitsCount = 0;
   utilisateursActifs = 0;
 
+  // Nouveaux KPI actionnables
+  documentsEnAttente = 0;
+  avisEnAttente = 0;
+  commandesEnAttente = 0;
+  paiementsEnRetard = 0;
+  paiementsEnAttenteSeul = 0;
+  clubsSansActiviteRecente = 0;
+
   // Liste des clubs
   clubs: Club[] = [];
 
@@ -135,8 +143,26 @@ export class DashboardSuperAdminComponent implements OnInit {
     private horairesService: HorairesService,
     private commandeService: CommandeService,
     private evenementService: EvenementService,
+    private membreService: MembreService,
     private http: HttpClient
   ) {}
+
+  private normStatutPaiement(statut?: string): string {
+    return String(statut ?? '').trim().toLowerCase();
+  }
+
+  get paiementsBadgeLabel(): string | null {
+    const parts: string[] = [];
+    if (this.paiementsEnRetard > 0) parts.push(`${this.paiementsEnRetard} en retard`);
+    if (this.paiementsEnAttenteSeul > 0) parts.push(`${this.paiementsEnAttenteSeul} en attente`);
+    return parts.length > 0 ? parts.join(' · ') : null;
+  }
+
+  get paiementsBadgeVariant(): 'danger' | 'warning' | 'neutral' {
+    if (this.paiementsEnRetard > 0) return 'danger';
+    if (this.paiementsEnAttenteSeul > 0) return 'warning';
+    return 'neutral';
+  }
 
   ngOnInit(): void {
     // Clubs
@@ -147,23 +173,86 @@ export class DashboardSuperAdminComponent implements OnInit {
       // Agréger tous les paiements de tous les clubs
       let paiementsTotal = 0;
       let paiementsAttente = 0;
+      let paiementsEnRetard = 0;
+      let paiementsEnAttenteSeul = 0;
       let clubsPaiementsLoaded = 0;
+      const dernierPaiementParClub = new Map<number, number>();
       if (clubs.length === 0) {
         this.paiementsTotal = 0;
         this.paiementsAttente = 0;
+        this.paiementsEnRetard = 0;
+        this.paiementsEnAttenteSeul = 0;
+        this.clubsSansActiviteRecente = 0;
       }
       clubs.forEach(club => {
         this.paiementService.getPaiementsByClub(club.id).subscribe((paiements: Paiement[]) => {
+          // Le backend stocke le statut en français minuscule ("en attente", "payé", "annulé") —
+          // pas "EN_ATTENTE"/"VALIDE" : ce filtre ne matchait donc jamais rien avant cette correction.
+          const enAttente = paiements.filter((p: Paiement) => this.normStatutPaiement(p.statut) === 'en attente');
           paiementsTotal += paiements
-            .filter((p: Paiement) => p.statut === 'VALIDE')
+            .filter((p: Paiement) => this.normStatutPaiement(p.statut) === 'payé')
             .reduce((acc: number, p: Paiement) => acc + (p.montantTotal || 0), 0);
-          paiementsAttente += paiements
-            .filter((p: Paiement) => p.statut === 'EN_ATTENTE')
+          paiementsAttente += enAttente
             .reduce((acc: number, p: Paiement) => acc + (p.montantTotal || 0), 0);
+
+          // Un paiement "en attente" est considéré en retard s'il a au moins une échéance
+          // elle-même en attente dont la date est dépassée (les paiements uniques, sans
+          // échéance, n'ont pas de date d'échéance propre et sont donc juste "en attente").
+          const aujourdHui = new Date();
+          enAttente.forEach(p => {
+            const enRetard = (p.echeances || []).some(e =>
+              this.normStatutPaiement(e.statut) === 'en attente' &&
+              e.dateEcheance && new Date(e.dateEcheance) < aujourdHui
+            );
+            if (enRetard) paiementsEnRetard++;
+            else paiementsEnAttenteSeul++;
+          });
+
+          // Dernière date de paiement du club : sert de proxy d'activité récente
+          // (aucune notion de "dernière connexion" n'existe côté backend).
+          const dates = paiements
+            .map(p => p.datePaiement ? new Date(p.datePaiement).getTime() : NaN)
+            .filter(t => !Number.isNaN(t));
+          if (dates.length > 0) {
+            dernierPaiementParClub.set(club.id, Math.max(...dates));
+          }
+
           clubsPaiementsLoaded++;
           if (clubsPaiementsLoaded === clubs.length) {
             this.paiementsTotal = paiementsTotal;
             this.paiementsAttente = paiementsAttente;
+            this.paiementsEnRetard = paiementsEnRetard;
+            this.paiementsEnAttenteSeul = paiementsEnAttenteSeul;
+
+            const seuil = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 jours
+            this.clubsSansActiviteRecente = clubs.filter(c => {
+              const derniere = dernierPaiementParClub.get(c.id);
+              return derniere === undefined || derniere < seuil;
+            }).length;
+          }
+        });
+      });
+
+      // Membres : agrégation par club (pas d'endpoint global filtrable)
+      let membresTotal = 0;
+      let clubsMembresLoaded = 0;
+      if (clubs.length === 0) {
+        this.membresCount = 0;
+      }
+      clubs.forEach(club => {
+        this.membreService.getMembresParClub(club.id).subscribe({
+          next: (membres) => {
+            membresTotal += membres?.length ?? 0;
+            clubsMembresLoaded++;
+            if (clubsMembresLoaded === clubs.length) {
+              this.membresCount = membresTotal;
+            }
+          },
+          error: () => {
+            clubsMembresLoaded++;
+            if (clubsMembresLoaded === clubs.length) {
+              this.membresCount = membresTotal;
+            }
           }
         });
       });
@@ -210,6 +299,7 @@ export class DashboardSuperAdminComponent implements OnInit {
     // Avis
     this.avisService.getAvis().subscribe((avis: Avis[]) => {
       this.avisCount = avis.length;
+      this.avisEnAttente = avis.filter(a => a.approuve === false).length;
     });
 
     // Galerie / Médias
@@ -224,8 +314,11 @@ export class DashboardSuperAdminComponent implements OnInit {
 
     // Documents (endpoint global, pas de service dédié)
     this.http.get<any[]>(`${environment.apiUrl}/documents/all`).subscribe({
-      next: (documents) => { this.documentsCount = documents.length; },
-      error: () => { this.documentsCount = 0; }
+      next: (documents) => {
+        this.documentsCount = documents.length;
+        this.documentsEnAttente = documents.filter(d => normalizeStatus(d.status) === 'en_attente').length;
+      },
+      error: () => { this.documentsCount = 0; this.documentsEnAttente = 0; }
     });
 
     // Horaires (tous clubs)
@@ -236,12 +329,18 @@ export class DashboardSuperAdminComponent implements OnInit {
     // Commandes (tous clubs)
     this.commandeService.getCommandes().subscribe((commandes) => {
       this.commandesCount = commandes.length;
+      this.commandesEnAttente = commandes.filter(c => c.statut === 'EN_ATTENTE').length;
     });
 
     // Événements actifs (tous clubs)
     this.evenementService.getEvenementsActifs().subscribe((evenements) => {
       this.evenementsActifsCount = evenements.length;
-      this.evenementsAVenir = evenements.length;
+    });
+
+    // Événements à venir (tous clubs) — filtré par date, indépendamment du flag "actif"
+    this.evenementService.getAllEvenements().subscribe((evenements) => {
+      const maintenant = new Date();
+      this.evenementsAVenir = evenements.filter(e => e.dateDebut && new Date(e.dateDebut) >= maintenant).length;
     });
 
     // Produits (endpoint global, pas de méthode dédiée dans ProduitService)

@@ -15,14 +15,40 @@
     </div>
   </div>
 
-  <!-- KPI -->
-  <ui-kpi-grid [cols]="5">
-    <ui-kpi-card icon="ri-community-line"   label="Clubs"               [value]="clubsCount"                                         tone="blue"   ></ui-kpi-card>
-    <ui-kpi-card icon="ri-user-star-line"   label="Admins"              [value]="adminsCount"                                        tone="purple" ></ui-kpi-card>
-    <ui-kpi-card icon="ri-team-line"        label="Membres"             [value]="membresCount"                                       tone="green"  ></ui-kpi-card>
-    <ui-kpi-card icon="ri-hand-coin-line"   label="Paiements reçus"     [value]="paiementsTotal | currency:'EUR':'symbol':'1.0-0'"   tone="teal"   ></ui-kpi-card>
-    <ui-kpi-card icon="ri-time-line"        label="Paiements en attente" [value]="paiementsAttente"                                  tone="amber"  ></ui-kpi-card>
-  </ui-kpi-grid>
+  <!-- 3 KPI généraux, avec le détail en petit -->
+  <div class="kpi-trio">
+
+    <div class="kpi-trio__card kpi-trio__card--blue">
+      <div class="kpi-trio__head"><i class="ri-community-line"></i><span>Vue d'ensemble</span></div>
+      <div class="kpi-trio__main">{{ clubsCount }}<small>clubs</small></div>
+      <ul class="kpi-trio__details">
+        <li>{{ membresCount }} membres</li>
+        <li>{{ evenementsAVenir }} événements à venir</li>
+        <li [class.kpi-trio__details--warn]="clubsSansActiviteRecente > 0">{{ clubsSansActiviteRecente }} club(s) sans activité récente</li>
+      </ul>
+    </div>
+
+    <div class="kpi-trio__card kpi-trio__card--amber">
+      <div class="kpi-trio__head"><i class="ri-todo-line"></i><span>À traiter</span></div>
+      <div class="kpi-trio__main">{{ documentsEnAttente + avisEnAttente + commandesEnAttente }}<small>en attente</small></div>
+      <ul class="kpi-trio__details">
+        <li [class.kpi-trio__details--warn]="documentsEnAttente > 0">{{ documentsEnAttente }} documents</li>
+        <li [class.kpi-trio__details--warn]="avisEnAttente > 0">{{ avisEnAttente }} avis</li>
+        <li [class.kpi-trio__details--warn]="commandesEnAttente > 0">{{ commandesEnAttente }} commandes</li>
+      </ul>
+    </div>
+
+    <div class="kpi-trio__card kpi-trio__card--green">
+      <div class="kpi-trio__head"><i class="ri-wallet-3-line"></i><span>Finances</span></div>
+      <div class="kpi-trio__main">{{ paiementsTotal | currency:'EUR':'symbol':'1.0-0' }}<small>reçus</small></div>
+      <ul class="kpi-trio__details">
+        <li [class.kpi-trio__details--warn]="paiementsAttente > 0">{{ paiementsAttente | currency:'EUR':'symbol':'1.0-0' }} en attente</li>
+        <li [class.kpi-trio__details--alert]="paiementsEnRetard > 0">{{ paiementsEnRetard }} paiement(s) en retard</li>
+        <li [class.kpi-trio__details--warn]="paiementsEnAttenteSeul > 0">{{ paiementsEnAttenteSeul }} paiement(s) pas encore échu(s)</li>
+      </ul>
+    </div>
+
+  </div>
 
   <!-- Sections de navigation -->
   <div class="dash-sections">
@@ -69,8 +95,8 @@
         <app-dashboard-nav-card
           label="Clubs"
           icon="ri-community-line"
-          badgeVariant="neutral"
-          [badge]="clubsCount > 0 ? clubsCount : null"
+          [badgeVariant]="clubsSansActiviteRecente > 0 ? 'warning' : 'neutral'"
+          [badge]="clubsSansActiviteRecente > 0 ? clubsSansActiviteRecente : (clubsCount > 0 ? clubsCount : null)"
           (pressed)="navigateToClubs()"
         />
         <app-dashboard-nav-card
@@ -90,8 +116,8 @@
         <app-dashboard-nav-card
           label="Documents"
           icon="ri-file-list-line"
-          badgeVariant="neutral"
-          [badge]="documentsCount > 0 ? documentsCount : null"
+          [badgeVariant]="documentsEnAttente > 0 ? 'warning' : 'neutral'"
+          [badge]="documentsEnAttente > 0 ? documentsEnAttente : (documentsCount > 0 ? documentsCount : null)"
           (pressed)="navigateToDocuments()"
         />
       </div>
@@ -143,7 +169,8 @@
         <app-dashboard-nav-card
           label="Paiements"
           icon="ri-money-euro-circle-line"
-          [badge]="paiementsAttente > 0 ? paiementsAttente : null"
+          [badgeVariant]="paiementsBadgeVariant"
+          [badge]="paiementsBadgeLabel"
           (pressed)="navigateToPaiement()"
         />
         <app-dashboard-nav-card
@@ -156,15 +183,15 @@
         <app-dashboard-nav-card
           label="Commandes"
           icon="ri-shopping-bag-3-line"
-          badgeVariant="neutral"
-          [badge]="commandesCount > 0 ? commandesCount : null"
+          [badgeVariant]="commandesEnAttente > 0 ? 'warning' : 'neutral'"
+          [badge]="commandesEnAttente > 0 ? commandesEnAttente : (commandesCount > 0 ? commandesCount : null)"
           (pressed)="navigateToCommandes()"
         />
         <app-dashboard-nav-card
           label="Avis"
           icon="ri-star-line"
-          badgeVariant="neutral"
-          [badge]="avisCount > 0 ? avisCount : null"
+          [badgeVariant]="avisEnAttente > 0 ? 'warning' : 'neutral'"
+          [badge]="avisEnAttente > 0 ? avisEnAttente : (avisCount > 0 ? avisCount : null)"
           (pressed)="navigateToAvis()"
         />
       </div>

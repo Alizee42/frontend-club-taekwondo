@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 
 import { EvenementService, EvenementDTO } from '../../services/evenement.service';
 import { AuthService } from '../../services/auth.service';
 import { MembreService, Membre } from '../../services/membre.service';
+import { ClubSelectionService } from '../../services/club-selection.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 
@@ -17,7 +19,7 @@ import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.com
   templateUrl: './evenements.component.html',
   styleUrls: ['./evenements.component.css']
 })
-export class EvenementsComponent implements OnInit {
+export class EvenementsComponent implements OnInit, OnDestroy {
   evenements: EvenementDTO[] = [];
   isLoading = true;
   errorMessage = '';
@@ -36,10 +38,13 @@ export class EvenementsComponent implements OnInit {
   readonly confirmInscriptionLabel = "Confirmer l'inscription";
   readonly fallbackEventImage = 'assets/images/default-event.jpg.jpg';
 
+  private sub = new Subscription();
+
   constructor(
     private evenementService: EvenementService,
     private authService: AuthService,
     private membreService: MembreService,
+    private clubSelection: ClubSelectionService,
     private router: Router
   ) {}
 
@@ -60,7 +65,28 @@ export class EvenementsComponent implements OnInit {
 
   ngOnInit(): void {
     this.detectUserContext();
-    this.chargerEvenements();
+
+    const clubId = this.getClubId();
+    if (clubId) {
+      this.chargerEvenements(clubId);
+    } else {
+      this.sub.add(
+        this.clubSelection.selectedClubId$.subscribe(id => {
+          if (id) { this.chargerEvenements(id); }
+          else { this.isLoading = false; }
+        })
+      );
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
+
+  private getClubId(): number | null {
+    const user = this.authService.getUtilisateurConnecte();
+    if (user?.['clubId']) return Number(user['clubId']);
+    return this.clubSelection.getSelectedClubId();
   }
 
   private detectUserContext(): void {
@@ -80,11 +106,11 @@ export class EvenementsComponent implements OnInit {
     }
   }
 
-  chargerEvenements(): void {
+  chargerEvenements(clubId: number): void {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.evenementService.getEvenementsActifs().subscribe({
+    this.evenementService.getEvenementsActifsByClub(clubId).subscribe({
       next: (data) => {
         this.evenements = data;
         this.isLoading = false;
@@ -134,7 +160,8 @@ export class EvenementsComponent implements OnInit {
             const prenomEnfant = this.membreSelectionne?.prenom || 'L\'enfant';
             this.successMessage = `${prenomEnfant} est inscrit(e) à cet événement 🎉`;
             this.fermerModal();
-            this.chargerEvenements();
+            const clubId = this.getClubId();
+        if (clubId) { this.chargerEvenements(clubId); }
             this.clearMessages();
           },
           error: (err: HttpErrorResponse) => {
@@ -160,7 +187,8 @@ export class EvenementsComponent implements OnInit {
           next: () => {
             this.successMessage = 'Vous êtes inscrit à cet événement 🎉';
             this.fermerModal();
-            this.chargerEvenements();
+            const clubId = this.getClubId();
+        if (clubId) { this.chargerEvenements(clubId); }
             this.clearMessages();
           },
           error: (err: HttpErrorResponse) => {
@@ -186,7 +214,8 @@ export class EvenementsComponent implements OnInit {
     this.evenementService.desinscrireEvenement(evenement.inscriptionId).subscribe({
       next: () => {
         this.successMessage = 'Désinscription effectuée avec succès ✅';
-        this.chargerEvenements();
+        const clubId = this.getClubId();
+        if (clubId) { this.chargerEvenements(clubId); }
         this.clearMessages();
       },
       error: (err: HttpErrorResponse) => {

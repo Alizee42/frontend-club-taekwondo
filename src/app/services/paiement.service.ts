@@ -16,9 +16,10 @@ export interface Echeance {
 export interface Paiement {
   id?: number;
   montantTotal?: number;
-  statut?: string; 
-  mode?: string;   
+  statut?: string;
+  mode?: string;
   echeances?: Echeance[];
+  datePaiement?: string;
 }
 
 @Injectable({ providedIn: 'root' })

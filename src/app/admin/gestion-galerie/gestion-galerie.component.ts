@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { GalerieService, Galerie } from '../../services/galerie.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -35,6 +35,8 @@ export class GestionGalerieComponent implements OnInit {
   modalTitle = '';
   formImage: Partial<Galerie> = {};
   editMode = false;
+
+  @ViewChild('imageFileInput') imageFileInput?: ElementRef<HTMLInputElement>;
 
   constructor(private galerieService: GalerieService, private authService: AuthService, private readonly toast: ToastService) {}
 
@@ -127,6 +129,9 @@ export class GestionGalerieComponent implements OnInit {
   closeModal() {
     this.modalOpen = false;
     this.formImage = {};
+    if (this.imageFileInput) {
+      this.imageFileInput.nativeElement.value = '';
+    }
   }
 
   isSubmitting = false;

@@ -1,209 +1,108 @@
-<app-page-header title="Gestion des produits" icon="ri-price-tag-3-line" subtitle="Ajoutez et gérez les produits disponibles dans la boutique du club.">
-  <ng-container page-header-actions>
-    @if (isClubLocked) {
-      <span class="club-chip">
-        <i class="ri-building-4-line"></i>
-        {{ selectedClubName || '…' }}
-      </span>
-    } @else {
-      <span class="club-picker-inline">
-        <span class="club-picker-inline__label">Club</span>
-        <select class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
-          <option [ngValue]="null">Choisir un club…</option>
-          @for (c of clubs; track c.id) {
-            <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
-          }
-        </select>
-      </span>
-    }
-    <ui-button
-      variant="primary"
-      icon="ri-add-line"
-      label="Nouveau produit"
-      [disabled]="!selectedClubId"
-      (clicked)="ouvrirAjout()">
-    </ui-button>
-  </ng-container>
-</app-page-header>
+<div class="page-shell">
+  <app-page-header title="Gestion des produits" icon="ri-price-tag-3-line" subtitle="Ajoutez et gérez les produits disponibles dans la boutique du club.">
+    <ng-container page-header-actions>
+      @if (isClubLocked) {
+        <span class="club-chip">
+          <i class="ri-building-4-line"></i>
+          {{ selectedClubName || '…' }}
+        </span>
+      } @else {
+        <span class="club-picker-inline">
+          <span class="club-picker-inline__label">Club</span>
+          <select class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
+            <option [ngValue]="null">Choisir un club…</option>
+            @for (c of clubs; track c.id) {
+              <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
+            }
+          </select>
+        </span>
+      }
+      <ui-button
+        variant="primary"
+        icon="ri-add-line"
+        label="Nouveau produit"
+        [disabled]="!selectedClubId"
+        (clicked)="ouvrirAjout()">
+      </ui-button>
+    </ng-container>
+  </app-page-header>
 
-<ui-kpi-grid [cols]="3">
-  <ui-kpi-card icon="ri-price-tag-3-line" label="Produits"   [value]="nbProduits" tone="primary" [loading]="loading"></ui-kpi-card>
-  <ui-kpi-card icon="ri-checkbox-circle-line" label="En stock" [value]="nbEnStock" tone="success" [loading]="loading"></ui-kpi-card>
-  <ui-kpi-card icon="ri-error-warning-line" label="En rupture" [value]="nbRupture" [tone]="nbRupture > 0 ? 'danger' : 'neutral'" [loading]="loading"></ui-kpi-card>
-</ui-kpi-grid>
+  <ui-kpi-grid [cols]="3">
+    <ui-kpi-card icon="ri-price-tag-3-line" label="Produits"   [value]="nbProduits" tone="primary" [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-checkbox-circle-line" label="En stock" [value]="nbEnStock" tone="success" [loading]="loading"></ui-kpi-card>
+    <ui-kpi-card icon="ri-error-warning-line" label="En rupture" [value]="nbRupture" [tone]="nbRupture > 0 ? 'danger' : 'neutral'" [loading]="loading"></ui-kpi-card>
+  </ui-kpi-grid>
 
-<div class="gp-page" *ngIf="selectedClubId; else noClubSelected">
+  <div *ngIf="selectedClubId; else noClubSelected">
 
-  <!-- Barre de recherche -->
-  <div class="gp-toolbar">
-    <div class="gp-search">
-      <i class="ri-search-line"></i>
+    <!-- Barre de recherche -->
+    <div class="search-bar">
       <input
-        class="gp-search__input"
         type="text"
         placeholder="Rechercher un produit…"
         [(ngModel)]="search"
         (ngModelChange)="filtrer()"
         aria-label="Rechercher un produit" />
+      <span class="result-count">{{ filtered.length }} produit(s)</span>
     </div>
-    <span class="gp-count">{{ filtered.length }} produit(s)</span>
+
+    <div *ngIf="!loading && error" class="error-msg">{{ error }}</div>
+
+    <div class="table-wrap">
+      <ui-table [columns]="tableColumns" [data]="filtered" [actions]="tableActions" (actionClick)="handleTableAction($event)"></ui-table>
+    </div>
+
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="gp-state">
-    <span class="gp-spinner"></span>
-    <span>Chargement…</span>
-  </div>
-
-  <!-- Erreur -->
-  <div *ngIf="!loading && error" class="gp-alert">
-    <i class="ri-error-warning-line"></i> {{ error }}
-  </div>
-
-  <!-- Liste vide -->
-  <div *ngIf="!loading && !error && filtered.length === 0" class="gp-state">
-    <i class="ri-box-3-line"></i>
-    <p>Aucun produit trouvé.</p>
-    <ui-button variant="primary" icon="ri-add-line" label="Créer le premier produit" (clicked)="ouvrirAjout()"></ui-button>
-  </div>
-
-  <!-- Tableau -->
-  <div *ngIf="!loading && !error && filtered.length > 0" class="gp-table-wrap">
-    <table class="gp-table" role="grid">
-      <thead>
-        <tr>
-          <th>Produit</th>
-          <th class="gp-th-right">Prix</th>
-          <th class="gp-th-right">Stock</th>
-          <th>Catégorie</th>
-          <th class="gp-th-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let p of filtered" class="gp-row">
-          <td>
-            <div class="gp-produit-cell">
-              <img *ngIf="p.imageUrl" [src]="p.imageUrl" [alt]="p.nom" class="gp-thumb" />
-              <span *ngIf="!p.imageUrl" class="gp-thumb gp-thumb--placeholder">
-                <i class="ri-t-shirt-line"></i>
-              </span>
-              <div>
-                <p class="gp-produit-nom">{{ p.nom }}</p>
-                <p class="gp-produit-desc">{{ p.description }}</p>
-              </div>
-            </div>
-          </td>
-          <td class="gp-td-right gp-prix">{{ p.prix | number:'1.2-2' }} €</td>
-          <td class="gp-td-right">
-            <span class="gp-stock" [class.gp-stock--low]="p.stock <= 5" [class.gp-stock--zero]="p.stock === 0">
-              {{ p.stock }}
-            </span>
-          </td>
-          <td>
-            <span class="gp-chip">{{ p.categorie || '—' }}</span>
-          </td>
-          <td class="gp-td-right">
-            <div class="gp-actions">
-              <button class="gp-btn-icon gp-btn-icon--edit" (click)="ouvrirEdit(p)" title="Modifier" aria-label="Modifier {{ p.nom }}">
-                <i class="ri-pencil-line"></i>
-              </button>
-              <button class="gp-btn-icon gp-btn-icon--delete" (click)="demanderSuppression(p)" title="Supprimer" aria-label="Supprimer {{ p.nom }}">
-                <i class="ri-delete-bin-line"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
+  <ng-template #noClubSelected>
+    <p class="empty-hint">Choisis un club ci-dessus pour afficher et gérer ses produits.</p>
+  </ng-template>
 </div>
 
-<ng-template #noClubSelected>
-  <div class="gp-state">
-    <i class="ri-building-4-line"></i>
-    <span>Choisis un club ci-dessus pour afficher et gérer ses produits.</span>
-  </div>
-</ng-template>
-
-<!-- ══════════════════ MODAL AJOUT / ÉDITION ══════════════════ -->
 <ui-modal [open]="modalOpen" [title]="modalMode === 'add' ? 'Nouveau produit' : 'Modifier le produit'" (closed)="fermerModal()">
-  <form class="gp-form" (ngSubmit)="sauvegarder()" novalidate>
+  <form (ngSubmit)="sauvegarder()">
+    <div class="form-group">
+      <label for="f-nom">Nom</label>
+      <input id="f-nom" type="text" [(ngModel)]="form.nom" name="nom" placeholder="Ex : Dobok Taekwondo" required />
+    </div>
 
-    <div class="gp-form-row">
-      <div class="gp-form-group">
-        <label class="gp-label" for="f-nom">Nom *</label>
-        <input class="gp-input" id="f-nom" type="text" [(ngModel)]="form.nom" name="nom" placeholder="Ex : Dobok Taekwondo" required />
-      </div>
-      <div class="gp-form-group">
-        <label class="gp-label" for="f-categorie">Catégorie</label>
-        <select class="gp-input" id="f-categorie" [(ngModel)]="form.categorie" name="categorie">
-          <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-        </select>
+    <div class="form-group">
+      <label for="f-categorie">Catégorie</label>
+      <select id="f-categorie" [(ngModel)]="form.categorie" name="categorie">
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="f-desc">Description</label>
+      <textarea id="f-desc" [(ngModel)]="form.description" name="description" rows="3" placeholder="Description courte du produit"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="f-prix">Prix (€)</label>
+      <input id="f-prix" type="number" min="0.01" step="0.01" [(ngModel)]="form.prix" name="prix" placeholder="30.00" required />
+    </div>
+
+    <div class="form-group">
+      <label for="f-stock">Stock</label>
+      <input id="f-stock" type="number" min="0" [(ngModel)]="form.stock" name="stock" placeholder="100" required />
+    </div>
+
+    <div class="form-group">
+      <label for="imageFile">Image</label>
+      <input id="imageFile" type="file" #imageFileInput accept="image/*" (change)="onFileSelected($event)" />
+      <div class="photo-preview" *ngIf="imagePreview">
+        <img [src]="imagePreview" alt="Aperçu du produit">
+        <div class="uploading" *ngIf="uploading">Téléversement…</div>
       </div>
     </div>
 
-    <div class="gp-form-group">
-      <label class="gp-label" for="f-desc">Description *</label>
-      <textarea class="gp-input gp-textarea" id="f-desc" [(ngModel)]="form.description" name="description" rows="3" placeholder="Description courte du produit"></textarea>
-    </div>
-
-    <div class="gp-form-row">
-      <div class="gp-form-group">
-        <label class="gp-label" for="f-prix">Prix (€) *</label>
-        <input class="gp-input" id="f-prix" type="number" min="0.01" step="0.01" [(ngModel)]="form.prix" name="prix" placeholder="30.00" required />
-      </div>
-      <div class="gp-form-group">
-        <label class="gp-label" for="f-stock">Stock *</label>
-        <input class="gp-input" id="f-stock" type="number" min="0" [(ngModel)]="form.stock" name="stock" placeholder="100" required />
-      </div>
-    </div>
-
-    <div class="gp-form-group">
-      <label class="gp-label">Image du produit</label>
-      <input #fileInput type="file" accept="image/*" class="gp-file-hidden" (change)="onFileSelected($event)" />
-      <div class="gp-upload-zone" (click)="triggerFileInput()">
-        <ng-container *ngIf="!imagePreview && !uploading">
-          <i class="ri-image-add-line gp-upload-icon"></i>
-          <span class="gp-upload-text">Cliquer pour choisir une image</span>
-          <span class="gp-upload-hint">PNG, JPG, WEBP — max 5 Mo</span>
-        </ng-container>
-        <ng-container *ngIf="uploading">
-          <span class="gp-spinner"></span>
-          <span class="gp-upload-text">Upload en cours…</span>
-        </ng-container>
-        <img *ngIf="imagePreview && !uploading" [src]="imagePreview" alt="Aperçu" class="gp-upload-preview" />
-      </div>
-      <button *ngIf="imagePreview && !uploading" type="button" class="gp-upload-remove" (click)="imagePreview = null; form.imageUrl = ''">
-        <i class="ri-close-line"></i> Supprimer l'image
-      </button>
-    </div>
-
-    <div class="gp-form-actions">
+    <div class="modal-footer">
       <ui-button type="button" variant="ghost" label="Annuler" (clicked)="fermerModal()"></ui-button>
       <ui-button type="submit" variant="primary"
-        [icon]="saving ? '' : (modalMode === 'add' ? 'ri-add-line' : 'ri-save-line')"
         [label]="saving ? 'Enregistrement…' : (modalMode === 'add' ? 'Créer le produit' : 'Enregistrer')"
-        [disabled]="saving">
+        [disabled]="saving || uploading">
       </ui-button>
     </div>
-
   </form>
-</ui-modal>
-
-<!-- ══════════════════ MODAL CONFIRMATION SUPPRESSION ══════════════════ -->
-<ui-modal [open]="confirmOpen" title="Confirmer la suppression" (closed)="annulerSuppression()">
-  <div class="gp-confirm">
-    <i class="ri-error-warning-line gp-confirm__icon"></i>
-    <p>Cette action est <strong>irréversible</strong>. Le produit sera définitivement supprimé.</p>
-    <div class="gp-form-actions">
-      <ui-button type="button" variant="ghost" label="Annuler" (clicked)="annulerSuppression()"></ui-button>
-      <ui-button type="button" variant="danger"
-        [icon]="deleting ? '' : 'ri-delete-bin-line'"
-        [label]="deleting ? 'Suppression…' : 'Supprimer'"
-        [disabled]="deleting"
-        (clicked)="confirmerSuppression()">
-      </ui-button>
-    </div>
-  </div>
 </ui-modal>

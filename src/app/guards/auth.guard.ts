@@ -32,8 +32,11 @@ export class AuthGuard implements CanActivate, CanActivateChild {
 
     const requiredRole = route.data['role'] as string;
     if (requiredRole) {
-      const role = this.authService.getRole() ?? '';
-      if (role.trim().toUpperCase() !== requiredRole.trim().toUpperCase()) {
+      const role = (this.authService.getRole() ?? '').trim().toUpperCase();
+      const required = requiredRole.trim().toUpperCase();
+      // Le SUPER_ADMIN hérite des accès ADMIN (hiérarchie de rôles) — mais pas l'inverse.
+      const autorise = role === required || (required === 'ADMIN' && role === 'SUPER_ADMIN');
+      if (!autorise) {
         console.warn(`🚫 Accès refusé. Rôle requis : ${requiredRole}, rôle utilisateur : ${role}`);
         this.router.navigate(['/connexion']);
         return false;

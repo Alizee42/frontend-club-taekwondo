@@ -12,6 +12,7 @@ import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.c
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
 import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
+import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 
 interface ProduitDTO {
   id?: number;
@@ -33,11 +34,11 @@ const VIDE: ProduitDTO = {
   standalone: true,
   templateUrl: './gestion-produits.component.html',
   styleUrls: ['./gestion-produits.component.css'],
-  imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent, UiModalComponent, KpiCardComponent, KpiGridComponent],
+  imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent, UiModalComponent, KpiCardComponent, KpiGridComponent, UiTableComponent],
 })
 export class GestionProduitsComponent implements OnInit {
 
-  @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('imageFileInput') imageFileInput?: ElementRef<HTMLInputElement>;
 
   produits: ProduitDTO[] = [];
   filtered: ProduitDTO[] = [];
@@ -57,10 +58,6 @@ export class GestionProduitsComponent implements OnInit {
   imagePreview: string | null = null;
   uploading = false;
 
-  confirmId: number | null = null;
-  confirmOpen = false;
-  deleting = false;
-
   readonly categories = ['TENUE', 'PROTECTION', 'ACCESSOIRE', 'AUTRE'];
 
   // ADMIN : club fixe (son propre club). SUPER_ADMIN : doit choisir un club dans la liste.
@@ -68,6 +65,26 @@ export class GestionProduitsComponent implements OnInit {
   clubs: Club[] = [];
   selectedClubId: number | null = null;
   selectedClubName = '';
+
+  tableColumns: UiTableColumn[] = [
+    { key: 'imageUrl', label: 'Image', type: 'image', width: '80px' },
+    { key: 'nom', label: 'Produit' },
+    {
+      key: 'prix',
+      label: 'Prix',
+      display: (row: ProduitDTO) => `${Number(row.prix ?? 0).toFixed(2)} €`
+    },
+    {
+      key: 'stock',
+      label: 'Stock',
+      textClass: (row: ProduitDTO) => row.stock === 0 ? 'stock-zero' : (row.stock <= 5 ? 'stock-low' : '')
+    },
+    { key: 'categorie', label: 'Catégorie' }
+  ];
+  tableActions = [
+    { label: '', icon: 'ri-edit-line', action: 'edit', color: '#2563eb' },
+    { label: '', icon: 'ri-delete-bin-line', action: 'delete', color: '#e53935' }
+  ];
 
   private get headers(): HttpHeaders {
     return this.auth.getAuthHeaders();
@@ -87,8 +104,11 @@ export class GestionProduitsComponent implements OnInit {
   ngOnInit(): void {
     const utilisateur: Utilisateur | null = this.auth.getUtilisateurConnecte();
     const clubId = utilisateur?.['clubId'];
+    // Un SUPER_ADMIN ne doit jamais être verrouillé sur un club, même si son compte
+    // a un clubId renseigné (ex: comptes de seed) — seul le rôle fait foi ici.
+    const role = (utilisateur?.['role'] ?? this.auth.getRole() ?? '').toString().toUpperCase();
 
-    if (clubId) {
+    if (clubId && role !== 'SUPER_ADMIN') {
       this.isClubLocked = true;
       this.selectedClubId = clubId;
       this.clubService.getClubs().subscribe({
@@ -163,6 +183,9 @@ export class GestionProduitsComponent implements OnInit {
     this.modalOpen = false;
     this.saving = false;
     this.imagePreview = null;
+    if (this.imageFileInput) {
+      this.imageFileInput.nativeElement.value = '';
+    }
   }
 
   onFileSelected(event: Event): void {
@@ -170,12 +193,12 @@ export class GestionProduitsComponent implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
 
-    // Show local preview immediately
+    // Aperçu local immédiat
     const reader = new FileReader();
     reader.onload = () => { this.imagePreview = reader.result as string; };
     reader.readAsDataURL(file);
 
-    // Upload to server
+    // Upload vers le serveur
     this.uploading = true;
     const formData = new FormData();
     formData.append('image', file);
@@ -190,10 +213,6 @@ export class GestionProduitsComponent implements OnInit {
         this.uploading = false;
       }
     });
-  }
-
-  triggerFileInput(): void {
-    this.fileInputRef.nativeElement.click();
   }
 
   sauvegarder(): void {
@@ -228,31 +247,27 @@ export class GestionProduitsComponent implements OnInit {
     });
   }
 
-  demanderSuppression(p: ProduitDTO): void {
-    this.confirmId = p.id ?? null;
-    this.confirmOpen = true;
-  }
+  supprimer(p: ProduitDTO): void {
+    if (!p.id) return;
+    if (!confirm(`Supprimer le produit "${p.nom}" ?`)) return;
 
-  annulerSuppression(): void {
-    this.confirmId = null;
-    this.confirmOpen = false;
-  }
-
-  confirmerSuppression(): void {
-    if (!this.confirmId) return;
-    this.deleting = true;
-    this.http.delete(`${this.api}/${this.confirmId}`, { headers: this.headers }).subscribe({
+    this.http.delete(`${this.api}/${p.id}`, { headers: this.headers }).subscribe({
       next: () => {
-        this.produits = this.produits.filter(p => p.id !== this.confirmId);
+        this.produits = this.produits.filter(x => x.id !== p.id);
         this.filtrer();
         this.toast.success('Produit supprimé.');
-        this.annulerSuppression();
-        this.deleting = false;
       },
       error: () => {
         this.toast.error('Impossible de supprimer ce produit.');
-        this.deleting = false;
       }
     });
+  }
+
+  handleTableAction(event: { action: string; row: ProduitDTO }): void {
+    if (event.action === 'edit') {
+      this.ouvrirEdit(event.row);
+    } else if (event.action === 'delete') {
+      this.supprimer(event.row);
+    }
   }
 }

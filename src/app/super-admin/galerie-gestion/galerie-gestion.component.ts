@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -43,6 +43,8 @@ export class GalerieGestionSuperAdminComponent implements OnInit {
   modalOpen = false;
   modalTitle = '';
   formImage: Partial<Galerie> = {};
+
+  @ViewChild('imageFileInput') imageFileInput?: ElementRef<HTMLInputElement>;
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -118,6 +120,9 @@ export class GalerieGestionSuperAdminComponent implements OnInit {
   closeModal() {
     this.modalOpen = false;
     this.formImage = {};
+    if (this.imageFileInput) {
+      this.imageFileInput.nativeElement.value = '';
+    }
   }
 
   isSubmitting = false;

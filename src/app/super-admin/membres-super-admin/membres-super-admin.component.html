@@ -32,6 +32,7 @@
 <ui-modal [open]="showModal" [title]="modalMode === 'ajout' ? 'Ajouter un membre' : 'Modifier le membre'" (closed)="closeModal()">
   <app-membres-super-admin-form
     [membre]="membreEnCours"
+    [clubId]="selectedClubId"
     (submitForm)="onSubmitForm($event)"
     (cancel)="closeModal()">
   </app-membres-super-admin-form>

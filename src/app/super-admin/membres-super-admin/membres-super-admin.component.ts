@@ -47,8 +47,11 @@ export class MembresSuperAdminComponent implements OnInit {
     this.loading = true;
     const utilisateur: Utilisateur | null = this.authService.getUtilisateurConnecte();
     const clubId = utilisateur?.['clubId'];
+    // Un SUPER_ADMIN ne doit jamais être verrouillé sur un club, même si son compte
+    // a un clubId renseigné (ex: comptes de seed) — seul le rôle fait foi ici.
+    const role = (utilisateur?.['role'] ?? this.authService.getRole() ?? '').toString().toUpperCase();
 
-    if (clubId) {
+    if (clubId && role !== 'SUPER_ADMIN') {
       this.selectedClubId = clubId;
       this.loadMembresForClub(clubId);
       return;

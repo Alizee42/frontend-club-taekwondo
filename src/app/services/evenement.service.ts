@@ -99,6 +99,13 @@ export class EvenementService {
     );
   }
 
+  /** Événements actifs d'un club — endpoint public, pour la page /evenements publique */
+  getEvenementsActifsByClub(clubId: number): Observable<EvenementDTO[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/club/${clubId}/actifs`).pipe(
+      map(events => events.map(e => this.mapToEvenementDTO(e)))
+    );
+  }
+
   getEvenementsMonClub(): Observable<EvenementDTO[]> {
     return this.http.get<any[]>(`${this.apiUrl}/mon-club`).pipe(
       map(events => events.map(e => this.mapToEvenementDTO(e)))

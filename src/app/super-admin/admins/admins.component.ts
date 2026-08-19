@@ -23,7 +23,11 @@ export class AdminsComponent {
     return club ? club.name : '-';
   }
   apiUrl = environment.apiUrl + '/utilisateurs';
-  tableActions = [];
+  tableActions = [
+    { label: '', icon: 'ri-edit-line', action: 'edit', color: '#2563eb' },
+    { label: '', icon: 'ri-delete-bin-line', action: 'delete', color: '#e53935' }
+  ];
+  editingId: number | null = null;
 
   newAdmin: any = {
     nom: '',
@@ -68,22 +72,40 @@ export class AdminsComponent {
   }
 
   createAdmin() {
-  if (!this.newAdmin.email || !this.newAdmin.nom) {
+    if (!this.newAdmin.email || !this.newAdmin.nom) {
       this.message = 'Nom et email sont requis.';
       return;
     }
     this.loading = true;
     this.message = '';
 
-    const payload = { ...this.newAdmin };
+    // Le rôle ADMIN est toujours forcé explicitement : le backend (updateUtilisateurFromDTO)
+    // retombe sur MEMBRE par défaut si le champ role est absent/vide lors d'une modification.
+    const payload = { ...this.newAdmin, role: 'ADMIN' };
+
+    if (this.editingId) {
+      this.http.put(`${this.apiUrl}/${this.editingId}`, payload).subscribe({
+        next: () => {
+          this.message = 'Admin modifié avec succès.';
+          this.loading = false;
+          this.closeModal();
+          this.loadAdmins();
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.message = err?.error?.message || 'Erreur lors de la modification';
+          this.loading = false;
+        }
+      });
+      return;
+    }
 
     // Création via endpoint admin: mot de passe temporaire et email de réinitialisation envoyés automatiquement
     this.http.post(this.apiUrl, payload).subscribe({
       next: (res: any) => {
         this.message = res?.message || 'Admin créé avec succès. Un email de définition du mot de passe a été envoyé.';
         this.loading = false;
-        this.newAdmin = { nom: '', prenom: '', email: '', password: '', role: 'ADMIN', clubId: null };
-        this.showModal = false;
+        this.closeModal();
         this.loadAdmins();
       },
       error: (err: any) => {
@@ -94,8 +116,55 @@ export class AdminsComponent {
     });
   }
 
+  openCreateModal(): void {
+    this.editingId = null;
+    this.newAdmin = { nom: '', prenom: '', email: '', password: '', role: 'ADMIN', clubId: null };
+    this.message = '';
+    this.showModal = true;
+  }
+
+  openEditModal(admin: any): void {
+    this.editingId = admin.id;
+    this.newAdmin = {
+      nom: admin.nom,
+      prenom: admin.prenom,
+      email: admin.email,
+      password: '',
+      role: 'ADMIN',
+      clubId: admin.clubId
+    };
+    this.message = '';
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.editingId = null;
+    this.newAdmin = { nom: '', prenom: '', email: '', password: '', role: 'ADMIN', clubId: null };
+    this.message = '';
+  }
+
+  deleteAdmin(admin: any): void {
+    if (!admin?.id) return;
+    if (!confirm(`Supprimer l'administrateur ${admin.prenom || ''} ${admin.nom || ''} ?`.trim())) return;
+    this.http.delete(`${this.apiUrl}/${admin.id}`).subscribe({
+      next: () => {
+        this.message = 'Admin supprimé.';
+        this.loadAdmins();
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.message = err?.error?.message || 'Erreur lors de la suppression';
+      }
+    });
+  }
+
   onTableAction(event: { action: string; row: any }): void {
-    // À compléter selon les actions souhaitées (ex : suppression, édition)
+    if (event.action === 'edit') {
+      this.openEditModal(event.row);
+    } else if (event.action === 'delete') {
+      this.deleteAdmin(event.row);
+    }
   }
 
   // ...existing code...

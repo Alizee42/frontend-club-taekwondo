@@ -8,8 +8,6 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 import { ClubService } from '../../services/club.service';
 import { DashboardNavCardComponent } from '../../dashboard/shared/dashboard-nav-card/dashboard-nav-card.component';
-import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
-import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
 
 interface DashboardStats {
   nbMembres: number;
@@ -32,13 +30,15 @@ type BadgeCounts = {
 const STATUS = {
   AVIS_NON_APPROUVE: 'false',            // query ?approuve=false
   PAIEMENT_EN_ATTENTE: 'EN_ATTENTE',     // normalisation
-  COMMANDE_A_TRAITER: 'A_TRAITER'
+  // 'A_TRAITER' n'existe pas côté backend (valeurs réelles : EN_ATTENTE, PAYEE, A_RETIRER, ANNULEE)
+  // — ce badge était donc toujours à 0 avant cette correction.
+  COMMANDE_A_TRAITER: 'EN_ATTENTE'
 };
 
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [CommonModule, DashboardNavCardComponent, KpiCardComponent, KpiGridComponent],
+  imports: [CommonModule, DashboardNavCardComponent],
   templateUrl: './dashboard-admin.component.html',
   styleUrls: ['./dashboard-admin.component.css']
 })
@@ -55,6 +55,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   nbMembres = 0;
   totalPaiements = 0;
   paiementsAttente = 0;
+  paiementsEnRetard = 0;
+  paiementsEnAttenteSeul = 0;
   evenementsAVenir = 0;
 
   // Badges (affichés dans l'UI)
@@ -189,30 +191,45 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
 
   /** Centralisation des compteurs pour badges */
   private refreshBadges(): void {
-    
+
     forkJoin({
-      avis: this.fetchAvis(),               
-      paiements: this.fetchPaiements(),     
-      commandes: this.fetchCommandes(),     
+      avis: this.fetchAvis(),
+      paiements: this.fetchPaiements(),
+      commandes: this.fetchCommandes(),
       documents: this.fetchDocuments(),
       horaires: this.fetchHoraires(),
-      actualites: this.fetchActualites()      
+      actualites: this.fetchActualites()
     }).subscribe({
       next: (res) => {
         this.currentCounts = {
           avis: Number(res.avis || 0),
-          paiements: Number(res.paiements || 0),
+          paiements: Number(res.paiements.enRetard + res.paiements.enAttenteSeul || 0),
           commandes: Number(res.commandes || 0),
           documents: Number(res.documents || 0),
           horaires: Number(res.horaires || 0),
           actualites: Number(res.actualites || 0)
         };
         this.badge = { ...this.currentCounts };
+        this.paiementsEnRetard = res.paiements.enRetard;
+        this.paiementsEnAttenteSeul = res.paiements.enAttenteSeul;
       },
       error: (err) => {
         console.error('❌ Erreur lors du refresh des badges:', err);
       }
     });
+  }
+
+  get paiementsBadgeLabel(): string | null {
+    const parts: string[] = [];
+    if (this.paiementsEnRetard > 0) parts.push(`${this.paiementsEnRetard} en retard`);
+    if (this.paiementsEnAttenteSeul > 0) parts.push(`${this.paiementsEnAttenteSeul} en attente`);
+    return parts.length > 0 ? parts.join(' · ') : null;
+  }
+
+  get paiementsBadgeVariant(): 'danger' | 'warning' | 'neutral' {
+    if (this.paiementsEnRetard > 0) return 'danger';
+    if (this.paiementsEnAttenteSeul > 0) return 'warning';
+    return 'neutral';
   }
 
   // ===== Requêtes directes (filtrées) =====
@@ -232,8 +249,8 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Paiements en attente (robuste: /filter → fallback /api/paiements) */
-  private fetchPaiements(): Observable<number> {
+  /** Paiements en attente, séparés en "en retard" (échéance dépassée) / "pas encore échu" (robuste: /filter → fallback /api/paiements) */
+  private fetchPaiements(): Observable<{ enRetard: number; enAttenteSeul: number }> {
     const params = new HttpParams().set('statut', STATUS.PAIEMENT_EN_ATTENTE);
     const filtered$ = this.http.get<any[]>(this.url('paiements/filter'), { params });
     const all$ = this.http.get<any[]>(this.url('paiements'));
@@ -243,18 +260,32 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
         return all$;
       }),
       switchMap(list => {
-        const count = this.countPendingPaiements(list);
-        if (count > 0) return of(count);
-        return all$.pipe(map(all => {
-          const fallbackCount = this.countPendingPaiements(all);
-          return fallbackCount;
-        }));
+        const split = this.splitPaiementsEnAttente(list);
+        if (split.enRetard + split.enAttenteSeul > 0) return of(split);
+        return all$.pipe(map(all => this.splitPaiementsEnAttente(all)));
       }),
       catchError((err) => {
         console.error('❌ Erreur récupération paiements:', err);
-        return of(0);
+        return of({ enRetard: 0, enAttenteSeul: 0 });
       })
     );
+  }
+
+  /** Sépare les paiements en attente entre ceux ayant une échéance dépassée et les autres. */
+  private splitPaiementsEnAttente(list: any[]): { enRetard: number; enAttenteSeul: number } {
+    const enAttente = Array.isArray(list) ? list.filter(p => this.isPaiementEnAttente(p?.statut)) : [];
+    const aujourdHui = new Date();
+    let enRetard = 0;
+    let enAttenteSeul = 0;
+    enAttente.forEach(p => {
+      const echeances = Array.isArray(p?.echeances) ? p.echeances : [];
+      const aUneEcheanceEnRetard = echeances.some((e: any) =>
+        this.isPaiementEnAttente(e?.statut) && e?.dateEcheance && new Date(e.dateEcheance) < aujourdHui
+      );
+      if (aUneEcheanceEnRetard) enRetard++;
+      else enAttenteSeul++;
+    });
+    return { enRetard, enAttenteSeul };
   }
 
   /** Commandes à traiter UNIQUEMENT */
@@ -272,14 +303,10 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Documents (par défaut : total). Si tu as un statut "à valider", filtre-le ici. */
+  /** Documents en attente de validation (endpoint dédié, scopé au club de l'admin par le backend). */
   private fetchDocuments(): Observable<number> {
-    // 👉 Si tu as un statut spécifique (ex: ?statut=A_VALIDER), adapte ci-dessous.
-    return this.http.get<any[]>(this.url('documents')).pipe(
-      map(list => {
-        const count = Array.isArray(list) ? list.length : 0;
-        return count;
-      }),
+    return this.http.get<any[]>(this.url('documents/en-attente')).pipe(
+      map(list => Array.isArray(list) ? list.length : 0),
       catchError((err) => {
         console.error('❌ Erreur récupération documents:', err);
         return of(0);
@@ -322,11 +349,6 @@ export class DashboardAdminComponent implements OnInit, OnDestroy {
   }
 
   // —— Helpers de normalisation & comptage (paiements) ——
-  private countPendingPaiements(list: any[]): number {
-    if (!Array.isArray(list)) return 0;
-    return list.filter(p => this.isPaiementEnAttente(p?.statut)).length;
-  }
-
   private isPaiementEnAttente(statut: any): boolean {
     const s = this.norm(statut);
     return s === 'en attente'
