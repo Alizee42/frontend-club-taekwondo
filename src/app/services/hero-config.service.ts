@@ -41,7 +41,7 @@ export class HeroConfigService {
   }
 
   videoUrl(path: string | undefined): string {
-    if (!path || !path.trim()) return 'assets/videos/video1.MOV';
+    if (!path || !path.trim()) return 'assets/videos/hero-optimise.mp4';
 
     const raw = path.trim();
     if (/^https?:\/\//i.test(raw)) return raw;

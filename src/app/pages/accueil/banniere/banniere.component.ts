@@ -27,7 +27,7 @@ const DEFAULTS: Required<Pick<HeroConfig, 'eyebrowText' | 'identityStrong' | 'id
 export class BanniereComponent implements OnInit, OnDestroy {
 
   config: HeroConfig = { ...DEFAULTS };
-  videoUrl = 'assets/videos/video1.MOV';
+  videoUrl = 'assets/videos/hero-optimise.mp4';
   private hasVideoFallback = false;
   currentSlogan = DEFAULTS.slogans[0];
   private sloganIndex = 0;
@@ -71,7 +71,7 @@ export class BanniereComponent implements OnInit, OnDestroy {
   onVideoError(): void {
     if (this.hasVideoFallback) return;
     this.hasVideoFallback = true;
-    this.videoUrl = 'assets/videos/video1.MOV';
+    this.videoUrl = 'assets/videos/hero-optimise.mp4';
   }
 
   private startRotation(): void {

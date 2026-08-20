@@ -42,7 +42,7 @@
              'chip-warn':    getDocumentStatusInfo(doc.type).state === 'en_attente',
              'chip-danger':  getDocumentStatusInfo(doc.type).state === 'refusé'
            }">
-        <i class="ri-check-circle-fill" *ngIf="getDocumentStatusInfo(doc.type).state === 'validé'"    aria-hidden="true"></i>
+        <i class="ri-checkbox-circle-fill" *ngIf="getDocumentStatusInfo(doc.type).state === 'validé'"    aria-hidden="true"></i>
         <i class="ri-time-fill"          *ngIf="getDocumentStatusInfo(doc.type).state === 'en_attente'" aria-hidden="true"></i>
         <i class="ri-close-circle-fill"  *ngIf="getDocumentStatusInfo(doc.type).state === 'refusé'"     aria-hidden="true"></i>
         <span>{{ doc.label }}</span>
