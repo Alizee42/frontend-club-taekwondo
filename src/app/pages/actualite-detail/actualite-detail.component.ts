@@ -56,6 +56,10 @@ export class ActualiteDetailComponent implements OnInit {
     }
   }
 
+  badgeClass(typeActu: string | undefined): string {
+    return `badge-${(typeActu || 'default').toLowerCase()}`;
+  }
+
   resolveImageUrl(url: string | undefined): string {
     // Toujours préfixer par /uploads/actualites/
     const apiBase = environment.apiUrl.replace(/\/api\/?$/, '');

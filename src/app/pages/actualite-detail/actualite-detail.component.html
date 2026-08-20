@@ -7,7 +7,7 @@
   </div>
 
   <div class="infos">
-    <span class="type">{{ actualite.typeActu }}</span>
+    <span class="actu-badge" [ngClass]="badgeClass(actualite.typeActu)">{{ actualite.typeActu || 'Info' }}</span>
     <span class="date">Publié le {{ actualite.datePublication | date:'d MMMM yyyy' }}</span>
   </div>
 
