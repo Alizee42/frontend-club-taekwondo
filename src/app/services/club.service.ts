@@ -9,6 +9,7 @@ export interface Club {
   nom: string;
   ville: string;
   logo?: string;
+  logoDisplay?: string;
   adresse?: string;
   telephone?: string;
   email?: string;
@@ -25,6 +26,17 @@ export class ClubService {
     const club = this.getSelectedClub();
     this.selectedClubSubject = new BehaviorSubject<Club | null>(club);
     this.selectedClub$ = this.selectedClubSubject.asObservable();
+    if (club?.id) {
+      this.refreshSelectedClub(club.id);
+    }
+  }
+
+  /** Recharge les données à jour du club sélectionné depuis l'API (le cache localStorage peut être périmé). */
+  private refreshSelectedClub(clubId: number): void {
+    this.http.get<Club>(`${this.apiUrl}/${clubId}`).subscribe({
+      next: (freshClub) => this.setSelectedClub(freshClub),
+      error: () => { /* garde la version en cache si l'API est indisponible */ }
+    });
   }
 
   deleteClub(id: number): Observable<any> {
@@ -41,6 +53,12 @@ export class ClubService {
 
   editClub(club: Club): Observable<Club> {
     return this.http.put<Club>(`${this.apiUrl}/${club.id}`, club);
+  }
+
+  uploadLogo(file: File): Observable<{ path: string }> {
+    const form = new FormData();
+    form.append('logo', file);
+    return this.http.post<{ path: string }>(`${this.apiUrl}/upload-logo`, form);
   }
 
   getSelectedClub(): Club | null {

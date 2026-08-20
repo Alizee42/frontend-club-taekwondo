@@ -1,26 +1,54 @@
 <footer class="site-footer">
   <div class="footer-main">
-    <div class="footer-brand">
-      <span class="footer-mark">OT</span>
-      <div>
-        <strong>Olympique Taekwondo {{ selectedClub?.name || selectedClub?.nom || '' }}</strong>
-      <span>Club de taekwondo et pratique sportive encadree.</span>
+
+    <div class="footer-col footer-col--brand">
+      <div class="footer-brand">
+        <span class="footer-mark">OT</span>
+        <div>
+          <strong>Olympique Taekwondo {{ selectedClub?.name || selectedClub?.nom || '' }}</strong>
+          <span>Club de taekwondo et pratique sportive encadree.</span>
+        </div>
       </div>
     </div>
 
-    <nav class="footer-nav" aria-label="Liens rapides">
-      <a routerLink="/">Accueil</a>
-      <a routerLink="/inscription">Inscriptions</a>
-      <a routerLink="/galerie">Galerie</a>
-      <a routerLink="/contact">Contact</a>
-    </nav>
-
-    <div class="footer-contact">
-      <span *ngIf="selectedClub?.telephone"><i class="ri-phone-line"></i>{{ selectedClub?.telephone }}</span>
-      <a *ngIf="selectedClub?.email" [href]="'mailto:' + selectedClub?.email">
-        <i class="ri-mail-line"></i>{{ selectedClub?.email }}
-      </a>
+    <div class="footer-col">
+      <h3 class="footer-col__title">Navigation</h3>
+      <nav class="footer-nav" aria-label="Liens rapides">
+        <a routerLink="/">Accueil</a>
+        <a routerLink="/inscription">Inscriptions</a>
+        <a routerLink="/boutique">Boutique</a>
+        <a routerLink="/galerie">Galerie</a>
+        <a routerLink="/evenements">Événements</a>
+        <a routerLink="/contact">Contact</a>
+      </nav>
     </div>
+
+    <div class="footer-col">
+      <h3 class="footer-col__title">Contact</h3>
+      <div class="footer-contact" *ngIf="selectedClub?.telephone || selectedClub?.email || selectedClub?.adresse; else noContact">
+        <span *ngIf="selectedClub?.telephone"><i class="ri-phone-line"></i>{{ selectedClub?.telephone }}</span>
+        <a *ngIf="selectedClub?.email" [href]="'mailto:' + selectedClub?.email">
+          <i class="ri-mail-line"></i>{{ selectedClub?.email }}
+        </a>
+        <span *ngIf="selectedClub?.adresse">
+          <i class="ri-map-pin-line"></i>{{ selectedClub?.adresse }}<ng-container *ngIf="selectedClub?.ville">, {{ selectedClub?.ville }}</ng-container>
+        </span>
+      </div>
+      <ng-template #noContact>
+        <p class="footer-contact-empty">Coordonnées à venir.</p>
+      </ng-template>
+    </div>
+
+    <div class="footer-col" *ngIf="joursResume.length">
+      <h3 class="footer-col__title">Horaires</h3>
+      <ul class="footer-horaires">
+        <li *ngFor="let j of joursResume">
+          <span class="footer-horaires__jour">{{ j.jour }}</span>
+          <span class="footer-horaires__plage">{{ j.plage }}</span>
+        </li>
+      </ul>
+    </div>
+
   </div>
 
   <div class="footer-bottom">
