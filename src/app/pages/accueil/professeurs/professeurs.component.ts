@@ -22,9 +22,6 @@ export class ProfesseursComponent implements OnInit {
     specialite?: string;
     description?: string;
     photo?: string;
-    facebook?: string;
-    instagram?: string;
-    linkedin?: string;
   }> = [];
   loading = false;
   apiError = false;
@@ -52,9 +49,6 @@ export class ProfesseursComponent implements OnInit {
           specialite: e.specialite,
           description: e.description,
           photo: this.resolvePhotoUrl(e.photoUrl),
-          facebook: e.facebook,
-          instagram: e.instagram,
-          linkedin: e.linkedin,
         }));
         this.loading = false;
       },

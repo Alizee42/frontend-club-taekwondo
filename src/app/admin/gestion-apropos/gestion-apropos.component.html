@@ -141,28 +141,6 @@
                         placeholder="Notre mission est de former des athlètes sur le plan physique et mental…"></textarea>
             </div>
 
-            <!-- Mots-clés -->
-            <div class="form-group form-group--chips">
-              <label class="form-label">
-                Mots-clés
-                <span class="hint-inline">Petites étiquettes affichées sous le texte ({{ config.chips?.length ?? 0 }})</span>
-              </label>
-              <ul class="editable-list">
-                @for (chip of config.chips; track trackByIndex($index)) {
-                  <li class="editable-row">
-                    <input class="form-input" type="text" [(ngModel)]="config.chips![$index]"
-                           [name]="'chip_' + $index" placeholder="ex : Respect">
-                    <button type="button" class="btn-remove" (click)="removeChip($index)" aria-label="Supprimer">
-                      <i class="ri-delete-bin-line"></i>
-                    </button>
-                  </li>
-                }
-              </ul>
-              <button type="button" class="btn-add" (click)="addChip()">
-                <i class="ri-add-line"></i> Ajouter un mot-clé
-              </button>
-            </div>
-
           </div>
         }
 

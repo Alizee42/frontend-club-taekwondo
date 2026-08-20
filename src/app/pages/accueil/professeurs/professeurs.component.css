@@ -105,29 +105,6 @@
   margin-bottom: var(--sp-3);
 }
 
-.teacher-card__socials {
-  display: flex;
-  gap: var(--sp-2);
-}
-
-.teacher-card__socials a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--color-text-inv);
-  font-size: 0.95rem;
-  transition: background var(--t-fast);
-}
-
-.teacher-card__socials a:hover {
-  background: var(--brand-accent);
-  text-decoration: none;
-}
-
 /* Info sous la photo */
 .teacher-card__info {
   padding: var(--sp-4) var(--sp-5);

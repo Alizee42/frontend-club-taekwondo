@@ -97,10 +97,6 @@ export class GestionAProposComponent implements OnInit {
   setTab(tab: Tab): void { this.activeTab = tab; }
   trackByIndex(i: number): number { return i; }
 
-  // ── Chips ─────────────────────────────────────
-  addChip(): void { this.config.chips = [...(this.config.chips ?? []), '']; }
-  removeChip(i: number): void { this.config.chips = this.config.chips!.filter((_, j) => j !== i); }
-
   // ── Valeurs ───────────────────────────────────
   addValue(): void { this.config.values = [...(this.config.values ?? []), { bold: '', description: '' }]; }
   removeValue(i: number): void { this.config.values = this.config.values!.filter((_, j) => j !== i); }

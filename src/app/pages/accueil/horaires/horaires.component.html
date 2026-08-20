@@ -23,8 +23,8 @@
         </div>
         <div class="schedule-card__body">
           <ng-container *ngFor="let groupe of (jourBlock.horaires | groupBy:'groupe')">
-            <fieldset class="horaire-groupe">
-              <legend class="horaire-groupe-label">{{ groupe.key || 'Sans groupe' }}</legend>
+            <div class="horaire-groupe" role="group" [attr.aria-label]="groupe.key || 'Sans groupe'">
+              <p class="horaire-groupe-label">{{ groupe.key || 'Sans groupe' }}</p>
               <ng-container *ngFor="let h of groupe.items">
                 <div class="horaire-time-row">
                   <span class="time">
@@ -42,7 +42,7 @@
                   </span>
                 </div>
               </ng-container>
-            </fieldset>
+            </div>
           </ng-container>
         </div>
       </div>

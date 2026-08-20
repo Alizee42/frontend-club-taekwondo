@@ -12,15 +12,6 @@
           <strong>Olympique Taekwondo {{ clubVille }}</strong>{{ config.leadText }}
         </p>
         <p>{{ config.descriptionText }}</p>
-
-        <div class="about-chips">
-          @for (chip of config.chips; track $index) {
-            <span class="about-chip">
-              <i class="ri-shield-check-line" aria-hidden="true"></i>
-              {{ chip }}
-            </span>
-          }
-        </div>
       </div>
 
       <div class="about-visual">
