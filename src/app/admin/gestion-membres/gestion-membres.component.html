@@ -138,8 +138,8 @@
 <!-- ═══════════════════════════════════════════
      MODAL COMPTE
      ═══════════════════════════════════════════ -->
-<ui-modal [open]="modalOpen && isCompteModal()" [title]="modalTitle" (closed)="closeModal()">
-  <form *ngIf="editItem" class="gm-form" (ngSubmit)="saveCompte()" #compteForm="ngForm">
+<ui-modal [open]="modalOpen && isCompteModal()" [title]="modalTitle" size="md" [stickyFooter]="true" (closed)="closeModal()">
+  <form *ngIf="editItem" class="gm-form" #compteForm="ngForm">
     <div class="gm-form__row">
       <div class="gm-form__field">
         <label>Nom <span class="required">*</span></label>
@@ -178,18 +178,19 @@
     <div class="gm-form__hint" *ngIf="modalMode === 'add-compte'">
       <i class="ri-mail-send-line"></i> Un email avec un mot de passe temporaire sera envoyé.
     </div>
-    <div class="gm-form__footer">
-      <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
-      <ui-button label="Enregistrer" variant="primary" type="submit" [disabled]="isSaveDisabled()"></ui-button>
-    </div>
   </form>
+
+  <div modal-footer *ngIf="editItem">
+    <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
+    <ui-button label="Enregistrer" variant="primary" icon="ri-save-line" type="button" [disabled]="isSaveDisabled()" (clicked)="saveCompte()"></ui-button>
+  </div>
 </ui-modal>
 
 <!-- ═══════════════════════════════════════════
      MODAL PRATIQUANT
      ═══════════════════════════════════════════ -->
-<ui-modal [open]="modalOpen && !isCompteModal()" [title]="modalTitle" (closed)="closeModal()">
-  <form *ngIf="editItem" class="gm-form" (ngSubmit)="savePratiquant()" #pratiquantForm="ngForm">
+<ui-modal [open]="modalOpen && !isCompteModal()" [title]="modalTitle" size="md" [stickyFooter]="true" (closed)="closeModal()">
+  <form *ngIf="editItem" class="gm-form" #pratiquantForm="ngForm">
     <div class="gm-form__row">
       <div class="gm-form__field">
         <label>Nom <span class="required">*</span></label>
@@ -233,17 +234,18 @@
         <input type="text" [(ngModel)]="editItem.numeroLicence" name="numeroLicence" placeholder="123456" />
       </div>
     </div>
-    <div class="gm-form__footer">
-      <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
-      <ui-button label="Enregistrer" variant="primary" type="submit" [disabled]="isSaveDisabled()"></ui-button>
-    </div>
   </form>
+
+  <div modal-footer *ngIf="editItem">
+    <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
+    <ui-button label="Enregistrer" variant="primary" icon="ri-save-line" type="button" [disabled]="isSaveDisabled()" (clicked)="savePratiquant()"></ui-button>
+  </div>
 </ui-modal>
 
 <!-- ═══════════════════════════════════════════
      MODAL CONFIRMATION SUPPRESSION
      ═══════════════════════════════════════════ -->
-<ui-modal [open]="confirmDeleteOpen" title="Confirmer la suppression" (closed)="closeDeleteConfirm()">
+<ui-modal [open]="confirmDeleteOpen" title="Confirmer la suppression" size="sm" [stickyFooter]="true" (closed)="closeDeleteConfirm()">
   <div class="gm-confirm" *ngIf="deleteItem">
     <div class="gm-confirm__icon">
       <i class="ri-delete-bin-6-line"></i>
@@ -256,9 +258,10 @@
       Supprimer le pratiquant <strong>{{ deleteItem.prenom }} {{ deleteItem.nom }}</strong> ?
       <br><span class="gm-confirm__warn">Cette action est irréversible.</span>
     </p>
-    <div class="gm-form__footer">
-      <ui-button label="Annuler" variant="ghost" (clicked)="closeDeleteConfirm()"></ui-button>
-      <ui-button label="Supprimer" variant="danger" [loading]="deleteLoading" (clicked)="confirmDelete()"></ui-button>
-    </div>
+  </div>
+
+  <div modal-footer *ngIf="deleteItem">
+    <ui-button label="Annuler" variant="ghost" (clicked)="closeDeleteConfirm()"></ui-button>
+    <ui-button label="Supprimer" variant="danger" [loading]="deleteLoading" (clicked)="confirmDelete()"></ui-button>
   </div>
 </ui-modal>

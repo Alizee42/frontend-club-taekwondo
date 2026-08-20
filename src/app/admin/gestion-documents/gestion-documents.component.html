@@ -182,6 +182,8 @@
 <ui-modal
   [open]="!!documentARefuser"
   title="Refuser le document"
+  size="sm"
+  [stickyFooter]="true"
   (closed)="fermerRefus()">
   <div class="refus-modal" *ngIf="documentARefuser as doc">
     <p>Indiquez le motif du refus pour <strong>{{ labelFor(doc.typeDocument) }}</strong>. Il sera visible par la personne qui a déposé le document.</p>
@@ -196,9 +198,10 @@
       placeholder="Précisez le motif du refus…"
       [(ngModel)]="motifRefusAutre">
     </textarea>
-    <div class="modal-actions">
-      <ui-button label="Annuler" variant="ghost" (clicked)="fermerRefus()"></ui-button>
-      <ui-button label="Confirmer le refus" variant="danger" [disabled]="!motifRefusValide" (clicked)="confirmerRefus()"></ui-button>
-    </div>
+  </div>
+
+  <div modal-footer *ngIf="documentARefuser">
+    <ui-button label="Annuler" variant="ghost" (clicked)="fermerRefus()"></ui-button>
+    <ui-button label="Confirmer le refus" variant="danger" [disabled]="!motifRefusValide" (clicked)="confirmerRefus()"></ui-button>
   </div>
 </ui-modal>

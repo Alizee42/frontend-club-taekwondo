@@ -16,10 +16,11 @@
   align-items: center;
   min-height: 72px;
   padding: var(--sp-3) var(--sp-4);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-xs);
+  transition: border-color var(--t-base);
 }
 
 .kpi-icon {
@@ -76,12 +77,15 @@
   text-overflow: ellipsis;
 }
 
+.kpi-card--primary,
+.kpi-card--info { border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--color-border)); }
 .kpi-card--primary .kpi-icon,
 .kpi-card--info .kpi-icon {
   background: color-mix(in srgb, var(--brand-primary) 10%, white);
   color: var(--brand-primary);
 }
 
+.kpi-card--warning { border-color: color-mix(in srgb, var(--color-warning) 45%, var(--color-border)); }
 .kpi-card--warning .kpi-icon,
 .kpi-card--warning .kpi-value {
   color: var(--color-warning-ink);
@@ -91,6 +95,7 @@
   background: var(--color-warning-bg);
 }
 
+.kpi-card--success { border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border)); }
 .kpi-card--success .kpi-icon,
 .kpi-card--success .kpi-value {
   color: var(--color-success-ink);
@@ -100,6 +105,7 @@
   background: var(--color-success-bg);
 }
 
+.kpi-card--danger { border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border)); }
 .kpi-card--danger .kpi-icon,
 .kpi-card--danger .kpi-value {
   color: var(--color-danger-ink);

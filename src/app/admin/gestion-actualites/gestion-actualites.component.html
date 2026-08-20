@@ -53,59 +53,80 @@
 <ui-modal
   [open]="isModalOpen"
   [title]="actualite.id ? 'Modifier une actualite' : 'Nouvelle actualite'"
+  size="lg"
+  [stickyFooter]="true"
   (closed)="closeModal()"
 >
-  <form class="actualite-form" #actualiteForm="ngForm" (ngSubmit)="onSubmit()">
-    <div class="form-grid">
-      <div class="form-group form-group--full">
-        <label for="titre">Titre</label>
-        <input id="titre" type="text" [(ngModel)]="actualite.titre" name="titre" required />
-      </div>
+  <form class="actualite-form" #actualiteForm="ngForm">
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-file-text-line" aria-hidden="true"></i> Informations générales
+      </legend>
+      <div class="form-grid">
+        <div class="form-group form-group--full">
+          <label for="titre">Titre <span class="required-mark">*</span></label>
+          <input id="titre" type="text" [(ngModel)]="actualite.titre" name="titre" required />
+        </div>
 
-      <div class="form-group">
-        <label for="typeActu">Type</label>
-        <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
-          <option value="" disabled>Selectionner un type</option>
-          <option *ngFor="let option of typeOptions" [value]="option.value">{{ option.label }}</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label for="typeActu">Type <span class="required-mark">*</span></label>
+          <select id="typeActu" [(ngModel)]="actualite.typeActu" name="typeActu" required>
+            <option value="" disabled>Selectionner un type</option>
+            <option *ngFor="let option of typeOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label for="datePublication">Date de publication</label>
-        <input
-          id="datePublication"
-          type="text"
-          [ngModel]="actualite.datePublication | date: 'dd/MM/yyyy'"
-          name="datePublicationDisplay"
-          disabled
-        />
+        <div class="form-group">
+          <label for="datePublication">Date de publication</label>
+          <input
+            id="datePublication"
+            type="text"
+            [ngModel]="actualite.datePublication | date: 'dd/MM/yyyy'"
+            name="datePublicationDisplay"
+            disabled
+          />
+        </div>
       </div>
+    </fieldset>
 
-      <div class="form-group form-group--full">
-        <label for="extrait">
-          Extrait
-          <span class="hint-inline">Résumé court affiché sur la carte d'accueil (220 caractères max)</span>
-        </label>
-        <textarea id="extrait" [(ngModel)]="actualite.extrait" name="extrait" maxlength="220" rows="2"
-                  placeholder="Une phrase d'accroche qui donne envie de lire la suite…"></textarea>
-      </div>
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-align-left" aria-hidden="true"></i> Contenu
+      </legend>
+      <div class="form-grid">
+        <div class="form-group form-group--full">
+          <label for="extrait">
+            Extrait
+            <span class="hint-inline">Résumé court affiché sur la carte d'accueil (220 caractères max)</span>
+          </label>
+          <textarea id="extrait" [(ngModel)]="actualite.extrait" name="extrait" maxlength="220" rows="2"
+                    placeholder="Une phrase d'accroche qui donne envie de lire la suite…"></textarea>
+        </div>
 
-      <div class="form-group form-group--full">
-        <label for="contenu">Contenu complet</label>
-        <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
+        <div class="form-group form-group--full">
+          <label for="contenu">Contenu complet <span class="required-mark">*</span></label>
+          <textarea id="contenu" [(ngModel)]="actualite.contenu" name="contenu" required></textarea>
+        </div>
       </div>
+    </fieldset>
 
-      <div class="form-group form-group--full">
-        <label for="image">Image</label>
-        <input id="image" type="file" accept="image/*" (change)="onImageSelected($event)" />
-        <p *ngIf="imageError" class="form-error">{{ imageError }}</p>
-      </div>
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-image-line" aria-hidden="true"></i> Image
+      </legend>
+      <div class="form-grid">
+        <div class="form-group form-group--full">
+          <label for="image">Image</label>
+          <input id="image" type="file" accept="image/*" (change)="onImageSelected($event)" />
+          <p *ngIf="imageError" class="form-error">{{ imageError }}</p>
+        </div>
 
-      <div class="form-group form-group--full image-preview" *ngIf="imageUrl">
-        <label>Apercu</label>
-        <img [src]="imageUrl" alt="Apercu de l'image" />
+        <div class="form-group form-group--full image-preview" *ngIf="imageUrl">
+          <label>Apercu</label>
+          <img [src]="imageUrl" alt="Apercu de l'image" />
+        </div>
       </div>
-    </div>
+    </fieldset>
 
     <div class="featured-toggle">
       <input id="isFeatured" type="checkbox" [(ngModel)]="actualite.isFeatured" name="isFeatured" />
@@ -114,15 +135,17 @@
         <p>Elle sera mise en avant sur le site du club.</p>
       </div>
     </div>
-
-    <div class="modal-footer">
-      <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
-      <ui-button
-        [label]="actualite.id ? 'Mettre a jour' : 'Ajouter'"
-        variant="primary"
-        type="submit"
-        [disabled]="!!actualiteForm.invalid"
-      ></ui-button>
-    </div>
   </form>
+
+  <div modal-footer>
+    <ui-button label="Annuler" variant="ghost" type="button" (clicked)="closeModal()"></ui-button>
+    <ui-button
+      [label]="actualite.id ? 'Mettre a jour' : 'Ajouter'"
+      variant="primary"
+      icon="ri-save-line"
+      type="button"
+      [disabled]="!!actualiteForm.invalid"
+      (clicked)="onSubmit()"
+    ></ui-button>
+  </div>
 </ui-modal>

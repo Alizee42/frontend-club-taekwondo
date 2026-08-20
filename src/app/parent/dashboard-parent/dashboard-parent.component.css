@@ -84,93 +84,6 @@
   color: var(--brand-primary);
 }
 
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sp-3);
-}
-
-@media (max-width: 640px) {
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.kpi-card {
-  padding: var(--sp-3) var(--sp-4);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--sp-3);
-  transition: transform var(--t-fast), box-shadow var(--t-base);
-}
-
-.kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.kpi-card__top {
-  flex-shrink: 0;
-}
-
-.kpi-card__icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-}
-
-.kpi-card--family .kpi-card__icon {
-  background: color-mix(in srgb, var(--color-success) 10%, white);
-  color: var(--color-success);
-}
-
-.kpi-card--documents .kpi-card__icon {
-  background: color-mix(in srgb, var(--color-warning) 12%, white);
-  color: var(--color-warning);
-}
-
-.kpi-card--payments .kpi-card__icon {
-  background: color-mix(in srgb, var(--color-danger) 10%, white);
-  color: var(--color-danger);
-}
-
-.kpi-card--events .kpi-card__icon {
-  background: color-mix(in srgb, var(--brand-primary) 10%, white);
-  color: var(--brand-primary);
-}
-
-.kpi-card__body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  gap: var(--sp-2);
-}
-
-.kpi-card__value {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--color-text);
-  line-height: 1.1;
-}
-
-.kpi-card__label {
-  font-size: var(--text-xs);
-  color: var(--color-text-2);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.kpi-card__badge {
-  flex-shrink: 0;
-}
-
 .dash-section {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -472,17 +385,7 @@
   }
 }
 
-@media (max-width: 640px) {
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media (max-width: 479px) {
-  .kpi-grid {
-    grid-template-columns: 1fr;
-  }
-
   .dash-section__body {
     grid-template-columns: 1fr;
   }
@@ -494,7 +397,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kpi-card,
   .nav-card,
   .nav-card__arrow,
   .kid-item {

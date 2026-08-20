@@ -22,13 +22,12 @@
 
 .kpi-trio__card {
   position: relative;
-  overflow: hidden;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--sp-4);
   box-shadow: var(--shadow-sm);
-  transition: transform var(--t-fast), box-shadow var(--t-base);
+  transition: transform var(--t-fast), box-shadow var(--t-base), border-color var(--t-base);
 }
 
 .kpi-trio__card:hover {
@@ -36,16 +35,9 @@
   box-shadow: var(--shadow-md);
 }
 
-.kpi-trio__card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-}
-
-.kpi-trio__card--blue::before  { background: var(--brand-primary); }
-.kpi-trio__card--amber::before { background: var(--color-warning); }
-.kpi-trio__card--green::before { background: var(--color-success); }
+.kpi-trio__card--blue  { border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--color-border)); }
+.kpi-trio__card--amber { border-color: color-mix(in srgb, var(--color-warning) 45%, var(--color-border)); }
+.kpi-trio__card--green { border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border)); }
 
 .kpi-trio__head {
   display: flex;
@@ -205,72 +197,6 @@
   color: var(--brand-primary);
 }
 
-/* ── KPI Grid — 3 colonnes ──────────────────── */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sp-3);
-}
-
-/* ── KPI Card ──────────────────────────────── */
-.kpi-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--sp-4);
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--t-fast), box-shadow var(--t-base);
-}
-
-.kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.kpi-card__icon {
-  width: 42px;
-  height: 42px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.kpi-card--blue   .kpi-card__icon { background: color-mix(in srgb, var(--brand-primary) 10%, white); color: var(--brand-primary); }
-.kpi-card--purple .kpi-card__icon { background: color-mix(in srgb, var(--color-purple) 10%, white); color: var(--color-purple); }
-.kpi-card--green  .kpi-card__icon { background: color-mix(in srgb, var(--color-success) 10%, white); color: var(--color-success); }
-.kpi-card--teal   .kpi-card__icon { background: color-mix(in srgb, #0891B2 10%, white); color: #0891B2; }
-.kpi-card--amber  .kpi-card__icon { background: color-mix(in srgb, var(--color-warning) 12%, white); color: var(--color-warning); }
-.kpi-card--red    .kpi-card__icon { background: color-mix(in srgb, var(--color-danger) 10%, white); color: var(--color-danger); }
-
-.kpi-card__body {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  gap: var(--sp-2);
-  min-width: 0;
-}
-
-.kpi-card__value {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--color-text);
-  line-height: 1.1;
-  white-space: nowrap;
-}
-
-.kpi-card__label {
-  font-size: var(--text-xs);
-  color: var(--color-text-2);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
 /* ── Sections ──────────────────────────────── */
 .dash-sections {
   display: grid;
@@ -391,19 +317,14 @@
 
 /* ── Responsive ────────────────────────────── */
 @media (max-width: 900px) {
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-trio { grid-template-columns: 1fr; }
+  .dash-sections { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
   .dash-admin { padding: var(--sp-4); gap: var(--sp-4); }
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .dash-sections { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 479px) {
-  .kpi-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kpi-card, .nav-card, .nav-card__arrow { transition: none; }
+  .kpi-trio__card, .nav-card, .nav-card__arrow { transition: none; }
 }

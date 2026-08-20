@@ -1,424 +1,46 @@
-.page-title {
-  color: var(--blue-main);
-  font-size: 2.1rem;
-  font-weight: 700;
-  margin-bottom: 1.2rem;
-  margin-top: 0.2rem;
-  text-align: left;
-  letter-spacing: 0.5px;
-  line-height: 1.15;
-  background: linear-gradient(90deg, var(--blue-main) 60%, #e0e7ef 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.page-title {
-  color: var(--blue-main);
-  font-size: 2rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 1.2rem;
-  margin-top: 0.2rem;
-  text-align: left;
-}
-/* Header similaire à gestion-evenements */
-.gestion-galerie-admin {
-font-family: "Poppins", sans-serif;
-  margin: 0 auto;
-  padding: 1rem 2rem;
-}
-.header-galerie-admin {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2.2rem;
-  gap: 1.2rem;
-}
-.header-galerie-admin .titre-section {
-  margin-bottom: 0;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--blue-main, #2563eb);
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-}
-.creation-btn-header {
-  margin-left: auto;
-  min-width: 0;
-  white-space: nowrap;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.6rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.08);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  background: var(--blue-main, #2563eb);
-  color: #fff;
-  border: none;
-  transition: background 0.2s;
-}
-.creation-btn-header:hover {
-  background: #1746a2;
+.form-group {
+  display: grid;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
 }
 
-/* Modale */
-.modal-backdrop {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(30, 41, 59, 0.18);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s;
-  backdrop-filter: blur(2px);
+.form-group label {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 800;
 }
-.modal {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(37,99,235,0.10), 0 2px 8px rgba(0,0,0,0.04);
-  padding: 1.1rem 1.1rem 0.7rem 1.1rem;
-  min-width: 320px;
-  max-width: 96vw;
-  width: 480px;
-  max-height: 75vh;
-  overflow-y: auto;
-  position: relative;
-  animation: modalPopInSobre 0.28s cubic-bezier(.4,2,.6,1) both;
-  border: 1.5px solid #e3e8f0;
-  transition: box-shadow 0.2s, border 0.2s;
+
+.required-mark {
+  color: var(--color-danger);
+  font-weight: 800;
 }
-@keyframes modalPopInSobre {
-  from { transform: translateY(40px) scale(0.98); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
-}
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.7rem;
-  background: #fff;
-  border-radius: 12px 12px 0 0;
-  padding: 0.7rem 0.5rem 0.7rem 0.5rem;
-  box-shadow: none;
-  border-bottom: 1px solid #e3e8f0;
-}
-.modal-header h5 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--blue-main, #2563eb);
-  margin: 0;
-  letter-spacing: 0.01em;
-}
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.7rem;
-  color: #888;
-  cursor: pointer;
-  border-radius: 50%;
-  width: 2.2rem;
-  height: 2.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
-  transition: background 0.2s, color 0.2s;
-}
-.close-btn:hover {
-  background: #f3f4f6;
-  color: #2563eb;
-}
-.modal-body form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.modal-body .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  margin-bottom: 15px;
-}
-.modal-body .form-group label {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--blue-main, #2563eb);
-  margin-bottom: 0.1rem;
-  letter-spacing: 0.01em;
-}
-.form-control {
+
+.form-group input,
+.form-group textarea {
   width: 100%;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 5px;
-}
-.modal-body button[type="submit"],
-.modal-body .btn-success {
-  align-self: flex-end;
-  background: var(--blue-main, #2563eb) !important;
-  color: #fff !important;
-  font-weight: 600;
-  font-size: 1.08rem;
-  border-radius: 8px;
-  padding: 0.6rem 1.6rem;
-  margin-top: 0.7rem;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.10);
-  border: none;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.modal-body button[type="submit"]:hover,
-.modal-body .btn-success:hover {
-  background: #1746a2 !important;
-  box-shadow: 0 4px 16px rgba(37,99,235,0.13);
-}
-.modal-body button[type="submit"]:disabled,
-.modal-body .btn-success:disabled {
-  background: #bcd0f7 !important;
-  color: #fff !important;
-  cursor: not-allowed;
-  box-shadow: none;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  outline: none;
+  transition: border-color var(--t-base), box-shadow var(--t-base);
 }
 
-/* Tableau */
-.card {
-  background: #fff;
-  border: 1.5px solid #e3e8f0;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(37,99,235,0.06);
-  margin: 2.5rem auto 0 auto;
-  padding: 2rem 2rem 1.5rem 2rem;
-}
-.table-galerie {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-.table-galerie {
-  /* Forcer un layout fixe pour éviter que les cellules s'agrandissent selon le contenu */
-  table-layout: fixed;
+.form-group input {
+  min-height: var(--control-h);
 }
 
-/* Spécifier la largeur de la première colonne (Image) et laisser les autres se partager le reste */
-.table-galerie th:first-child,
-.table-galerie td:first-child {
-  width: 110px; /* petite colonne pour la miniature */
-  max-width: 110px;
-  vertical-align: middle;
-}
-.table-galerie th,
-.table-galerie td {
-  /* plus de border */
-  padding: 8px;
-  text-align: left;
-}
-.table-galerie th {
-  background-color: var(--blue-main);
-  color: #fff;
-  font-weight: bold;
-}
-.table-image {
-  width: 100px; /* augmenter légèrement la vignette pour être plus visible */
-  height: 100px;
-  object-fit: cover;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  display: block;
-  margin: 0 auto;
-}
-.btn-action-icon {
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-right: 5px;
-  font-size: 1.2rem;
-  color: #2563eb;
-  transition: color 0.2s;
-}
-.btn-action-icon:hover {
-  color: #1746a2;
-}
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  border: 0;
-}
-.text-center {
-  text-align: center;
-}
-.image-preview img {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  input, textarea {
-    width: 100%;
-    padding: 10px;
-  /* border supprimée */
-    border-radius: 5px;
-  }
-  
-  textarea {
-    resize: vertical;
-  }
-  
-  .btn {
-    background: #3498db;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  
-  .btn:hover {
-    background: #2980b9;
-  }
-  
-  .btn.cancel {
-    background: #e74c3c;
-  }
-  
-  .image-list {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-  
-  .image-item {
-    text-align: center;
-  }
-  
-  .image-item img {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  .image-preview img {
-    max-width: 100%;
-    max-height: 200px; /* Limite la hauteur de la prévisualisation */
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+.form-group textarea {
+  padding: var(--sp-3);
+  resize: vertical;
 }
 
-  /* Uniformiser les inputs/textareas dans la modale */
-  .gestion-galerie-admin ui-modal input[type="text"],
-  .gestion-galerie-admin ui-modal textarea,
-  .gestion-galerie-admin ui-modal input[type="file"],
-  .gestion-galerie-admin .modal-body .form-control {
-    width: 100% !important;
-    box-sizing: border-box;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background: #fff;
-    font-size: 15px;
-  }
-
-  .gestion-galerie-admin ui-modal textarea {
-    resize: vertical;
-  }
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-.table-galerie th,
-.table-galerie td {
-  /* border supprimée */
-  padding: 8px;
-  text-align: left;
-}
-.table-galerie th {
-  background: var(--blue-main, #2563eb);
-  color: #fff;
-  font-weight: 600;
-  padding: 1rem 0.7rem;
-  border-radius: 0;
-  }
-  
-  .table-image {
-    width: 80px; /* Réduction de la largeur */
-    height: 80px; /* Réduction de la hauteur */
-    object-fit: cover; /* Maintient les proportions */
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-
-.table-galerie td {
-  padding: 0.9rem 0.7rem;
-  background: #f9fafe;
-  border-bottom: 1px solid #e3e8f0;
-  font-size: 1rem;
-  /* Empêcher le texte long d'agrandir la colonne image : tronquer avec ellipsis */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Pour permettre aux titres/descriptions d'avoir plusieurs lignes tout en limitant la largeur,
-   on ajoute des classes réutilisables et on remet le comportement normal à l'intérieur si besoin. */
-.cell-multiline {
-  white-space: normal;
-  display: -webkit-box;
-  /* propriété standard + préfixée pour compatibilité */
-  line-clamp: 2;
-  -webkit-line-clamp: 2; /* afficher au maximum 2 lignes */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.table-galerie tr.selected {
-  background: #e0eaff;
-}
-.table-galerie tr:hover {
-  background: #f1f5ff;
-}
-
-.btn {
-  padding: 5px 10px;
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-.btn.edit {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-}
-
-.btn.delete {
-  background-color: #f44336;
-  color: white;
-  border: none;
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 14%, transparent);
 }
 
 .upload-preview {

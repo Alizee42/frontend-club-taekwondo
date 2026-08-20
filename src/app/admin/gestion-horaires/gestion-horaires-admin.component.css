@@ -18,10 +18,11 @@
   align-items: center;
   min-height: 72px;
   padding: var(--sp-3) var(--sp-4);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-xs);
+  transition: border-color var(--t-base);
 }
 
 .kpi-card > div {
@@ -59,15 +60,18 @@
   white-space: nowrap;
 }
 
+.kpi-card--primary { border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--color-border)); }
 .kpi-card--primary .kpi-icon {
   background: color-mix(in srgb, var(--brand-primary) 10%, white);
   color: var(--brand-primary);
 }
 
+.kpi-card--success { border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border)); }
 .kpi-card--success .kpi-icon,
 .kpi-card--success .kpi-value { color: var(--color-success-ink); }
 .kpi-card--success .kpi-icon  { background: var(--color-success-bg); }
 
+.kpi-card--info { border-color: color-mix(in srgb, #4f46e5 45%, var(--color-border)); }
 .kpi-card--info .kpi-icon { background: #eef2ff; color: #4f46e5; }
 
 /* ── Grille semaine ───────────────────────────── */
@@ -348,13 +352,6 @@
   font-weight: 700;
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding-top: 0.25rem;
-}
-
 /* ── Responsive ───────────────────────────────── */
 @media (max-width: 860px) {
   .kpi-grid {
@@ -365,9 +362,5 @@
 
   .form-grid {
     grid-template-columns: 1fr;
-  }
-
-  .modal-footer {
-    flex-direction: column;
   }
 }

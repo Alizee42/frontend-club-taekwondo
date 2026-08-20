@@ -79,6 +79,10 @@
   display: block;
   margin-bottom: 5px;
 }
+.required-mark {
+  color: var(--color-danger);
+  font-weight: 800;
+}
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -105,9 +109,3 @@
   color: #2563eb;
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--sp-3);
-  margin-top: var(--sp-3);
-}

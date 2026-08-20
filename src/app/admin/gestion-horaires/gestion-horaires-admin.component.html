@@ -85,9 +85,10 @@
   title="Ajouter des horaires"
   subtitle="Créer plusieurs créneaux sur un même jour"
   size="lg"
+  [stickyFooter]="true"
   (closed)="showAjoutModal = false; resetAjoutForm()"
 >
-  <form class="schedule-form" (ngSubmit)="ajoutFormValid && addHoraire()" #ajoutForm="ngForm">
+  <form class="schedule-form" #ajoutForm="ngForm">
     <div class="form-section">
       <label for="jour">Jour</label>
       <select id="jour" required [(ngModel)]="ajoutJour" name="jour" (change)="openedPlageIndex = 0">
@@ -179,12 +180,12 @@
     @if (ajoutJour && !ajoutFormValid) {
       <div class="form-alert">Tous les champs sont nécessaires pour publier les créneaux.</div>
     }
-
-    <footer class="modal-footer">
-      <ui-button type="button" label="Ajouter un créneau" icon="ri-add-line" variant="secondary" (clicked)="addPlageForm()"></ui-button>
-      <ui-button type="submit" label="Publier" icon="ri-check-line" variant="primary" [disabled]="!ajoutFormValid"></ui-button>
-    </footer>
   </form>
+
+  <div modal-footer>
+    <ui-button type="button" label="Ajouter un créneau" icon="ri-add-line" variant="secondary" (clicked)="addPlageForm()"></ui-button>
+    <ui-button type="button" label="Publier" icon="ri-check-line" variant="primary" [disabled]="!ajoutFormValid" (clicked)="addHoraire()"></ui-button>
+  </div>
 </ui-modal>
 
 <!-- Modale : ajouter / modifier un créneau -->
@@ -193,9 +194,10 @@
   [title]="modalPlageTitle"
   [subtitle]="jourAjoutPlage"
   size="md"
+  [stickyFooter]="true"
   (closed)="closeAjoutPlageModal()"
 >
-  <form (ngSubmit)="submitAjoutPlageModal()" #ajoutPlageForm="ngForm" class="schedule-form schedule-form--single">
+  <form #ajoutPlageForm="ngForm" class="schedule-form schedule-form--single">
     <div class="form-grid">
       <div class="form-section">
         <label>Plage horaire</label>
@@ -227,16 +229,17 @@
         <input type="text" [(ngModel)]="ajoutPlageData.ville" name="ville" placeholder="Ville" required />
       </div>
     </div>
-
-    <footer class="modal-footer">
-      <ui-button type="button" label="Annuler" variant="ghost" (clicked)="closeAjoutPlageModal()"></ui-button>
-      <ui-button
-        type="submit"
-        [label]="editingHoraireId ? 'Enregistrer' : 'Ajouter'"
-        icon="ri-check-line"
-        variant="primary"
-        [disabled]="!ajoutPlageForm.form.valid"
-      ></ui-button>
-    </footer>
   </form>
+
+  <div modal-footer>
+    <ui-button type="button" label="Annuler" variant="ghost" (clicked)="closeAjoutPlageModal()"></ui-button>
+    <ui-button
+      type="button"
+      [label]="editingHoraireId ? 'Enregistrer' : 'Ajouter'"
+      icon="ri-check-line"
+      variant="primary"
+      [disabled]="!ajoutPlageForm.form.valid"
+      (clicked)="submitAjoutPlageModal()"
+    ></ui-button>
+  </div>
 </ui-modal>

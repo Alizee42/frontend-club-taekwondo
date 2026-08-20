@@ -232,17 +232,17 @@
 .btn.btn-ghost,
 .btn.ghost,
 .ui-btn.ghost {
-  background: transparent;
+  background: var(--color-surface-2);
   border-color: var(--color-border-2);
-  color: var(--color-text-2);
+  color: var(--color-text);
   box-shadow: none;
 }
 
 .btn.btn-ghost:hover:not(:disabled),
 .btn.ghost:hover:not(:disabled),
 .ui-btn.ghost:hover:not(:disabled):not(.is-disabled) {
-  background: var(--color-surface-2);
-  border-color: var(--color-border-2);
+  background: var(--color-border-2);
+  border-color: var(--color-text-3);
   color: var(--color-text);
 }
 

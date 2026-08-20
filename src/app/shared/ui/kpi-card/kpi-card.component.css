@@ -4,16 +4,17 @@
 
 /* ── Base card ───────────────────────────────── */
 .kpi-card {
+  position: relative;
+  overflow: hidden;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-top: 3px solid transparent;
-  border-radius: var(--radius-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: var(--sp-4);
   display: flex;
   align-items: center;
   gap: var(--sp-3);
   box-shadow: var(--shadow-sm);
-  transition: transform var(--t-fast), box-shadow var(--t-base);
+  transition: transform var(--t-fast), box-shadow var(--t-base), border-color var(--t-base);
   min-height: 72px;
 }
 
@@ -22,7 +23,17 @@
   box-shadow: var(--shadow-md);
 }
 
-/* ── Icon ────────────────────────────────────── */
+/* ── Icône en filigrane (arrière-plan) ────────── */
+.kpi-card__icon-bg {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  font-size: 3.4rem;
+  line-height: 1;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
 .kpi-card__icon {
   width: 44px;
   height: 44px;
@@ -38,11 +49,28 @@
 
 /* ── Body ────────────────────────────────────── */
 .kpi-card__body {
+  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.kpi-card__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.kpi-card__value {
+  font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .kpi-card__label {
@@ -54,16 +82,6 @@
   text-overflow: ellipsis;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-.kpi-card__value {
-  font-size: clamp(1.2rem, 2vw, 1.6rem);
-  font-weight: 800;
-  line-height: 1.1;
-  color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .kpi-card__meta {
@@ -78,8 +96,6 @@
 /* ── Badge (status) ──────────────────────────── */
 .kpi-card .status-badge {
   flex-shrink: 0;
-  align-self: flex-start;
-  margin-left: auto;
 }
 
 /* ── Trend pill ──────────────────────────────── */
@@ -115,78 +131,93 @@
   color: var(--color-text-2);
 }
 
-/* ── Tones : top-border + icon ───────────────── */
+/* ── Tones : bordure + icône + filigrane + valeur ─ */
 
 /* blue / primary */
 .kpi-card--blue,
-.kpi-card--primary   { border-top-color: var(--brand-primary); }
-.kpi-card--blue   .kpi-card__icon,
+.kpi-card--primary { border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--color-border)); }
+.kpi-card--blue .kpi-card__icon,
 .kpi-card--primary .kpi-card__icon {
   background: color-mix(in srgb, var(--brand-primary) 12%, white);
   color: var(--brand-primary);
 }
+.kpi-card--blue .kpi-card__icon-bg,
+.kpi-card--primary .kpi-card__icon-bg { color: var(--brand-primary); }
 
 /* green / success */
 .kpi-card--green,
-.kpi-card--success   { border-top-color: var(--color-success); }
-.kpi-card--green   .kpi-card__icon,
+.kpi-card--success { border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border)); }
+.kpi-card--green .kpi-card__icon,
 .kpi-card--success .kpi-card__icon {
   background: color-mix(in srgb, var(--color-success) 12%, white);
   color: var(--color-success);
 }
+.kpi-card--green .kpi-card__icon-bg,
+.kpi-card--success .kpi-card__icon-bg { color: var(--color-success); }
 
 /* amber / warning */
 .kpi-card--amber,
-.kpi-card--warning   { border-top-color: var(--color-warning); }
-.kpi-card--amber   .kpi-card__icon,
+.kpi-card--warning { border-color: color-mix(in srgb, var(--color-warning) 45%, var(--color-border)); }
+.kpi-card--amber .kpi-card__icon,
 .kpi-card--warning .kpi-card__icon {
   background: color-mix(in srgb, var(--color-warning) 14%, white);
   color: var(--color-warning);
 }
+.kpi-card--amber .kpi-card__icon-bg,
+.kpi-card--warning .kpi-card__icon-bg { color: var(--color-warning); }
 .kpi-card--warning .kpi-card__value { color: var(--color-warning-ink, var(--color-warning)); }
 
 /* purple */
-.kpi-card--purple { border-top-color: var(--color-purple); }
+.kpi-card--purple { border-color: color-mix(in srgb, var(--color-purple) 45%, var(--color-border)); }
 .kpi-card--purple .kpi-card__icon {
   background: color-mix(in srgb, var(--color-purple) 12%, white);
   color: var(--color-purple);
 }
+.kpi-card--purple .kpi-card__icon-bg { color: var(--color-purple); }
 
 /* red / danger */
 .kpi-card--red,
-.kpi-card--danger    { border-top-color: var(--color-danger); }
-.kpi-card--red    .kpi-card__icon,
+.kpi-card--danger { border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border)); }
+.kpi-card--red .kpi-card__icon,
 .kpi-card--danger .kpi-card__icon {
   background: color-mix(in srgb, var(--color-danger) 12%, white);
   color: var(--color-danger);
 }
+.kpi-card--red .kpi-card__icon-bg,
+.kpi-card--danger .kpi-card__icon-bg { color: var(--color-danger); }
 .kpi-card--danger .kpi-card__value { color: var(--color-danger-ink, var(--color-danger)); }
 
 /* teal / info */
 .kpi-card--teal,
-.kpi-card--info      { border-top-color: #0891B2; }
+.kpi-card--info { border-color: color-mix(in srgb, #0891B2 45%, var(--color-border)); }
 .kpi-card--teal .kpi-card__icon,
 .kpi-card--info .kpi-card__icon {
   background: color-mix(in srgb, #0891B2 12%, white);
   color: #0891B2;
 }
+.kpi-card--teal .kpi-card__icon-bg,
+.kpi-card--info .kpi-card__icon-bg { color: #0891B2; }
 
 /* neutral */
-.kpi-card--neutral { border-top-color: var(--color-border); }
 .kpi-card--neutral .kpi-card__icon {
   background: var(--color-surface-2);
   color: var(--color-text-2);
 }
+.kpi-card--neutral .kpi-card__icon-bg { color: var(--color-text-3); }
 
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 600px) {
   .kpi-card {
     padding: var(--sp-3);
-    min-height: 64px;
+    min-height: 76px;
   }
 
   .kpi-card__value {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
+  }
+
+  .kpi-card__icon-bg {
+    font-size: 2.8rem;
   }
 }
 
@@ -203,8 +234,8 @@
   animation: kpi-pulse 1.4s ease-in-out infinite;
 }
 
-.kpi-skel--sm { height: 10px; width: 60%; }
-.kpi-skel--lg { height: 22px; width: 80%; }
+.kpi-skel--sm { height: 10px; width: 50%; }
+.kpi-skel--lg { height: 26px; width: 70%; }
 
 @keyframes kpi-pulse {
   0%, 100% { opacity: 1; }

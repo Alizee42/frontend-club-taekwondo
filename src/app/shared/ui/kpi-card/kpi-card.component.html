@@ -2,13 +2,17 @@
 
   <ng-container *ngIf="!loading; else skeletonTpl">
 
+    <i class="kpi-card__icon-bg" *ngIf="icon" [class]="icon" aria-hidden="true"></i>
+
     <span class="kpi-card__icon" *ngIf="icon">
       <i [class]="icon"></i>
     </span>
 
     <div class="kpi-card__body">
-      <span class="kpi-card__label">{{ label }}</span>
-      <strong class="kpi-card__value">{{ value }}</strong>
+      <div class="kpi-card__row">
+        <strong class="kpi-card__value">{{ value }}</strong>
+        <span class="kpi-card__label">{{ label }}</span>
+      </div>
       <span class="kpi-card__meta" *ngIf="meta">{{ meta }}</span>
       <span *ngIf="trend" [ngClass]="trendClass">
         <i [class]="trendIcon"></i>{{ trend }}
@@ -22,8 +26,8 @@
   <ng-template #skeletonTpl>
     <span class="kpi-card__icon kpi-card__icon--skel"></span>
     <div class="kpi-card__body">
-      <span class="kpi-skel kpi-skel--sm"></span>
       <span class="kpi-skel kpi-skel--lg"></span>
+      <span class="kpi-skel kpi-skel--sm"></span>
     </div>
   </ng-template>
 

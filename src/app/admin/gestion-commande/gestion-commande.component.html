@@ -69,6 +69,8 @@
 <ui-modal
   [open]="!!commandeSelectionnee"
   [title]="commandeSelectionnee ? 'Commande #' + commandeSelectionnee.id : 'Details commande'"
+  size="lg"
+  [stickyFooter]="true"
   (closed)="fermerDetails()"
 >
   <div *ngIf="commandeSelectionnee" class="details-shell">
@@ -98,21 +100,21 @@
         [data]="detailRows"
       ></ui-table>
     </div>
+  </div>
 
-    <div class="modal-footer">
-      <ui-button label="Fermer" variant="ghost" (clicked)="fermerDetails()"></ui-button>
-      <ui-button
-        *ngIf="commandeSelectionnee.modePaiement !== 'cb' && commandeSelectionnee.statut === 'en attente'"
-        label="Marquer paye"
-        variant="primary"
-        (clicked)="marquerPaye(commandeSelectionnee.id)"
-      ></ui-button>
-      <ui-button
-        *ngIf="commandeSelectionnee.statut === 'paye'"
-        label="Marquer retire"
-        variant="secondary"
-        (clicked)="marquerRetiree(commandeSelectionnee.id)"
-      ></ui-button>
-    </div>
+  <div modal-footer *ngIf="commandeSelectionnee">
+    <ui-button label="Fermer" variant="ghost" (clicked)="fermerDetails()"></ui-button>
+    <ui-button
+      *ngIf="commandeSelectionnee.modePaiement !== 'cb' && commandeSelectionnee.statut === 'en attente'"
+      label="Marquer paye"
+      variant="primary"
+      (clicked)="marquerPaye(commandeSelectionnee.id)"
+    ></ui-button>
+    <ui-button
+      *ngIf="commandeSelectionnee.statut === 'paye'"
+      label="Marquer retire"
+      variant="secondary"
+      (clicked)="marquerRetiree(commandeSelectionnee.id)"
+    ></ui-button>
   </div>
 </ui-modal>

@@ -21,5 +21,8 @@
     <div class="ui-modal-content">
       <ng-content></ng-content>
     </div>
+    <div class="ui-modal-footer" *ngIf="stickyFooter">
+      <ng-content select="[modal-footer]"></ng-content>
+    </div>
   </div>
 </div>

@@ -17,6 +17,7 @@ import { environment } from '../../../environments/environment';
       submitLabel="Valider"
       [error]="formError"
       (submitted)="onSubmit($event)"
+      (cancel)="cancel.emit()"
     >
     </ui-form>
   `

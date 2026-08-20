@@ -36,7 +36,8 @@
       [fields]="formFields"
       [model]="form"
       submitLabel="Enregistrer"
-      (submitted)="onFormSubmit($event)">
+      (submitted)="onFormSubmit($event)"
+      (cancel)="openModal=false">
     </ui-form>
   </div>
 </ui-modal>

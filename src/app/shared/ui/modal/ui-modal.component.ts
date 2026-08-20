@@ -18,6 +18,7 @@ export class UiModalComponent {
   @Input() showClose: boolean = true;
   @Input() closeOnBackdrop: boolean = true;
   @Input() closeOnEscape: boolean = true;
+  @Input() stickyFooter: boolean = false;
   @Output() closed = new EventEmitter<void>();
 
   @HostListener('document:keydown.escape')

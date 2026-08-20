@@ -11,21 +11,12 @@
     <ui-kpi-card icon="ri-bank-line"        label="Avec RIB"      [value]="avecRib"   tone="blue"></ui-kpi-card>
   </ui-kpi-grid>
 
-  <div class="status-line success" *ngIf="successMessage">
-    <i class="ri-checkbox-circle-line"></i>
-    {{ successMessage }}
-  </div>
-
   <div class="status-line error" *ngIf="errorMessage">
     <i class="ri-error-warning-line"></i>
     {{ errorMessage }}
   </div>
 
   <div class="clubs-toolbar">
-    <div>
-      <strong>{{ clubs.length }}</strong>
-      <span>{{ clubs.length > 1 ? 'clubs enregistres' : 'club enregistre' }}</span>
-    </div>
     <ui-button variant="ghost" icon="ri-refresh-line" label="Actualiser" [loading]="loading" (clicked)="loadClubs()"></ui-button>
   </div>
 
@@ -44,111 +35,133 @@
   [title]="modalTitle"
   [subtitle]="modalSubtitle"
   size="lg"
+  [stickyFooter]="true"
   [closeOnBackdrop]="!saving"
   [closeOnEscape]="!saving"
   (closed)="closeClubModal()">
-  <form class="club-form" #clubNgForm="ngForm" (ngSubmit)="saveClub(clubNgForm)" novalidate>
-    <div class="club-form__grid">
-      <label class="field">
-        <span>Nom du club *</span>
-        <input
-          name="name"
-          type="text"
-          required
-          [(ngModel)]="clubForm.name"
-          #name="ngModel"
-          [class.is-invalid]="name.invalid && (name.dirty || name.touched)"
-          placeholder="Ex: Villeurbanne">
-        <small *ngIf="name.invalid && (name.dirty || name.touched)">Nom obligatoire</small>
-      </label>
+  <form class="club-form" #clubNgForm="ngForm" novalidate>
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-building-4-line" aria-hidden="true"></i> Identité
+      </legend>
+      <div class="club-form__grid">
+        <label class="field">
+          <span>Nom du club <span class="required-mark">*</span></span>
+          <input
+            name="name"
+            type="text"
+            required
+            [(ngModel)]="clubForm.name"
+            #name="ngModel"
+            [class.is-invalid]="name.invalid && (name.dirty || name.touched)"
+            placeholder="Ex: Villeurbanne">
+          <small *ngIf="name.invalid && (name.dirty || name.touched)">Nom obligatoire</small>
+        </label>
 
-      <label class="field">
-        <span>Email *</span>
-        <input
-          name="email"
-          type="email"
-          required
-          email
-          [(ngModel)]="clubForm.email"
-          #email="ngModel"
-          [class.is-invalid]="email.invalid && (email.dirty || email.touched)"
-          placeholder="club@example.fr">
-        <small *ngIf="email.invalid && (email.dirty || email.touched)">Email invalide</small>
-      </label>
-
-      <label class="field">
-        <span>Telephone *</span>
-        <input
-          name="telephone"
-          type="tel"
-          required
-          [(ngModel)]="clubForm.telephone"
-          #telephone="ngModel"
-          [class.is-invalid]="telephone.invalid && (telephone.dirty || telephone.touched)"
-          placeholder="06 00 00 00 00">
-        <small *ngIf="telephone.invalid && (telephone.dirty || telephone.touched)">Telephone obligatoire</small>
-      </label>
-
-      <label class="field">
-        <span>Logo URL</span>
-        <input
-          name="logo"
-          type="url"
-          [(ngModel)]="clubForm.logo"
-          placeholder="https://...">
-      </label>
-
-      <label class="field field--full">
-        <span>Adresse *</span>
-        <input
-          name="adresse"
-          type="text"
-          required
-          [(ngModel)]="clubForm.adresse"
-          #adresse="ngModel"
-          [class.is-invalid]="adresse.invalid && (adresse.dirty || adresse.touched)"
-          placeholder="Adresse complete du club">
-        <small *ngIf="adresse.invalid && (adresse.dirty || adresse.touched)">Adresse obligatoire</small>
-      </label>
-
-      <label class="field field--full">
-        <span>RIB / IBAN</span>
-        <textarea
-          name="rib"
-          rows="3"
-          [(ngModel)]="clubForm.rib"
-          placeholder="Coordonnees bancaires du club"></textarea>
-      </label>
-    </div>
-
-    <div class="club-preview" *ngIf="clubForm.logo || clubForm.name || clubForm.adresse">
-      <div class="club-preview__logo">
-        <img *ngIf="clubForm.logo" [src]="clubForm.logo" alt="Logo du club">
-        <i *ngIf="!clubForm.logo" class="ri-building-4-line"></i>
+        <label class="field">
+          <span>Logo</span>
+          <input
+            name="logoFile"
+            type="file"
+            accept="image/*"
+            (change)="onLogoSelected($event)">
+          <small *ngIf="uploadingLogo">Envoi en cours…</small>
+        </label>
       </div>
-      <div>
-        <strong>{{ clubForm.name || 'Nom du club' }}</strong>
-        <span>{{ clubForm.adresse || 'Adresse du club' }}</span>
+
+      <div class="club-preview" *ngIf="logoPreviewUrl || clubForm.name || clubForm.adresse">
+        <div class="club-preview__logo">
+          <img *ngIf="logoPreviewUrl" [src]="logoPreviewUrl" alt="Logo du club">
+          <i *ngIf="!logoPreviewUrl" class="ri-building-4-line"></i>
+        </div>
+        <div>
+          <strong>{{ clubForm.name || 'Nom du club' }}</strong>
+          <span>{{ clubForm.adresse || 'Adresse du club' }}</span>
+        </div>
       </div>
-    </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-map-pin-line" aria-hidden="true"></i> Contact
+      </legend>
+      <div class="club-form__grid">
+        <label class="field">
+          <span>Email <span class="required-mark">*</span></span>
+          <input
+            name="email"
+            type="email"
+            required
+            email
+            [(ngModel)]="clubForm.email"
+            #email="ngModel"
+            [class.is-invalid]="email.invalid && (email.dirty || email.touched)"
+            placeholder="club@example.fr">
+          <small *ngIf="email.invalid && (email.dirty || email.touched)">Email invalide</small>
+        </label>
+
+        <label class="field">
+          <span>Telephone <span class="required-mark">*</span></span>
+          <input
+            name="telephone"
+            type="tel"
+            required
+            [(ngModel)]="clubForm.telephone"
+            #telephone="ngModel"
+            [class.is-invalid]="telephone.invalid && (telephone.dirty || telephone.touched)"
+            placeholder="06 00 00 00 00">
+          <small *ngIf="telephone.invalid && (telephone.dirty || telephone.touched)">Telephone obligatoire</small>
+        </label>
+
+        <label class="field field--full">
+          <span>Adresse <span class="required-mark">*</span></span>
+          <input
+            name="adresse"
+            type="text"
+            required
+            [(ngModel)]="clubForm.adresse"
+            #adresse="ngModel"
+            [class.is-invalid]="adresse.invalid && (adresse.dirty || adresse.touched)"
+            placeholder="Adresse complete du club">
+          <small *ngIf="adresse.invalid && (adresse.dirty || adresse.touched)">Adresse obligatoire</small>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-bank-line" aria-hidden="true"></i> Coordonnées bancaires
+      </legend>
+      <div class="club-form__grid">
+        <label class="field field--full">
+          <span>RIB / IBAN</span>
+          <textarea
+            name="rib"
+            rows="3"
+            [(ngModel)]="clubForm.rib"
+            placeholder="Coordonnees bancaires du club (optionnel, utilisé pour les paiements par virement)"></textarea>
+        </label>
+      </div>
+    </fieldset>
 
     <div class="status-line error" *ngIf="modalError">
       <i class="ri-error-warning-line"></i>
       {{ modalError }}
     </div>
-
-    <div class="modal-actions">
-      <ui-button type="button" variant="ghost" label="Annuler" [disabled]="saving" (clicked)="closeClubModal()"></ui-button>
-      <ui-button
-        type="submit"
-        variant="primary"
-        icon="ri-save-line"
-        [label]="selectedClub ? 'Enregistrer' : 'Creer'"
-        [loading]="saving"
-        [disabled]="saving">
-      </ui-button>
-    </div>
   </form>
+
+  <div modal-footer>
+    <ui-button type="button" variant="ghost" label="Annuler" [disabled]="saving" (clicked)="closeClubModal()"></ui-button>
+    <ui-button
+      type="button"
+      variant="primary"
+      icon="ri-save-line"
+      [label]="selectedClub ? 'Enregistrer' : 'Creer'"
+      [loading]="saving"
+      [disabled]="saving"
+      (clicked)="saveClub(clubNgForm)">
+    </ui-button>
+  </div>
 </ui-modal>
 
 <ui-modal
@@ -156,6 +169,7 @@
   title="Supprimer le club"
   subtitle="Cette action est définitive."
   size="sm"
+  [stickyFooter]="true"
   [closeOnBackdrop]="!deleting"
   [closeOnEscape]="!deleting"
   (closed)="closeDeleteModal()">
@@ -171,9 +185,10 @@
       <i class="ri-error-warning-line"></i>
       {{ deleteError }}
     </div>
-    <div class="modal-actions">
-      <ui-button type="button" variant="ghost" label="Annuler" [disabled]="deleting" (clicked)="closeDeleteModal()"></ui-button>
-      <ui-button type="button" variant="danger" icon="ri-delete-bin-line" label="Supprimer" [loading]="deleting" [disabled]="deleting" (clicked)="confirmDelete()"></ui-button>
-    </div>
+  </div>
+
+  <div modal-footer>
+    <ui-button type="button" variant="ghost" label="Annuler" [disabled]="deleting" (clicked)="closeDeleteModal()"></ui-button>
+    <ui-button type="button" variant="danger" icon="ri-delete-bin-line" label="Supprimer" [loading]="deleting" [disabled]="deleting" (clicked)="confirmDelete()"></ui-button>
   </div>
 </ui-modal>

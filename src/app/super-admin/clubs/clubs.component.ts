@@ -3,12 +3,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 
 import { ClubService, Club } from '../../services/club.service';
+import { environment } from '../../../environments/environment';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
 import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
+import { ToastService } from '../../shared/toast/toast.service';
 
 type ClubFormModel = Pick<Club, 'name' | 'adresse' | 'telephone' | 'email'> & {
   id?: number;
@@ -38,12 +40,13 @@ export class ClubsComponent implements OnInit {
   selectedClub: Club | null = null;
   clubToDelete: Club | null = null;
   clubForm: ClubFormModel = { ...EMPTY_CLUB_FORM };
+  logoPreviewUrl: string | null = null;
+  uploadingLogo = false;
 
   loading = false;
   saving = false;
   deleting = false;
   errorMessage = '';
-  successMessage = '';
   modalError = '';
   deleteError = '';
 
@@ -54,6 +57,7 @@ export class ClubsComponent implements OnInit {
   get avecRib()     { return this.clubs.filter(c => !!c.rib).length; }
 
   clubColumns = [
+    { key: 'logoDisplay', label: 'Logo', type: 'image' as const, width: '64px' },
     { key: 'name', label: 'Nom', display: (club: Club) => club.name || club.nom || '-' },
     { key: 'adresse', label: 'Adresse', display: (club: Club) => club.adresse || '-' },
     { key: 'telephone', label: 'Telephone', display: (club: Club) => club.telephone || '-' },
@@ -65,7 +69,7 @@ export class ClubsComponent implements OnInit {
     { label: 'Supprimer', icon: 'ri-delete-bin-line', action: 'delete', variant: 'danger' as const, title: 'Supprimer le club' }
   ];
 
-  constructor(private clubService: ClubService) {}
+  constructor(private clubService: ClubService, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.loadClubs();
@@ -77,7 +81,7 @@ export class ClubsComponent implements OnInit {
 
     this.clubService.getClubs().subscribe({
       next: (clubs) => {
-        this.clubs = clubs || [];
+        this.clubs = (clubs || []).map(club => ({ ...club, logoDisplay: this.toFullImageUrl(club.logo) } as Club));
         this.loading = false;
       },
       error: () => {
@@ -90,6 +94,7 @@ export class ClubsComponent implements OnInit {
   openCreateModal(): void {
     this.selectedClub = null;
     this.clubForm = { ...EMPTY_CLUB_FORM };
+    this.logoPreviewUrl = null;
     this.modalError = '';
     this.openClubModal = true;
   }
@@ -105,6 +110,7 @@ export class ClubsComponent implements OnInit {
       logo: club.logo || '',
       rib: club.rib || ''
     };
+    this.logoPreviewUrl = this.toFullImageUrl(club.logo);
     this.modalError = '';
     this.openClubModal = true;
   }
@@ -114,7 +120,34 @@ export class ClubsComponent implements OnInit {
     this.openClubModal = false;
     this.selectedClub = null;
     this.clubForm = { ...EMPTY_CLUB_FORM };
+    this.logoPreviewUrl = null;
     this.modalError = '';
+  }
+
+  onLogoSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => { this.logoPreviewUrl = reader.result as string; };
+    reader.readAsDataURL(file);
+
+    this.uploadingLogo = true;
+    this.clubService.uploadLogo(file).subscribe({
+      next: (res) => {
+        this.clubForm.logo = res.path;
+        this.uploadingLogo = false;
+      },
+      error: () => { this.uploadingLogo = false; }
+    });
+  }
+
+  toFullImageUrl(raw?: string): string {
+    const apiBase = environment.apiUrl.replace(/\/api\/?$/i, '');
+    if (!raw) return '';
+    if (raw.startsWith('http') || raw.startsWith('data:') || raw.startsWith('/')) return raw;
+    if (raw.startsWith('clubs/')) return `${apiBase}/uploads/${raw}`;
+    return `${apiBase}/uploads/clubs/${encodeURIComponent(raw)}`;
   }
 
   handleClubAction(event: { action: string; row: Club }): void {
@@ -130,7 +163,6 @@ export class ClubsComponent implements OnInit {
 
   saveClub(form: NgForm): void {
     this.modalError = '';
-    this.successMessage = '';
 
     if (form.invalid) {
       form.control.markAllAsTouched();
@@ -145,7 +177,7 @@ export class ClubsComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
-        this.successMessage = this.selectedClub ? 'Club modifie avec succes.' : 'Club cree avec succes.';
+        this.toast.success(this.selectedClub ? 'Club modifié avec succès.' : 'Club créé avec succès.');
         this.saving = false;
         this.closeClubModal();
         this.loadClubs();
@@ -175,11 +207,10 @@ export class ClubsComponent implements OnInit {
 
     this.deleting = true;
     this.deleteError = '';
-    this.successMessage = '';
 
     this.clubService.deleteClub(this.clubToDelete.id).subscribe({
       next: () => {
-        this.successMessage = 'Club supprime avec succes.';
+        this.toast.success('Club supprimé avec succès.');
         this.deleting = false;
         this.closeDeleteModal();
         this.loadClubs();

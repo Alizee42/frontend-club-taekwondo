@@ -280,12 +280,6 @@
   color: var(--color-text);
 }
 .refus-motif-input { resize: vertical; }
-.refus-modal .modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-}
-
 /* ════════════════════════════════════════
    Modale aperçu
 ════════════════════════════════════════ */

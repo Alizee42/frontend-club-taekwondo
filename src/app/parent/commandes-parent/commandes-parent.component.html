@@ -47,6 +47,8 @@
 <ui-modal
   [open]="!!commandeSelectionnee"
   [title]="'Commande #' + (commandeSelectionnee?.id || '')"
+  size="lg"
+  [stickyFooter]="true"
   (closed)="fermerDetails()">
   <ng-container *ngIf="commandeSelectionnee as commande">
     <p class="modal-summary">{{ articlesResume(commande) }}</p>
@@ -82,14 +84,14 @@
         </tbody>
       </table>
     </div>
-
-    <div class="modal-footer">
-      <ui-button
-        type="button"
-        variant="secondary"
-        label="Fermer"
-        (clicked)="fermerDetails()"
-      />
-    </div>
   </ng-container>
+
+  <div modal-footer *ngIf="commandeSelectionnee">
+    <ui-button
+      type="button"
+      variant="secondary"
+      label="Fermer"
+      (clicked)="fermerDetails()"
+    />
+  </div>
 </ui-modal>

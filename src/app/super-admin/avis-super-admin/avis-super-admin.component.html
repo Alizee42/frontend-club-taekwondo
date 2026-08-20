@@ -34,7 +34,7 @@
   <ui-form
     [fields]="fields"
     [model]="avisEnCours"
-    (submit)="onSubmitForm($event)"
+    (submitted)="onSubmitForm($event)"
     (cancel)="closeModal()"
     [submitLabel]="modalMode === 'ajout' ? 'Ajouter' : 'Enregistrer'">
   </ui-form>

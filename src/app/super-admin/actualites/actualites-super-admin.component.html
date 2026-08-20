@@ -29,7 +29,7 @@
   </div>
 </div>
 
-<ui-modal [open]="isModalOpen" [title]="actualite.id ? 'Modifier une actualité' : 'Nouvelle actualité'" (closed)="closeModal()">
+<ui-modal [open]="isModalOpen" [title]="actualite.id ? 'Modifier une actualité' : 'Nouvelle actualité'" size="lg" (closed)="closeModal()">
   <ui-form
     [fields]="fieldsWithoutFeatured"
     [model]="actualite"

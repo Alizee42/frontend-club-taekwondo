@@ -106,139 +106,158 @@
   [open]="afficherFormulaire"
   [title]="isEditing ? 'Modifier un evenement' : 'Creer un evenement'"
   size="lg"
+  [stickyFooter]="true"
   (closed)="fermerFormulaire()"
 >
-  <form class="event-form" (ngSubmit)="soumettreEvenement()">
-    <div class="form-grid">
-      <label class="field">
-        <span class="field-label">Titre</span>
-        <input
-          type="text"
-          class="form-input"
-          [(ngModel)]="nouvelEvenement.titre"
-          name="titre"
-          required
-        />
-      </label>
-
-      <label class="field">
-        <span class="field-label">Lieu</span>
-        <input
-          type="text"
-          class="form-input"
-          [(ngModel)]="nouvelEvenement.lieu"
-          name="lieu"
-          required
-        />
-      </label>
-
-      <label class="field">
-        <span class="field-label">Date début</span>
-        <div class="field-date-heure">
+  <form class="event-form" #evenementNgForm="ngForm" novalidate>
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-calendar-event-line" aria-hidden="true"></i> Informations générales
+      </legend>
+      <div class="form-grid">
+        <label class="field">
+          <span class="field-label">Titre <span class="required-mark">*</span></span>
           <input
-            type="date"
+            type="text"
             class="form-input"
-            [(ngModel)]="dateDebutJour"
-            name="dateDebutJour"
+            [(ngModel)]="nouvelEvenement.titre"
+            name="titre"
             required
           />
-          <select class="form-select" [(ngModel)]="dateDebutH" name="dateDebutH" required>
-            <option value="" disabled selected hidden>Heure</option>
-            <option *ngFor="let h of heuresDisponibles" [value]="h">{{ h }}</option>
-          </select>
-          <select class="form-select" [(ngModel)]="dateDebutMin" name="dateDebutMin" required>
-            <option value="" disabled selected hidden>Min</option>
-            <option *ngFor="let m of minutesDisponibles" [value]="m">{{ m }}</option>
-          </select>
-        </div>
-      </label>
+        </label>
 
-      <label class="field">
-        <span class="field-label">Date fin</span>
-        <div class="field-date-heure">
+        <label class="field">
+          <span class="field-label">Lieu <span class="required-mark">*</span></span>
           <input
-            type="date"
+            type="text"
             class="form-input"
-            [(ngModel)]="dateFinJour"
-            name="dateFinJour"
+            [(ngModel)]="nouvelEvenement.lieu"
+            name="lieu"
             required
           />
-          <select class="form-select" [(ngModel)]="dateFinH" name="dateFinH" required>
-            <option value="" disabled selected hidden>Heure</option>
-            <option *ngFor="let h of heuresDisponibles" [value]="h">{{ h }}</option>
-          </select>
-          <select class="form-select" [(ngModel)]="dateFinMin" name="dateFinMin" required>
-            <option value="" disabled selected hidden>Min</option>
-            <option *ngFor="let m of minutesDisponibles" [value]="m">{{ m }}</option>
-          </select>
-        </div>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Capacité <span class="required-mark">*</span></span>
+          <input
+            type="number"
+            min="1"
+            class="form-input"
+            [(ngModel)]="nouvelEvenement.capacite"
+            name="capacite"
+            required
+          />
+        </label>
+
+        <label class="field field--checkbox">
+          <span class="field-label">Statut</span>
+          <span class="checkbox-line">
+            <input
+              type="checkbox"
+              [(ngModel)]="nouvelEvenement.actif"
+              name="actif"
+            />
+            <span>Evenement actif</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-time-line" aria-hidden="true"></i> Dates
+      </legend>
+      <div class="form-grid">
+        <label class="field">
+          <span class="field-label">Date début <span class="required-mark">*</span></span>
+          <div class="field-date-heure">
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="dateDebutJour"
+              name="dateDebutJour"
+              required
+            />
+            <select class="form-select" [(ngModel)]="dateDebutH" name="dateDebutH" required>
+              <option value="" disabled selected hidden>Heure</option>
+              <option *ngFor="let h of heuresDisponibles" [value]="h">{{ h }}</option>
+            </select>
+            <select class="form-select" [(ngModel)]="dateDebutMin" name="dateDebutMin" required>
+              <option value="" disabled selected hidden>Min</option>
+              <option *ngFor="let m of minutesDisponibles" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Date fin <span class="required-mark">*</span></span>
+          <div class="field-date-heure">
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="dateFinJour"
+              name="dateFinJour"
+              required
+            />
+            <select class="form-select" [(ngModel)]="dateFinH" name="dateFinH" required>
+              <option value="" disabled selected hidden>Heure</option>
+              <option *ngFor="let h of heuresDisponibles" [value]="h">{{ h }}</option>
+            </select>
+            <select class="form-select" [(ngModel)]="dateFinMin" name="dateFinMin" required>
+              <option value="" disabled selected hidden>Min</option>
+              <option *ngFor="let m of minutesDisponibles" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-align-left" aria-hidden="true"></i> Description &amp; image
+      </legend>
+      <label class="field">
+        <span class="field-label">Description</span>
+        <textarea
+          class="form-input form-textarea"
+          [(ngModel)]="nouvelEvenement.description"
+          name="description"
+          rows="4"
+        ></textarea>
       </label>
 
       <label class="field">
-        <span class="field-label">Capacité</span>
+        <span class="field-label">Image</span>
         <input
-          type="number"
-          min="1"
+          type="file"
           class="form-input"
-          [(ngModel)]="nouvelEvenement.capacite"
-          name="capacite"
-          required
+          accept="image/*"
+          (change)="onFileSelected($event)"
         />
       </label>
 
-      <label class="field field--checkbox">
-        <span class="field-label">Statut</span>
-        <span class="checkbox-line">
-          <input
-            type="checkbox"
-            [(ngModel)]="nouvelEvenement.actif"
-            name="actif"
-          />
-          <span>Evenement actif</span>
-        </span>
-      </label>
-    </div>
-
-    <label class="field">
-      <span class="field-label">Description</span>
-      <textarea
-        class="form-input form-textarea"
-        [(ngModel)]="nouvelEvenement.description"
-        name="description"
-        rows="4"
-      ></textarea>
-    </label>
-
-    <label class="field">
-      <span class="field-label">Image</span>
-      <input
-        type="file"
-        class="form-input"
-        accept="image/*"
-        (change)="onFileSelected($event)"
-      />
-    </label>
-
-    <div class="image-preview" *ngIf="nouvelEvenement.imageUrl">
-      <img [src]="nouvelEvenement.imageUrl" alt="Apercu de l evenement" />
-    </div>
-
-    <div class="modal-actions">
-      <ui-button
-        label="Annuler"
-        variant="ghost"
-        type="button"
-        (clicked)="fermerFormulaire()"
-      ></ui-button>
-      <ui-button
-        [label]="isEditing ? 'Enregistrer' : 'Créer'"
-        icon="ri-save-line"
-        variant="primary"
-        type="submit"
-        [loading]="isLoading"
-      ></ui-button>
-    </div>
+      <div class="image-preview" *ngIf="nouvelEvenement.imageUrl">
+        <img [src]="nouvelEvenement.imageUrl" alt="Apercu de l evenement" />
+      </div>
+    </fieldset>
   </form>
+
+  <div modal-footer>
+    <ui-button
+      label="Annuler"
+      variant="ghost"
+      type="button"
+      (clicked)="fermerFormulaire()"
+    ></ui-button>
+    <ui-button
+      [label]="isEditing ? 'Enregistrer' : 'Créer'"
+      icon="ri-save-line"
+      variant="primary"
+      type="button"
+      [loading]="isLoading"
+      (clicked)="soumettreEvenement()"
+    ></ui-button>
+  </div>
 </ui-modal>
 
 <ui-modal

@@ -80,59 +80,72 @@
 <ui-modal
   [open]="showModal"
   [title]="selected ? 'Modifier l enseignant' : 'Ajouter un enseignant'"
+  size="lg"
+  [stickyFooter]="true"
   (closed)="resetForm()"
 >
-  <form class="professeur-form" (ngSubmit)="addProfesseur()">
-    <div class="form-grid">
-      <label class="field">
-        <span class="field-label">Nom</span>
-        <input type="text" class="form-input" [(ngModel)]="newProfesseur.nom" name="nom" required>
-      </label>
+  <form class="professeur-form" #professeurNgForm="ngForm" novalidate>
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-user-line" aria-hidden="true"></i> Identité
+      </legend>
+      <div class="form-grid">
+        <label class="field">
+          <span class="field-label">Nom <span class="required-mark">*</span></span>
+          <input type="text" class="form-input" [(ngModel)]="newProfesseur.nom" name="nom" required>
+        </label>
 
-      <label class="field">
-        <span class="field-label">Prenom</span>
-        <input type="text" class="form-input" [(ngModel)]="newProfesseur.prenom" name="prenom" required>
-      </label>
+        <label class="field">
+          <span class="field-label">Prenom <span class="required-mark">*</span></span>
+          <input type="text" class="form-input" [(ngModel)]="newProfesseur.prenom" name="prenom" required>
+        </label>
 
-      <label class="field field--full">
-        <span class="field-label">Specialite</span>
-        <input type="text" class="form-input" [(ngModel)]="newProfesseur.specialite" name="specialite" placeholder="ex : 5ème Dan – Instructeur">
-      </label>
+        <label class="field field--full">
+          <span class="field-label">Specialite</span>
+          <input type="text" class="form-input" [(ngModel)]="newProfesseur.specialite" name="specialite" placeholder="ex : 5ème Dan – Instructeur">
+        </label>
 
-      <label class="field field--full">
-        <span class="field-label">Photo</span>
-        <input type="file" class="form-input" name="photo" #photoFileInput accept="image/*" (change)="onPhotoSelected($event)">
-      </label>
+        <label class="field field--full">
+          <span class="field-label">Photo</span>
+          <input type="file" class="form-input" name="photo" #photoFileInput accept="image/*" (change)="onPhotoSelected($event)">
+        </label>
 
-      <div class="photo-preview" *ngIf="photoPreview">
-        <img [src]="photoPreview" alt="Apercu de l enseignant">
-        <div class="uploading" *ngIf="uploadingPhoto">Téléversement…</div>
+        <div class="photo-preview" *ngIf="photoPreview">
+          <img [src]="photoPreview" alt="Apercu de l enseignant">
+          <div class="uploading" *ngIf="uploadingPhoto">Téléversement…</div>
+        </div>
       </div>
-    </div>
+    </fieldset>
 
-    <label class="field">
-      <span class="field-label">Description</span>
-      <textarea
-        class="form-input form-textarea"
-        [(ngModel)]="newProfesseur.description"
-        name="description"
-        rows="5"
-      ></textarea>
-    </label>
-
-    <div class="modal-actions">
-      <ui-button
-        label="Annuler"
-        variant="ghost"
-        type="button"
-        (clicked)="resetForm()"
-      ></ui-button>
-      <ui-button
-        [label]="selected ? 'Enregistrer les modifications' : 'Ajouter l enseignant'"
-        icon="ri-check-line"
-        variant="primary"
-        type="submit"
-      ></ui-button>
-    </div>
+    <fieldset class="form-section">
+      <legend class="form-section__title">
+        <i class="ri-align-left" aria-hidden="true"></i> Description
+      </legend>
+      <label class="field">
+        <span class="field-label">Description</span>
+        <textarea
+          class="form-input form-textarea"
+          [(ngModel)]="newProfesseur.description"
+          name="description"
+          rows="5"
+        ></textarea>
+      </label>
+    </fieldset>
   </form>
+
+  <div modal-footer>
+    <ui-button
+      label="Annuler"
+      variant="ghost"
+      type="button"
+      (clicked)="resetForm()"
+    ></ui-button>
+    <ui-button
+      [label]="selected ? 'Enregistrer les modifications' : 'Ajouter l enseignant'"
+      icon="ri-check-line"
+      variant="primary"
+      type="button"
+      (clicked)="addProfesseur()"
+    ></ui-button>
+  </div>
 </ui-modal>

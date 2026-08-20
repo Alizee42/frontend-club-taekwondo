@@ -15,12 +15,15 @@ export class UiFormComponent {
   @Input() description: string = '';
   @Input() fields: any[] = [];
   @Input() submitLabel: string = 'Envoyer';
+  @Input() cancelLabel: string = 'Annuler';
+  @Input() showCancel: boolean = true;
   @Input() loading: boolean = false;
   @Input() error: string = '';
   @Input() set model(value: any) {
     this.formData = value ? { ...value } : {};
   }
   @Output() submitted = new EventEmitter<any>();
+  @Output() cancel = new EventEmitter<void>();
 
   formData: any = {};
 

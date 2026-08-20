@@ -9,10 +9,10 @@
   </div>
 </div>
 
-<ui-modal [open]="modalOpen" [title]="modalTitle" (closed)="closeModal()">
-  <form (ngSubmit)="submitImage()">
+<ui-modal [open]="modalOpen" [title]="modalTitle" (closed)="closeModal()" [stickyFooter]="true" size="sm">
+  <form #galerieNgForm="ngForm" novalidate>
     <div class="form-group">
-      <label for="titre">Titre</label>
+      <label for="titre">Titre <span class="required-mark">*</span></label>
       <input id="titre" type="text" [(ngModel)]="formImage.titre" name="titre" required />
     </div>
     <div class="form-group">
@@ -24,8 +24,10 @@
       <input id="imageFile" type="file" #imageFileInput (change)="onFileSelected($event)" accept="image/*" />
       <img *ngIf="formImage.imageUrl" [src]="formImage.imageUrl" alt="Aperçu" class="upload-preview" />
     </div>
-    <div class="modal-footer">
-      <ui-button [label]="editMode ? 'Modifier' : 'Enregistrer'" type="submit" variant="primary" [disabled]="isSubmitting"></ui-button>
-    </div>
   </form>
+
+  <div modal-footer>
+    <ui-button type="button" variant="ghost" label="Annuler" (clicked)="closeModal()"></ui-button>
+    <ui-button [label]="editMode ? 'Modifier' : 'Enregistrer'" type="button" variant="primary" icon="ri-save-line" [disabled]="isSubmitting" (clicked)="submitImage()"></ui-button>
+  </div>
 </ui-modal>
