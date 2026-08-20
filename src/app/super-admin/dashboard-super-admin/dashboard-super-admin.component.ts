@@ -402,14 +402,6 @@ export class DashboardSuperAdminComponent implements OnInit {
     this.router.navigate(['super-admin/accueil-site']);
   }
 
-  navigateToHero() {
-    this.router.navigate(['super-admin/hero']);
-  }
-
-  navigateToAPropos() {
-    this.router.navigate(['super-admin/apropos']);
-  }
-
   navigateToPagesLegales() {
     this.router.navigate(['super-admin/pages-legales']);
   }

@@ -1,5 +1,3 @@
-import { GestionHeroComponent } from './admin/gestion-hero/gestion-hero.component';
-import { GestionAProposComponent } from './admin/gestion-apropos/gestion-apropos.component';
 import { GestionPagesLegalesComponent } from './admin/gestion-pages-legales/gestion-pages-legales.component';
 import { GestionAccueilSiteComponent } from './admin/gestion-accueil-site/gestion-accueil-site.component';
 import { GestionHorairesSuperAdminComponent } from './super-admin/gestion-horaires/gestion-horaires-super-admin.component';
@@ -100,8 +98,6 @@ export const routes: Routes = [
       { path: 'gestion-evenement', component: GestionEvenementsComponent },
       { path: 'membres', loadComponent: () => import('./admin/gestion-membres/gestion-membres.component').then(m => m.GestionMembresComponent) },
       { path: 'accueil-site', component: GestionAccueilSiteComponent },
-      { path: 'hero', component: GestionHeroComponent },
-      { path: 'apropos', component: GestionAProposComponent },
       { path: 'pages-legales', component: GestionPagesLegalesComponent }
     ]
   },
@@ -116,7 +112,6 @@ export const routes: Routes = [
       { path: 'documents', component: DocumentsComponent },
       { path: 'paiements', component: PaiementComponent },
       { path: 'commandes', component: CommandesMembreComponent },
-      { path: 'bon-de-commande', loadComponent: () => import('./membre/bon-de-commande/bon-de-commande-membre.component').then(m => m.BonDeCommandeMembreComponent) },
       { path: 'evenements', component: EvenementsMembre }
     ]
   },
@@ -131,7 +126,6 @@ export const routes: Routes = [
       { path: 'paiements', component: PaiementParentComponent },
       { path: 'documents', component: DocumentsParentComponent },
       { path: 'commandes', component: CommandesParentComponent },
-      { path: 'bon-de-commande', loadComponent: () => import('./membre/bon-de-commande/bon-de-commande-membre.component').then(m => m.BonDeCommandeMembreComponent) },
       { path: 'evenements', component: EvenementsParent }
     ]
   },
@@ -160,8 +154,6 @@ export const routes: Routes = [
   { path: 'avis', loadComponent: () => import('./super-admin/avis-super-admin/avis-super-admin.component').then(m => m.AvisSuperAdminComponent) },
   { path: 'enseignants', loadComponent: () => import('./super-admin/enseignants/enseignants-super-admin.component').then(m => m.EnseignantsSuperAdminComponent) },
       { path: 'accueil-site', component: GestionAccueilSiteComponent },
-      { path: 'hero', component: GestionHeroComponent },
-      { path: 'apropos', component: GestionAProposComponent },
       { path: 'pages-legales', component: GestionPagesLegalesComponent },
     ]
     },
