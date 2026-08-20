@@ -32,69 +32,80 @@
   padding: var(--sp-5);
 }
 
-/* —— Steps / stepper ——————————————————————— */
-.steps {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
-  list-style: none;
-  padding: 0;
-}
-
-.steps li {
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: var(--sp-2) var(--sp-3);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  color: var(--color-text-2);
-  text-align: center;
+/* —— Stepper connecté ——————————————————————— */
+.stepper {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
+  align-items: flex-start;
+  margin: 0 0 var(--sp-5);
+  padding: 0;
+  list-style: none;
 }
 
-.steps li span {
+.stepper__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: 0 0 auto;
+  width: 84px;
+}
+
+.stepper__circle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-full);
-  background: var(--color-border);
+  background: var(--color-surface-2);
+  border: 2px solid var(--color-border);
   color: var(--color-text-2);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: 700;
   flex-shrink: 0;
+  transition: background var(--t-base), border-color var(--t-base), color var(--t-base);
 }
 
-.steps li.active {
-  background: color-mix(in srgb, var(--brand-primary) 8%, white);
-  color: var(--brand-primary);
-  border-color: color-mix(in srgb, var(--brand-primary) 30%, white);
+.stepper__label {
+  color: var(--color-text-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-align: center;
+  transition: color var(--t-base);
 }
 
-.steps li.active span {
+.stepper__step.is-active .stepper__circle {
   background: var(--brand-primary);
+  border-color: var(--brand-primary);
   color: #fff;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-primary) 16%, transparent);
 }
 
-.progress-steps {
-  height: 5px;
-  background: var(--color-surface-2);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  margin-bottom: var(--sp-4);
+.stepper__step.is-active .stepper__label {
+  color: var(--brand-primary);
+  font-weight: 700;
 }
 
-.progress-steps__bar {
-  height: 100%;
-  background: var(--brand-primary);
-  width: 0;
-  transition: width .35s ease;
+.stepper__step.is-done .stepper__circle {
+  background: color-mix(in srgb, var(--color-success) 12%, white);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.stepper__step.is-done .stepper__label {
+  color: var(--color-text);
+}
+
+.stepper__connector {
+  flex: 1 1 auto;
+  height: 2px;
+  margin-top: 15px;
+  background: var(--color-border);
+  transition: background var(--t-base);
+}
+
+.stepper__connector.is-done {
+  background: var(--color-success);
 }
 
 /* —— Step body ————————————————————————————— */
@@ -107,41 +118,36 @@
 
 .step-head {
   display: grid;
-  gap: var(--sp-1);
+  gap: var(--sp-2);
   margin-bottom: var(--sp-4);
-}
-
-.step-choice-layout {
-  display: grid;
-  grid-template-columns: minmax(260px, 340px) minmax(440px, 1fr);
-  gap: var(--sp-5);
-  align-items: center;
-  margin-bottom: var(--sp-4);
-}
-
-.step-head--side {
-  position: sticky;
-  top: var(--sp-4);
-  margin-bottom: 0;
-  padding: var(--sp-5) var(--sp-5) var(--sp-5) 0;
-  border-right: 3px solid var(--brand-primary);
 }
 
 .step-subtitle {
   margin: 0;
   color: var(--color-text-2);
   font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.step-choice-layout {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8, 3rem);
+  margin-bottom: var(--sp-5);
+}
+
+.step-head--side {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+  max-width: 400px;
 }
 
 /* —— Enfants ——————————————————————————————— */
 .child-grid {
   display: flex;
-  flex-wrap: nowrap;
-  gap: var(--sp-2);
-  justify-content: center;
-  align-items: stretch;
-  overflow-x: auto;
-  padding: var(--sp-1) 0 var(--sp-2);
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  flex: 1 1 auto;
   margin-bottom: 0;
 }
 
@@ -149,18 +155,17 @@
   position: relative;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  min-height: 72px;
-  padding: var(--sp-3);
+  min-height: 64px;
+  padding: var(--sp-3) var(--sp-4);
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
   background: var(--color-surface);
   cursor: pointer;
   transition: background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
   text-align: left;
-  flex: 0 0 clamp(210px, 34%, 248px);
-  max-width: 248px;
-  width: auto;
+  flex: 1 1 220px;
+  max-width: 280px;
 }
 
 .child-card:hover {
@@ -175,8 +180,8 @@
 }
 
 .child-card .avatar {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--brand-primary) 10%, white);
   color: var(--brand-primary);
@@ -184,7 +189,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   flex-shrink: 0;
 }
 
@@ -945,13 +950,12 @@ details.accordion summary {
     padding: var(--sp-4);
   }
 
-  .steps {
-    grid-template-columns: 1fr;
+  .stepper__step {
+    width: 64px;
   }
 
-  .steps li {
-    justify-content: flex-start;
-    text-align: left;
+  .stepper__label {
+    font-size: 0.7rem;
   }
 
   .split-line,
@@ -963,19 +967,19 @@ details.accordion summary {
     flex-direction: column;
   }
 
-  .child-grid {
-    justify-content: flex-start;
-  }
-
   .step-choice-layout {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-3);
   }
 
   .step-head--side {
-    position: static;
-    padding: 0;
-    border-right: none;
-    margin-bottom: var(--sp-2);
+    max-width: none;
+  }
+
+  .child-card {
+    max-width: none;
+    flex: 1 1 100%;
   }
 
   .step-footer__hint {
@@ -1010,7 +1014,8 @@ details.accordion summary {
   .child-card,
   .mode-card,
   .btn,
-  .progress-steps__bar,
+  .stepper__circle,
+  .stepper__connector,
   .progress .bar {
     transition: none;
   }

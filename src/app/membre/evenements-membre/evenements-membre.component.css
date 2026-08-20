@@ -4,7 +4,6 @@
 .evenements-container {
   width: 100%;
   margin: 0;
-  min-height: 100vh;
 }
 
 /* ========================
@@ -101,7 +100,7 @@
 ======================== */
 .evenements-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.25rem;
   width: 100%;
   justify-items: stretch;
@@ -185,7 +184,7 @@
 ======================== */
 .evenement-image {
   position: relative;
-  height: 132px;
+  height: 92px;
   overflow: hidden;
 }
 
@@ -345,28 +344,13 @@
 /* ========================
    RESPONSIVE
 ======================== */
-@media (max-width: 1024px) {
-  .evenements-container {
-    width: 100%;
-  }
-  
-  .evenements-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 768px) {
   .evenements-grid {
-    grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .event-card {
     margin: 0;
-  }
-  
-  .evenement-image {
-    height: 130px;
   }
 
   .list-toolbar {

@@ -83,23 +83,24 @@
                        (change)="onFileSelected($event)"
                        accept=".pdf,.png,.jpg,.jpeg" />
               </div>
-              <small class="field-error" *ngIf="selectedFile && !isValidFile(selectedFile)">
-                Fichier invalide — PNG, JPEG ou PDF, max 5 Mo.
-              </small>
-              <small class="field-error" *ngIf="isTypeDejaUploaded(documentType)">
-                Un document de ce type a déjà été déposé pour cet enfant. Modifiez-le depuis le tableau ci-dessous si besoin.
-              </small>
+            </div>
+            <div class="form-group form-group--action">
+              <ui-button
+                type="submit"
+                variant="primary"
+                icon="ri-upload-2-line"
+                label="Téléverser"
+                [full]="true"
+                [disabled]="!selectedKidId || !documentType || !selectedFile || !isValidFile(selectedFile) || isTypeDejaUploaded(documentType)"
+              />
             </div>
           </div>
-          <div class="form-actions">
-            <ui-button
-              type="submit"
-              variant="primary"
-              icon="ri-upload-2-line"
-              label="Téléverser"
-              [disabled]="!selectedKidId || !documentType || !selectedFile || !isValidFile(selectedFile) || isTypeDejaUploaded(documentType)"
-            />
-          </div>
+          <small class="field-error" *ngIf="selectedFile && !isValidFile(selectedFile)">
+            Fichier invalide — PNG, JPEG ou PDF, max 5 Mo.
+          </small>
+          <small class="field-error" *ngIf="isTypeDejaUploaded(documentType)">
+            Un document de ce type a déjà été déposé pour cet enfant. Modifiez-le depuis le tableau ci-dessous si besoin.
+          </small>
         </form>
       </div>
     </div>
