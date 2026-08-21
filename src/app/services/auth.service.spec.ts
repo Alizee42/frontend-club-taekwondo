@@ -21,7 +21,13 @@ describe('AuthService', () => {
     httpMock.match(() => true).forEach(r => r.flush([]));
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    // Isolation entre suites : evite qu'un token laisse en localStorage par
+    // ce fichier ne pollue les autres composants/services testes ensuite
+    // dans la meme session Karma (ex: DocumentsComponent lit authService.isConnecte()).
+    localStorage.clear();
+  });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
@@ -106,8 +112,10 @@ describe('AuthService', () => {
   });
 
   it('[AUTH-11] isConnecte() retourne true après un login simulé', () => {
-    // Simuler un token JWT valide (payload: {exp: far future})
-    // Structure: header.payload.signature (base64url)
+    // getToken()/isConnecte() lisent l'etat interne (_authState$), pas
+    // localStorage directement : celui-ci n'est relu qu'a l'hydratation.
+    // On doit donc passer par restoreSession() pour que le token pose
+    // en storage soit repris dans l'etat du service.
     const futureExp = Math.floor(Date.now() / 1000) + 3600;
     const payload = btoa(JSON.stringify({ utilisateurId: 1, role: 'MEMBRE', exp: futureExp }))
       .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
@@ -115,8 +123,10 @@ describe('AuthService', () => {
 
     localStorage.setItem('token', fakeToken);
     localStorage.setItem('role', 'MEMBRE');
+    service.restoreSession();
 
     expect(service.getToken()).toBe(fakeToken);
+    expect(service.isConnecte()).toBeTrue();
   });
 
   // -----------------------------------------------------------------------
@@ -129,10 +139,10 @@ describe('AuthService', () => {
 
   it('[AUTH-13] getRole() retourne le rôle après login', () => {
     localStorage.setItem('role', 'ADMIN');
-    // authState n'est rechargé qu'au login — on vérifie la valeur directe
-    const role = service.getRole();
-    // Accepte null (si le service lit depuis l'état interne) ou 'ADMIN' (si lit depuis localStorage)
-    expect(['ADMIN', null]).toContain(role);
+    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.e30.sig');
+    service.restoreSession();
+
+    expect(service.getRole()).toBe('ADMIN');
   });
 
   // -----------------------------------------------------------------------

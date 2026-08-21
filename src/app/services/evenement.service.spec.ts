@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
 
 const API = `${environment.apiUrl}/inscriptions`;
+const API_ME = `${environment.apiUrl}/inscriptions/me`;
 const API_EVT = `${environment.apiUrl}/evenements`;
 
 describe('EvenementService', () => {
@@ -35,15 +36,15 @@ describe('EvenementService', () => {
   });
 
   // -----------------------------------------------------------------------
-  // EVT-02 : Inscription d'un membre à un événement
+  // EVT-02 : Inscription d'un membre à un événement (route /inscriptions/me)
   // -----------------------------------------------------------------------
-  it('[EVT-02] inscrireMembreEvenement – POST /inscriptions retourne l\'inscription', () => {
+  it('[EVT-02] inscrireMembreEvenement – POST /inscriptions/me retourne l\'inscription', () => {
     const response = { id: 10, evenementId: 5, utilisateurId: 1, statut: 'CONFIRME', dateInscription: '2026-04-10' };
     let result: any;
 
     service.inscrireMembreEvenement(5).subscribe(r => (result = r));
 
-    const req = httpMock.expectOne(API);
+    const req = httpMock.expectOne(API_ME);
     expect(req.request.method).toBe('POST');
     expect(req.request.body.evenementId).toBe(5);
     req.flush(response);
@@ -53,7 +54,7 @@ describe('EvenementService', () => {
   // -----------------------------------------------------------------------
   // EVT-03 : Inscription d'un enfant (parent) à un événement
   // -----------------------------------------------------------------------
-  it('[EVT-03] inscrireEnfantEvenement – POST /inscriptions avec membreId', () => {
+  it('[EVT-03] inscrireEnfantEvenement – POST /inscriptions avec membreIds', () => {
     const response = { id: 11, evenementId: 5, membreId: 3, statut: 'CONFIRME', dateInscription: '2026-04-10' };
     let result: any;
 
@@ -61,7 +62,7 @@ describe('EvenementService', () => {
 
     const req = httpMock.expectOne(API);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body.enfantsIds[0]).toBe(3);
+    expect(req.request.body.membreIds[0]).toBe(3);
     req.flush(response);
     expect(result.id).toBe(11);
   });
@@ -91,7 +92,7 @@ describe('EvenementService', () => {
 
     service.inscrireMembreEvenement(5).subscribe({ error: err => (errorStatus = err.status) });
 
-    const req = httpMock.expectOne(API);
+    const req = httpMock.expectOne(API_ME);
     req.flush({ message: 'Capacité maximale atteinte' }, { status: 409, statusText: 'Conflict' });
     expect(errorStatus).toBe(409);
   });
