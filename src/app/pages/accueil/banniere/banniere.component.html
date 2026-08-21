@@ -19,7 +19,7 @@
     <p class="hero-slogan" aria-live="polite">{{ currentSlogan }}</p>
 
     <div class="hero-ctas">
-      <a class="hero-btn hero-btn--primary" [routerLink]="['/inscription']">
+      <a class="hero-btn hero-btn--primary" [routerLink]="[selectedClub ? '/inscription' : '/club-select']">
         <i class="ri-user-add-line" aria-hidden="true"></i>
         {{ selectedClub ? 'Rejoindre le club' : 'Choisir un club' }}
       </a>
