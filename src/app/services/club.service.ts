@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Club {
@@ -21,6 +21,14 @@ export class ClubService {
   private readonly apiUrl = `${environment.apiUrl}/clubs`;
   private selectedClubSubject: BehaviorSubject<Club | null>;
   public selectedClub$: Observable<Club | null>;
+
+  /** Signal permettant d'ouvrir la modale de choix du club depuis n'importe quel composant. */
+  private openPickerSubject = new Subject<void>();
+  public openPicker$ = this.openPickerSubject.asObservable();
+
+  requestOpenPicker(): void {
+    this.openPickerSubject.next();
+  }
 
   constructor(private http: HttpClient) {
     const club = this.getSelectedClub();

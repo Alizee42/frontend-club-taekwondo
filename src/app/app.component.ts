@@ -61,6 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private routerSub?: any;
   private cartSub?: any;
   private notifSub?: any;
+  private openPickerSub?: any;
 
   onChangeClub(): void {
     this.showSelectClubModal = true;
@@ -120,6 +121,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.openPickerSub = this.clubService.openPicker$.subscribe(() => {
+      this.showSelectClubModal = true;
+    });
+
     this.cartSub = this.panierService.count$.subscribe(n => (this.cartCount = n));
 
     // Abonnement aux notifications
@@ -219,6 +224,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.routerSub) this.routerSub.unsubscribe();
     if (this.cartSub) this.cartSub.unsubscribe();
     if (this.notifSub) this.notifSub.unsubscribe();
+    if (this.openPickerSub) this.openPickerSub.unsubscribe();
     this.notificationService.stopPolling();
   }
 }

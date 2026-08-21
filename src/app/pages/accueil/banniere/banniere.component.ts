@@ -68,6 +68,13 @@ export class BanniereComponent implements OnInit, OnDestroy {
     return this.clubService.getSelectedClub();
   }
 
+  onCtaClick(event: Event): void {
+    if (!this.selectedClub) {
+      event.preventDefault();
+      this.clubService.requestOpenPicker();
+    }
+  }
+
   onVideoError(): void {
     if (this.hasVideoFallback) return;
     this.hasVideoFallback = true;
