@@ -131,6 +131,46 @@ export class GestionMembresComponent implements OnInit {
   goToPageComptes(p: number)      { this.pageComptes     = Math.min(Math.max(1, p), this.totalPagesComptes); }
   goToPagePratiquants(p: number)  { this.pagePratiquants = Math.min(Math.max(1, p), this.totalPagesPratiquants); }
 
+  // ── Export CSV ──────────────────────────────────────────────
+  exportCSV(): void {
+    if (this.activeTab === 'comptes') {
+      this.exportComptesCSV();
+    } else {
+      this.exportPratiquantsCSV();
+    }
+  }
+
+  private exportComptesCSV(): void {
+    if (!this.comptes.length) return;
+    const header = ['Nom', 'Prénom', 'Email', 'Rôle', 'Téléphone'];
+    const rows = this.comptes.map(c => [
+      c.nom ?? '', c.prenom ?? '', c.email ?? '', c.role ?? '', c.telephone ?? ''
+    ]);
+    this.downloadCSV(header, rows, 'comptes.csv');
+  }
+
+  private exportPratiquantsCSV(): void {
+    if (!this.pratiquants.length) return;
+    const header = ['Nom', 'Prénom', 'Ceinture', 'N° Licence', 'Type', 'Parent', 'Compte'];
+    const rows = this.pratiquants.map(m => [
+      m.nom ?? '', m.prenom ?? '', m.ceinture ?? '', m.numeroLicence ?? '',
+      m.estAdulte ? 'Adulte' : 'Enfant', m.parentLabel ?? '',
+      m.utilisateurId ? 'Compte actif' : 'Sans compte'
+    ]);
+    this.downloadCSV(header, rows, 'membres.csv');
+  }
+
+  private downloadCSV(header: string[], rows: (string | number)[][], filename: string): void {
+    const csv = [header, ...rows].map(row => row.join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+  }
+
   // ── Modal ───────────────────────────────────────────────────
   modalOpen = false;
   modalTitle = '';

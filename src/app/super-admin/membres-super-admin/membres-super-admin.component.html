@@ -1,6 +1,7 @@
 <div class="page-shell">
   <app-page-header title="Gestion des membres" icon="ri-group-line" subtitle="Membres du club sélectionné">
     <ng-container page-header-actions>
+      <ui-button label="Exporter" icon="ri-file-download-line" (clicked)="exportCSV()" variant="secondary"></ui-button>
       <ui-button label="Ajouter un membre" (clicked)="openAjoutModal()" variant="primary" [disabled]="!selectedClubId"></ui-button>
     </ng-container>
   </app-page-header>

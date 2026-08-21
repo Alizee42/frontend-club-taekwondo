@@ -255,6 +255,33 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
     return raw || (p.clubId != null ? `Club ${p.clubId}` : '');
   }
 
+  exportCSV(): void {
+    if (!this.paiementsFiltres.length) {
+      return;
+    }
+
+    const header = ['Club', 'Date', 'Payeur', 'Pour', 'Type', 'Mode', 'Montant', 'Statut'];
+    const rows = this.paiementsFiltres.map((p: Paiement) => [
+      this.getClubName(p),
+      p.datePaiement ? new Date(p.datePaiement).toLocaleDateString('fr-FR') : '',
+      `${p.utilisateurPrenom || ''} ${p.utilisateurNom || ''}`.trim(),
+      `${p.membrePrenom || ''} ${p.membreNom || ''}`.trim(),
+      this.libelleType(p.type, p.echeances),
+      this.libelleMode(p.modePaiement),
+      Number(p.montantTotal || 0),
+      p.statut || ''
+    ]);
+
+    const csv = [header, ...rows].map(row => row.join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'paiements.csv';
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+  }
+
   resetFilters(): void { this.filtres = { q: '', statut: '', type: '', mode: '' }; this.applyFilters(); }
 
   buildGroups(): void {

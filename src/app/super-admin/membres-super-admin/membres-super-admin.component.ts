@@ -41,6 +41,22 @@ export class MembresSuperAdminComponent implements OnInit {
     { label: 'Supprimer', icon: 'ri-delete-bin-6-line', action: 'delete', color: '#e53935' }
   ];
 
+  exportCSV(): void {
+    if (!this.membres.length) return;
+    const header = ['Nom', 'Prénom', 'Date de naissance', 'Ceinture'];
+    const rows = this.membres.map(m => [
+      m.nom ?? '', m.prenom ?? '', m.dateNaissance ?? '', m.ceinture ?? ''
+    ]);
+    const csv = [header, ...rows].map(row => row.join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'membres.csv';
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+  }
+
   constructor(private membreService: MembreService, private authService: AuthService, private clubService: ClubService) {}
 
   ngOnInit(): void {

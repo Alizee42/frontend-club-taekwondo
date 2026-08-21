@@ -56,6 +56,14 @@
       <ui-button
         customClass="ms-auto"
         type="button"
+        variant="secondary"
+        size="sm"
+        icon="ri-file-download-line"
+        label="Exporter"
+        (clicked)="exportCSV()"
+      />
+      <ui-button
+        type="button"
         variant="ghost"
         size="sm"
         icon="ri-eraser-line"
