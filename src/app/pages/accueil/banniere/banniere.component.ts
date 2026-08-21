@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ClubService, Club } from '../../../services/club.service';
 import { HeroConfigService, HeroConfig } from '../../../services/hero-config.service';
@@ -35,7 +35,8 @@ export class BanniereComponent implements OnInit, OnDestroy {
 
   constructor(
     private clubService: ClubService,
-    private heroConfigService: HeroConfigService
+    private heroConfigService: HeroConfigService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -68,9 +69,10 @@ export class BanniereComponent implements OnInit, OnDestroy {
     return this.clubService.getSelectedClub();
   }
 
-  onCtaClick(event: Event): void {
-    if (!this.selectedClub) {
-      event.preventDefault();
+  onCtaClick(): void {
+    if (this.selectedClub) {
+      this.router.navigate(['/inscription']);
+    } else {
       this.clubService.requestOpenPicker();
     }
   }

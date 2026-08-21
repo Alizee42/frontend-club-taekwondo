@@ -19,10 +19,10 @@
     <p class="hero-slogan" aria-live="polite">{{ currentSlogan }}</p>
 
     <div class="hero-ctas">
-      <a class="hero-btn hero-btn--primary" [routerLink]="['/inscription']" (click)="onCtaClick($event)">
+      <button type="button" class="hero-btn hero-btn--primary" (click)="onCtaClick()">
         <i class="ri-user-add-line" aria-hidden="true"></i>
         {{ selectedClub ? 'Rejoindre le club' : 'Choisir un club' }}
-      </a>
+      </button>
       <a class="hero-btn hero-btn--ghost" href="#about">
         Découvrir
         <i class="ri-arrow-down-line" aria-hidden="true"></i>
