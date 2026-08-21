@@ -13,7 +13,7 @@
     <div class="hero-identity">
       <span class="hero-identity__strong">{{ config.identityStrong }}</span>
       <span class="hero-identity__mid">{{ config.identityMid }}</span>
-      <span class="hero-identity__thin">{{ selectedClub?.name || 'Villeurbannais' }}</span>
+      <span class="hero-identity__thin">{{ selectedClub?.name || 'Académie Ogoudobi' }}</span>
     </div>
 
     <p class="hero-slogan" aria-live="polite">{{ currentSlogan }}</p>
@@ -21,7 +21,7 @@
     <div class="hero-ctas">
       <a class="hero-btn hero-btn--primary" [routerLink]="['/inscription']">
         <i class="ri-user-add-line" aria-hidden="true"></i>
-        Rejoindre le club
+        {{ selectedClub ? 'Rejoindre le club' : 'Choisir un club' }}
       </a>
       <a class="hero-btn hero-btn--ghost" href="#about">
         Découvrir
