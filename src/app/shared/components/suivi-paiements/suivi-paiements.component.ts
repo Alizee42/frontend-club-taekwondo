@@ -260,9 +260,12 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
       return;
     }
 
-    const header = ['Club', 'Date', 'Payeur', 'Pour', 'Type', 'Mode', 'Montant', 'Statut'];
+    const header = [
+      ...(this.showClub ? ['Club'] : []),
+      'Date', 'Payeur', 'Pour', 'Type', 'Mode', 'Montant', 'Statut'
+    ];
     const rows = this.paiementsFiltres.map((p: Paiement) => [
-      this.getClubName(p),
+      ...(this.showClub ? [this.getClubName(p)] : []),
       p.datePaiement ? new Date(p.datePaiement).toLocaleDateString('fr-FR') : '',
       `${p.utilisateurPrenom || ''} ${p.utilisateurNom || ''}`.trim(),
       `${p.membrePrenom || ''} ${p.membreNom || ''}`.trim(),
