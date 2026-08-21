@@ -18,7 +18,7 @@ import { environment } from '../../../../environments/environment';
 
 type Mode = 'ESPECES' | 'CHEQUE' | 'VIREMENT' | 'CB';
 
-interface ClubInfo { id: number; name: string; adresse?: string; rib?: string; }
+interface ClubInfo { id: number; name: string; adresse?: string; rib?: string; stripeAccountId?: string | null; stripeChargesEnabled?: boolean; }
 
 @Component({
   standalone: true,
@@ -105,8 +105,9 @@ export class MiniCartComponent implements OnInit, OnDestroy {
   ouvrirModalPaiement(): void {
     this.stripeError = '';
     this.modalPaiementOuverte = true;
+    const stripeAccountId = this.club?.stripeChargesEnabled ? this.club?.stripeAccountId ?? null : null;
     setTimeout(() => {
-      this.stripeService.monterElementDans('#mini-cart-stripe-card-element').catch(err => {
+      this.stripeService.monterElementDans('#mini-cart-stripe-card-element', stripeAccountId).catch(err => {
         this.stripeError = err?.message || 'Stripe non disponible';
       });
     }, 100);

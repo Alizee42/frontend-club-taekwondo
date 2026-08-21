@@ -7,6 +7,7 @@ import { ParametresPaiementService } from '../../services/parametres-paiement.se
 import { AuthService } from '../../services/auth.service';
 import { MembreService } from '../../services/membre.service';
 import { PaiementService } from '../../services/paiement.service';
+import { ClubService } from '../../services/club.service';
 import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
@@ -50,6 +51,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   stripe: any = null;
   cardElement: any = null;               // carte (modale principale)
   cardElementParentModal: any = null;    // carte (modale échéance)
+  private stripeAccountId: string | null = null; // compte Connect du club, si actif
 
   // États paiement
   enCoursDePaiement = false;
@@ -89,7 +91,8 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     private auth: AuthService,
     private membreService: MembreService,
     private paiementService: PaiementService,
-    private toast: ToastService
+    private toast: ToastService,
+    private clubService: ClubService
   ) {}
 
   // ===== Utils =====
@@ -207,6 +210,10 @@ export class PaiementComponent implements OnInit, AfterViewInit {
           const clubId = Number(me?.clubId ?? me?.club?.id ?? 0);
           if (clubId) {
             this.parametresService.chargerParametresParClub(clubId).subscribe(p => this.appliquerParametresPaiement(p));
+            this.clubService.getClubById(clubId).subscribe({
+              next: (club) => { this.stripeAccountId = club.stripeChargesEnabled ? (club.stripeAccountId ?? null) : null; },
+              error: () => { this.stripeAccountId = null; }
+            });
           }
           const prenom = me?.prenom || me?.firstName || authUser?.prenom || '';
           const nom = me?.nom || me?.lastName || authUser?.nom || '';
@@ -360,7 +367,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
     }
     try {
       this.log('mountStripeOn.start', targetId);
-      const stripe = await this.stripeService.getStripeInstance();
+      const stripe = await this.stripeService.getStripeInstance(this.stripeAccountId);
       if (!stripe) {
         this.log('mountStripeOn.noStripe');
         console.error('[Stripe] Stripe non initialisé');
@@ -502,7 +509,7 @@ export class PaiementComponent implements OnInit, AfterViewInit {
   }
   private initStripeElementParentModal(): void{
     const container = document.querySelector('#card-element-parent-modal'); if (!container) return;
-    this.stripeService.getStripeInstance().then((stripe: any) => {
+    this.stripeService.getStripeInstance(this.stripeAccountId).then((stripe: any) => {
       this.stripe = stripe; const elements = stripe.elements();
       if (this.cardElementParentModal) { try { this.cardElementParentModal.unmount(); } catch {} }
       this.cardElementParentModal = elements.create('card'); this.cardElementParentModal.mount('#card-element-parent-modal');

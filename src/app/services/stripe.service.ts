@@ -20,6 +20,7 @@ type CreatePiPayload = {
 type CreatePiResponse = {
   clientSecret: string;
   paymentIntentId?: string;
+  stripeAccountId?: string | null;
   [k: string]: any;
 };
 
@@ -27,7 +28,11 @@ type CreatePiResponse = {
 export class StripeService {
   private readonly backendUrl = `${environment.apiUrl}/stripe`;
 
-  private stripe: Stripe | null = null;
+  // Une instance Stripe.js par compte connecte (cle = stripeAccountId, ou 'platform'
+  // pour le compte partage) : confirmer un paiement cree en charge directe sur le
+  // compte d'un club exige une instance Stripe.js chargee avec { stripeAccount }.
+  private stripeInstances = new Map<string, Stripe>();
+  private currentStripeAccountId: string | null = null;
   private elements: StripeElements | null = null;
   private publicKeyPromise: Promise<string> | null = null;
 
@@ -82,17 +87,29 @@ export class StripeService {
     return this.publicKeyPromise;
   }
 
-  async ensureStripe(): Promise<Stripe> {
-    if (this.stripe) return this.stripe;
+  /**
+   * @param stripeAccountId compte Stripe connecte a utiliser (charge directe sur le
+   *   compte d'un club). Si omis, reutilise le dernier compte renvoye par
+   *   createPaymentIntent() ; si aucun, utilise le compte plateforme partage.
+   */
+  async ensureStripe(stripeAccountId?: string | null): Promise<Stripe> {
+    const accountId = stripeAccountId !== undefined ? stripeAccountId : this.currentStripeAccountId;
+    const cacheKey = accountId ?? 'platform';
+
+    const cached = this.stripeInstances.get(cacheKey);
+    if (cached) return cached;
+
     const pk = await this.getPublicKey();
-    const stripe = await loadStripe(pk);
+    const stripe = accountId
+      ? await loadStripe(pk, { stripeAccount: accountId })
+      : await loadStripe(pk);
     if (!stripe) throw new Error('Stripe non initialise (cle publique invalide ?)');
-    this.stripe = stripe;
+    this.stripeInstances.set(cacheKey, stripe);
     return stripe;
   }
 
-  getStripeInstance(): Promise<Stripe> {
-    return this.ensureStripe();
+  getStripeInstance(stripeAccountId?: string | null): Promise<Stripe> {
+    return this.ensureStripe(stripeAccountId);
   }
 
   // ---------- API BACKEND ----------
@@ -111,13 +128,20 @@ export class StripeService {
     );
 
     this.clientSecret = res?.clientSecret || null;
+    this.currentStripeAccountId = res?.stripeAccountId ?? null;
     return res;
   }
 
   // ---------- STRIPE ELEMENTS ----------
 
-  async monterElementDans(selector: string): Promise<void> {
-    const stripe = await this.ensureStripe();
+  async monterElementDans(selector: string, stripeAccountId?: string | null): Promise<void> {
+    // Le futur confirmerPaiement() doit utiliser la MEME instance Stripe.js que celle
+    // qui a monte cet element carte (un Element n'est valide que pour l'instance dont
+    // il provient) : on memorise donc explicitement le compte utilise ici.
+    if (stripeAccountId !== undefined) {
+      this.currentStripeAccountId = stripeAccountId;
+    }
+    const stripe = await this.ensureStripe(stripeAccountId);
 
     this.elements = stripe.elements({ locale: 'fr' });
 
@@ -176,7 +200,7 @@ export class StripeService {
     paymentIntentId?: string;
     message?: string;
   }> {
-    const stripe = await this.ensureStripe();
+    const stripe = await this.ensureStripe(this.currentStripeAccountId);
     if (!this.cardElement) return { success: false, message: 'Element carte non monte' };
     if (!this.clientSecret) return { success: false, message: 'Client secret manquant' };
 

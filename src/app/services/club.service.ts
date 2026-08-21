@@ -14,6 +14,8 @@ export interface Club {
   telephone?: string;
   email?: string;
   rib?: string;
+  stripeAccountId?: string | null;
+  stripeChargesEnabled?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -49,6 +51,23 @@ export class ClubService {
 
   deleteClub(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  getClubById(id: number): Observable<Club> {
+    return this.http.get<Club>(`${this.apiUrl}/${id}`);
+  }
+
+  /** Demarre/reprend l'onboarding Stripe Connect d'un club, renvoie l'URL a ouvrir. */
+  onboardClubStripe(clubId: number): Observable<{ onboardingUrl: string }> {
+    return this.http.post<{ onboardingUrl: string }>(
+      `${environment.apiUrl}/stripe/connect/club/${clubId}/onboard`, {}
+    );
+  }
+
+  getClubStripeStatus(clubId: number): Observable<{ connected: boolean; chargesEnabled: boolean }> {
+    return this.http.get<{ connected: boolean; chargesEnabled: boolean }>(
+      `${environment.apiUrl}/stripe/connect/club/${clubId}/status`
+    );
   }
 
   getClubs(): Observable<Club[]> {

@@ -7,6 +7,15 @@
   gap: var(--sp-4);
 }
 
+.stripe-status {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.stripe-status--ok { color: var(--color-success-ink, #166534); }
+.stripe-status--pending { color: var(--color-warning-ink, #92400e); }
+.stripe-status--none { color: var(--color-text-3, #94a3b8); }
+
 .clubs-toolbar {
   display: flex;
   align-items: center;

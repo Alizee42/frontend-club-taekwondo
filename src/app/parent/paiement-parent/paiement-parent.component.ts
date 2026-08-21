@@ -7,6 +7,7 @@ import { ParametresPaiementService } from '../../services/parametres-paiement.se
 import { AuthService } from '../../services/auth.service';
 import { MembreService } from '../../services/membre.service';
 import { PaiementService } from '../../services/paiement.service';
+import { ClubService } from '../../services/club.service';
 import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
@@ -103,13 +104,16 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   // Utilisé par le template
   today: Date = new Date();
 
+  private stripeAccountId: string | null = null; // compte Connect du club, si actif
+
   constructor(
     private stripeService: StripeService,
     private parametresService: ParametresPaiementService,
     private authService: AuthService,
     private membreService: MembreService,
     private paiementService: PaiementService,
-    private toast: ToastService
+    private toast: ToastService,
+    private clubService: ClubService
   ) {}
 
   // ===== Utils
@@ -238,6 +242,10 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
         const clubId = Number((this.enfants[0] as any)?.clubId ?? (this.enfants[0] as any)?.club?.id ?? 0);
         if (clubId) {
           this.parametresService.chargerParametresParClub(clubId).subscribe(p => this.appliquerParametresPaiement(p));
+          this.clubService.getClubById(clubId).subscribe({
+            next: (club) => { this.stripeAccountId = club.stripeChargesEnabled ? (club.stripeAccountId ?? null) : null; },
+            error: () => { this.stripeAccountId = null; }
+          });
         }
         if (this.enfants.length === 1) this.selectMembre(this.enfants[0]);
         this.loadPaiements();
@@ -448,7 +456,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
     }
     try {
       console.log('[Stripe][parent] mountStripeOn.start', targetId);
-      const stripe = await this.stripeService.getStripeInstance();
+      const stripe = await this.stripeService.getStripeInstance(this.stripeAccountId);
       if (!stripe) {
         console.error('[Stripe][parent] Stripe non initialisé');
         this.stripeReady = false;
@@ -582,7 +590,7 @@ export class PaiementParentComponent implements OnInit, AfterViewInit, OnDestroy
   }
   private initStripeElementParentModal(): void{
     const container = document.querySelector('#card-element-parent-modal'); if (!container) return;
-    this.stripeService.getStripeInstance().then((stripe: any) => {
+    this.stripeService.getStripeInstance(this.stripeAccountId).then((stripe: any) => {
       this.stripe = stripe; const elements = stripe.elements();
       if (this.cardElementParentModal) { try { this.cardElementParentModal.unmount(); } catch {} }
       this.cardElementParentModal = elements.create('card'); this.cardElementParentModal.mount('#card-element-parent-modal');

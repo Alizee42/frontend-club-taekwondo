@@ -61,13 +61,29 @@ export class ClubsComponent implements OnInit {
     { key: 'name', label: 'Nom', display: (club: Club) => club.name || club.nom || '-' },
     { key: 'adresse', label: 'Adresse', display: (club: Club) => club.adresse || '-' },
     { key: 'telephone', label: 'Telephone', display: (club: Club) => club.telephone || '-' },
-    { key: 'email', label: 'Email', display: (club: Club) => club.email || '-' }
+    { key: 'email', label: 'Email', display: (club: Club) => club.email || '-' },
+    {
+      key: 'stripe', label: 'Paiements CB',
+      display: (club: Club) => this.stripeStatusLabel(club),
+      textClass: (club: Club) => this.stripeStatusClass(club)
+    }
   ];
 
   clubActions = [
     { label: 'Modifier', icon: 'ri-edit-line', action: 'edit', variant: 'ghost' as const, title: 'Modifier le club' },
+    { label: 'Connecter Stripe', icon: 'ri-bank-card-line', action: 'stripe', variant: 'ghost' as const, title: 'Connecter le compte Stripe du club' },
     { label: 'Supprimer', icon: 'ri-delete-bin-line', action: 'delete', variant: 'danger' as const, title: 'Supprimer le club' }
   ];
+
+  stripeStatusLabel(club: Club): string {
+    if (!club.stripeAccountId) return 'Non connecté';
+    return club.stripeChargesEnabled ? 'Connecté ✅' : 'En attente de vérification';
+  }
+
+  stripeStatusClass(club: Club): string {
+    if (!club.stripeAccountId) return 'stripe-status stripe-status--none';
+    return club.stripeChargesEnabled ? 'stripe-status stripe-status--ok' : 'stripe-status stripe-status--pending';
+  }
 
   constructor(private clubService: ClubService, private toast: ToastService) {}
 
@@ -158,7 +174,29 @@ export class ClubsComponent implements OnInit {
 
     if (event.action === 'delete') {
       this.openDeleteConfirm(event.row);
+      return;
     }
+
+    if (event.action === 'stripe') {
+      this.onboardStripe(event.row);
+    }
+  }
+
+  onboardingClubId: number | null = null;
+
+  onboardStripe(club: Club): void {
+    if (!club.id || this.onboardingClubId) return;
+    this.onboardingClubId = club.id;
+    this.clubService.onboardClubStripe(club.id).subscribe({
+      next: (res) => {
+        this.onboardingClubId = null;
+        window.location.href = res.onboardingUrl;
+      },
+      error: (err) => {
+        this.onboardingClubId = null;
+        this.toast.error(this.getErrorMessage(err));
+      }
+    });
   }
 
   saveClub(form: NgForm): void {
