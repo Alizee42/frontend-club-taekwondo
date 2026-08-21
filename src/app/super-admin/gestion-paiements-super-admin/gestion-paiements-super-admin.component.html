@@ -118,21 +118,106 @@
     ></ui-button>
   </div>
 
-  <div class="panel-shell">
-    <app-suivi-paiements
-      [paiementsData]="filteredPaiements"
-      [clubFilter]="selectedClubId"
-      [clubs]="clubs"
-      [viewMode]="viewMode"
-      [showTitle]="false"
-      [showToolbar]="false"
-      [externalQuery]="filter.q"
-      [externalFilters]="{
-        statut: filter.statut === 'all' ? '' : filter.statut,
-        mode: filter.mode === 'all' ? '' : filter.mode
-      }"
-      [externalGroupByParent]="groupByParentLocal"
-    ></app-suivi-paiements>
+  <div class="main-layout">
+    <div class="tableau-area panel-shell">
+      <app-suivi-paiements
+        [paiementsData]="filteredPaiements"
+        [clubFilter]="selectedClubId"
+        [clubs]="clubs"
+        [viewMode]="viewMode"
+        [showTitle]="false"
+        [showToolbar]="false"
+        [externalQuery]="filter.q"
+        [externalFilters]="{
+          statut: filter.statut === 'all' ? '' : filter.statut,
+          mode: filter.mode === 'all' ? '' : filter.mode
+        }"
+        [externalGroupByParent]="groupByParentLocal"
+      ></app-suivi-paiements>
+    </div>
+
+    <aside class="params-sidebar">
+      <div class="card card-body">
+        <h3 class="params-title">
+          <i class="ri-settings-3-line"></i> Cotisation
+        </h3>
+
+        <p *ngIf="selectedClubId === 'all'" class="params-hint">
+          Sélectionnez un club dans le filtre ci-dessus pour gérer sa cotisation.
+        </p>
+
+        <ng-container *ngIf="selectedClubId !== 'all'">
+          <div class="form-group">
+            <label class="form-label">Montant (€)</label>
+            <input class="form-input" type="number" [(ngModel)]="parametres.montantCotisation" min="0" step="5" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Modes acceptes</label>
+            <div class="check-list">
+              <label class="filters-check">
+                <input type="checkbox" [(ngModel)]="parametres.stripe" />
+                <i class="ri-bank-card-line"></i> Stripe (CB)
+              </label>
+              <label class="filters-check">
+                <input type="checkbox" [(ngModel)]="parametres.virement" />
+                <i class="ri-bank-line"></i> Virement
+              </label>
+              <label class="filters-check">
+                <input type="checkbox" [(ngModel)]="parametres.especes" />
+                <i class="ri-money-euro-circle-line"></i> Especes
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Echeances max</label>
+            <div class="ech-btns">
+              <button
+                type="button"
+                *ngFor="let n of [1, 2, 3, 4]"
+                class="ech-btn"
+                [class.active]="parametres.echeancesAutorisees === n"
+                (click)="parametres.echeancesAutorisees = n"
+              >{{ n }}</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Intervalle</label>
+            <select class="form-select" [(ngModel)]="parametres.intervalleEcheance">
+              <option value="MENSUEL">Mensuel</option>
+              <option value="BIMESTRIEL">Bimestriel</option>
+              <option value="TRIMESTRIEL">Trimestriel</option>
+            </select>
+          </div>
+
+          <app-alert-banner
+            *ngIf="paramsSaved"
+            type="success"
+            message="Parametres sauvegardes"
+            [dismissible]="true"
+            (dismissed)="paramsSaved = false"
+          ></app-alert-banner>
+          <app-alert-banner
+            *ngIf="paramsError"
+            type="error"
+            [message]="paramsError"
+            [dismissible]="true"
+            (dismissed)="paramsError = ''"
+          ></app-alert-banner>
+
+          <ui-button
+            label="Sauvegarder"
+            variant="primary"
+            size="sm"
+            [loading]="paramsSaving"
+            (clicked)="sauvegarderParametres()"
+            [full]="true"
+          ></ui-button>
+        </ng-container>
+      </div>
+    </aside>
   </div>
 </div>
 

@@ -4,11 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { SuiviPaiementsComponent } from '../../shared/components/suivi-paiements/suivi-paiements.component';
 import { Club, ClubService } from '../../services/club.service';
 import { SuperAdminPaiementService } from '../../services/super-admin-paiement.service';
+import { ParametresPaiementService } from '../../services/parametres-paiement.service';
+import { ParametresPaiement } from '../../models/parametres-paiement';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
 import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
+import { AlertBannerComponent } from '../../shared/ui/alert-banner/alert-banner.component';
 import { AjoutPaiementComponent } from '../../admin/gestion-paiements/ajout-paiement/ajout-paiement.component';
 
 @Component({
@@ -23,7 +26,8 @@ import { AjoutPaiementComponent } from '../../admin/gestion-paiements/ajout-paie
     PageHeaderComponent,
     AjoutPaiementComponent,
     KpiCardComponent,
-    KpiGridComponent
+    KpiGridComponent,
+    AlertBannerComponent
   ],
   templateUrl: './gestion-paiements-super-admin.component.html',
   styleUrls: ['./gestion-paiements-super-admin.component.css']
@@ -59,9 +63,23 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
   modalPaiementVisible = false;
   paiementSelectionne: any = null;
 
+  parametres: ParametresPaiement = {
+    montantCotisation: 100,
+    stripe: true,
+    virement: true,
+    especes: true,
+    modePaiementParDefaut: 'stripe',
+    echeancesAutorisees: 3,
+    intervalleEcheance: 'MENSUEL'
+  };
+  paramsSaving = false;
+  paramsSaved = false;
+  paramsError = '';
+
   constructor(
     private paiementService: SuperAdminPaiementService,
-    private clubService: ClubService
+    private clubService: ClubService,
+    private parametresService: ParametresPaiementService
   ) {}
 
   ngOnInit(): void {
@@ -110,6 +128,33 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
 
   onClubChange(): void {
     this.applyFilters();
+    this.loadParametres();
+  }
+
+  loadParametres(): void {
+    if (this.selectedClubId === 'all') return;
+    this.parametresService.getParametresPaiementByClub(this.selectedClubId).subscribe({
+      next: (p) => { if (p) this.parametres = p; },
+      error: () => undefined
+    });
+  }
+
+  sauvegarderParametres(): void {
+    if (this.selectedClubId === 'all') return;
+    this.paramsSaving = true;
+    this.paramsError = '';
+    this.paramsSaved = false;
+    this.parametresService.sauvegarderParClub(this.selectedClubId, this.parametres).subscribe({
+      next: () => {
+        this.paramsSaving = false;
+        this.paramsSaved = true;
+        setTimeout(() => this.paramsSaved = false, 3000);
+      },
+      error: (err) => {
+        this.paramsSaving = false;
+        this.paramsError = err?.error?.message || 'Erreur lors de la sauvegarde';
+      }
+    });
   }
 
   refresh(): void {

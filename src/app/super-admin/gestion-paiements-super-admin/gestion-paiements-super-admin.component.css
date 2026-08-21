@@ -162,6 +162,71 @@
   overflow: hidden;
 }
 
+/* ── Layout principal + sidebar cotisation ─────────── */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: var(--sp-4);
+  align-items: start;
+}
+
+.tableau-area {
+  /* Sans min-width: 0, un enfant de grille refuse de rétrécir sous la largeur
+     naturelle de son contenu (le tableau) et fait déborder toute la page. */
+  min-width: 0;
+}
+
+.params-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-4);
+}
+
+.params-hint {
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.ech-btns {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.ech-btn {
+  width: var(--control-h-sm);
+  height: var(--control-h-sm);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--t-base), border-color var(--t-base), color var(--t-base);
+}
+
+.ech-btn:hover:not(.active) {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.ech-btn.active {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: var(--color-text-inv);
+}
+
 .modal-panel {
   display: grid;
   gap: 1rem;
@@ -242,6 +307,14 @@
 @media (max-width: 1100px) {
   .kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .params-sidebar {
+    order: -1;
   }
 }
 
