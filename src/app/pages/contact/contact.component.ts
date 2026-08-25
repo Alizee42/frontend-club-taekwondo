@@ -62,7 +62,7 @@ export class ContactComponent implements OnDestroy {
     this.sending = true;
 
     try {
-      await this.contactService.envoyer(this.form);
+      await this.contactService.envoyer({ ...this.form, clubId: this.club?.id ?? null });
       this.toast.success('Votre message a été envoyé. Merci !');
       this.form = { name: '', email: '', objet: '', message: '' };
       contactForm?.resetForm(this.form);

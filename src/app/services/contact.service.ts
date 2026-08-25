@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 
 export interface ContactPayload {
+  clubId?: number | null;
   name: string;
   email: string;
   objet: string;
