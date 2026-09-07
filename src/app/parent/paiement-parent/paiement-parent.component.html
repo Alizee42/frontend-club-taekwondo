@@ -203,9 +203,9 @@
           <div class="confirm-date">le {{ (paymentDate || today) | date:'dd/MM/yyyy' }} à {{ (paymentDate || today) | date:'HH:mm' }}</div>
 
           <div class="confirm-actions">
-            <a class="btn btn-primary" *ngIf="factureUrl" [href]="factureUrl" target="_blank" rel="noopener">
+            <button type="button" class="btn btn-primary" *ngIf="factureUrl" (click)="telechargerFacture()">
               <i class="ri-file-text-line"></i> Voir le reçu
-            </a>
+            </button>
             <ui-button type="button" variant="secondary" label="Nouveau paiement" (clicked)="step = 1" />
           </div>
 
