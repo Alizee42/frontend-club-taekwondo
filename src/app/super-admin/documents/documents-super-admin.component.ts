@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { labelFor as docLabelFor, normalizeStatus, unifyType } from '../../shared/documents/doc-utils';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
@@ -53,11 +55,12 @@ type UserGroup = { key: string; utilisateurNom: string; utilisateurEmail: string
   templateUrl: './documents-super-admin.component.html',
   styleUrls: ['./documents-super-admin.component.css']
 })
-export class DocumentsSuperAdminComponent implements OnInit {
+export class DocumentsSuperAdminComponent implements OnInit, OnDestroy {
   private readonly API_BASE = environment.apiUrl;
 
   clubs: Club[] = [];
   selectedClubId: number | null = null;
+  private clubSelectionSub?: Subscription;
 
   rows: Row[] = [];
   filtered: Row[] = [];
@@ -90,7 +93,12 @@ export class DocumentsSuperAdminComponent implements OnInit {
     { label: 'Télécharger',  icon: 'ri-download-line', action: 'download',  color: 'var(--brand-primary)', show: (row: any) => !!row.cheminFichier,         title: 'Télécharger' }
   ];
 
-  constructor(private http: HttpClient, private clubService: ClubService, private toast: ToastService) {}
+  constructor(
+    private http: HttpClient,
+    private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService,
+    private toast: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.tableColumns = [
@@ -131,12 +139,20 @@ export class DocumentsSuperAdminComponent implements OnInit {
 
   private loadClubs() {
     this.clubService.getClubs().subscribe({
-      next: (clubs) => { this.clubs = clubs || []; this.loadDocs(); },
-      error: () => { this.clubs = []; this.loadDocs(); }
+      next: (clubs) => { this.clubs = clubs || []; },
+      error: () => { this.clubs = []; }
+    });
+
+    // Suit le sélecteur de club global du header ; 'all'/null => tous les clubs.
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      this.selectedClubId = (id === 'all' || id === null) ? null : id;
+      this.loadDocs();
     });
   }
 
-  onSelectClub() { this.loadDocs(); }
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
+  }
 
   loadDocs() {
     const qp = this.selectedClubId ? `?clubId=${this.selectedClubId}` : '';

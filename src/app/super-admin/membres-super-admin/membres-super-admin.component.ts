@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { MembreService, Membre } from '../../services/membre.service';
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiTableComponent } from '../../shared/components/ui-table/ui-table.component';
@@ -19,12 +21,13 @@ import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
   templateUrl: './membres-super-admin.component.html',
   styleUrls: ['./membres-super-admin.component.css']
 })
-export class MembresSuperAdminComponent implements OnInit {
+export class MembresSuperAdminComponent implements OnInit, OnDestroy {
   membres: Membre[] = [];
   loading = false;
   error: string | null = null;
   clubs: Club[] = [];
   selectedClubId: number | null = null;
+  private clubSelectionSub?: Subscription;
 
   get nbMembres() { return this.membres.length; }
   get nbClubs()   { return this.clubs.length; }
@@ -57,7 +60,12 @@ export class MembresSuperAdminComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
-  constructor(private membreService: MembreService, private authService: AuthService, private clubService: ClubService) {}
+  constructor(
+    private membreService: MembreService,
+    private authService: AuthService,
+    private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -83,6 +91,21 @@ export class MembresSuperAdminComponent implements OnInit {
         this.loading = false;
       }
     });
+
+    // SUPER_ADMIN : suit le sélecteur de club global du header.
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      if (id === 'all' || id === null) {
+        this.selectedClubId = null;
+        this.membres = [];
+      } else {
+        this.selectedClubId = id;
+        this.loadMembresForClub(id);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
 
   openAjoutModal() {
@@ -130,12 +153,6 @@ export class MembresSuperAdminComponent implements OnInit {
         error: () => { this.error = "Erreur lors de la suppression du membre."; }
       });
     }
-  }
-
-  onSelectClub(clubId: number|null) {
-    this.selectedClubId = clubId;
-    if (clubId) this.loadMembresForClub(clubId);
-    else this.membres = [];
   }
 
   private loadMembresForClub(clubId: number|string) {

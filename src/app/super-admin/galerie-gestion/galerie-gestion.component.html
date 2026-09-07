@@ -4,11 +4,6 @@
       <ui-button label="Ajouter une photo" variant="primary" (clicked)="openAddModal()"></ui-button>
     </ng-container>
   </app-page-header>
-  <div class="filters-bar">
-    <select class="form-select" [(ngModel)]="selectedClubId" (change)="onClubChange(selectedClubId)">
-      <option *ngFor="let club of clubs" [value]="club.id">{{ club.nom || club.name }}</option>
-    </select>
-  </div>
   <div class="table-wrap">
     <ui-table
       [columns]="tableColumns"

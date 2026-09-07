@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 
 import { Club, ClubService } from './services/club.service';
 import { ClubSelectionService } from './services/club-selection.service';
+import { AdminClubSelectionService } from './services/admin-club-selection.service';
 import { AuthService } from './services/auth.service';
 import { PanierService } from './services/panier.service';
 import { NotificationService, Notification } from './services/notification.service';
@@ -32,6 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     private router: Router,
     private clubSelectionService: ClubSelectionService,
+    private adminClubSelectionService: AdminClubSelectionService,
     private panierService: PanierService,
     private notificationService: NotificationService
   ) {}
@@ -55,6 +57,8 @@ export class AppComponent implements OnInit, OnDestroy {
   notifications: Notification[] = [];
   loadingNotifs = false;
   cartCount = 0;
+  allClubs: Club[] = [];
+  currentClubSelectionId: number | 'all' | null = null;
 
   private clubSub?: any;
   private authSub?: any;
@@ -62,6 +66,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private cartSub?: any;
   private notifSub?: any;
   private openPickerSub?: any;
+  private clubSelectionSub?: any;
 
   onChangeClub(): void {
     this.showSelectClubModal = true;
@@ -104,6 +109,14 @@ export class AppComponent implements OnInit, OnDestroy {
     return this.auth.getRole() ?? '';
   }
 
+  get showClubSelector(): boolean {
+    return this.role.toString().toUpperCase() === 'SUPER_ADMIN' && this.isDashboardRoute;
+  }
+
+  onClubSelectionChange(id: number | 'all' | null): void {
+    this.adminClubSelectionService.setSelectedClubId(id);
+  }
+
   onGoToDashboard(): void {
     const role = this.role.toString().toUpperCase();
 
@@ -141,16 +154,21 @@ export class AppComponent implements OnInit, OnDestroy {
       () => {}
     );
 
-    const initial = this.clubService.getSelectedClub();
-    if (initial && initial.id) {
-      this.clubSelectionService.setSelectedClubId(initial.id);
-    } else {
-      // Le blocage plein ecran venait d'ici : on ne force plus la modale au demarrage.
-      this.clubSelectionService.setSelectedClubId(null);
-    }
+    this.clubService.getClubs().subscribe({
+      next: (clubs) => { this.allClubs = clubs || []; },
+      error: () => { this.allClubs = []; }
+    });
 
+    // Contexte club "public" (boutique, evenements, avis, horaires...) : mirroir
+    // depuis ClubService.selectedClub$, inchange par le selecteur SUPER_ADMIN.
+    const initial = this.clubService.getSelectedClub();
+    this.clubSelectionService.setSelectedClubId(initial && initial.id ? initial.id : null);
     this.clubService.selectedClub$.subscribe(c => {
       this.clubSelectionService.setSelectedClubId(c?.id ?? null);
+    });
+
+    this.clubSelectionSub = this.adminClubSelectionService.selectedClubId$.subscribe(id => {
+      this.currentClubSelectionId = id;
     });
 
     this.authSub = this.auth.authState$.subscribe(
@@ -185,6 +203,10 @@ export class AppComponent implements OnInit, OnDestroy {
                   this.showSelectClubModal = false;
                 }
               });
+            }
+          } else if (state.role && userRole === 'SUPER_ADMIN') {
+            if (this.adminClubSelectionService.getSelectedClubId() === null) {
+              this.adminClubSelectionService.setSelectedClubId('all');
             }
           }
         } else {
@@ -225,6 +247,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.cartSub) this.cartSub.unsubscribe();
     if (this.notifSub) this.notifSub.unsubscribe();
     if (this.openPickerSub) this.openPickerSub.unsubscribe();
+    if (this.clubSelectionSub) this.clubSelectionSub.unsubscribe();
     this.notificationService.stopPolling();
   }
 }

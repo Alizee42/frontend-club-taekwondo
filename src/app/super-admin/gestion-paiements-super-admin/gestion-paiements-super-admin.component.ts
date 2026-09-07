@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { SuiviPaiementsComponent } from '../../shared/components/suivi-paiements/suivi-paiements.component';
 import { Club, ClubService } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { SuperAdminPaiementService } from '../../services/super-admin-paiement.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
 import { ParametresPaiement } from '../../models/parametres-paiement';
@@ -32,11 +34,12 @@ import { AjoutPaiementComponent } from '../../admin/gestion-paiements/ajout-paie
   templateUrl: './gestion-paiements-super-admin.component.html',
   styleUrls: ['./gestion-paiements-super-admin.component.css']
 })
-export class GestionPaiementsSuperAdminComponent implements OnInit {
+export class GestionPaiementsSuperAdminComponent implements OnInit, OnDestroy {
   clubs: Club[] = [];
   selectedClubId: number | 'all' = 'all';
   paiements: any[] = [];
   filteredPaiements: any[] = [];
+  private clubSelectionSub?: Subscription;
 
   stats = {
     total: 0,
@@ -79,6 +82,7 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
   constructor(
     private paiementService: SuperAdminPaiementService,
     private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService,
     private parametresService: ParametresPaiementService
   ) {}
 
@@ -88,6 +92,16 @@ export class GestionPaiementsSuperAdminComponent implements OnInit {
     });
 
     this.refresh();
+
+    // Suit le sélecteur de club global du header (filtre côté client, pas de refetch).
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      this.selectedClubId = (id === 'all' || id === null) ? 'all' : id;
+      this.onClubChange();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
 
   get totalClubs(): number {

@@ -31,16 +31,6 @@
   </ui-kpi-grid>
 
   <div class="filters-bar">
-    <select
-      class="form-select"
-      [(ngModel)]="selectedClubId"
-      (change)="onClubChange()"
-      aria-label="Filtrer par club"
-    >
-      <option [ngValue]="'all'">Tous les clubs</option>
-      <option *ngFor="let club of clubs" [ngValue]="club.id">{{ club.nom || club.name }}</option>
-    </select>
-
     <input
       type="text"
       class="form-input"

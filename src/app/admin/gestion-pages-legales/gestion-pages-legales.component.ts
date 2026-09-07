@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { MentionsLegalesConfigService, MentionsLegalesConfig } from '../../services/mentions-legales-config.service';
 import { PolitiqueConfidentialiteConfigService, PolitiqueConfidentialiteConfig } from '../../services/politique-confidentialite-config.service';
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -18,7 +20,7 @@ type Tab = 'mentions' | 'confidentialite';
   templateUrl: './gestion-pages-legales.component.html',
   styleUrl: './gestion-pages-legales.component.css'
 })
-export class GestionPagesLegalesComponent implements OnInit {
+export class GestionPagesLegalesComponent implements OnInit, OnDestroy {
 
   activeTab: Tab = 'mentions';
 
@@ -27,17 +29,18 @@ export class GestionPagesLegalesComponent implements OnInit {
   loading = false;
   saving = false;
 
-  // ADMIN : club fixe (son propre club). SUPER_ADMIN : doit choisir un club dans la liste.
+  // ADMIN : club fixe (son propre club). SUPER_ADMIN : suit le sélecteur global du header.
   isClubLocked = false;
-  clubs: Club[] = [];
   selectedClubId: number | null = null;
   selectedClubName = '';
+  private clubSelectionSub?: Subscription;
 
   constructor(
     private mentionsLegalesConfigService: MentionsLegalesConfigService,
     private politiqueConfidentialiteConfigService: PolitiqueConfidentialiteConfigService,
     private authService: AuthService,
     private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService,
     private toast: ToastService
   ) {}
 
@@ -62,20 +65,24 @@ export class GestionPagesLegalesComponent implements OnInit {
       return;
     }
 
-    this.clubService.getClubs().subscribe({
-      next: (clubs) => { this.clubs = clubs || []; },
-      error: () => this.toast.error('Impossible de charger la liste des clubs.')
+    // SUPER_ADMIN : suit le sélecteur de club global du header.
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      if (id === 'all' || id === null) {
+        this.selectedClubId = null;
+        this.mentionsLegales = {};
+        this.politiqueConfidentialite = {};
+      } else {
+        this.selectedClubId = id;
+        this.loadConfigsForClub(id);
+      }
     });
   }
 
-  setTab(tab: Tab): void { this.activeTab = tab; }
-
-  onSelectClub(clubId: number | null): void {
-    this.selectedClubId = clubId;
-    const club = this.clubs.find(c => c.id === clubId);
-    this.selectedClubName = club ? (club.nom || club.name) : '';
-    if (clubId) this.loadConfigsForClub(clubId);
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
+
+  setTab(tab: Tab): void { this.activeTab = tab; }
 
   private loadConfigsForClub(clubId: number): void {
     this.loading = true;

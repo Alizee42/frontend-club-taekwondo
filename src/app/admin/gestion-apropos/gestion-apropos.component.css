@@ -449,7 +449,15 @@
 }
 .btn-add:hover { color: var(--brand-accent); border-color: var(--brand-accent); }
 
-/* Contexte club — intégré au header, à côté du bouton principal */
+/* Contexte club — barre indépendante, toujours visible même quand le
+   header de ce composant est masqué par une page parente (ex: onglet
+   "À propos" dans Gestion Accueil du site). */
+.club-context-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--sp-2);
+}
+
 .club-chip {
   display: inline-flex;
   align-items: center;
@@ -462,20 +470,6 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.club-picker-inline {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-}
-.club-picker-inline__label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text-2);
-}
-.club-picker-inline .form-select {
-  min-width: 160px;
-}
-
 /* État chargement */
 .empty-state {
   display: flex;

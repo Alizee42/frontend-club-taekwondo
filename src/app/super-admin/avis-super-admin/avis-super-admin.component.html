@@ -11,13 +11,6 @@
     <ui-kpi-card icon="ri-star-half-line"       label="Note moyenne"  [value]="noteMoyenne"  tone="amber"   [loading]="loading"></ui-kpi-card>
   </ui-kpi-grid>
 
-  <div class="filters-bar">
-    <select class="form-select" [(ngModel)]="selectedClubId" (ngModelChange)="onSelectClub($event)">
-      <option [ngValue]="null">-- Choisir un club --</option>
-      <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
-    </select>
-    <div *ngIf="!clubs || clubs.length === 0" class="info">Aucun club disponible.</div>
-  </div>
   <div *ngIf="error" class="error">{{ error }}</div>
   <div class="table-wrap">
     <ui-table

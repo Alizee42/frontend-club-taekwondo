@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { HorairesService } from '../../services/horaires.service';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
 import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
@@ -25,11 +27,12 @@ type PlageForm = {
   templateUrl: './gestion-horaires-super-admin.component.html',
   styleUrls: ['./gestion-horaires-super-admin.component.css']
 })
-export class GestionHorairesSuperAdminComponent implements OnInit {
+export class GestionHorairesSuperAdminComponent implements OnInit, OnDestroy {
   clubs: any[] = [];
   horairesParJour: Array<{ jour: string; horaires: any[] }> = [];
   horaires: any[] = [];
   selectedClubId: number | null = null;
+  private clubSelectionSub?: Subscription;
 
   showAjoutModal = false;
   ajoutJour = '';
@@ -57,22 +60,26 @@ export class GestionHorairesSuperAdminComponent implements OnInit {
     '20h - 21h'
   ];
 
-  constructor(private horairesService: HorairesService, private clubService: ClubService) {}
+  constructor(
+    private horairesService: HorairesService,
+    private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService
+  ) {}
 
   ngOnInit(): void {
     this.clubService.getClubs().subscribe({
-      next: (clubs: Club[]) => {
-        this.clubs = clubs || [];
-        const selectedClub = this.clubService.getSelectedClub();
-        this.selectedClubId = selectedClub?.id ?? this.clubs[0]?.id ?? null;
-        this.loadHoraires();
-      },
-      error: (err) => {
-        console.error('Impossible de charger la liste des clubs :', err);
-        this.selectedClubId = this.clubService.getSelectedClub()?.id ?? null;
-        this.loadHoraires();
-      }
+      next: (clubs: Club[]) => { this.clubs = clubs || []; },
+      error: (err) => console.error('Impossible de charger la liste des clubs :', err)
     });
+
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      this.selectedClubId = (id === 'all' || id === null) ? null : id;
+      this.loadHoraires();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
 
   onTableAction(event: { action: string; row: any }) {

@@ -1,11 +1,13 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -36,7 +38,7 @@ const VIDE: ProduitDTO = {
   styleUrls: ['./gestion-produits.component.css'],
   imports: [CommonModule, FormsModule, PageHeaderComponent, UiButtonComponent, UiModalComponent, KpiCardComponent, KpiGridComponent, UiTableComponent],
 })
-export class GestionProduitsComponent implements OnInit {
+export class GestionProduitsComponent implements OnInit, OnDestroy {
 
   @ViewChild('imageFileInput') imageFileInput?: ElementRef<HTMLInputElement>;
 
@@ -60,11 +62,11 @@ export class GestionProduitsComponent implements OnInit {
 
   readonly categories = ['TENUE', 'PROTECTION', 'ACCESSOIRE', 'AUTRE'];
 
-  // ADMIN : club fixe (son propre club). SUPER_ADMIN : doit choisir un club dans la liste.
+  // ADMIN : club fixe (son propre club). SUPER_ADMIN : suit le sélecteur global du header.
   isClubLocked = false;
-  clubs: Club[] = [];
   selectedClubId: number | null = null;
   selectedClubName = '';
+  private clubSelectionSub?: Subscription;
 
   tableColumns: UiTableColumn[] = [
     { key: 'imageUrl', label: 'Image', type: 'image', width: '80px' },
@@ -98,6 +100,7 @@ export class GestionProduitsComponent implements OnInit {
     private http: HttpClient,
     private auth: AuthService,
     private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService,
     private toast: ToastService,
   ) {}
 
@@ -122,20 +125,23 @@ export class GestionProduitsComponent implements OnInit {
       return;
     }
 
-    // SUPER_ADMIN : pas de club propre, doit en choisir un explicitement.
-    this.clubService.getClubs().subscribe({
-      next: (clubs) => { this.clubs = clubs || []; },
-      error: () => this.toast.error('Impossible de charger la liste des clubs.')
+    // SUPER_ADMIN : suit le sélecteur de club global du header.
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      if (id === 'all' || id === null) {
+        this.selectedClubId = null;
+        this.produits = [];
+        this.filtrer();
+      } else {
+        this.selectedClubId = id;
+        this.charger();
+      }
     });
   }
 
-  onSelectClub(clubId: number | null): void {
-    this.selectedClubId = clubId;
-    const club = this.clubs.find(c => c.id === clubId);
-    this.selectedClubName = club ? (club.nom || club.name) : '';
-    if (clubId) this.charger();
-    else { this.produits = []; this.filtrer(); }
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
+
 
   charger(): void {
     if (!this.selectedClubId) return;
