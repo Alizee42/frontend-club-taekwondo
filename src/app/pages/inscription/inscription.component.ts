@@ -352,12 +352,13 @@ export class InscriptionComponent implements OnInit {
   }
 
   // ===== Nettoyage payload membre =====
-  private cleanMembre(m: any, utilisateurId: number): MembrePayload {
+  // Note : utilisateurId n'est pas fourni ici — le backend l'attribue lui-même à
+  // l'utilisateur qu'il vient de créer, dans la même transaction (voir onSubmit()).
+  private cleanMembre(m: any): MembrePayload {
     const obj: MembrePayload = {
       nom: (m.nom || '').trim(),
       prenom: (m.prenom || '').trim(),
-      dateNaissance: m.dateNaissance,
-      utilisateurId
+      dateNaissance: m.dateNaissance
     };
     const num = (m.numeroLicence || '').trim();
     const cei = (m.ceinture || '').trim();
@@ -400,81 +401,41 @@ export class InscriptionComponent implements OnInit {
       password: f.password
     };
 
-    this.http.post(`${environment.apiUrl}/utilisateurs/register`, utilisateurData).subscribe({
-      next: (utilisateur: any) => {
-        const utilisateurId = utilisateur?.id;
-        if (!utilisateurId) {
-          this.erreurMessage = "Réponse inattendue du serveur.";
-          this.loading = false;
-          return;
-        }
+    let membres: MembrePayload[];
+    if (this.roleMembreSeul) {
+      const membreSeul = this.cleanMembre({
+        nom: utilisateurData.nom,
+        prenom: utilisateurData.prenom,
+        dateNaissance: utilisateurData.dateNaissance
+      });
+      // s'assurer que le DTO indique qu'il s'agit bien d'un adulte
+      // (sinon le backend le considèrera comme enfant et rattachera un parent)
+      (membreSeul as any).estAdulte = true;
+      if (utilisateurData.clubId) (membreSeul as any).clubId = utilisateurData.clubId;
+      membres = [membreSeul];
+    } else {
+      // parent → un membre enfant par ligne du formulaire
+      membres = (this.membresForm.value.membres || []).map((m: any) => this.cleanMembre(m));
+      for (const m of membres) {
+        (m as any).estAdulte = false;
+        if (utilisateurData.clubId) (m as any).clubId = utilisateurData.clubId;
+      }
+    }
 
-        // conserver l'email renvoyé (ou celui du formulaire) pour affichage dans la modale
-        this.lastRegisteredEmail = utilisateur?.email || utilisateurData.email;
-
-        if (this.roleMembreSeul) {
-          // créer membre adulte
-          const membreSeul = this.cleanMembre({
-            nom: utilisateurData.nom,
-            prenom: utilisateurData.prenom,
-            dateNaissance: utilisateurData.dateNaissance
-          }, utilisateurId);
-
-          // s'assurer que le DTO indique qu'il s'agit bien d'un adulte
-          // (sinon le backend le considèrera comme enfant et rattachera un parent)
-          (membreSeul as any).estAdulte = true;
-          // rattacher le club si présent
-          if (utilisateurData.clubId) (membreSeul as any).clubId = utilisateurData.clubId;
-
-          this.http.post(`${environment.apiUrl}/membres`, membreSeul).subscribe({
-            next: () => {
-              this.finaliser();
-            },
-            error: () => {
-              this.toastService.error('Erreur lors de l\'ajout du membre.');
-              this.loading = false;
-            }
-          });
-          return;
-        }
-
-        // parent → créer les membres
-        const membres: MembrePayload[] = (this.membresForm.value.membres || [])
-          .map((m: any) => this.cleanMembre(m, utilisateurId));
-
-        // pour les inscriptions faites par un parent, ces membres sont des enfants (estAdulte=false)
-        for (const m of membres) {
-          (m as any).estAdulte = false;
-          if (utilisateurData.clubId) (m as any).clubId = utilisateurData.clubId;
-        }
-
-        if (!membres.length) { this.finaliser(); return; }
-
-        let count = 0;
-        let erreurs = 0;
-
-        for (const membre of membres) {
-          this.http.post(`${environment.apiUrl}/membres`, membre).subscribe({
-            next: () => {
-              count++;
-              if (count + erreurs === membres.length && erreurs === 0) this.finaliser();
-              if (count + erreurs === membres.length) this.loading = false;
-            },
-            error: (err) => {
-              erreurs++;
-              if (err.status === 409 || (err.status === 400 && err.error?.message?.includes('licence'))) {
-                this.toastService.error(`Numéro de licence ${membre.numeroLicence ?? ''} déjà utilisé.`);
-              } else {
-                this.toastService.error('Erreur lors de l\'ajout des membres.');
-              }
-              if (count + erreurs === membres.length) this.loading = false;
-            }
-          });
-        }
+    // Inscription complète en un seul appel transactionnel : utilisateur + membre(s)
+    // créés ensemble côté serveur, sans laisser d'utilisateur orphelin en cas d'échec
+    // sur un membre (ex: numéro de licence déjà utilisé).
+    this.http.post(`${environment.apiUrl}/utilisateurs/inscription-complete`, {
+      utilisateur: utilisateurData,
+      membres
+    }).subscribe({
+      next: (result: any) => {
+        this.lastRegisteredEmail = result?.email || utilisateurData.email;
+        this.finaliser();
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.toastService.error('Erreur lors de l\'inscription.');
+        this.toastService.error(err.error?.message || 'Erreur lors de l\'inscription.');
       }
     });
   }
