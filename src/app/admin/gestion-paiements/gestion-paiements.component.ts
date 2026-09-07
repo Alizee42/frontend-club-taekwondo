@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SuiviPaiementsComponent } from '../../shared/components/suivi-paiements/suivi-paiements.component';
 import { EcheanceComponent } from '../../shared/components/echeance/echeance.component';
@@ -11,13 +12,23 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
 import { AlertBannerComponent } from '../../shared/ui/alert-banner/alert-banner.component';
 import { KpiCardComponent } from '../../shared/ui/kpi-card/kpi-card.component';
 import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
+import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 import { PaymentAdminService } from '../../services/payment-admin.service';
 import { ParametresPaiementService } from '../../services/parametres-paiement.service';
 import { ClubService } from '../../services/club.service';
+import { CommandeService } from '../../services/commande.service';
 import { ParametresPaiement } from '../../models/parametres-paiement';
 import { DashboardStats } from '../../models/dashboard-stats.model';
 import { DaySum } from '../../models/day-sum';
 import { MembreRetard } from '../../models/membre-retard';
+
+interface CaisseSuivi {
+  from: string;
+  to: string;
+  totalParMode: Record<string, number>;
+  nbParMode: Record<string, number>;
+  totalGeneral: number;
+}
 
 @Component({
   selector: 'app-gestion-paiements',
@@ -33,7 +44,8 @@ import { MembreRetard } from '../../models/membre-retard';
     PageHeaderComponent,
     AlertBannerComponent,
     KpiCardComponent,
-    KpiGridComponent
+    KpiGridComponent,
+    EmptyStateComponent
   ],
   templateUrl: './gestion-paiements.component.html',
   styleUrls: ['./gestion-paiements.component.css']
@@ -41,6 +53,7 @@ import { MembreRetard } from '../../models/membre-retard';
 export class GestionPaiementsComponent implements OnInit, OnDestroy {
   ongletActif: 'paiements' | 'parents' | 'echeances' = 'paiements';
   modalAjoutVisible = false;
+  modalParametresVisible = false;
   paiements: any[] = [];
 
   stats: DashboardStats & { courbe: DaySum[]; membresEnRetard: MembreRetard[] } = {
@@ -65,13 +78,25 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
   paramsSaved = false;
   paramsError = '';
 
+  caisse: CaisseSuivi | null = null;
+  caissePeriode: 'mois' | 'mois-dernier' | 'annee' = 'mois';
+  caisseLoading = false;
+
+  commandesImpayeesCount = 0;
+
   private subs: Subscription[] = [];
 
   constructor(
     private paymentService: PaymentAdminService,
     private parametresService: ParametresPaiementService,
-    private clubService: ClubService
+    private clubService: ClubService,
+    private commandeService: CommandeService,
+    private router: Router
   ) {}
+
+  allerVersCommandes(): void {
+    this.router.navigateByUrl('/admin/gestion-commande');
+  }
 
   ngOnInit(): void {
     this.subs.push(
@@ -91,6 +116,51 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
     this.refreshStats();
     this.loadPaiements();
     this.loadParametres();
+    this.loadCaisseSuivi();
+    this.loadCommandesImpayees();
+  }
+
+  private periodeRange(): { from: string; to: string } {
+    const now = new Date();
+    let from: Date;
+    let to: Date;
+    if (this.caissePeriode === 'mois-dernier') {
+      from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      to = new Date(now.getFullYear(), now.getMonth(), 0);
+    } else if (this.caissePeriode === 'annee') {
+      from = new Date(now.getFullYear(), 0, 1);
+      to = new Date(now.getFullYear(), 11, 31);
+    } else {
+      from = new Date(now.getFullYear(), now.getMonth(), 1);
+      to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    }
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    return { from: iso(from), to: iso(to) };
+  }
+
+  changerPeriodeCaisse(periode: 'mois' | 'mois-dernier' | 'annee'): void {
+    this.caissePeriode = periode;
+    this.loadCaisseSuivi();
+  }
+
+  loadCaisseSuivi(): void {
+    const { from, to } = this.periodeRange();
+    this.caisseLoading = true;
+    this.paymentService.getSuiviPaiements({ from, to }).subscribe({
+      next: (res) => { this.caisse = res || null; this.caisseLoading = false; },
+      error: () => { this.caisse = null; this.caisseLoading = false; }
+    });
+  }
+
+  get caisseModes(): string[] {
+    return this.caisse?.totalParMode ? Object.keys(this.caisse.totalParMode) : [];
+  }
+
+  loadCommandesImpayees(): void {
+    this.commandeService.countEnAttente().subscribe({
+      next: (n) => { this.commandesImpayeesCount = n || 0; },
+      error: () => { this.commandesImpayeesCount = 0; }
+    });
   }
 
   get totalPaiements(): number { return this.paiements.length; }
@@ -228,6 +298,9 @@ export class GestionPaiementsComponent implements OnInit, OnDestroy {
 
   ouvrirModalAjout(): void { this.modalAjoutVisible = true; }
   fermerModalAjout(): void { this.modalAjoutVisible = false; }
+
+  ouvrirModalParametres(): void { this.modalParametresVisible = true; }
+  fermerModalParametres(): void { this.modalParametresVisible = false; }
 
   onPaiementAjoute(): void {
     this.fermerModalAjout();

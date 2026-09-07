@@ -42,6 +42,9 @@ export interface Paiement {
   montantTotal: number;
   statut?: Statut | string;
   echeances?: Echeance[];
+  creeParNom?: string;
+  valideParNom?: string;
+  dateValidation?: string | Date;
 }
 
 interface GroupeParent {
@@ -337,6 +340,27 @@ export class SuiviPaiementsComponent implements OnInit, OnChanges {
   userFermerModales(): void { this.utilisateurSelectionne = null; this.modalUserStatsVisible = false; this.modalUserEcheancesVisible = false; }
 
   estPayable(p: Paiement): boolean { const s = this.sansAccents(p.statut); return !s.includes('annul') && !this.isPaidStatus(p.statut) && this.montantRestant(p) > 0; }
+
+  relanceEnvoiId: number | null = null;
+  relanceMessage = '';
+  relanceError = '';
+
+  relancerPaiement(p: Paiement): void {
+    if (!p?.id) return;
+    this.relanceEnvoiId = p.id;
+    this.relanceMessage = '';
+    this.relanceError = '';
+    this.http.post(`${this.API_BASE}/paiements/${p.id}/relancer`, {}).subscribe({
+      next: () => {
+        this.relanceEnvoiId = null;
+        this.relanceMessage = 'Relance envoyée.';
+      },
+      error: (err) => {
+        this.relanceEnvoiId = null;
+        this.relanceError = err?.error?.message || err?.message || 'Impossible d\'envoyer la relance.';
+      }
+    });
+  }
 
   marquerPaiementPaye(p: Paiement): void { if (!p?.id) return; if (!confirm('Confirmer : marquer ce paiement comme entièrement payé ?')) return;
     this.http.post(`${this.API_BASE}/paiements/${p.id}/valider`, {}).subscribe({ next: () => { p.statut = 'payé'; if (Array.isArray(p.echeances)) p.echeances = p.echeances.map(e => ({ ...e, statut: 'payé' as Statut })); this.applyFilters(); this.modalEcheancesVisible = false; }, error: (err) => { console.error('[Suivi] marquerPaiementPaye error', err); const serverMsg = err?.error?.message || err?.message || `Erreur ${err?.status || 'inconnue'}`; alert('Impossible de marquer le paiement comme payé.\n' + serverMsg); } }); }

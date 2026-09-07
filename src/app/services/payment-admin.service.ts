@@ -142,6 +142,10 @@ export class PaymentAdminService {
     return this.http.post<any>(`${this.apiUrl}/${id}/valider`, {});
   }
 
+  relancerPaiement(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/relancer`, {});
+  }
+
   payerEcheances(id: number, echeanceIds: number[]): Observable<any> {
     const body = (echeanceIds || []).map(eid => ({ id: eid }));
     return this.http.post<any>(`${this.apiUrl}/${id}/payer-echeance`, body);
