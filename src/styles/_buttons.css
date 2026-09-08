@@ -432,6 +432,17 @@
   color: var(--color-danger-ink);
 }
 
+.action-btn--warning {
+  background: color-mix(in srgb, var(--color-warning) 9%, white);
+  border-color: color-mix(in srgb, var(--color-warning) 20%, white);
+  color: var(--color-warning-ink);
+}
+.action-btn--warning:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-warning) 16%, white);
+  border-color: color-mix(in srgb, var(--color-warning) 32%, white);
+  color: var(--color-warning-ink);
+}
+
 .action-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;

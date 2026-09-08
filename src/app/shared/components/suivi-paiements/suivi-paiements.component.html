@@ -23,6 +23,8 @@
 
   <!-- Erreur & loader -->
   <app-alert-banner *ngIf="error" type="error" [message]="error"></app-alert-banner>
+  <app-alert-banner *ngIf="relanceMessage" type="success" [message]="relanceMessage" [dismissible]="true" (dismissed)="relanceMessage = ''"></app-alert-banner>
+  <app-alert-banner *ngIf="relanceError" type="error" [message]="relanceError" [dismissible]="true" (dismissed)="relanceError = ''"></app-alert-banner>
   <app-skeleton *ngIf="loading" [lines]="5"></app-skeleton>
 
   <!-- ==========================
@@ -94,7 +96,9 @@
         <tbody>
           <tr *ngFor="let p of paiementsFiltres; trackBy: trackByPaiement" [class.row-late]="isPaiementLate(p)">
             <td *ngIf="showClub">{{ getClubName(p) }}</td>
-            <td>{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
+            <td
+              [title]="(p.creeParNom ? ('Enregistré par ' + p.creeParNom) : '') + (p.valideParNom ? ('\nValidé par ' + p.valideParNom) : '')"
+            >{{ p.datePaiement | date:'dd/MM/yyyy' }}</td>
             <td>
               <div class="cell-payeur">
                 <span>{{ p.utilisateurPrenom }} {{ p.utilisateurNom }}</span>
@@ -123,8 +127,9 @@
             <td><span [class]="classeBadge(statutPaiement(p))">{{ statutPaiement(p) }}</span></td>
             <td class="actions-col">
               <div class="actions-wrap">
-                <button type="button" class="action-btn action-btn--primary" (click)="ouvrirEcheances(p)" title="Voir les échéances" aria-label="Voir les échéances"><i class="ri-calendar-event-line"></i></button>
+                <button type="button" class="action-btn action-btn--primary" *ngIf="p.echeances?.length" (click)="ouvrirEcheances(p)" title="Voir les échéances" aria-label="Voir les échéances"><i class="ri-calendar-event-line"></i></button>
                 <button type="button" class="action-btn action-btn--success" *ngIf="estPayable(p)" (click)="marquerPaiementPaye(p)" title="Marquer comme payé" aria-label="Marquer comme payé"><i class="ri-checkbox-circle-line"></i></button>
+                <button type="button" class="action-btn action-btn--warning" *ngIf="isPaiementLate(p)" [disabled]="relanceEnvoiId === p.id" (click)="relancerPaiement(p)" title="Relancer par email" aria-label="Relancer par email"><i class="ri-mail-send-line"></i></button>
                 <button type="button" class="action-btn action-btn--danger" (click)="ouvrirAnnulation(p)" title="Annuler" aria-label="Annuler"><i class="ri-close-circle-line"></i></button>
               </div>
             </td>

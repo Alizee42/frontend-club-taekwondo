@@ -162,12 +162,37 @@
   white-space: nowrap;
 }
 
+/* ── Vue caisse ──────────────────────────────────── */
+.caisse-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.caisse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.caisse-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
 /* ── Layout principal ────────────────────────────── */
 .main-layout {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: var(--sp-4);
-  align-items: start;
+  display: block;
 }
 
 /* ── Zone tableau ────────────────────────────────── */
@@ -229,7 +254,7 @@
   padding: var(--sp-4);
 }
 
-/* ── Sidebar paramètres ──────────────────────────── */
+/* ── Paramètres (dans la modale) ─────────────────── */
 .params-title {
   font-size: var(--text-base);
   font-weight: 700;
@@ -284,14 +309,6 @@
 @media (max-width: 1024px) {
   .kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .main-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .params-sidebar {
-    order: -1;
   }
 
   .kpi-item {
