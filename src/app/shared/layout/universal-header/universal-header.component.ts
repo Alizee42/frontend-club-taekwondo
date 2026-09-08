@@ -1,14 +1,16 @@
 import { Component, EventEmitter, HostListener, Input, OnChanges, Output } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Notification } from '../../../services/notification.service';
+import { Club } from '../../../services/club.service';
 
 type RoleStr = 'ADMIN' | 'SUPER_ADMIN' | 'MEMBRE' | 'PARENT' | string;
 
 @Component({
   selector: 'universal-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './universal-header.component.html',
   styleUrls: ['./universal-header.component.css']
 })
@@ -24,12 +26,16 @@ export class UniversalHeaderComponent implements OnChanges {
   @Input() loadingNotifs: boolean = false;
   @Input() role: RoleStr = '';
   @Input() cartCount: number = 0;
+  @Input() clubs: Club[] = [];
+  @Input() selectedClubId: number | 'all' | null = null;
+  @Input() showClubSelector: boolean = false;
 
   @Output() changeClub            = new EventEmitter<void>();
   @Output() logout                = new EventEmitter<void>();
   @Output() goToDashboard         = new EventEmitter<void>();
   @Output() markNotifRead         = new EventEmitter<number>();
   @Output() markAllNotifsRead     = new EventEmitter<void>();
+  @Output() clubSelectionChange   = new EventEmitter<number | 'all' | null>();
 
   userDropdownOpen = false;
   notifOpen        = false;
@@ -112,5 +118,9 @@ export class UniversalHeaderComponent implements OnChanges {
 
   onMarkAllRead(): void {
     this.markAllNotifsRead.emit();
+  }
+
+  onClubSelectionChange(id: number | 'all' | null): void {
+    this.clubSelectionChange.emit(id);
   }
 }

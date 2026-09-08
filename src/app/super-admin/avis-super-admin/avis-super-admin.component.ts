@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AvisService, Avis } from '../../services/avis.service';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { Subscription } from 'rxjs';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
@@ -66,46 +67,19 @@ export class AvisSuperAdminComponent implements OnInit {
     // Le bouton 'Refuser' reste toujours disponible (possibilité de suppression future)
     { label: 'Refuser', icon: 'ri-close-line', action: 'refuse', color: '#d32f2f', variant: 'danger' }
   ];
-  clubSelectFields = [
-    { name: 'club', label: 'Sélectionner un club', type: 'select', required: true, options: [] as { value: number, label: string }[] }
-  ];
-  clubSelectModel: { club: number | null } = { club: null };
   private subs: Subscription[] = [];
 
-  constructor(private avisService: AvisService, private clubService: ClubService) {}
+  constructor(
+    private avisService: AvisService,
+    private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
     this.clubService.getClubs().subscribe({
       next: (clubs) => {
         this.clubs = clubs || [];
-        this.clubSelectFields[0].options = this.clubs.map(c => ({ value: c.id, label: c.nom }));
-        // Synchronise le modèle avec la sélection actuelle
-        // Si un club est déjà sélectionné dans le service (localStorage), l'utiliser
-        const sel = this.clubService.getSelectedClub();
-        if (sel && sel.id) {
-          this.selectedClubId = sel.id;
-          this.clubSelectModel.club = this.selectedClubId;
-          this.loadAvisForClub(this.selectedClubId);
-        } else if (this.selectedClubId) {
-          this.clubSelectModel.club = this.selectedClubId;
-        }
-        // S'abonner aux changements globaux de sélection de club
-        this.subs.push(this.clubService.selectedClub$.subscribe(club => {
-          if (club && club.id) {
-            // si la sélection a changé ailleurs, recharger les avis pour ce club
-            if (club.id !== this.selectedClubId) {
-              this.selectedClubId = club.id;
-              this.clubSelectModel.club = this.selectedClubId;
-              this.loadAvisForClub(this.selectedClubId);
-            }
-          } else {
-            // pas de club sélectionné
-            this.selectedClubId = null;
-            this.clubSelectModel.club = null;
-            this.avis = [];
-          }
-        }));
         this.loading = false;
       },
       error: () => {
@@ -113,18 +87,17 @@ export class AvisSuperAdminComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
 
-  onSelectClub(clubId: number|null) {
-    // NE PAS persister la sélection globalement ici : la sélection ne doit
-    // affecter que le tableau d'avis local (pas toute la page).
-    this.selectedClubId = clubId;
-    this.clubSelectModel.club = clubId;
-    if (clubId) {
-      this.loadAvisForClub(clubId);
-    } else {
-      this.avis = [];
-    }
+    // Suit le sélecteur de club global du header.
+    this.subs.push(this.adminClubSelection.selectedClubId$.subscribe(id => {
+      if (id === 'all' || id === null) {
+        this.selectedClubId = null;
+        this.avis = [];
+      } else {
+        this.selectedClubId = id;
+        this.loadAvisForClub(id);
+      }
+    }));
   }
 
   ngOnDestroy(): void {

@@ -194,6 +194,19 @@
     <!-- Actions connectées -->
     <div class="uh-actions">
 
+      <!-- Sélecteur de club (SUPER_ADMIN uniquement) -->
+      <span class="uh-club-select" *ngIf="showClubSelector" title="Club affiché">
+        <i class="ri-map-pin-line" aria-hidden="true"></i>
+        <select
+          class="uh-club-select__input"
+          [ngModel]="selectedClubId"
+          (ngModelChange)="onClubSelectionChange($event)"
+          aria-label="Sélectionner un club">
+          <option [ngValue]="'all'">Tous les clubs</option>
+          <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
+        </select>
+      </span>
+
       <!-- Panier -->
       <a class="uh-icon-btn" routerLink="/boutique" title="Mon panier" *ngIf="showCart">
         <i class="ri-shopping-cart-line"></i>
@@ -283,6 +296,17 @@
 
   <!-- Drawer mobile -->
   <div class="uh-drawer" [class.uh-drawer--open]="mobileOpen" (click)="$event.stopPropagation()">
+    <span class="uh-club-select uh-club-select--drawer" *ngIf="showClubSelector">
+      <i class="ri-map-pin-line" aria-hidden="true"></i>
+      <select
+        class="uh-club-select__input"
+        [ngModel]="selectedClubId"
+        (ngModelChange)="onClubSelectionChange($event)"
+        aria-label="Sélectionner un club">
+        <option [ngValue]="'all'">Tous les clubs</option>
+        <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
+      </select>
+    </span>
     <a class="uh-drawer__link" [routerLink]="dashboardRoute" (click)="goToDashboard.emit(); closeAll()">
       <i class="ri-dashboard-line"></i> Mon dashboard
     </a>

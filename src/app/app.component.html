@@ -10,11 +10,15 @@
     [loadingNotifs]="loadingNotifs"
     [role]="role"
     [cartCount]="cartCount"
+    [clubs]="allClubs"
+    [selectedClubId]="currentClubSelectionId"
+    [showClubSelector]="showClubSelector"
     (logout)="onLogout()"
     (changeClub)="onChangeClub()"
     (goToDashboard)="onGoToDashboard()"
     (markNotifRead)="onMarkNotifRead($event)"
     (markAllNotifsRead)="onMarkAllNotifsRead()"
+    (clubSelectionChange)="onClubSelectionChange($event)"
   ></universal-header>
 
   <div class="club-picker-backdrop" *ngIf="showSelectClubModal" (click)="showSelectClubModal = false">

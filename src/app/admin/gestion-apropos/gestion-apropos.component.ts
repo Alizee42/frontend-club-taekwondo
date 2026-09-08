@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { AboutConfigService, AboutConfig } from '../../services/about-config.service';
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -17,7 +19,7 @@ type Tab = 'general' | 'image' | 'cartes';
   templateUrl: './gestion-apropos.component.html',
   styleUrl: './gestion-apropos.component.css'
 })
-export class GestionAProposComponent implements OnInit {
+export class GestionAProposComponent implements OnInit, OnDestroy {
 
   config: AboutConfig = {};
   imagePreviewUrl: string | null = null;
@@ -26,16 +28,18 @@ export class GestionAProposComponent implements OnInit {
   uploadingImage = false;
   activeTab: Tab = 'general';
 
-  // ADMIN : club fixe (son propre club). SUPER_ADMIN : doit choisir un club dans la liste.
+  // ADMIN : club fixe (son propre club). SUPER_ADMIN : suit le sélecteur global du header.
   isClubLocked = false;
   clubs: Club[] = [];
   selectedClubId: number | null = null;
   selectedClubName = '';
+  private clubSelectionSub?: Subscription;
 
   constructor(
     private aboutConfigService: AboutConfigService,
     private authService: AuthService,
     private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService,
     private toast: ToastService
   ) {}
 
@@ -60,18 +64,37 @@ export class GestionAProposComponent implements OnInit {
       return;
     }
 
-    // SUPER_ADMIN : pas de club propre, doit en choisir un explicitement.
+    // SUPER_ADMIN : garde la liste pour resoudre le nom du club selectionne, et
+    // suit le selecteur de club global du header.
     this.clubService.getClubs().subscribe({
-      next: (clubs) => { this.clubs = clubs || []; },
+      next: (clubs) => {
+        this.clubs = clubs || [];
+        this.refreshSelectedClubName();
+      },
       error: () => this.toast.error('Impossible de charger la liste des clubs.')
+    });
+
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      if (id === 'all' || id === null) {
+        this.selectedClubId = null;
+        this.selectedClubName = '';
+        this.config = {};
+      } else {
+        this.selectedClubId = id;
+        this.refreshSelectedClubName();
+        this.loadConfigForClub(id);
+      }
     });
   }
 
-  onSelectClub(clubId: number | null): void {
-    this.selectedClubId = clubId;
-    const club = this.clubs.find(c => c.id === clubId);
+  private refreshSelectedClubName(): void {
+    if (!this.selectedClubId) return;
+    const club = this.clubs.find(c => c.id === this.selectedClubId);
     this.selectedClubName = club ? (club.nom || club.name) : '';
-    if (clubId) this.loadConfigForClub(clubId);
+  }
+
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
 
   private loadConfigForClub(clubId: number): void {

@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { EvenementDTO, EvenementService } from '../../services/evenement.service';
 import { AuthService, Utilisateur } from '../../services/auth.service';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { Inscription, InscriptionsService } from '../../services/inscriptions.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
@@ -45,7 +47,7 @@ interface EventFormModel {
   templateUrl: './gestion-evenements.component.html',
   styleUrls: ['./gestion-evenements.component.css']
 })
-export class GestionEvenementsComponent implements OnInit {
+export class GestionEvenementsComponent implements OnInit, OnDestroy {
   evenements: EvenementDTO[] = [];
   inscriptions: Inscription[] = [];
   evenementSelectionne: EvenementDTO | null = null;
@@ -80,11 +82,11 @@ export class GestionEvenementsComponent implements OnInit {
 
   isLoading = false;
 
-  // ADMIN : club fixe (son propre club). SUPER_ADMIN : doit choisir un club dans la liste.
+  // ADMIN : club fixe (son propre club). SUPER_ADMIN : suit le sélecteur global du header.
   isClubLocked = false;
-  clubs: Club[] = [];
   selectedClubId: number | null = null;
   selectedClubName = '';
+  private clubSelectionSub?: Subscription;
 
   searchTerm = '';
   statusFilter: EventStatusFilter = '';
@@ -162,6 +164,7 @@ export class GestionEvenementsComponent implements OnInit {
     private inscriptionsService: InscriptionsService,
     private authService: AuthService,
     private clubService: ClubService,
+    private adminClubSelection: AdminClubSelectionService,
     private readonly toast: ToastService
   ) {}
 
@@ -186,22 +189,20 @@ export class GestionEvenementsComponent implements OnInit {
       return;
     }
 
-    // SUPER_ADMIN : pas de club propre, doit en choisir un explicitement.
-    this.clubService.getClubs().subscribe({
-      next: (clubs) => { this.clubs = clubs || []; },
-      error: () => this.toast.error('Impossible de charger la liste des clubs.')
+    // SUPER_ADMIN : suit le sélecteur de club global du header.
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      if (id === 'all' || id === null) {
+        this.selectedClubId = null;
+        this.evenements = [];
+      } else {
+        this.selectedClubId = id;
+        this.chargerEvenements();
+      }
     });
   }
 
-  onSelectClub(clubId: number | null): void {
-    this.selectedClubId = clubId;
-    const club = this.clubs.find(c => c.id === clubId);
-    this.selectedClubName = club ? (club.nom || club.name) : '';
-    if (clubId) {
-      this.chargerEvenements();
-    } else {
-      this.evenements = [];
-    }
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
 
   get totalEvenements(): number {
