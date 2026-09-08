@@ -15,14 +15,7 @@
     </ng-container>
   </app-page-header>
 
-  <section class="horaires-toolbar">
-    <div class="club-filter">
-      <label for="clubSelect">Club</label>
-      <select id="clubSelect" class="form-select" [(ngModel)]="selectedClubId" (change)="onClubChange()">
-        <option *ngFor="let club of clubs" [ngValue]="club.id">{{ club.nom || club.name }}</option>
-      </select>
-    </div>
-
+  <section class="horaires-toolbar" *ngIf="selectedClubId">
     <div class="toolbar-summary">
       <span>{{ selectedClubName }}</span>
       <strong>{{ horairesCountLabel }}</strong>

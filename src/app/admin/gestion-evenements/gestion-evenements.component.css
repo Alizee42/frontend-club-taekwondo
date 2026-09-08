@@ -15,20 +15,6 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.club-picker-inline {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2, 0.5rem);
-}
-.club-picker-inline__label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text-2);
-}
-.club-picker-inline .form-select {
-  min-width: 160px;
-}
-
 .gp-state {
   display: flex;
   flex-direction: column;

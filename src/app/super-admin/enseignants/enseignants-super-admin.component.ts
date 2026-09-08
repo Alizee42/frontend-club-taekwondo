@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { Club, ClubService } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { Enseignant, EnseignantService } from '../../services/enseignant.service';
 import { environment } from '../../../environments/environment';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
@@ -19,11 +21,12 @@ import { KpiGridComponent } from '../../shared/ui/kpi-grid/kpi-grid.component';
   templateUrl: './enseignants-super-admin.component.html',
   styleUrls: ['./enseignants-super-admin.component.css']
 })
-export class EnseignantsSuperAdminComponent implements OnInit {
+export class EnseignantsSuperAdminComponent implements OnInit, OnDestroy {
   clubs: Club[] = [];
   selectedClubId: number | null = null;
   enseignants: Enseignant[] = [];
   loading = false;
+  private clubSelectionSub?: Subscription;
 
   get nbEnseignants() { return this.enseignants.length; }
   get nbClubs()       { return this.clubs.length; }
@@ -68,26 +71,37 @@ export class EnseignantsSuperAdminComponent implements OnInit {
 
   constructor(
     private clubService: ClubService,
-    private enseignantService: EnseignantService
+    private enseignantService: EnseignantService,
+    private adminClubSelection: AdminClubSelectionService
   ) {}
 
   ngOnInit(): void {
     this.clubService.getClubs().subscribe({
       next: (clubs) => {
         this.clubs = clubs;
-        if (clubs.length > 0) {
-          this.selectedClubId = clubs[0].id;
-          this.currentClubLogo = this.getClubLogoUrl(clubs[0]);
-          this.loadEnseignants();
+        if (this.selectedClubId) {
+          const club = this.clubs.find(c => c.id === this.selectedClubId);
+          this.currentClubLogo = this.getClubLogoUrl(club);
         }
+      }
+    });
+
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      if (id === 'all' || id === null) {
+        this.selectedClubId = null;
+        this.currentClubLogo = undefined;
+        this.enseignants = [];
+      } else {
+        this.selectedClubId = id;
+        const club = this.clubs.find(c => c.id === id);
+        this.currentClubLogo = this.getClubLogoUrl(club);
+        this.loadEnseignants();
       }
     });
   }
 
-  onClubChange() {
-    this.loadEnseignants();
-    const club = this.clubs.find(c => c.id === this.selectedClubId);
-    this.currentClubLogo = this.getClubLogoUrl(club);
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
 
   loadEnseignants() {

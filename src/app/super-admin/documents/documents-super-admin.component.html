@@ -20,10 +20,6 @@
     <!-- ── Panneau gauche : liste des membres ── -->
     <div class="master-panel">
       <div class="master-search">
-        <select class="form-select" [(ngModel)]="selectedClubId" (change)="onSelectClub()" aria-label="Filtrer par club">
-          <option [ngValue]="null">Tous les clubs</option>
-          <option *ngFor="let c of clubs" [ngValue]="c.id">{{ c.nom || c.name }}</option>
-        </select>
         <select class="form-select" [(ngModel)]="statut" (change)="onStatutChange()" aria-label="Filtrer par statut">
           <option value="">Tous statuts</option>
           <option value="en_attente">En attente</option>

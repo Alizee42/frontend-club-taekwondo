@@ -1,10 +1,12 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { UiTableComponent, UiTableColumn } from '../../shared/components/ui-table/ui-table.component';
 import { UiModalComponent } from '../../shared/ui/modal/ui-modal.component';
 import { UiButtonComponent } from '../../shared/ui/buttons/ui-button/ui-button.component';
 import { CommonModule } from '@angular/common';
 import { GalerieService, Galerie } from '../../services/galerie.service';
 import { ClubService, Club } from '../../services/club.service';
+import { AdminClubSelectionService } from '../../services/admin-club-selection.service';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
@@ -17,11 +19,12 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
   templateUrl: './galerie-gestion.component.html',
   styleUrls: ['./galerie-gestion.component.css']
 })
-export class GalerieGestionSuperAdminComponent implements OnInit {
+export class GalerieGestionSuperAdminComponent implements OnInit, OnDestroy {
   images: Galerie[] = [];
   clubs: Club[] = [];
   selectedClubId: number = 0;
   role: string = '';
+  private clubSelectionSub?: Subscription;
 
   // Pour le tableau
   tableColumns: UiTableColumn[] = [
@@ -65,23 +68,29 @@ export class GalerieGestionSuperAdminComponent implements OnInit {
   constructor(
     private galerieService: GalerieService,
     private clubService: ClubService,
-    private authService: AuthService
+    private authService: AuthService,
+    private adminClubSelection: AdminClubSelectionService
   ) {}
 
   ngOnInit(): void {
     this.role = (this.authService.getRole() || '').toString().toUpperCase();
     this.clubService.getClubs().subscribe(clubs => {
       this.clubs = clubs;
-      if (clubs.length > 0) {
-        this.selectedClubId = clubs[0].id;
-        this.loadImages(this.selectedClubId);
+    });
+
+    this.clubSelectionSub = this.adminClubSelection.selectedClubId$.subscribe(id => {
+      if (id === 'all' || id === null) {
+        this.selectedClubId = 0;
+        this.images = [];
+      } else {
+        this.selectedClubId = id;
+        this.loadImages(id);
       }
     });
   }
 
-  onClubChange(clubId: number) {
-    this.selectedClubId = clubId;
-    this.loadImages(clubId);
+  ngOnDestroy(): void {
+    this.clubSelectionSub?.unsubscribe();
   }
 
   loadImages(clubId: number): void {

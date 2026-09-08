@@ -139,6 +139,73 @@
   color: #fff;
 }
 
+/* ── Sélecteur de club (SUPER_ADMIN) ────────────────────────── */
+.uh-club-select {
+  display: inline-flex;
+  align-items: center;
+  gap: .3em;
+  height: 38px;
+  padding: 0 var(--sp-2, .5rem) 0 var(--sp-3, .75rem);
+  background: rgba(255,255,255,.07);
+  border: 1.5px solid rgba(255,255,255,.18);
+  border-radius: var(--radius-full, 9999px);
+  color: rgba(255,255,255,.85);
+  flex-shrink: 0;
+  transition: background var(--t-fast, 120ms), border-color var(--t-fast, 120ms);
+}
+
+.uh-club-select:hover {
+  background: rgba(255,255,255,.13);
+  border-color: rgba(255,255,255,.3);
+}
+
+.uh-club-select__input {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: var(--text-xs, .8rem);
+  font-weight: 600;
+  width: 210px;
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+  .uh-club-select__input {
+    width: 150px;
+    max-width: 150px;
+  }
+}
+
+.uh-club-select__input:focus,
+.uh-club-select__input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.uh-club-select:has(.uh-club-select__input:focus-visible) {
+  border-color: rgba(255,255,255,.45);
+  background: rgba(255,255,255,.13);
+}
+
+.uh-club-select__input option {
+  color: #111;
+}
+
+.uh-club-select--drawer {
+  width: 100%;
+  margin-bottom: var(--sp-2, .5rem);
+  justify-content: flex-start;
+}
+
+.uh-club-select--drawer .uh-club-select__input {
+  max-width: none;
+  flex: 1;
+}
+
 /* ── Login button ────────────────────────────────────────── */
 .uh-btn-login {
   display: inline-flex;

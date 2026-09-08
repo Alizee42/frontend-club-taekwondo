@@ -11,16 +11,6 @@
           <i class="ri-building-4-line"></i>
           {{ selectedClubName || '…' }}
         </span>
-      } @else {
-        <span class="club-picker-inline">
-          <span class="club-picker-inline__label">Club</span>
-          <select class="form-select" [ngModel]="selectedClubId" (ngModelChange)="onSelectClub($event)">
-            <option [ngValue]="null">Choisir un club…</option>
-            @for (c of clubs; track c.id) {
-              <option [ngValue]="c.id">{{ c.nom || c.name }}</option>
-            }
-          </select>
-        </span>
       }
       <ui-button
         label="Enregistrer"
